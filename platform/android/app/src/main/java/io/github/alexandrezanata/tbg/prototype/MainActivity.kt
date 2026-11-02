@@ -42,6 +42,20 @@ class MainActivity : GameActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() { events.offer(JSONObject().put("type", "back")) }
         })
+        immersive()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // Dialogs and the IME can restore the bars; hide them again when the game regains focus.
+        if (hasFocus) immersive()
+    }
+
+    /** Landscape play is edge to edge everywhere; a swipe shows transient bars over the game. */
+    private fun immersive() {
+        val controller = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+        controller.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.hide(WindowInsetsCompat.Type.systemBars())
     }
 
     override fun onResume() {
@@ -65,21 +79,15 @@ class MainActivity : GameActivity() {
     override fun onApplyWindowInsets(view: View, insets: WindowInsetsCompat): WindowInsetsCompat {
         // Preserve GameActivity's own input/content-rect callbacks before taking a snapshot.
         val result = super.onApplyWindowInsets(view, insets)
+        // The surface always fills the window: scenery is drawn to every edge and Rust
+        // insets only the controls, once. Clear margins left by an older layout.
         val surface = mSurfaceView ?: return result
-        val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or
-            WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.systemGestures())
-        val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
         val margins = surface.layoutParams as? android.view.ViewGroup.MarginLayoutParams
-        if (margins != null) {
-            val content = if (battleViewport) androidx.core.graphics.Insets.NONE else safe
-            val bottom = maxOf(content.bottom, ime.bottom)
-            if (margins.leftMargin != content.left || margins.topMargin != content.top ||
-                margins.rightMargin != content.right || margins.bottomMargin != bottom) {
-                margins.setMargins(content.left, content.top, content.right, bottom)
-                surface.layoutParams = margins
-            }
+        if (margins != null && (margins.leftMargin != 0 || margins.topMargin != 0 ||
+                margins.rightMargin != 0 || margins.bottomMargin != 0)) {
+            margins.setMargins(0, 0, 0, 0)
+            surface.layoutParams = margins
         }
-
         captureViewport(insets)
         return result
     }
@@ -92,8 +100,10 @@ class MainActivity : GameActivity() {
 
     private fun captureViewport(insets: WindowInsetsCompat) {
         val surface = mSurfaceView ?: return
+        // Controls avoid visible bars, the cutout and the mandatory home/edge gesture
+        // strips. Back-gesture zones still accept taps, and text entry is a separate dialog.
         val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or
-            WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.systemGestures())
+            WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.mandatorySystemGestures())
         val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
         val location = IntArray(2)
         surface.getLocationInWindow(location)
@@ -114,17 +124,13 @@ class MainActivity : GameActivity() {
         runOnUiThread {
             if (battleViewport == enabled) return@runOnUiThread
             battleViewport = enabled
-            val controller = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
-            controller.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            // Only the screen-on policy differs between the lobby and a running battle.
             if (enabled) {
-                controller.hide(WindowInsetsCompat.Type.systemBars())
                 window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             } else {
-                controller.show(WindowInsetsCompat.Type.systemBars())
                 window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
-            androidx.core.view.ViewCompat.requestApplyInsets(window.decorView)
-            mSurfaceView?.requestApplyInsets()
+            immersive()
         }
         return true
     }

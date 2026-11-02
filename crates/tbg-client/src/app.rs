@@ -102,7 +102,8 @@ pub fn run() {
                     ..default()
                 }),
         )
-        .insert_resource(ClearColor(if cfg!(tbg_desktop) {
+        // Native-style screens (desktop, browser, Android) never show a sky band behind the UI.
+        .insert_resource(ClearColor(if cfg!(tbg_native_ui) {
             Color::srgb_u8(7, 15, 22)
         } else {
             art::palette::SKY_TOP

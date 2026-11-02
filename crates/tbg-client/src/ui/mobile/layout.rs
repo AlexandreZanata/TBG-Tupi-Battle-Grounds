@@ -12,6 +12,7 @@ pub fn measure(
     window: Single<&Window>,
     mut metrics: ResMut<Metrics>,
     mut last: Local<(u32, u32)>,
+    mut last_safe: Local<Vec4>,
     mut rotate: Local<Option<Entity>>,
     mut commands: Commands,
     lang: Res<Lang>,
@@ -30,10 +31,14 @@ pub fn measure(
                     (n("left_px") - n("surface_x_px")).max(0.),
                     (n("top_px") - n("surface_y_px")).max(0.),
                     (n("right_px") - outside_right).max(0.),
-                    (n("bottom_px").max(n("ime_bottom_px")) - outside_bottom).max(0.),
+                    // Text is entered in a separate system dialog, so the IME never moves controls.
+                    (n("bottom_px") - outside_bottom).max(0.),
                 ) / metrics.density;
-                if *last != (window.physical_width(), window.physical_height()) {
-                    bevy::log::info!("Android viewport {raw}");
+                if *last != (window.physical_width(), window.physical_height())
+                    || *last_safe != metrics.safe
+                {
+                    *last_safe = metrics.safe;
+                    bevy::log::info!("Android viewport {raw}; control insets {:?} dp", metrics.safe);
                 }
             }
         }
