@@ -62,8 +62,14 @@ pub fn apply_action(
         UiAction::DownloadKey => {
             if let AccountScreen::SaveKey { key, name, saved } = &mut account.screen {
                 if download_key(name, key) {
-                    *saved = true;
-                    toasts.say(Msg::AccountKeyDownloaded);
+                    // Android confirms only after the document picker actually writes the file.
+                    #[cfg(not(target_os = "android"))]
+                    {
+                        *saved = true;
+                        toasts.say(Msg::AccountKeyDownloaded);
+                    }
+                    #[cfg(target_os = "android")]
+                    let _ = saved;
                 } else {
                     toasts.say(Msg::AuthBackupFailed);
                 }

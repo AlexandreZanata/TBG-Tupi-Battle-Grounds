@@ -17,6 +17,8 @@ pub fn poll(
     mut queue: ResMut<ui::ActionQueue>,
     mut shell: ResMut<Shell>,
     mut form: NonSendMut<ui::textform::ActiveForm>,
+    mut account: ResMut<ui::account::Account>,
+    mut toasts: ResMut<ui::Toasts>,
     state: Res<State<GameState>>,
     sinks: Query<&AudioSink>,
     mut previous: Local<bool>,
@@ -65,6 +67,22 @@ pub fn poll(
                     queue.0.push(ui::UiAction::ToMenu);
                 } else {
                     queue.0.push(ui::UiAction::Deselect);
+                }
+            } else if event["type"] == "backup-export" {
+                if let (Some(epoch), Some(name), Some(saved), Some(cancelled)) = (
+                    event["epoch"].as_u64(),
+                    event["name"].as_str(),
+                    event["saved"].as_bool(),
+                    event["cancelled"].as_bool(),
+                ) {
+                    ui::account_backup::export_completed(
+                        epoch,
+                        name,
+                        saved,
+                        cancelled,
+                        &mut account,
+                        &mut toasts,
+                    );
                 }
             } else if event["type"] == "text-commit" {
                 if let (Some(id), Some(text)) = (event["id"].as_u64(), event["text"].as_str()) {

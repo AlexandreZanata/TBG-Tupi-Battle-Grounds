@@ -50,7 +50,11 @@ pub(crate) fn request(account: &mut Account, action: ExportAction, toasts: &mut 
         let Some(profile) = account.profile.as_ref() else {
             return;
         };
-        toasts.say(if export(action, &profile.name, key) {
+        let exported = export(action, &profile.name, key);
+        if cfg!(target_os = "android") && matches!(action, ExportAction::Download) && exported {
+            return;
+        }
+        toasts.say(if exported {
             match action {
                 ExportAction::Copy => Msg::AccountKeyCopied,
                 ExportAction::Download => Msg::AccountKeyDownloaded,
@@ -134,4 +138,43 @@ mod tests {
         assert!(!matches_account("OtherUser-0000-0000-0000-0000", &account));
         assert!(!matches_account("not-a-key", &account));
     }
+}
+
+/// The Android file picker cannot acknowledge a backup before the write completes.
+#[cfg(target_os = "android")]
+pub(crate) fn export_completed(
+    epoch: u64,
+    name: &str,
+    saved: bool,
+    cancelled: bool,
+    account: &mut Account,
+    toasts: &mut Toasts,
+) {
+    if epoch != auth::epoch() || cancelled {
+        return;
+    }
+    let same_account = account
+        .profile
+        .as_ref()
+        .is_some_and(|p| p.name.eq_ignore_ascii_case(name));
+    let mut same_panel = false;
+    if let super::account::AccountScreen::SaveKey {
+        name: owner,
+        saved: acknowledged,
+        ..
+    } = &mut account.screen
+    {
+        same_panel = owner.eq_ignore_ascii_case(name);
+        if same_panel && saved {
+            *acknowledged = true;
+        }
+    }
+    if !same_account && !same_panel {
+        return;
+    }
+    toasts.say(if saved {
+        Msg::AccountKeyDownloaded
+    } else {
+        Msg::AuthBackupFailed
+    });
 }

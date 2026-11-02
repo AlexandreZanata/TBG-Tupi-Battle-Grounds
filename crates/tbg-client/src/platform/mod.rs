@@ -153,6 +153,11 @@ pub fn open_page(path: &str) {
     }
 }
 #[cfg(target_os = "android")]
-pub fn export_recovery_key(_name: &str, key: &str) -> bool {
-    copy(key)
+pub fn export_recovery_key(name: &str, key: &str) -> bool {
+    if !tbg_core::account::parse_key(key).is_some_and(|(owner, _)| owner.eq_ignore_ascii_case(name))
+    {
+        return false;
+    }
+    let request = serde_json::json!({"epoch":crate::auth::epoch(), "name":name, "key":key});
+    android::services::send(jni::jni_str!("exportRecoveryKey"), &request.to_string())
 }

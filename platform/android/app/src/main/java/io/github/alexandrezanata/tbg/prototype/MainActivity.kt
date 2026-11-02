@@ -17,6 +17,7 @@ class MainActivity : GameActivity() {
     internal val events = HostEvents()
     private val services by lazy { PlatformServices(this) }
     private val textInput by lazy { NativeTextInput(this) }
+    private val recoveryExport by lazy { RecoveryExport(this) }
     @Volatile private var viewport = "{}"
     @Volatile private var battleViewport = false
     @Volatile private var resumed = false
@@ -73,7 +74,15 @@ class MainActivity : GameActivity() {
 
     override fun onDestroy() {
         textInput.dismiss()
+        recoveryExport.clear()
         super.onDestroy()
+    }
+
+    @Deprecated("Android result callback retained for the explicit document picker")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        if (!recoveryExport.result(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
     }
 
     override fun onApplyWindowInsets(view: View, insets: WindowInsetsCompat): WindowInsetsCompat {
@@ -156,6 +165,7 @@ class MainActivity : GameActivity() {
     fun hasAudioFocus(): Boolean = resumed && audioFocused
     fun showTextForm(request: String): Boolean = textInput.show(request)
     fun dismissTextForm() = textInput.dismiss()
+    fun exportRecoveryKey(request: String): Boolean = recoveryExport.start(request)
     fun copyText(text: String) = services.copy(text)
     fun requestPaste() = services.paste()
     fun pasteText(): String? = services.pasteText()

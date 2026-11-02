@@ -908,3 +908,13 @@ Shop/reservation/Reroll/auxiliary controls and settings. Candidate 21 on API36
 shows intact geometry in inspected lobby/Practice/match frames but exposes
 auxiliary overlap and lost scroll distance. Corrected runtime and same-source
 Linux/Windows/web correspondence remain pending.
+
+## 2026-11-02 — P69 explicit Android document export
+
+Android Download recovery key uses the system document picker and acknowledges
+the backup only after a successful write. Back/cancel leaves the saved state
+unchanged, and stale account-epoch completions are ignored. Clipboard Copy
+remains a separate explicit action. Desktop/browser export and #57 updater
+behavior remain unchanged. Coverage: account backup/import/save confirmation,
+Android picker return/focus/immersive restoration and failure/cancel states.
+Compilation and observed journeys for this adapter remain pending.
