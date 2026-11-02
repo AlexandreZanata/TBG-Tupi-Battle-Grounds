@@ -19,7 +19,8 @@ ROOT = Path(__file__).resolve().parents[1]
 STAGE = ROOT / "platform/android/app/build/native-input"
 ASSETS = ROOT / "crates/tbg-client/assets"
 PACKAGE = "io.github.alexandrezanata.tbg.prototype"
-BASE = "6e569183b1f589faafab16bdc3f1c2b7a3d83316"
+# PR #48 Linux reference (0.1.4-colossus.1, protocol 38) the Android client integrates.
+BASE = "5e1bee4833a1c6957926bba7d6791ff3b2f7da00"
 
 
 def digest(raw):
@@ -100,7 +101,7 @@ def prepare(args):
                             (ROOT / "crates/tbg-core/src/protocol.rs").read_text())[1])
     info = {
         "source_sha": source, "reviewed_linux_base": BASE, "linux_version": version,
-        "android_revision": 9, "package": PACKAGE, "abi": args.abi,
+        "android_revision": args.version_code, "package": PACKAGE, "abi": args.abi,
         "protocol": protocol, "ruleset": rules_identity(),
         "content_sha256": digest((ROOT / "crates/tbg-core/src/content.rs").read_bytes()),
         "cargo_lock_sha256": digest((ROOT / "Cargo.lock").read_bytes()),
@@ -216,6 +217,8 @@ def main():
     stage.add_argument("--dependency", type=Path, action="append", default=[])
     stage.add_argument("--source", required=True)
     stage.add_argument("--abi", choices=["arm64-v8a","x86_64"], default="arm64-v8a")
+    # Must equal Gradle's -PprototypeVersionCode; upgrades only ever increase it.
+    stage.add_argument("--version-code", type=int, required=True)
     verify = commands.add_parser("verify-stage")
     verify.add_argument("--abi", choices=["arm64-v8a","x86_64"])
     apk = commands.add_parser("inspect-apk")

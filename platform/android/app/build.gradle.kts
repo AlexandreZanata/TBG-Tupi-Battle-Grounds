@@ -19,7 +19,7 @@ android {
         minSdk = 31
         targetSdk = 36
         versionCode = prototypeCode.get().toInt()
-        versionName = "0.1.1-rc.1-android.9"
+        versionName = "0.1.4-colossus.1-android.${prototypeCode.get()}"
         ndk { abiFilters += prototypeAbi.get() }
     }
 
