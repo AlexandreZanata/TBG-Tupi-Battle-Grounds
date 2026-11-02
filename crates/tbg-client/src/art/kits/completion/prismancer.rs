@@ -60,6 +60,5 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
     FigureSpec { plan: p, parts: v }
 }
 pub fn plan(t: u8) -> Proportions {
-    let p = body::plan(false, 1.0, t);
-    p
+    body::plan(false, 1.0, t)
 }

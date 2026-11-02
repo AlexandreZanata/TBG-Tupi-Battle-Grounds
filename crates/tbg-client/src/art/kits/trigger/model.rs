@@ -131,15 +131,13 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             v.push(part(Body(foot), Ball(0.035), GOLD, [0.0, 0.03, -0.12]));
         }
     }
-    if f.a {
-        if f.t2 {
-            v.push(part(
-                Prop(Socket::Back),
-                Box(0.09, 0.14, 0.065),
-                GOLD,
-                [0.0, 0.19, 0.0],
-            ));
-        }
+    if f.a && f.t2 {
+        v.push(part(
+            Prop(Socket::Back),
+            Box(0.09, 0.14, 0.065),
+            GOLD,
+            [0.0, 0.19, 0.0],
+        ));
     }
     FigureSpec { plan: p, parts: v }
 }

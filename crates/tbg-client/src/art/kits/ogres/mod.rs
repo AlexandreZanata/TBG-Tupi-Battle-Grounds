@@ -124,7 +124,7 @@ static CLAY_BINDER: Kit = Kit {
     figure: clay_binder::spec,
     pose: |m, p| motion::pose(UnitKind::ClayBinder, m, p),
     gait: Gait {
-        stride: 0.9199999999999999,
+        stride: 0.92,
         lift: 0.16,
         bob: 0.018,
         sink: 0.09,
