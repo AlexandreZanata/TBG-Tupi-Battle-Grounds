@@ -91,12 +91,20 @@ fn journey(
             catalog.enemies = vec![placed(
                 Shieldbearer,
                 if crate::config::url_param("capture_barrel_intercept").is_some() {
-                    7200
+                    7800
                 } else {
                     // Both Furnaces can attack here without walking into the caster.
                     5900
                 },
             )];
+            if crate::config::url_param("capture_barrel_intercept").is_some() {
+                // PK-01 needs legal body space; the burst reaches the wounded carrier and near Furnace.
+                catalog.allies = vec![
+                    placed(GustDrummer, 9200),
+                    placed(BloodFurnace, 5000),
+                    placed(BloodFurnace, 6800),
+                ];
+            }
             catalog.dummies = false;
         }
         if crate::config::url_param("capture_abyssal_crowd").is_some() {
