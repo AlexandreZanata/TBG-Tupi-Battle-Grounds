@@ -61,7 +61,7 @@ closed: ranked authority moving inside the admission switch, client re-admission
 instead of `ServerFull` on a draining slot, notifying queued/room/rematch waiters,
 connection counts in the retire gate and a directory-backed first admission answer.
 The single process cannot hand over to a slot while it runs (`tbg-server@` conflicts
-with it and it never reads the directory), so the switch to slots needs one restart,
+with it and it never reads the directory), so the switch to slots needed one restart (done 2026-11-02 10:31Z, `deploy/slot-bootstrap.sh`),
 scheduled when it holds no connection, match or pending result (D-99). Multiple containers or pods do not transfer in-memory matches,
 share an Access index safely, or make SQLite a distributed database. Before adding a
 host, design explicit match ownership/routing, reconnection, durable settlement,

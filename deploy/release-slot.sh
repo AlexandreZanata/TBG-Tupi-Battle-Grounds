@@ -6,6 +6,8 @@
 # until it is `ready` (it admits nothing until an operator promotes it).
 # `retire` stops a drained slot only after its retirement gate passed and
 # otherwise reports Pending: it never kills a slot that is still busy.
+# Running slots are enabled and retired ones disabled, so a reboot restarts
+# exactly the generations the directory still knows; it decides which admits.
 set -euo pipefail
 
 DB="${TBG_DB:-/var/lib/tbg/tbg.sqlite3}"
@@ -39,7 +41,7 @@ start() {
 	ln -sfn "$dir/tbg-server" "/opt/tbg/slots/$slot/tbg-server"
 	printf 'TBG_ADDR=127.0.0.1:%s\nTBG_GENERATION=%s\nTBG_SERVER_BUILD=%s\n' \
 		"$port" "$generation" "$build" >"/etc/tbg/slot-$slot.env"
-	systemctl start "tbg-server@$slot"
+	systemctl enable --now "tbg-server@$slot"
 	for _ in $(seq 1 60); do
 		if "${ADMIN[@]}" status | grep -Eq "^$slot +ready"; then
 			echo "slot $slot ready with $generation: canary or promote it with tbg-release-admin"
@@ -54,7 +56,7 @@ start() {
 retire() {
 	for _ in $(seq 1 "${TBG_RETIRE_CHECKS:-30}"); do
 		if "${ADMIN[@]}" retire-check "$slot"; then
-			systemctl stop "tbg-server@$slot"
+			systemctl disable --now "tbg-server@$slot"
 			"${ADMIN[@]}" retire "$slot"
 			return
 		fi

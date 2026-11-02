@@ -42,7 +42,9 @@ restart, and a running match never moves. Run `tbg-release-admin` as
 shortened to `admin` here).
 
 One-time switch from the single server, in a quiet window with no open
-sockets: install the units with `provision.sh`, then
+sockets: `systemd-run --unit=tbg-slot-bootstrap --wait --collect /bin/bash
+/opt/tbg/bin/slot-bootstrap.sh <generation> [build]` (preflight, backup,
+restore on failure). Done by hand, that is: install the units with `provision.sh`, then
 `sudo systemctl disable --now tbg-server`,
 `sudo /opt/tbg/bin/release-slot.sh start a <generation> /opt/tbg/bin/tbg-server`,
 `admin promote a` and `admin ranked a`. Until `promote`, a slot admits
