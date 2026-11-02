@@ -28,7 +28,7 @@ def main():
                     '9fb7be01ac08cbed3bce1aa466d7243418490957', 'HEAD'], cwd=ROOT, check=True)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     info = json.loads(subprocess.check_output([str(binary), '--build-info'], text=True))
-    if (info['source_commit'] != commit or info['version'] != '0.1.2-cc.1'
+    if (info['source_commit'] != commit or info['version'] != '0.1.2-cc.2'
             or info['protocol'] != 33 or info['target'] != 'x86_64-unknown-linux-gnu'):
         raise SystemExit('Build the committed CC17 Linux source with TBG_SOURCE_COMMIT before installation')
     prefix = args.prefix.expanduser().resolve()

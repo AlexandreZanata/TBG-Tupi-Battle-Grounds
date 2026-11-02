@@ -7,6 +7,14 @@ use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, journey);
+    if crate::config::url_param("capture_support_rear").is_some() {
+        app.init_resource::<SupportProbe>().add_systems(
+            PostUpdate,
+            support_probe
+                .after(crate::art::anim::animate)
+                .after(bevy::transform::TransformSystems::Propagate),
+        );
+    }
 }
 fn journey(
     state: Res<State<GameState>>,
@@ -15,8 +23,27 @@ fn journey(
     mut queue: ResMut<Requests>,
     mut stage: Local<u8>,
     mut observed: Local<(u32, u32, f32)>,
+    mut catalog: ResMut<crate::training::Catalog>,
 ) {
     if *stage == 0 && *state.get() == GameState::Menu {
+        if crate::config::url_param("capture_support_rear").is_some() {
+            use tbg_core::{training::TrainingUnitSpec, UnitKind};
+            assert_eq!(
+                tbg_core::content::def(catalog.selected).archetype,
+                tbg_core::Archetype::Support
+            );
+            let placed = |kind, x| TrainingUnitSpec {
+                x: Some(x),
+                ..TrainingUnitSpec::base(kind)
+            };
+            // The Furnace wounds itself through real rules; the Shieldbearer attacks the front healer.
+            catalog.allies = vec![
+                placed(catalog.selected, 8_000),
+                placed(UnitKind::BloodFurnace, 6_000),
+            ];
+            catalog.enemies = vec![placed(UnitKind::Shieldbearer, 8_600)];
+            catalog.dummies = false;
+        }
         queue.0.push(Action::Open(Tab::Editor));
         *stage = 1;
         return;
@@ -72,5 +99,62 @@ fn journey(
             *stage = 8;
         }
         _ => {}
+    }
+}
+
+#[derive(Resource, Default)]
+pub(super) struct SupportProbe {
+    pub(super) ready: bool,
+    rear_frames: u32,
+    damaged: bool,
+    max_yaw: f32,
+}
+
+fn support_probe(
+    catalog: Res<crate::training::Catalog>,
+    latest: Res<crate::sync::LatestView>,
+    units: Query<(
+        &crate::visuals::UnitVisual,
+        &crate::art::anim::Animator,
+        &Transform,
+    )>,
+    transforms: Query<&Transform>,
+    mut probe: ResMut<SupportProbe>,
+) {
+    if probe.ready {
+        return;
+    }
+    let Some(view) = &latest.0 else { return };
+    probe.damaged |= view
+        .units
+        .iter()
+        .any(|u| u.kind == catalog.selected && u.hp < u.max_hp);
+    for (visual, animator, root) in &units {
+        if visual.kind() != catalog.selected || visual.dying || !animator.aim_is_ally {
+            continue;
+        }
+        let Some(target) = animator.aim_at else {
+            continue;
+        };
+        let direction = if visual.own { 1.0 } else { -1.0 };
+        if (target.x - root.translation.x) * direction >= -0.05 {
+            continue;
+        }
+        let joint = animator.joints[crate::art::rig::Joint::Root.index()];
+        let Ok(transform) = transforms.get(joint) else {
+            continue;
+        };
+        let forward = transform.rotation * Vec3::Z;
+        let yaw = forward.x.atan2(forward.z).abs();
+        assert!(
+            yaw < 0.02,
+            "rear heal/hit changed the support's foot heading: {yaw}"
+        );
+        probe.rear_frames += 1;
+        probe.max_yaw = probe.max_yaw.max(yaw);
+    }
+    if probe.rear_frames >= 60 && probe.damaged {
+        probe.ready = true;
+        eprintln!("Support rear-heal visual regression passed: kind={:?}, rear_frames={}, attacked=true, max_foot_yaw={}", catalog.selected, probe.rear_frames, probe.max_yaw);
     }
 }

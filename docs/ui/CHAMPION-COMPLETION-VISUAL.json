@@ -598,5 +598,25 @@
     "evidence": ".local/champion-concepts-2026-11-01/pr44-update/latest/linux-verification.json",
     "windows": "pending actual same-source visual/motion comparison",
     "desktop_web": "pending actual same-source browser visual/motion comparison"
+  },
+  "support_friendly_facing": {
+    "scope": "ten conventional Support kinds; 50 forms; both seats; 30/120 Hz",
+    "shared_paths": [
+      "art/anim.rs",
+      "art/anim/support_facing.rs",
+      "sync/events.rs"
+    ],
+    "cases": [
+      "rear injured ally while caster is attacked",
+      "repeated Cast/Hit/Idle/Walk",
+      "rear-angle boundary jitter",
+      "target loss and retarget",
+      "hostile/non-support aiming",
+      "Spawn/Evolution/Death/Victory unchanged"
+    ],
+    "unit_evidence": "five focused scenarios passed, including 200 repeated-animation cases",
+    "linux": "native rear-patient witness and install pending",
+    "windows": "pending actual motion comparison",
+    "desktop_web": "pending actual browser motion comparison"
   }
 }

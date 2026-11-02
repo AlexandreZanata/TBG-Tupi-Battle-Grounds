@@ -14,6 +14,7 @@ use super::{
 };
 use bevy::prelude::*;
 use tbg_core::UnitKind;
+mod support_facing;
 const FADE: f32 = 0.1;
 /// Seconds for the aim to swing fully in, and to let go.
 const AIM_IN: f32 = 0.15;
@@ -38,6 +39,8 @@ pub struct Animator {
     pub form: (u8, u8),
     /// The engaged target in world space; visuals refresh it every frame.
     pub aim_at: Option<Vec3>,
+    /// Relation of the authoritative action target; incoming hits never retarget the caster.
+    pub(crate) aim_is_ally: bool,
     pub special_at: Option<Vec3>,
     special_aim: Option<Vec3>,
     /// Walk in place at content speed (review tools): feet are not planted.
@@ -62,6 +65,7 @@ pub struct Animator {
     phase: f32,
     feet: FootLocks,
     aim: Option<Aim>,
+    support_facing: support_facing::Facing,
     since_attack: f32,
     variant: u8,
     clock: f32,
@@ -95,6 +99,7 @@ impl Animator {
             celebration: None,
             form: (0, 0),
             aim_at: None,
+            aim_is_ally: false,
             special_at: None,
             special_aim: None,
             treadmill: false,
@@ -117,6 +122,7 @@ impl Animator {
             phase,
             feet: FootLocks::default(),
             aim: None,
+            support_facing: support_facing::Facing::default(),
             since_attack: 1e6,
             variant: 0,
             clock: phase * 100.0,
@@ -200,6 +206,7 @@ impl Animator {
         self.fade = None;
         self.aim = None;
         self.aim_at = None;
+        self.aim_is_ally = false;
         self.special_at = None;
         self.special_aim = None;
         self.hit_stop = 0.;
@@ -293,12 +300,13 @@ impl Animator {
     pub(crate) fn pose(&self, clip: Clip, t: f32) -> Pose {
         let mut pose = sample(clip, t);
         let walk = (clip == Clip::Walk).then(|| (t / clip.duration()).rem_euclid(1.0));
+        let support_cast = self.friendly_support() && support_facing::combat(clip);
         let moment = Moment {
             clip,
             t,
             tier: self.form.0,
             branch: self.form.1,
-            aim: self.aim,
+            aim: if support_cast { None } else { self.aim },
             since_attack: self.since_attack,
             variant: self.variant,
             clock: if crate::config::low_motion() {
@@ -323,7 +331,14 @@ impl Animator {
         if let Some(motion) = self.celebration {
             super::celebration::finish(motion, &moment, &mut pose);
         }
+        if support_cast {
+            self.support_facing.apply(&mut pose);
+        }
         pose
+    }
+    fn friendly_support(&self) -> bool {
+        self.aim_is_ally
+            && tbg_core::content::def(self.kind).archetype == tbg_core::Archetype::Support
     }
     fn action_pose(&mut self, dt: f32) -> Pose {
         let mut pose = self.last;
@@ -416,6 +431,14 @@ impl Animator {
         self.aim = target
             .filter(|_| weight > 0.0)
             .map(|target| Aim { target, weight });
+        self.support_facing.observe(
+            if self.friendly_support() {
+                self.aim
+            } else {
+                None
+            },
+            dt,
+        );
     }
 }
 pub fn animate(

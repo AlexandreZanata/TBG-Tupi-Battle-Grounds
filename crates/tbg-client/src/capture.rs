@@ -172,6 +172,7 @@ fn capture(
     #[cfg(tbg_desktop)] stats: Res<crate::sync::MatchStats>,
     #[cfg(tbg_desktop)] match_info: Res<crate::sync::MatchInfo>,
     #[cfg(tbg_desktop)] loading: Res<crate::ui::native_loading::Status>,
+    #[cfg(tbg_desktop)] support_probe: Option<Res<training::SupportProbe>>,
     mut started: Local<bool>,
     #[cfg(tbg_desktop)] mut ready_at: Local<Option<f32>>,
 ) {
@@ -202,6 +203,9 @@ fn capture(
         // Shader/font work can outlive the requested delay on a busy machine.
         // Capture the ready scene, never the loading overlay in front of it.
         if !loading.boot_ready || loading.scene_waiting {
+            return;
+        }
+        if support_probe.is_some_and(|probe| !probe.ready) {
             return;
         }
         if crate::config::url_param("capture_panel").as_deref() == Some("arena_train")

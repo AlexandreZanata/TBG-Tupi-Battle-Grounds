@@ -367,3 +367,19 @@ affiliation plates. The seventeen added champions remain selectable in the
 updated 63-entry catalog and local training. Linux recapture/install checks
 are pending on the integrated source; Windows/desktop-web visual and motion
 parity remain pending. Old screenshots do not certify the updated UI.
+
+### 2026-11-01 — Stable friendly-target support posture
+
+All ten conventional Support kinds and their five forms use one shared
+friendly-action torso/head look across Idle, Walk, Cast and Hit. Feet keep
+the BattleLine heading while the authoritative patient can be behind or
+across the rear angle boundary. Incoming hits never retarget the heal or
+reset the support's look toward an attacker. Patient loss releases the look;
+hostile attacks and authored life/celebration clips remain independent.
+
+Shared paths: art/anim.rs, art/anim/support_facing.rs and sync/events.rs.
+Coverage: both seats, all forms, 30/120 Hz, rear/side/front patients, target
+loss, repeated hits and casts; paired grips and projectile timing. The
+[focused report](../phases/SUPPORT-FACING-FIX.md) records the failing-before/
+passing-after evidence. Linux native witness/install are pending at this
+checkpoint; Windows and desktop-web actual motion comparison remain pending.
