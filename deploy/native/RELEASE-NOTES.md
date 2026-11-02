@@ -1,6 +1,11 @@
-TBG 0.1.2-rc.1 — Linux and Windows beta candidate
+TBG 0.1.2-rc.2 — Linux and Windows beta candidate
 
 Protocol 31, schema 10, ruleset 6 / 097385fee9a10b0f.
+
+Same gameplay, protocol and contract as 0.1.2-rc.1. This is the first version
+published by the automatic main pipeline: one exact-source build per platform,
+promoted byte for byte, built with the pinned Rust 1.99.0 from LF-normalized
+sources.
 
 Shared Bevy desktop interface, 46 conventional champions, eight Arenas, local
 training, winner celebrations, illustrated cards/Augments and protected sessions.
