@@ -25,6 +25,8 @@ mod feet;
 pub mod figure;
 #[cfg(all(debug_assertions, not(target_arch = "wasm32")))]
 pub(crate) mod footprint_export;
+#[cfg(test)]
+mod gods_tests;
 pub mod ik;
 pub mod kits;
 mod legacy;

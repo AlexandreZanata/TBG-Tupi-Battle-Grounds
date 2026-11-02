@@ -19,6 +19,9 @@ pub(crate) fn describe(kind: UnitKind, tier: u8, branch: u8, lang: crate::i18n::
         .into_iter()
         .filter_map(|a| match a {
             Ability::Completion(c) => Some(super::ability_completion::text(c, lang)),
+            gods @ (Ability::StormJudgment { .. } | Ability::VerdictLance { .. }) => {
+                super::ability_gods::text(gods, lang)
+            }
             other => ability(other),
         })
         .collect();

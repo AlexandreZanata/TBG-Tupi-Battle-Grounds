@@ -2514,7 +2514,7 @@ No splash, lifesteal or control immunity is added.
 
 Presentation: the server emits a public `StormArc {unit, from, to, jump}` per
 link (jump 0 = B2 extra) and the existing `AbilityResolved`; clients only draw
-them. Both counters share the existing public per-kind progress bits. Neither
-champion can ride a Cargo Crab beyond the existing Tank rule (they are not Tanks;
-the ordinary carry rules apply). PK-01 lab footprints are authored provisionally
-until the native mesh export measures the new forms.
+them. Both counters share the existing public per-kind progress bits; every
+other system (Synergy rows, Arcanas, Augments, Interest, Shop, Evolution costs,
+Strongholds, carry rules) applies unchanged. PK-01 lab footprints are authored
+provisionally until the native mesh export measures the new forms.

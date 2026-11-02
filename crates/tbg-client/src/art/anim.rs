@@ -419,8 +419,11 @@ impl Animator {
             }
             walk = None;
         }
-        if self.kind == UnitKind::Trident {
-            kits::trident::motion::finish_blend(&mut pose, &self.plan);
+        match self.kind {
+            UnitKind::Trident => kits::trident::motion::finish_blend(&mut pose, &self.plan),
+            UnitKind::Astreon => kits::astreon::motion::finish_blend(&mut pose, &self.plan),
+            UnitKind::Volthar => kits::volthar::motion::finish_blend(&mut pose, &self.plan),
+            _ => {}
         }
         self.last = pose;
         (pose, walk)

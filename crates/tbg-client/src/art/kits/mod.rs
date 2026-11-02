@@ -8,6 +8,7 @@ mod acidmaw;
 pub mod aim;
 mod antidote_brewer;
 mod archer;
+pub(crate) mod astreon;
 mod beetling;
 mod blood_furnace;
 mod bloodweaver;
@@ -57,6 +58,7 @@ mod solar_sentinel;
 mod tools;
 pub(crate) mod trident;
 mod trigger;
+pub(crate) mod volthar;
 mod weaver;
 mod whisperer;
 
@@ -287,6 +289,8 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
         UnitKind::Colossus => Some(&colossus::KIT),
+        UnitKind::Volthar => Some(&volthar::KIT),
+        UnitKind::Astreon => Some(&astreon::KIT),
         _ => abyssals::kit(kind)
             .or_else(|| ogres::kit(kind))
             .or_else(|| completion::kit(kind)),
