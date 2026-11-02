@@ -14,7 +14,7 @@ use bevy::prelude::*;
 pub(super) const REAR: f32 = -0.78;
 pub(super) const SHAFT_FRONT: f32 = 0.52;
 /// The leading hand, ahead of the rear grip at the origin.
-pub(super) const SUPPORT: Vec3 = Vec3::new(0.0, 0.0, 0.24);
+pub(super) const SUPPORT: Vec3 = Vec3::new(0.0, 0.0, 0.20);
 
 pub(super) fn blade(f: Form) -> f32 {
     match (f.a, f.t2) {

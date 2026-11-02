@@ -332,7 +332,7 @@ fn wrath(v: &mut Vec<PartSpec>, s: Stone, f: Form) {
         v.push(
             part(
                 Body(Head),
-                Prism(0.04, 0.22 + 0.4 * (0.1 - x.abs())),
+                Prism(0.04, 0.14 + 0.5 * (0.1 - x.abs())),
                 s.metal,
                 [x, 0.26, -0.01],
             )
@@ -487,13 +487,19 @@ fn obelisk(v: &mut Vec<PartSpec>, s: Stone, f: Form) {
         }
     }
     if f.b {
-        // Structural buttresses and a heavier foot; tier 2 a broad crowned cap.
+        // Slim stone buttresses with gold caps; tier 2 adds a broad crowned cap.
         for side in [-1.0f32, 1.0] {
             v.push(part(
                 n,
-                Bevel(0.05, 0.85, width * 0.9, 0.012),
+                Bevel(0.035, 0.70, width * 0.55, 0.01),
+                s.shade,
+                [side * width * 0.66, 0.30, 0.0],
+            ));
+            v.push(part(
+                n,
+                Bevel(0.045, 0.04, width * 0.6, 0.008),
                 s.metal,
-                [side * width * 0.72, 0.30, 0.0],
+                [side * width * 0.66, 0.66, 0.0],
             ));
         }
         if f.t2 {

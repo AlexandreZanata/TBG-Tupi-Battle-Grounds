@@ -98,7 +98,7 @@ fn gd04_astreon_holds_the_lance_in_both_hands_and_its_shaft_stays_out_of_the_tor
         let plan = kits::astreon::plan(t);
         frames(UnitKind::Astreon, t, b, |clip, world| {
             let lance = world[Prop(WeaponR).index()];
-            for (hand, anchor) in [(HandR, 0.0f32), (HandL, 0.24)] {
+            for (hand, anchor) in [(HandR, 0.0f32), (HandL, 0.20)] {
                 let at = lance.transform_point3(Vec3::new(0.0, 0.0, anchor));
                 let wrist = world[Body(hand).index()].transform_point3(Vec3::ZERO);
                 assert!(

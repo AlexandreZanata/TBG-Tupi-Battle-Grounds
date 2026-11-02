@@ -15,6 +15,11 @@ use std::f32::consts::TAU;
 const GUARD: Vec3 = Vec3::new(-0.19, 0.26, 0.28);
 /// Shaft yaw: the point leads to the left-front, the butt trails right-back.
 const SHAFT_YAW: f32 = 42.0;
+/// The upright guard of every non-attack clip: the lance stands at his right,
+/// point skyward and butt toward the ground, never across the cuirass.
+const GUARD_UP: Vec3 = Vec3::new(-0.22, 0.12, 0.30);
+const UP_YAW: f32 = 8.0;
+const UP_TILT: f32 = -32.0;
 
 pub(super) fn pose(m: &Moment, p: &mut Pose) {
     p.fill((Vec3::ZERO, Vec3::ZERO));
@@ -32,7 +37,13 @@ pub(super) fn pose(m: &Moment, p: &mut Pose) {
     if m.clip != Clip::Walk {
         tools::plant(p, &body, tools::stance(&body, 1.3, 0.12));
     }
-    grip(m, p, &body, slide, pitch);
+    // Only the stroke lowers the lance onto the diagonal thrust line.
+    let up = if matches!(m.clip, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast) {
+        1.0 - tools::hold(m.t, [0.0, 0.14, 0.42, 0.68])
+    } else {
+        1.0
+    };
+    grip(m, p, &body, (slide, pitch), up);
 }
 
 fn idle(m: &Moment, p: &mut Pose) -> (f32, f32) {
@@ -63,8 +74,21 @@ fn stroke(t: f32) -> (f32, f32) {
 fn attack(m: &Moment, p: &mut Pose) -> (f32, f32) {
     let (load, contact) = stroke(m.t);
     let f = Form::of(m.tier, m.branch);
-    // The pierce (counted) and the B executions lunge deeper and heavier.
-    let verdict = if m.counter >= 2 { 1.0 } else { 0.0 };
+    // The counted pierce (the form's own cycle, read from the server's table)
+    // and the B executions lunge deeper and heavier.
+    let every = tbg_core::content::def(tbg_core::UnitKind::Astreon)
+        .ability(m.tier, m.branch)
+        .into_iter()
+        .find_map(|a| match a {
+            tbg_core::content::Ability::VerdictLance { every, .. } => Some(every),
+            _ => None,
+        })
+        .unwrap_or(4);
+    let verdict = if m.counter.saturating_add(1) >= every {
+        1.0
+    } else {
+        0.0
+    };
     let weight = 1.0 + 0.35 * verdict + if f.b { 0.25 } else { 0.0 };
     tools::set(p, Chest, [3.0 + 5.0 * contact * weight, -10.0 * load, 0.0]);
     tools::set(p, Head, [-3.0 - 3.0 * contact, 6.0 * load, 0.0]);
@@ -90,7 +114,7 @@ fn hit(m: &Moment, p: &mut Pose) -> (f32, f32) {
     (-0.04 * recoil, -34.0 + 6.0 * recoil)
 }
 
-/// He loses balance onto one knee, the lance sinking to the ground in both hands.
+/// He loses balance onto one knee and slumps over the lance planted in both hands.
 fn death(m: &Moment, p: &mut Pose, body: &Proportions) -> (f32, f32) {
     let stagger = tools::hold(m.t, [0.0, 0.10, 0.18, 0.30]);
     let kneel = tools::window(m.t, 0.12, 0.70);
@@ -99,14 +123,14 @@ fn death(m: &Moment, p: &mut Pose, body: &Proportions) -> (f32, f32) {
     tools::set(p, Spine, [-8.0 * stagger + 16.0 * bow, 0.0, 5.0 * bow]);
     tools::set(p, Head, [12.0 * bow, 0.0, 0.0]);
     p[Secondary(Spring::Back).index()].0.x = -10.0 * bow;
-    (-0.02 * bow, -34.0 + 70.0 * kneel)
+    (-0.06 * kneel, -34.0 + 20.0 * kneel)
 }
 
 fn spawn(m: &Moment, p: &mut Pose) -> (f32, f32) {
     let rise = tools::window(m.t, 0.0, 0.45);
     tools::shift(p, Root, [0.0, -0.22 * (1.0 - rise), 0.0]);
     tools::set(p, Head, [-8.0 * (1.0 - rise), 0.0, 0.0]);
-    (0.0, -60.0 + 26.0 * rise)
+    (0.0, -40.0 + 6.0 * rise)
 }
 
 fn evolve(m: &Moment, p: &mut Pose) -> (f32, f32) {
@@ -116,7 +140,7 @@ fn evolve(m: &Moment, p: &mut Pose) -> (f32, f32) {
     tools::set(p, Chest, [4.0 * gather - 6.0 * display, 0.0, 0.0]);
     tools::set(p, Head, [-10.0 * display, 0.0, 0.0]);
     p[Secondary(Spring::Back).index()].0.x = -12.0 * display;
-    (0.04 * display, -34.0 - 30.0 * display)
+    (0.06 * display, -34.0 - 12.0 * display)
 }
 
 /// Conquest: the point rises skyward on each beat and settles back to guard.
@@ -128,18 +152,21 @@ fn victory(m: &Moment, p: &mut Pose) -> (f32, f32) {
     tools::set(p, Chest, [-5.0 * raise, 3.0 * beat, 0.0]);
     tools::set(p, Head, [-12.0 * raise, -3.0 * beat, 0.0]);
     p[Secondary(Spring::Back).index()].0.x = 10.0 * raise;
-    (0.06 * raise, -34.0 - 40.0 * raise)
+    (0.10 * raise, -34.0 - 14.0 * raise)
 }
 
-fn grip(m: &Moment, p: &mut Pose, body: &Proportions, mut slide: f32, pitch: f32) {
+fn grip(m: &Moment, p: &mut Pose, body: &Proportions, (mut slide, pitch): (f32, f32), up: f32) {
     let chest = tools::chest(p, body);
+    let guard = GUARD.lerp(GUARD_UP, up);
+    let yaw = SHAFT_YAW + (UP_YAW - SHAFT_YAW) * up;
+    let pitch = pitch + UP_TILT * up;
     let thrust = matches!(m.clip, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast);
     let (_, contact) = stroke(m.t);
     let tip = lance::tip(Form::of(m.tier, m.branch));
     let pitch = match m.aim {
         Some(aim) if thrust => {
             let target = chest.inverse().transform_point3(aim.target);
-            let delta = target - GUARD;
+            let delta = target - guard;
             let wanted = -delta.y.atan2(delta.xz().length()).to_degrees();
             // The point lands just inside the target instead of spearing past it.
             let fit = (delta.length() - tip.z + 0.06).clamp(-0.30, 0.12);
@@ -149,8 +176,8 @@ fn grip(m: &Moment, p: &mut Pose, body: &Proportions, mut slide: f32, pitch: f32
         _ => pitch,
     };
     let rotation =
-        Quat::from_rotation_y(SHAFT_YAW.to_radians()) * Quat::from_rotation_x(pitch.to_radians());
-    let origin = GUARD + rotation * Vec3::Z * slide;
+        Quat::from_rotation_y(yaw.to_radians()) * Quat::from_rotation_x(pitch.to_radians());
+    let origin = guard + rotation * Vec3::Z * slide;
     p[Prop(Socket::WeaponR).index()] = (ik::degrees(rotation), origin);
     solve_hands(p, body, rotation, origin);
     if let Some(aim) = m.aim {

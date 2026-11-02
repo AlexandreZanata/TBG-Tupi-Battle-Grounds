@@ -212,7 +212,8 @@ mod side_tests {
             while game.state.phase != Phase::Running {
                 game.state.step();
             }
-            game.state.players[game.you.index()].energy = 20 * tbg_core::content::ENERGY_SCALE;
+            // GD-04: the preview pool's dearest offer (Astreon) costs 23.
+            game.state.players[game.you.index()].energy = 30 * tbg_core::content::ENERGY_SCALE;
             let energy = game.state.player(game.you).energy;
             game.send(ClientMsg::Intent {
                 seq: 17,

@@ -23,11 +23,12 @@ struct Hold {
     both: f32,
 }
 
+// The head turns edge-on to the face (roll) so no striking face or spike crosses it.
 const GUARD: Hold = Hold {
-    at: Vec3::new(-0.44, -0.02, 0.18),
-    pitch: -78.0,
-    yaw: -12.0,
-    roll: 0.0,
+    at: Vec3::new(-0.50, -0.12, 0.10),
+    pitch: -72.0,
+    yaw: -18.0,
+    roll: 90.0,
     both: 0.0,
 };
 const LOADED: Hold = Hold {

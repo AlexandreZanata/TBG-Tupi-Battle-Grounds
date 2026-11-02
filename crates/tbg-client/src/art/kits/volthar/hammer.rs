@@ -17,9 +17,9 @@ pub(super) const SUPPORT: Vec3 = Vec3::new(0.0, 0.0, 0.26);
 pub(super) const MUZZLE: Vec3 = Vec3::new(0.0, 0.0, HEAD_Z + 0.12);
 
 fn head_size(f: Form) -> Vec3 {
-    let grow = if f.t2 { 1.18 } else { 1.0 };
+    let grow = if f.t2 { 1.12 } else { 1.0 };
     let base = if f.b {
-        Vec3::new(0.40, 0.24, 0.24)
+        Vec3::new(0.36, 0.22, 0.22)
     } else {
         Vec3::new(0.34, 0.21, 0.21)
     };
