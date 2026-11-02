@@ -14,3 +14,5 @@
 12 8f5a8ebb3e4f88ec
 13 b66993d9e87a9cfc
 14 f354f651c056d615
+# P74 branch-only identity (superseded by integrated R15): 13 ed69d43c2812469e
+15 cc459351581b7763

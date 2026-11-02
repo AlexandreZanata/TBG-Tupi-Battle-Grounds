@@ -45,6 +45,8 @@ pub fn match_view(view: &PublicView) -> MatchView {
         events: view.events.clone(),
         outcome: view.outcome,
         spectators: view.spectators,
+        auxiliaries: view.auxiliaries,
+        free_rerolls: 0,
     }
 }
 

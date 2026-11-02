@@ -3259,3 +3259,49 @@ bits. Appending kinds and the event bumps wire 36 → 37 and ruleset 13 → 14.
 
 **Reopen when** a Gods Synergy is approved, when D-33 evidence moves a value, or
 if a future champion needs per-unit state that `UnitFx` cannot express.
+
+
+## D-106 — War Auxiliaries (`Mineiro` and `Mercador`) architecture (2026-11-02)
+
+**Context:** P74 introduces two purchasable off-lane War Auxiliaries (`Mineiro`
+for unmultiplied Energy production and `Mercador` for purchase-driven free
+Shop rerolls) with a dedicated bottom-right two-slot HUD panel and animated
+low-poly 3D precincts/ships across all eight Arenas.
+
+**Decision:**
+1. Keep `PlayerState::{auxiliaries, free_rerolls}` in `tbg-core` with integer-only
+   Bresenham sub-energy accounting (`36` sub-energy/s over `3_600` ticks) and
+   append `PlayerIntention::HireAuxiliary { slot }`,
+   `Rejection::{BadAuxiliarySlot, AuxiliaryAlreadyHired}`, and
+   `Event::{AuxiliaryHired, AuxiliaryTriggered}` without renumbering any existing
+   wire tag.
+2. Expose public `auxiliaries: [[AuxiliarySlotView; 2]; 2]` in both `MatchView`
+   and `PublicView`, and private `free_rerolls: u8` in `MatchView`.
+3. Render the bottom-right `Auxiliares (0/2)` navy-and-gold HUD panel in
+   `native_battle/auxiliaries.rs` without moving the five conventional Shop cards
+   or the `Energy / Interest / Army / Reroll` bar.
+4. Place the symmetric Left (`x = -2.55`) and Right (`x = +18.55`) 3D precincts
+   at `z = -3.45` (`Mineiro`) and `z = +3.45` (`Mercador`, pier, and Caravel
+   ship), strictly outside the widened `ARENA-CLEAR-01` road box
+   (`x ∈ [-1.1, 17.1], z ∈ [-2.67, 2.67]`), with theme-adapted palettes and prop
+   pad filtering across all eight Arenas.
+
+## INT-06 — Integrated P74/GD-04 wire, state and release identity (2026-11-02)
+
+The owner explicitly requested integration and testing of #51, both new Gods
+and the other agent's Colossus refinement. Merge both published histories.
+Keep the exact CROWD-EXIT-01 HOME_HALF_WIDTH solution and full live envelopes.
+The combined release uses wire 38 and ruleset 15: GD-04's wire 37/R14 and
+P74's parallel R13 are recorded historical branch identities, not conflicting
+current declarations. Preserve all older canonical registry rows; retain the
+unreleased P74 identity in a registry comment.
+
+P74 auxiliary phases and free rerolls must participate in serialized state
+and deterministic hashes. Removing serde(skip) repairs that omission; zeroed
+new fields necessarily change state hashes while unused-feature outcomes and
+ticks must remain identical. Append observed R15 baselines, never rewrite old
+rows. Serialize the owning seat's reroll quote for real network roundtrips;
+free rerolls and quotes remain absent from PublicView. Values, the 46-unit
+online Shop and proposed 84-unit local preview are unchanged.
+
+Integrated source identity after formatting: `w38-r15-cc459351581b7763` (59 watched files).

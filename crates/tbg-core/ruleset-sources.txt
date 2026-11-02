@@ -4,6 +4,7 @@ watch afflictions.rs
 watch arcana.rs
 watch astreon.rs
 watch augment.rs
+watch auxiliary.rs
 watch barrel.rs
 watch bonehorn.rs
 watch bulwark.rs

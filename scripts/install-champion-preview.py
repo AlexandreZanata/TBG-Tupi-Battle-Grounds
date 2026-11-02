@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Install the committed 82-champion Linux preview without replacing the ordinary client or its data."""
+"""Install the committed champion Linux preview without replacing the ordinary client or its data."""
 import argparse
 import hashlib
 import json
 import os
+import re
+import tomllib
 from pathlib import Path
 import shlex
 import shutil
@@ -20,6 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--prefix', type=Path, default=Path.home() / '.local')
+    parser.add_argument('--data-dir', type=Path, help='Keep existing preview data when packages live on another disk')
     args = parser.parse_args()
     binary = args.binary.resolve()
     subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'crates', 'Cargo.toml',
@@ -28,17 +31,20 @@ def main():
                     '9fb7be01ac08cbed3bce1aa466d7243418490957', 'HEAD'], cwd=ROOT, check=True)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     info = json.loads(subprocess.check_output([str(binary), '--build-info'], text=True))
-    if (info['source_commit'] != commit or info['version'] != '0.1.4-colossus.1'
-            or info['protocol'] != 36 or info['target'] != 'x86_64-unknown-linux-gnu'):
-        raise SystemExit('Build the committed 82-champion Linux source with TBG_SOURCE_COMMIT before installation')
+    version = tomllib.loads((ROOT / 'crates/tbg-client/Cargo.toml').read_text())['package']['version']
+    protocol = int(re.search(r'PROTOCOL_VERSION: u16 = (\d+)', (ROOT / 'crates/tbg-core/src/protocol.rs').read_text())[1])
+    count = int(re.search(r'COMPLETION_POOL: \[UnitKind; (\d+)\]', (ROOT / 'crates/tbg-core/src/types.rs').read_text())[1])
+    if (info['source_commit'] != commit or info['version'] != version
+            or info['protocol'] != protocol or info['target'] != 'x86_64-unknown-linux-gnu'):
+        raise SystemExit('Build the committed champion Linux source with TBG_SOURCE_COMMIT before installation')
     prefix = args.prefix.expanduser().resolve()
     slot = prefix / 'opt/tupi-battle-grounds-champion-preview' / f"{info['version']}-{commit[:12]}"
-    data = prefix / 'share/tupi-battle-grounds-champion-preview'
+    data = args.data_dir.expanduser().resolve() if args.data_dir else prefix / 'share/tupi-battle-grounds-champion-preview'
     files = [{'path': p.relative_to(ROOT / 'crates/tbg-client/assets').as_posix(),
               'sha256': sha(p)} for p in sorted((ROOT / 'crates/tbg-client/assets').rglob('*')) if p.is_file()]
     manifest = {'schema': 1, **info, 'binary_sha256': sha(binary),
                 'cargo_lock_sha256': sha(ROOT / 'Cargo.lock'), 'assets': files,
-                'scope': '82-champion local Practice/Training preview; online roster is not activated',
+                'scope': f'{count}-champion local Practice/Training preview; online roster is not activated',
                 'laboratory_baseline': 'PR44 / 9fb7be01ac08cbed3bce1aa466d7243418490957',
                 'data_directory': str(data)}
     if slot.exists():
@@ -69,8 +75,8 @@ def main():
     applications.mkdir(parents=True, exist_ok=True)
     quoted = str(launcher).replace('\\', '\\\\').replace('"', '\\"').replace('`', '\\`').replace('$', '\\$')
     desktop = applications / 'tbg-champions-preview.desktop'
-    desktop.write_text('[Desktop Entry]\nType=Application\nName=TBG · 82 Champions Preview\n'
-                       'Name[pt_BR]=TBG · Prévia dos 82 Campeões\n'
+    desktop.write_text(f'[Desktop Entry]\nType=Application\nName=TBG · {count} Champions Preview\n'
+                       f'Name[pt_BR]=TBG · Prévia dos {count} Campeões\n'
                        'Comment=Local champion and Evolution validation\n'
                        f'Exec="{quoted}"\nIcon={slot}/assets/branding/tbg-icon-512.png\n'
                        'Terminal=false\nCategories=Game;StrategyGame;\n')

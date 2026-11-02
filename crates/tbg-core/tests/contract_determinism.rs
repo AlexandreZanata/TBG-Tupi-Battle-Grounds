@@ -173,6 +173,12 @@ fn bot_matches_are_frozen() {
             (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
             (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
         ],
+        // INT-06: auxiliary fields join serialized state; R14 outcomes and ticks are retained.
+        (15, 0xcc459351581b7763) => [
+            (1, 0x498ca4c4ecd99d8c, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0xd3ae68c37379b915, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0x66740835064ae569, 23274, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

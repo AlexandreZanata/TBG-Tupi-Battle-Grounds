@@ -239,6 +239,9 @@ pub struct PlayerState {
     pub reserve: [u8; OFFERS],
     pub held_mask: u8,
     pub reroll_streak: u8,
+    /// P74 (BR-AX01–BR-AX10): War Auxiliaries state and accumulated Merchant free rerolls.
+    pub auxiliaries: [crate::auxiliary::AuxiliaryPhase; crate::auxiliary::AUXILIARY_SLOTS],
+    pub free_rerolls: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -408,6 +411,17 @@ pub enum Event {
         from: UnitId,
         to: UnitId,
         jump: u8,
+    },
+    /// P74: a seat hired one of its War Auxiliaries (`Mineiro` or `Mercador`).
+    AuxiliaryHired {
+        seat: Seat,
+        slot: u8,
+        kind: crate::auxiliary::AuxiliaryKind,
+    },
+    /// P74: an auxiliary completed an activation cycle (Merchant 3rd purchase or Miner completion).
+    AuxiliaryTriggered {
+        seat: Seat,
+        kind: crate::auxiliary::AuxiliaryKind,
     },
 }
 

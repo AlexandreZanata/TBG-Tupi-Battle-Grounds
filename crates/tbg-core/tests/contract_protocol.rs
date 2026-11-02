@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 37,
-        "GD-04: Volthar/Astreon kinds and the public StormArc event require wire 37"
+        PROTOCOL_VERSION, 38,
+        "INT-06: combined P74 auxiliary views and GD-04 events require wire 38"
     );
 }
 

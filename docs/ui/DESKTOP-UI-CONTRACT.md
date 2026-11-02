@@ -664,6 +664,7 @@ before compilation; no test ran or passed in that attempt. Hosted CI on
 the consolidated head remains required. Windows/browser rendered parity
 is still pending, independently of shared source and numerical tests.
 
+
 ## GD-03 — Colossus body turn and 3D obelisk-tip strike alignment (2026-11-02)
 
 Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/motion.rs`,
@@ -708,3 +709,43 @@ Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/
   actually taken and the focused tests run. Windows and desktop-web
   observations are **pending**; no parity is claimed from shared code or
   compilation.
+
+## P74 — War Auxiliaries (`Mineiro` & `Mercador`) HUD Panel, 3D Precincts & Construction Animations (2026-11-02)
+
+Shared Linux/Windows/desktop web path (`crates/tbg-client/src/ui/native_battle/auxiliaries.rs`,
+`crates/tbg-client/src/ui/native_battle/resources.rs`,
+`crates/tbg-client/src/arena/auxiliaries/`):
+- Bottom-right `Auxiliares (0/2)` / `Auxiliaries (0/2)` navy-and-gold framed
+  panel (`right: 14px`, `bottom: SHOP_BOTTOM`, `SHOP_SCALE = 0.9`) with two
+  dedicated auxiliary cards (`Mineiro · Cost 6` and `Mercador · Cost 4`), 3D
+  portraits (`aux_miner.webp`, `aux_merchant.webp`), and live phase/timer/progress
+  badges, keeping the five conventional Shop cards and the
+  `Energy / Interest / Army / Reroll` bar in their exact coordinates.
+- Free-reroll readout on the `Reroll` button (`Reroll · GRÁTIS (N)` /
+  `Reroll · FREE (N)`) enabled at `0` Energy when `free_rerolls > 0`.
+- Symmetric Left (`Seat::A` / Blue, `x = -2.55`) and Right (`Seat::B` / Red,
+  `x = +18.55`) off-lane 3D precincts for `Mineiro` (`z = -3.45`: rock outcrop,
+  portal shoring, lantern, rails, ore cart, pickaxe mining loop) and `Mercador`
+  (`z = +3.45`: timber pier on pilings, red-and-cream striped market stall,
+  balance-scales banner, crates/sacks, brass spyglass lookout, and wave-bobbing
+  wooden Merchant Caravel ship), with 3-stage procedural construction animations
+  and theme-adapted palettes across all eight Arenas (`Forest`, `Tundra`,
+  `Volcanic`, `Ruins`, `Storm`, `Celestial`, `Clockwork`, `Desert`).
+- Linux targeted regressions and native preview installation are verified;
+  Windows and desktop web visual observations remain pending.
+
+### INT-06 integration coverage (2026-11-02)
+
+Shared P74/GD-04 source is integrated at wire 38/R15. Construction reads the
+authoritative remaining ticks and pauses with the Augment window; idle
+work/delivery loops use low-motion static poses when requested. The P74 HUD
+remains private to the owning seat; precinct phases are public on both sides
+and to spectators. CROWD-EXIT-01 HOME_HALF_WIDTH, walking envelopes and
+original pushing remain intact alongside the refined Colossus and both Gods.
+
+Focused numerical/source coverage passed on Linux: 35 client cases including
+all eight Arena precinct/road geometry, Gods forms/grips/clearance, both side
+orientations and live contact envelopes. Real WebSocket auxiliary ownership,
+private free currency, quote roundtrips and reconnect passed independently.
+Packaged integrated Linux capture and Windows/browser rendered observations
+remain pending; no parity is inferred from these tests or shared code.

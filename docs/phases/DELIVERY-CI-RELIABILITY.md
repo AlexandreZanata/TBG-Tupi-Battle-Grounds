@@ -228,3 +228,52 @@ x2 HP/heal score 0.519531 (+24.609375 percentage points). No parameter sweep,
 live rule adjustment or acceptance claim is involved. Full hosted C7 is
 still required; the earlier shared/isolated observations remain in its
 assertion and diagnostics. The new helper is test-only.
+
+## INT-06 — P74 and GD-04 integrated, 2026-11-02
+
+The owner extended consolidation to PR #51 and both new Gods/Colossus from
+PR #52. Exact published heads 5357045 and 74473cc were merged normally;
+#52's later evidence-only head is reconciled next. No worktree owned by
+another front was edited. The main checkout's original nine dirty/untracked
+files and HEAD were rechecked unchanged.
+
+Contract: w38-r15-cc459351581b7763, native 0.1.4-colossus.1, database schema 10
+(history schema 11 remains disabled). Preview roster 84, online FULL_POOL 46.
+The landing derives its actual 84 champions and ten Factions from core/i18n.
+Volthar, Astreon, the refined five-form Colossus, and GD-03 are retained.
+HOME_HALF_WIDTH and complete 73c7a07 overhead/live_body changes remain.
+
+P74 repairs discovered during integration: auxiliary phase/free currency now
+serialize and affect deterministic hashes; owning reroll quotes survive the
+wire; successful auxiliary intentions are handled by server telemetry;
+construction follows the authoritative countdown and freezes with Augment
+selection. Decorative animation respects low motion. No economic or combat
+value was changed.
+
+Scoped checks passed under the shared nonblocking lock, CARGO_BUILD_JOBS=2:
+
+- Core auxiliary state/wire/privacy/pause regressions 3; protocol 21; identity 2.
+- Auxiliary rules 3; GD-04 combat 12.
+- R15 determinism/lab/legacy/constant/Stronghold union 26.
+- All five observed reference games keep R14 end ticks and winners; new hashes
+  reflect serialized auxiliary fields. Explicit R15 rows were appended.
+- Real WebSocket P74 case 1 (0.55 s): Red seat, slot rejection, paid hiring,
+  three purchases/free reroll, reconnect, one-hire rejection, Miner construction,
+  opposite-seat ownership/privacy and equal end outcomes.
+- Client presentation 35: auxiliary HUD and all-eight-Arena precinct geometry 2;
+  Gods/Colossus finite forms, grips and clearance 8; crowd 11; sides 4; envelopes 2;
+  widened Arena clearance 2; bilingual catalog coverage 6.
+- Strict core/client/server scoped clippy passed (one P74 lantern vec-init lint
+  corrected without changing any vertices); server tests compile.
+- Web source/catalog checks and patch notes passed (8 entries).
+
+The prior 267593e CI is fully green, including complete hosted C7, Linux and
+Windows packaging. That evidence does not validate this extended head; its
+protected CI and native factories are still required before merge/publication.
+No local full suite, complete balance gate or cross-platform rendered parity
+claim is made. Official artifacts/application/timer-only proof remain pending.
+
+Packaged ui-acceptance client compilation also passed. The view-audit example
+now carries auxiliary state, private free rerolls and quotes through every
+prototype and exact header accounting; its focused compilation passed.
+The audit benchmark itself was not executed.

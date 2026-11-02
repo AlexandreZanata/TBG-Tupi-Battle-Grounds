@@ -74,6 +74,7 @@ arm and bazooka clearance:
   web visual observation remain pending.
 
 
+
 ## GD-03 — Colossus body turn and obelisk-tip strike alignment (2026-11-02)
 
 - `Animator::observe` keeps `engaged = true` whenever an attack action clip is
