@@ -197,7 +197,15 @@ impl NetLink {
 
     pub fn send(&mut self, msg: ClientMsg, now: f64) {
         // P47 (BR-LV02): a spectator has no seat, so no intention leaves the client.
-        if self.watching && matches!(msg, ClientMsg::Intent { .. } | ClientMsg::Surrender) {
+        if self.watching
+            && matches!(
+                msg,
+                ClientMsg::Intent { .. }
+                    | ClientMsg::Surrender
+                    | ClientMsg::ChatSend { .. }
+                    | ClientMsg::EmojiSend { .. }
+            )
+        {
             return;
         }
         if let ClientMsg::Intent { seq, .. } = &msg {

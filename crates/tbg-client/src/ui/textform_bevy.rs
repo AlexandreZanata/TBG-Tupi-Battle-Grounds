@@ -18,6 +18,7 @@ enum Control {
     Cancel,
     Reveal,
     Remember,
+    Recover,
 }
 
 pub fn plugin(app: &mut App) {
@@ -33,6 +34,9 @@ fn insert(form: &mut ActiveForm, value: &str) {
     };
     let limit = match form.kind {
         Some(TextKind::Name) => 16,
+        Some(TextKind::Email) => 254,
+        Some(TextKind::P75Text) => 500,
+        Some(TextKind::P75Code) => 16,
         Some(TextKind::Room) => 5,
         Some(TextKind::PlayerSearch) => 16,
         _ => 128,
@@ -68,12 +72,16 @@ fn keyboard(
                 match form.focus {
                     2 => textform::cancel(&form),
                     3 => form.masked = !form.masked,
+                    4 => {
+                        textform::close(&mut form);
+                        super::p75::request(super::p75::Action::LostKey);
+                    }
                     _ => textform::submit(&form),
                 }
             }
             Key::Tab => {
                 let count = if form.kind == Some(TextKind::Key) {
-                    4
+                    5
                 } else {
                     3
                 };
@@ -151,6 +159,10 @@ fn render(
             for (control, node, transform) in &controls {
                 if node.contains_point(*transform, p * window.scale_factor()) {
                     match control {
+                        Control::Recover => {
+                            textform::close(&mut form);
+                            super::p75::request(super::p75::Action::LostKey);
+                        }
                         Control::Field => form.focus = 0,
                         Control::Submit => {
                             form.focus = 1;
@@ -273,6 +285,10 @@ fn render(
                             }));
                     }
                     if form.kind == Some(TextKind::Key) {
+                        row.spawn((
+                            kit::control(lang.key("p75.lost_key"), true, 180.),
+                            Control::Recover,
+                        ));
                         row.spawn((
                             kit::control(lang.key("native.reveal"), true, 140.),
                             Control::Reveal,

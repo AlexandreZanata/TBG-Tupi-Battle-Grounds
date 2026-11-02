@@ -116,3 +116,5 @@ pub fn export_recovery_key(name: &str, key: &str) -> bool {
         .and_then(|mut file| file.write_all(key.as_bytes()).and_then(|_| file.sync_all()))
         .is_ok()
 }
+
+pub mod file_pick;

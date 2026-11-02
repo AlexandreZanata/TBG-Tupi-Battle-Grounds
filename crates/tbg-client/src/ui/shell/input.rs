@@ -42,6 +42,9 @@ pub fn mouse_and_keys(
     mut lights: Query<&mut DirectionalLight>,
     mut volume: ResMut<bevy::audio::GlobalVolume>,
 ) {
+    if crate::ui::p75::captured() {
+        return;
+    }
     if !crate::config::bevy_ui() || super::textform::is_open(&form) {
         return;
     }

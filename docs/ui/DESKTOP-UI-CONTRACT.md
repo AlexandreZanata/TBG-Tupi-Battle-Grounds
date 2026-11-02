@@ -773,3 +773,9 @@ spectator/Blue-side browser coverage, or matched-frame GD-04/P74 motion rows.
 Those remain pending; no pixel parity or renderer tolerance is inferred.
 See [the production report](../phases/DELIVERY-consolidation-production-20261102.md)
 for actual sources, evidence and limitations.
+
+## P75 shared identity and match-social presentation — 2026-11-02
+
+Registration gains a private email step. Shared Bevy overlays implement account email verification/change/hold, lost-key request/code/save-key, suspension, reports, three-slot emoji library/upload states, and chat mode. The battle HUD reserves its right column for text, input and emoji buttons, with seat bubbles lasting exactly 2.5 seconds and sprite-sheet animation driven by the same frame delays on every target. Mute and spectator exclusion share one implementation; private controls carry `Hud::PrivateControls`. Enter requires explicit Tab focus before activating a battle control and typing consumes game keys.
+
+The `p75-*` cases in `desktop-ui-contract.json` cover the states listed by P75-CONTRACTS section 5. Linux is the reference; Windows and desktop web must match the same states, layout, imagery and motion. Native picker dialogs adapt to XDG/Win32/browser services behind the same visible button. Real Linux, Windows and web captures, keyboard journeys, upload errors and animation timing are **pending S14/owner device evidence**. Shared code or compilation does not establish parity.

@@ -85,8 +85,8 @@ pub fn upload(
     Ok(id)
 }
 pub fn library(db: &Connection, account: i64) -> Result<Value, Error> {
-    let mut s=db.prepare("SELECT id,label,status,decision_reason,created_unix,frames,columns,delays_json FROM emoji_assets WHERE owner_account_id=?1 ORDER BY id DESC LIMIT 100")?;
-    let uploads=s.query_map([account],|r|Ok(json!({"id":r.get::<_,i64>(0)?,"label":r.get::<_,String>(1)?,"status":r.get::<_,String>(2)?,"reason":r.get::<_,Option<String>>(3)?,"created":r.get::<_,i64>(4)?,"frames":r.get::<_,i64>(5)?,"columns":r.get::<_,i64>(6)?,"delays_ms":serde_json::from_str::<Value>(&r.get::<_,String>(7)?).unwrap_or(Value::Null)})))?.collect::<Result<Vec<_>,_>>()?;
+    let mut s=db.prepare("SELECT id,label,status,decision_reason,created_unix,frames,columns,delays_json,lower(hex(public_id)) FROM emoji_assets WHERE owner_account_id=?1 ORDER BY id DESC LIMIT 100")?;
+    let uploads=s.query_map([account],|r|Ok(json!({"id":r.get::<_,i64>(0)?,"label":r.get::<_,String>(1)?,"status":r.get::<_,String>(2)?,"reason":r.get::<_,Option<String>>(3)?,"created":r.get::<_,i64>(4)?,"frames":r.get::<_,i64>(5)?,"columns":r.get::<_,i64>(6)?,"delays_ms":serde_json::from_str::<Value>(&r.get::<_,String>(7)?).unwrap_or(Value::Null),"public_id":r.get::<_,Option<String>>(8)?})))?.collect::<Result<Vec<_>,_>>()?;
     let mut slots = std::array::from_fn::<_, 3, _>(|slot| json!({"standard":slot}));
     let mut s=db.prepare("SELECT s.slot,s.standard_id,hex(e.public_id) FROM account_emoji_slots s LEFT JOIN emoji_assets e ON e.id=s.emoji_id WHERE s.account_id=?1")?;
     for row in s.query_map([account], |r| {

@@ -58,6 +58,7 @@ pub(super) fn poll_link(
         ResMut<crate::ui::social::Social>,
         ResMut<crate::ui::shell::Shell>,
         ResMut<crate::ui::history::History>,
+        ResMut<crate::ui::match_chat::Inbox>,
     ),
     presentation: (
         Res<Lang>,
@@ -70,6 +71,18 @@ pub(super) fn poll_link(
     let mut started = false;
     for msg in link.poll(now) {
         match msg {
+            m @ (ServerMsg::MatchSocial(_)
+            | ServerMsg::Chat { .. }
+            | ServerMsg::Emoji { .. }
+            | ServerMsg::SocialRefused { .. }
+            | ServerMsg::AccountSuspended { .. }) => {
+                if matches!(m, ServerMsg::AccountSuspended { .. }) {
+                    next.set(GameState::Menu);
+                }
+                if social.3 .0.len() < 128 {
+                    social.3 .0.push(m);
+                }
+            }
             ServerMsg::MatchStart {
                 result_id,
                 you,

@@ -87,6 +87,9 @@ pub fn players(
                     lang.key(&format!("live.status.{}", row.status)),
                     17.,
                 ));
+                if !mine {
+                    super::super::p75::report_button(r, name, lang);
+                }
                 if !mine && available {
                     control(r, "p73.challenge", Action::Challenge(name), lang, 150.);
                 } else if !mine {
@@ -164,6 +167,9 @@ pub fn rematch_card(p: &mut ChildSpawnerCommands, rematch: &crate::sync::Rematch
 }
 
 pub fn profile(p: &mut ChildSpawnerCommands, history: &History, lang: Lang) {
+    if let Some(name) = Name::new(&history.subject) {
+        super::super::p75::report_button(p, name, lang);
+    }
     if !history.current() {
         return;
     }
@@ -311,6 +317,9 @@ pub fn spawn(p: &mut ChildSpawnerCommands, history: &History, lang: Lang) {
 }
 
 fn item(p: &mut ChildSpawnerCommands, v: &Value, lang: Lang) {
+    if let Some(name) = v["opponent"].as_str().and_then(Name::new) {
+        super::super::p75::report_button(p, name, lang);
+    }
     let opponent = v["opponent"]
         .as_str()
         .map(str::to_owned)

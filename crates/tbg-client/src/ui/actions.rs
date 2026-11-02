@@ -87,6 +87,10 @@ pub(super) fn apply(
         selected.0 = None;
     }
     for action in std::mem::take(&mut queue.0) {
+        if let UiAction::P75(action) = action {
+            super::p75::request(action);
+            continue;
+        }
         // Purchase cards and the focused entity preserve focus; other actions are outside clicks.
         if !matches!(
             action,

@@ -76,6 +76,9 @@ fn keys(
     info: Res<MatchInfo>,
     mut actions: ResMut<crate::ui::ActionQueue>,
 ) {
+    if crate::ui::p75::captured() {
+        return;
+    }
     for (key, action) in [
         (KeyCode::PageUp, UiAction::CelebrationPrev),
         (KeyCode::PageDown, UiAction::CelebrationNext),

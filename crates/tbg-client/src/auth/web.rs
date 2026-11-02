@@ -31,6 +31,7 @@ pub(super) fn start(
         Kind::Restore => "restore",
         Kind::Login => "login",
         Kind::Register => "register",
+        Kind::Recover => "recover",
         Kind::Refresh => "refresh",
         Kind::Backup => "backup",
         Kind::Logout => "logout",

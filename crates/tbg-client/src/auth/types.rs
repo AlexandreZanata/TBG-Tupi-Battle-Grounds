@@ -5,6 +5,15 @@ use tbg_core::protocol::{AccessToken, Profile};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Failure {
+    Suspended {
+        until: Option<u64>,
+        reason: tbg_core::protocol::SuspensionReason,
+    },
+    EmailInvalid,
+    EmailBlocked,
+    EmailLimit,
+    RegistrationClosed,
+    CodeInvalid,
     Unavailable,
     Incompatible,
     InvalidKey,
@@ -117,6 +126,18 @@ pub(super) fn valid_hex(value: &str, bytes: usize) -> bool {
 
 pub(super) fn public_error(value: &Value) -> Failure {
     match value.get("error").and_then(Value::as_str) {
+        Some("account_suspended") => Failure::Suspended {
+            until: value["until"].as_u64(),
+            reason: value["reason"]
+                .as_str()
+                .and_then(tbg_core::protocol::SuspensionReason::parse)
+                .unwrap_or(tbg_core::protocol::SuspensionReason::Other),
+        },
+        Some("email_required" | "email_invalid") => Failure::EmailInvalid,
+        Some("email_blocked") => Failure::EmailBlocked,
+        Some("email_limit") => Failure::EmailLimit,
+        Some("registration_closed") => Failure::RegistrationClosed,
+        Some("code_invalid") => Failure::CodeInvalid,
         Some("auth_required") => Failure::InvalidKey,
         Some("storage_unavailable") => Failure::StorageUnavailable,
         Some("no_session") => Failure::NoSession,

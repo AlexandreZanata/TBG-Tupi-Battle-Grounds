@@ -17,6 +17,7 @@ pub(super) enum Operation {
     Restore,
     Login(String),
     Register(String),
+    Recover(String),
     Refresh,
     Backup,
     Logout,
@@ -115,6 +116,7 @@ pub(super) fn run(mut work: Work) -> Result<Outcome, Failure> {
             vault,
         ),
         Operation::Login(key) => login(&work, store.as_mut(), Some(key), None),
+        Operation::Recover(input) => login(&work, store.as_mut(), None, Some(input)),
         Operation::Register(name) => login(&work, store.as_mut(), None, Some(name)),
         Operation::Refresh => refresh(&work, store.as_mut()),
         Operation::Backup => backup(&work, store.as_mut().ok_or(Failure::StorageUnavailable)?),
@@ -202,11 +204,30 @@ fn login(
     let body = if let Some(key) = key {
         json!({"account_key":key,"device_id":device,"persistent":work.remember})
     } else {
-        json!({"name":name.ok_or(Failure::Incompatible)?,"device_id":device,"persistent":work.remember,"registration_retry_key":nonce(32)?})
+        let mut body: Value = serde_json::from_str(name.ok_or(Failure::Incompatible)?)
+            .map_err(|_| Failure::Incompatible)?;
+        body["device_id"] = json!(device);
+        body["persistent"] = json!(work.remember);
+        body["registration_retry_key"] = json!(nonce(32)?);
+        body
     };
-    let operation = if key.is_some() { "login" } else { "register" };
+    let operation = if key.is_some() {
+        "login"
+    } else if body.get("code").is_some() {
+        "recover"
+    } else {
+        "register"
+    };
     let value = retry(&work.origin, operation, body, None)?;
     let grant = parse_grant(value, true)?;
+    if operation == "recover" {
+        super::recovery::replace_backup(
+            store.as_deref(),
+            &work.origin,
+            &grant.profile.name,
+            grant.account_key.as_deref(),
+        );
+    }
     let secure = save_grant(work, store.as_deref_mut(), &grant, None)?;
     cancelled(work, &grant, store)?;
     Ok(Outcome::SignedIn {
@@ -559,7 +580,7 @@ fn retry(
     access: Option<AccessToken>,
 ) -> Result<Value, Failure> {
     match transport::post(origin, operation, body.clone(), access) {
-        Err(Failure::Unavailable) if operation == "register" || operation == "refresh" => {
+        Err(Failure::Unavailable) if operation == "register" || operation == "refresh" || operation == "recover" => {
             transport::post(origin, operation, body, access)
         }
         result => result,
