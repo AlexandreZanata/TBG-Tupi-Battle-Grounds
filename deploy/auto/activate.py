@@ -44,8 +44,31 @@ def sync_file(path):
 
 
 def status():
+    # Frontend families follow the admitting generation even after slot a retires.
+    # Import here because the host adapter also uses this module's paths and fsync helpers.
+    from slot_host import SystemHost
+    host = SystemHost()
+    try:
+        rows = host.directory()
+    except sqlite3.OperationalError as error:
+        if 'no such table' not in str(error):
+            raise
+        rows = []  # legacy single-process database, before release slots existed
+    if rows:
+        active = [row for row in rows if row['state'] == 'active' and row['fresh']]
+        require(len(active) == 1, 'exactly one fresh active release slot is required')
+        row = active[0]
+        require(row['slot'] in {'a', 'b'}, 'unknown active release slot')
+        live = host.status(row['slot'])
+        require(live is not None and live.get('slot') == row['slot']
+                and live.get('generation') == row['generation'] and live.get('contract') == row['contract']
+                and live.get('admitting') and not live.get('shutdown'),
+                'active release identity/admission mismatch')
+        return live
     with urlopen('http://127.0.0.1:8080/api/release', timeout=5) as response:
-        return json.loads(response.read(65536))
+        live = json.loads(response.read(65536))
+    require(not live.get('slot'), 'release slot missing from the directory')
+    return live
 
 
 def require_running_binary(expected):

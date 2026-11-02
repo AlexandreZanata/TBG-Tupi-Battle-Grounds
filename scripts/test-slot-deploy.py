@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'deploy/auto'))
+import activate
 import control
 import pull
 import slot_host
@@ -804,6 +805,46 @@ class Controller(SlotCase):
         with patch.object(self.host, 'directory', side_effect=sqlite3.OperationalError('database is locked')), \
              self.assertRaises(control.Deferred):
             slots.in_slot_mode(self.host)
+
+
+class FrontendLiveStatus(unittest.TestCase):
+    """Every frontend observes the authoritative active slot, never a retired or draining port."""
+
+    def test_either_active_slot_is_selected_while_the_other_is_draining_or_offline(self):
+        for target in ['a', 'b']:
+            with self.subTest(active=target):
+                host = FakeHost()
+                old = slots.other(target)
+                host.rows = {old: row(old, 'draining', 'old'),
+                             target: row(target, 'active', 'new', contract='w36-r13-' + '0'*16)}
+                host.running = {target}
+                with patch.object(slot_host, 'SystemHost', return_value=host), patch.object(activate, 'urlopen') as legacy:
+                    live = activate.status()
+                self.assertEqual((live['slot'], live['generation'], live['contract']),
+                                 (target, 'new', 'w36-r13-' + '0'*16))
+                legacy.assert_not_called()
+
+    def test_a_stale_directory_or_different_process_never_supplies_a_contract(self):
+        host = FakeHost()
+        host.rows['a']['state'] = 'draining'
+        with patch.object(slot_host, 'SystemHost', return_value=host), self.assertRaises(ValueError):
+            activate.status()
+        host.rows['a']['state'] = 'active'
+        with patch.object(slot_host, 'SystemHost', return_value=host), \
+             patch.object(host, 'status', return_value={'slot': 'a', 'generation': 'other', 'admitting': True}), \
+             self.assertRaisesRegex(ValueError, 'identity/admission'):
+            activate.status()
+
+    def test_legacy_fallback_requires_a_real_single_process_identity(self):
+        from unittest.mock import MagicMock
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = b'{"contract":"legacy"}'
+        with patch.object(slot_host.SystemHost, 'directory', return_value=[]), \
+             patch.object(activate, 'urlopen', return_value=response):
+            self.assertEqual(activate.status(), {'contract': 'legacy'})
+            response.__enter__.return_value.read.return_value = b'{"slot":"a","contract":"legacy"}'
+            with self.assertRaisesRegex(ValueError, 'missing from the directory'):
+                activate.status()
 
 
 class Machine(unittest.TestCase):
