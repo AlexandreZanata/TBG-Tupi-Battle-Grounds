@@ -40,13 +40,25 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
             Node {
                 position_type: PositionType::Absolute,
                 right: px(14.),
-                bottom: px(SHOP_BOTTOM),
-                padding: UiRect::axes(px(10.), px(8.)),
+                top: if cfg!(target_os = "android") {
+                    px(90)
+                } else {
+                    Val::Auto
+                },
+                bottom: if cfg!(target_os = "android") {
+                    Val::Auto
+                } else {
+                    px(SHOP_BOTTOM)
+                },
+                padding: UiRect::axes(
+                    px(if cfg!(target_os = "android") { 4. } else { 10. }),
+                    px(if cfg!(target_os = "android") { 4. } else { 8. }),
+                ),
                 border: UiRect::all(px(2.)),
                 border_radius: BorderRadius::all(px(10.)),
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
-                row_gap: px(6.),
+                row_gap: px(if cfg!(target_os = "android") { 2. } else { 6. }),
                 ..default()
             },
             BackgroundColor(Color::srgba_u8(12, 22, 33, 236)),
@@ -63,7 +75,11 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 .spawn((
                     Node {
                         width: percent(100),
-                        height: px(24.),
+                        height: px(if cfg!(target_os = "android") {
+                            18.
+                        } else {
+                            24.
+                        }),
                         padding: UiRect::horizontal(px(8.)),
                         border: UiRect::bottom(px(1.)),
                         justify_content: JustifyContent::Center,
@@ -73,12 +89,22 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                     BorderColor::all(chrome::GOLD.with_alpha(0.45)),
                 ))
                 .with_children(|hdr| {
-                    hdr.spawn((chrome::title("", 15.), AuxReadout::Header));
+                    hdr.spawn((
+                        chrome::title(
+                            "",
+                            if cfg!(target_os = "android") {
+                                11.
+                            } else {
+                                15.
+                            },
+                        ),
+                        AuxReadout::Header,
+                    ));
                 });
 
             panel
                 .spawn(Node {
-                    column_gap: px(8.),
+                    column_gap: px(if cfg!(target_os = "android") { 4. } else { 8. }),
                     ..default()
                 })
                 .with_children(|row| {
@@ -97,8 +123,16 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, slot: usize) {
     parent
         .spawn((
             Node {
-                width: px(124.),
-                height: px(176.),
+                width: px(if cfg!(target_os = "android") {
+                    118.
+                } else {
+                    124.
+                }),
+                height: px(if cfg!(target_os = "android") {
+                    80.
+                } else {
+                    176.
+                }),
                 flex_shrink: 0.,
                 ..default()
             },
@@ -115,24 +149,43 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, slot: usize) {
                     position_type: PositionType::Absolute,
                     top: px(7.),
                     left: px(5.),
-                    width: px(114.),
-                    height: px(102.),
+                    width: px(if cfg!(target_os = "android") {
+                        32.
+                    } else {
+                        114.
+                    }),
+                    height: px(if cfg!(target_os = "android") {
+                        32.
+                    } else {
+                        102.
+                    }),
                     ..default()
                 },
                 ImageNode::new(assets.load(portrait_path)),
             ));
             card.spawn(Node {
                 position_type: PositionType::Absolute,
-                left: px(9.),
+                left: px(if cfg!(target_os = "android") { 42. } else { 9. }),
                 right: px(8.),
-                top: px(112.),
+                top: px(if cfg!(target_os = "android") {
+                    8.
+                } else {
+                    112.
+                }),
                 height: px(20.),
                 overflow: Overflow::clip(),
                 ..default()
             })
             .with_children(|title| {
                 title.spawn((
-                    chrome::title("", 14.),
+                    chrome::title(
+                        "",
+                        if cfg!(target_os = "android") {
+                            11.
+                        } else {
+                            14.
+                        },
+                    ),
                     TextLayout::no_wrap(),
                     AuxReadout::Name(slot),
                 ));
@@ -142,7 +195,11 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, slot: usize) {
                     position_type: PositionType::Absolute,
                     left: px(9.),
                     right: px(8.),
-                    top: px(131.),
+                    top: px(if cfg!(target_os = "android") {
+                        41.
+                    } else {
+                        131.
+                    }),
                     ..default()
                 },
                 kit::muted("", 10.),

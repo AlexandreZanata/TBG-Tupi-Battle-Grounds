@@ -14,6 +14,8 @@ use tbg_core::{
 #[derive(Component)]
 enum Readout {
     Energy,
+    EnergyLabel,
+    InterestLabel,
     Interest,
     Band,
     Army,
@@ -31,9 +33,12 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
         .spawn((
             Node {
                 width: percent(100),
-                height: px(43),
-                padding: UiRect::axes(px(15), px(5)),
-                column_gap: px(14),
+                height: px(if cfg!(target_os = "android") { 48 } else { 43 }),
+                padding: UiRect::axes(
+                    px(if cfg!(target_os = "android") { 6 } else { 15 }),
+                    px(if cfg!(target_os = "android") { 0 } else { 5 }),
+                ),
+                column_gap: px(if cfg!(target_os = "android") { 6 } else { 14 }),
                 align_items: AlignItems::Center,
                 ..default()
             },
@@ -44,12 +49,22 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
             },
         ))
         .with_children(|bar| {
-            bar.spawn(chrome::title("Energy", 17.));
+            bar.spawn((
+                chrome::title(
+                    "Energy",
+                    if cfg!(target_os = "android") {
+                        12.
+                    } else {
+                        17.
+                    },
+                ),
+                Readout::EnergyLabel,
+            ));
             bar.spawn((
                 Node {
                     flex_grow: 1.,
-                    min_width: px(70),
-                    max_width: px(240),
+                    min_width: px(if cfg!(target_os = "android") { 32 } else { 70 }),
+                    max_width: px(if cfg!(target_os = "android") { 80 } else { 240 }),
                     height: px(21),
                     border: UiRect::all(px(2)),
                     border_radius: BorderRadius::all(px(20)),
@@ -80,7 +95,17 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 Readout::Energy,
             ));
             divider(bar);
-            bar.spawn(chrome::title("Interest", 17.));
+            bar.spawn((
+                chrome::title(
+                    "Interest",
+                    if cfg!(target_os = "android") {
+                        12.
+                    } else {
+                        17.
+                    },
+                ),
+                Readout::InterestLabel,
+            ));
             bar.spawn((
                 Text::new(""),
                 TextFont::from_font_size(FontSize::Px(13.)),
@@ -89,12 +114,35 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
             ));
             bar.spawn((kit::muted("", 9.), Readout::Band));
             divider(bar);
-            bar.spawn(chrome::icon(assets, "friends", 27., chrome::CREAM));
-            bar.spawn((chrome::title("", 17.), Readout::Army));
+            bar.spawn(chrome::icon(
+                assets,
+                "friends",
+                if cfg!(target_os = "android") {
+                    18.
+                } else {
+                    27.
+                },
+                chrome::CREAM,
+            ));
+            bar.spawn((
+                chrome::title(
+                    "",
+                    if cfg!(target_os = "android") {
+                        12.
+                    } else {
+                        17.
+                    },
+                ),
+                Readout::Army,
+            ));
             bar.spawn((
                 Node {
-                    min_width: px(150),
-                    height: px(30),
+                    min_width: px(if cfg!(target_os = "android") {
+                        112
+                    } else {
+                        150
+                    }),
+                    height: px(if cfg!(target_os = "android") { 48 } else { 30 }),
                     padding: UiRect::horizontal(px(8)),
                     border: UiRect::all(px(2)),
                     border_radius: BorderRadius::all(px(6)),
@@ -145,6 +193,20 @@ fn update(
     for (kind, mut text) in &mut texts {
         let want = match kind {
             Readout::Energy => energy_text(v.energy),
+            Readout::EnergyLabel => {
+                if cfg!(target_os = "android") {
+                    lang.key("battle.energy")
+                } else {
+                    "Energy".into()
+                }
+            }
+            Readout::InterestLabel => {
+                if cfg!(target_os = "android") {
+                    lang.key("battle.interest")
+                } else {
+                    "Interest".into()
+                }
+            }
             Readout::Interest => format!("×{:.2}", v.regen_bp as f32 / 10_000.),
             Readout::Band => format!(
                 "{}/{}",

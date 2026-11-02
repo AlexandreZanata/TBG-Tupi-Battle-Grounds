@@ -891,3 +891,20 @@ is process-only; the mobile prompt explains that lifetime. Linux/Windows/web
 retain #57's existing OS-vault/browser behavior and text. Native key masking,
 reveal/cancel, copy and account/logout states are affected. Emulator journeys
 and desktop correspondence remain pending for this source.
+
+## 2026-11-02 — P69 coalesced scrolling and compact battle controls
+
+Android preserves every touch move delivered between rendered frames and picks
+the foremost shell target, including disabled modal shields. A BR-AN05
+regression covers accumulated motion and cancellation. Its auxiliary cards move
+above the Shop; all five offers and Reroll retain independent touch regions.
+The resource strip uses compact mobile dimensions and localized labels.
+Android Settings retains language/audio/account controls and adds the existing
+shadow preference; app version and manual APK update information replace the
+inactive desktop updater entry. Desktop geometry and updater remain unchanged.
+
+Coverage: lobby modal ownership, clipped/scrolling Practice controls, battle
+Shop/reservation/Reroll/auxiliary controls and settings. Candidate 21 on API36
+shows intact geometry in inspected lobby/Practice/match frames but exposes
+auxiliary overlap and lost scroll distance. Corrected runtime and same-source
+Linux/Windows/web correspondence remain pending.

@@ -20,6 +20,7 @@ type Buttons<'w, 's> = Query<
         &'static UiGlobalTransform,
         &'static InheritedVisibility,
         Option<&'static bevy::ui::CalculatedClip>,
+        &'static bevy::ui::ComputedStackIndex,
     ),
 >;
 
@@ -62,19 +63,20 @@ pub fn mouse_and_keys(
     }
     let mut ordered: Vec<_> = buttons
         .iter()
-        .filter(|(_, a, u, node, t, v, clip)| {
+        .filter(|(_, a, u, node, t, v, clip, _)| {
             v.get()
                 && (a.is_some() || **u != UiAction::Disabled)
-                && clip.is_none_or(|c| c.contains_point(t.translation))
+                && (cfg!(target_os = "android")
+                    || clip.is_none_or(|c| c.contains_point(t.translation)))
                 && node.size.x > 0.0
         })
         .collect();
-    ordered.sort_by_key(|(_, _, _, _, t, _, _)| {
+    ordered.sort_by_key(|(_, _, _, _, t, _, _, _)| {
         let p = t.translation;
         ((p.y * 10.) as i32, (p.x * 10.) as i32)
     });
     if let Some(anchor) = *social_focus {
-        if let Some(index)=ordered.iter().position(|(_,action,_,_,_,_,_)|matches!(action,Some(Action::Social(value)) if *value==anchor)) {
+        if let Some(index)=ordered.iter().position(|(_,action,_,_,_,_,_,_)|matches!(action,Some(Action::Social(value)) if *value==anchor)) {
             *focus=index;
             button_focus.0=Some(ordered[index].0);
         }
@@ -97,24 +99,31 @@ pub fn mouse_and_keys(
         }
     }
     for p in releases {
-        if let Some(index) = ordered.iter().position(|(_, _, _, node, t, _, clip)| {
-            let hit = {
-                #[cfg(target_os = "android")]
-                {
-                    super::super::mobile::input::hit(
-                        node,
-                        **t,
-                        p * window.scale_factor(),
-                        window.scale_factor() * scale.0,
-                    )
-                }
-                #[cfg(not(target_os = "android"))]
-                {
-                    node.contains_point(**t, p * window.scale_factor())
-                }
-            };
-            hit && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
-        }) {
+        #[cfg(target_os = "android")]
+        let index = {
+            let physical = p * window.scale_factor();
+            // A disabled modal surface still shields the navigation beneath it.
+            buttons
+                .iter()
+                .filter(|(_, _, _, node, transform, visible, clip, _)| {
+                    visible.get()
+                        && super::super::mobile::input::hit(
+                            node,
+                            **transform,
+                            physical,
+                            window.scale_factor() * scale.0,
+                        )
+                        && clip.is_none_or(|c| c.contains_point(physical))
+                })
+                .max_by_key(|(_, _, _, _, _, _, _, stack)| stack.0)
+                .and_then(|(entity, ..)| ordered.iter().position(|row| row.0 == entity))
+        };
+        #[cfg(not(target_os = "android"))]
+        let index = ordered.iter().position(|(_, _, _, node, t, _, clip, _)| {
+            node.contains_point(**t, p * window.scale_factor())
+                && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
+        });
+        if let Some(index) = index {
             selected.push(index);
         }
     }
@@ -135,7 +144,7 @@ pub fn mouse_and_keys(
             .extend([UiAction::CloseRanking, UiAction::ClosePanel]);
     }
     let pointer = window.cursor_position().map(|p| p * window.scale_factor());
-    for (i, (entity, _, _, node, t, _, _)) in ordered.iter().enumerate() {
+    for (i, (entity, _, _, node, t, _, _, _)) in ordered.iter().enumerate() {
         if let Ok(mut border) = borders.get_mut(*entity) {
             let hovered = pointer.is_some_and(|p| node.contains_point(**t, p));
             *border = BorderColor::all(if hovered || (keys.pressed(KeyCode::Tab) && *focus == i) {
@@ -152,7 +161,7 @@ pub fn mouse_and_keys(
         *social_focus =
             ordered
                 .get(*focus % ordered.len().max(1))
-                .and_then(|(_, action, _, _, _, _, _)| match action {
+                .and_then(|(_, action, _, _, _, _, _, _)| match action {
                     Some(Action::Social(a)) => Some(*a),
                     _ => None,
                 });
@@ -163,7 +172,7 @@ pub fn mouse_and_keys(
             Some(Action::Social(a)) => Some(*a),
             _ => None,
         };
-        let (_, action, ui, _, _, _, _) = ordered[index];
+        let (_, action, ui, _, _, _, _, _) = ordered[index];
         if let Some(Action::Social(action)) = action {
             social.0.push(*action);
             return;

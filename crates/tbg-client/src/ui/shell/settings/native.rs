@@ -3,6 +3,7 @@
 mod controls;
 use super::*;
 use crate::ui::shell::catalog;
+#[cfg(not(target_os = "android"))]
 use bevy::window::{PresentMode, WindowMode};
 
 pub fn spawn(
@@ -32,7 +33,6 @@ pub fn spawn(
     .with_children(|grid| {
         language(grid, assets, lang);
         audio(grid, assets, sounds, volume, lang);
-        #[cfg(not(target_os = "android"))]
         video(grid, assets, window, lang);
         account_panel(grid, assets, account, lang);
     });
@@ -162,46 +162,49 @@ fn audio(
     );
 }
 
-fn video(parent: &mut ChildSpawnerCommands, assets: &AssetServer, window: &Window, lang: Lang) {
+fn video(parent: &mut ChildSpawnerCommands, assets: &AssetServer, _window: &Window, lang: Lang) {
     controls::section(
         parent,
         assets,
         words(lang, "Display & performance", "Tela e desempenho"),
         "settings",
         |card| {
-            let fullscreen = window.mode != WindowMode::Windowed;
-            controls::row(
-                card,
-                lang.key("native.fullscreen"),
-                "F11 / Alt+Enter".into(),
-                (
-                    controls::button(
-                        words(
-                            lang,
-                            if fullscreen { "Fullscreen" } else { "Windowed" },
-                            if fullscreen { "Tela cheia" } else { "Janela" },
+            #[cfg(not(target_os = "android"))]
+            {
+                let fullscreen = _window.mode != WindowMode::Windowed;
+                controls::row(
+                    card,
+                    lang.key("native.fullscreen"),
+                    "F11 / Alt+Enter".into(),
+                    (
+                        controls::button(
+                            words(
+                                lang,
+                                if fullscreen { "Fullscreen" } else { "Windowed" },
+                                if fullscreen { "Tela cheia" } else { "Janela" },
+                            ),
+                            fullscreen,
                         ),
-                        fullscreen,
+                        UiAction::Disabled,
+                        Action::Fullscreen,
                     ),
-                    UiAction::Disabled,
-                    Action::Fullscreen,
-                ),
-            );
-            let vsync = window.present_mode != PresentMode::AutoNoVsync;
-            controls::row(
-                card,
-                "VSync".into(),
-                words(
-                    lang,
-                    "Synchronize frames with your display",
-                    "Sincronizar os quadros com a tela",
-                ),
-                (
-                    controls::button(state(lang, vsync), vsync),
-                    UiAction::Disabled,
-                    Action::Vsync,
-                ),
-            );
+                );
+                let vsync = _window.present_mode != PresentMode::AutoNoVsync;
+                controls::row(
+                    card,
+                    "VSync".into(),
+                    words(
+                        lang,
+                        "Synchronize frames with your display",
+                        "Sincronizar os quadros com a tela",
+                    ),
+                    (
+                        controls::button(state(lang, vsync), vsync),
+                        UiAction::Disabled,
+                        Action::Vsync,
+                    ),
+                );
+            }
             let shadows = !crate::config::load_flag("video.low");
             controls::row(
                 card,
@@ -283,7 +286,23 @@ fn account_panel(
                 ..default()
             });
             card.spawn(kit::muted(words(lang, "APPLICATION", "APLICATIVO"), 10.));
+            #[cfg(target_os = "android")]
+            {
+                card.spawn(kit::muted(
+                    format!("TBG {}", env!("CARGO_PKG_VERSION")),
+                    12.,
+                ));
+                card.spawn(kit::muted(
+                    words(
+                        lang,
+                        "Android prototype · install updates from the provided APK.",
+                        "Protótipo Android · instale atualizações pelo APK fornecido.",
+                    ),
+                    11.,
+                ));
+            }
             card.spawn(controls::group()).with_children(|actions| {
+                #[cfg(not(target_os = "android"))]
                 actions.spawn((
                     controls::button(lang.key("native.downloads"), false),
                     UiAction::UpdateOpen,

@@ -32,14 +32,20 @@ impl Pointer {
             TouchPhase::Started => {
                 self.cancelled = true;
                 self.dragging = false;
+                self.drag = None;
             }
             TouchPhase::Moved if self.owner == Some(id) => {
+                let was_dragging = self.dragging;
                 if !self.cancelled && point.distance(self.start) > 12. {
                     self.cancelled = true;
                     self.dragging = true;
                 }
                 if self.dragging {
-                    self.drag = Some((point, point - self.last));
+                    // Android can deliver several moves between rendered frames.
+                    // Preserve their full distance instead of only the final event.
+                    let previous = self.drag.map_or(Vec2::ZERO, |(_, delta)| delta);
+                    let from = if was_dragging { self.last } else { self.start };
+                    self.drag = Some((point, previous + point - from));
                 }
                 self.last = point;
             }
@@ -151,6 +157,22 @@ mod tests {
         p.event(2, TouchPhase::Ended, Vec2::ZERO, 0.1);
         p.event(1, TouchPhase::Ended, Vec2::ZERO, 0.2);
         assert!(p.taps.is_empty());
+    }
+
+    #[test]
+    fn coalesced_moves_preserve_the_scroll_distance_and_cancel_together() {
+        // BR-AN05: scrolling must not depend on the renderer's frame rate.
+        let mut p = Pointer::default();
+        p.event(1, TouchPhase::Started, Vec2::new(100., 300.), 0.);
+        for y in [295., 280., 250., 200.] {
+            p.event(1, TouchPhase::Moved, Vec2::new(100., y), 0.1);
+        }
+        assert_eq!(p.drag, Some((Vec2::new(100., 200.), Vec2::new(0., -100.))));
+        p.event(1, TouchPhase::Ended, Vec2::new(100., 200.), 0.2);
+        assert!(p.taps.is_empty());
+        p.event(2, TouchPhase::Started, Vec2::ZERO, 0.3);
+        p.event(3, TouchPhase::Started, Vec2::ZERO, 0.3);
+        assert!(p.drag.is_none());
     }
 }
 
