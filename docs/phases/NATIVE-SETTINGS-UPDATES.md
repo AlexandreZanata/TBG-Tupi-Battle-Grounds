@@ -144,3 +144,28 @@ pending; this focused Linux delivery does not claim completion of that phase.
 The explicit O02 question was submitted after the final release and automatic
 upgrade rehearsal were ready. Until answered, real publication, private-key
 custody activation and owner shortcut migration remain pending.
+
+## Pull request preparation
+
+The owner subsequently explicitly authorized pushing this task and opening a
+GitHub pull request; this overrides the default no-push rule for this delivery.
+It does not approve O02 or deploy the signed executable channel. The task branch
+retains the session fix, settings work and all recorded evidence. Unrelated
+uncommitted files in the owner's primary checkout are excluded.
+
+Current `origin/main` was merged without rewriting history. Its only conflict
+was appended desktop-contract documentation; both sets of observations were
+retained. The PR preparation also completed the new catalog entry's required
+ruleset fingerprint, concrete bilingual changes, evidence/document links and
+candidate status, and updated native release notes to `.4`. No game or auth
+implementation changed after the recorded `edab60c` runtime evidence. The
+packaged rehearsal predates this additional release-note presentation content.
+
+`python3 scripts/check-native-version.py --base origin/main`,
+`python3 scripts/check-patch-notes.py --base origin/main` (nine notes, unchanged
+R15 fingerprint), `python3 scripts/check-desktop-ui.py` and `git diff --check`
+passed on the PR preparation. The version lookup needed normal network access;
+its first sandboxed attempt could not resolve GitHub. The patch-note check
+first rejected the incomplete new metadata, which was corrected before push.
+Only the public trust anchor is tracked; no private signing keys or release
+archives are included in the PR.
