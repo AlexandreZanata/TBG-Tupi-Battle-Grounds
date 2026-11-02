@@ -455,7 +455,12 @@ async fn failed_history_journal_reports_delayed_without_changing_the_authoritati
         unreachable!()
     };
     send(&mut b, ClientMsg::JoinChallenge { token }).await;
-    until(&mut a, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
+    let start = until(&mut a, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
+    let ServerMsg::MatchStart { you: winner, .. } = start else {
+        unreachable!()
+    };
+    let start = until(&mut b, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
+    assert!(matches!(start, ServerMsg::MatchStart { you, .. } if you == winner.other()));
     until(
         &mut b,
         |m| matches!(m,ServerMsg::View(v)if v.phase==tbg_core::Phase::Running),
@@ -463,9 +468,14 @@ async fn failed_history_journal_reports_delayed_without_changing_the_authoritati
     .await;
     send(&mut b, ClientMsg::Surrender).await;
     let result = until(&mut a, |m| matches!(m, ServerMsg::MatchEnd { .. })).await;
-    assert!(
-        matches!(result,ServerMsg::MatchEnd{outcome,..}if outcome.winner==Some(tbg_core::Seat::A))
-    );
+    let ServerMsg::MatchEnd { outcome, .. } = result else {
+        unreachable!()
+    };
+    // SIDE-01/BR-M06: the opponent of the surrendering connection wins,
+    // regardless of the server's random side assignment or journal failure.
+    assert_eq!(outcome.winner, Some(winner));
+    let peer = until(&mut b, |m| matches!(m, ServerMsg::MatchEnd { .. })).await;
+    assert!(matches!(peer, ServerMsg::MatchEnd { outcome: other, .. } if other == outcome));
     until(&mut a, |m| {
         matches!(
             m,

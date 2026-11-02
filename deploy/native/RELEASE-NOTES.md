@@ -1,4 +1,9 @@
-TBG 0.1.4-colossus.1 — Champions, shared match sides and automatic delivery beta
+TBG 0.1.4-colossus.2 — War Auxiliaries and Gods consolidation beta
+
+Miner and Merchant now provide authoritative War Auxiliary choices during a match.
+The consolidated preview includes Volthar, Astreon and the refined Colossus,
+while preserving the original contact-based pushing and randomized match sides.
+The Linux preview installer reads the committed version and preserves existing data.
 
 Protocol 38, schema 10 (P73 history schema 11 remains opt-in), ruleset 15 /
 cc459351581b7763. This contract requires a coordinated release from protocol 31;
