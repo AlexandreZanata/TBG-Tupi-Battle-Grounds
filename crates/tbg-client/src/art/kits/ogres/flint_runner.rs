@@ -6,7 +6,7 @@ pub fn plan(t: u8) -> Proportions {
 pub fn spec(t: u8, b: u8) -> FigureSpec {
     let p = plan(t);
     let f = Form::of(t, b);
-    let mut v = ogre(&p, SKIN, cloth(f, RUST));
+    let mut v = ogre(&p, OLD_BONE, cloth(f, RUST));
 
     for n in [Prop(Socket::WeaponR), Prop(Socket::OffhandL)] {
         v.push(part(n, Cyl(0.022, 0.12), OAK, [0.0, 0.0, 0.0]).rot([90.0, 0.0, 0.0]));

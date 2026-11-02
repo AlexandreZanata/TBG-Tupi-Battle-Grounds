@@ -6,7 +6,7 @@ pub fn plan(t: u8) -> Proportions {
 pub fn spec(t: u8, b: u8) -> FigureSpec {
     let p = plan(t);
     let f = Form::of(t, b);
-    let mut v = ogre(&p, SKIN, cloth(f, DARK_LEATHER));
+    let mut v = ogre(&p, OGRE_SKIN, cloth(f, DARK_LEATHER));
 
     v.push(part(
         Prop(Socket::OffhandL),
@@ -22,9 +22,9 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
     for y in [0.0, 0.20, 0.40] {
         v.push(part(
             Prop(Socket::OffhandL),
-            Box(0.25, 0.025, 0.13),
-            if f.b { BRASS } else { IRON },
-            [0.0, y, 0.07],
+            Bevel(0.27, 0.16, 0.16, 0.045),
+            if f.b { CHARCOAL } else { ROCK },
+            [if y == 0.20 { 0.025 } else { -0.015 }, y, 0.075],
         ));
     }
     v.push(part(

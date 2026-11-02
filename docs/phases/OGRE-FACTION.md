@@ -45,8 +45,8 @@ and after; the eight new solo kits lose all three initial reference matchups.
 Those weak starting values require a proposed tuning pass before visual delivery;
 the isolated control/healing roles are not judged by solo-duel wins alone.
 
-Five canonical trace seeds were recorded; seed 65535 changes end tick/winner
-from the previous baseline (requested range/Faction change). Earlier fixtures
+Five canonical trace seeds were recorded; seed 65535 ends at tick 19759 with seat A winning, versus the earlier
+8613-tick trace (requested range/Faction change). Earlier fixtures
 remain intact; OG-01 has an explicit appended source identity and baseline.
 All compiling commands used the nonblocking shared host lock and two jobs.
 No full suite ran. Native installation and actual captures remain next.
@@ -93,3 +93,15 @@ Local review: `http://localhost:8964/`. Its nine concept sheets are available;
 actual engine portraits and five-form lineups are being added next. Native
 figures share one vertex-color rig pipeline across desktop targets. Linux
 native observation is next; Windows/game-web visual motion remains pending.
+
+
+### Native silhouette refinement
+
+The first source-stamped native portraits revealed thin human-like arms and
+insufficiently visible tusks on the new Ogres. The shared Ogre-only anatomy
+now has broad beveled forearms/fists, a larger jaw/nose, sloping brows and
+forward lower tusks. Basalt uses intrinsic Ogre skin and irregular stacked
+stone faces; Flint uses aged pale skin. The Machine replacement and existing
+Ogre Archer keep their own anatomy. This is presentation-only. Initial images
+retain their provenance; affected portraits/lineups are replaced from a new
+committed renderer, with unchanged kinds reused only through verified manifests.
