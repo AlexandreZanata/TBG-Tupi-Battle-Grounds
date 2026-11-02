@@ -88,7 +88,11 @@ fn finish(
         Ok(None) => textform::open(
             &mut form,
             TextKind::BackupKey,
-            &lang.key("account.backup.prompt"),
+            &lang.key(if cfg!(target_os = "android") {
+                "android.account.backup_prompt"
+            } else {
+                "account.backup.prompt"
+            }),
         ),
         Err(error) => {
             let key = if error == auth::Failure::InvalidKey {

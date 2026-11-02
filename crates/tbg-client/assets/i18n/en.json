@@ -1,4 +1,5 @@
 {
+  "android.account.backup_prompt": "Use this account's original key to copy a manual backup. The app does not keep the key after it closes.",
   "android.hide_preview_controls": "Close controls",
   "android.preview_controls": "Preview controls",
   "update.checking": "Checking for new versions...",

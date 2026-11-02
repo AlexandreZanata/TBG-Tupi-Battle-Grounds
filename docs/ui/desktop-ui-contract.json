@@ -195,6 +195,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-session-backup-mask",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "account login/backup-key forms and clipboard; existing desktop cases retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

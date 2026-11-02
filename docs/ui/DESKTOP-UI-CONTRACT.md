@@ -882,3 +882,12 @@ P69 candidate 19's separate full-bleed UI root failed to present content on the
 emulator. The next candidate restores the previously observed single UI-root
 hierarchy; loading-edge coverage remains pending while geometry/UI visibility
 are diagnosed. No desktop root or presentation path changes.
+
+## 2026-11-02 — P69 session-only manual backup and shared key masking
+
+Android consumes the shared form masking state for login and BackupKey entry,
+retaining native paste/reveal/Done/Back behavior. Its manual verified-key cache
+is process-only; the mobile prompt explains that lifetime. Linux/Windows/web
+retain #57's existing OS-vault/browser behavior and text. Native key masking,
+reveal/cancel, copy and account/logout states are affected. Emulator journeys
+and desktop correspondence remain pending for this source.
