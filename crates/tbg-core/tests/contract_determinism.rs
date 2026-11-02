@@ -167,6 +167,12 @@ fn bot_matches_are_frozen() {
             (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
             (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
         ],
+        // GD-04: Gods join only the private preview pool; canonical bot traces are unchanged.
+        (14, 0xf354f651c056d615) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

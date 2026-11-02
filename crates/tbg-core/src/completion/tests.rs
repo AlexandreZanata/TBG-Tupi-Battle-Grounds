@@ -407,9 +407,10 @@ fn completion_cc17_rhythm_keeps_standard_root_priority_and_two_victim_cap() {
 }
 
 #[test]
-fn completion_pool_keeps_nine_full_factions_and_one_god() {
+fn completion_pool_keeps_nine_full_factions_and_three_gods() {
     assert_eq!(crate::FULL_POOL.len(), 46);
-    assert_eq!(crate::COMPLETION_POOL.len(), 82);
+    // GD-04 appends Volthar and Astreon after Colossus.
+    assert_eq!(crate::COMPLETION_POOL.len(), 84);
     for faction in crate::FACTIONS {
         assert_eq!(
             crate::COMPLETION_POOL
@@ -417,7 +418,7 @@ fn completion_pool_keeps_nine_full_factions_and_one_god() {
                 .filter(|&&kind| content::def(kind).faction == faction)
                 .count(),
             if faction == crate::Faction::Gods {
-                1
+                3
             } else {
                 9
             }

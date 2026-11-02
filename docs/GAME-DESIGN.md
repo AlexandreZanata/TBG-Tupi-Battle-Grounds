@@ -2459,7 +2459,7 @@ champions after Colossus to the local Practice/Training preview pool (84 kinds);
 FULL_POOL stays 46 and online canon is unchanged. Every form row changes only
 the champion's ability; Evolution costs and stat contracts are the common ones.
 Gods keeps its zero-bonus Synergy row (BR-Y02): a Gods Synergy is an owner
-decision, not part of this phase. Ruleset **14** / `b7e74906f79860ec`, wire **37**.
+decision, not part of this phase. Ruleset **14** / `f354f651c056d615`, wire **37**.
 
 **Volthar — Deus da Tempestade (Storm God)**, Ranged, 12 600 sub-Energy
 (**21 Energy**), HP **2200**, damage **130**, interval **30 ticks** (1.5 s),
@@ -2516,5 +2516,7 @@ Presentation: the server emits a public `StormArc {unit, from, to, jump}` per
 link (jump 0 = B2 extra) and the existing `AbilityResolved`; clients only draw
 them. Both counters share the existing public per-kind progress bits; every
 other system (Synergy rows, Arcanas, Augments, Interest, Shop, Evolution costs,
-Strongholds, carry rules) applies unchanged. PK-01 lab footprints are authored
+Strongholds, carry rules) applies unchanged. Smuggler cargo keeps its pre-GD-04
+draw table: Volthar and Astreon never come out of a crate, so canonical online
+matches and their traces are identical to revision 13. PK-01 lab footprints are authored
 provisionally until the native mesh export measures the new forms.
