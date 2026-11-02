@@ -546,7 +546,30 @@ rotated with its current aim. Measurement and live selection share one predicate
 to prevent a measured champion being omitted from crowd separation again.
 Retain original direct pushing, wide road, immediate births and no normal queues.
 Coverage: Base/A1/A2/B1/B2, Idle/Walk/Attack, near/far aim, both seat facings and
-a neighboring Archer. GD-02 tests and Linux reinstall are deferred: the shared
-validation lock returned exit 75 before compilation. The installed source remains
-`e868927`. All GD-02 runtime/platform observations are pending; see
+a neighboring Archer. GD-02 initially deferred for a busy validation slot; all
+three Colossus tests subsequently passed in ARENA-REFINE-01 consolidation. Linux
+reinstall remains pending and the installed source remains `e868927`.
+All GD-02 runtime/platform observations are pending; see
 `docs/phases/COLOSSUS-ARM-CLEARANCE.md`.
+
+
+## ARENA-REFINE-01 — Separate independent scenery silhouettes (2026-11-02)
+
+Shared Linux/Windows/desktop web: optional trees and scattered props are placed
+after authored architecture, checking actual transformed mesh footprints and
+previously accepted sites. The layout uses the same seeded sites on all targets.
+Remove redundant rear coastal boulder groups that cut into trees/temples; keep
+foreground geology and whole fitted snow/plant/stone assemblies intact. Separate
+Forest rock gardens, Tundra foreground firs, Celestial statue surroundings and
+Clockwork boilers/fences. No road width, movement, unit balance or camera changes.
+Coverage: all eight Arenas; rock/canopy intersections, landmark silhouettes,
+boiler/fence separation, compound attachments, original road-clearance cases.
+The phase receipt records actual validation and observed platforms; unobserved
+Windows/desktop web appearance remains pending.
+
+ARENA-REFINE-01 current evidence: both road/animation tests and all three
+Colossus cases passed on the initial combined tree. The new scenery test found
+insufficient Forest density; nine curated anchors restore the intended silhouette
+in source without relaxing the test. Its focused rerun returned exit 75. Final
+Arena tests, native install and new visual observations remain pending. No
+ARENA-REFINE-01 or GD-02 runtime parity is claimed.

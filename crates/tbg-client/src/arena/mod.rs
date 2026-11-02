@@ -6,6 +6,7 @@ use bevy::{light::NotShadowCaster, prelude::*};
 mod camp;
 mod cliffs;
 mod clouds;
+mod dressing;
 mod geometry;
 mod ground;
 mod life;

@@ -413,3 +413,14 @@ Colossus shoulders, upper arms, forearms, hands and their form-specific armor
 belong to its measured crowd envelope. Use the cached posed meshes in live
 spacing as well as measurement. Cover Base/A1/A2/B1/B2 during Idle/Walk/Attack
 and both seat facings. Preserve the existing obelisk and original pushing motion.
+
+
+### ARENA-REFINE-01 scenery composition (2026-11-02)
+
+Optional scenery must respect the rendered bounds of authored landmarks and
+previously accepted independent props. Omit a blocked optional asset as a whole;
+never move individual branches, snow caps, crystals or glow away from their base.
+Keep background tree silhouettes clear of boulders/monuments, foreground rock
+gardens readable, and boilers clear of fence runs. Fitted snow shells, plantings
+on offshore islets, masonry assemblies and meshing gears remain intentional
+compound designs. This layout filtering runs only when building an Arena.

@@ -34,25 +34,7 @@ pub(super) fn build(kit: &mut Kit) {
             rgb(0xb9985c),
         );
     }
-    for (x, z, s) in [
-        (-0.1, -4.0, 1.0),
-        (1.0, -4.3, 1.2),
-        (3.1, -4.85, 0.85),
-        (12.9, -4.85, 0.85),
-        (15.0, -4.3, 1.2),
-        (16.1, -4.0, 1.0),
-        (0.7, 3.4, 0.60),
-        (15.3, 3.4, 0.60),
-    ] {
-        palm(&mut kit.props, Vec3::new(x, 0.0, z), s);
-    }
-    for (i, at, s) in scatter(0xde5e47).into_iter().filter(|(i, _, _)| i % 3 == 0) {
-        if i % 2 == 0 {
-            boulder(&mut kit.props, at, s, p.dark);
-        } else {
-            vessel(&mut kit.props, at, s);
-        }
-    }
+
     for (x, z) in [(3.0, 4.3), (13.0, 4.3)] {
         for dx in [-0.38, 0.0, 0.38] {
             block(
@@ -68,6 +50,37 @@ pub(super) fn build(kit: &mut Kit) {
         let at = Vec3::new(x, -1.0, z);
         boulder(&mut kit.props, at, 1.4, p.stone);
         palm(&mut kit.props, at + Vec3::Y * 0.80, 0.70);
+    }
+    for (_, at, s) in crate::arena::dressing::spaced(
+        &kit.props,
+        &kit.glow,
+        [
+            (-0.1, -4.0, 1.0),
+            (1.0, -4.3, 1.2),
+            (3.1, -4.85, 0.85),
+            (12.9, -4.85, 0.85),
+            (15.0, -4.3, 1.2),
+            (16.1, -4.0, 1.0),
+            (0.7, 3.4, 0.60),
+            (15.3, 3.4, 0.60),
+        ]
+        .into_iter()
+        .enumerate()
+        .map(|(i, (x, z, s))| (i, Vec3::new(x, 0., z), s))
+        .collect(),
+        1.4,
+    ) {
+        palm(&mut kit.props, at, s);
+    }
+    for (i, at, s) in scatter(0xde5e47, &kit.props, &kit.glow)
+        .into_iter()
+        .filter(|(i, _, _)| i % 3 == 0)
+    {
+        if i % 2 == 0 {
+            boulder(&mut kit.props, at, s, p.dark);
+        } else {
+            vessel(&mut kit.props, at, s);
+        }
     }
 }
 

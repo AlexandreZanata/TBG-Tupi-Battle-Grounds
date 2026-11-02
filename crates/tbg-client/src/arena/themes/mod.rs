@@ -23,6 +23,11 @@ pub(super) struct Kit {
 
 pub(super) fn build(theme: Theme) -> Kit {
     let mut kit = Kit::default();
+    if theme == Theme::Forest {
+        return kit;
+    }
+    structures::fittings(&mut kit.props, theme);
+    shore_rocks(&mut kit, theme);
     match theme {
         Theme::Tundra => tundra::build(&mut kit),
         Theme::Volcanic => volcanic::build(&mut kit),
@@ -33,8 +38,6 @@ pub(super) fn build(theme: Theme) -> Kit {
         Theme::Desert => desert::build(&mut kit),
         Theme::Forest => return kit,
     }
-    shore_rocks(&mut kit, theme);
-    structures::fittings(&mut kit.props, theme);
     kit
 }
 
@@ -51,16 +54,17 @@ pub(super) fn back_row() -> Vec<(Vec3, f32)> {
         .collect()
 }
 
-pub(super) fn scatter(seed: u64) -> Vec<(usize, Vec3, f32)> {
+pub(super) fn scatter(seed: u64, parts: &[Part], glow: &[Part]) -> Vec<(usize, Vec3, f32)> {
     let mut rng = Pcg32::new(seed, 11);
     let mut unit = || rng.below(10_000) as f32 / 10_000.0;
-    (0..100)
+    let candidates = (0..100)
         .filter_map(|i| {
             let x = -3.7 + unit() * 23.4;
             let z = (if i % 2 == 0 { 1.0 } else { -1.0 }) * (3.5 + unit() * 1.7);
             inside(x, z).then(|| (i, Vec3::new(x, 0.0, z), 0.25 + unit() * 0.35))
         })
-        .collect()
+        .collect();
+    super::dressing::spaced(parts, glow, candidates, 1.5)
 }
 
 fn inside(x: f32, z: f32) -> bool {
@@ -91,7 +95,8 @@ fn shore_rocks(kit: &mut Kit, theme: Theme) {
     let p = theme.palette();
     let rim = super::geometry::outline();
     let center = Vec3::new(8.0, 0.0, 0.0);
-    for i in [7, 12, 19, 25, 39, 45, 51, 57] {
+    // Background landmarks already supply geology; spare their tree/temple silhouettes.
+    for i in [7, 12, 19, 25] {
         let mut at = center + (rim[i] - center) * 0.93;
         // Keep each coastal group intact while clearing the widened road corners.
         if at.z.abs() < 4.0 && (-1.7..17.7).contains(&at.x) {

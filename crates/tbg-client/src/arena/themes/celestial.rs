@@ -62,7 +62,6 @@ pub(super) fn build(kit: &mut Kit) {
     }
     for x in [4.35, 11.65] {
         guardian(parts, Vec3::new(x, 0.0, -3.30), 1.02, p.stone, p.accent);
-        planter(parts, Vec3::new(x + 0.65, 0.0, -3.26), p.stone, p.plant);
     }
     shared::crystal(
         &mut kit.glow,

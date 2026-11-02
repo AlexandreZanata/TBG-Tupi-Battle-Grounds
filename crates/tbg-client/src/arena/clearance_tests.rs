@@ -127,3 +127,45 @@ fn arena_clear01_fire_stays_on_its_braziers_and_animated_dressing_clears_the_roa
         }
     }
 }
+
+#[test]
+fn arena_refine01_rocks_do_not_cut_through_tree_crowns() {
+    use crate::art::mesh::Shape;
+    let mut failures = Vec::new();
+    for arena in tbg_core::Arena::ALL {
+        let theme = Theme::from(arena);
+        let parts = if theme == Theme::Forest {
+            props::scatter()
+        } else {
+            themes::build(theme).props
+        };
+        let crowns: Vec<_> = parts
+            .iter()
+            .filter(|(shape, _, _)| matches!(shape, Shape::Canopy(..)))
+            .map(super::dressing::bounds)
+            .collect();
+        if theme == Theme::Forest && crowns.len() < 15 {
+            failures.push(format!(
+                "retain a readable forest silhouette: {} crown layers",
+                crowns.len()
+            ));
+        }
+        for part in parts
+            .iter()
+            .filter(|(shape, _, _)| matches!(shape, Shape::Rock(..)))
+        {
+            let (min, max) = super::dressing::bounds(part);
+            for &(tree_min, tree_max) in &crowns {
+                if min.cmplt(tree_max - Vec3::splat(0.01)).all()
+                    && max.cmpgt(tree_min + Vec3::splat(0.01)).all()
+                {
+                    failures.push(format!(
+                        "{theme:?}: rock at {:?} intersects a tree crown",
+                        part.2.translation
+                    ));
+                }
+            }
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+}

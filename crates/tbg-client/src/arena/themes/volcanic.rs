@@ -13,16 +13,7 @@ use bevy::prelude::*;
 
 pub(super) fn build(kit: &mut Kit) {
     let p = Theme::Volcanic.palette();
-    for (i, (at, s)) in back_row().into_iter().enumerate() {
-        if (at.x - 8.0).abs() < 2.0 && at.z < -3.8 {
-            continue;
-        }
-        if i % 4 == 0 {
-            shared::dead_tree(&mut kit.props, at, s, p.wood);
-        } else {
-            basalt(&mut kit.props, at, s);
-        }
-    }
+
     let at = Vec3::new(8.0, 0.0, -5.0);
     kit.props.extend([
         (
@@ -42,21 +33,7 @@ pub(super) fn build(kit: &mut Kit) {
         Transform::from_translation(at + Vec3::Y * 2.085),
     ));
     crater_rim(kit);
-    for (i, at, s) in scatter(0xf04e).into_iter().filter(|(i, _, _)| i % 3 != 1) {
-        if i % 3 == 0 {
-            basalt(&mut kit.props, at, s * 0.65);
-        } else {
-            boulder(
-                &mut kit.props,
-                at,
-                s,
-                if i % 2 == 0 { p.dark } else { p.plant },
-            );
-        }
-        if i % 5 == 0 {
-            fissure(&mut kit.glow, at, s);
-        }
-    }
+
     for (x, z, s) in [
         (0.0, 3.2, 0.7),
         (4.3, 4.0, 1.0),
@@ -144,6 +121,43 @@ pub(super) fn build(kit: &mut Kit) {
         ));
         if i % 3 == 0 {
             basalt(&mut kit.props, at + Vec3::Y * 0.4, 0.45 * size + 0.15);
+        }
+    }
+    for (i, at, s) in crate::arena::dressing::spaced(
+        &kit.props,
+        &kit.glow,
+        back_row()
+            .into_iter()
+            .enumerate()
+            .map(|(i, (at, s))| (i, at, s))
+            .collect(),
+        1.2,
+    ) {
+        if (at.x - 8.0).abs() < 2.0 && at.z < -3.8 {
+            continue;
+        }
+        if i % 4 == 0 {
+            shared::dead_tree(&mut kit.props, at, s, p.wood);
+        } else {
+            basalt(&mut kit.props, at, s);
+        }
+    }
+    for (i, at, s) in scatter(0xf04e, &kit.props, &kit.glow)
+        .into_iter()
+        .filter(|(i, _, _)| i % 3 != 1)
+    {
+        if i % 3 == 0 {
+            basalt(&mut kit.props, at, s * 0.65);
+        } else {
+            boulder(
+                &mut kit.props,
+                at,
+                s,
+                if i % 2 == 0 { p.dark } else { p.plant },
+            );
+        }
+        if i % 5 == 0 {
+            fissure(&mut kit.glow, at, s);
         }
     }
 }

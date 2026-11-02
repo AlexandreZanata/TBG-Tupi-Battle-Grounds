@@ -14,20 +14,7 @@ use bevy::prelude::*;
 
 pub(super) fn build(kit: &mut Kit) {
     let p = Theme::Tundra.palette();
-    for (i, (at, s)) in back_row().into_iter().enumerate() {
-        if i % 4 != 2 {
-            fir(&mut kit.props, at, s * 0.9);
-        }
-    }
-    for (i, at, s) in scatter(0x1ce).into_iter().filter(|(i, _, _)| i % 3 != 1) {
-        match i % 5 {
-            0 => shared::crystal(&mut kit.props, at, s, p.accent, TIP),
-            1 => snow_rock(&mut kit.props, at, s),
-            2 => boulder(&mut kit.props, at, s, rgb(0xe9f3f3)),
-            3 => frost_grass(&mut kit.props, at),
-            _ => shared::crystal(&mut kit.props, at, s * 0.5, rgb(0xc7e9f1), TIP),
-        }
-    }
+
     for (x, z, s) in [
         (0.0, 3.8, 0.9),
         (4.4, 4.0, 1.0),
@@ -52,10 +39,10 @@ pub(super) fn build(kit: &mut Kit) {
         ridge(&mut kit.props, Vec3::new(x, 0.0, z), s);
     }
     for (x, z, s) in [
-        (0.7, 3.6, 0.8),
-        (4.8, 4.5, 0.75),
+        (1.8, 4.2, 0.8),
+        (6.3, 4.5, 0.75),
         (12.6, 4.35, 0.8),
-        (16.0, 3.6, 0.65),
+        (14.7, 4.4, 0.65),
     ] {
         fir(&mut kit.props, Vec3::new(x, 0.0, z), s * 0.65);
         crystal(
@@ -129,6 +116,32 @@ pub(super) fn build(kit: &mut Kit) {
             0 => shared::crystal(&mut kit.props, top, 0.45 * size + 0.2, p.accent, TIP),
             2 => snow_rock(&mut kit.props, top, 0.35 * size + 0.2),
             _ => {}
+        }
+    }
+    for (i, at, s) in crate::arena::dressing::spaced(
+        &kit.props,
+        &kit.glow,
+        back_row()
+            .into_iter()
+            .enumerate()
+            .map(|(i, (at, s))| (i, at, s))
+            .collect(),
+        0.8,
+    ) {
+        if i % 4 != 2 {
+            fir(&mut kit.props, at, s * 0.9);
+        }
+    }
+    for (i, at, s) in scatter(0x1ce, &kit.props, &kit.glow)
+        .into_iter()
+        .filter(|(i, _, _)| i % 3 != 1)
+    {
+        match i % 5 {
+            0 => shared::crystal(&mut kit.props, at, s, p.accent, TIP),
+            1 => snow_rock(&mut kit.props, at, s),
+            2 => boulder(&mut kit.props, at, s, rgb(0xe9f3f3)),
+            3 => frost_grass(&mut kit.props, at),
+            _ => shared::crystal(&mut kit.props, at, s * 0.5, rgb(0xc7e9f1), TIP),
         }
     }
 }

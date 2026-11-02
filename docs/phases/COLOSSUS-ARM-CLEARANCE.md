@@ -44,3 +44,13 @@ core tests. No full suite, balance gate, release build or extra target build.
 
 The installed Linux version is still source `e868927` (RESTORE-02/ARENA-CLEAR-01).
 GD-02 is not installed or visually verified yet. Existing sessions remain intact.
+
+## Later consolidation update — ARENA-REFINE-01
+
+After the owner's subsequent scenery request, one new consolidation acquired the
+shared slot for the combined changed fronts. All three Colossus tests passed,
+including both GD-02 regressions. Compilation passed; this supersedes the earlier
+not-executed test status. No Colossus source changed afterward. Linux reinstall
+and runtime/Windows/desktop web observations remain pending. The scene test's
+minimum-density failure and later busy-slot deferral are recorded in
+[the scenery receipt](ARENA-SCENERY-REFINEMENT.md).

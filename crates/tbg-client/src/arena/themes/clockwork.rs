@@ -22,7 +22,7 @@ pub(super) fn build(kit: &mut Kit) {
     for (x, z, side) in [(0.4, -3.55, 1.0), (15.6, -3.55, -1.0)] {
         crane(parts, Vec3::new(x, 0.0, z), side);
     }
-    for (x, z) in [(1.4, 3.6), (14.6, 3.6), (3.0, -3.3), (13.0, -3.3)] {
+    for (x, z) in [(1.4, 3.6), (14.6, 3.6), (3.0, -4.3), (13.0, -4.3)] {
         boiler(parts, Vec3::new(x, 0.0, z));
     }
     for x in [4.2, 11.8] {
