@@ -79,3 +79,32 @@ affect existing games, but automatic frontend advancement was delayed. Stagger
 activation by a minute per family and use AccuracySec=1s; keep the nonblocking
 lock, random jitter and ten-minute cadence. A policy regression requires starts
 farther apart than the 30-second jitter plus accuracy and no shared boot deadline.
+
+## C7 control and transferred Faction fixtures
+
+Hosted balance 125338013106 exposed Tuned Gears applied to SiegeWalker after
+its explicit OG-01 transfer to Ogres, plus the unchanged C7 cost canary failing.
+The attack-cap fixture now uses its Ranged Machine replacement RivetBallista
+and still asserts the +100% cap on real hit intervals. Six Arcana cases pass.
+
+A direct policy regression reproduced the price control discarding an already
+offered expensive target for a cheap redraw. INT-02 fixes both scheduled and
+fallback reaction decisions; two focused regressions pass. No C7 assertion,
+threshold, sample, mutation or budget changed. A 32-pair original Bot-control
+screen reports 1.000000 normal and 0.796875 tripled cost, above its unchanged
+10-point sensitivity. Full C7 is deferred to the required hosted balance lane.
+Counterfactual diagnostics retained: BotAvoid and ranged-spam rows were too
+insensitive, and the ten-kind duel subgroup missed the 60-Energy criterion;
+none was added to the test as an escape hatch.
+
+The successful native PR run 41463262341 produced Linux and Windows packages.
+Its synthetic merge source is b07cb2e4242db5df53aefc95667e09d8231372c7, not a
+production release. The Linux tarball checksum and all 391 package-file hashes
+passed, and --build-info reported release/profile ui-acceptance, protocol 36 /
+R13 contract. It was not installed or published as an official main package.
+
+Linux package runtime also passed one scoped five-form Colossus capture (idle,
+walk, attack), 1600x1000: boot_ready=true, scene_waiting=false, zero pending
+images/texts and zero failed images, normal process exit in 9.55 seconds. The
+native image was inspected. This is Linux package evidence only; Windows and
+browser rendered correspondence remain unobserved.

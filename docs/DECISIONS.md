@@ -3164,3 +3164,26 @@ not follow a promotion and stay documented limits.
 a scheduled promotion), a second host is added (match ownership and routing), a measurement
 shows an interruption the rehearsal and the observed promotions did not, or capacity no longer
 fits two overlapping generations.
+
+## INT-02 — D-44 price-canary policy correction (2026-11-02)
+
+The consolidated C7 gate missed SiegeWalker's existing x3 cost mutation. No
+combat stat, threshold, sample size, duel budget or assertion is changed. The
+internal Favor controller spent on cheap redraws even while the desired offer
+was already present but unaffordable, including fallback-bot reaction ticks.
+That can remove the price canary from its own measured army before the policy
+can afford it. D-44 refresh-by-buying applies when the desired kind is absent.
+
+Favor now banks for a present preferred kind and protects it between scheduled
+decisions. If absent, its cheapest redraw and bot fallback remain. Comp retains
+its separately documented affordable-composition policy. This corrects offline
+lab controls only; the shipped bot, server simulation, online Shop and all
+player rules are unchanged. Existing source-specific reports remain historical;
+new policy-sensitive experiments must be recomputed before claiming acceptance.
+
+A held-offer regression failed before the change and both present/absent
+scenarios pass after it. A bounded 32-pair original favor-vs-Bot screen changed
+from the diagnostic's ineffective controls to a 1.000000 versus 0.796875 price
+comparison after the fix (20.3125 points). This is screening evidence, not the
+full C7 result or D-33 acceptance. The original 256-pair C7 test and its 10-point
+match/20-point duel criteria remain intact and queued to hosted CI.
