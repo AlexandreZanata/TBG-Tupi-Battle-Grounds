@@ -854,3 +854,8 @@ Android visual comparison of the corrected path remains pending.
 P69's next direct-submission candidate also selects the public render-world
 `GpuPreprocessingMode::None`; phase batches must match the CPU builder.
 Candidate 16 failed this runtime requirement; its screenshot is not accepted.
+
+P69 manual CPU-builder overrides failed twice and are removed. The next
+Android capability profile derives the complete uniform-buffer rendering path
+from WebGL2 device limits on both native backends; sRGB Vulkan presentation
+is retained in the emulator. This does not waive art/motion correspondence.

@@ -27,7 +27,6 @@ pub fn settings() -> Window {
     }
 }
 pub fn plugin(app: &mut App) {
-    render::cpu_submission(app);
     if super::storage::get(super::storage::Scope::Local, "video.low").is_none() {
         crate::config::save_flag("video.low", true);
     }

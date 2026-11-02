@@ -7,26 +7,19 @@ use bevy::render::{
 use std::ffi::{c_char, c_int, CStr};
 
 pub fn plugin() -> RenderPlugin {
-    let render_creation = if emulator() {
-        // Emulator EGL exposes no sRGB window surface, which Bevy 0.20 requires on GLES
-        // (SURFACE_VIEW_FORMATS); its Vulkan device uses the engine's normal limits.
-        WgpuSettings {
-            backends: Some(Backends::VULKAN),
-            ..Default::default()
-        }
+    let backend = if emulator() {
+        Backends::VULKAN
     } else {
-        // Keep the same PBR/art path with the engine's uniform-buffer fallback.
-        // Vulkan failed twice on the owned POCO; do not silently retry that backend.
-        WgpuSettings {
-            backends: Some(Backends::GL),
-            priority: WgpuSettingsPriority::WebGL2,
-            features: WgpuFeatures::empty(),
-            // Overriding priority does not recompute limits in Default::default().
-            // Zero vertex storage selects the engine's actual uniform-buffer layouts.
-            // The POCO landscape surface is wider than WebGL2's 2048px minimum.
-            limits: WgpuLimits::downlevel_webgl2_defaults().using_resolution(WgpuLimits::default()),
-            ..Default::default()
-        }
+        Backends::GL
+    };
+    // Select the engine's complete uniform-buffer path, including its device-derived
+    // phase allocation. Disabling only the PBR builder leaves incompatible GPU batches.
+    let render_creation = WgpuSettings {
+        backends: Some(backend),
+        priority: WgpuSettingsPriority::WebGL2,
+        features: WgpuFeatures::empty(),
+        limits: WgpuLimits::downlevel_webgl2_defaults().using_resolution(WgpuLimits::default()),
+        ..Default::default()
     };
     RenderPlugin {
         render_creation: render_creation.into(),
@@ -56,17 +49,4 @@ fn emulator() -> bool {
         }
     );
     emulator
-}
-
-/// Keep phase allocation consistent with the engine's CPU instance builder.
-pub fn cpu_submission(app: &mut bevy::prelude::App) {
-    use bevy::render::{
-        batching::gpu_preprocessing::{GpuPreprocessingMode, GpuPreprocessingSupport},
-        RenderApp,
-    };
-    if let Some(render) = app.get_sub_app_mut(RenderApp) {
-        render.insert_resource(GpuPreprocessingSupport {
-            max_supported_mode: GpuPreprocessingMode::None,
-        });
-    }
 }
