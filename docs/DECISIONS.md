@@ -3129,3 +3129,29 @@ Randomize the complete paired token order once before freezing account/loadout
 fields. Reconnection reuses that match assignment. Local Practice uses a separate
 seeded side draw and seat-aware disclosed bot assistance. No matchmaking-rating
 policy or Elo formula change is included in this presentation/assignment task.
+
+
+## D-106 — War Auxiliaries (`Mineiro` and `Mercador`) architecture (2026-11-02)
+
+**Context:** P74 introduces two purchasable off-lane War Auxiliaries (`Mineiro`
+for unmultiplied Energy production and `Mercador` for purchase-driven free
+Shop rerolls) with a dedicated bottom-right two-slot HUD panel and animated
+low-poly 3D precincts/ships across all eight Arenas.
+
+**Decision:**
+1. Keep `PlayerState::{auxiliaries, free_rerolls}` in `tbg-core` with integer-only
+   Bresenham sub-energy accounting (`36` sub-energy/s over `3_600` ticks) and
+   append `PlayerIntention::HireAuxiliary { slot }`,
+   `Rejection::{BadAuxiliarySlot, AuxiliaryAlreadyHired}`, and
+   `Event::{AuxiliaryHired, AuxiliaryTriggered}` without renumbering any existing
+   wire tag.
+2. Expose public `auxiliaries: [[AuxiliarySlotView; 2]; 2]` in both `MatchView`
+   and `PublicView`, and private `free_rerolls: u8` in `MatchView`.
+3. Render the bottom-right `Auxiliares (0/2)` navy-and-gold HUD panel in
+   `native_battle/auxiliaries.rs` without moving the five conventional Shop cards
+   or the `Energy / Interest / Army / Reroll` bar.
+4. Place the symmetric Left (`x = -2.55`) and Right (`x = +18.55`) 3D precincts
+   at `z = -3.45` (`Mineiro`) and `z = +3.45` (`Mercador`, pier, and Caravel
+   ship), strictly outside the widened `ARENA-CLEAR-01` road box
+   (`x ∈ [-1.1, 17.1], z ∈ [-2.67, 2.67]`), with theme-adapted palettes and prop
+   pad filtering across all eight Arenas.

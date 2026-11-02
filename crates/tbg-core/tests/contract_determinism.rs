@@ -161,6 +161,12 @@ fn bot_matches_are_frozen() {
             (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
             (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
         ],
+        // P74 (D-106): War Auxiliaries are opt-in player intentions; canonical bot traces stay frozen.
+        (13, 0xed69d43c2812469e) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

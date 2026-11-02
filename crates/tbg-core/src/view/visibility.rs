@@ -38,6 +38,8 @@ pub fn is_public(event: &Event) -> bool {
         | Event::Crossfire { .. }
         | Event::ProfaneFlame { .. }
         | Event::DrillFused { .. }
-        | Event::BarrelBurst { .. } => true,
+        | Event::BarrelBurst { .. }
+        | Event::AuxiliaryHired { .. }
+        | Event::AuxiliaryTriggered { .. } => true,
     }
 }

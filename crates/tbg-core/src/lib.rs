@@ -9,6 +9,7 @@ mod acidmaw;
 mod afflictions;
 pub mod arcana;
 pub mod augment;
+pub mod auxiliary;
 pub mod barrel;
 mod bonehorn;
 pub mod bot;
@@ -70,6 +71,7 @@ mod weaver;
 mod whisperer;
 
 pub use arcana::ArcanaPreset;
+pub use auxiliary::{AuxiliaryKind, AuxiliaryPhase, AuxiliarySlotView, AUXILIARY_SLOTS};
 pub use intent::{PlayerIntention, Rejection};
 pub use rng::Pcg32;
 pub use ruleset::Ruleset;

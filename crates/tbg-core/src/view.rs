@@ -145,6 +145,10 @@ pub struct MatchView {
     /// BR-LV05: how many spectators watch this match. Set by the server
     /// when it sends the view; a count, never who (`0` from `view_for`).
     pub spectators: u16,
+    /// Public War Auxiliary state for both seats (BR-AX11, D-106).
+    pub auxiliaries: [[crate::auxiliary::AuxiliarySlotView; crate::auxiliary::AUXILIARY_SLOTS]; 2],
+    /// Private Merchant free rerolls held by the viewing seat (BR-AX08).
+    pub free_rerolls: u8,
     /// BR-S13: the viewing seat only, never the opponent or PublicView.
     #[serde(skip)]
     pub reserve: [u8; OFFERS],
@@ -216,6 +220,8 @@ impl MatchState {
             events: events.to_vec(),
             outcome: self.outcome,
             spectators: 0,
+            auxiliaries: crate::auxiliary::views(self),
+            free_rerolls: me.free_rerolls,
         }
     }
 }

@@ -57,6 +57,8 @@ pub struct PublicView {
     pub outcome: Option<Outcome>,
     /// BR-LV05: a count of spectators, never who. Set by the server.
     pub spectators: u16,
+    /// Public War Auxiliary state for both seats (BR-AX11, D-106).
+    pub auxiliaries: [[crate::auxiliary::AuxiliarySlotView; crate::auxiliary::AUXILIARY_SLOTS]; 2],
 }
 
 impl MatchState {
@@ -99,6 +101,7 @@ impl MatchState {
             events: events.iter().filter(|e| is_public(e)).cloned().collect(),
             outcome: self.outcome,
             spectators,
+            auxiliaries: crate::auxiliary::views(self),
         }
     }
 }

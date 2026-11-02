@@ -30,6 +30,8 @@ pub fn rejection(lang: Lang, reason: tbg_core::Rejection) -> &'static str {
         tbg_core::Rejection::NoReserve => Msg::RejectionNoReserve,
         tbg_core::Rejection::LaneFull => Msg::RejectionLaneFull,
         tbg_core::Rejection::StalePrice => Msg::RejectionStalePrice,
+        tbg_core::Rejection::BadAuxiliarySlot => Msg::RejectionBadOption,
+        tbg_core::Rejection::AuxiliaryAlreadyHired => Msg::RejectionUnavailable,
     })
 }
 

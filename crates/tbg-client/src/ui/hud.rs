@@ -319,6 +319,7 @@ fn spawn(
                     super::native_battle::cards(bottom, &assets);
                 });
             });
+            super::native_battle::auxiliaries(root, &assets);
             root.spawn((
                 Node {
                     position_type: PositionType::Absolute,

@@ -650,3 +650,27 @@ Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/
   `gd02_colossus`, `gd03_colossus`). Linux targeted regressions and native
   preview installation are verified; Windows and desktop web visual
   observations remain pending.
+
+## P74 — War Auxiliaries (`Mineiro` & `Mercador`) HUD Panel, 3D Precincts & Construction Animations (2026-11-02)
+
+Shared Linux/Windows/desktop web path (`crates/tbg-client/src/ui/native_battle/auxiliaries.rs`,
+`crates/tbg-client/src/ui/native_battle/resources.rs`,
+`crates/tbg-client/src/arena/auxiliaries/`):
+- Bottom-right `Auxiliares (0/2)` / `Auxiliaries (0/2)` navy-and-gold framed
+  panel (`right: 14px`, `bottom: SHOP_BOTTOM`, `SHOP_SCALE = 0.9`) with two
+  dedicated auxiliary cards (`Mineiro · Cost 6` and `Mercador · Cost 4`), 3D
+  portraits (`aux_miner.webp`, `aux_merchant.webp`), and live phase/timer/progress
+  badges, keeping the five conventional Shop cards and the
+  `Energy / Interest / Army / Reroll` bar in their exact coordinates.
+- Free-reroll readout on the `Reroll` button (`Reroll · GRÁTIS (N)` /
+  `Reroll · FREE (N)`) enabled at `0` Energy when `free_rerolls > 0`.
+- Symmetric Left (`Seat::A` / Blue, `x = -2.55`) and Right (`Seat::B` / Red,
+  `x = +18.55`) off-lane 3D precincts for `Mineiro` (`z = -3.45`: rock outcrop,
+  portal shoring, lantern, rails, ore cart, pickaxe mining loop) and `Mercador`
+  (`z = +3.45`: timber pier on pilings, red-and-cream striped market stall,
+  balance-scales banner, crates/sacks, brass spyglass lookout, and wave-bobbing
+  wooden Merchant Caravel ship), with 3-stage procedural construction animations
+  and theme-adapted palettes across all eight Arenas (`Forest`, `Tundra`,
+  `Volcanic`, `Ruins`, `Storm`, `Celestial`, `Clockwork`, `Desert`).
+- Linux targeted regressions and native preview installation are verified;
+  Windows and desktop web visual observations remain pending.

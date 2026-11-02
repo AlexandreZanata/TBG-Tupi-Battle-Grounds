@@ -152,23 +152,50 @@ fn update(
                 INTEREST_MAX_BANDS
             ),
             Readout::Army => army_label(v, *lang),
-            Readout::Reroll => match v.reroll_cost {
-                Some(cost) => format!(
-                    "{} · {} Energy",
-                    lang.key("shop.reroll"),
-                    cost / ENERGY_SCALE
-                ),
-                None => lang.key("shop.reroll"),
-            },
+            Readout::Reroll => {
+                if v.free_rerolls > 0 {
+                    let free_tag = match *lang {
+                        Lang::PtBr => "GRÁTIS",
+                        Lang::En => "FREE",
+                    };
+                    format!(
+                        "{} · {} ({})",
+                        lang.key("shop.reroll"),
+                        free_tag,
+                        v.free_rerolls
+                    )
+                } else {
+                    match v.reroll_cost {
+                        Some(0) => {
+                            let free_tag = match *lang {
+                                Lang::PtBr => "GRÁTIS",
+                                Lang::En => "FREE",
+                            };
+                            format!("{} · {}", lang.key("shop.reroll"), free_tag)
+                        }
+                        Some(cost) => format!(
+                            "{} · {} Energy",
+                            lang.key("shop.reroll"),
+                            cost / ENERGY_SCALE
+                        ),
+                        None => lang.key("shop.reroll"),
+                    }
+                }
+            }
         };
         if text.0 != want {
             text.0 = want;
         }
     }
+    let effective_cost = if v.free_rerolls > 0 {
+        Some(0)
+    } else {
+        v.reroll_cost
+    };
     let enabled = v.phase == Phase::Running
         && v.augment_round.is_none()
         && pending.0.is_none()
-        && v.reroll_cost.is_some_and(|cost| v.energy >= cost);
+        && effective_cost.is_some_and(|cost| v.energy >= cost);
     for (mut action, mut chrome) in &mut rerolls {
         chrome.enabled = enabled;
         *action = if enabled {
