@@ -4,18 +4,21 @@ Branch `codex/automated-player-safe-delivery`, based on main `70827a7`, with PR 
 (automation plan, LF-normalized native inputs) and PR #46 (backend packaging
 interpreter, pinned `rust-toolchain.toml`) merged in normally. Inventory and gap
 diagnosis: [DEPLOY-automation-inventory-20261102](DEPLOY-automation-inventory-20261102.md).
-Level: work front plus scoped production actions authorized by the owner's request.
+Decision: D-104. Level: work front plus scoped production actions authorized by the
+owner's request.
 
-## State per family (2026-11-02 01:00 UTC)
+## State per family (2026-11-02 12:10 UTC)
 
-Implemented, published, verified, applied and timer are separate states.
+Implemented, published, verified, applied and timer are separate states. Every
+"not yet" below waits for one thing: this PR (and #45 for the landing) reaching main,
+because the host controllers verify only artifacts attested from main.
 
 | Family | Implemented | Published (main) | Verified on host | Applied by controller | Timer |
 |--------|-------------|------------------|------------------|-----------------------|-------|
 | Browser game | yes | `web-70827a7…` | yes, tokenless | yes, 00:46:42Z | **active** since 00:47:50Z |
 | Static landing/admin | yes | `static-70827a7…` | yes, tokenless | admin yes; landing restored to a hand publish (see below) | off: needs `--adopt` after #45 |
 | Native catalog | yes (metadata) | `v0.1.2-rc.1` (branch commit, before this pipeline) | by the publication front, 00:12 | by the publication front | off: enable after this PR's pagination fix is installed |
-| Backend | slot mode bootstrapped; routine A/B coordinator pending | none yet: first candidate after #46 merges | — | — | off; slot a runs the 8be248e binary since 10:31:34Z (see below) |
+| Backend | yes: A/B slot coordinator, rehearsed locally and its host adapter exercised on the host (below) | none yet: the first `server-<sha>` is built by the merge of this PR | host adapter and preflight verified read-only and a sandboxed idle-slot start/retire on the real host | slot mode bootstrapped by hand at 10:31:34Z; no candidate promoted yet | off until the first promotion is observed |
 
 ## Production actions and evidence
 
@@ -66,6 +69,26 @@ and the shared lock held for the duration, then restored.
   `/etc/cron.d/tbg-backup` never ran (only the 2026-11-01 18:40 copy exists).
   Not changed here; needs an owner decision (systemd timer or install cron).
 
+## Coordinator exercised on the real host (12:05Z, no player impact)
+
+Read-only and idle-slot checks, run from a transient unit with the controller's own
+sandbox (`ProtectSystem=strict`, the same `ReadWritePaths`, `NoNewPrivileges`):
+
+- `release-slot.sh start b …` with the current binary: slot `b` ready in 2 s, admitting
+  nothing (public `/api/admission` kept answering slot `a`, `/health` 200).
+- `slot_host.SystemHost`: directory, schema, `/api/release`, `/metrics`, store check,
+  public admission and health all answer; `preflight_host`, `gate` and `preflight` pass.
+- A WebSocket upgrade through Cloudflare and Caddy to `/ws/slot-b` and `/ws/slot-a` on both
+  `api.tupibg.com` and `app.tupibg.com` returns 101, so the route the coordinator checks
+  after a promotion works end to end.
+- `release-slot.sh retire b`: retirement gate passed, unit stopped and disabled, row
+  `retired`. Slot `a` stayed active; `/health` 200 and admission unchanged.
+- `systemctl enable`/`disable` of a slot unit work under the sandbox (the manager makes the
+  symlinks); `/etc/tbg` and `/opt/tbg/slots` are the extra writable paths the unit needed.
+
+These are mechanics, not a release: no candidate exists yet, nothing was promoted and
+nothing was installed into `/opt/tbg/deploy`.
+
 ## Implementation in this branch
 
 - **Controllers.**
@@ -82,6 +105,9 @@ and the shared lock held for the duration, then restored.
 - **CI.**
   - Family relevance is measured from the last published candidate.
   - Filter gaps are closed: toolchain, embedded patch notes, site-manifest sources.
+- **Backend A/B promotion** (D-104). `slots.py` is the coordinator and `slot_host.py` the
+  machine adapter; `status.py` shows every family on one screen; the installer places
+  them with the fixed `release-slot.sh` and `slot-bootstrap.sh`. See the next section.
 - **Native.**
   - Version gate in pull requests.
   - `release-main` tags a new version once from a main commit, using the job token.
@@ -89,47 +115,124 @@ and the shared lock held for the duration, then restored.
   - Draft-first, reconciling publication.
   - `0.1.2-rc.2` is the first version for this pipeline.
 
-## Zero-interruption backend: findings and plan
+## Backend A/B promotion
 
-Read-only analysis of the P66/P71 code, all claims with file references in the
-work log:
+### What it does
 
-1. **Bootstrap needed one restart (done above).**
-   - `tbg-server@.service` declares `Conflicts=tbg-server.service`.
-   - The running single process never reads the slot directory, never records
-     account ownership and keeps answering admission.
-   - The proxy moves to slot b only when 8080 stops answering.
+Before anything is downloaded: one fresh active slot, a free idle slot, memory and disk for
+two generations, an empty lobby (up to 90 s). Then: manifest against the live contract and
+schema, the binary describes itself as `nobody`, install into the idle slot, ready/identity/
+store check, a last lobby look, `promote --expect`, ranked authority, admission + health + a
+WebSocket upgrade through the public proxy (3 in a row), receipt, and only then the previous
+slot drains and retires, provided the new one is still seen admitting. Failure to serve rolls
+admissions back to the old slot; the old slot is never stopped while it holds a match, a
+pending result or ranked authority. Every step is journaled and every resume reads the
+directory before the journal. Phases, outcomes and commands: `deploy/auto/README.md`.
 
-   The switch to slots therefore requires the current process to exit once.
-   Scheduled when it holds zero connections, matches and pending results (it held
-   0 connections at 00:44Z), no player is interrupted. Requests arriving in the few
-   seconds before slot a is ready can still fail. **This is the one owner decision
-   needed.**
-2. **Gaps before routine A→B promotions are truly uninterrupted:**
-   - ranked authority moves up to ~5 s after the admission switch;
-   - idle clients on a draining slot get `ServerFull` instead of re-admission
-     (client change);
-   - queued, room and rematch waiters on A are not told to move;
-   - open connections are not part of the retire gate;
-   - a just-started slot answers `unavailable` until its first directory read;
-   - `/api/live` and `/api/online` are per process;
-   - any Caddy reload closes WebSockets (no `stream_close_delay`).
+Supports without any wire or schema change: `lobby_waiting` in `/metrics`; a draining slot
+refuses its stranded waiters with `ServerFull`; an admitting slot without ranked authority
+asks every second; a slot that has just started answers admission from the database (the
+rehearsal found it answering "unavailable" for one probe); a client asks admission again
+(3 times in 30 s) when a draining slot refuses new play.
 
-   These are server, client and coordinator changes. They will be rehearsed with
-   two isolated generations and synthetic accounts before any canary. Until then
-   the backend has no automatic activation.
+### Local rehearsal (`scripts/rehearse-slot-release.py`)
+
+Real processes, the real coordinator, a private database and synthetic accounts; nothing
+touches production. The live generation (`8be248e`, no gauge, no waiter refusal) runs in
+slot `a`; three casual and two ranked bot loops ask admission, connect to the answer and
+play a bounded 20 s match, continuously, across: release 1 (`8be248e` → this branch), release
+2 with a lone player queued for 30 s (the coordinator waited, then promoted), and a drill
+where a candidate promotes but the public route never follows it (rolled back).
+
+| Final run (coordinator v2) | Result |
+|----------------------------|--------|
+| Matches completed | 70 (45 on slot a, 25 on slot b), 28 of them ranked |
+| Failed attempts (match, admission, registration) | 0 |
+| Admission probes at 10 Hz through all three events | 2995, 0 failed; median 0.4 ms, max 72 ms |
+| Health failures | 0 |
+| Release 1 / release 2 / rollback drill | old slot retired after 46.6 s / 79.6 s (28 s waiting for the lobby) / rolled back after 9 s; the rejected slot finished the 5 matches it had admitted and retired after 68.6 s in total |
+
+Earlier runs found, and the final run confirms the fixes of: the "unavailable" window of a
+just-started slot, ranked bots running out of deterministic names after 10 matches
+(`tbg-bots --seed`), and a lone waiter shifting every later bot pair (the harness now pauses
+the other players while it waits).
+
+What it does not prove: loopback only (no Cloudflare or Caddy), bots instead of browsers,
+20 s matches, one binary standing in for the second release, older tabs, spectators and rematch
+offers, and a real overlap at production load. It is evidence for the mechanism, not a
+promise of zero interruption.
+
+### Independent review and what changed
+
+A read-only reviewer read the coordinator, the controller wiring, the scripts and the unit
+sandbox. Its findings, all reproduced or confirmed in the code, are fixed:
+
+- the old slot could retire while its successor had died: it now requires the successor to be
+  seen admitting (30 s window) and otherwise rolls back to it;
+- rollback was not idempotent (a crash after its commit, or an operator's manual rollback,
+  ended in a hold, a rewritten receipt and blocked releases): resume now reads the directory
+  and adopts it, and the receipt is written only for the live release;
+- verification never exercised the promoted slot's own route: it now upgrades a WebSocket to
+  `/ws/slot-x` through the public proxy;
+- slot mode skipped the `--build-info` identity check: restored (as `nobody`, in a temporary
+  directory);
+- permanent refusals were retried forever with a 64 MB download each time: contract and
+  schema changes are latched `rejected`, and the host gate runs before any download;
+- a candidate that died while warming blocked every later release: teardown now drains and
+  retires it, and the next release reclaims such a row;
+- over-eager holds: only states that need a person hold the controller (`OperatorRequired`);
+  a busy database is retried, a slow stop is a deferral, `cleanup_failed` can be cleared;
+- a stale journal could stop another generation: the generation is compared first;
+- the test double accepted what the real admin refuses: it now implements the rules of
+  `release_admin.rs`, `retire_self` and heartbeat ageing, and every crash point (before and
+  after each state-changing step) is replayed with a restart, checking one admitting slot, no
+  slot stopped under load and a closed journal. Mutation checks confirm the tests fail when a
+  guard is removed.
+
+Residual risks the reviewer listed: the controller runs at `Nice=15` with idle I/O (the
+timing-critical steps are light and retried), and verification passes through Cloudflare at
+about 1.5 requests per second for at most 60 s (a block would cause a safe false rollback).
+
+### Gaps from the 2026-11-02 analysis
+
+| Gap | Status |
+|-----|--------|
+| Single process → slots needs one restart | done once at 0 connections (10:31Z) |
+| Ranked authority moves up to ~5 s after the switch | requested every second and moved by the coordinator right after the promotion (same second in the rehearsal) |
+| Idle clients on a draining slot get `ServerFull` | clients with this change ask admission again; older tabs show it until reloaded |
+| Queued, room and challenge waiters are not told to move | counted and awaited, refused if one slips in (not on the generation running today, so the first promotion can strand such a player for up to the idle grace) |
+| Open connections are not in the retire gate | 120 s grace on idle sockets, then they reconnect through admission |
+| A just-started slot answers `unavailable` | fixed |
+| `/api/live`, `/api/online` per process | open (cosmetic during an overlap) |
+| Rematch offers and spectators do not follow a promotion | open; offers are awaited like waiters |
+| Any Caddy reload closes WebSockets | releases never reload Caddy |
 
 ## Validation
 
-Local, no compilation: `test-auto-deploy.py` (20), `test-web-deploy.py` (14),
-`test-static-deploy.py` (11), `test-native-catalog.py` (7),
-`test-native-release-policy.py` (12), `test-ci-required-checks.py` (11),
-`test-native-inputs.py`, `check-native-inputs.py`, `ci-test-lanes.py`,
-`check-native-version.py --base origin/main`, `cargo metadata --locked --offline`
-and `git diff --check`.
+Local, work-front level (no full suite, per AGENTS.md):
 
-Deferred: everything that only runs on GitHub after merge, namely `release-main`,
-tag dispatch, draft-first publication, the first main backend candidate and the
-second controlled merge. Also deferred: the A/B coordinator and its rehearsal,
-the backend first apply and timer, the static adoption and timer, and the native
-timer.
+- Python: `test-slot-deploy.py` (43, including every crash point), `test-auto-deploy.py` (21),
+  `test-web-deploy.py` (14), `test-static-deploy.py` (11), `test-native-catalog.py` (7),
+  `test-native-release-policy.py` (12), `test-ci-required-checks.py` (11),
+  `test-native-inputs.py`, `check-native-inputs.py`, `check-native-version.py --base origin/main`,
+  `shellcheck` of the three scripts, `git diff --check`.
+- Rust under the shared lock with two jobs: `cargo fmt --all -- --check`; `cargo clippy --locked
+  -p tbg-server -- -D warnings` and `-p tbg-client` (the CI commands); `tbg-server` lib (61),
+  `release_slots` (6, one ignored probe), `health` (2), `online` (32); `tbg-client` `p66_` (6).
+- The local rehearsal above, and the host checks of the previous section.
+
+Not run here: the full workspace suite, the WASM and Windows builds (CI), the browser, and
+everything that only exists after merge.
+
+## Deferred and owner actions
+
+- **Merge this PR** (it contains #42 and #46). Then the automatic native `v0.1.2-rc.2`
+  publication (`release-main`, tag dispatch, draft-first publication), the first web
+  candidate and the first `server-<sha>` happen without a command; each is observed, not assumed.
+- **Install the new controllers** (briefly stop the web timer; `deploy/auto/README.md`),
+  verify the first backend candidate with a dry run, apply it once and watch the promotion,
+  then enable the backend timer. Enable the native catalog timer after its dry run.
+- **Static:** merge #45, let its static candidate publish, then `static_pull.py --apply --adopt`
+  once and enable the timer.
+- Owner decision: the nightly backup cron never ran because `cron` is not installed.
+- Not done by design: native TUF signing, Windows signing, mobile, any change to rules.

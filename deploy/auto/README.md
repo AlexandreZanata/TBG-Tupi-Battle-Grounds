@@ -12,17 +12,40 @@ The complete release-family and activation contract is in
 
 ## Exact scope
 
-The backend family automates **compatible backend updates**. It uses the
-existing single-process drain fallback, not P66 two-slot canaries. During a drain
-new matches pause; existing matches and result/reconnect windows finish before
-replacement. It is not zero-downtime admission or live simulation migration.
+The backend family automates **compatible backend updates** through the two release
+slots (P66, D-92); `slots.py` is the coordinator and `slot_host.py` the machine it drives.
+Before anything is downloaded the host must be able to start a release (one fresh active
+slot, a free idle slot, headroom for two generations, an empty lobby). For a verified
+candidate the coordinator checks the manifest against the live contract and schema, has
+the binary describe itself as `nobody`, installs it into the idle slot, checks it, looks
+at the lobby once more, promotes it (one audited database change: no restart, no proxy
+reload), confirms admission, health and a WebSocket upgrade through the public proxy,
+moves the ranked authority and then lets the previous slot drain. A running match never
+moves. The previous slot is stopped only after the slot that replaces it is seen
+admitting and `tbg-release-admin retire-check` passes (no running match, pending result,
+in-flight ranked result or ranked authority); if the replacement stops admitting while the
+old slot still runs, admissions return to the old slot instead. A new generation always
+goes to the idle slot; a slot is never reused while it runs.
 
-A changed wire/gameplay contract, database version or an already enabled two-slot
-runtime blocks automatic activation. The controller records operator_required
-and does not keep retrying the same candidate. Coordinate client distribution,
-review migrations or use the reviewed P66 rollout before rechecking. The process
-never restores a database backup during rollback, truncates a match timeout or
-kills a busy previous generation to finish a deploy.
+What a player can notice during a routine promotion, measured in the local rehearsal
+(`scripts/rehearse-slot-release.py`, see the delivery report) and not claimed beyond it:
+
+- running matches, reconnects and result screens: untouched, they stay on their slot;
+- new players: asked admission, they are sent to the promoted slot within one heartbeat;
+- a request the draining slot refuses (`ServerFull`) is asked again through admission by
+  clients that carry this change; older tabs show "server full" until reloaded;
+- players waiting in a queue, room or invitation cannot follow a promotion, so the
+  coordinator waits (up to 90 s per run) for an empty lobby and otherwise defers to the next run;
+- ranked play resumes on the promoted slot as soon as the previous one has no ranked
+  result in flight (about a second);
+- idle lobby sockets on the old slot get a short grace after the slot is otherwise drained,
+  then reconnect through admission when it stops.
+
+A changed wire/gameplay contract, database version or a missing slot directory blocks
+automatic activation (no retry loop; coordinate the client release or review the
+migration first). A single-process host (before the one-time switch to slots) is only
+restarted by an attended `--maintenance-window`; the timer refuses. The process never
+restores a database backup, truncates a match timeout or kills a busy previous generation.
 
 Web/game bundles and static landing/admin now have separate attested workflows and
 host controllers; Linux client distribution remains a separate native artifact. Frontend-only merges do not redeploy this backend. The existing native
@@ -67,7 +90,8 @@ All timers and CLIs serialize through the same non-blocking host state lock
 manual deploy or a provisioning job while this controller is enabled. No step may
 hold the lock for an unbounded time: waiting states are recorded and resumed.
 
-For each eligible candidate: verify before extraction; compare live contract and
+Every candidate is verified before extraction. On a single-process host (attended
+`--maintenance-window` only) the controller then compares the live contract and
 read-only schema; inspect build identity as `nobody`; preserve previous binaries;
 persist a transition journal and fsync files/pointers; drain via systemd; run the
 existing integrity-checked predeploy backup; switch executable pointers; start;
@@ -78,12 +102,60 @@ rollback leaves its journal and writes `operator-hold.json`: every later backend
 refuses to act (no repeated drain/restart loop) until an operator reviews it and
 runs `pull.py --release-hold`.
 
-**The timer never restarts the single game process.** That path needs
-`pull.py --apply --maintenance-window` from an attending operator; automatic backend
-delivery is reserved for release slots once the A/B coordinator lands.
+**The timer never restarts the single game process.** On a slot host it runs `slots.py`:
+every step is journaled in `/var/lib/tbg-deploy/slot-transition.json` before it runs and a
+deferred or crashed run resumes from there.
+
+| Phase | What is true | If the run stops here |
+|-------|--------------|------------------------|
+| `installing` / `ready` | candidate in the idle slot, identity and store checked, admits nothing | next run stops the unpromoted slot (only if it still holds the journaled generation) and starts over |
+| `promoting` | the promotion is about to be, or was just, committed | the directory decides: committed → continue as promoted; not committed → start over |
+| `promoted` | the candidate admits new players; once verified the receipt `current.json` is written; the previous slot drains | next run verifies admission, then keeps retiring the previous slot |
+| `rolling_back` / `rolled_back` | public verification failed or the replacement stopped admitting; the previous slot admits again | next run retires the rejected slot once it drains; a rollback made by hand is adopted the same way |
+| `cleanup_failed` | a failed teardown of an unpromoted slot | operator hold; the next run after the cause is fixed repeats the cleanup |
+
+Every resume reads the directory before it trusts the journal, so a run killed between any two
+steps, or an operator's manual `admin rollback`, converges instead of repeating or fighting a step.
+
+Outcomes: a candidate whose contract or schema differs from the live one, that does not become
+ready, is refused by the promotion, describes itself differently from its manifest or fails live
+verification is latched `rejected` in `checked.json` with the previous release serving. Only a state
+automation must not repair holds the controller (`operator-hold.json`): a refused rollback, no
+slot admitting, a failed cleanup, a slot holding another generation. Busy-database or command
+failures retry on the next run and latch nothing; every deferral (busy lobby, previous slot still
+draining) exits 0.
+
+Operator commands (on the host, as root):
+
+```bash
+# One screen for every family (timer, flag, last receipt and check, journals, holds, slots).
+sudo python3 /opt/tbg/deploy/status.py
+# State of both slots and the audit trail of every promotion.
+sudo -u tbg /opt/tbg/bin/tbg-release-admin --db /var/lib/tbg/tbg.sqlite3 status
+sudo -u tbg /opt/tbg/bin/tbg-release-admin --db /var/lib/tbg/tbg.sqlite3 audit 20
+cat /var/lib/tbg-deploy/slot-transition.json /var/lib/tbg-deploy/checked.json   # journal, last candidate
+# Dry run of the newest candidate: verification plus the read-only slot preflight.
+sudo env GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/pull.py
+# Retry now (what the timer does), or retry a latched candidate after fixing its cause.
+sudo env GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/pull.py --apply [--recheck]
+# An urgent fix in a busy hour: do not wait for an empty lobby (waiting players are refused
+# by the draining slot and ask admission again; older tabs show "server full").
+sudo env GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/pull.py --apply --recheck --ignore-lobby
+# Enable / disable automatic promotion.
+sudo touch /etc/tbg/auto-deploy.enabled && sudo systemctl enable --now tbg-auto-deploy.timer
+sudo systemctl disable --now tbg-auto-deploy.timer
+# Release an operator hold after reading it.
+sudo python3 /opt/tbg/deploy/pull.py --release-hold
+```
+
+Rollback while the previous slot still runs (before it retires) is one database change that
+also moves new admissions back: `tbg-release-admin rollback <previous-slot>`; matches on both
+slots keep running. After the previous slot retired, roll forward: start the previous
+generation's `/opt/tbg/releases/<generation>/tbg-server` into the idle slot with
+`release-slot.sh start`, then `promote`. Release directories are never deleted automatically.
 
 Monitoring: `journalctl -u tbg-auto-deploy.service`, `/var/lib/tbg-deploy/checked.json`,
-`current.json` and `transition.json`. GitHub has the immutable source, CI run and
+`current.json`, `transition.json` (single process) and `slot-transition.json` (slots). GitHub has the immutable source, CI run and
 provenance. Operator status/metrics stay loopback-only; Caddy is untouched.
 
 ## Before activation
@@ -99,7 +171,8 @@ old commit, a branch name or a placeholder.
 
 The development CLI was 2.45 and Debian's default gh package was 2.46; both
 predate needed attestation support. Official host preparation installed gh 2.103.3
-and checked the required flags; real first-artifact verification is still pending.
+and checked the required flags; real main web and static candidates were verified on
+the host without a token on 2026-11-02 (the first backend candidate is still pending).
 For a new host, install a current GitHub CLI using its official Linux package
 instructions: https://github.com/cli/cli/blob/trunk/docs/install_linux.md. Confirm
 `gh attestation verify --help` includes `--bundle`, `--source-ref`, `--source-digest`,
@@ -111,7 +184,7 @@ first candidate:
 
 ```bash
 # SSH connection details remain in the computer's private config.
-tar -cf - deploy/auto | ssh -o BatchMode=yes tupibg-vps \
+tar -cf - deploy/auto deploy/release-slot.sh deploy/slot-bootstrap.sh | ssh -o BatchMode=yes tupibg-vps \
   'mkdir -p /root/tbg-auto-review; tar -xf - -C /root/tbg-auto-review'
 ssh tupibg-vps 'bash /root/tbg-auto-review/deploy/auto/install.sh'
 ```
@@ -126,10 +199,10 @@ credential is required in that file. Then:
 # Verify a real main package and compatibility, without activating it.
 sudo env GH_CONFIG_DIR=/var/lib/tbg-deploy/gh \
   python3 /opt/tbg/deploy/pull.py
-# After reviewing that first verified candidate, apply and observe it once,
-# in a quiet window (it drains and restarts the only game process).
+# After reviewing that first verified candidate, apply and observe it once. On a slot host
+# this is an ordinary promotion; a single-process host would need --maintenance-window.
 sudo env GH_CONFIG_DIR=/var/lib/tbg-deploy/gh \
-  python3 /opt/tbg/deploy/pull.py --apply --recheck --maintenance-window
+  python3 /opt/tbg/deploy/pull.py --apply --recheck
 # Only after the real first delivery passes, enable future compatible releases.
 sudo touch /etc/tbg/auto-deploy.enabled
 sudo systemctl enable --now tbg-auto-deploy.timer

@@ -38,7 +38,7 @@ available so a tab already in a match can finish using its original release.
 The compatible single-process backend path drains admission and waits without a
 forced timeout for matches/results/reconnect windows. New matchmaking pauses;
 there is no claim of uninterrupted admission, so the timer never runs it (only an
-operator `--maintenance-window`). Two release slots on this host are the planned
+operator `--maintenance-window`). Two release slots on this host are the
 uninterrupted path; their overlap needs measured headroom (2026-11-02: 4 vCPU,
 16 GB RAM, about 0.5 GB in use while idle) and a preflight that defers a release
 rather than starving the generation that still owns matches. Never kill a previous generation to
@@ -53,16 +53,22 @@ reducing unnecessary network payloads, caching read-only ranking, or moving non-
 jobs away from simulation workers. Keep ranked settlement durable and single-writer.
 Raising task count beyond memory/CPU capacity only increases queueing.
 
-P66 has slot/generation and drain foundations. Cross-slot revocation is implemented
-since `2e15dd9` (each process polls `revoked_at` every second); the server deployed
-on 2026-11-01 (`8be248e`) predates it. Two-slot rollout stays disabled until the
-two-generation continuity acceptance passes and the gaps found on 2026-11-02 are
-closed: ranked authority moving inside the admission switch, client re-admission
-instead of `ServerFull` on a draining slot, notifying queued/room/rematch waiters,
-connection counts in the retire gate and a directory-backed first admission answer.
-The single process cannot hand over to a slot while it runs (`tbg-server@` conflicts
-with it and it never reads the directory), so the switch to slots needed one restart (done 2026-11-02 10:31Z, `deploy/slot-bootstrap.sh`),
-scheduled when it holds no connection, match or pending result (D-99). Multiple containers or pods do not transfer in-memory matches,
+P66 has slot/generation and drain foundations, and since 2026-11-02 the official host runs
+them: the single process was switched to slot `a` once, at zero connections
+(`deploy/slot-bootstrap.sh`), and `deploy/auto/slots.py` promotes compatible releases into
+the idle slot. Cross-slot revocation has been in place since `2e15dd9` (each process polls
+`revoked_at` every second); the generation running today (`8be248e`) predates it, so during
+the first overlap a session revoked on the new slot stays valid on the old one until that
+slot drains. The gaps found on 2026-11-02 are handled as follows: ranked
+authority is requested every second by an admitting slot that lacks it and moved by the
+coordinator right after the promotion; clients that carry the re-admission change ask
+admission again when a draining slot answers `ServerFull`; players waiting in a queue,
+room or invitation are counted (`lobby_waiting`), awaited by the coordinator, and refused
+with `ServerFull` if one slips in; idle sockets get a bounded grace before a drained slot
+stops. Still open: rematch offers and spectators do not follow a promotion, `/api/live`
+and `/api/online` are per process during an overlap, older tabs show "server full" until
+reloaded, and a Caddy reload would still close every WebSocket (releases never reload it).
+Multiple containers or pods do not transfer in-memory matches,
 share an Access index safely, or make SQLite a distributed database. Before adding a
 host, design explicit match ownership/routing, reconnection, durable settlement,
 credential revocation and compatible client admission. A distributed database or

@@ -2923,3 +2923,36 @@ accepted competitive-balance claim are introduced. Runtime/core sources, ruleset
 revision/hash, protocol, visual correspondence and player-facing behavior remain
 unchanged. Older planning statements about Farwatch never targeting a Stronghold
 are superseded by the existing P71 owner update.
+
+## D-104 · Compatible server releases are promoted through the release slots, never by restarting the game — 2026-11-02 (Proposed)
+
+The official host first ran one `tbg-server` process, so every automatic backend delivery
+meant a drain, a stop and a restart: matchmaking paused, and anyone arriving during the
+restart failed. P66 (D-92) already built two immutable generations behind fixed proxy routes
+whose promotion is one audited database change, but nothing drove it and the single process
+could not hand over to a slot.
+
+**Decision.** The host runs slot mode (one-time switch at zero connections, matches and
+pending results, 2026-11-02 10:31Z; `deploy/slot-bootstrap.sh`). `deploy/auto/slots.py`
+promotes a verified candidate into the idle slot, waits for a lobby with nobody queued,
+promotes it, confirms admission, health and a WebSocket upgrade through the public proxy and
+retires the previous slot only after the new one is seen admitting and the old one's own
+retirement gate passes. Every step is journaled and every resume reads the directory first; a
+candidate that does not serve is rolled back by moving admissions to the still-running
+previous slot. A
+changed contract or database schema is never promoted by automation (the coordinated client
+release and the migration review stay human). Automation never stops a slot that holds a
+match, a pending result or ranked authority, never reloads Caddy and never restores a
+database backup.
+
+Server and client carry three small supports and no wire change: `lobby_waiting` in `/metrics`
+(so the coordinator can wait), a draining slot refuses its stranded waiters with the existing
+`ServerFull`, and an admitting slot without ranked authority asks for it every second instead
+of every fifth; a client asks admission again (at most three times in 30 s) when a draining slot
+answers `ServerFull` to a new request. Rematch offers, spectators and per-process listings do
+not follow a promotion and stay documented limits.
+
+**Reopens when** the contract or schema must change in one step (a coordinated release with
+a scheduled promotion), a second host is added (match ownership and routing), a measurement
+shows an interruption the rehearsal and the observed promotions did not, or capacity no longer
+fits two overlapping generations.

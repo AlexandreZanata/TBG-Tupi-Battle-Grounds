@@ -50,6 +50,11 @@ restore on failure). Done by hand, that is: install the units with `provision.sh
 `admin promote a` and `admin ranked a`. Until `promote`, a slot admits
 nothing (fail closed).
 
+Since 2026-11-02 the numbered steps below are what `deploy/auto/slots.py` does for every
+verified candidate (see [auto/README.md](auto/README.md)), plus a wait for an empty lobby and a
+check through the public proxy before the previous slot may retire. Run them by hand only
+for a build the automation refuses (a new contract, an attended rollout).
+
 Each release, into the idle slot (here `b`):
 
 1. Build `tbg-server` and copy it to the host. Schema changes are additive
@@ -121,9 +126,9 @@ newer results.
    10 file and expected to keep its auth data.
 
 New knobs: `TBG_PAUSE_SECS` (connection-pause budget per player per match,
-default 120, BR-M03 Proposed). Keep two-slot mode off in production until
-the P71 chaos and continuity checks pass (cross-slot revocation is in place
-since P71 W3).
+default 120, BR-M03 Proposed). Production has run in two-slot mode since
+2026-11-02 (`slot-bootstrap.sh`, D-104); cross-slot revocation is in place since
+P71 W3, so a generation older than `2e15dd9` must not overlap a newer one for long.
 
 ## Update repository (P66)
 
@@ -265,8 +270,8 @@ systems; actual provisioning on Debian 13 remains pending. `provision.sh` instal
 `sudo` for minimal images and writes `/etc/tbg/server.env` with
 `TBG_AUTH_ORIGINS=https://<domain>` for D-97 cookie/origin checks. Both service modes
 read this file. The normal single-slot deploy remains sufficient for the first
-installation; two-slot activation and signed native updates retain their separate
-operator gates. Local `.local/`, agent metadata and deployment credentials are
+installation; `slot-bootstrap.sh` then switches to two slots once, and signed
+native updates retain their separate operator gate. Local `.local/`, agent metadata and deployment credentials are
 excluded from source transfer. Builds use the host validation lock and two jobs.
 
 ## tupibg.com domain layout

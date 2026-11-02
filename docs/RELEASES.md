@@ -19,9 +19,10 @@ published by the next one.
 Three source filters avoid redeploying unrelated products:
 
 - `backend-release.yml`: Rust server/core dependencies and runtime inputs, packaged
-  as `server-<full SHA>`. Automatic activation is reserved for release slots (the
-  A/B coordinator is pending); the timer never stops the single game process. An
-  operator-attended `--maintenance-window` restart remains for bootstrap/emergencies.
+  as `server-<full SHA>`. Activation is an A/B promotion through the two release
+  slots (`deploy/auto/slots.py`); the timer never stops a running game process. A
+  host still running the single process needs the one-time `deploy/slot-bootstrap.sh`
+  (or an attended `--maintenance-window` restart) before automation can act.
 - `web-release.yml`: the shared Bevy browser client, core contract and its assets,
   packaged as `web-<full SHA>`. Trunk uses `/releases/<SHA>/`; the package sets the
   document base before any relative asset request. All old assets are retained.
@@ -55,23 +56,57 @@ part of a frontend promotion. An interrupted transition is recovered before anot
 applied update. Old tabs keep loading their source-qualified assets.
 
 Backend automation accepts only the exact live MatchContract and database schema.
-Contract/schema changes stop for coordinated client/migration review. The current
-host runs one game process, so the timer refuses to activate a backend at all; the
-legacy drain-and-restart path needs an explicit `--maintenance-window` and is not
-zero downtime. Before any pause or DB operation, it requires the systemd
-main process kernel executable to match the adopted binary path; post-start and
-rollback perform the same check. An unused legacy install path cannot masquerade
-as a successful update. It never rolls back player data, shortens the drain or kills
-active matches. If rollback itself fails, a durable operator hold
-(`/var/lib/tbg-deploy/operator-hold.json`) stops every further backend action instead
-of repeating stop/drain/start each timer run; clear it with `--release-hold` after
-review. A maintenance-window drain pauses matchmaking; this is not HA.
+Contract/schema changes stop for coordinated client/migration review. On a slot host the
+candidate must be what its attested manifest says (the binary describes itself as `nobody`),
+is installed into the idle slot, checked, promoted when nobody waits in the lobby, confirmed
+through the public proxy (admission, health and a WebSocket upgrade to its own `/ws/slot-x`
+route) and the previous slot is retired only after the new one is seen admitting and the old
+one's own gate passes (no running match, pending result or ranked authority). The
+journal `slot-transition.json` makes every phase resumable and every resume reads the
+directory first; a candidate that does not serve is rolled back by moving admissions to the
+previous slot, which is still running.
+Details, the phases and the operator commands are in
+[deploy/auto/README](../deploy/auto/README.md); what a player can notice is bounded there
+and measured in the [delivery report](phases/DELIVERY-automated-player-safe.md).
+On a single-process host the timer refuses; the drain-and-restart path needs
+`--maintenance-window` and is not zero downtime (it pauses matchmaking; this is not HA).
+It never rolls back player data, shortens a drain or kills active matches. If a rollback
+or cleanup fails, a durable operator hold (`/var/lib/tbg-deploy/operator-hold.json`)
+stops every further backend action instead of repeating a loop each timer run; clear it
+with `--release-hold` after review.
 
 Initial domain/proxy setup is separate from a normal deployment. Caddy reloads can
 close WebSockets, so the bootstrap verifies zero connections, matches and pending
 results, backs up the real config, preserves API/auth/private routes, validates the
 candidate and only then reloads. Later frontend updates do not reload it. Preserve
 Cloudflare strict proxy trust and TLS; do not weaken SSL mode to hide a handshake error.
+
+## Secrets and custody
+
+No secret is needed for this delivery and none is stored in the repository, GitHub or the
+host's controller files. GitHub builds use the job's ephemeral token with OIDC build
+attestations; only the `release-main` job holds `contents: write` and `actions: write`, to tag
+a version and start its publication. The host reads public release assets over HTTPS and
+verifies attestations with an empty `GH_CONFIG_DIR` and no token. Its one private file,
+`/etc/tbg/auto-deploy.json` (mode 0600), holds public URLs and the deployment floor SHA. The
+owner's key-only SSH access stays the maintenance channel; its alias lives in the owner's
+private configuration. Native updater (TUF) keys and any Windows Authenticode certificate are
+not on GitHub or the host (Windows packages stay unsigned beta); if they are ever created they
+stay offline with the owner. Nobody pastes a token or key into chat, a file under version
+control, a log or a screenshot; a step that would need one is an owner action.
+
+## Android extension point (documented only)
+
+Mobile is a later maturity stage (owner rule, AGENTS.md), so nothing Android is built, published
+or advertised. A future Android family plugs into the same shape without changing the other
+families: (1) a separate attested workflow publishing an immutable `android-<full SHA>` release
+whose manifest binds the source commit, the exact MatchContract and each package's digest (the
+`tbg-native-release.json` pattern); (2) a catalog entry beside `linux` and `windows` in the
+public `/downloads.json`, `unavailable` until a complete verified release exists, produced by a
+host controller that keeps the same gates (attestation from main, contract equal to the live
+server, atomic replacement, never a partial set); (3) the landing offering only formats whose
+catalog entry is `available`, chosen by platform with a manual list as the fallback. Store
+distribution and signing stay owner decisions with their own custody; none is implied here.
 
 ## Activation gates and operating commands
 
@@ -90,8 +125,9 @@ backend details. The installer deliberately leaves all timers disabled. Before e
    quiet window; preserve current releases and legacy assets.
 4. Dry-verify, apply and observe the first real attested candidate for each family.
    A message saying “Waiting for the first candidate” is not acceptance.
-5. Enable only the observed family. Keep native TUF signing and dual-slot rollout
-   disabled until their separate owner/custody/security gates pass.
+5. Enable only the observed family. Keep native TUF signing disabled until its
+   separate owner/custody/security gate passes. The backend timer is enabled only
+   after a promotion through the slots was observed end to end.
 
 On the official host, after the reviewed installation and private config:
 
