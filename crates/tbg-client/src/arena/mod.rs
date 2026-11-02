@@ -4,6 +4,7 @@ use crate::art::mesh::{self, Shape};
 use bevy::{light::NotShadowCaster, prelude::*};
 
 mod auxiliaries;
+pub(crate) use auxiliaries::spawn_portrait as spawn_auxiliary_portrait;
 mod camp;
 mod cliffs;
 mod clouds;
@@ -68,9 +69,9 @@ fn build(
     info!("arena scene: {}", theme.name());
     let mut kit = themes::build(theme);
     kit.props
-        .retain(|(_, _, t)| !auxiliaries::overlaps_precinct(t.translation));
+        .retain(|part| !auxiliaries::yields_to_precinct(theme, part));
     kit.glow
-        .retain(|(_, _, t)| !auxiliaries::overlaps_precinct(t.translation));
+        .retain(|part| !auxiliaries::yields_to_precinct(theme, part));
     let mat = mats.add(StandardMaterial {
         base_color: Color::WHITE,
         perceptual_roughness: 1.0,
@@ -96,7 +97,7 @@ fn build(
             painted(if theme == theme::Theme::Forest {
                 props::scatter()
                     .into_iter()
-                    .filter(|(_, _, t)| !auxiliaries::overlaps_precinct(t.translation))
+                    .filter(|part| !auxiliaries::yields_to_precinct(theme, part))
                     .collect()
             } else {
                 kit.props

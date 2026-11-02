@@ -317,9 +317,10 @@ fn spawn(
                 .with_children(|bottom| {
                     super::native_battle::resources(bottom, &assets);
                     super::native_battle::cards(bottom, &assets);
+                    // Positioned just right of the fifth card, sharing the Shop scale.
+                    super::native_battle::auxiliaries(bottom, &assets);
                 });
             });
-            super::native_battle::auxiliaries(root, &assets);
             root.spawn((
                 Node {
                     position_type: PositionType::Absolute,

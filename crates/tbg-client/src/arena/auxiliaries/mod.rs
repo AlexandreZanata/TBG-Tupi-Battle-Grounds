@@ -1,36 +1,64 @@
-//! Off-lane 3D War Auxiliaries (`Mineiro` and `Mercador`), 3-stage procedural construction
-//! animations, active mining/shipping loops, and 8-Arena visual reconciliation (P74).
+//! Off-lane 3D War Auxiliaries (`Mineiro` and `Mercador`): precinct spawning,
+//! per-Arena palettes and placement, and the client-side state that drives
+//! their construction, tier and payout animations (P74, BR-AX12).
 //!
 //! Coordinate contract (`ARENA-CLEAR-01`):
 //! - Left (`Seat::A` / Blue) precincts sit at `x = -2.55` (`z = -3.45` Mine, `z = +3.45` Merchant).
-//! - Right (`Seat::B` / Red) precincts sit at `x = +18.55` (`z = -3.45` Mine, `z = +3.45` Merchant).
+//! - Right (`Seat::B` / Red) precincts sit at `x = +18.55`, mirrored along X.
 //! - Every static and animated vertex stays strictly outside `x ∈ [-1.1, 17.1], z ∈ [-2.67, 2.67]`.
+//! - A pad over the water stands on stilts and is reached by a plank bridge from the shore.
 
+mod animate;
 mod models;
 mod palette;
+mod placement;
+mod structures;
 
 use crate::arena::{scene::ActiveArena, theme::Theme, water};
 use crate::sync::LatestView;
 use crate::GameState;
 use bevy::prelude::*;
 use palette::AuxPalette;
+use placement::{pad_center, pad_half, placement};
 use tbg_core::auxiliary::{AuxiliaryKind, AuxiliaryPhase, AUXILIARY_RULE};
 use tbg_core::Seat;
 
-/// World X centers for Left (`Seat::A` / Blue) and Right (`Seat::B` / Red) precincts.
-pub(super) const LEFT_X: f32 = -2.55;
-pub(super) const RIGHT_X: f32 = 18.55;
-/// World Z center for the North/upper flank `Mineiro` precinct (`z < -2.67`).
-pub(super) const MINE_Z: f32 = -3.45;
-/// World Z center for the South/lower flank `Mercador` stall (`z > +2.67`).
-pub(super) const MERCHANT_Z: f32 = 3.45;
+/// True when a static arena prop at `pos` would clip into a `Mineiro` or
+/// `Mercador` pad or bridge (BR-AX15). Leaves `camp::BRAZIERS` untouched.
+pub(super) fn overlaps_precinct(theme: Theme, pos: Vec3) -> bool {
+    Seat::BOTH.into_iter().any(|seat| {
+        AuxiliaryKind::ALL
+            .into_iter()
+            .any(|kind| placement::covers(theme, seat, kind, pos.xz(), 0.35))
+    })
+}
 
-/// True when a static arena prop at `pos` would clip into a `Mineiro` or `Mercador` pad.
-/// Leaves `camp::BRAZIERS` (`z = ±1.5..1.7` at `x = -2.1/18.1` and `x = 1.9/14.1`) untouched.
-pub(super) fn overlaps_precinct(pos: Vec3) -> bool {
-    let near_x = (pos.x - LEFT_X).abs() < 0.88 || (pos.x - RIGHT_X).abs() < 0.88;
-    let near_z = (pos.z - MINE_Z).abs() < 0.68 || (pos.z - MERCHANT_Z).abs() < 0.68;
-    near_x && near_z
+/// True when an arena prop must yield to a precinct (BR-AX15): any prop whose
+/// origin lies on a pad or bridge, and sea-surface floaters crossing a
+/// harbor's open water. Rocks, crags and landmarks are never removed; the
+/// layouts keep clear of them instead.
+pub(super) fn yields_to_precinct(theme: Theme, part: &crate::arena::Part) -> bool {
+    let (shape, _, t) = part;
+    if overlaps_precinct(theme, t.translation) {
+        return true;
+    }
+    if t.translation.y >= placement::FLOATER_Y {
+        return false;
+    }
+    let mesh = crate::art::mesh::build(*shape);
+    let Some(bevy::mesh::VertexAttributeValues::Float32x3(points)) =
+        mesh.attribute(Mesh::ATTRIBUTE_POSITION)
+    else {
+        return false;
+    };
+    // Matches the lab: half the widest horizontal extent of the placed prop.
+    let (min, max) = points
+        .iter()
+        .map(|p| t.transform_point(Vec3::from(*p)).xz())
+        .fold((Vec2::INFINITY, Vec2::NEG_INFINITY), |(lo, hi), p| {
+            (lo.min(p), hi.max(p))
+        });
+    placement::clears_floater(theme, t.translation, (max - min).max_element() * 0.5)
 }
 
 pub(super) fn plugin(app: &mut App) {
@@ -38,11 +66,21 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(Startup, spawn_precincts)
         .add_systems(
             Update,
-            (rebuild_on_theme_change, sync_from_view, animate_precincts).chain(),
+            (
+                rebuild_on_theme_change,
+                sync_from_view,
+                animate::clock,
+                animate::visibility,
+                animate::mine,
+                animate::merchant,
+                animate::construction,
+                animate::tiers,
+            )
+                .chain(),
         );
 }
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 struct AuxiliarySceneState {
     built_theme: Option<Theme>,
     material: Handle<StandardMaterial>,
@@ -50,29 +88,20 @@ struct AuxiliarySceneState {
     animation_time: f32,
 }
 
-impl Default for AuxiliarySceneState {
-    fn default() -> Self {
-        Self {
-            built_theme: None,
-            material: Handle::default(),
-            slot_anim: Default::default(),
-            animation_time: 0.0,
-        }
-    }
-}
-
 #[derive(Clone, Copy, Debug, Default)]
 struct SlotAnimState {
     phase: AuxiliaryPhase,
+    /// Authoritative tier (`0` = not hired).
+    tier: u8,
     hired_seen: bool,
-    /// Seconds since this auxiliary was hired on the client clock (drives Merchant 2.0s construction).
+    /// Seconds since this auxiliary was hired on the client clock (drives Merchant construction).
     since_hire: f32,
-    /// Last seen `activations_used` for the Merchant, triggering the 3.2s ship delivery window.
+    /// Seconds since the last tier Evolution (drives tier reveals and the golden ring).
+    tier_since: f32,
+    /// Last seen `activations_used` for the Merchant, triggering the ship delivery window.
     last_activations: u8,
     /// Remaining seconds of the Merchant ship docking & crate unloading sequence.
     delivery_timer: f32,
-    /// Accumulated seconds in `Active` phase.
-    active_elapsed: f32,
 }
 
 #[derive(Component, Clone, Copy)]
@@ -84,7 +113,34 @@ pub(super) struct AuxPrecinctRoot {
 #[derive(Component, Clone, Copy)]
 struct AuxPartOwner(Seat);
 
+/// A structure that appears only from `tier` onward, popping in when bought.
 #[derive(Component, Clone, Copy)]
+struct TierPart {
+    slot: usize,
+    tier: u8,
+}
+
+/// Construction pieces that bring an offshore pad within reach of the shore.
+#[derive(Component, Clone, Copy)]
+enum Approach {
+    Platform {
+        slot: usize,
+    },
+    Plank {
+        slot: usize,
+        index: usize,
+        count: usize,
+    },
+    Rails {
+        slot: usize,
+    },
+}
+
+/// Golden ring that sweeps out of the pad on every tier Evolution.
+#[derive(Component, Clone, Copy)]
+struct TierRing(usize);
+
+#[derive(Component, Clone, Copy, PartialEq, Eq)]
 enum MinePart {
     Outcrop,
     Shoring,
@@ -95,6 +151,12 @@ enum MinePart {
     Sparks,
     MinerBody,
     MinerPickaxe,
+    WinchDrum,
+    Bucket,
+    Sheave,
+    Banner,
+    Crystals,
+    Apprentice,
 }
 
 #[derive(Component, Clone, Copy)]
@@ -108,6 +170,37 @@ enum MerchantPart {
     SpyglassArm,
     Ship,
     DeliveryCrate,
+    Pennant,
+    Pavilion,
+    ChestLid,
+    Coins,
+}
+
+/// Precinct-local spots of the tier structures, shared with the collision lab.
+/// Each keeps clear of the base precinct and of the other tiers.
+mod spots {
+    use bevy::math::Vec3;
+    pub const WINCH: Vec3 = Vec3::new(0.62, 0.0, -0.56);
+    pub const ORE_PILE: Vec3 = Vec3::new(0.85, 0.0, 0.55);
+    pub const HEADFRAME: Vec3 = Vec3::new(-0.42, 0.42, 0.0);
+    pub const BANNER: Vec3 = Vec3::new(1.0, 0.0, -0.7);
+    pub const APPRENTICE: Vec3 = Vec3::new(0.42, 0.0, 0.6);
+    pub const GOODS: Vec3 = Vec3::new(0.66, 0.0, -0.1);
+    pub const PAVILION: Vec3 = Vec3::new(-0.97, 0.0, -0.1);
+    pub const CHEST: Vec3 = Vec3::new(0.66, 0.0, 0.3);
+}
+
+/// Material shared by every precinct mesh. Seat B is mirrored with a negative
+/// X scale, which flips triangle winding; rendering both faces keeps the
+/// outward faces (and their correctly transformed normals) visible instead of
+/// the dark interiors that made the red side look grey.
+fn precinct_material() -> StandardMaterial {
+    StandardMaterial {
+        base_color: Color::WHITE,
+        perceptual_roughness: 0.95,
+        cull_mode: None,
+        ..default()
+    }
 }
 
 fn spawn_precincts(
@@ -116,12 +209,7 @@ fn spawn_precincts(
     mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mat = mats.add(StandardMaterial {
-        base_color: Color::WHITE,
-        perceptual_roughness: 0.95,
-        ..default()
-    });
-    state.material = mat;
+    state.material = mats.add(precinct_material());
     let theme = Theme::selected();
     state.built_theme = Some(theme);
     for seat in Seat::BOTH {
@@ -130,7 +218,7 @@ fn spawn_precincts(
                 .spawn((
                     Name::new(format!("auxiliary {seat:?} {kind:?}")),
                     AuxPrecinctRoot { seat, kind },
-                    precinct_transform(seat, kind),
+                    placement(theme, seat, kind).root,
                     Visibility::Hidden,
                 ))
                 .id();
@@ -147,21 +235,40 @@ fn spawn_precincts(
     }
 }
 
-fn precinct_transform(seat: Seat, kind: AuxiliaryKind) -> Transform {
-    let x = match seat {
-        Seat::A => LEFT_X,
-        Seat::B => RIGHT_X,
-    };
-    let z = match kind {
-        AuxiliaryKind::Miner => MINE_Z,
-        AuxiliaryKind::Merchant => MERCHANT_Z,
-    };
-    // Mirror the Right (`Seat::B`) precinct along X so both face inward toward their Stronghold/lane.
-    let scale_x = match seat {
-        Seat::A => 1.0,
-        Seat::B => -1.0,
-    };
-    Transform::from_xyz(x, 0.0, z).with_scale(Vec3::new(scale_x, 1.0, 1.0))
+/// Spawns one mesh child and returns it, so moving parts can nest further pieces.
+struct Builder<'a, 'w, 's> {
+    commands: &'a mut Commands<'w, 's>,
+    meshes: &'a mut Assets<Mesh>,
+    material: Handle<StandardMaterial>,
+    seat: Seat,
+}
+
+impl Builder<'_, '_, '_> {
+    fn part(&mut self, parent: Entity, mesh: Mesh, at: Transform, tag: impl Bundle) -> Entity {
+        self.commands
+            .spawn((
+                Mesh3d(self.meshes.add(mesh)),
+                MeshMaterial3d(self.material.clone()),
+                at,
+                tag,
+                AuxPartOwner(self.seat),
+                ChildOf(parent),
+            ))
+            .id()
+    }
+
+    /// Mesh-less pivot: its transform carries a tier reveal while children animate.
+    fn group(&mut self, parent: Entity, at: Transform, tag: impl Bundle) -> Entity {
+        self.commands
+            .spawn((
+                at,
+                Visibility::Inherited,
+                tag,
+                AuxPartOwner(self.seat),
+                ChildOf(parent),
+            ))
+            .id()
+    }
 }
 
 fn populate_precinct(
@@ -175,144 +282,315 @@ fn populate_precinct(
 ) {
     commands.entity(root).despawn_related::<Children>();
     let pal = AuxPalette::for_theme(theme);
-    let blue = seat == Seat::A;
-
+    let mut b = Builder {
+        commands,
+        meshes,
+        material: material.clone(),
+        seat,
+    };
+    spawn_approach(&mut b, root, kind, pal, theme);
+    let slot = usize::from(kind.slot());
+    b.part(
+        root,
+        structures::tier_ring(pal),
+        Transform::from_scale(Vec3::ZERO),
+        TierRing(slot),
+    );
     match kind {
-        AuxiliaryKind::Miner => {
-            for (part, mesh, tr) in [
-                (
-                    MinePart::Outcrop,
-                    models::mine_outcrop(pal),
-                    Transform::default(),
-                ),
-                (
-                    MinePart::Shoring,
-                    models::mine_shoring(pal),
-                    Transform::default(),
-                ),
-                (
-                    MinePart::Rails,
-                    models::mine_rails(pal),
-                    Transform::default(),
-                ),
-                (
-                    MinePart::Cart,
-                    models::mine_cart(pal),
-                    Transform::from_xyz(0.62, 0.03, 0.0),
-                ),
-                (
-                    MinePart::Ore,
-                    models::mine_ore(pal),
-                    Transform::from_xyz(0.62, 0.03, 0.0),
-                ),
-                (
-                    MinePart::Lantern,
-                    models::mine_lantern(pal),
-                    Transform::from_xyz(0.24, 0.68, 0.0),
-                ),
-                (
-                    MinePart::Sparks,
-                    models::mine_sparks(pal),
-                    Transform::from_xyz(0.22, 0.28, 0.0).with_scale(Vec3::ZERO),
-                ),
-            ] {
-                commands.spawn((
-                    Mesh3d(meshes.add(mesh)),
-                    MeshMaterial3d(material.clone()),
-                    tr,
-                    part,
-                    AuxPartOwner(seat),
-                    ChildOf(root),
-                ));
-            }
-            let body = commands
-                .spawn((
-                    Mesh3d(meshes.add(models::miner_body(blue))),
-                    MeshMaterial3d(material.clone()),
-                    Transform::from_xyz(0.46, 0.0, 0.22)
-                        .with_rotation(Quat::from_rotation_y(std::f32::consts::PI)),
-                    MinePart::MinerBody,
-                    AuxPartOwner(seat),
-                    ChildOf(root),
-                ))
-                .id();
-            commands.spawn((
-                Mesh3d(meshes.add(models::miner_pickaxe())),
-                MeshMaterial3d(material.clone()),
-                Transform::from_xyz(0.0, 0.44, 0.16),
-                MinePart::MinerPickaxe,
-                AuxPartOwner(seat),
-                ChildOf(body),
-            ));
-        }
-        AuxiliaryKind::Merchant => {
-            for (part, mesh, tr) in [
-                (
-                    MerchantPart::PierPilings,
-                    models::merchant_pier_pilings(pal),
-                    Transform::default(),
-                ),
-                (
-                    MerchantPart::PierDeck,
-                    models::merchant_pier_deck(pal),
-                    Transform::default(),
-                ),
-                (
-                    MerchantPart::StallFrame,
-                    models::merchant_stall_frame(pal),
-                    Transform::default(),
-                ),
-                (
-                    MerchantPart::StallAwning,
-                    models::merchant_stall_awning(pal),
-                    Transform::default(),
-                ),
-                (
-                    MerchantPart::StallCargo,
-                    models::merchant_stall_cargo(pal),
-                    Transform::default(),
-                ),
-                (
-                    MerchantPart::Ship,
-                    models::merchant_ship(pal, blue),
-                    Transform::from_xyz(-3.4, water::LEVEL, 2.25),
-                ),
-                (
-                    MerchantPart::DeliveryCrate,
-                    models::merchant_crate_parcel(pal),
-                    Transform::from_xyz(0.0, -0.05, 1.35).with_scale(Vec3::ZERO),
-                ),
-            ] {
-                commands.spawn((
-                    Mesh3d(meshes.add(mesh)),
-                    MeshMaterial3d(material.clone()),
-                    tr,
-                    part,
-                    AuxPartOwner(seat),
-                    ChildOf(root),
-                ));
-            }
-            let body = commands
-                .spawn((
-                    Mesh3d(meshes.add(models::merchant_body(blue))),
-                    MeshMaterial3d(material.clone()),
-                    Transform::from_xyz(0.0, 0.0, 0.52)
-                        .with_rotation(Quat::from_rotation_y(-std::f32::consts::FRAC_PI_2)),
-                    MerchantPart::MerchantBody,
-                    AuxPartOwner(seat),
-                    ChildOf(root),
-                ))
-                .id();
-            commands.spawn((
-                Mesh3d(meshes.add(models::merchant_spyglass_arm(blue))),
-                MeshMaterial3d(material.clone()),
-                Transform::from_xyz(0.0, 0.44, 0.16),
-                MerchantPart::SpyglassArm,
-                AuxPartOwner(seat),
-                ChildOf(body),
-            ));
-        }
+        AuxiliaryKind::Miner => spawn_mine(&mut b, root, pal, seat == Seat::A),
+        AuxiliaryKind::Merchant => spawn_merchant(&mut b, root, pal, seat == Seat::A),
     }
+}
+
+fn spawn_approach(
+    b: &mut Builder,
+    root: Entity,
+    kind: AuxiliaryKind,
+    pal: AuxPalette,
+    theme: Theme,
+) {
+    let place = placement(theme, b.seat, kind);
+    let slot = usize::from(kind.slot());
+    if !place.on_water {
+        return;
+    }
+    let platform = structures::platform(pal, pad_center(kind), pad_half(kind));
+    b.part(
+        root,
+        platform,
+        Transform::default(),
+        Approach::Platform { slot },
+    );
+    let Some((land, edge)) = place.bridge else {
+        return;
+    };
+    let span = edge - land;
+    let length = span.length();
+    let yaw = (-span.z).atan2(span.x);
+    let axis = b
+        .commands
+        .spawn((
+            Transform::from_translation(land).with_rotation(Quat::from_rotation_y(yaw)),
+            Visibility::Inherited,
+            ChildOf(root),
+        ))
+        .id();
+    let count = (length / structures::PLANK_STEP).ceil().max(1.0) as usize;
+    for index in 0..count {
+        let at = Transform::from_xyz((index as f32 + 0.5) * length / count as f32, 0.0, 0.0);
+        let tag = Approach::Plank { slot, index, count };
+        b.part(axis, structures::bridge_plank(pal, index), at, tag);
+    }
+    let rails = structures::bridge_rails(pal, length);
+    b.part(axis, rails, Transform::default(), Approach::Rails { slot });
+}
+
+fn spawn_mine(b: &mut Builder, root: Entity, pal: AuxPalette, blue: bool) {
+    let cart_at = Transform::from_xyz(0.62, 0.03, 0.0);
+    for (part, mesh, at) in [
+        (
+            MinePart::Outcrop,
+            models::mine_outcrop(pal),
+            Transform::default(),
+        ),
+        (
+            MinePart::Shoring,
+            models::mine_shoring(pal),
+            Transform::default(),
+        ),
+        (
+            MinePart::Rails,
+            models::mine_rails(pal),
+            Transform::default(),
+        ),
+        (MinePart::Cart, models::mine_cart(pal), cart_at),
+        (MinePart::Ore, models::mine_ore(pal), cart_at),
+        (
+            MinePart::Lantern,
+            models::mine_lantern(pal),
+            Transform::from_xyz(0.24, 0.68, 0.0),
+        ),
+        (
+            MinePart::Sparks,
+            models::mine_sparks(pal),
+            Transform::from_xyz(0.22, 0.28, 0.0).with_scale(Vec3::ZERO),
+        ),
+    ] {
+        b.part(root, mesh, at, part);
+    }
+    let facing = Quat::from_rotation_y(std::f32::consts::PI);
+    let body = b.part(
+        root,
+        models::miner_body(blue),
+        Transform::from_xyz(0.46, 0.0, 0.22).with_rotation(facing),
+        MinePart::MinerBody,
+    );
+    b.part(
+        body,
+        models::miner_pickaxe(),
+        Transform::from_xyz(0.0, 0.44, 0.16),
+        MinePart::MinerPickaxe,
+    );
+
+    // Tier 2: a crank winch hauling ore buckets and a glowing heap by the rails.
+    let tier = |tier| TierPart { slot: 0, tier };
+    let winch = b.part(
+        root,
+        structures::winch_frame(pal),
+        Transform::from_translation(spots::WINCH),
+        tier(2),
+    );
+    b.part(
+        winch,
+        structures::winch_drum(pal),
+        Transform::from_xyz(0.0, 0.62, 0.0),
+        MinePart::WinchDrum,
+    );
+    b.part(
+        winch,
+        structures::ore_bucket(pal),
+        Transform::from_xyz(0.0, 0.3, 0.0),
+        MinePart::Bucket,
+    );
+    b.part(
+        root,
+        structures::ore_pile(pal),
+        Transform::from_translation(spots::ORE_PILE),
+        tier(2),
+    );
+
+    // Tier 3: a headframe on the crag, a crystal crown, a banner and an apprentice.
+    let head = b.part(
+        root,
+        structures::headframe(pal),
+        Transform::from_translation(spots::HEADFRAME),
+        tier(3),
+    );
+    b.part(
+        head,
+        structures::sheave(pal),
+        Transform::from_xyz(0.0, 1.5, 0.0),
+        MinePart::Sheave,
+    );
+    let crown = b.group(root, Transform::from_xyz(-0.12, 0.6, -0.44), tier(3));
+    b.part(
+        crown,
+        structures::crystal_crown(pal),
+        Transform::default(),
+        MinePart::Crystals,
+    );
+    let flag = b.group(root, Transform::from_translation(spots::BANNER), tier(3));
+    b.part(
+        flag,
+        structures::banner(pal, blue),
+        Transform::default(),
+        MinePart::Banner,
+    );
+    let helper = b.group(root, Transform::default(), tier(3));
+    b.part(
+        helper,
+        models::miner_body(blue),
+        Transform::from_translation(spots::APPRENTICE).with_scale(Vec3::splat(0.82)),
+        MinePart::Apprentice,
+    );
+}
+
+fn spawn_merchant(b: &mut Builder, root: Entity, pal: AuxPalette, blue: bool) {
+    for (part, mesh, at) in [
+        (
+            MerchantPart::PierPilings,
+            models::merchant_pier_pilings(pal),
+            Transform::default(),
+        ),
+        (
+            MerchantPart::PierDeck,
+            models::merchant_pier_deck(pal),
+            Transform::default(),
+        ),
+        (
+            MerchantPart::StallFrame,
+            models::merchant_stall_frame(pal),
+            Transform::default(),
+        ),
+        (
+            MerchantPart::StallAwning,
+            models::merchant_stall_awning(pal),
+            Transform::default(),
+        ),
+        (
+            MerchantPart::StallCargo,
+            models::merchant_stall_cargo(pal),
+            Transform::default(),
+        ),
+        (
+            MerchantPart::Ship,
+            models::merchant_ship(pal, blue),
+            Transform::from_xyz(-3.4, water::LEVEL, 2.25),
+        ),
+        (
+            MerchantPart::DeliveryCrate,
+            models::merchant_crate_parcel(pal),
+            Transform::from_xyz(0.0, -0.05, 1.35).with_scale(Vec3::ZERO),
+        ),
+    ] {
+        b.part(root, mesh, at, part);
+    }
+    let body = b.part(
+        root,
+        models::merchant_body(blue),
+        Transform::from_xyz(0.0, 0.0, 0.52)
+            .with_rotation(Quat::from_rotation_y(-std::f32::consts::FRAC_PI_2)),
+        MerchantPart::MerchantBody,
+    );
+    b.part(
+        body,
+        models::merchant_spyglass_arm(blue),
+        Transform::from_xyz(0.0, 0.44, 0.16),
+        MerchantPart::SpyglassArm,
+    );
+
+    // Tier 2: stacked goods and team pennants on the pier bollards.
+    let tier = |tier| TierPart { slot: 1, tier };
+    b.part(
+        root,
+        structures::goods_stack(pal),
+        Transform::from_translation(spots::GOODS),
+        tier(2),
+    );
+    for dx in [-0.28, 0.28] {
+        let post = b.group(root, Transform::from_xyz(dx, 0.02, 1.48), tier(2));
+        b.part(
+            post,
+            structures::pennant(pal, blue),
+            Transform::default(),
+            MerchantPart::Pennant,
+        );
+    }
+
+    // Tier 3: a market pavilion and a treasure chest that bursts with coins on payouts.
+    let tent = b.group(root, Transform::from_translation(spots::PAVILION), tier(3));
+    b.part(
+        tent,
+        structures::pavilion(pal, blue),
+        Transform::default(),
+        MerchantPart::Pavilion,
+    );
+    let chest = b.part(
+        root,
+        structures::chest(pal),
+        Transform::from_translation(spots::CHEST),
+        tier(3),
+    );
+    b.part(
+        chest,
+        structures::chest_lid(pal),
+        Transform::from_xyz(0.0, 0.12, -0.085),
+        MerchantPart::ChestLid,
+    );
+    b.part(
+        chest,
+        structures::coins(pal),
+        Transform::from_xyz(0.0, 0.12, 0.0).with_scale(Vec3::ZERO),
+        MerchantPart::Coins,
+    );
+}
+
+/// Gallery portrait (`--gallery=auxiliary`): the in-game figure alone, in a
+/// working pose, for the HUD card renders.
+pub(crate) fn spawn_portrait(
+    commands: &mut Commands,
+    meshes: &mut Assets<Mesh>,
+    material: &Handle<StandardMaterial>,
+    kind: AuxiliaryKind,
+    blue: bool,
+) {
+    let (body, tool, tool_at, angle) = match kind {
+        AuxiliaryKind::Miner => (
+            models::miner_body(blue),
+            models::miner_pickaxe(),
+            Vec3::new(0.0, 0.44, 0.16),
+            0.75,
+        ),
+        AuxiliaryKind::Merchant => (
+            models::merchant_body(blue),
+            models::merchant_spyglass_arm(blue),
+            Vec3::new(0.0, 0.44, 0.16),
+            0.38,
+        ),
+    };
+    let figure = commands
+        .spawn((
+            Mesh3d(meshes.add(body)),
+            MeshMaterial3d(material.clone()),
+            Transform::default(),
+        ))
+        .id();
+    commands.spawn((
+        Mesh3d(meshes.add(tool)),
+        MeshMaterial3d(material.clone()),
+        Transform::from_translation(tool_at).with_rotation(Quat::from_rotation_z(angle)),
+        ChildOf(figure),
+    ));
 }
 
 fn rebuild_on_theme_change(
@@ -320,14 +598,15 @@ fn rebuild_on_theme_change(
     active_arena: Option<Res<ActiveArena>>,
     mut state: ResMut<AuxiliarySceneState>,
     mut meshes: ResMut<Assets<Mesh>>,
-    roots: Query<(Entity, &AuxPrecinctRoot)>,
+    mut roots: Query<(Entity, &AuxPrecinctRoot, &mut Transform)>,
 ) {
     let want = active_arena.map_or_else(Theme::selected, |a| a.0);
     if state.built_theme == Some(want) {
         return;
     }
     state.built_theme = Some(want);
-    for (entity, root) in &roots {
+    for (entity, root, mut transform) in &mut roots {
+        *transform = placement(want, root.seat, root.kind).root;
         populate_precinct(
             &mut commands,
             &mut meshes,
@@ -340,496 +619,97 @@ fn rebuild_on_theme_change(
     }
 }
 
+/// `--auxiliaries[=tier]` review preview: every precinct active at that tier.
+fn preview(state: &mut AuxiliarySceneState, tier: u8) {
+    for seat_slots in &mut state.slot_anim {
+        seat_slots[0].phase = AuxiliaryPhase::Active {
+            ticks_left: 2_400,
+            progress: 0,
+            activations_used: 0,
+        };
+        seat_slots[1].phase = AuxiliaryPhase::Active {
+            ticks_left: 0,
+            progress: 1,
+            activations_used: 1,
+        };
+        for slot in seat_slots {
+            slot.tier = tier;
+            slot.hired_seen = true;
+            slot.since_hire = slot.since_hire.max(15.0);
+            slot.tier_since = slot.tier_since.max(15.0);
+        }
+    }
+}
+
 fn sync_from_view(
     view: Res<LatestView>,
     game_state: Option<Res<State<GameState>>>,
     mut state: ResMut<AuxiliarySceneState>,
 ) {
     let in_match = game_state.is_none_or(|s| *s.get() == GameState::InMatch);
-    let preview = crate::config::url_param("auxiliaries").is_some();
-    if !in_match && !preview {
-        for seat_slots in &mut state.slot_anim {
-            for slot in seat_slots {
-                *slot = SlotAnimState::default();
-            }
-        }
+    let preview_tier = crate::config::url_param("auxiliaries").map(|v| {
+        v.parse::<u8>()
+            .unwrap_or(1)
+            .clamp(1, tbg_core::auxiliary::AUXILIARY_MAX_TIER)
+    });
+    if !in_match && preview_tier.is_none() {
+        state.slot_anim = Default::default();
         return;
     }
-    if preview && view.0.is_none() {
-        for seat_slots in &mut state.slot_anim {
-            seat_slots[0].phase = AuxiliaryPhase::Active {
-                ticks_left: 2_400,
-                progress: 0,
-                activations_used: 0,
-            };
-            seat_slots[0].hired_seen = true;
-            seat_slots[0].since_hire = 15.0;
-            seat_slots[1].phase = AuxiliaryPhase::Active {
-                ticks_left: 0,
-                progress: 2,
-                activations_used: 1,
-            };
-            seat_slots[1].hired_seen = true;
-            seat_slots[1].since_hire = 10.0;
+    let Some(v) = &view.0 else {
+        if let Some(tier) = preview_tier {
+            preview(&mut state, tier);
         }
         return;
-    }
-    let Some(v) = &view.0 else { return };
-    for seat in Seat::BOTH {
-        let si = seat.index();
-        for slot_idx in 0..2 {
-            let new_phase = v.auxiliaries[si][slot_idx].phase;
-            let anim = &mut state.slot_anim[si][slot_idx];
-            if new_phase == AuxiliaryPhase::Available {
-                *anim = SlotAnimState::default();
-                continue;
-            }
-            if !anim.hired_seen {
-                anim.hired_seen = true;
-                anim.since_hire = 0.0;
-                anim.active_elapsed = 0.0;
-                anim.last_activations = 0;
-                anim.delivery_timer = 0.0;
-            }
-            if slot_idx == 1 {
-                let new_used = match new_phase {
-                    AuxiliaryPhase::Active {
-                        activations_used, ..
-                    } => activations_used,
-                    AuxiliaryPhase::Completed => AUXILIARY_RULE.merchant_max_activations,
-                    _ => 0,
-                };
-                if new_used > anim.last_activations {
-                    anim.last_activations = new_used;
-                    anim.delivery_timer = 3.2;
-                }
-            }
-            anim.phase = new_phase;
-        }
-    }
-}
-
-fn ease_out_cubic(t: f32) -> f32 {
-    let inv = 1.0 - t.clamp(0.0, 1.0);
-    1.0 - inv * inv * inv
-}
-
-fn spring_pop(t: f32) -> f32 {
-    let x = t.clamp(0.0, 1.0);
-    if x <= 0.0 {
-        0.0
-    } else if x >= 1.0 {
-        1.0
-    } else {
-        1.0 - (-6.0 * x).exp() * (8.5 * x).cos()
-    }
-}
-
-fn animate_precincts(
-    time: Res<Time>,
-    view: Res<LatestView>,
-    game_state: Option<Res<State<GameState>>>,
-    mut state: ResMut<AuxiliarySceneState>,
-    mut roots: Query<(&AuxPrecinctRoot, &mut Visibility)>,
-    mut mine_parts: Query<(&MinePart, &AuxPartOwner, &mut Transform), Without<MerchantPart>>,
-    mut merch_parts: Query<(&MerchantPart, &AuxPartOwner, &mut Transform), Without<MinePart>>,
-) {
-    let paused = view.0.as_ref().is_some_and(|v| v.augment_round.is_some());
-    let dt = if paused { 0.0 } else { time.delta_secs() };
-    state.animation_time += dt;
-    let low_motion = crate::config::low_motion();
-    let t = if low_motion {
-        0.0
-    } else {
-        state.animation_time
     };
-    let hidden_screen = game_state.is_some_and(|s| *s.get() == GameState::Gallery);
-
-    for seat_slots in &mut state.slot_anim {
-        for slot in seat_slots {
-            if slot.hired_seen {
-                slot.since_hire += dt;
-                if matches!(slot.phase, AuxiliaryPhase::Active { .. }) {
-                    slot.active_elapsed += dt;
-                }
-                if slot.delivery_timer > 0.0 {
-                    slot.delivery_timer = (slot.delivery_timer - dt).max(0.0);
-                }
-            }
-        }
-    }
-
-    for (root, mut vis) in &mut roots {
-        let anim = state.slot_anim[root.seat.index()][root.kind.slot() as usize];
-        let show = !hidden_screen && anim.phase != AuxiliaryPhase::Available;
-        *vis = if show {
-            Visibility::Inherited
-        } else {
-            Visibility::Hidden
-        };
-    }
-
-    for (part, owner, mut tr) in &mut mine_parts {
-        let anim = state.slot_anim[owner.0.index()][0];
-        if anim.phase == AuxiliaryPhase::Available {
-            continue;
-        }
-        // Construction progress p in [0.0, 1.0] across the 12-second (240-tick) Preparing phase.
-        let prep_total = AUXILIARY_RULE.miner_prep_ticks.max(1) as f32;
-        let p = match anim.phase {
-            AuxiliaryPhase::Preparing { ticks_left } => {
-                // Construction follows the authoritative countdown, including Augment pauses.
-                (1.0 - ticks_left as f32 / prep_total).clamp(0.0, 1.0)
-            }
-            AuxiliaryPhase::Active { .. } | AuxiliaryPhase::Completed => 1.0,
-            AuxiliaryPhase::Available => 0.0,
-        };
-
-        let c1 = ((p - 0.0) / 0.35).clamp(0.0, 1.0);
-        let c2 = ((p - 0.35) / 0.40).clamp(0.0, 1.0);
-        let c3 = ((p - 0.75) / 0.25).clamp(0.0, 1.0);
-
-        match part {
-            MinePart::Outcrop => {
-                let s = ease_out_cubic(c1).max(0.01);
-                tr.translation = Vec3::new(0.0, (1.0 - s) * -0.45, 0.0);
-                tr.scale = Vec3::new(1.0, s, 1.0);
-            }
-            MinePart::Shoring => {
-                let s = spring_pop(c2).max(0.001);
-                tr.scale = Vec3::splat(s);
-            }
-            MinePart::Rails => {
-                let s = ease_out_cubic(c2).max(0.001);
-                tr.scale = Vec3::new(s, 1.0, 1.0);
-            }
-            MinePart::Cart => {
-                let s = ease_out_cubic(c3);
-                let base_x = 0.18 + 0.44 * s;
-                let rock_dx = match anim.phase {
-                    AuxiliaryPhase::Active { .. } => 0.05 * (t * 2.2).sin(),
-                    _ => 0.0,
-                };
-                tr.translation = Vec3::new(base_x + rock_dx, 0.03, 0.0);
-                tr.scale = Vec3::splat(s.max(0.001));
-            }
-            MinePart::Ore => {
-                let fill = match anim.phase {
-                    AuxiliaryPhase::Preparing { .. } => 0.001,
-                    AuxiliaryPhase::Active { ticks_left, .. } => {
-                        let dur = AUXILIARY_RULE.miner_duration_ticks.max(1) as f32;
-                        let done = 1.0 - (ticks_left as f32 / dur).clamp(0.0, 1.0);
-                        0.28 + 0.72 * done
-                    }
-                    AuxiliaryPhase::Completed => 1.0,
-                    AuxiliaryPhase::Available => 0.001,
-                };
-                let rock_dx = match anim.phase {
-                    AuxiliaryPhase::Active { .. } => 0.05 * (t * 2.2).sin(),
-                    _ => 0.0,
-                };
-                tr.translation = Vec3::new(0.62 + rock_dx, 0.03, 0.0);
-                tr.scale = Vec3::splat(fill);
-            }
-            MinePart::Lantern => {
-                let s = spring_pop(c3).max(0.001);
-                let swing = 0.14 * (t * 3.1).sin();
-                tr.translation = Vec3::new(0.24, 0.68, 0.0);
-                tr.rotation = Quat::from_rotation_z(swing);
-                tr.scale = Vec3::splat(s);
-            }
-            MinePart::Sparks => {
-                let cycle = (t / 1.35).fract();
-                let impact = matches!(anim.phase, AuxiliaryPhase::Active { .. })
-                    && (0.46..=0.66).contains(&cycle);
-                if impact {
-                    let burst = 1.0 - ((cycle - 0.56).abs() / 0.10).clamp(0.0, 1.0);
-                    tr.translation = Vec3::new(0.22, 0.28 + burst * 0.06, 0.0);
-                    tr.scale = Vec3::splat(0.4 + 0.9 * burst);
-                    tr.rotation = Quat::from_rotation_y(t * 6.0);
-                } else {
-                    tr.scale = Vec3::ZERO;
-                }
-            }
-            MinePart::MinerBody => {
-                let walk_x = if p < 1.0 {
-                    0.92 - 0.46 * ease_out_cubic(c1)
-                } else {
-                    0.46
-                };
-                let lean = match anim.phase {
-                    AuxiliaryPhase::Preparing { .. } => 0.16 * (t * 6.5).sin(),
-                    AuxiliaryPhase::Active { .. } => {
-                        let cycle = (t / 1.35).fract();
-                        if cycle < 0.46 {
-                            -0.18 * (cycle / 0.46)
-                        } else if cycle < 0.62 {
-                            0.24
-                        } else {
-                            0.0
-                        }
-                    }
-                    _ => 0.0,
-                };
-                let bob = if p < 1.0 {
-                    0.03 * (t * 9.0).sin().abs()
-                } else {
-                    0.0
-                };
-                tr.translation = Vec3::new(walk_x, bob, 0.22);
-                tr.rotation =
-                    Quat::from_rotation_y(std::f32::consts::PI) * Quat::from_rotation_z(lean);
-            }
-            MinePart::MinerPickaxe => {
-                let angle = match anim.phase {
-                    AuxiliaryPhase::Preparing { .. } => 0.25 + 0.85 * (t * 6.5).sin(),
-                    AuxiliaryPhase::Active { .. } => {
-                        let cycle = (t / 1.35).fract();
-                        if cycle < 0.46 {
-                            -0.30 + 1.25 * ease_out_cubic(cycle / 0.46)
-                        } else if cycle < 0.60 {
-                            let strike = (cycle - 0.46) / 0.14;
-                            0.95 - 1.75 * ease_out_cubic(strike)
-                        } else {
-                            let rec = (cycle - 0.60) / 0.40;
-                            -0.80 + 0.50 * ease_out_cubic(rec)
-                        }
-                    }
-                    _ => -0.55,
-                };
-                tr.rotation = Quat::from_rotation_z(angle);
-            }
-        }
-    }
-
-    for (part, owner, mut tr) in &mut merch_parts {
-        let anim = state.slot_anim[owner.0.index()][1];
-        if anim.phase == AuxiliaryPhase::Available {
-            continue;
-        }
-        // 2.0-second visual construction sequence upon hiring the Merchant.
-        let p = (anim.since_hire / 2.0).clamp(0.0, 1.0);
-        let m1 = ((p - 0.0) / 0.35).clamp(0.0, 1.0);
-        let m2 = ((p - 0.35) / 0.37).clamp(0.0, 1.0);
-        let m3 = ((p - 0.72) / 0.28).clamp(0.0, 1.0);
-
-        let progress = match anim.phase {
-            AuxiliaryPhase::Active { progress, .. } => progress,
-            _ => 0,
-        };
-
-        match part {
-            MerchantPart::PierPilings => {
-                let s = ease_out_cubic(m1).max(0.001);
-                tr.translation = Vec3::new(0.0, (1.0 - s) * 0.45, 0.0);
-                tr.scale = Vec3::new(1.0, s, 1.0);
-            }
-            MerchantPart::PierDeck => {
-                let s = ease_out_cubic(m1).max(0.001);
-                tr.scale = Vec3::new(1.0, 1.0, s);
-            }
-            MerchantPart::StallFrame => {
-                let s = spring_pop(m2).max(0.001);
-                tr.scale = Vec3::new(1.0, s, 1.0);
-            }
-            MerchantPart::StallAwning => {
-                let s = spring_pop(m2).max(0.001);
-                let breeze = 0.025 * (t * 2.4).sin();
-                tr.rotation = Quat::from_rotation_x(breeze);
-                tr.scale = Vec3::splat(s);
-            }
-            MerchantPart::StallCargo => {
-                let s = spring_pop(m3).max(0.001);
-                tr.scale = Vec3::splat(s);
-            }
-            MerchantPart::MerchantBody => {
-                let walk_z = if p < 1.0 {
-                    0.12 + 0.42 * ease_out_cubic(m3)
-                } else if progress >= 2 || anim.delivery_timer > 0.0 {
-                    0.68
-                } else {
-                    0.52
-                };
-                let bob = 0.015 * (t * 2.6).sin().abs();
-                tr.translation = Vec3::new(0.0, bob, walk_z);
-                tr.rotation = Quat::from_rotation_y(-std::f32::consts::FRAC_PI_2);
-            }
-            MerchantPart::SpyglassArm => {
-                let angle = if anim.delivery_timer > 0.0 {
-                    // Celebratory wave while unloading free-reroll cargo
-                    0.55 + 0.35 * (t * 7.0).sin()
-                } else if progress >= 2 {
-                    // Raise brass spyglass to eye scanning the approaching Caravel
-                    0.38 + 0.06 * (t * 1.8).sin()
-                } else {
-                    -0.45 + 0.08 * (t * 1.5).sin()
-                };
-                tr.rotation = Quat::from_rotation_z(angle);
-            }
-            MerchantPart::Ship => {
-                // Continuous wave buoyancy and pitch/roll on the sea surface
-                let dy = 0.045 * (t * 2.1).sin() + 0.020 * (t * 3.4).cos();
-                let roll = 0.055 * (t * 1.8).sin();
-                let pitch = 0.040 * (t * 2.3).cos();
-
-                let (ship_x, ship_z, yaw) = if low_motion && anim.delivery_timer > 0.0 {
-                    (0.0, 1.68, 0.0)
-                } else if anim.delivery_timer > 0.0 {
-                    // Delivery window (3.2s total): approach -> berth at pier -> depart
-                    let u = 1.0 - (anim.delivery_timer / 3.2).clamp(0.0, 1.0);
-                    if u < 0.58 {
-                        let a = ease_out_cubic(u / 0.58);
-                        (-0.85 * (1.0 - a), 1.82 - 0.14 * a, 0.08 * (1.0 - a))
-                    } else {
-                        let d = (u - 0.58) / 0.42;
-                        (1.35 * d * d, 1.68 + 0.45 * d, -0.22 * d)
-                    }
-                } else {
-                    match anim.phase {
-                        AuxiliaryPhase::Completed => (-1.65, 2.05, 0.05 * (t * 0.6).sin()),
-                        _ => match progress {
-                            0 => (-3.35 + 0.25 * (t * 0.45).sin(), 2.35, 0.12),
-                            1 => (-1.95 + 0.15 * (t * 0.55).sin(), 1.98, 0.08),
-                            _ => (-0.85 + 0.08 * (t * 0.75).sin(), 1.82, 0.04),
-                        },
-                    }
-                };
-                tr.translation = Vec3::new(ship_x, water::LEVEL + dy, ship_z);
-                tr.rotation = Quat::from_euler(EulerRot::YXZ, yaw, pitch, roll);
-                tr.scale = Vec3::splat(ease_out_cubic(m1).max(0.001));
-            }
-            MerchantPart::DeliveryCrate => {
-                if anim.delivery_timer > 1.1 {
-                    let u = ((3.2 - anim.delivery_timer) / 2.1).clamp(0.0, 1.0);
-                    let z = 1.66 - 0.36 * ease_out_cubic(u);
-                    let arc_y = -0.08 + 0.28 * (u * std::f32::consts::PI).sin();
-                    tr.translation = Vec3::new(0.0, arc_y, z);
-                    tr.scale = Vec3::splat(1.0);
-                } else {
-                    tr.scale = Vec3::ZERO;
-                }
-            }
-        }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::art::mesh;
-    use bevy::mesh::VertexAttributeValues;
-
-    const PAVED_HALF_WIDTH: f32 = 2.67;
-    const PAVED_MIN_X: f32 = -1.1;
-    const PAVED_MAX_X: f32 = 17.1;
-
-    fn assert_outside_road(m: &Mesh, world_tr: Transform, label: &str) {
-        let Some(VertexAttributeValues::Float32x3(points)) = m.attribute(Mesh::ATTRIBUTE_POSITION)
-        else {
-            panic!("{label}: missing vertex positions");
-        };
-        for p in points {
-            let w = world_tr.transform_point(Vec3::from(*p));
-            let in_road = w.y > 0.02
-                && w.x > PAVED_MIN_X + 0.001
-                && w.x < PAVED_MAX_X - 0.001
-                && w.z > -PAVED_HALF_WIDTH + 0.001
-                && w.z < PAVED_HALF_WIDTH - 0.001;
-            assert!(
-                !in_road,
-                "{label} intruded into the BattleLine road at world point {w:?}"
+    for seat in Seat::BOTH {
+        for (slot_idx, entry) in v.auxiliaries[seat.index()].iter().enumerate() {
+            observe(
+                &mut state.slot_anim[seat.index()][slot_idx],
+                slot_idx,
+                entry.phase,
+                entry.tier,
             );
         }
     }
+}
 
-    #[test]
-    fn p74_auxiliary_precincts_and_ships_clear_the_wide_road_across_all_eight_arenas() {
-        for arena in tbg_core::Arena::ALL {
-            let theme = Theme::from(arena);
-            let pal = AuxPalette::for_theme(theme);
-            for seat in Seat::BOTH {
-                let blue = seat == Seat::A;
-                let mine_root = precinct_transform(seat, AuxiliaryKind::Miner);
-                for (name, m, local) in [
-                    ("outcrop", models::mine_outcrop(pal), Transform::default()),
-                    ("shoring", models::mine_shoring(pal), Transform::default()),
-                    ("rails", models::mine_rails(pal), Transform::default()),
-                    (
-                        "cart",
-                        models::mine_cart(pal),
-                        Transform::from_xyz(0.62, 0.03, 0.0),
-                    ),
-                    (
-                        "miner",
-                        models::miner_body(blue),
-                        Transform::from_xyz(0.46, 0.0, 0.22),
-                    ),
-                ] {
-                    assert!(
-                        mesh::triangles(&m) > 10,
-                        "{theme:?} {name} must have geometry"
-                    );
-                    assert_outside_road(
-                        &m,
-                        mine_root * local,
-                        &format!("{theme:?} {seat:?} {name}"),
-                    );
-                }
-
-                let merch_root = precinct_transform(seat, AuxiliaryKind::Merchant);
-                for (name, m, local) in [
-                    (
-                        "pilings",
-                        models::merchant_pier_pilings(pal),
-                        Transform::default(),
-                    ),
-                    (
-                        "deck",
-                        models::merchant_pier_deck(pal),
-                        Transform::default(),
-                    ),
-                    (
-                        "stall_frame",
-                        models::merchant_stall_frame(pal),
-                        Transform::default(),
-                    ),
-                    (
-                        "stall_awning",
-                        models::merchant_stall_awning(pal),
-                        Transform::default(),
-                    ),
-                    (
-                        "stall_cargo",
-                        models::merchant_stall_cargo(pal),
-                        Transform::default(),
-                    ),
-                    (
-                        "merchant",
-                        models::merchant_body(blue),
-                        Transform::from_xyz(0.0, 0.0, 0.68),
-                    ),
-                    (
-                        "ship_horizon",
-                        models::merchant_ship(pal, blue),
-                        Transform::from_xyz(-3.35, water::LEVEL, 2.35),
-                    ),
-                    (
-                        "ship_docked",
-                        models::merchant_ship(pal, blue),
-                        Transform::from_xyz(0.0, water::LEVEL, 1.68),
-                    ),
-                ] {
-                    assert!(
-                        mesh::triangles(&m) > 10,
-                        "{theme:?} {name} must have geometry"
-                    );
-                    assert_outside_road(
-                        &m,
-                        merch_root * local,
-                        &format!("{theme:?} {seat:?} {name}"),
-                    );
-                }
+fn observe(anim: &mut SlotAnimState, slot_idx: usize, phase: AuxiliaryPhase, tier: u8) {
+    if phase == AuxiliaryPhase::Available {
+        *anim = SlotAnimState::default();
+        return;
+    }
+    if !anim.hired_seen {
+        *anim = SlotAnimState {
+            hired_seen: true,
+            tier,
+            // Joining mid-match (reconnect, spectate) shows structures already built.
+            tier_since: if tier > 1 { 15.0 } else { 0.0 },
+            ..SlotAnimState::default()
+        };
+    }
+    if tier > anim.tier {
+        anim.tier = tier;
+        anim.tier_since = 0.0;
+    }
+    if slot_idx == 1 {
+        let used = match phase {
+            AuxiliaryPhase::Active {
+                activations_used, ..
+            } => activations_used,
+            AuxiliaryPhase::Completed => {
+                let t = usize::from(anim.tier.clamp(1, 3) - 1);
+                AUXILIARY_RULE.merchant_max_activations[t]
             }
+            _ => 0,
+        };
+        if used > anim.last_activations {
+            anim.last_activations = used;
+            anim.delivery_timer = animate::DELIVERY_SECS;
         }
     }
+    anim.phase = phase;
 }
+
+#[cfg(test)]
+mod tests;

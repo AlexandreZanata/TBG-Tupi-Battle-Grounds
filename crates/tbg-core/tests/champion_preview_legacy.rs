@@ -10,7 +10,9 @@ fn cc_id03_keeps_pr44_legacy_outcomes_and_ticks() {
         tbg_core::ruleset_version::ruleset_source_hash(),
     ) {
         // GD-04 (R14) keeps R13's canonical outcomes exactly.
-        (13, 0xb66993d9e87a9cfc) | (14, 0xf354f651c056d615) | (15, 0xcc459351581b7763)
+        (13, 0xb66993d9e87a9cfc)
+        | (14, 0xf354f651c056d615)
+        | (15, 0xcc459351581b7763)
         | (16, 0xf2e253b98ccb313a) => [
             (1, 16625, Seat::B),
             (7, 14265, Seat::B),

@@ -77,6 +77,13 @@ impl LocalMatch {
                 state.step();
             }
         }
+        #[cfg(all(any(debug_assertions, feature = "ui-acceptance"), tbg_desktop))]
+        if let Some(tier) = crate::config::url_param("capture")
+            .and(crate::config::url_param("capture_aux_tier"))
+            .and_then(|v| v.parse::<u8>().ok())
+        {
+            capture_auxiliaries(&mut state, tier);
+        }
         static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         let mut result_id = [0u8; 16];
         result_id[..8].copy_from_slice(
@@ -163,6 +170,28 @@ impl LocalMatch {
             });
             self.ended = true;
         }
+    }
+}
+
+/// UI capture fixture: hire and evolve both War Auxiliaries on both seats to
+/// `tier` through ordinary intentions, then let the Mineiro finish building.
+#[cfg(all(any(debug_assertions, feature = "ui-acceptance"), tbg_desktop))]
+fn capture_auxiliaries(state: &mut MatchState, tier: u8) {
+    while state.phase != Phase::Running {
+        state.step();
+    }
+    for seat in Seat::BOTH {
+        for slot in 0..tbg_core::auxiliary::AUXILIARY_SLOTS as u8 {
+            for _ in 0..tier.min(tbg_core::auxiliary::AUXILIARY_MAX_TIER) {
+                state.players[seat.index()].energy += 30 * tbg_core::content::ENERGY_SCALE;
+                let _ = state.apply_intention(seat, 0, PlayerIntention::HireAuxiliary { slot });
+            }
+        }
+    }
+    let prep = tbg_core::auxiliary::AUXILIARY_RULE.miner_prep_ticks;
+    for _ in 0..=prep {
+        state.augments.next_open_at = u32::MAX;
+        state.step();
     }
 }
 

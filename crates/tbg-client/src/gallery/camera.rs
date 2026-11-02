@@ -24,6 +24,14 @@ pub fn frame(
             let bounds =
                 *monument.get_or_insert_with(|| super::monument_frame::bounds(kind, &lib, &meshes));
             super::monument_frame::target(bounds, aspect)
+        } else if options.mode == "auxiliary" {
+            // War Auxiliary card portrait: front three-quarter view, head to boots.
+            (
+                Vec3::new(0.0, 0.4, 0.0),
+                0.5,
+                0.56,
+                Vec3::new(1.0, 0.5, 0.42),
+            )
         } else if options.portrait {
             let kind = options.unit.unwrap_or(tbg_core::UnitKind::Archer);
             let (radius, h) = cached
