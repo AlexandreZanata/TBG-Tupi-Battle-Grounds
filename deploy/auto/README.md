@@ -62,8 +62,10 @@ review of access/trust, not a silent token fallback.
 
 The reviewed controller is installed once by the owner's computer. Artifacts
 cannot replace privileged controller scripts, systemd units or proxy settings.
-All timers and CLIs serialize through the same host state lock. Do not run the legacy
-manual deploy or a provisioning job while this controller is enabled.
+All timers and CLIs serialize through the same non-blocking host state lock
+(`control.py`); a busy lock prints `Deferred:` and exits 0. Do not run the legacy
+manual deploy or a provisioning job while this controller is enabled. No step may
+hold the lock for an unbounded time: waiting states are recorded and resumed.
 
 For each eligible candidate: verify before extraction; compare live contract and
 read-only schema; inspect build identity as `nobody`; preserve previous binaries;
@@ -72,7 +74,13 @@ existing integrity-checked predeploy backup; switch executable pointers; start;
 check local admission/store availability and public HTTPS health. Failure restores
 the prior binary/receipt after another safe drain. New player data stays intact.
 Interrupted transitions are recovered on the next applied invocation. An unhealthy
-rollback leaves its journal for operator recovery instead of claiming success.
+rollback leaves its journal and writes `operator-hold.json`: every later backend run
+refuses to act (no repeated drain/restart loop) until an operator reviews it and
+runs `pull.py --release-hold`.
+
+**The timer never restarts the single game process.** That path needs
+`pull.py --apply --maintenance-window` from an attending operator; automatic backend
+delivery is reserved for release slots once the A/B coordinator lands.
 
 Monitoring: `journalctl -u tbg-auto-deploy.service`, `/var/lib/tbg-deploy/checked.json`,
 `current.json` and `transition.json`. GitHub has the immutable source, CI run and
@@ -118,9 +126,10 @@ credential is required in that file. Then:
 # Verify a real main package and compatibility, without activating it.
 sudo env GH_CONFIG_DIR=/var/lib/tbg-deploy/gh \
   python3 /opt/tbg/deploy/pull.py
-# After reviewing that first verified candidate, apply and observe it once.
+# After reviewing that first verified candidate, apply and observe it once,
+# in a quiet window (it drains and restarts the only game process).
 sudo env GH_CONFIG_DIR=/var/lib/tbg-deploy/gh \
-  python3 /opt/tbg/deploy/pull.py --apply --recheck
+  python3 /opt/tbg/deploy/pull.py --apply --recheck --maintenance-window
 # Only after the real first delivery passes, enable future compatible releases.
 sudo touch /etc/tbg/auto-deploy.enabled
 sudo systemctl enable --now tbg-auto-deploy.timer
@@ -130,6 +139,9 @@ sudo systemctl enable --now tbg-auto-deploy.timer
 source rollback, contract/schema mismatch or an unavailable verifier is not a pass.
 Stop future polling with `systemctl disable --now tbg-auto-deploy.timer`; let an
 already active deploy finish, and never delete its transition or ranked journals.
+`install.sh` refuses to replace modules while any controller timer is enabled:
+disable the enabled timers first (currently `tbg-web-deploy.timer`), install, then
+re-enable them.
 Retain release directories/backups until an operator reviews safe disk cleanup.
 
 ## Docker and Kubernetes decision

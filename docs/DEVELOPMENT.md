@@ -84,6 +84,16 @@ Gameplay edits require their Proposed canon entries, source fingerprint and bili
 patch notes; balance values additionally require D-33 evidence. Use the existing
 [patch process](patches/README.md), never edit a contract test to hide a failure.
 
+## Desktop versions
+
+A pull request that changes shipped desktop inputs (client/core/update crates outside
+tests, `Cargo.*`, `.gitattributes`, `rust-toolchain.toml`, licenses, packaging scripts,
+`deploy/native/**`, `docs/patches/**`) must bump `crates/tbg-client/Cargo.toml`
+(and `Cargo.lock`) to an unpublished SemVer and title `deploy/native/RELEASE-NOTES.md`
+with it. `python3 scripts/check-native-version.py --base origin/main` runs the same
+check locally; CI fails early otherwise. Its merge publishes that version
+automatically; see [RELEASES](RELEASES.md).
+
 ## Review and handoff
 
 Record the source revision, changed scope, actual commands/results, known failures

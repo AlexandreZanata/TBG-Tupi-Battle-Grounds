@@ -11,13 +11,17 @@ Main CI keeps its existing six required lanes and fail-closed `check` aggregator
 The owner reviews and merges the PR manually. Publication workflows accept only a
 successful main **push** CI run from this repository and the exact current main SHA;
 PRs, forks, stale runs and failed checks cannot publish. Actions and compiler/tools
-are pinned. A newer main commit supersedes an older pending publication.
+are pinned. A newer main commit supersedes an older pending publication; each
+family measures relevance from its **last published candidate** through the compare
+API (`scripts/release_scope.py`), so a change skipped by a superseded run is still
+published by the next one.
 
 Three source filters avoid redeploying unrelated products:
 
 - `backend-release.yml`: Rust server/core dependencies and runtime inputs, packaged
-  as `server-<full SHA>`. A compatible update drains new admission, finishes active
-  matches/results/reconnect windows, backs up, switches binaries and checks health.
+  as `server-<full SHA>`. Automatic activation is reserved for release slots (the
+  A/B coordinator is pending); the timer never stops the single game process. An
+  operator-attended `--maintenance-window` restart remains for bootstrap/emergencies.
 - `web-release.yml`: the shared Bevy browser client, core contract and its assets,
   packaged as `web-<full SHA>`. Trunk uses `/releases/<SHA>/`; the package sets the
   document base before any relative asset request. All old assets are retained.
@@ -37,20 +41,31 @@ latest native release. Source filters are an optimization, not a way to skip req
 ## Protect players and rollback
 
 The reviewed controller and proxy configuration are maintenance-installed; packages
-cannot replace them. All payload controllers and the native catalog share a host lock and durable transition
-journals. Browser/static updates switch symlinks after staging; a failed public
+cannot replace them. All payload controllers and the native catalog share one
+non-blocking host lock and durable transition journals. A busy lock, a draining or
+unreachable server, or a candidate waiting for a coordinated server contract is a
+**deferral**: exit 0, nothing latched, the next run retries. Forged or malformed
+candidates are latched as `rejected`; failures needing a person stay visible.
+A browser/static pointer changed outside the controller (for example a hand-published
+landing) is never overwritten: the run is refused until an operator reviews it and
+reruns with `--adopt`. A landing whose `config/release.json` names another server
+contract waits, so downloads are never advertised for a server that is not live. Browser/static updates switch symlinks after staging; a failed public
 health probe restores previous pointers/receipts. No DB or game-process action is
 part of a frontend promotion. An interrupted transition is recovered before another
 applied update. Old tabs keep loading their source-qualified assets.
 
-Backend automation accepts only the exact live MatchContract and database schema,
-and only the single-process mode. Contract/schema changes stop for coordinated
-client/migration review. Before any pause or DB operation, it requires the systemd
+Backend automation accepts only the exact live MatchContract and database schema.
+Contract/schema changes stop for coordinated client/migration review. The current
+host runs one game process, so the timer refuses to activate a backend at all; the
+legacy drain-and-restart path needs an explicit `--maintenance-window` and is not
+zero downtime. Before any pause or DB operation, it requires the systemd
 main process kernel executable to match the adopted binary path; post-start and
 rollback perform the same check. An unused legacy install path cannot masquerade
 as a successful update. It never rolls back player data, shortens the drain or kills
-active matches. If rollback itself fails, operator intervention remains visible.
-There is a temporary matchmaking pause during a backend drain; this is not HA.
+active matches. If rollback itself fails, a durable operator hold
+(`/var/lib/tbg-deploy/operator-hold.json`) stops every further backend action instead
+of repeating stop/drain/start each timer run; clear it with `--release-hold` after
+review. A maintenance-window drain pauses matchmaking; this is not HA.
 
 Initial domain/proxy setup is separate from a normal deployment. Caddy reloads can
 close WebSockets, so the bootstrap verifies zero connections, matches and pending
@@ -85,21 +100,36 @@ On the official host, after the reviewed installation and private config:
 GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/pull.py
 GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/web_pull.py
 GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/static_pull.py
-# Apply/observe one candidate per family, using --apply --recheck.
+# Apply/observe one candidate per family, using --apply --recheck; a first
+# adoption of a hand-published entry also needs --adopt.
 # Only afterward create its flag and enable its timer:
 touch /etc/tbg/web-deploy.enabled
 systemctl enable --now tbg-web-deploy.timer
+# Status, latches and quota:
+systemctl list-timers --all 'tbg-*'
+journalctl -u tbg-web-deploy.service --since -1h   # github-api lines log remaining quota
+cat /var/lib/tbg-deploy/web-checked.json /var/lib/tbg-deploy/web-current.json
+# Retry a latched candidate after fixing its cause, or stop a family:
+GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/web_pull.py --apply --recheck
+systemctl disable --now tbg-web-deploy.timer && rm /etc/tbg/web-deploy.enabled
+# Release a reviewed backend operator hold:
+GH_CONFIG_DIR=/var/lib/tbg-deploy/gh python3 /opt/tbg/deploy/pull.py --release-hold
 ```
+
+Rollback of a browser or static family is a pointer switch to a retained release,
+never a database restore: an interrupted promotion is restored from its journal on
+the next `--apply`; a reviewed manual rollback switches `current` atomically to the
+previous `releases/<id>` and records it in `activations.log` (the receipt then
+differs and the next candidate needs `--adopt`).
 
 Backend names are `auto-deploy.enabled` / `tbg-auto-deploy.timer`; static names are
 `static-deploy.enabled` / `tbg-static-deploy.timer`. Stop future polling by disabling
 its timer; let a running deployment finish. All timers check about every ten minutes
-with jitter: the three payload families plus native metadata normally use at most 48 public API reads/hour, leaving
-room below GitHub's unauthenticated quota for new-candidate checks. Other traffic
-sharing the same origin IP and bursts can still exhaust it; fail closed and inspect
-the HTTP error rather than adding a personal token. The current catalog scans the
-latest 30 repository releases; if a family falls outside it, an operator must review
-pagination rather than infer that it has no newer version.
+with jitter. API reads are conditional (ETag): an unchanged answer is a 304, which
+does not spend GitHub's anonymous quota, and every call logs the remaining quota.
+Discovery reads the newest 100 releases; the active native tag is revalidated by
+name, and a deleted one turns both downloads pending. Exhausted quota or network
+errors fail visibly and promote nothing; do not add a personal token.
 
 Inspect systemd journals plus `/var/lib/tbg-deploy/{checked,web-checked,static-checked}.json`,
 current receipts and transition files. Never delete a journal to make a failure vanish.
@@ -116,11 +146,21 @@ verifies its SHA-256 before running it in a private portable tools directory,
 and checks the real `PREPROCVER` during fixture and production compilation.
 `ISCC.exe` PE version resources may be `0.0.0.0` and are not version authority.
 After DevShell, the reviewed rustup proxy and exact Rust version are restored;
-the runner records the actual compiler and Inno provenance/hashes. Build jobs have read-only permissions. Tag dispatch publication
-requires all CI lanes. A successful exact-source native dispatch can be promoted
-by its run ID without rebuilding the tested package bytes. Never use PR merge
-artifacts or overwrite an existing tag's assets. Native versions do not need a main
-merge to publish an explicitly approved beta; server/web/static promotion still does.
+the runner records the actual compiler and Inno provenance/hashes. Build jobs have
+read-only permissions.
+
+**Version policy.** A pull request that changes shipped desktop inputs
+(`scripts/native_release_policy.py`) must bump `crates/tbg-client/Cargo.toml` and
+title `deploy/native/RELEASE-NOTES.md` with that version; CI fails early otherwise.
+Workflow/test-only, docs-only and static-only merges publish nothing native. After
+the merge, both main platform builds run once; `release-main` tags the new version
+from a commit still on main and dispatches the tag-ref publication with the job
+token. That run promotes the main run's exact artifacts, reuses the successful
+`ci.yml` main push run of the same commit as suite evidence, and publishes
+draft-first. A version that already names another commit with changed shipped
+inputs fails as contention; retries upload only missing files and never replace an
+asset. An exact-source manual dispatch remains available for an explicitly
+approved beta. Never use PR merge artifacts or overwrite an existing tag's assets.
 
 Before promotion, download the CI packages, verify checksums and package identity,
 and run the intended Linux/Windows installation and runtime checks. Linux evidence
