@@ -90,7 +90,21 @@ async fn until(db: &PathBuf, what: &str, pred: impl Fn(&[SlotRow]) -> bool) {
         }
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
-    panic!("timed out waiting for {what}");
+    let rows = read_directory(&admin_conn(db)).unwrap();
+    let load: Vec<_> = rows
+        .iter()
+        .map(|r| {
+            (
+                &r.slot,
+                &r.state,
+                r.matches_running,
+                r.results_pending,
+                r.ranked_inflight,
+                r.ranked_authority,
+            )
+        })
+        .collect();
+    panic!("timed out waiting for {what}: {load:?}");
 }
 
 async fn send(ws: &mut Ws, msg: &ClientMsg) {
@@ -241,6 +255,11 @@ async fn u13_u15_a_running_match_survives_promotion_and_rollback() {
             "match ends"
         );
     }
+    // Real clients keep answering pings after the result. An unread synthetic
+    // socket can expire during directory checks and create a new reconnect receipt.
+    let keepalive = [p1, p2, q1, q2].map(|mut ws| {
+        tokio::spawn(async move { while next(&mut ws, Duration::from_secs(5)).await.is_some() {} })
+    });
     // U14: B (now draining) retires only once its match, its queued records
     // and any ranked authority it took are gone; the gate refuses before.
     until(&db, "both slots idle", |r| {
@@ -264,6 +283,13 @@ async fn u13_u15_a_running_match_survives_promotion_and_rollback() {
         .query_row("SELECT COUNT(*) FROM matches", [], |r| r.get(0))
         .unwrap();
     assert_eq!(matches, 2, "each finished match recorded exactly once");
+    for task in keepalive {
+        assert!(
+            !task.is_finished(),
+            "finished clients remain responsive through the drain check"
+        );
+        task.abort();
+    }
 }
 
 /// `true` when the server signs this socket's account out within `wait`.
