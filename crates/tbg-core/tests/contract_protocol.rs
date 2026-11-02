@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 38,
-        "INT-06: combined P74 auxiliary views and GD-04 events require wire 38"
+        PROTOCOL_VERSION, 39,
+        "BR-AX12: tiered War Auxiliary slot views require wire 39"
     );
 }
 
