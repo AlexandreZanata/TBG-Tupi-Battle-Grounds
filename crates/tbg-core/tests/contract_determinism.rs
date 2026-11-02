@@ -161,6 +161,12 @@ fn bot_matches_are_frozen() {
             (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
             (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
         ],
+        // R13: equivalent divisibility syntax preserves the revision-12 traces exactly.
+        (13, 0xb66993d9e87a9cfc) => [
+            (1, 0xae47594e85732bbc, 16625, Seat::B, StrongholdDestroyed),
+            (7, 0x34994c75252c5c39, 14265, Seat::B, StrongholdDestroyed),
+            (42, 0xec212d8ee38450d7, 23274, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

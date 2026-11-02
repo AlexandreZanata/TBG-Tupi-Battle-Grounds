@@ -53,7 +53,7 @@ fn pounce(state: &mut MatchState, u: &Unit, st: &Stats, bonus: u16) -> i32 {
 }
 
 fn solar(u: &Unit, victim: &Unit, st: &Stats, high: u16, bonus: u16) -> i32 {
-    if u.fx.attacks % 2 == 0
+    if u.fx.attacks.is_multiple_of(2)
         && i64::from(victim.hp) * 10_000 >= i64::from(victim.max_hp) * i64::from(high)
     {
         scaled(st.damage, i32::from(bonus))
@@ -109,7 +109,7 @@ pub(crate) fn lunar_bp(state: &MatchState, u: &Unit, target: Target) -> i32 {
     else {
         return 0;
     };
-    if u.fx.attacks % 2 == 0 {
+    if u.fx.attacks.is_multiple_of(2) {
         return 0;
     }
     let Target::Unit(id) = target else { return 0 };

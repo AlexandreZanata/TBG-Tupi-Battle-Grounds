@@ -1,7 +1,7 @@
 TBG 0.1.4-colossus.1 — Champions, shared match sides and automatic delivery beta
 
-Protocol 36, schema 10 (P73 history schema 11 remains opt-in), ruleset 12 /
-8f5a8ebb3e4f88ec. This contract requires a coordinated release from protocol 31;
+Protocol 36, schema 10 (P73 history schema 11 remains opt-in), ruleset 13 /
+b66993d9e87a9cfc. This contract requires a coordinated release from protocol 31;
 compatible-only delivery must not bypass its production contract gate.
 
 The local Practice/Training preview contains 82 champions across ten Factions,
@@ -40,3 +40,6 @@ separate gated mechanisms. Preserve existing accounts, preferences and older pac
 
 Source, individual asset checksums and the exact compatible contract are in
 `tbg-native-release.json`; `native-provenance.jsonl` binds the artifacts to GitHub CI.
+
+Ruleset 13 registers equivalent Rust 1.99 lint fixes; gameplay values and branches
+are unchanged from the ruleset-12 preview. No competitive acceptance is implied.

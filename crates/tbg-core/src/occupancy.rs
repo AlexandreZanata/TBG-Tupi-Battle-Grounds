@@ -39,7 +39,7 @@ fn place(u: &mut Unit, placed: &[Unit]) -> bool {
     let dir = u.seat.dir();
     let preferred = if u.fx.lane_slot == 0 {
         let edge = (WIDTH - cells(u) * CELL) / 2;
-        if u.id % 2 == 0 {
+        if u.id.is_multiple_of(2) {
             edge
         } else {
             -edge
@@ -67,7 +67,11 @@ fn place(u: &mut Unit, placed: &[Unit]) -> bool {
             }
         }
         let z = center(u, slot);
-        let side = if u.id % 2 == 0 { z * dir } else { -z * dir };
+        let side = if u.id.is_multiple_of(2) {
+            z * dir
+        } else {
+            -z * dir
+        };
         let score = (progress, -(z - preferred).abs(), side);
         if best.is_none_or(|(old, _)| score > old) {
             best = Some((score, slot));

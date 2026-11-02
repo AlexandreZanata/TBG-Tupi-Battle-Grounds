@@ -2,7 +2,7 @@
   "schema": 1,
   "server": {
     "protocol": 36,
-    "contract": "w36-r12-8f5a8ebb3e4f88ec"
+    "contract": "w36-r13-b66993d9e87a9cfc"
   },
   "linux": {
     "state": "pending"

@@ -2425,3 +2425,10 @@ retaining the widened road's 2.1 centre boundary. Extra road room is available
 for actual contact/overtaking; it must not itself double birth/preferred offsets.
 Keep the original separation, return motion, body/weapon clearance and immediate
 authoritative advancement. No physical queue, capacity gate or extra smoothing.
+
+## R13 — Proposed source-identity maintenance (2026-11-02)
+
+Register ruleset 13 / `b66993d9e87a9cfc` for equivalent integer divisibility syntax
+required by the pinned compiler lints. Keep every value, outcome branch,
+wire tag and summary version from revision 12. This is source maintenance,
+not an additional balance adjustment or full D-33 acceptance.
