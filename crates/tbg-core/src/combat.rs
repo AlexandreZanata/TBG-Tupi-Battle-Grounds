@@ -143,6 +143,7 @@ fn advance_unit(
                 let (target, betrayed) = crate::support::betray_windup(state, &u, st.range, target);
                 crate::ravager::retarget(state, idx, target);
                 crate::mantis::retarget(state, idx, target);
+                crate::astreon::retarget(state, idx, target);
                 state.units[idx].windup = Some((target, WINDUP));
                 state.units[idx].fx.betray = betrayed;
                 crate::completion::prepare_heal(state, idx, target, &st);

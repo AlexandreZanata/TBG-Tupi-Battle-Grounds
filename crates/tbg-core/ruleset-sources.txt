@@ -2,6 +2,7 @@
 watch acidmaw.rs
 watch afflictions.rs
 watch arcana.rs
+watch astreon.rs
 watch augment.rs
 watch barrel.rs
 watch bonehorn.rs
@@ -53,6 +54,7 @@ watch targeting.rs
 watch trident.rs
 watch trigger.rs
 watch types.rs
+watch volthar.rs
 watch weaver.rs
 watch whisperer.rs
 exclude account.rs account key format, no gameplay
@@ -77,12 +79,14 @@ exclude training/metrics.rs local tools and observational hooks, no normal-match
 exclude training/mod.rs local tools and observational hooks, no normal-match outcome changes
 exclude training/scenario.rs local tools and observational hooks, no normal-match outcome changes
 exclude training/session.rs local tools and observational hooks, no normal-match outcome changes
+exclude volthar/tests.rs GD-04 regression scenarios, not simulation rules
 exclude training_hooks.rs local tools and observational hooks, no normal-match outcome changes
 exclude view.rs per-seat presentation of authoritative state
 exclude view/effects.rs cosmetic metadata, tests or read-only presentation
 exclude view/public.rs spectator presentation
 exclude view/visibility.rs presentation filtering
 exclude completion/tests.rs focused local-preview regression scenarios, no gameplay
+exclude astreon/tests.rs GD-04 regression scenarios, not simulation rules
 exclude barrel/tests.rs OG-02 regression scenarios, not simulation rules
 
 exclude occupancy/tests.rs PK-01 regression tests, not gameplay

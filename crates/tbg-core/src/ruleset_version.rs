@@ -5,16 +5,17 @@
 
 /// Gameplay revision. Bump it, and append a line to
 /// `tests/fixtures/ruleset-versions.txt`, whenever a watched source changes.
-pub const RULESET_VERSION: u32 = 13;
+pub const RULESET_VERSION: u32 = 14;
 /// Version of the per-match summary JSON (P61 §4).
 pub const SUMMARY_VERSION: u16 = 2;
 
 /// Watched gameplay sources, sorted by path (`ruleset-sources.txt`).
 #[rustfmt::skip] // The client build script reads one literal entry per line.
-pub const WATCHED: [(&str, &str); 56] = [
+pub const WATCHED: [(&str, &str); 58] = [
     ("acidmaw.rs", include_str!("acidmaw.rs")),
     ("afflictions.rs", include_str!("afflictions.rs")),
     ("arcana.rs", include_str!("arcana.rs")),
+    ("astreon.rs", include_str!("astreon.rs")),
     ("augment.rs", include_str!("augment.rs")),
     ("barrel.rs", include_str!("barrel.rs")),
     ("bonehorn.rs", include_str!("bonehorn.rs")),
@@ -66,6 +67,7 @@ pub const WATCHED: [(&str, &str); 56] = [
     ("trident.rs", include_str!("trident.rs")),
     ("trigger.rs", include_str!("trigger.rs")),
     ("types.rs", include_str!("types.rs")),
+    ("volthar.rs", include_str!("volthar.rs")),
     ("weaver.rs", include_str!("weaver.rs")),
     ("whisperer.rs", include_str!("whisperer.rs")),
 ];

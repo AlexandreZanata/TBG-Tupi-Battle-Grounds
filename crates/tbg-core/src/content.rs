@@ -598,6 +598,27 @@ pub enum Ability {
         short_range: i32,
         short_bonus_bp: u16,
     },
+    /// GD-04 Volthar: every nth completed enemy-unit primary chains to up to
+    /// four distinct enemies; `ratios` are per jump in bp of static basic damage.
+    StormJudgment {
+        every: u8,
+        jumps: u8,
+        radius: i32,
+        ratios: [u16; 4],
+        primary_bp: u16,
+        root: u16,
+        extra_ratio: u16,
+        extra_targets: u8,
+    },
+    /// GD-04 Astreon: the nth consecutive completed hit on one enemy unit adds
+    /// max-HP damage capped before defenses, plus a low-HP execution share.
+    VerdictLance {
+        every: u8,
+        max_hp_bp: u16,
+        cap: u16,
+        low_hp_bp: u16,
+        execute_bp: u16,
+    },
 }
 
 /// Base stats of a unit kind plus its forms `[A1, A2, B1, B2]`.
@@ -985,6 +1006,61 @@ const BONEHORN_ABILITIES: [[Ability; 2]; 5] = [
     carapace(80, 0),
     carapace(60, 1_500),
     carapace(60, 2_500),
+];
+
+#[allow(clippy::too_many_arguments)] // one call per form row reads as a table
+const fn storm(
+    jumps: u8,
+    radius: i32,
+    ratios: [u16; 4],
+    primary_bp: u16,
+    root: u16,
+    extra_ratio: u16,
+    extra_targets: u8,
+) -> [Ability; 2] {
+    [
+        Ability::StormJudgment {
+            every: 4,
+            jumps,
+            radius,
+            ratios,
+            primary_bp,
+            root,
+            extra_ratio,
+            extra_targets,
+        },
+        Ability::None,
+    ]
+}
+// GD-04: base 70/50/35 %; A1 adds a fourth 25 % jump (agent proposal); A2 +10 points
+// per jump and 2.8 tiles; B1 +35 % trigger hit; B2 +55 %, 0.5 s Root, 30 % to two more.
+const VOLTHAR_ABILITIES: [[Ability; 2]; 5] = [
+    storm(3, 2_200, [7_000, 5_000, 3_500, 0], 0, 0, 0, 0),
+    storm(4, 2_200, [7_000, 5_000, 3_500, 2_500], 0, 0, 0, 0),
+    storm(4, 2_800, [8_000, 6_000, 4_500, 3_500], 0, 0, 0, 0),
+    storm(3, 2_200, [7_000, 5_000, 3_500, 0], 3_500, 0, 0, 0),
+    storm(3, 2_200, [7_000, 5_000, 3_500, 0], 5_500, 10, 3_000, 2),
+];
+const fn verdict(every: u8, max_hp_bp: u16, cap: u16, execute_bp: u16) -> [Ability; 2] {
+    [
+        Ability::VerdictLance {
+            every,
+            max_hp_bp,
+            cap,
+            low_hp_bp: 4_000,
+            execute_bp,
+        },
+        Ability::None,
+    ]
+}
+// GD-04: base 5 % max HP capped at 240 every fourth; A1 every third; A2 7 % capped
+// at 300; B1/B2 add 35 %/60 % of basic damage below 40 % HP on the fourth.
+const ASTREON_ABILITIES: [[Ability; 2]; 5] = [
+    verdict(4, 500, 240, 0),
+    verdict(3, 500, 240, 0),
+    verdict(3, 700, 300, 0),
+    verdict(4, 500, 240, 3_500),
+    verdict(4, 500, 240, 6_000),
 ];
 
 const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
@@ -1628,6 +1704,21 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         FormDef { splash_add: 600, ..form("Pillar of Dawn") },
         FormDef { hp_bp: 3_000, ..form("Ancient Monolith") },
         FormDef { hp_bp: 3_000, ..form("Eternal Monument") },
+    ]),
+    // GD-04: Proposed Gods expansion; every form changes only its ability row.
+    unit(UnitKind::Volthar, "Volthar", Gods, Ranged, 12_600,
+        [2_200, 130, 30, 5_500, 35, 0, 0], None, VOLTHAR_ABILITIES, [
+        form("Storm Herald"),
+        form("Celestial Sovereign"),
+        form("Hammer of Wrath"),
+        form("Divine Tempest"),
+    ]),
+    unit(UnitKind::Astreon, "Astreon", Gods, Dps, 13_800,
+        [1_900, 190, 40, 2_200, 37, 0, 0], None, ASTREON_ABILITIES, [
+        form("Giant Piercer"),
+        form("Primordial Lance"),
+        form("Final Sentence"),
+        form("Absolute Verdict"),
     ]),
 
 ];

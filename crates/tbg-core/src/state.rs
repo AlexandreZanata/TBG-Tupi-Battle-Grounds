@@ -402,6 +402,13 @@ pub enum Event {
         branch: u8,
         tick: Tick,
     },
+    /// GD-04: one authoritative Storm Judgment link; jump 0 is a B2 extra discharge.
+    StormArc {
+        unit: UnitId,
+        from: UnitId,
+        to: UnitId,
+        jump: u8,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]

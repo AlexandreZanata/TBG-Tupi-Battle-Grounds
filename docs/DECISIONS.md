@@ -3187,3 +3187,21 @@ from the diagnostic's ineffective controls to a 1.000000 versus 0.796875 price
 comparison after the fix (20.3125 points). This is screening evidence, not the
 full C7 result or D-33 acceptance. The original 256-pair C7 test and its 10-point
 match/20-point duel criteria remain intact and queued to hosted CI.
+
+## D-105 · Gods expansion reuses counted-hit hooks and one public link event — 2026-11-02 (Proposed, GD-04)
+
+**Context.** The owner asked for two new Gods champions with a chained lightning
+and a same-target max-HP pierce, in the real game, without parallel targeting or
+damage systems. Crossfire (R04) and Precise Strike (R17) already implement a
+counted fourth hit and a same-enemy sequence inside `hits::resolve_hit`.
+
+**Decision.** `volthar.rs` and `astreon.rs` follow those modules: parameters live
+in the content `Ability` table per form; counters reuse `UnitFx::attacks` and
+`mark_target`, so the serialized unit layout, replay hashes and earlier canonical
+traces are unchanged. Chain links are auxiliary hits (defenses apply, no hooks).
+One appended public `Event::StormArc` per link lets clients draw the exact
+server-chosen path; the counter reaches the client through the existing progress
+bits. Appending kinds and the event bumps wire 36 → 37 and ruleset 13 → 14.
+
+**Reopen when** a Gods Synergy is approved, when D-33 evidence moves a value, or
+if a future champion needs per-unit state that `UnitFx` cannot express.
