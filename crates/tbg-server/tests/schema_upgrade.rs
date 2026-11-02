@@ -60,6 +60,48 @@ async fn populated() -> PathBuf {
          INSERT INTO release_audit (at_unix, actor, action, slot, detail)
            VALUES (1, 'operator', 'promote', 'a', 'synthetic');",
     );
+    // A real v10 source fixture: P75 installation is exercised by the next open.
+    let db = rusqlite::Connection::open(&p).unwrap();
+    let tables: Vec<String> = {
+        let mut q = db
+            .prepare("SELECT name FROM sqlite_master WHERE type='table'")
+            .unwrap();
+        q.query_map([], |r| r.get(0))
+            .unwrap()
+            .map(Result::unwrap)
+            .collect()
+    };
+    let p75 = [
+        "recovery_identity",
+        "recovery_challenges",
+        "recovery_dispatch_limits",
+        "recovery_audit",
+        "recovery_revocations",
+        "mail_outbox",
+        "mail_dispatch_lease",
+        "operators",
+        "operator_challenges",
+        "operator_sessions",
+        "admin_audit",
+        "account_moderation",
+        "moderation_actions",
+        "moderation_events",
+        "email_blocks",
+        "reports",
+        "match_social_records",
+        "chat_blocked_terms",
+        "admin_settings",
+        "emoji_assets",
+        "account_emoji_slots",
+    ];
+    db.execute_batch("PRAGMA foreign_keys=OFF").unwrap();
+    for table in tables {
+        if p75.contains(&table.as_str()) {
+            db.execute_batch(&format!("DROP TABLE {table}")).unwrap();
+        }
+    }
+    db.execute("DELETE FROM schema_version WHERE version=12", [])
+        .unwrap();
     p
 }
 
@@ -85,7 +127,7 @@ async fn assert_combined(p: &PathBuf) {
     assert_eq!(profile.rating, 1234);
     assert_eq!(store.match_count().await.unwrap(), 1);
     drop(store);
-    assert_eq!(count(p, "SELECT MAX(version) FROM schema_version"), 10);
+    assert_eq!(count(p, "SELECT MAX(version) FROM schema_version"), 12);
     assert_eq!(count(p, "SELECT COUNT(*) FROM ranked_baseline"), 1);
     for table in [
         "release_slots",
@@ -198,7 +240,7 @@ async fn opt_in_history_schema_11_applies_over_both_reconciled_v9_families() {
             .expect("the AccountKey still signs in on schema 11");
         assert_eq!(profile.rating, 1234);
         drop(store);
-        assert_eq!(count(&p, "SELECT MAX(version) FROM schema_version"), 11);
+        assert_eq!(count(&p, "SELECT MAX(version) FROM schema_version"), 12);
         assert_eq!(
             count(
                 &p,
@@ -294,6 +336,7 @@ async fn p75_partial_or_foreign_shape_aborts_without_repair() {
         "DROP INDEX operators_single_owner",
     ] {
         let p = populated().await;
+        drop(Store::open(&p).unwrap());
         sql(&p, damage);
         assert!(Store::open(&p).is_err(), "{damage}");
         assert_eq!(count(&p, "SELECT COUNT(*) FROM accounts"), 1);

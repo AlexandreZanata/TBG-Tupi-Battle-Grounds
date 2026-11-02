@@ -6,6 +6,7 @@ import {form,field,button,card} from '../ui/forms.js';
 export function auth(root,run,ready) {
   const login=async body=>run(async()=>{
     const reply=await request('session/start',{method:'POST',body});
+    if(reply.operator){ready(reply);return;}
     const verify=async data=>run(async()=>{
       const session=await request('session/verify',{method:'POST',body:{attempt:reply.attempt,code:data.code}});
       ready(session);

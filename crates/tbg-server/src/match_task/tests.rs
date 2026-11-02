@@ -319,7 +319,7 @@ async fn challenge_initial_detached_forfeits() {
 
 /// IC-19/BR-MD02: a ban uses the same forfeit outcome without a voluntary surrender signal.
 #[test]
-fn br_md02_ban_forfeit_settles_like_a_surrender() {
+fn p75_br_md02_ban_forfeit_settles_like_a_surrender() {
     let (transport, _receiver) = mpsc::channel(256);
     let players = Seat::BOTH.map(|seat| Player {
         token: [seat.index() as u8; 16],
@@ -364,4 +364,92 @@ fn br_md02_ban_forfeit_settles_like_a_surrender() {
     assert_eq!(game.end_detail, Some(EndDetail::Moderation));
     assert_eq!(game.stats[0].surrender_tick, None);
     assert!(!game.stats[0].surrendered);
+}
+
+#[test]
+fn p75_ic06_seeded_social_flood_preserves_every_step_event_state_and_outcome() {
+    let (transport, mut receiver) = mpsc::channel(256);
+    let config = Config::default();
+    config
+        .moderation
+        .0
+        .write()
+        .unwrap()
+        .settings
+        .insert("chat_enabled".into(), true);
+    config
+        .moderation
+        .0
+        .write()
+        .unwrap()
+        .settings
+        .insert("emoji_enabled".into(), true);
+    let players = Seat::BOTH.map(|seat| Player {
+        token: [seat.index() as u8; 16],
+        name: format!("Player{}", seat.index()),
+        conn: Some(ConnHandle::new(seat.index() as u64 + 1, transport.clone())),
+        account: Some((seat.index() as i64 + 1, 1000)),
+        arcanas: ArcanaPreset::NEUTRAL,
+        stronghold: tbg_core::StrongholdKind::Classic,
+    });
+    let mut game = Match {
+        result_id: [7; 16],
+        state: MatchState::new(75123),
+        players,
+        detached_at: [None; 2],
+        pause_left: [Duration::ZERO; 2],
+        seen: [true; 2],
+        paused: false,
+        stats: Default::default(),
+        pending: Default::default(),
+        applied: [false; 2],
+        mode: MatchMode::Casual,
+        metrics: Arc::new(Metrics::default()),
+        replay: None,
+        live: None,
+        spectators: Vec::new(),
+        pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
+        social: social::Social {
+            config: Some(Arc::new(config)),
+            verified: [true; 2],
+            ..Default::default()
+        },
+    };
+    let mut baseline = game.state.clone();
+    for tick in 0..300 {
+        for seat in Seat::BOTH {
+            game.command(MatchCmd::Chat {
+                seat,
+                conn_id: seat.index() as u64 + 1,
+                text: format!("cosmetic {tick}"),
+            });
+            game.command(MatchCmd::Emoji {
+                seat,
+                conn_id: seat.index() as u64 + 1,
+                slot: (tick % 3) as u8,
+            });
+            while receiver.try_recv().is_ok() {}
+        }
+        assert!(
+            game.state == baseline,
+            "social messages changed simulation at {tick}"
+        );
+        assert_eq!(
+            game.state.step(),
+            baseline.step(),
+            "IC-06 deterministic events"
+        );
+    }
+    game.command(MatchCmd::Surrender {
+        seat: Seat::A,
+        conn_id: 1,
+    });
+    baseline.forfeit(Seat::A);
+    assert!(
+        game.state == baseline,
+        "IC-06 final outcome/hash inputs identical"
+    );
 }

@@ -72,7 +72,7 @@ impl Transport {
                 let message = Message::builder()
                     .from(from)
                     .to(to)
-                    .subject(format!("Tupi Battle Grounds - {}", mail.purpose))
+                    .subject("Tupi Battle Grounds")
                     .raw_header(lettre::message::header::HeaderValue::new(
                         lettre::message::header::HeaderName::new_from_ascii_str("Auto-Submitted"),
                         "auto-generated".into(),

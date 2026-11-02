@@ -102,6 +102,16 @@ fn apply(
     i: Action,
     c: &Context<'_>,
 ) -> Result<Value, Error> {
+    if let Some(report) = i.report_id {
+        let target: Option<i64> = db
+            .query_row("SELECT target_id FROM reports WHERE id=?1", [report], |r| {
+                r.get(0)
+            })
+            .optional()?;
+        if target != Some(account) {
+            return Err(Error::Invalid);
+        }
+    }
     let mut entry = audit(
         c,
         kind,
@@ -236,7 +246,7 @@ fn list(db: &Connection, c: &Context<'_>) -> Result<Value, Error> {
     Ok(rows(items))
 }
 fn detail(db: &Connection, account: i64, c: &Context<'_>) -> Result<Value, Error> {
-    let mut panel = service::panel(db, account)?;
+    let mut panel = service::panel(db, account, c.now)?;
     panel["id"] = json!(account);
     let state = crate::store::moderation::state(db, account).map_err(|_| Error::Unavailable)?;
     panel["moderation"] = json!({"version":state.version,"ban_until":state.ban_until,"reason":state.reason.map(|r|r.as_str()),"chat_until":state.chat_until,"emoji_until":state.emoji_until});

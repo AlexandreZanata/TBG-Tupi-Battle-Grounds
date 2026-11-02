@@ -22,8 +22,21 @@ pub(crate) async fn handler(State(app): State<AppState>, req: Request) -> Respon
     r
 }
 async fn execute(app: AppState, req: Request) -> Result<Response, Error> {
-    let binding =
-        crate::auth::http::history_binding(&app, req.headers()).map_err(|_| Error::Restricted)?;
+    let raw = req.method() == Method::POST && req.uri().path() == "/api/me/emoji";
+    if raw
+        && !req
+            .headers()
+            .get("content-type")
+            .is_some_and(|v| matches!(v.to_str(), Ok("image/png" | "image/gif" | "image/webp")))
+    {
+        return Err(Error::Unsupported);
+    }
+    let binding = if raw {
+        crate::auth::http::image_binding(&app, req.headers())
+    } else {
+        crate::auth::http::history_binding(&app, req.headers())
+    }
+    .map_err(|_| Error::Restricted)?;
     let account = binding.account;
     let now = app.auth.now().map_err(|_| Error::Unavailable)?;
     let permit = app

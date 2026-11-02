@@ -6,6 +6,7 @@ pub struct Sprite {
     pub reference: EmojiRef,
     pub fallback: u8,
     pub born: f64,
+    pub private_asset: Option<i64>,
 }
 pub fn rect(reference: &EmojiRef, elapsed: f64) -> Option<Rect> {
     let EmojiRef::Custom {
@@ -40,4 +41,20 @@ pub fn rect(reference: &EmojiRef, elapsed: f64) -> Option<Rect> {
     ))
 }
 
-#[cfg(test)]mod tests{use super::*;#[test]fn animation_uses_exact_delay_boundaries(){let reference=EmojiRef::Custom{id:[1;16],frame_px:128,frames:2,columns:2,delays_ms:vec![100,200]};assert_eq!(rect(&reference,0.).unwrap().min,Vec2::ZERO);assert_eq!(rect(&reference,0.1).unwrap().min,Vec2::new(128.,0.));assert_eq!(rect(&reference,0.3).unwrap().min,Vec2::ZERO);}}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn p75_animation_uses_exact_delay_boundaries() {
+        let reference = EmojiRef::Custom {
+            id: [1; 16],
+            frame_px: 128,
+            frames: 2,
+            columns: 2,
+            delays_ms: vec![100, 200],
+        };
+        assert_eq!(rect(&reference, 0.).unwrap().min, Vec2::ZERO);
+        assert_eq!(rect(&reference, 0.1).unwrap().min, Vec2::new(128., 0.));
+        assert_eq!(rect(&reference, 0.3).unwrap().min, Vec2::ZERO);
+    }
+}

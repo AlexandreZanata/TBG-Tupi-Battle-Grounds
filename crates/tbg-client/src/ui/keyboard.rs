@@ -112,17 +112,66 @@ pub(super) fn navigate(
     }
 }
 
-#[cfg(test)]mod tests{
-use super::*;
-#[test]fn ch11_enter_enter_without_tab_never_queues_surrender(){
-    let mut app=App::new();
-    app.insert_resource(State::new(GameState::InMatch)).insert_resource(ButtonInput::<KeyCode>::default()).insert_resource(ActionQueue::default()).insert_resource(crate::sync::MatchInfo{result_id:Some([1;16]),..default()}).insert_resource(super::super::match_chat::Chat::default()).insert_resource(super::super::kit::buttons::Focus::default()).insert_non_send(super::super::textform::ActiveForm::default());
-    #[cfg(tbg_desktop)]app.insert_resource(crate::sync::LatestView::default());
-    app.world_mut().spawn((UiAction::Surrender,ComputedNode{size:Vec2::splat(100.),..default()},UiGlobalTransform::default(),InheritedVisibility::VISIBLE));
-    app.add_systems(Update,navigate);
-    for _ in 0..2{app.world_mut().resource_mut::<ButtonInput<KeyCode>>().reset_all();app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Enter);app.update();assert!(app.world().resource::<ActionQueue>().0.is_empty(),"CH-11: implicit focus must never surrender");}
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().reset_all();app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Tab);app.update();
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().reset_all();app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Enter);app.update();
-    assert_eq!(app.world().resource::<ActionQueue>().0,vec![UiAction::Surrender],"explicit Tab focus keeps keyboard activation usable");
-    TABBED.store(false,std::sync::atomic::Ordering::Relaxed);
-}}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn p75_ch11_enter_enter_without_tab_never_queues_surrender() {
+        let mut app = App::new();
+        app.insert_resource(State::new(GameState::InMatch))
+            .insert_resource(ButtonInput::<KeyCode>::default())
+            .insert_resource(ActionQueue::default())
+            .insert_resource(crate::sync::MatchInfo {
+                result_id: Some([1; 16]),
+                ..default()
+            })
+            .insert_resource(super::super::match_chat::Chat::default())
+            .insert_resource(super::super::kit::buttons::Focus::default())
+            .insert_non_send(super::super::textform::ActiveForm::default());
+        #[cfg(tbg_desktop)]
+        app.insert_resource(crate::sync::LatestView::default());
+        app.world_mut().spawn((
+            UiAction::Surrender,
+            ComputedNode {
+                size: Vec2::splat(100.),
+                ..default()
+            },
+            UiGlobalTransform::default(),
+            InheritedVisibility::VISIBLE,
+        ));
+        app.add_systems(Update, navigate);
+        for _ in 0..2 {
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .reset_all();
+            app.world_mut()
+                .resource_mut::<ButtonInput<KeyCode>>()
+                .press(KeyCode::Enter);
+            app.update();
+            assert!(
+                app.world().resource::<ActionQueue>().0.is_empty(),
+                "CH-11: implicit focus must never surrender"
+            );
+        }
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Tab);
+        app.update();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Enter);
+        app.update();
+        assert_eq!(
+            app.world().resource::<ActionQueue>().0,
+            vec![UiAction::Surrender],
+            "explicit Tab focus keeps keyboard activation usable"
+        );
+        TABBED.store(false, std::sync::atomic::Ordering::Relaxed);
+    }
+}

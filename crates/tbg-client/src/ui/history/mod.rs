@@ -12,6 +12,7 @@ use crate::{
 use bevy::prelude::*;
 use serde_json::{json, Value};
 mod views;
+pub(super) use views::date;
 pub use views::{players, profile, rematch_card, spawn};
 
 #[derive(Clone, Copy)]
@@ -417,6 +418,7 @@ mod tests {
         h.accept(
             Purpose::Save,
             Ok(Reply {
+                bytes: None,
                 status: 409,
                 value: Value::Null,
             }),
@@ -436,6 +438,7 @@ mod tests {
             h.accept(
                 Purpose::List,
                 Ok(Reply {
+                    bytes: None,
                     status,
                     value: Value::Null,
                 }),

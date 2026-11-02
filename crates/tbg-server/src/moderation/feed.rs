@@ -8,7 +8,7 @@ pub(crate) async fn start(
     auth: Arc<Service>,
 ) -> Result<(), &'static str> {
     let snapshot = store
-        .release(crate::store::moderation::feed::snapshot)
+        .release(|db| crate::store::moderation::feed::snapshot(db))
         .await
         .ok_or("moderation_store")?
         .map_err(|_| "moderation_store")?;
@@ -23,6 +23,7 @@ pub(crate) async fn start(
         drop((store, auth));
         let mut tick = tokio::time::interval(std::time::Duration::from_millis(config.feed_ms));
         let mut cursor = 0;
+        let mut previous_now = 0;
         loop {
             tick.tick().await;
             let Some(store) = weak.upgrade() else {
@@ -36,15 +37,16 @@ pub(crate) async fn start(
             };
             let now = config.auth_clock.now().unwrap_or(0);
             if !events.is_empty()
-                || config
-                    .moderation
-                    .0
-                    .read()
-                    .is_ok_and(|s| s.states.values().any(|v| v.ban_until == Some(now)))
+                || config.moderation.0.read().is_ok_and(|s| {
+                    s.states.values().any(|v| {
+                        v.ban_until
+                            .is_some_and(|until| until > previous_now && until <= now)
+                    })
+                })
             {
                 store.refresh_leaderboard(now).await;
                 let next = store
-                    .release(crate::store::moderation::feed::snapshot)
+                    .release(|db| crate::store::moderation::feed::snapshot(db))
                     .await;
                 let Some(Ok(next)) = next else {
                     continue;
@@ -82,6 +84,7 @@ pub(crate) async fn start(
                     cursor = id;
                 }
             }
+            previous_now = now;
             if let Ok(now) = config.auth_clock.now() {
                 let _ = store
                     .release(move |db| {

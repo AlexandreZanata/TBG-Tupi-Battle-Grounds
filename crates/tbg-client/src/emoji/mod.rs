@@ -5,11 +5,17 @@ use tbg_core::protocol::EmojiRef;
 pub mod atlas;
 pub mod sheet;
 pub mod standard;
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+enum Key {
+    Public([u8; 16]),
+    Private(u64, i64),
+}
 #[derive(Resource, Default)]
 struct Sheets {
-    pending: BTreeMap<[u8; 16], crate::auth::api::Request>,
-    loaded: BTreeMap<[u8; 16], Handle<Image>>,
-    failed: BTreeSet<[u8; 16]>,
+    pending: BTreeMap<Key, crate::auth::api::Request>,
+    loaded: BTreeMap<Key, Handle<Image>>,
+    failed: BTreeSet<Key>,
+    epoch: u64,
 }
 pub fn plugin(app: &mut App) {
     app.init_resource::<Sheets>().add_systems(Update, update);
@@ -32,6 +38,24 @@ pub fn spawn(
             reference,
             fallback,
             born,
+            private_asset: None,
+        },
+    ));
+}
+/// Private normalized sheets share the decoder/animation code, with account-scoped cache keys.
+pub fn preview(parent: &mut ChildSpawnerCommands, asset: i64, reference: EmojiRef, born: f64) {
+    parent.spawn((
+        ImageNode::default(),
+        Node {
+            width: px(96),
+            height: px(96),
+            ..default()
+        },
+        atlas::Sprite {
+            reference,
+            fallback: 0,
+            born,
+            private_asset: Some(asset),
         },
     ));
 }
@@ -43,6 +67,15 @@ fn update(
     mut sprites: Query<(&mut ImageNode, &atlas::Sprite)>,
 ) {
     let now = time.elapsed_secs_f64();
+    let epoch = crate::auth::epoch();
+    if sheets.epoch != epoch {
+        sheets.pending.clear();
+        sheets.failed.clear();
+        for (_, handle) in std::mem::take(&mut sheets.loaded) {
+            images.remove(handle.id());
+        }
+        sheets.epoch = epoch;
+    }
     let pending: Vec<_> = sheets.pending.keys().copied().collect();
     for id in pending {
         let result = sheets.pending.get_mut(&id).and_then(|r| r.take(now));
@@ -86,7 +119,11 @@ fn update(
                 node.rect = None;
             }
             EmojiRef::Custom { id, .. } => {
-                if let Some(handle) = sheets.loaded.get(id) {
+                let key = sprite
+                    .private_asset
+                    .map(|asset| Key::Private(epoch, asset))
+                    .unwrap_or(Key::Public(*id));
+                if let Some(handle) = sheets.loaded.get(&key) {
                     node.image = handle.clone();
                     node.rect = atlas::rect(&sprite.reference, now - sprite.born);
                 } else {
@@ -94,15 +131,18 @@ fn update(
                     node.rect = None;
                     if sheets.pending.len() < 6
                         && sheets.failed.len() < 128
-                        && !sheets.pending.contains_key(id)
-                        && !sheets.failed.contains(id)
+                        && !sheets.pending.contains_key(&key)
+                        && !sheets.failed.contains(&key)
                     {
                         let hex: String = id.iter().map(|b| format!("{b:02x}")).collect();
                         sheets.pending.insert(
-                            *id,
+                            key,
                             crate::auth::api::Request::sheet(
-                                format!("/api/emoji/{hex}.png"),
-                                false,
+                                sprite
+                                    .private_asset
+                                    .map(|asset| format!("/api/me/emoji/{asset}/sheet.png"))
+                                    .unwrap_or_else(|| format!("/api/emoji/{hex}.png")),
+                                sprite.private_asset.is_some(),
                             ),
                         );
                     }

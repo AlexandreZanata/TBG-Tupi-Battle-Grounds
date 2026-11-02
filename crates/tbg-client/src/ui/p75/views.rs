@@ -1,7 +1,7 @@
 //! One medieval presentation for identity, recovery, report and emoji-library states.
 use super::*;
 #[derive(Component)]
-struct Root;
+pub(super) struct Root;
 #[allow(clippy::too_many_arguments)]
 pub(super) fn render(
     mut commands: Commands,
@@ -43,13 +43,13 @@ pub(super) fn render(
                     column_gap: px(8),
                     ..default()
                 },
-            )
+            ))
             .with_children(|p| {
                 if crate::auth::snapshot().access.is_some() {
-                    button(p, *lang, "p75.account", Action::Account);
-                    button(p, *lang, "p75.emojis", Action::Emojis);
+                    toolbar_button(p, *lang, "p75.account", Action::Account);
+                    toolbar_button(p, *lang, "p75.emojis", Action::Emojis);
                 } else {
-                    button(p, *lang, "p75.lost_key", Action::LostKey);
+                    toolbar_button(p, *lang, "p75.lost_key", Action::LostKey);
                 }
             });
     }
@@ -57,6 +57,8 @@ pub(super) fn render(
         && !info.spectating
         && s.page == Page::None
         && crate::auth::snapshot().access.is_some()
+        && s.eligibility
+            .is_some_and(|(id, eligible)| eligible && Some(id) == info.result_id)
     {
         commands
             .spawn((
@@ -69,7 +71,16 @@ pub(super) fn render(
                     ..default()
                 },
             ))
-            .with_children(|p| button(p, *lang, "p75.report", Action::ReportMatch));
+            .with_children(|p| {
+                toolbar_button(p, *lang, "p75.report", Action::ReportMatch);
+                if let (Some(you), Some(policy)) = (info.you, chat.policy.as_ref()) {
+                    for emoji in &policy.loadouts[1 - you.index()] {
+                        if let tbg_core::protocol::EmojiRef::Custom { id, .. } = emoji {
+                            toolbar_button(p, *lang, "p75.report_emoji", Action::ReportEmoji(*id));
+                        }
+                    }
+                }
+            });
     }
     if s.page == Page::None {
         return;
@@ -89,55 +100,67 @@ pub(super) fn render(
             BackgroundColor(Color::BLACK.with_alpha(0.8)),
         ))
         .with_children(|root| {
-            root.spawn(kit::panel()).insert(
-                Node {
-                    width: px(840),
-                    max_height: percent(88),
-                    overflow: Overflow::scroll_y(),
-                    padding: UiRect::all(px(24)),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: px(10),
-                    ..default()
-                },
-            ))
-            .with_children(|p| {
-                p.spawn(kit::heading(
-                    lang.key(match s.page {
-                        Page::Account => "p75.account",
-                        Page::Recovery => "p75.lost_key",
-                        Page::Emojis => "p75.emojis",
-                        Page::Report => "p75.report",
-                        Page::Suspended => "p75.suspended",
-                        Page::None => "p75.account",
-                    }),
-                    28.,
-                ));
-                if !s.notice.is_empty() {
-                    p.spawn(kit::muted(lang.key(s.notice), 16.));
-                }
-                match s.page {
-                    Page::Account => account(p, &s, *lang),
-                    Page::Recovery => recovery(p, &s, *lang),
-                    Page::Report => report(p, &s, *lang),
-                    Page::Emojis => emojis(p, &s, *lang, time.elapsed_secs_f64()),
-                    Page::Suspended => {
-                        if let Some((until, reason)) = s.suspension {
-                            p.spawn(kit::muted(
-                                lang.key(&format!("p75.reason.{}", reason.as_str())),
-                                20.,
-                            ));
-                            p.spawn(kit::muted(
-                                until
-                                    .map(|v| v.to_string())
-                                    .unwrap_or_else(|| lang.key("p75.permanent")),
-                                18.,
-                            ));
-                        }
+            root.spawn(kit::panel())
+                .insert((
+                    DialogPanel,
+                    Node {
+                        width: px(840),
+                        max_height: percent(88),
+                        overflow: Overflow::scroll_y(),
+                        padding: UiRect::all(px(24)),
+                        flex_direction: FlexDirection::Column,
+                        row_gap: px(10),
+                        ..default()
+                    },
+                ))
+                .with_children(|p| {
+                    p.spawn(kit::heading(
+                        lang.key(match s.page {
+                            Page::Account => "p75.account",
+                            Page::Recovery => "p75.lost_key",
+                            Page::Emojis => "p75.emojis",
+                            Page::Report => "p75.report",
+                            Page::Suspended => "p75.suspended",
+                            Page::None => "p75.account",
+                        }),
+                        28.,
+                    ));
+                    p.spawn(kit::muted(lang.key("p75.keyboard"), 14.));
+                    if !s.notice.is_empty() {
+                        p.spawn(kit::muted(lang.key(s.notice), 16.));
                     }
-                    _ => {}
-                }
-                button(p, *lang, "common.close", Action::Close);
-            });
+                    match s.page {
+                        Page::Account => {
+                            account(p, &s, *lang);
+                            button(p, *lang, &format!("p75.mode.{}", chat.mode), Action::Mode);
+                        }
+                        Page::Recovery => recovery(p, &s, *lang),
+                        Page::Report => report(p, &s, *lang),
+                        Page::Emojis => emojis(p, &s, *lang, time.elapsed_secs_f64()),
+                        Page::Suspended => {
+                            if let Some((until, reason)) = s.suspension {
+                                p.spawn(kit::muted(
+                                    lang.key(&format!("p75.reason.{}", reason.as_str())),
+                                    20.,
+                                ));
+                                p.spawn(kit::muted(
+                                    until
+                                        .map(|v| {
+                                            i64::try_from(v)
+                                                .map(|v| super::super::history::date(v, *lang))
+                                                .unwrap_or_else(|_| {
+                                                    lang.key("p73.unavailable_metrics")
+                                                })
+                                        })
+                                        .unwrap_or_else(|| lang.key("p75.permanent")),
+                                    18.,
+                                ));
+                            }
+                        }
+                        _ => {}
+                    }
+                    button(p, *lang, "common.close", Action::Close);
+                });
         });
     let _ = &chat;
 }
@@ -180,9 +203,16 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
     });
     button(p, lang, "p75.confirm_change", Action::EmailConfirm);
     button(p, lang, "p75.cancel_change", Action::EmailCancel);
-    if let Some(until) = s.data["pending_change"]["until"].as_i64() {
+    if let Some(until) = s.data["pending_change"]["until"]
+        .as_i64()
+        .filter(|until| *until > 0)
+    {
         p.spawn(kit::muted(
-            format!("{}: {until}", lang.key("p75.hold_until")),
+            format!(
+                "{}: {}",
+                lang.key("p75.hold_until"),
+                super::super::history::date(until, lang)
+            ),
             16.,
         ));
     }
@@ -248,6 +278,7 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
                 r.spawn((
                     kit::control(id.to_string(), true, 44.),
                     UiAction::P75(Action::Standard(id)),
+                    DialogButton,
                 ))
                 .with_children(|p| {
                     crate::emoji::spawn(
@@ -283,9 +314,29 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
                 16.,
             ));
             if let Some(id) = asset["id"].as_i64() {
-                button(p, lang, "p75.withdraw", Action::Withdraw(id));
+                let reference = tbg_core::protocol::EmojiRef::Custom {
+                    id: [0; 16],
+                    frame_px: 128,
+                    frames: asset["frames"].as_u64().unwrap_or(0) as u8,
+                    columns: asset["columns"].as_u64().unwrap_or(0) as u8,
+                    delays_ms: serde_json::from_value(asset["delays_ms"].clone())
+                        .unwrap_or_default(),
+                };
+                if reference.valid() {
+                    crate::emoji::preview(p, id, reference, now);
+                }
+                if let Some(reason) = asset["reason"].as_str() {
+                    p.spawn(kit::muted(reason, 16.));
+                }
+                if matches!(asset["status"].as_str(), Some("pending" | "approved")) {
+                    button(p, lang, "p75.withdraw", Action::Withdraw(id));
+                }
             }
-            if let Some(public) = asset["public_id"].as_str().and_then(parse_id) {
+            if let Some(public) = asset["public_id"]
+                .as_str()
+                .and_then(parse_id)
+                .filter(|_| asset["status"] == "approved")
+            {
                 button(p, lang, "p75.equip", Action::EquipCustom(public));
             }
         }

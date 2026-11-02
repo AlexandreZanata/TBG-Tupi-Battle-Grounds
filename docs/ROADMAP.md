@@ -684,7 +684,7 @@ palettes across all eight Arenas.
 
 | Phase | Spec | Deliverable | Status | Owner gates |
 |---|---|---|---|---|
-| P75 | [P75-admin-moderation-and-match-social.md](phases/P75-admin-moderation-and-match-social.md) | Required player email, in-game key recovery by emailed code on the same account, single Owner operator claimed by email, console (bans, restrictions, reports, emoji review, blocked terms, kill switches, moderators, audit), Report account, match chat, emojis with 3 slots and moderated custom emojis/GIFs | **planned** on `docs/p75-admin-moderation-plan`; no runtime change | O-P75-01…13, SMTP account and DNS, privacy/conduct text, working backups, attended schema+protocol switch, admin claim, feature switches, look/fun |
+| P75 | [P75-admin-moderation-and-match-social.md](phases/P75-admin-moderation-and-match-social.md) | Required player email, in-game key recovery by emailed code on the same account, single Owner operator claimed by email, console (bans, restrictions, reports, emoji review, blocked terms, kill switches, moderators, audit), Report account, match chat, emojis with 3 slots and moderated custom emojis/GIFs | **implementation candidate** on `phase/p75-admin-moderation-social`; S14 evidence and Draft PR recorded in the phase report; activation pending | O-P75-01…13, SMTP account and DNS, privacy/conduct text, working backups, attended schema+protocol switch, admin claim, feature switches, look/fun |
 
 Read the [requirements](planning/P75-REQUIREMENTS.md), the
 [immutability contracts and acceptance](planning/P75-CONTRACTS.md), the

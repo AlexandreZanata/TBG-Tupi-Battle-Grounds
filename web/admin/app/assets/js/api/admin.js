@@ -19,8 +19,11 @@ export async function request(path,{method='GET',body=null}={}) {
 }
 export async function sheet(id) {
   if(!Number.isSafeInteger(id)||id<1)throw new ApiError(400,'invalid_asset');
-  const response=await fetch(`/admin-api/v1/emoji/${id}/sheet.png`,{credentials:'same-origin',cache:'no-store',redirect:'error'});
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
+  try {
+  const response=await fetch(`/admin-api/v1/emoji/${id}/sheet.png`,{credentials:'same-origin',cache:'no-store',redirect:'error',signal:controller.signal});
   if(!response.ok)throw new ApiError(response.status,'sheet_unavailable');const bytes=await read(response,262144);
   if(bytes.length<24||bytes[0]!==137||String.fromCharCode(...bytes.slice(1,4))!=='PNG')throw new ApiError(422,'sheet_invalid');
-  const data=new DataView(bytes.buffer);if(data.getUint32(16)>768||data.getUint32(20)>512)throw new ApiError(422,'sheet_dimensions');return createImageBitmap(new Blob([bytes],{type:'image/png'}));
+  const data=new DataView(bytes.buffer);if(data.getUint32(16)>768||data.getUint32(20)>512)throw new ApiError(422,'sheet_dimensions');return await createImageBitmap(new Blob([bytes],{type:'image/png'}));
+  } finally { clearTimeout(timer); }
 }

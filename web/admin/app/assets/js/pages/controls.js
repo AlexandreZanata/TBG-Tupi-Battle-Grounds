@@ -12,7 +12,7 @@ export async function controls(root,ctx,area) {
         await request(`settings/${row.key}`,{method:'PUT',body:{...body,value:row.value?0:1}});
         await controls(root,ctx,area);
       });
-      root.append(card(t(`setting.${row.key}`),el('p',{text:t(row.value?'enabled':'disabled')}),form([select('reason','reason',reasons)],row.value?'disable':'enable',toggle)));
+      root.append(card(t(`setting.${row.key}`),el('p',{text:t(row.value?'enabled':'disabled')}),ctx.session.operator.role==='owner'?form([select('reason','reason',reasons)],row.value?'disable':'enable',toggle):el('p',{text:t('read_only')})));
     }
     return;
   }

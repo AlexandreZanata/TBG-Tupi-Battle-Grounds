@@ -6,7 +6,7 @@ use axum::{
     Json,
 };
 use serde::Deserialize;
-use serde_json::{json, Value};
+use serde_json::json;
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Email {
@@ -42,6 +42,7 @@ pub(crate) fn execute(
     token: &str,
     ip: &str,
     request: &str,
+    attempt: &str,
     now: i64,
     second: bool,
 ) -> Result<Response, Error> {
@@ -60,9 +61,8 @@ pub(crate) fn execute(
         }
         "session/start" => {
             let i: Key = parse(bytes)?;
-            let attempt = super::key::random::<16>().map_err(|_| Error::Unavailable)?;
             if let Ok(Some(grant)) =
-                db::sessions::start(conn, &i.admin_key, &attempt, ip, now, second)
+                db::sessions::start(conn, &i.admin_key, attempt, ip, now, second)
             {
                 return render(grant);
             }

@@ -34,11 +34,11 @@ pub struct Slots {
     pub slots: Vec<Slot>,
 }
 pub fn allowed(db: &Connection, account: i64, now: i64) -> Result<(), Error> {
-    if super::moderation::state(db, account)
-        .map_err(|_| Error::Unavailable)?
-        .emoji_until
-        .is_some_and(|u| u > now)
-    {
+    let state = super::moderation::state(db, account).map_err(|_| Error::Unavailable)?;
+    if state.banned(now) {
+        return Err(Error::Restricted);
+    }
+    if state.emoji_until.is_some_and(|u| u > now) {
         return Err(Error::Restricted);
     }
     let verified:bool=db.query_row("SELECT EXISTS(SELECT 1 FROM recovery_identity WHERE account_id=?1 AND verified_email IS NOT NULL AND compromised=0)",[account],|r|r.get(0))?;
@@ -72,6 +72,14 @@ pub fn upload(
     }
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
     allowed(&tx, account, now)?;
+    let duplicate: bool = tx.query_row(
+        "SELECT EXISTS(SELECT 1 FROM emoji_assets WHERE owner_account_id=?1 AND content_hash=?2)",
+        params![account, sheet.hash.as_slice()],
+        |r| r.get(0),
+    )?;
+    if duplicate {
+        return Err(Error::Invalid);
+    }
     let (today,total,pending):(i64,i64,i64)=tx.query_row("SELECT (SELECT COUNT(*) FROM emoji_assets WHERE owner_account_id=?1 AND created_unix>?2),(SELECT COUNT(*) FROM emoji_assets WHERE owner_account_id=?1 AND status NOT IN ('rejected','withdrawn')),(SELECT COUNT(*) FROM emoji_assets WHERE status='pending')",params![account,now-86400],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?)))?;
     if today >= 3 || total >= 10 {
         return Err(Error::Limited);
@@ -82,6 +90,7 @@ pub fn upload(
     tx.execute("INSERT INTO emoji_assets(owner_account_id,content_hash,status,label,sheet,frame_px,frames,columns,delays_json,source_format,source_bytes,created_unix) VALUES(?1,?2,'pending',?3,?4,128,?5,?6,?7,?8,?9,?10)",params![account,sheet.hash.as_slice(),label,sheet.bytes,sheet.frames,sheet.columns,serde_json::to_string(&sheet.delays).map_err(|_|Error::Unavailable)?,sheet.source,sheet.source_bytes as i64,now])?;
     let id = tx.last_insert_rowid();
     tx.commit()?;
+    crate::metrics::p75::add(&crate::metrics::p75::UPLOADS);
     Ok(id)
 }
 pub fn library(db: &Connection, account: i64) -> Result<Value, Error> {
@@ -91,7 +100,7 @@ pub fn library(db: &Connection, account: i64) -> Result<Value, Error> {
     let mut s=db.prepare("SELECT s.slot,s.standard_id,hex(e.public_id) FROM account_emoji_slots s LEFT JOIN emoji_assets e ON e.id=s.emoji_id WHERE s.account_id=?1")?;
     for row in s.query_map([account], |r| {
         Ok((
-            r.get::<_, usize>(0)?,
+            usize::from(r.get::<_, u8>(0)?),
             r.get::<_, Option<u8>>(1)?,
             r.get::<_, Option<String>>(2)?,
         ))

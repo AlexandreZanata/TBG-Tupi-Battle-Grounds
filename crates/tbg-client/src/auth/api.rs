@@ -35,8 +35,19 @@ impl Request {
         revision: Option<i64>,
         private: bool,
     ) -> Self {
+        let mut request = Self::prepare(path, method, body, revision, private);
+        request.dispatch();
+        request
+    }
+    fn prepare(
+        path: String,
+        method: &'static str,
+        body: Option<Value>,
+        revision: Option<i64>,
+        private: bool,
+    ) -> Self {
         let view = snapshot();
-        let mut request = Self {
+        Self {
             path,
             method,
             body,
@@ -50,9 +61,7 @@ impl Request {
             slot: Arc::default(),
             retried: false,
             wait_until: None,
-        };
-        request.dispatch();
-        request
+        }
     }
     pub fn recovery(name: &str, email: &str, locale: &str) -> Self {
         let channel = if cfg!(target_arch = "wasm32") {
@@ -79,21 +88,20 @@ impl Request {
                 }
             })
             .collect();
-        let mut r = Self::new(
+        let mut r = Self::prepare(
             format!("/api/me/emoji?label={label}"),
-            "GET",
+            "POST",
             None,
             None,
             true,
         );
-        r.method = "POST";
         r.raw = Some(bytes);
         r.mime = Some(mime.into());
         r.dispatch();
         r
     }
     pub fn sheet(path: String, private: bool) -> Self {
-        let mut r = Self::new(path, "GET", None, None, private);
+        let mut r = Self::prepare(path, "GET", None, None, private);
         r.sheet = true;
         r.dispatch();
         r
@@ -291,4 +299,20 @@ pub fn allowed(path: &str, method: &str) -> bool {
     }
 }
 
-#[cfg(test)]mod p75_tests{use super::*;#[test]fn mutations_remain_on_the_exact_allowlist(){assert!(allowed("/api/me/emoji/slots","PUT"));assert!(allowed("/api/auth/native/recovery-request","POST"));for(path,method)in[("/api/players/Victim","POST"),("/admin-api/v1/settings/chat_enabled","PUT"),("/api/me/matches/1","DELETE"),("/api/me/emoji/1/sheet.png","DELETE")]{assert!(!allowed(path,method));}}}
+#[cfg(test)]
+mod p75_tests {
+    use super::*;
+    #[test]
+    fn p75_mutations_remain_on_the_exact_allowlist() {
+        assert!(allowed("/api/me/emoji/slots", "PUT"));
+        assert!(allowed("/api/auth/native/recovery-request", "POST"));
+        for (path, method) in [
+            ("/api/players/Victim", "POST"),
+            ("/admin-api/v1/settings/chat_enabled", "PUT"),
+            ("/api/me/matches/1", "DELETE"),
+            ("/api/me/emoji/1/sheet.png", "DELETE"),
+        ] {
+            assert!(!allowed(path, method));
+        }
+    }
+}

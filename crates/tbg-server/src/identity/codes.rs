@@ -58,7 +58,7 @@ pub fn equal(a: &[u8], b: &[u8]) -> bool {
 mod tests {
     use super::*;
     #[test]
-    fn ic15_codes_are_typed_and_purpose_bound() {
+    fn p75_ic15_codes_are_typed_and_purpose_bound() {
         let code = generate().unwrap();
         let raw = parse(&code).unwrap();
         assert_eq!(raw.len(), 10);

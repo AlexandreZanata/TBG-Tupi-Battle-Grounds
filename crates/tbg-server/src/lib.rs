@@ -166,6 +166,14 @@ pub async fn run_with(
         config.clone(),
     ));
     if let Some(store) = &store {
+        if config.admin.enabled {
+            let now = auth.now().map_err(|_| std::io::Error::other("clock"))?;
+            store
+                .release(move |db| store::operators::sessions::restart(db, now))
+                .await
+                .ok_or_else(|| std::io::Error::other("operator store unavailable"))?
+                .map_err(|_| std::io::Error::other("operator restart refused"))?;
+        }
         if !config.bootstrap_email.0.is_empty() {
             let address = config.bootstrap_email.0.clone();
             let now = auth.now().map_err(|_| std::io::Error::other("clock"))?;

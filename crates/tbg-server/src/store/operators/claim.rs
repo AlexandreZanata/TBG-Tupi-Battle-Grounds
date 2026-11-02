@@ -13,6 +13,11 @@ pub fn request(db: &mut Connection, address: &str, ip: &str, now: i64) -> Result
         )
         .optional()?;
     if let Some((id, locale)) = row {
+        tx.execute(
+            "UPDATE operator_challenges SET consumed=1 WHERE operator_id=?1 AND purpose='claim'",
+            [id],
+        )?;
+        tx.execute("UPDATE mail_outbox SET status='cancelled' WHERE principal_kind='operator' AND principal_id=?1 AND purpose='operator_claim' AND status='pending'", [id])?;
         let _ = mail_outbox::enqueue(
             &tx,
             "operator_claim",
@@ -52,6 +57,7 @@ pub fn complete(
     let (raw, hash) = key::generate().map_err(|_| Error::Unavailable)?;
     tx.execute("UPDATE operators SET key_hash=?2,key_epoch=key_epoch+1,status='active',claimed_unix=?3 WHERE id=?1",params![id,hash.as_slice(),now])?;
     tx.execute("UPDATE operator_sessions SET revoked_unix=?2,revoke_reason='key_rotated' WHERE operator_id=?1 AND revoked_unix IS NULL",params![id,now])?;
+    tx.execute("UPDATE mail_outbox SET status='cancelled' WHERE principal_kind='operator' AND principal_id=?1 AND purpose IN ('operator_login','operator_claim') AND status='pending'",[id])?;
     tx.execute(
         "UPDATE operator_challenges SET consumed=1 WHERE operator_id=?1",
         [id],

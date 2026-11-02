@@ -96,7 +96,7 @@ async fn execute(
     }
     let query = req.uri().query().unwrap_or("").to_owned();
     let method = req.method().as_str().to_owned();
-    let system = json!({"mail_configured":app.mail_configured,"slot":app.release.slot(),"build":app.config.server_build,"online":app.metrics.connections.load(std::sync::atomic::Ordering::Relaxed),"live_matches":app.metrics.matches_running.load(std::sync::atomic::Ordering::Relaxed),"feed_lag":0});
+    let system = json!({"mail_configured":app.mail_configured,"slot":app.release.slot(),"build":app.config.server_build,"online":app.metrics.connections.load(std::sync::atomic::Ordering::Relaxed),"live_matches":app.metrics.matches_running.load(std::sync::atomic::Ordering::Relaxed),"feed_cursor":app.config.moderation.cursor()});
     let path = req
         .uri()
         .path()
@@ -114,7 +114,7 @@ async fn execute(
     let mutation = req.method() != Method::GET;
     let anonymous = request::cookie(req.headers(), "__Host-tbg_admin_pre");
     if route.capability == policy::Capability::Public && mutation {
-        let expected = anonymous.ok_or(Error::Forbidden)?;
+        let expected = anonymous.as_ref().ok_or(Error::Forbidden)?;
         if expected.len() != 64
             || !crate::identity::codes::equal(
                 &super::key::hash(&expected),
@@ -124,6 +124,15 @@ async fn execute(
             return Err(Error::Forbidden);
         }
     }
+    let attempt = anonymous
+        .map(|nonce| {
+            super::key::hash(&nonce)
+                .iter()
+                .take(16)
+                .map(|b| format!("{b:02x}"))
+                .collect::<String>()
+        })
+        .unwrap_or_default();
     let permit = app
         .history_reads
         .clone()
@@ -149,12 +158,12 @@ async fn execute(
                 },Err(e)=>return Err(e)
             }
         }else{None};
-        if path.starts_with("session")||path.starts_with("claim/"){session::execute(db,&path,&bytes,&token,&ip,&id,now,second)}else{
+        if path.starts_with("session")||path.starts_with("claim/"){session::execute(db,&path,&bytes,&token,&ip,&id,&attempt,now,second)}else{
             let principal=principal.as_ref().ok_or(Error::Unauthorized)?;
             if path.starts_with("emoji/")&&path.ends_with("/sheet.png") {
                 let asset=path.split('/').nth(1).and_then(|v|v.parse::<i64>().ok()).ok_or(Error::Invalid)?;
-                let bytes:Option<Vec<u8>>=db.query_row("SELECT sheet FROM emoji_assets WHERE id=?1",[asset],|r|r.get(0)).map_err(|_|Error::Invalid)?;
-                return Ok(([("content-type","image/png")],bytes.ok_or(Error::Invalid)?).into_response());
+                let bytes=operators::areas::private_sheet(db,asset)?;
+                return Ok(([("content-type","image/png")],bytes).into_response());
             }
             let context=operators::areas::Context{principal,request:&id,now,query:&query,system};
             Ok(Json(operators::areas::authorized(db,&path,&method,&bytes,&context,&token,csrf.as_deref())?).into_response())

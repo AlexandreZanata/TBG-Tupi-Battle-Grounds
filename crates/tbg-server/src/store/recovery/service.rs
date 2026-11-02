@@ -80,7 +80,7 @@ pub fn mask(address: &str) -> String {
     };
     format!("{first}***{last}@{domain}")
 }
-pub fn panel(db: &Connection, account: i64) -> Result<Value, Error> {
+pub fn panel(db: &Connection, account: i64, now: i64) -> Result<Value, Error> {
     let name: String = db.query_row("SELECT name FROM accounts WHERE id=?1", [account], |r| {
         r.get(0)
     })?;
@@ -99,8 +99,25 @@ pub fn panel(db: &Connection, account: i64) -> Result<Value, Error> {
     } else {
         "none"
     };
+    let moderation =
+        super::super::moderation::state(db, account).map_err(|_| Error::Unavailable)?;
+    let enabled = |key: &str| {
+        db.query_row(
+            "SELECT value FROM admin_settings WHERE key=?1",
+            [key],
+            |r| r.get::<_, bool>(0),
+        )
+    };
+    let can_chat = !moderation.banned(now)
+        && verified.is_some()
+        && !moderation.chat_until.is_some_and(|until| until > now)
+        && enabled("chat_enabled")?;
+    let can_upload = !moderation.banned(now)
+        && verified.is_some()
+        && !moderation.emoji_until.is_some_and(|until| until > now)
+        && enabled("emoji_uploads_enabled")?;
     Ok(
-        json!({"name":name,"email_masked":email.as_deref().map(mask),"email_state":state,"pending_change":hold.map(|until|json!({"until":until})),"chat_until":null,"emoji_until":null,"can_chat":verified.is_some(),"can_upload":verified.is_some()}),
+        json!({"name":name,"email_masked":email.as_deref().map(mask),"email_state":state,"pending_change":hold.map(|until|json!({"until":until})),"chat_until":moderation.chat_until,"emoji_until":moderation.emoji_until,"can_chat":can_chat,"can_upload":can_upload}),
     )
 }
 pub fn verify(db: &mut Connection, account: i64, code: &str, now: i64) -> Result<(), Error> {
@@ -144,6 +161,7 @@ pub fn resend(db: &mut Connection, account: i64, ip: &str, now: i64) -> Result<(
     budget(&tx, &format!("verify:account:{account}"), 3, 3600, now)?;
     budget(&tx, &format!("destination:{email}"), 3, 3600, now)?;
     budget(&tx, &format!("mail:ip:{ip}"), 12, 3600, now)?;
+    challenge::consume(&tx, account, "verify")?;
     let _ = outbox::enqueue(
         &tx,
         "account_verify",
@@ -197,6 +215,9 @@ pub fn change(
             return Err(Error::Conflict);
         }
         budget(&tx, &format!("change:{account}"), 3, 3600, now)?;
+        challenge::consume(&tx, account, "change_old")?;
+        challenge::consume(&tx, account, "change_new")?;
+        tx.execute("UPDATE mail_outbox SET status='cancelled' WHERE principal_kind='account' AND principal_id=?1 AND purpose IN ('account_change_old','account_change_new') AND status='pending'",[account])?;
         // 0 denotes a routine change; a positive timestamp is the lost-mailbox hold deadline.
         tx.execute("UPDATE recovery_identity SET pending_email=?2,pending_unix=?3,locale=?4,updated_unix=?5 WHERE account_id=?1",params![account,input.email,if lost_old{now+7*86400}else{0},locale,now])?;
         let _ = outbox::enqueue(
@@ -256,16 +277,17 @@ pub fn confirm(
     let Some(hold) = hold else {
         return Err(Error::Denied);
     };
-    let new_ok = challenge::check(&tx, account, "change_new", new, now)?;
+    let new_ok = challenge::proof(&tx, account, "change_new", new, now)?;
     let old_ok = if hold > 0 {
         true
     } else {
-        challenge::check(&tx, account, "change_old", old, now)?
+        challenge::proof(&tx, account, "change_old", old, now)?
     };
     if !new_ok || !old_ok {
         tx.commit()?;
         return Err(Error::Denied);
     }
+    challenge::consume(&tx, account, "change_new")?;
     if hold > now {
         tx.commit()?;
         return Ok(false);

@@ -137,6 +137,12 @@ pub fn authorized(
     match result {
         Ok(value) => {
             db.execute_batch("COMMIT")?;
+            if method == "POST" && path.ends_with("/approve") {
+                crate::metrics::p75::add(&crate::metrics::p75::APPROVALS);
+            }
+            if method == "POST" && path.starts_with("accounts/") && path.ends_with("/ban") {
+                crate::metrics::p75::add(&crate::metrics::p75::BANS);
+            }
             Ok(value)
         }
         Err(e) => {
@@ -144,4 +150,14 @@ pub fn authorized(
             Err(e)
         }
     }
+}
+
+/// Authorization is checked by the dedicated operator router before this store-only read.
+pub fn private_sheet(db: &Connection, asset: i64) -> Result<Vec<u8>, Error> {
+    db.query_row("SELECT sheet FROM emoji_assets WHERE id=?1", [asset], |r| {
+        r.get::<_, Option<Vec<u8>>>(0)
+    })
+    .optional()?
+    .flatten()
+    .ok_or(Error::Invalid)
 }

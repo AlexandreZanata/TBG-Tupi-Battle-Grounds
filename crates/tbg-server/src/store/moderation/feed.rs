@@ -5,8 +5,8 @@ pub fn read(db: &Connection, after: i64) -> rusqlite::Result<Vec<(i64, String, O
     let mut s = db.prepare(
         "SELECT id,kind,account_id FROM moderation_events WHERE id>?1 ORDER BY id LIMIT 256",
     )?;
-    s.query_map([after], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?
-        .collect()
+    let rows = s.query_map([after], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))?;
+    rows.collect()
 }
 pub(crate) fn snapshot(db: &Connection) -> rusqlite::Result<crate::moderation::cache::Snapshot> {
     let mut snapshot = crate::moderation::cache::Snapshot::default();
@@ -24,13 +24,13 @@ pub(crate) fn snapshot(db: &Connection) -> rusqlite::Result<crate::moderation::c
     }
     snapshot.settings = {
         let mut s = db.prepare("SELECT key,value FROM admin_settings")?;
-        s.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?
-            .collect::<Result<BTreeMap<_, _>, _>>()?
+        let rows = s.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?;
+        rows.collect::<Result<BTreeMap<_, _>, _>>()?
     };
     snapshot.terms = {
         let mut s = db.prepare("SELECT term FROM chat_blocked_terms ORDER BY term LIMIT 4096")?;
-        s.query_map([], |r| r.get(0))?
-            .collect::<Result<BTreeSet<_>, _>>()?
+        let rows = s.query_map([], |r| r.get(0))?;
+        rows.collect::<Result<BTreeSet<_>, _>>()?
     };
     {
         let mut s = db.prepare(

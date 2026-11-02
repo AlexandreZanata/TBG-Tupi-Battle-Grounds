@@ -1,6 +1,6 @@
 //! Versioned restriction projection and atomic moderation history/feed writes.
 use super::audit;
-use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
+use rusqlite::{params, Connection, OptionalExtension};
 use serde_json::json;
 use tbg_core::protocol::SuspensionReason;
 pub const PERMANENT: i64 = 253402300799;
@@ -42,13 +42,26 @@ pub struct Action {
     pub audit: audit::Entry,
 }
 pub fn apply(db: &mut Connection, action: Action, now: i64) -> Result<State, Error> {
+    if db.is_autocommit() {
+        let tx = db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+        let next = write(&tx, action, now)?;
+        tx.commit()?;
+        Ok(next)
+    } else {
+        let tx = db.savepoint()?;
+        let next = write(&tx, action, now)?;
+        tx.commit()?;
+        Ok(next)
+    }
+}
+fn write(db: &Connection, action: Action, now: i64) -> Result<State, Error> {
     if SuspensionReason::parse(&action.reason).is_none()
         || action.note.as_ref().is_some_and(|s| s.len() > 1024)
     {
         return Err(Error::Invalid);
     }
-    let tx = db.savepoint()?;
-    let before = state(&tx, action.account)?;
+    let tx = db;
+    let before = state(tx, action.account)?;
     if before.version != action.expected {
         return Err(Error::Conflict);
     }
@@ -87,7 +100,6 @@ pub fn apply(db: &mut Connection, action: Action, now: i64) -> Result<State, Err
         tx.execute("UPDATE auth_sessions SET revoked_at=?2,revoke_reason=?3 WHERE account_id=?1 AND revoked_at IS NULL",params![action.account,now,if action.kind=="ban"{"banned"}else{"operator"}])?;
     }
     audit::insert(&tx, now, &action.audit)?;
-    tx.commit()?;
     Ok(next)
 }
 pub fn event(

@@ -21,6 +21,11 @@ pub fn enqueue(
     now: i64,
 ) -> rusqlite::Result<bool> {
     let changed=conn.execute("INSERT INTO mail_outbox(purpose,principal_kind,principal_id,to_email,locale,created_unix,not_before_unix) SELECT ?1,?2,?3,?4,?5,?6,?6 WHERE (SELECT COUNT(*) FROM mail_outbox WHERE status IN ('pending','sending'))<2000",params![purpose,kind,id,email,locale,now])?;
+    crate::metrics::p75::add(if changed == 1 {
+        &crate::metrics::p75::MAIL_QUEUED
+    } else {
+        &crate::metrics::p75::MAIL_DROPPED
+    });
     Ok(changed == 1)
 }
 
@@ -35,7 +40,8 @@ pub fn lease(conn: &mut Connection, holder: &str, now: i64) -> rusqlite::Result<
     if !mine {
         return Ok(None);
     }
-    let row:Option<(i64,String,String,i64,String,String)>=tx.query_row("SELECT id,purpose,principal_kind,principal_id,to_email,locale FROM mail_outbox WHERE (status='pending' AND not_before_unix<=?1) OR (status='sending' AND lease_until_unix<=?1) ORDER BY id LIMIT 1",[now],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?,r.get(4)?,r.get(5)?))).optional()?;
+    tx.execute("UPDATE mail_outbox SET status='failed',last_error='dispatch_exhausted' WHERE id IN (SELECT id FROM mail_outbox WHERE attempts>=8 AND (status='pending' OR (status='sending' AND lease_until_unix<=?1)) LIMIT 256)",[now])?;
+    let row:Option<(i64,String,String,i64,String,String)>=tx.query_row("SELECT id,purpose,principal_kind,principal_id,to_email,locale FROM mail_outbox WHERE attempts<8 AND ((status='pending' AND not_before_unix<=?1) OR (status='sending' AND lease_until_unix<=?1)) ORDER BY id LIMIT 1",[now],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?,r.get(4)?,r.get(5)?))).optional()?;
     let Some((id, purpose, kind, principal, to, locale)) = row else {
         tx.commit()?;
         return Ok(None);

@@ -101,8 +101,13 @@ async fn execute(app: AppState, peer: SocketAddr, req: Request) -> Result<Respon
     let now = app.auth.now().map_err(|_| Error::Unavailable)?;
     store
         .release(move |db| -> Result<Response, Error> {
+            if binding.revoked() {
+                return Err(Error::Denied);
+            }
             match path.as_str() {
-                "/api/me/account" if get => Ok(Json(service::panel(db, account)?).into_response()),
+                "/api/me/account" if get => {
+                    Ok(Json(service::panel(db, account, now)?).into_response())
+                }
                 "/api/me/email/verify" => {
                     let c: Code = parse(&bytes)?;
                     service::verify(db, account, &c.code, now)?;

@@ -56,8 +56,15 @@ pub(super) fn execute(
     if !matches!(status.as_str(), "open" | "actioned" | "dismissed") {
         return Err(Error::Invalid);
     }
-    let mut s=db.prepare("SELECT id,created_unix,reporter_id,target_id,reason,context,comment,evidence_json,status,resolution_note FROM reports WHERE (?1 IS NULL AND id>?2 AND status=?3) OR id=?1 ORDER BY id LIMIT ?4")?;
-    let items=s.query_map(params![target,after,status,limit],|r|Ok(json!({"id":r.get::<_,i64>(0)?,"created":r.get::<_,i64>(1)?,"reporter_id":r.get::<_,i64>(2)?,"target_id":r.get::<_,i64>(3)?,"reason":r.get::<_,String>(4)?,"context":r.get::<_,String>(5)?,"comment":r.get::<_,Option<String>>(6)?,"evidence":serde_json::from_str::<Value>(&r.get::<_,String>(7)?).unwrap_or(Value::Null),"status":r.get::<_,String>(8)?,"resolution_note":r.get::<_,Option<String>>(9)?})))?.collect::<Result<Vec<_>,_>>()?;
+    let mut s=db.prepare("SELECT id,created_unix,reporter_id,target_id,reason,context,comment,evidence_json,status,resolution_note,(SELECT name FROM accounts WHERE id=reports.target_id) FROM reports WHERE (?1 IS NULL AND id>?2 AND status=?3) OR id=?1 ORDER BY id LIMIT ?4")?;
+    let mut items=s.query_map(params![target,after,status,limit],|r|Ok(json!({"id":r.get::<_,i64>(0)?,"created":r.get::<_,i64>(1)?,"reporter_id":r.get::<_,i64>(2)?,"target_id":r.get::<_,i64>(3)?,"reason":r.get::<_,String>(4)?,"context":r.get::<_,String>(5)?,"comment":r.get::<_,Option<String>>(6)?,"evidence":serde_json::from_str::<Value>(&r.get::<_,String>(7)?).unwrap_or(Value::Null),"status":r.get::<_,String>(8)?,"resolution_note":r.get::<_,Option<String>>(9)?,"target_name":r.get::<_,String>(10)?})))?.collect::<Result<Vec<_>,_>>()?;
+    if target.is_none() {
+        for item in &mut items {
+            if let Some(row) = item.as_object_mut() {
+                row.remove("evidence");
+            }
+        }
+    }
     if target.is_some() {
         items.into_iter().next().ok_or(Error::Invalid)
     } else {

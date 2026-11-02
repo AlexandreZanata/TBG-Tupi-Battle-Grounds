@@ -58,12 +58,14 @@ impl Service {
         if address.is_empty() {
             return Err(Error::EmailRequired);
         }
-        let store = self.store()?;
-        let email = store
-            .release(move |db| crate::store::recovery::service::registration(db, &address, &locale))
-            .await
-            .ok_or(Error::Unavailable)?
-            .map_err(db::Error::from)?;
+        let email = crate::store::recovery::service::Enrollment {
+            email: crate::store::recovery::email::normalize(&address)
+                .map_err(|_| Error::EmailInvalid)?,
+            locale,
+        };
+        if !matches!(email.locale.as_str(), "en" | "pt-BR") {
+            return Err(Error::EmailInvalid);
+        }
         let device = tokens::decode::<16>(device)?;
         let retry = tokens::hash(&tokens::decode::<32>(retry)?);
         let fingerprint = tokens::hash(
@@ -99,6 +101,13 @@ impl Service {
                 .await?;
             return Ok(cached.grant.clone());
         }
+        let address = email.email.clone();
+        let locale = email.locale.clone();
+        self.store()?
+            .release(move |db| crate::store::recovery::service::registration(db, &address, &locale))
+            .await
+            .ok_or(Error::Unavailable)?
+            .map_err(db::Error::from)?;
         self.cache_capacity(&state, None)?;
         if !state.login_limits.check_register(
             ip,

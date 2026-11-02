@@ -1971,5 +1971,14 @@
   "p75.asset.withdrawn": "Withdrawn",
   "p75.slot1": "Slot 1",
   "p75.slot2": "Slot 2",
-  "p75.slot3": "Slot 3"
+  "p75.slot3": "Slot 3",
+  "p75.mode.0": "Chat: all",
+  "p75.mode.1": "Chat: emojis only",
+  "p75.mode.2": "Chat: off",
+  "p75.report_emoji": "Report custom emoji",
+  "p75.keyboard": "Tab / Shift+Tab: focus. Enter: select. PageUp / PageDown: scroll. Esc: close.",
+  "p75.chat_guest": "Sign in and verify your email to chat",
+  "p75.chat_restricted": "Your chat is temporarily restricted",
+  "p75.chat_disabled": "Chat is currently disabled",
+  "p73.reason.moderation": "Moderation forfeit"
 }

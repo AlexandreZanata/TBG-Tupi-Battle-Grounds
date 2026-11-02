@@ -38,7 +38,7 @@ async fn until(ws: &mut Ws, predicate: impl Fn(&ServerMsg) -> bool) -> ServerMsg
     .expect("fixture server did not reach the expected state")
 }
 async fn account(base: &str, name: &str) -> (Ws, native_auth::Grant, protocol::Token) {
-    let (_,v)=native_auth::post(base,"register",json!({"name":name,"device_id":native_auth::random_hex(16).unwrap(),"persistent":false,"registration_retry_key":native_auth::random_hex(32).unwrap()}),None).await.unwrap();
+    let (_,v)=native_auth::post(base,"register",json!({"name":name,"email":format!("{name}@example.invalid"),"locale":"en","device_id":native_auth::random_hex(16).unwrap(),"persistent":false,"registration_retry_key":native_auth::random_hex(32).unwrap()}),None).await.unwrap();
     let grant = native_auth::parse(&v).unwrap();
     let mut ws = tokio_tungstenite::connect_async(format!("{base}/ws"))
         .await

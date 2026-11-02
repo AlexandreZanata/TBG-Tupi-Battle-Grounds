@@ -3346,6 +3346,8 @@ each code when it sends. Up to 5 accounts may share an address; emails are
 not unique, so registration reveals nothing.
 **Why.** Losing a key must not lose an account, and recovery must never
 lose data: everything is keyed by the stable AccountId.
+**S14 contract amendment.** Legacy registration fixtures now send the required private email and locale; the BR-P01 name/refund/IP assertions stay intact. Recovery audit rollback, populated-history preservation, five-account retry behavior and every-account-FK snapshots are additive D-108 checks, not a relaxation of AccountKey format or account ownership.
+
 **Reopen when** paid ownership needs stronger proof (D-94), when a provider
 login is added, or when support must handle lost key plus lost mailbox.
 
@@ -3399,5 +3401,7 @@ emoji from every slot at once. Custom emojis are usable only by their owner.
 only normalized, approved sheets keeps the game from hosting hostile files.
 **Ponytail.** BLOBs in the main database are fine at indie scale; move
 sheets to content-addressed files or object storage if they exceed 256 MiB.
+**Implementation freeze (S14).** Standard IDs 0–15 use Twemoji 14.0.2 in this exact order: `1f44b`, `1f44d`, `1f600`, `1f602`, `1f60e`, `1f914`, `1f622`, `1f621`, `1f525`, `2764`, `1f389`, `1f680`, `1f480`, `1f3c6`, `1f64f`, `1f4aa`. The IC-11 test expectation corrects its omitted Skull entry at ID 12; no previously shipped ID is renumbered.
+
 **Reopen when** sharing/selling custom emojis, animated WebP/APNG or
 larger frames are requested.

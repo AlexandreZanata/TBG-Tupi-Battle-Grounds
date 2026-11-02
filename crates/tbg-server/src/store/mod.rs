@@ -32,10 +32,8 @@ pub mod release;
 pub mod release_admin;
 pub mod reports;
 pub mod social;
-// P67 is deliberately unavailable to server binaries until activation is reviewed.
 pub use recovery::outbox as mail_outbox;
 mod p75;
-#[cfg(test)]
 pub(crate) mod recovery;
 mod rulesets;
 mod schema;

@@ -4,6 +4,7 @@ pub mod challenge;
 pub mod email;
 pub mod outbox;
 pub mod service;
+#[cfg(test)]
 use super::AccountId;
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Error {

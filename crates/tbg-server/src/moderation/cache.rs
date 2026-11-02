@@ -21,6 +21,9 @@ pub(crate) struct Snapshot {
     pub approved: std::collections::BTreeSet<[u8; 16]>,
 }
 impl Cache {
+    pub fn cursor(&self) -> i64 {
+        self.0.read().map(|s| s.cursor).unwrap_or(0)
+    }
     pub fn approved(&self, id: &[u8; 16]) -> bool {
         self.0.read().is_ok_and(|s| s.approved.contains(id))
     }

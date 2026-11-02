@@ -115,7 +115,7 @@ pub fn file(db: &mut Connection, reporter: i64, input: Input, now: i64) -> Resul
             return Err(Error::NotEligible);
         };
         let target = target.ok_or(Error::NotEligible)?;
-        let mut emoji_id = None;
+        let mut emoji_id: Option<i64> = None;
         if let Some(public) = emoji {
             let public = hex16(&public).ok_or(Error::Invalid)?;
             let equipped: [[tbg_core::protocol::EmojiRef; 3]; 2] =
@@ -178,5 +178,6 @@ pub fn file(db: &mut Connection, reporter: i64, input: Input, now: i64) -> Resul
     tx.execute("INSERT INTO reports(created_unix,reporter_id,target_id,reason,context,result_id,emoji_id,comment,evidence_json) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9)",params![now,reporter,target,reason,context,result.as_ref().map(|v|v.as_slice()),emoji_id,comment,evidence.to_string()])?;
     let id = tx.last_insert_rowid();
     tx.commit()?;
+    crate::metrics::p75::add(&crate::metrics::p75::REPORTS);
     Ok(id)
 }

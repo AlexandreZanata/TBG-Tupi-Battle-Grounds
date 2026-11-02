@@ -220,15 +220,17 @@ fn login(
     };
     let value = retry(&work.origin, operation, body, None)?;
     let grant = parse_grant(value, true)?;
-    if operation == "recover" {
+    let backup_saved = if operation == "recover" {
         super::recovery::replace_backup(
             store.as_deref(),
             &work.origin,
             &grant.profile.name,
             grant.account_key.as_deref(),
-        );
-    }
-    let secure = save_grant(work, store.as_deref_mut(), &grant, None)?;
+        )
+    } else {
+        true
+    };
+    let secure = save_grant(work, store.as_deref_mut(), &grant, None)? && backup_saved;
     cancelled(work, &grant, store)?;
     Ok(Outcome::SignedIn {
         grant,
@@ -580,7 +582,9 @@ fn retry(
     access: Option<AccessToken>,
 ) -> Result<Value, Failure> {
     match transport::post(origin, operation, body.clone(), access) {
-        Err(Failure::Unavailable) if operation == "register" || operation == "refresh" || operation == "recover" => {
+        Err(Failure::Unavailable)
+            if operation == "register" || operation == "refresh" || operation == "recover" =>
+        {
             transport::post(origin, operation, body, access)
         }
         result => result,

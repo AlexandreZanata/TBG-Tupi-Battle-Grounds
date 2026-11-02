@@ -15,7 +15,7 @@ pub fn dimensions(bytes: &[u8]) -> Option<(u32, u32)> {
 mod tests {
     use super::*;
     #[test]
-    fn header_rejects_overflow_before_decode() {
+    fn p75_header_rejects_overflow_before_decode() {
         let mut b = vec![0; 24];
         b[..8].copy_from_slice(b"\x89PNG\r\n\x1a\n");
         b[12..16].copy_from_slice(b"IHDR");

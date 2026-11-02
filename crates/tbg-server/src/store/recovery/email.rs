@@ -1,4 +1,4 @@
-//! Narrow synthetic email normalization, pending the owner's O02 delivery policy.
+//! Narrow ASCII mailbox normalization under the selected O-P75-02 policy.
 
 use super::Error;
 

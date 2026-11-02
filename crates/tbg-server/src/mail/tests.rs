@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicU64, Ordering};
 static NEXT: AtomicU64 = AtomicU64::new(0);
 
 #[tokio::test]
-async fn capture_delivery_uses_one_lease_and_persists_no_code() {
+async fn p75_capture_delivery_uses_one_lease_and_persists_no_code() {
     let path = std::env::temp_dir().join(format!(
         "p75-mail-{}-{}.sqlite",
         std::process::id(),
@@ -17,10 +17,7 @@ async fn capture_delivery_uses_one_lease_and_persists_no_code() {
     ));
     let store = Store::open(&path).unwrap();
     let other = Store::open(&path).unwrap();
-    let (account, _) = store
-        .register("Mailer".into(), "mailer".into(), [7; 32])
-        .await
-        .unwrap();
+    let (account, _) = store.register("Mailer".into(), [7; 32]).await.unwrap();
     store.release(move |db| {
         db.execute("INSERT INTO recovery_identity(account_id,email,updated_unix) VALUES(?1,'mail@example.invalid',1000)",[account]).unwrap();
         mail_outbox::enqueue(db,"account_verify","account",account,"mail@example.invalid","en",1000).unwrap();
@@ -66,7 +63,7 @@ async fn capture_delivery_uses_one_lease_and_persists_no_code() {
 }
 
 #[tokio::test]
-async fn dispatch_retries_then_gives_up_and_queue_is_bounded() {
+async fn p75_dispatch_retries_then_gives_up_and_queue_is_bounded() {
     let store = Store::open(std::path::Path::new(":memory:")).unwrap();
     store
         .release(|db| {
@@ -125,7 +122,7 @@ async fn dispatch_retries_then_gives_up_and_queue_is_bounded() {
 }
 
 #[test]
-fn private_configuration_and_capture_never_debug_secrets() {
+fn p75_private_configuration_and_capture_never_debug_secrets() {
     let mut config = crate::Config::default();
     config.bootstrap_email = settings::Private("owner-canary@example.invalid".into());
     config.mail.username = settings::Private("smtp-username-canary".into());

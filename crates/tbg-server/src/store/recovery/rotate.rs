@@ -33,6 +33,8 @@ pub fn request(
     service::budget(&tx, &format!("destination:{email}"), 3, 3600, now)?;
     let account:Option<i64>=tx.query_row("SELECT a.id FROM accounts a JOIN recovery_identity i ON a.id=i.account_id WHERE a.name_lower=?1 AND i.verified_email=?2 AND i.compromised=0",params![name.to_ascii_lowercase(),email],|r|r.get(0)).optional()?;
     if let Some(account) = account {
+        // Invalidate immediately, including while SMTP is unavailable.
+        challenge::consume(&tx, account, "rotate")?;
         // A newly requested code replaces any outstanding dispatch for this purpose.
         tx.execute("UPDATE mail_outbox SET status='cancelled' WHERE principal_kind='account' AND principal_id=?1 AND purpose='account_recovery' AND status='pending'",[account])?;
         let _ = outbox::enqueue(
@@ -85,6 +87,7 @@ pub fn complete(
         "UPDATE recovery_identity SET epoch=epoch+1,updated_unix=?2 WHERE account_id=?1",
         params![account, now],
     )?;
+    tx.execute("UPDATE mail_outbox SET status='cancelled' WHERE principal_kind='account' AND principal_id=?1 AND purpose IN ('account_verify','account_recovery','account_change_old','account_change_new') AND status='pending'",[account])?;
     tx.execute(
         "UPDATE recovery_challenges SET consumed=1 WHERE account_id=?1",
         [account],

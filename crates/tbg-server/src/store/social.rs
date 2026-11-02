@@ -46,7 +46,7 @@ pub fn profiles(
         let mut s=db.prepare("SELECT s.slot,s.standard_id,e.public_id,e.frame_px,e.frames,e.columns,e.delays_json FROM account_emoji_slots s LEFT JOIN emoji_assets e ON e.id=s.emoji_id AND e.status='approved' AND e.owner_account_id=s.account_id WHERE s.account_id=?1 ORDER BY s.slot")?;
         for row in s.query_map([account], |r| {
             Ok((
-                r.get::<_, usize>(0)?,
+                usize::from(r.get::<_, u8>(0)?),
                 r.get::<_, Option<u8>>(1)?,
                 r.get::<_, Option<Vec<u8>>>(2)?,
                 r.get::<_, Option<u8>>(3)?,

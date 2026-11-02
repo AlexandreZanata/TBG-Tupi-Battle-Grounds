@@ -78,7 +78,7 @@ impl Match {
             loadouts,
         }
     }
-    pub(super) fn send_social(&self, seat: Seat) {
+    pub(super) fn send_social(&mut self, seat: Seat) {
         self.send(
             seat,
             tbg_core::protocol::ServerMsg::MatchSocial(Box::new(self.social_rights(seat))),
@@ -118,6 +118,7 @@ impl Match {
         })();
         match result {
             Ok(text) => {
+                Metrics::add(&self.metrics.chat_sent, 1);
                 self.transcript(json!({"from":seat.index(),"text":text}));
                 for recipient in Seat::BOTH {
                     self.send(
@@ -129,7 +130,10 @@ impl Match {
                     );
                 }
             }
-            Err(reason) => self.send(seat, ServerMsg::SocialRefused { reason }),
+            Err(reason) => {
+                Metrics::add(&self.metrics.chat_refused, 1);
+                self.send(seat, ServerMsg::SocialRefused { reason });
+            }
         }
     }
     pub(super) fn social_emoji(&mut self, seat: Seat, conn_id: u64, slot: u8) {
@@ -152,6 +156,7 @@ impl Match {
         };
         match result {
             Ok(()) => {
+                Metrics::add(&self.metrics.emoji_sent, 1);
                 self.transcript(json!({"from":seat.index(),"slot":slot}));
                 for recipient in Seat::BOTH {
                     self.send(recipient, ServerMsg::Emoji { from: seat, slot });

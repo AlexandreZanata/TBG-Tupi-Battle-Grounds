@@ -75,6 +75,7 @@ struct Recover {
 enum Output {
     Accepted,
     Grant(Grant),
+    Recovered(Grant),
     Confirmed(FamilyId),
     LoggedOut { clear_cookie: bool },
 }
@@ -210,7 +211,7 @@ async fn execute(
         }
         "recover" => {
             let i: Recover = parse(body)?;
-            Ok(Output::Grant(
+            Ok(Output::Recovered(
                 auth.recover(
                     i.name,
                     i.code,
@@ -310,16 +311,18 @@ fn credential(
 }
 
 fn render(output: Output, channel: Channel, now: i64) -> Result<Response, Error> {
+    let recovered = matches!(&output, Output::Recovered(_));
     match output {
         Output::Accepted => Ok((StatusCode::ACCEPTED, Json(json!({"ok":true}))).into_response()),
-        Output::Grant(grant) => {
+        Output::Grant(grant) | Output::Recovered(grant) => {
             if now >= grant.expires_at || now >= grant.family.expires_at {
                 return Err(Error::Unauthorized);
             }
             let mut value = json!({"access_token":grant.access,"access_expires_at":grant.expires_at,"session_expires_at":grant.family.expires_at,"session_id":tokens::hex(&grant.family.id),"server_time":now,"profile":grant.profile,"persistent":grant.persistent});
             if let Some(key) = grant.account_key {
                 value["account_key"] = Value::String(key);
-                value["email_state"] = Value::String("unverified".into());
+                value["email_state"] =
+                    Value::String(if recovered { "verified" } else { "unverified" }.into());
             }
             if channel == Channel::Native {
                 value["refresh_token"] = Value::String(grant.refresh.clone());
@@ -433,4 +436,21 @@ pub(crate) fn history_binding(
     slot_matches(headers, app.release.slot())?;
     let raw = bearer(headers)?.ok_or(Error::Unauthorized)?;
     app.auth.authenticate(tokens::decode::<32>(&raw)?)
+}
+
+/// CE-01 changes only the permitted media type; the exact Origin, custom header, cookie and slot fences stay identical.
+pub(crate) fn image_binding(app: &AppState, headers: &HeaderMap) -> Result<super::Binding, Error> {
+    if headers.get_all("content-type").iter().count() != 1
+        || !headers
+            .get("content-type")
+            .is_some_and(|v| matches!(v.to_str(), Ok("image/png" | "image/gif" | "image/webp")))
+    {
+        return Err(Error::BadRequest);
+    }
+    let mut envelope = headers.clone();
+    envelope.insert(
+        "content-type",
+        axum::http::HeaderValue::from_static("application/json"),
+    );
+    history_binding(app, &envelope)
 }

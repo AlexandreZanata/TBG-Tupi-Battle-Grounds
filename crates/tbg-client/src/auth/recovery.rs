@@ -5,12 +5,12 @@ pub(super) fn replace_backup(
     origin: &str,
     account: &str,
     key: Option<&str>,
-) {
+) -> bool {
     let (Some(store), Some(key)) = (store, key) else {
-        return;
+        return true;
     };
     let Ok(namespace) = store.namespace(origin, account) else {
-        return;
+        return false;
     };
     let namespace = format!("{namespace}:recovery-key");
     let present = crate::platform::credentials::read(&namespace).is_ok_and(|old| {
@@ -23,6 +23,7 @@ pub(super) fn replace_backup(
     if present {
         // Never remove an existing backup; the recovered key also reaches the save-key screen.
         // PR #57's writer provides the same namespace and remains owned by that front.
-        let _ = crate::platform::credentials::write(&namespace, key);
+        return crate::platform::credentials::write(&namespace, key).is_ok();
     }
+    true
 }

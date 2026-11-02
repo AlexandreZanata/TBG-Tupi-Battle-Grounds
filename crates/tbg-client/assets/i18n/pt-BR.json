@@ -1971,5 +1971,14 @@
   "p75.asset.withdrawn": "Retirado",
   "p75.slot1": "Espaco 1",
   "p75.slot2": "Espaco 2",
-  "p75.slot3": "Espaco 3"
+  "p75.slot3": "Espaco 3",
+  "p75.mode.0": "Chat: tudo",
+  "p75.mode.1": "Chat: apenas emojis",
+  "p75.mode.2": "Chat: desligado",
+  "p75.report_emoji": "Denunciar emoji personalizado",
+  "p75.keyboard": "Tab / Shift+Tab: foco. Enter: selecionar. PageUp / PageDown: rolar. Esc: fechar.",
+  "p75.chat_guest": "Entre e verifique seu email para conversar",
+  "p75.chat_restricted": "Seu chat esta temporariamente restrito",
+  "p75.chat_disabled": "O chat esta desativado no momento",
+  "p73.reason.moderation": "Derrota por moderacao"
 }

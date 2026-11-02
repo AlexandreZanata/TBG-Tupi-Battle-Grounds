@@ -27,6 +27,7 @@ pub fn start(
         if !second_factor {
             let grant = issue(&tx, id, now)?;
             tx.commit()?;
+            crate::metrics::p75::add(&crate::metrics::p75::SIGNINS);
             return Ok(Some(grant));
         }
         let (email, locale, epoch): (String, String, i64) = tx.query_row(
@@ -34,11 +35,15 @@ pub fn start(
             [id],
             |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
         )?;
+        tx.execute("UPDATE operator_challenges SET consumed=1,attempt_hash=NULL WHERE purpose='login' AND attempt_hash=?1 AND operator_id<>?2", params![key::hash(attempt).as_slice(),id])?;
         tx.execute("INSERT INTO operator_challenges(operator_id,purpose,digest,key_epoch,expires_unix,consumed,attempt_hash) VALUES(?1,'login',zeroblob(32),?2,?3,1,?4) ON CONFLICT(operator_id,purpose) DO UPDATE SET digest=zeroblob(32),key_epoch=?2,expires_unix=?3,consumed=1,attempt_hash=?4,attempts=0",params![id,epoch,now+600,key::hash(attempt).as_slice()])?;
         tx.execute("UPDATE mail_outbox SET status='cancelled' WHERE purpose='operator_login' AND principal_kind='operator' AND principal_id=?1 AND status='pending'",[id])?;
         let _ = mail_outbox::enqueue(&tx, "operator_login", "operator", id, &email, &locale, now)?;
     }
     tx.commit()?;
+    if id.is_none() {
+        crate::metrics::p75::add(&crate::metrics::p75::SIGNIN_FAILURES);
+    }
     Ok(None)
 }
 pub fn verify(
@@ -60,10 +65,12 @@ pub fn verify(
         .unwrap_or(0);
     if !check_code(&tx, id, "login", code, Some(attempt), now)? {
         tx.commit()?;
+        crate::metrics::p75::add(&crate::metrics::p75::SIGNIN_FAILURES);
         return Err(Error::CodeInvalid);
     }
     let granted = issue(&tx, id, now)?;
     tx.commit()?;
+    crate::metrics::p75::add(&crate::metrics::p75::SIGNINS);
     Ok(granted)
 }
 fn issue(db: &Connection, id: i64, now: i64) -> Result<Granted, Error> {
@@ -196,6 +203,29 @@ pub fn logout(db: &mut Connection, token: &str, request: &str, now: i64) -> Resu
             request,
         ),
     )?;
+    tx.commit()?;
+    Ok(())
+}
+
+/// S04: a process restart ends console authority without affecting player sessions.
+pub fn restart(db: &mut Connection, now: i64) -> Result<(), Error> {
+    let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    let changed = tx.execute("UPDATE operator_sessions SET revoked_unix=?1,revoke_reason='restart' WHERE revoked_unix IS NULL",[now])?;
+    if changed > 0 {
+        let request = key::random::<16>().map_err(|_| Error::Unavailable)?;
+        audit::insert(
+            &tx,
+            now,
+            &audit_entry(
+                None,
+                "startup",
+                "sessions_revoked",
+                "operator",
+                "all",
+                &request,
+            ),
+        )?;
+    }
     tx.commit()?;
     Ok(())
 }

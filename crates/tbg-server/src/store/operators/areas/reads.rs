@@ -24,6 +24,17 @@ pub(super) fn execute(db: &Connection, path: &str, c: &Context<'_>) -> Result<Va
     )?;
     let last:Option<String>=db.query_row("SELECT last_error FROM mail_outbox WHERE last_error IS NOT NULL ORDER BY id DESC LIMIT 1",[],|r|r.get(0)).optional()?.flatten();
     let mut out = c.system.clone();
+    let latest: i64 = db.query_row(
+        "SELECT COALESCE(MAX(id),0) FROM moderation_events",
+        [],
+        |r| r.get(0),
+    )?;
+    let cursor = out["feed_cursor"].as_i64().unwrap_or(0);
+    if let Some(object) = out.as_object_mut() {
+        object.remove("feed_cursor");
+    }
+    out["feed_lag"] = json!(latest.saturating_sub(cursor));
+    out["feed_lag_unit"] = json!("events");
     out["outbox"] = json!({"pending":pending,"failed":failed,"last_error":last});
     if path == "overview" {
         let (reports,emoji,bans):(i64,i64,i64)=db.query_row("SELECT (SELECT COUNT(*) FROM reports WHERE status='open'),(SELECT COUNT(*) FROM emoji_assets WHERE status='pending'),(SELECT COUNT(*) FROM account_moderation WHERE ban_until_unix>?1)",[c.now],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?)))?;

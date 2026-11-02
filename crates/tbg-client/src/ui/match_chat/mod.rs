@@ -1,5 +1,5 @@
 //! Battle chat log/input, mute and three-slot cosmetic delivery; never gameplay authority.
-use super::super::{kit, UiAction};
+use super::{kit, UiAction};
 use crate::{i18n::Lang, link::MatchLink, sync::MatchInfo, GameState};
 use bevy::{
     input::keyboard::{Key, KeyboardInput},
@@ -16,7 +16,7 @@ pub struct Inbox(pub Vec<ServerMsg>);
 #[derive(Resource, Default)]
 pub struct Chat {
     pub policy: Option<MatchSocial>,
-    pub lines: VecDeque<(f64, String)>,
+    pub lines: VecDeque<(f64, tbg_core::Seat, String)>,
     pub bubbles: [Option<(u8, f64)>; 2],
     pub focused: bool,
     pub edit: kit::edit::Edit,
@@ -29,13 +29,25 @@ pub struct Chat {
 struct Root;
 pub fn plugin(app: &mut App) {
     app.init_resource::<Inbox>()
-        .init_resource::<Chat>()
+        .insert_resource(Chat {
+            mode: stored_mode(),
+            ..default()
+        })
         .add_systems(
             Update,
             (receive, keys, render)
                 .chain()
-                .before(super::super::keyboard::navigate),
+                .before(super::keyboard::navigate),
         );
+}
+fn stored_mode() -> u8 {
+    if crate::config::load_flag("p75_chat_off") {
+        2
+    } else if crate::config::load_flag("p75_chat_emoji") {
+        1
+    } else {
+        0
+    }
 }
 pub fn allow(c: char) -> bool {
     (' '..='~').contains(&c) || ('\u{a0}'..='\u{ff}').contains(&c)
@@ -49,13 +61,7 @@ fn receive(
     if chat.result != info.result_id {
         *chat = Chat {
             result: info.result_id,
-            mode: if crate::config::load_flag("p75_chat_off") {
-                2
-            } else if crate::config::load_flag("p75_chat_emoji") {
-                1
-            } else {
-                0
-            },
+            mode: stored_mode(),
             ..default()
         };
     }
@@ -71,7 +77,7 @@ fn receive(
                 } else {
                     &info.opponent
                 };
-                chat.lines.push_back((now, format!("{name}: {text}")));
+                chat.lines.push_back((now, from, format!("{name}: {text}")));
                 while chat.lines.len() > 50 {
                     chat.lines.pop_front();
                 }
@@ -83,7 +89,7 @@ fn receive(
             }
             ServerMsg::SocialRefused { .. } => chat.refusal = true,
             ServerMsg::AccountSuspended { until_unix, reason } => {
-                super::super::p75::suspend(until_unix, reason)
+                super::p75::suspend(until_unix, reason)
             }
             _ => {}
         }
@@ -97,13 +103,15 @@ pub(crate) fn keys(
     info: Res<MatchInfo>,
     mut link: NonSendMut<MatchLink>,
     time: Res<Time>,
-    form: NonSend<super::super::textform::ActiveForm>,
+    form: NonSend<super::textform::ActiveForm>,
 ) {
     CONSUMED.store(chat.focused, std::sync::atomic::Ordering::Relaxed);
     if *state.get() != GameState::InMatch
         || info.spectating
-        || super::super::textform::is_open(&form)
-        || super::super::p75::modal()
+        || chat.mode == 2
+        || !matches!(&*link, MatchLink::Net(_))
+        || super::textform::is_open(&form)
+        || super::p75::modal()
     {
         events.clear();
         chat.focused = false;
@@ -112,7 +120,7 @@ pub(crate) fn keys(
     let now = time.elapsed_secs_f64();
     if !chat.focused {
         events.clear();
-        if keys.just_pressed(KeyCode::Enter) && !super::super::keyboard::tabbed() {
+        if keys.just_pressed(KeyCode::Enter) && !super::keyboard::tabbed() {
             chat.focused = chat
                 .policy
                 .as_ref()
@@ -123,7 +131,7 @@ pub(crate) fn keys(
                 (KeyCode::Digit2, 1),
                 (KeyCode::Digit3, 2),
             ] {
-                if keys.just_pressed(key) {
+                if keys.just_pressed(key) && chat.policy.as_ref().is_some_and(|p| p.emojis) {
                     link.send(ClientMsg::EmojiSend { slot }, now);
                 }
             }
@@ -179,9 +187,13 @@ fn render(
     state: Res<State<GameState>>,
     lang: Res<Lang>,
     time: Res<Time>,
+    link: NonSend<MatchLink>,
     mut shown: Local<String>,
 ) {
-    let active = *state.get() == GameState::InMatch && !info.spectating;
+    let active = chat.mode < 2
+        && *state.get() == GameState::InMatch
+        && !info.spectating
+        && matches!(&*link, MatchLink::Net(_));
     let signature = format!(
         "{active}:{}:{}:{}:{}:{}:{}",
         chat.focused,
@@ -205,7 +217,7 @@ fn render(
     commands
         .spawn((
             Root,
-            super::super::hud::Hud::PrivateControls,
+            super::hud::Hud::PrivateControls,
             GlobalZIndex(25),
             Node {
                 position_type: PositionType::Absolute,
@@ -222,61 +234,94 @@ fn render(
         ))
         .with_children(|p| {
             p.spawn(kit::heading(lang.key("p75.chat"), 18.));
-            for (_, line) in chat
+            let lines: Vec<_> = chat
                 .lines
                 .iter()
-                .filter(|(at, _)| chat.focused || now - at < 12.)
+                .filter(|(at, from, _)| {
+                    chat.mode == 0
+                        && (chat.focused || now - at < 12.)
+                        && (!chat.muted || Some(*from) == info.you)
+                })
                 .rev()
                 .take(8)
-                .rev()
-            {
+                .collect();
+            for (_, _, line) in lines.into_iter().rev() {
                 p.spawn(kit::muted(line, 14.));
             }
-            p.spawn(kit::button(
-                if chat.focused {
-                    chat.edit.display(false)
+            if chat.mode == 0 {
+                if chat
+                    .policy
+                    .as_ref()
+                    .is_some_and(|p| p.chat == ChatPermission::Allowed)
+                {
+                    p.spawn(kit::button(
+                        if chat.focused {
+                            chat.edit.display(false)
+                        } else {
+                            lang.key("p75.chat_enter")
+                        },
+                        UiAction::P75(super::p75::Action::Chat),
+                        230.,
+                    ));
                 } else {
-                    lang.key("p75.chat_enter")
-                },
-                UiAction::P75(super::super::p75::Action::Chat),
-                230.,
-            ));
+                    let key = match chat.policy.as_ref().map(|p| p.chat) {
+                        Some(ChatPermission::Guest) => "p75.chat_guest",
+                        Some(ChatPermission::Unverified) => "p75.unverified",
+                        Some(ChatPermission::Restricted { .. }) => "p75.chat_restricted",
+                        _ => "p75.chat_disabled",
+                    };
+                    p.spawn(kit::muted(lang.key(key), 14.));
+                }
+            }
             p.spawn(kit::row()).with_children(|r| {
                 for slot in 0..3 {
+                    let allowed = chat.policy.as_ref().is_some_and(|p| p.emojis);
                     r.spawn(kit::button(
                         (slot + 1).to_string(),
-                        UiAction::P75(super::super::p75::Action::Emoji(slot)),
-                        45.,
-                    ));
-                    if let Some(policy) = &chat.policy {
-                        let seat = info.you.map(|s| s.index()).unwrap_or(0);
-                        crate::emoji::spawn(
-                            r,
-                            policy.loadouts[seat][slot as usize].clone(),
-                            slot,
-                            now,
-                            30.,
-                        );
-                    }
+                        if allowed {
+                            UiAction::P75(super::p75::Action::Emoji(slot))
+                        } else {
+                            UiAction::Disabled
+                        },
+                        64.,
+                    ))
+                    .with_children(|button| {
+                        if let Some(policy) = &chat.policy {
+                            let seat = info.you.map(|s| s.index()).unwrap_or(0);
+                            crate::emoji::spawn(
+                                button,
+                                policy.loadouts[seat][slot as usize].clone(),
+                                slot,
+                                now,
+                                30.,
+                            );
+                        }
+                    });
                 }
             });
             p.spawn(kit::button(
                 lang.key(if chat.muted { "p75.unmute" } else { "p75.mute" }),
-                UiAction::P75(super::super::p75::Action::Mute),
+                UiAction::P75(super::p75::Action::Mute),
                 230.,
             ));
-            p.spawn(kit::button(
-                lang.key("p75.report_after"),
-                UiAction::P75(super::super::p75::Action::MarkReport),
-                230.,
-            ));
+            if crate::auth::snapshot().access.is_some()
+                && tbg_core::account::valid_name_shape(&info.opponent)
+            {
+                p.spawn(kit::button(
+                    lang.key("p75.report_after"),
+                    UiAction::P75(super::p75::Action::MarkReport),
+                    230.,
+                ));
+            }
             if chat.refusal {
                 p.spawn(kit::muted(lang.key("p75.social_refused"), 13.));
             }
         });
     if let Some(policy) = &chat.policy {
         for seat in tbg_core::Seat::BOTH {
-            if let Some((slot, at)) = chat.bubbles[seat.index()].filter(|(_, at)| now - at < 2.5) {
+            if let Some((slot, at)) = chat.bubbles[seat.index()]
+                .filter(|(_, at)| now - at < 2.5 && (!chat.muted || Some(seat) == info.you))
+            {
                 commands
                     .spawn((
                         Root,
@@ -304,7 +349,7 @@ fn render(
 mod tests {
     use super::*;
     #[test]
-    fn chat_input_filters_only_supported_characters() {
+    fn p75_chat_input_filters_only_supported_characters() {
         assert!(allow('ç'));
         assert!(!allow('\n'));
         assert!(!allow('\u{202e}'));

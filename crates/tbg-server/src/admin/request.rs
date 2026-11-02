@@ -87,7 +87,7 @@ pub fn valid_cidr(entry: &str) -> bool {
 mod tests {
     use super::*;
     #[test]
-    fn s14_forwarded_ip_is_only_trusted_from_loopback() {
+    fn p75_s14_forwarded_ip_is_only_trusted_from_loopback() {
         let mut h = HeaderMap::new();
         h.insert("x-forwarded-for", "127.0.0.1".parse().unwrap());
         h.insert("host", "admin.tupibg.com".parse().unwrap());

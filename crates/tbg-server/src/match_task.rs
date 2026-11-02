@@ -45,7 +45,7 @@ pub(crate) struct Player {
 }
 
 pub(super) struct Match {
-    pub(super) social: social::Social,
+    social: social::Social,
     pub(super) result_id: tbg_core::protocol::ResultId,
     pub(super) state: MatchState,
     pub(super) players: [Player; 2],

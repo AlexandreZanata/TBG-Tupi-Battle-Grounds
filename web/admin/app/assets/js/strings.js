@@ -1,6 +1,8 @@
 // Complete console string catalogs; operational content is never translated.
 export const STRINGS = {
   'pt-BR': {
+    'read_only': 'Somente leitura',
+    'review_account': 'Revisar conta denunciada',
     'action.ban': "Suspender conta",
     'action.chat': "Restringir chat",
     'action.emoji': "Restringir emojis",
@@ -137,6 +139,8 @@ export const STRINGS = {
     'verify': "Verificar e entrar",
   },
   en: {
+    'read_only': 'Read only',
+    'review_account': 'Review reported account',
     'action.ban': "Ban account",
     'action.chat': "Restrict chat",
     'action.emoji': "Restrict emojis",

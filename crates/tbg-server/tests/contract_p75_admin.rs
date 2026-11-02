@@ -33,7 +33,7 @@ async fn br_ad01_player_and_operator_credentials_never_cross() {
     let s = operator::server().await;
     let op = operator::claim(&s).await;
     assert_eq!(op.request("GET", "session", json!(null)).await.status, 200);
-    let player = s.register("Player", "player@example.invalid").await;
+    let player = s.register("Claimant", "player@example.invalid").await;
     assert_eq!(
         s.request(
             "GET",
@@ -448,5 +448,562 @@ async fn s01_moderator_and_disabled_operator_are_checked_against_current_state()
         .await
         .status,
         401
+    );
+}
+
+#[tokio::test]
+async fn s01_every_route_has_all_five_principals_and_a_wrong_method() {
+    use tbg_server::admin::policy::{Capability, ROUTES};
+    let s = operator::server().await;
+    let op = operator::claim(&s).await;
+    let pre = operator::preauth(&s).await;
+    s.register("Keeper", "keeper@example.invalid").await;
+    // Independent policy inventory: adding a route requires an explicit security decision here.
+    let expected = [
+        ("POST", "claim/request", true),
+        ("POST", "claim/complete", true),
+        ("POST", "session/start", true),
+        ("POST", "session/verify", true),
+        ("GET", "session", true),
+        ("POST", "session/reauth", true),
+        ("POST", "session/logout", true),
+        ("GET", "overview", true),
+        ("GET", "accounts", true),
+        ("GET", "accounts/{name}", true),
+        ("POST", "accounts/{name}/ban", true),
+        ("POST", "accounts/{name}/unban", false),
+        ("POST", "accounts/{name}/chat", true),
+        ("POST", "accounts/{name}/emoji", true),
+        ("POST", "accounts/{name}/revoke-sessions", true),
+        ("POST", "accounts/{name}/send-recovery", false),
+        ("GET", "reports", true),
+        ("GET", "reports/{id}", true),
+        ("POST", "reports/{id}/resolve", true),
+        ("GET", "emoji", true),
+        ("GET", "emoji/{id}", true),
+        ("GET", "emoji/{id}/sheet.png", true),
+        ("POST", "emoji/{id}/approve", true),
+        ("POST", "emoji/{id}/reject", true),
+        ("POST", "emoji/{id}/revoke", true),
+        ("GET", "chat/terms", true),
+        ("POST", "chat/terms", true),
+        ("DELETE", "chat/terms/{term}", true),
+        ("GET", "settings", true),
+        ("PUT", "settings/{key}", false),
+        ("GET", "email-blocks", false),
+        ("POST", "email-blocks", false),
+        ("DELETE", "email-blocks/{email}", false),
+        ("GET", "operators", false),
+        ("POST", "operators", false),
+        ("POST", "operators/{id}/disable", false),
+        ("POST", "operators/{id}/enable", false),
+        ("GET", "audit", false),
+        ("GET", "system", true),
+    ];
+    assert_eq!(
+        ROUTES
+            .iter()
+            .map(|r| (r.method, r.path))
+            .collect::<Vec<_>>(),
+        expected.iter().map(|r| (r.0, r.1)).collect::<Vec<_>>()
+    );
+    let before = s.number("SELECT COUNT(*) FROM admin_audit");
+    for (route, (_, _, moderator)) in ROUTES.iter().zip(expected) {
+        let path = route
+            .path
+            .replace("{name}", "Keeper")
+            .replace("{id}", "9999")
+            .replace("{term}", "fixture")
+            .replace("{key}", "chat_enabled")
+            .replace("{email}", "blocked%40example.invalid");
+        let path = if path == "accounts" {
+            "accounts?prefix=Ke".into()
+        } else {
+            path
+        };
+        for principal in ["none", "expired", "disabled", "moderator", "owner"] {
+            s.sql("UPDATE operators SET status='active',role='owner';UPDATE operator_sessions SET last_seen_unix=1000000;");
+            if principal == "expired" {
+                s.sql("UPDATE operator_sessions SET last_seen_unix=998200;");
+            }
+            if principal == "disabled" {
+                s.sql("UPDATE operators SET status='disabled';");
+            }
+            if principal == "moderator" {
+                s.sql("UPDATE operators SET role='moderator';");
+            }
+            let public = route.capability == Capability::Public;
+            let cookie = if principal == "none" {
+                pre.cookie.clone()
+            } else {
+                format!("{}; {}", pre.cookie, op.cookie)
+            };
+            let result = request(
+                &op.url,
+                route.method,
+                &format!("/admin-api/v1/{path}"),
+                json!({"unexpected":true}),
+                vec![
+                    ("cookie".into(), cookie),
+                    ("origin".into(), "https://admin.tupibg.com".into()),
+                    (
+                        "x-tbg-csrf".into(),
+                        if public {
+                            pre.csrf.clone()
+                        } else {
+                            op.csrf.clone()
+                        },
+                    ),
+                ],
+            )
+            .await;
+            if public {
+                assert_eq!(result.status, 400, "{principal} {} {path}", route.method);
+            } else if matches!(principal, "none" | "expired" | "disabled") {
+                assert_eq!(result.status, 401, "{principal} {path}");
+            } else if principal == "moderator" && !moderator {
+                assert_eq!(result.status, 403, "moderator {path}");
+            } else {
+                assert!(
+                    matches!(result.status, 200 | 400),
+                    "authorized {principal} {} {path}: {} {}",
+                    route.method,
+                    result.status,
+                    result.body
+                );
+            }
+        }
+        assert_eq!(
+            op.request("TRACE", &path, json!({})).await.status,
+            400,
+            "wrong method {path}"
+        );
+    }
+    assert_eq!(
+        s.number("SELECT COUNT(*) FROM admin_audit"),
+        before,
+        "invalid bodies never produce effects or audit"
+    );
+}
+
+#[tokio::test]
+async fn s02_s03_forged_actors_and_non_json_posts_have_no_effect() {
+    let s = operator::server().await;
+    let op = operator::claim(&s).await;
+    s.register("Keeper", "keeper@example.invalid").await;
+    let before = s.number("SELECT COUNT(*) FROM admin_audit");
+    for forged in [
+        json!({"duration_hours":1,"reason":"other","expected_version":0,"account_id":2}),
+        json!({"duration_hours":1,"reason":"other","expected_version":0,"operator_id":99,"role":"owner"}),
+        json!({"duration_hours":1,"reason":"other","expected_version":0,"version":99}),
+    ] {
+        assert_eq!(
+            op.request("POST", "accounts/Keeper/ban", forged)
+                .await
+                .status,
+            400
+        );
+    }
+    for mime in ["text/plain", "application/x-www-form-urlencoded"] {
+        let r = request(
+            &op.url,
+            "POST",
+            "/admin-api/v1/session/logout",
+            json!({}),
+            vec![
+                ("cookie".into(), op.cookie.clone()),
+                ("origin".into(), "https://admin.tupibg.com".into()),
+                ("x-tbg-csrf".into(), op.csrf.clone()),
+                ("content-type".into(), mime.into()),
+            ],
+        )
+        .await;
+        assert_eq!(r.status, 403);
+    }
+    assert_eq!(s.number("SELECT COUNT(*) FROM admin_audit"), before);
+    assert_eq!(s.number("SELECT COUNT(*) FROM account_moderation"), 0);
+    assert_eq!(op.request("GET", "session", json!(null)).await.status, 200);
+}
+
+#[tokio::test]
+async fn ic03_session_start_is_byte_identical_for_every_outcome() {
+    let s = operator::server().await;
+    let owner = operator::claim(&s).await;
+    let pre = operator::preauth(&s).await;
+    let mut responses = Vec::new();
+    for key in [&owner.key, "wrong", &owner.key, "wrong"] {
+        let r = pre
+            .request("POST", "session/start", json!({"admin_key":key}))
+            .await;
+        responses.push((r.status, r.body));
+    }
+    s.sql("CREATE TRIGGER mail_outage BEFORE INSERT ON mail_outbox BEGIN SELECT RAISE(ABORT,'mail unavailable'); END;");
+    let r = pre
+        .request("POST", "session/start", json!({"admin_key":owner.key}))
+        .await;
+    responses.push((r.status, r.body));
+    assert!(
+        responses.iter().all(|r| r == &responses[0]),
+        "IC-03/S06 includes unavailable outbox"
+    );
+}
+
+#[tokio::test]
+async fn s04_absolute_expiry_claim_rotation_disable_and_restart_end_sessions() {
+    let s = operator::server().await;
+    let mut op = operator::claim(&s).await;
+    s.sql("UPDATE operator_sessions SET absolute_expires_unix=1000000;");
+    assert_eq!(op.request("GET", "session", json!(null)).await.status, 401);
+    let pre = operator::preauth(&s).await;
+    op = operator::sign_in(
+        &s,
+        operator::Operator {
+            key: op.key.clone(),
+            ..pre
+        },
+    )
+    .await;
+    let pre = operator::preauth(&s).await;
+    assert_eq!(
+        pre.request(
+            "POST",
+            "claim/request",
+            json!({"email":"owner@example.invalid"})
+        )
+        .await
+        .status,
+        202
+    );
+    let code = s.mail("operator_claim").await.code.unwrap();
+    let rotated = pre
+        .request(
+            "POST",
+            "claim/complete",
+            json!({"email":"owner@example.invalid","code":code}),
+        )
+        .await;
+    assert_eq!(rotated.status, 200);
+    assert_eq!(op.request("GET", "session", json!(null)).await.status, 401);
+    let pre = operator::preauth(&s).await;
+    let mut op = operator::sign_in(
+        &s,
+        operator::Operator {
+            key: rotated.json()["admin_key"].as_str().unwrap().into(),
+            ..pre
+        },
+    )
+    .await;
+    s.sql("UPDATE operators SET status='disabled';");
+    assert_eq!(op.request("GET", "session", json!(null)).await.status, 401);
+    s.sql("UPDATE operators SET status='active';");
+    // Disabling through the real route revokes sessions; restart independently revokes all console sessions.
+    let _b = Server::on(s.db.clone(), s.clock.clone(), |c| {
+        c.admin.enabled = true;
+        c.admin.addr = "127.0.0.1:0".into();
+    })
+    .await;
+    assert_eq!(
+        _b.request("GET", "/health", json!(null), None).await.status,
+        200
+    );
+    assert_eq!(
+        op.request("GET", "session", json!(null)).await.status,
+        401,
+        "S04 process restart"
+    );
+    op.key.clear();
+}
+
+#[tokio::test]
+async fn s05_operator_guesses_share_the_code_budget_and_fresh_claim_recovers() {
+    let a = operator::server().await;
+    let _ = logs();
+    let owner = operator::claim(&a).await;
+    let b = Server::on(a.db.clone(), a.clock.clone(), |c| {
+        c.admin.enabled = true;
+        c.admin.addr = "127.0.0.1:0".into();
+    })
+    .await;
+    let pre = operator::preauth(&a).await;
+    let other = operator::preauth(&b).await;
+    let start = pre
+        .request("POST", "session/start", json!({"admin_key":owner.key}))
+        .await;
+    let code = a.mail("operator_login").await.code.unwrap();
+    for n in 0..5 {
+        let client = if n % 2 == 0 { &pre } else { &other };
+        assert_eq!(
+            client
+                .request(
+                    "POST",
+                    "session/verify",
+                    json!({"attempt":start.json()["attempt"],"code":"00000-00000"})
+                )
+                .await
+                .status,
+            401
+        );
+    }
+    assert_eq!(
+        pre.request(
+            "POST",
+            "session/verify",
+            json!({"attempt":start.json()["attempt"],"code":code})
+        )
+        .await
+        .status,
+        401
+    );
+    assert_eq!(
+        pre.request(
+            "POST",
+            "claim/request",
+            json!({"email":"owner@example.invalid"})
+        )
+        .await
+        .status,
+        202
+    );
+    let claim = a.mail("operator_claim").await.code.unwrap();
+    let r = pre
+        .request(
+            "POST",
+            "claim/complete",
+            json!({"email":"owner@example.invalid","code":claim}),
+        )
+        .await;
+    assert_eq!(r.status, 200);
+    let new_key = r.json()["admin_key"].as_str().unwrap().to_owned();
+    let secrets = [
+        owner.key.as_str(),
+        code.as_str(),
+        claim.as_str(),
+        new_key.as_str(),
+    ];
+    let captured = logs();
+    assert!(captured.contains("P75_LOG_CAPTURE_ACTIVE"));
+    for suffix in ["", "-wal"] {
+        let bytes = std::fs::read(format!("{}{suffix}", a.db.display())).unwrap_or_default();
+        for secret in secrets {
+            assert!(
+                !bytes.windows(secret.len()).any(|v| v == secret.as_bytes()),
+                "IC-16 operator DB/WAL"
+            );
+            assert!(!captured.contains(secret), "IC-16 captured logs");
+        }
+    }
+}
+
+#[tokio::test]
+async fn s12_claim_race_rotates_once_and_audits_one_effect() {
+    let s = operator::server().await;
+    let pre = operator::preauth(&s).await;
+    let code = s.mail("operator_claim").await.code.unwrap();
+    let input = json!({"email":"owner@example.invalid","code":code});
+    let (one, two) = tokio::join!(
+        pre.request("POST", "claim/complete", input.clone()),
+        pre.request("POST", "claim/complete", input)
+    );
+    let mut status = [one.status, two.status];
+    status.sort();
+    assert_eq!(status, [200, 401]);
+    assert_eq!(
+        s.number("SELECT COUNT(*) FROM admin_audit WHERE action='key_rotated'"),
+        1
+    );
+    assert_eq!(s.number("SELECT key_epoch FROM operators"), 1);
+}
+
+#[tokio::test]
+async fn s05_admin_key_attempts_across_ips_share_the_operator_budget_but_allow_fresh_claim() {
+    let s = operator::server().await;
+    let owner = operator::claim(&s).await;
+    let pre = operator::preauth(&s).await;
+    let before = s.number("SELECT COUNT(*) FROM mail_outbox WHERE purpose='operator_login'");
+    for ip in 1..=12 {
+        let result = request(
+            &pre.url,
+            "POST",
+            "/admin-api/v1/session/start",
+            json!({"admin_key":owner.key}),
+            vec![
+                ("cookie".into(), pre.cookie.clone()),
+                ("x-tbg-csrf".into(), pre.csrf.clone()),
+                ("origin".into(), "https://admin.tupibg.com".into()),
+                ("x-forwarded-for".into(), format!("192.0.2.{ip}")),
+            ],
+        )
+        .await;
+        assert_eq!(result.status, 202);
+    }
+    assert!(
+        s.number("SELECT COUNT(*) FROM mail_outbox WHERE purpose='operator_login'") - before <= 9,
+        "operator's first sign-in already used one of ten slots"
+    );
+    assert_eq!(
+        pre.request(
+            "POST",
+            "claim/request",
+            json!({"email":"owner@example.invalid"})
+        )
+        .await
+        .status,
+        202
+    );
+    let code = s.mail("operator_claim").await.code.unwrap();
+    assert_eq!(
+        pre.request(
+            "POST",
+            "claim/complete",
+            json!({"email":"owner@example.invalid","code":code})
+        )
+        .await
+        .status,
+        200
+    );
+}
+
+#[tokio::test]
+async fn ic08_recovery_audit_update_and_delete_are_refused() {
+    let s = Server::new().await;
+    s.register("Keeper", "keeper@example.invalid").await;
+    let db = rusqlite::Connection::open(&s.db).unwrap();
+    assert!(db
+        .execute("UPDATE recovery_audit SET action='forged'", [])
+        .is_err());
+    assert!(db.execute("DELETE FROM recovery_audit", []).is_err());
+    assert_eq!(s.number("SELECT COUNT(*) FROM recovery_audit"), 1);
+}
+
+#[tokio::test]
+async fn s04_disabled_moderator_sessions_stay_revoked_after_reenable() {
+    let s = operator::server().await;
+    let owner = operator::claim(&s).await;
+    assert_eq!(
+        owner
+            .request(
+                "POST",
+                "operators",
+                json!({"email":"mod@example.invalid","role":"moderator"})
+            )
+            .await
+            .status,
+        200
+    );
+    let pre = operator::preauth(&s).await;
+    let code = s.mail("operator_claim").await.code.unwrap();
+    let key = pre
+        .request(
+            "POST",
+            "claim/complete",
+            json!({"email":"mod@example.invalid","code":code}),
+        )
+        .await
+        .json()["admin_key"]
+        .as_str()
+        .unwrap()
+        .to_owned();
+    let moderator = operator::sign_in(&s, operator::Operator { key, ..pre }).await;
+    assert_eq!(
+        moderator
+            .request("GET", "session", json!(null))
+            .await
+            .status,
+        200
+    );
+    assert_eq!(
+        owner
+            .request("POST", "operators/2/disable", json!({"reason":"other"}))
+            .await
+            .status,
+        200
+    );
+    assert_eq!(
+        moderator
+            .request("GET", "session", json!(null))
+            .await
+            .status,
+        401
+    );
+    assert_eq!(
+        owner
+            .request("POST", "operators/2/enable", json!({"reason":"other"}))
+            .await
+            .status,
+        200
+    );
+    assert_eq!(
+        moderator
+            .request("GET", "session", json!(null))
+            .await
+            .status,
+        401,
+        "S04 enabling an operator never resurrects a session"
+    );
+}
+
+#[tokio::test]
+async fn s07_controls_rtl_and_zero_width_comments_notes_and_terms_are_refused() {
+    let s = operator::server().await;
+    let owner = operator::claim(&s).await;
+    let player = s.register("Reporter", "reporter@example.invalid").await;
+    s.register("Target", "target@example.invalid").await;
+    let before = s.number("SELECT COUNT(*) FROM admin_audit");
+    for value in [
+        "bad\r\nvalue",
+        "bad\u{202e}value",
+        "bad\u{200b}value",
+        "bad\0value",
+    ] {
+        assert_eq!(
+            s.request(
+                "POST",
+                "/api/me/reports",
+                json!({"context":"profile","target":"Target","reason":"other","comment":value}),
+                player["access_token"].as_str()
+            )
+            .await
+            .status,
+            400
+        );
+        assert_eq!(
+            owner
+                .request(
+                    "POST",
+                    "accounts/Target/chat",
+                    json!({"duration_hours":1,"expected_version":0,"reason":"other","note":value})
+                )
+                .await
+                .status,
+            400
+        );
+        assert_eq!(
+            owner
+                .request("POST", "chat/terms", json!({"term":value,"reason":"other"}))
+                .await
+                .status,
+            400
+        );
+    }
+    assert_eq!(s.number("SELECT COUNT(*) FROM reports"), 0);
+    assert_eq!(s.number("SELECT COUNT(*) FROM account_moderation"), 0);
+    assert_eq!(s.number("SELECT COUNT(*) FROM admin_audit"), before);
+    let markup = "<script>alert('literal text')</script>";
+    assert_eq!(
+        s.request(
+            "POST",
+            "/api/me/reports",
+            json!({"context":"profile","target":"Target","reason":"other","comment":markup}),
+            player["access_token"].as_str()
+        )
+        .await
+        .status,
+        201
+    );
+    let report = owner.request("GET", "reports/1", json!(null)).await;
+    assert_eq!(
+        report.json()["comment"],
+        markup,
+        "operators receive text; the console's text-only gate forbids markup interpretation"
     );
 }

@@ -128,3 +128,91 @@ fn ch05_em05_s11_budgets_are_bounded_and_expire() {
     assert_eq!(limit.emoji(1999), Err(SocialRefusal::RateLimited));
     assert!(limit.emoji(2000).is_ok());
 }
+
+#[tokio::test]
+async fn ic12_attached_spectators_and_other_matches_never_receive_social_or_email() {
+    let _ = logs();
+    let s = Server::new().await;
+    let canary = format!("private{}@example.invalid", random(16));
+    let account = s.register("Speaker", &canary).await;
+    let code = s.mail("account_verify").await.code.unwrap();
+    assert_eq!(
+        s.request(
+            "POST",
+            "/api/me/email/verify",
+            json!({"code":code}),
+            account["access_token"].as_str()
+        )
+        .await
+        .status,
+        200
+    );
+    s.sql("UPDATE admin_settings SET value=1 WHERE key='chat_enabled';INSERT INTO moderation_events(at_unix,kind,payload_json) VALUES(1000000,'settings','{}');");
+    tokio::time::sleep(std::time::Duration::from_millis(1100)).await;
+    let mut sender = ws::connect(&s.url, Some(&account)).await;
+    let mut peer = ws::connect(&s.url, None).await;
+    ws::send(&mut sender, ClientMsg::QuickMatch).await;
+    ws::send(&mut peer, ClientMsg::QuickMatch).await;
+    ws::until(&mut sender, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
+    ws::until(&mut peer, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
+    tokio::time::sleep(std::time::Duration::from_millis(1100)).await;
+    let listed = s
+        .request("GET", "/api/live", json!(null), None)
+        .await
+        .json();
+    let id = u64::from_str_radix(listed["matches"][0]["id"].as_str().unwrap(), 16).unwrap();
+    let mut spectator = ws::connect(&s.url, None).await;
+    ws::send(&mut spectator, ClientMsg::Spectate { id }).await;
+    ws::until(&mut spectator, |m| {
+        matches!(m, ServerMsg::SpectateStart { .. })
+    })
+    .await;
+    let mut other = ws::connect(&s.url, None).await;
+    let mut other_peer = ws::connect(&s.url, None).await;
+    ws::send(&mut other, ClientMsg::QuickMatch).await;
+    ws::send(&mut other_peer, ClientMsg::QuickMatch).await;
+    ws::until(&mut other, |m| matches!(m, ServerMsg::MatchStart { .. })).await;
+    assert!(
+        matches!(ws::until(&mut other,|m|matches!(m,ServerMsg::MatchSocial(_))).await,ServerMsg::MatchSocial(policy) if policy.chat==tbg_core::protocol::ChatPermission::Guest),
+        "the unrelated match receives only its own initial policy"
+    );
+    let sink = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let text = format!("private http://{}/not-fetched", sink.local_addr().unwrap());
+    ws::send(&mut sender, ClientMsg::ChatSend { text: text.clone() }).await;
+    for client in [&mut sender, &mut peer] {
+        assert!(
+            matches!(ws::until(client,|m|matches!(m,ServerMsg::Chat{..})).await,ServerMsg::Chat{text:received,..} if received==text)
+        );
+    }
+    ws::send(&mut sender, ClientMsg::EmojiSend { slot: 0 }).await;
+    for client in [&mut sender, &mut peer] {
+        ws::until(client, |m| matches!(m, ServerMsg::Emoji { .. })).await;
+    }
+    for client in [&mut spectator, &mut other] {
+        for _ in 0..8 {
+            let message = ws::recv(client).await;
+            assert!(
+                !matches!(
+                    message,
+                    ServerMsg::Chat { .. } | ServerMsg::Emoji { .. } | ServerMsg::MatchSocial(_)
+                ),
+                "IC-12 private relay escaped its two seats"
+            );
+            let bytes = tbg_core::protocol::encode(&message);
+            assert!(
+                !bytes.windows(canary.len()).any(|w| w == canary.as_bytes()),
+                "IC-04 email in a wire frame"
+            );
+        }
+    }
+    assert!(
+        tokio::time::timeout(std::time::Duration::from_millis(100), sink.accept())
+            .await
+            .is_err(),
+        "S09 a message URL was fetched"
+    );
+    assert!(!logs().contains(&canary));
+    assert!(!logs().contains(&text), "IC-12 no transcript in logs");
+    ws::send(&mut sender, ClientMsg::Surrender).await;
+    ws::send(&mut other, ClientMsg::Surrender).await;
+}
