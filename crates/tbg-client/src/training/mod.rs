@@ -34,6 +34,8 @@ pub enum Action {
     Rotate(i8),
     Zoom(i8),
     Motion,
+    #[cfg(target_os = "android")]
+    PreviewControls,
     Add(bool),
     Remove(bool, usize),
     Move(bool, usize, i8),
@@ -65,6 +67,8 @@ pub struct Catalog {
     pub yaw: f32,
     pub zoom: f32,
     pub reduced: bool,
+    #[cfg(target_os = "android")]
+    pub preview_controls: bool,
     pub allies: Vec<TrainingUnitSpec>,
     pub enemies: Vec<TrainingUnitSpec>,
     pub dummies: bool,
@@ -97,6 +101,8 @@ impl Default for Catalog {
             zoom: 1.0,
             // The laboratory opens in playback mode; its toggle never inherits Result settings.
             reduced: false,
+            #[cfg(target_os = "android")]
+            preview_controls: false,
             allies: [UnitKind::BoneBrute, UnitKind::Hexer, UnitKind::Archer]
                 .map(TrainingUnitSpec::base)
                 .to_vec(),

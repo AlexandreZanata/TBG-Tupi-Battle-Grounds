@@ -859,3 +859,21 @@ P69 manual CPU-builder overrides failed twice and are removed. The next
 Android capability profile derives the complete uniform-buffer rendering path
 from WebGL2 device limits on both native backends; sRGB Vulkan presentation
 is retained in the emulator. This does not waive art/motion correspondence.
+
+## 2026-11-02 — P69 compact navigation, laboratory and safe controls
+
+Android's adaptive composition retains the shared Linux heraldic icons,
+mode actions, collection art and kit typography. The owner-authorized mobile
+header is 56dp; the page fills its measured remainder. The same five modes
+(including Ranked account gating), collection pages, live directory and notes
+remain reachable. Laboratory controls move into a scrollable drawer while the
+model keeps its own viewport. Scroll/cancel handling follows BR-AN05 and
+48dp effective controls; it never changes purchases or simulation rules.
+Lobby insets distinguish visible bars/cutouts from mandatory gesture strips;
+battle scenery and loading backgrounds cover the complete surface. No Android
+creator strip is reintroduced. Shared desktop geometry/behavior is retained.
+
+Coverage: lobby, header, every menu page, laboratory catalog/forms/clips/editor/
+Practice, touch cancellation/scroll, native text input, loading/safe-area
+transitions. Android runtime checks and same-source Linux/Windows/web
+observations for this new composition remain pending.

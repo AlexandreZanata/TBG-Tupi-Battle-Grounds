@@ -16,6 +16,43 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         },
         Viewport,
     ));
+    #[cfg(not(target_os = "android"))]
+    panel(p, c, lang);
+    #[cfg(target_os = "android")]
+    {
+        if c.preview_controls {
+            p.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(0),
+                    right: px(0),
+                    top: px(0),
+                    bottom: px(56),
+                    min_height: px(0),
+                    flex_direction: FlexDirection::Column,
+                    overflow: Overflow::scroll_y(),
+                    ..default()
+                },
+                BackgroundColor(kit::INK),
+                ZIndex(20),
+                crate::ui::UiAction::Disabled,
+            ))
+            .with_children(|drawer| panel(drawer, c, lang));
+        }
+        p.spawn(skin::control(
+            lang.key(if c.preview_controls {
+                "android.hide_preview_controls"
+            } else {
+                "android.preview_controls"
+            }),
+            Action::PreviewControls,
+            0.,
+            c.preview_controls,
+        ));
+    }
+}
+
+fn panel(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
     p.spawn((
         Node {
             width: percent(100),
@@ -43,7 +80,11 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
                     r.spawn(skin::control(
                         name,
                         Action::Form(t, b),
-                        58.,
+                        if cfg!(target_os = "android") {
+                            48.
+                        } else {
+                            58.
+                        },
                         c.form == (t, b),
                     ));
                 }
@@ -64,7 +105,11 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
                 r.spawn(skin::control(
                     lang.key(&format!("training.clip.{key}")),
                     Action::Clip(clip),
-                    104.,
+                    if cfg!(target_os = "android") {
+                        84.
+                    } else {
+                        104.
+                    },
                     c.clip == clip,
                 ));
             }
@@ -78,7 +123,11 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
                 r.spawn(skin::control(
                     lang.key(&format!("training.clip.{key}")),
                     Action::Clip(clip),
-                    142.,
+                    if cfg!(target_os = "android") {
+                        84.
+                    } else {
+                        142.
+                    },
                     c.clip == clip,
                 ));
             }
@@ -90,7 +139,16 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
                 ("-", Action::Zoom(-1)),
                 ("+", Action::Zoom(1)),
             ] {
-                r.spawn(skin::control(text, a, 40., false));
+                r.spawn(skin::control(
+                    text,
+                    a,
+                    if cfg!(target_os = "android") {
+                        48.
+                    } else {
+                        40.
+                    },
+                    false,
+                ));
             }
             r.spawn(skin::control(
                 lang.key(if c.reduced {
@@ -106,6 +164,7 @@ pub(super) fn controls(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
         p.spawn(kit::muted(lang.key("training.drag_help"), 11.));
     });
 }
+
 fn row(p: &mut ChildSpawnerCommands, spawn: impl FnOnce(&mut ChildSpawnerCommands)) {
     p.spawn(Node {
         flex_wrap: FlexWrap::Wrap,

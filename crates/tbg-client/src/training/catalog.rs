@@ -32,6 +32,8 @@ pub fn spawn(
 ) {
     parent
         .spawn(Node {
+            #[cfg(target_os = "android")]
+            width: percent(100),
             column_gap: px(10),
             align_items: AlignItems::Center,
             flex_shrink: 0.,
@@ -43,13 +45,27 @@ pub fn spawn(
                 ("editor", Tab::Editor),
                 ("practice", Tab::Practice),
             ] {
-                row.spawn(skin::control(
+                #[cfg_attr(not(target_os = "android"), allow(unused_mut))]
+                let mut control = row.spawn(skin::control(
                     lang.key(&format!("training.{key}")),
                     Action::Tab(tab),
                     220.,
                     c.tab == tab,
                 ));
+                #[cfg(target_os = "android")]
+                control.insert(Node {
+                    flex_grow: 1.,
+                    flex_basis: px(0),
+                    min_width: px(48),
+                    min_height: px(48),
+                    padding: UiRect::all(px(4)),
+                    border: UiRect::all(px(1)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                });
             }
+            #[cfg(not(target_os = "android"))]
             row.spawn(kit::muted(
                 format!(
                     "{} · {}",
@@ -64,26 +80,38 @@ pub fn spawn(
             width: percent(100),
             flex_grow: 1.,
             min_height: px(0),
-            column_gap: px(14),
+            column_gap: px(if cfg!(target_os = "android") { 6 } else { 14 }),
             ..default()
         })
         .with_children(|row| {
-            row.spawn(skin::panel(28.))
-                .with_children(|p| list(p, c, assets, lang, scroll[0]));
+            row.spawn(skin::panel(if cfg!(target_os = "android") {
+                30.
+            } else {
+                28.
+            }))
+            .with_children(|p| list(p, c, assets, lang, scroll[0]));
             row.spawn(Node {
-                width: percent(40),
+                width: percent(if cfg!(target_os = "android") { 36 } else { 40 }),
                 min_width: px(0),
                 flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::FlexEnd,
                 ..default()
             })
             .with_children(|p| viewer::controls(p, c, lang));
-            row.spawn((skin::panel(30.), ScrollPosition(scroll[1]), Pane(1)))
-                .with_children(|p| match c.tab {
-                    Tab::Catalog => inspector::details(p, c, lang),
-                    Tab::Editor => inspector::editor(p, c, lang),
-                    Tab::Practice => practice(p, c, assets, lang),
-                });
+            row.spawn((
+                skin::panel(if cfg!(target_os = "android") {
+                    32.
+                } else {
+                    30.
+                }),
+                ScrollPosition(scroll[1]),
+                Pane(1),
+            ))
+            .with_children(|p| match c.tab {
+                Tab::Catalog => inspector::details(p, c, lang),
+                Tab::Editor => inspector::editor(p, c, lang),
+                Tab::Practice => practice(p, c, assets, lang),
+            });
         });
 }
 fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang, scroll: Vec2) {

@@ -2,7 +2,7 @@
 
 pub mod input;
 #[cfg(target_os = "android")]
-mod insets;
+pub(in crate::ui) mod insets;
 #[cfg(target_os = "android")]
 pub mod layout;
 #[cfg(target_os = "android")]

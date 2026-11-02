@@ -34,7 +34,9 @@ pub(super) fn control(
         Node {
             width: if width == 0. { percent(100) } else { px(width) },
             min_width: px(0),
-            min_height: px(38),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 38 }),
+            #[cfg(target_os = "android")]
+            max_width: percent(100),
             flex_shrink: 0.,
             padding: UiRect::axes(px(10), px(8)),
             border: UiRect::all(px(1)),

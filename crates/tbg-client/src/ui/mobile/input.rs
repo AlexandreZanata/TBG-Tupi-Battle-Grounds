@@ -9,6 +9,7 @@ pub struct Pointer {
     last: Vec2,
     started: f64,
     cancelled: bool,
+    dragging: bool,
     pub taps: Vec<(Vec2, Vec2, bool)>,
     pub drag: Option<(Vec2, Vec2)>,
     pub touch_frame: bool,
@@ -26,13 +27,20 @@ impl Pointer {
                 self.last = point;
                 self.started = now;
                 self.cancelled = false;
+                self.dragging = false;
             }
-            TouchPhase::Started => self.cancelled = true,
+            TouchPhase::Started => {
+                self.cancelled = true;
+                self.dragging = false;
+            }
             TouchPhase::Moved if self.owner == Some(id) => {
-                if point.distance(self.start) > 12. {
+                if !self.cancelled && point.distance(self.start) > 12. {
                     self.cancelled = true;
+                    self.dragging = true;
                 }
-                self.drag = Some((point, point - self.last));
+                if self.dragging {
+                    self.drag = Some((point, point - self.last));
+                }
                 self.last = point;
             }
             TouchPhase::Ended if self.owner == Some(id) => {
@@ -44,6 +52,8 @@ impl Pointer {
             }
             TouchPhase::Canceled => {
                 self.cancelled = true;
+                self.dragging = false;
+                self.drag = None;
                 if self.owner == Some(id) {
                     self.owner = None;
                 }
@@ -115,6 +125,24 @@ mod tests {
             assert!(p.taps.is_empty());
         }
     }
+    #[test]
+    fn small_tap_motion_never_scrolls_and_a_second_pointer_cancels_drag() {
+        // BR-AN05: pointer jitter must not move a control before its tap is released.
+        let mut p = Pointer::default();
+        p.event(1, TouchPhase::Started, Vec2::ZERO, 0.);
+        p.event(1, TouchPhase::Moved, Vec2::new(2., 2.), 0.1);
+        assert!(p.drag.is_none());
+        p.event(1, TouchPhase::Moved, Vec2::new(0., 30.), 0.2);
+        assert!(p.drag.is_some());
+        p.drag = None;
+        p.event(2, TouchPhase::Started, Vec2::ZERO, 0.3);
+        p.event(2, TouchPhase::Ended, Vec2::ZERO, 0.4);
+        p.event(1, TouchPhase::Moved, Vec2::new(0., 60.), 0.5);
+        p.event(1, TouchPhase::Ended, Vec2::ZERO, 0.6);
+        assert!(p.drag.is_none());
+        assert!(p.taps.is_empty());
+    }
+
     #[test]
     fn another_finger_cannot_release_the_owned_action() {
         let mut p = Pointer::default();

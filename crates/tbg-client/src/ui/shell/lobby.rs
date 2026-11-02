@@ -2,7 +2,7 @@
 
 #[cfg(not(target_os = "android"))]
 mod cards;
-pub(super) mod chrome;
+pub(in crate::ui) mod chrome;
 #[cfg(not(target_os = "android"))]
 mod home;
 #[cfg(not(target_os = "android"))]

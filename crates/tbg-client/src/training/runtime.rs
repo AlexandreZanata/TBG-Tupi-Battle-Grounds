@@ -127,6 +127,8 @@ fn viewer(action: Action, c: &mut Catalog) -> bool {
         Action::Rotate(d) => c.yaw += f32::from(d) * 0.25,
         Action::Zoom(d) => c.zoom = (c.zoom + f32::from(d) * 0.1).clamp(0.6, 1.7),
         Action::Motion => c.reduced = !c.reduced,
+        #[cfg(target_os = "android")]
+        Action::PreviewControls => c.preview_controls = !c.preview_controls,
         _ => return false,
     }
     true

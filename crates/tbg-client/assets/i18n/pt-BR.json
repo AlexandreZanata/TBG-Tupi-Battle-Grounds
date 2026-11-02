@@ -1,4 +1,6 @@
 {
+  "android.hide_preview_controls": "Fechar controles",
+  "android.preview_controls": "Controles da prévia",
   "update.checking": "Procurando novas versões...",
   "update.current": "Você está usando a versão mais recente. Verifique e atualize por aqui, sem desinstalar o jogo.",
   "update.setup_required": "Esta cópia foi aberta sem o iniciador de atualizações. Abra o TBG pelo atalho instalado para ativar as atualizações automáticas.",

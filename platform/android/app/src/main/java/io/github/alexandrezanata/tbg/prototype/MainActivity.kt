@@ -102,8 +102,13 @@ class MainActivity : GameActivity() {
         val surface = mSurfaceView ?: return
         // Controls avoid visible bars, the cutout and the mandatory home/edge gesture
         // strips. Back-gesture zones still accept taps, and text entry is a separate dialog.
-        val safe = insets.getInsets(WindowInsetsCompat.Type.systemBars() or
-            WindowInsetsCompat.Type.displayCutout() or WindowInsetsCompat.Type.mandatorySystemGestures())
+        val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+        val cutout = insets.getInsets(WindowInsetsCompat.Type.displayCutout())
+        val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+        val visibleSafe = androidx.core.graphics.Insets.max(bars, cutout)
+        // Lobby taps remain usable at hidden bar edges; only actual cutouts/visible
+        // bars reserve space. Battle controls additionally avoid mandatory drags.
+        val safe = if (battleViewport) androidx.core.graphics.Insets.max(visibleSafe, gestures) else visibleSafe
         val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
         val location = IntArray(2)
         surface.getLocationInWindow(location)
@@ -112,7 +117,15 @@ class MainActivity : GameActivity() {
             .put("width_px", bounds.width()).put("height_px", bounds.height())
             .put("surface_width_px", surface.width).put("surface_height_px", surface.height)
             .put("surface_x_px", location[0]).put("surface_y_px", location[1])
-            .put("density", resources.displayMetrics.density).put("battle_viewport", battleViewport)
+            .put("surface_buffer_width_px", surface.holder.surfaceFrame.width())
+            .put("surface_buffer_height_px", surface.holder.surfaceFrame.height())
+            .put("density", resources.displayMetrics.density)
+            .put("font_scale", resources.configuration.fontScale)
+            .put("rotation", surface.display?.rotation ?: 0).put("battle_viewport", battleViewport)
+            .put("bars_top_px", bars.top).put("bars_bottom_px", bars.bottom)
+            .put("cutout_left_px", cutout.left).put("cutout_top_px", cutout.top)
+            .put("cutout_right_px", cutout.right).put("cutout_bottom_px", cutout.bottom)
+            .put("mandatory_top_px", gestures.top).put("mandatory_bottom_px", gestures.bottom)
             .put("left_px", safe.left).put("top_px", safe.top)
             .put("right_px", safe.right).put("bottom_px", safe.bottom)
             .put("ime_bottom_px", ime.bottom).toString()

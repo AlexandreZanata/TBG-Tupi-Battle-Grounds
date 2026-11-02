@@ -85,7 +85,15 @@ pub fn image(
 pub fn control(text: impl Into<String>, enabled: bool, width: f32) -> impl Bundle {
     (
         Node {
-            min_width: px(width),
+            min_width: px(if cfg!(target_os = "android") {
+                48.
+            } else {
+                width
+            }),
+            #[cfg(target_os = "android")]
+            width: if width > 0. { px(width) } else { Val::Auto },
+            #[cfg(target_os = "android")]
+            max_width: percent(100),
             min_height: px(if cfg!(target_os = "android") { 48 } else { 42 }),
             padding: UiRect::axes(px(14), px(10)),
             align_items: AlignItems::Center,

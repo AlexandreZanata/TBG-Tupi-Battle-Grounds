@@ -10,6 +10,8 @@ mod header;
 mod input;
 mod live;
 mod lobby;
+#[cfg(target_os = "android")]
+pub(in crate::ui) use lobby::chrome as mobile_chrome;
 mod patch_notes;
 mod settings;
 mod strongholds;
@@ -102,24 +104,30 @@ struct Body;
 /// Every Linux menu page reserves the same clear region below the shared header.
 #[cfg(tbg_native_ui)]
 pub(super) fn page_node() -> Node {
-    Node {
-        flex_direction: FlexDirection::Column,
-        row_gap: px(16),
-        overflow: Overflow::scroll_y(),
-        ..lobby::chrome::region(
-            2.,
-            if cfg!(target_os = "android") {
-                20.
-            } else {
-                17.
-            },
-            96.,
-            if cfg!(target_os = "android") {
-                77.
-            } else {
-                79.
-            },
-        )
+    #[cfg(target_os = "android")]
+    {
+        Node {
+            position_type: PositionType::Absolute,
+            left: px(8),
+            right: px(8),
+            top: px(64),
+            bottom: px(8),
+            min_width: px(0),
+            min_height: px(0),
+            flex_direction: FlexDirection::Column,
+            row_gap: px(8),
+            overflow: Overflow::scroll_y(),
+            ..default()
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        Node {
+            flex_direction: FlexDirection::Column,
+            row_gap: px(16),
+            overflow: Overflow::scroll_y(),
+            ..lobby::chrome::region(2., 17., 96., 79.)
+        }
     }
 }
 
@@ -288,7 +296,14 @@ fn render(
                     ranking.open,
                 );
                 #[cfg(target_os = "android")]
-                super::mobile::shell::header(root, &assets, *lang, &account);
+                super::mobile::shell::header(
+                    root,
+                    &assets,
+                    *lang,
+                    &account,
+                    shell.panel,
+                    ranking.open,
+                );
                 if ranking.open {
                     return;
                 }
@@ -297,7 +312,7 @@ fn render(
                 #[cfg(not(target_os = "android"))]
                 lobby::spawn(root, &shell, &data, &account, &assets, *lang);
                 #[cfg(target_os = "android")]
-                super::mobile::shell::home(root, &assets, *lang);
+                super::mobile::shell::home(root, &assets, *lang, &account, &data);
                 if social.outgoing.is_some() || !social.incoming.is_empty() {
                     root.spawn((
                         Node {

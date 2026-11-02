@@ -1,4 +1,6 @@
 {
+  "android.hide_preview_controls": "Close controls",
+  "android.preview_controls": "Preview controls",
   "update.checking": "Checking for new versions...",
   "update.current": "You are running the latest version. Check and update here without uninstalling the game.",
   "update.setup_required": "This copy was opened without its update launcher. Open TBG from the installed application shortcut to enable automatic updates.",

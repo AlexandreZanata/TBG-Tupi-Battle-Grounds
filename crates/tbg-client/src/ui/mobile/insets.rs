@@ -6,12 +6,24 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct SafeFrame;
 
+/// Backgrounds cover the surface; only interactive presentation is inset.
+#[derive(Component)]
+pub(in crate::ui) struct FullBleed;
+
 pub fn apply(
     mut commands: Commands,
     window: Single<&Window>,
     metrics: Res<Metrics>,
     mut frame: Query<(Entity, &mut Node), With<SafeFrame>>,
-    roots: Query<Entity, (With<Node>, Without<ChildOf>, Without<SafeFrame>)>,
+    roots: Query<
+        Entity,
+        (
+            With<Node>,
+            Without<ChildOf>,
+            Without<SafeFrame>,
+            Without<FullBleed>,
+        ),
+    >,
 ) {
     let safe = metrics.safe;
     let density = if metrics.density > 0. {
