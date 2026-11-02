@@ -680,7 +680,7 @@ pier over water, and wave-bobbing wooden Merchant Caravel ship) with 3-stage
 construction animations, active work/delivery loops, and theme-harmonized
 palettes across all eight Arenas.
 
-## P75 — Administration, moderation, email key recovery and match social (owner request, 2026-11-02)
+## P75 — Administration, moderation, email key recovery and match social (implementation candidate, review pending)
 
 | Phase | Spec | Deliverable | Status | Owner gates |
 |---|---|---|---|---|

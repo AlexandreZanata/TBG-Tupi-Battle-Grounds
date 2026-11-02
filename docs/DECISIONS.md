@@ -3306,7 +3306,7 @@ online Shop and proposed 84-unit local preview are unchanged.
 
 Integrated source identity after formatting: `w38-r15-cc459351581b7763` (59 watched files).
 
-## D-107 · One Owner operator claimed by email; console separate from player accounts — 2026-11-02 (Proposed, P75)
+## D-107 · One Owner operator claimed by email; console separate from player accounts — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
 
 **Decision.** Administration uses `Operator` principals stored apart from
 `Account`s. Exactly one Owner exists, created idempotently at startup from
@@ -3331,7 +3331,7 @@ mitigated by login codes, sign-in notices and SSH-only recovery of the
 Owner address. **Reopen when** a second Owner, hardware keys/TOTP or an
 identity provider is wanted, or the console must be private-network only.
 
-## D-108 · Required player email and in-game key recovery by code — 2026-11-02 (Proposed, P75)
+## D-108 · Required player email and in-game key recovery by code — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
 
 **Decision.** New accounts require an email (supersedes D-17's "no email,
 no recovery" for new accounts and D-94's optional enrollment). Verification,
@@ -3349,7 +3349,7 @@ lose data: everything is keyed by the stable AccountId.
 **Reopen when** paid ownership needs stronger proof (D-94), when a provider
 login is added, or when support must handle lost key plus lost mailbox.
 
-## D-109 · Account suspensions and moderation with immediate forfeit — 2026-11-02 (Proposed, P75)
+## D-109 · Account suspensions and moderation with immediate forfeit — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
 
 **Decision.** Operators may suspend accounts (1 h–365 d or permanent),
 restrict chat or emojis, revoke sessions and block addresses. Suspension
@@ -3385,7 +3385,7 @@ simulation preserves determinism, replays and the authority model.
 **Reopen when** spectators, lobby/global chat, private messages or
 voice are requested, or report volume needs automated filtering.
 
-## D-111 · Moderated custom emojis normalized by the server — 2026-11-02 (Proposed, P75)
+## D-111 · Moderated custom emojis normalized by the server — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
 
 **Decision.** Players with a verified email upload PNG, GIF or static WebP
 (≤ 1 MiB). The server checks declared dimensions before decoding, decodes

@@ -327,3 +327,13 @@ steps above: [official releases guide](../docs/RELEASES.md),
 [consolidation report](../docs/phases/PLAYER-safe-consolidation.md). Static frontends
 and the immutable browser entry have separate controllers; normal frontend updates
 do not reload Caddy or restart the Rust service.
+
+## P75 attended schema and protocol rollout
+
+P75 changes schema 10 to additive schema 12 and wire 38 to 39. Automatic compatible delivery must refuse it. Follow [P75 operations](../docs/planning/P75-OPERATIONS.md): install working backups, take an integrity-checked predeploy copy, rehearse on a synthetic/copy database, publish all compatible clients, and perform the attended release-slot contract switch. Do not restart a live match slot. The separately opted-in P73 history schema 11 still installs after 12.
+
+The `p75.env.example` and `systemd/p75.conf.example` files are templates only. SMTP password loading uses systemd credentials, with no password in an EnvironmentFile. The bootstrap Owner address belongs in the private host file. `systemd/tbg-backup.{service,timer}.example` can replace the missing cron prerequisite; the owner must verify paths, permissions and a successful restore before enabling it. No unit is installed by this phase.
+
+Stage `admin-app` separately with `python3 web/scripts/stage.py admin-app <empty-directory>`. It is never part of the automatic public-placeholder package. The attended admin artifact must identify `admin_mode=app`, and static-policy approval requires the exact console CSP. Activate the admin Caddy block and loopback listeners only in the attended window; keep `admin-public` as the fallback.
+
+Rollback preserves the additive P75 tables. Before any P75 writes the previous generation may be promoted; after writes, keep newer accounts/results and follow the operations runbook. Restoring the old backup discards newer data and requires a separate explicit owner decision. No migration, server restart, email, DNS or production operation was performed by implementation.

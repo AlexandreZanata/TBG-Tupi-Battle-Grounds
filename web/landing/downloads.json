@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "server": {
-    "protocol": 38,
-    "contract": "w38-r15-cc459351581b7763"
+    "protocol": 39,
+    "contract": "w39-r15-cc459351581b7763"
   },
   "linux": {
     "state": "pending"

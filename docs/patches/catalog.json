@@ -946,6 +946,71 @@
         }
       },
       "document": "docs/patches/2026-11-02-auxiliaries-gods.md"
+    },
+    {
+      "id": "p75-account-social",
+      "version": "0.1.4-colossus.3+p75",
+      "date": "2026-11-02",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 15,
+      "ruleset_hash": "cc459351581b7763",
+      "title": {
+        "en": "Account recovery and match social",
+        "pt-BR": "Recuperacao de conta e recursos sociais"
+      },
+      "summary": {
+        "en": "Candidate: verified email recovery preserves your account; private match chat, three emoji slots, reviewed uploads and reports. Chat/uploads await Owner activation.",
+        "pt-BR": "Candidato: recuperacao por email verificado preserva sua conta; chat privado da partida, tres espacos de emojis, envios revisados e denuncias. Chat e envios aguardam ativacao do Owner."
+      },
+      "changes": [
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Account and match social",
+            "pt-BR": "Conta e recursos sociais da partida"
+          },
+          "field": {
+            "en": "recovery and communication",
+            "pt-BR": "recuperacao e comunicacao"
+          },
+          "before": {
+            "en": "Manual keys without in-game recovery; no match social tools",
+            "pt-BR": "Chaves manuais sem recuperacao no jogo; sem ferramentas sociais na partida"
+          },
+          "after": {
+            "en": "Email-code recovery on the same account, chat/mute, three emoji slots and private reports",
+            "pt-BR": "Recuperacao por codigo na mesma conta, chat/silenciar, tres espacos de emojis e denuncias privadas"
+          },
+          "reason": {
+            "en": "Protect account continuity and support moderated match communication. Gameplay is unchanged.",
+            "pt-BR": "Proteger a continuidade da conta e oferecer comunicacao moderada. As regras do jogo permanecem iguais."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Activation pending",
+            "body": "Wire 39/schema 12 require the attended rollout, compatible clients, working backups, privacy approval and real desktop correspondence evidence."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Ativacao pendente",
+            "body": "Protocolo 39 e esquema 12 exigem publicacao assistida, clientes compativeis, backups funcionais, aprovacao de privacidade e evidencia real de correspondencia desktop."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/P75-admin-moderation-and-match-social.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "targeted contracts only; no gameplay change",
+          "confirmation": "pending"
+        }
+      },
+      "document": "docs/patches/2026-11-02-p75.md"
     }
   ]
 }

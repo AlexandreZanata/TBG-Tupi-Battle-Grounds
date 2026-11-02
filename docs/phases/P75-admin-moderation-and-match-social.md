@@ -1,7 +1,6 @@
 # P75 — Administration, moderation, email key recovery and match social
 
-**Status:** planning only, 2026-11-02. No runtime code, migration, VPS
-change or secret is part of this delivery.
+**Status:** implementation candidate, 2026-11-02; S14 validation and review pending. No production migration, VPS change or real secret is part of this delivery.
 **Planning branch:** `docs/p75-admin-moderation-plan`.
 **Execution branch:** `phase/p75-admin-moderation-social`, created from the
 freshly fetched GitHub `origin/main` (owner rule 2026-11-02: always base on
@@ -574,7 +573,9 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
-| S11 | This step commit | `cargo fmt -p tbg-client -p tbg-server`; `git diff --check`; PNG signatures and i18n/visual JSON inspected | Actual keyboard system Enter/Enter regression, charset, transport allowlist, PNG predecode dimensions, frame timing | Native/WASM checks, real flows, private preview/library polish and Linux/Windows/web captures queued S14. PR #57 vault integration requires consolidated verification. |
+| S13 | This step commit | Static web/patch-note checks; `git diff --check`; templates inspected (Caddy absent locally) | Deployment templates only; automatic console activation remains refused | Owner rollout, SMTP/DNS, privacy publication, backup install/restore and coordinated contract switch pending. |
+| S12 | This step commit | Initial `python3 web/scripts/check.py` found JS delimiters (corrected) and pre-P75 landing contract metadata (S13). Node syntax checks passed on corrected modules. | Static no-HTML/CSRF checks integrated; all console areas connected | Full static check after S13 metadata; real capture-backed browser sign-in pending S14. No site was published. |
+| S11 | `a249583f` | Initial `cargo fmt` failed on a delimiter in `ui/p75/views.rs`; corrected before S14 and formatting rerun. `git diff --check`, PNG/i18n/visual JSON inspection passed | Actual keyboard system Enter/Enter regression, charset, transport allowlist, PNG predecode dimensions, frame timing | Native/WASM checks, real flows, private preview/library polish and Linux/Windows/web captures queued S14. PR #57 vault integration requires consolidated verification. |
 | S10 | This step commit | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | `contract_p75_emoji`: hostile dimensions/truncation/polyglots/frame count, standard IDs, private upload → approval → equip → revoke, content hash and cache reauthorization | Tests queued S14; 2 s timing and real animated-client presentation pending. |
 | S9 | This step commit | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | Appended wire goldens; real two-seat chat/guest boundary and replay hash test; sanitizer and limit contracts | Tests queued S14; actual spectator attachment/reconnect/mid-match checks pending extension. |
 | S8 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_reports`: participant eligibility, duplicate race, frozen transcript, forged target rejection, privacy and daily bound | S9 populates live transcript/loadouts; tests and real-client filing queued S14. |
