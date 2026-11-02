@@ -108,3 +108,30 @@ walk, attack), 1600x1000: boot_ready=true, scene_waiting=false, zero pending
 images/texts and zero failed images, normal process exit in 9.55 seconds. The
 native image was inspected. This is Linux package evidence only; Windows and
 browser rendered correspondence remain unobserved.
+
+## Full-match fixture assumptions after TW-01 and SIDE-01
+
+The canceled 05c42d9 test log exposed three independent fixture assumptions.
+C4a and reconnect bots could exceed their unchanged wall deadline under the
+stronger towers and random server seeds. Their synthetic fast clock is now
+1 ms (already used by other integration fixtures), retaining the same complete
+natural match, replay hash/outcome and wrong-seed checks; production remains
+50 ms and no deadline increases. C4b still exercises 50 ms when explicitly run.
+
+The Fortification fixture spent its initial 5 Energy on the now-6-Energy first
+tier, then waited forever for an impossible accepted view. Wait for the actual
+affordable server view before sending the intention; view waits now have the
+existing 10-second total bound instead of restarting on every ping. No rejection
+or authority check is removed.
+
+The rematch reload fixture could read P71's frozen previous-result MatchStart
+as the new game. SIDE-01 gives each game independent seats, exposing that stale
+comparison. Track the previous result id and require both new seats to name the
+same distinct rematch id; keep the challenge-mode and opposite-seat assertions.
+The original scenario passed once locally, consistent with a seat-dependent
+flake; a previous CI run failed. No runtime player behavior changes here.
+
+Scoped online validation passed on the corrected fixtures: rematch reload 0.21 s,
+real Fortification/reconnect/replay 0.47 s, bot reconnect 4.51 s, and C4a complete
+natural-match replay equivalence 28.41 s. Every original outcome/hash/wrong-seed
+assertion remains. No full local server/workspace suite or ignored C4b was run.

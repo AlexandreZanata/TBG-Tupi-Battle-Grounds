@@ -1,5 +1,5 @@
 //! Integration tests over real WebSockets against an in-process server.
-//! Matches run at a 5 ms tick so a full match takes seconds.
+//! Synthetic 1 ms ticks keep full TW-01 matches bounded; production remains 50 ms.
 
 use std::time::Duration;
 
@@ -25,7 +25,7 @@ async fn server_with(config: Config) -> String {
 
 async fn server(reconnect_secs: u64) -> String {
     server_with(Config {
-        tick_ms: 5,
+        tick_ms: 1,
         reconnect_secs,
         // The window itself is under test here; P71's pause has its own file.
         pause_secs: 0,
@@ -197,10 +197,21 @@ async fn start_challenge(
     )
 }
 
-async fn end_by_surrender(ws: &mut Ws, other: &mut Ws) {
+async fn end_by_surrender(ws: &mut Ws, other: &mut Ws) -> protocol::ResultId {
     send(ws, &ClientMsg::Surrender).await;
-    let _ = await_end(ws).await;
+    let id = tokio::time::timeout(Duration::from_secs(10), async {
+        loop {
+            match recv(ws).await {
+                Some(ServerMsg::MatchEnd { result_id, .. }) => return result_id,
+                Some(_) => {}
+                None => panic!("socket closed before MatchEnd"),
+            }
+        }
+    })
+    .await
+    .expect("surrender produces a bounded result");
     let _ = await_end(other).await;
+    id
 }
 
 fn fast(url: &str) -> BotOpts {
@@ -901,7 +912,7 @@ async fn rematch_decline_closes() {
 async fn rematch_reload_keeps_offer() {
     let url = server(30).await;
     let (mut owner, mut guest, owner_token, _, _, _) = start_challenge(&url).await;
-    end_by_surrender(&mut owner, &mut guest).await;
+    let previous = end_by_surrender(&mut owner, &mut guest).await;
     let _ = rematch_open(&mut owner).await;
     let _ = rematch_open(&mut guest).await;
     send(&mut owner, &ClientMsg::RequestRematch).await;
@@ -916,9 +927,36 @@ async fn rematch_reload_keeps_offer() {
 
     let mut owner = connect(&url).await;
     hello_resume(&mut owner, owner_token).await;
-    let (a, b) = tokio::join!(challenge_start(&mut owner), challenge_start(&mut guest));
+    // P71 may replay the previous result before the new rematch. Random SIDE-01
+    // seats belong to each result id; an old MatchStart cannot identify the new seat.
+    async fn new_start(
+        ws: &mut Ws,
+        previous: protocol::ResultId,
+    ) -> (Seat, MatchMode, protocol::ResultId) {
+        tokio::time::timeout(Duration::from_secs(10), async {
+            loop {
+                match recv(ws).await {
+                    Some(ServerMsg::MatchStart {
+                        result_id,
+                        you,
+                        mode,
+                        ..
+                    }) if result_id != previous => return (you, mode, result_id),
+                    Some(_) => {}
+                    None => panic!("socket closed before the new rematch"),
+                }
+            }
+        })
+        .await
+        .expect("the new rematch starts after reload")
+    }
+    let (a, b) = tokio::join!(
+        new_start(&mut owner, previous),
+        new_start(&mut guest, previous)
+    );
     assert_eq!((a.1, b.1), (MatchMode::Challenge, MatchMode::Challenge));
     assert_ne!(a.0, b.0);
+    assert_eq!(a.2, b.2, "both seats belong to the same new rematch");
 }
 
 #[tokio::test]
@@ -1133,13 +1171,17 @@ async fn wait_for_view(
     ws: &mut Ws,
     predicate: impl Fn(&tbg_core::MatchView) -> bool,
 ) -> tbg_core::MatchView {
-    loop {
-        match recv(ws).await {
-            Some(ServerMsg::View(view)) if predicate(&view) => return *view,
-            Some(_) => {}
-            None => panic!("socket closed while waiting for a view"),
+    tokio::time::timeout(Duration::from_secs(10), async {
+        loop {
+            match recv(ws).await {
+                Some(ServerMsg::View(view)) if predicate(&view) => return *view,
+                Some(_) => {}
+                None => panic!("socket closed while waiting for a view"),
+            }
         }
-    }
+    })
+    .await
+    .expect("the required authoritative view arrives")
 }
 
 #[tokio::test]
@@ -1329,14 +1371,16 @@ async fn br_sk01_kinds_freeze_at_pairing_fortify_online_and_survive_reconnect() 
     challenge_start(&mut guest).await;
     let mut kinds = [StrongholdKind::Command; 2];
     kinds[owner_seat.index()] = StrongholdKind::Artillery;
-    let running = |v: &tbg_core::MatchView| v.phase == Phase::Running;
-    let view = wait_for_view(&mut owner, running).await;
+    let affordable = |v: &tbg_core::MatchView| {
+        v.phase == Phase::Running && v.energy >= tbg_core::content::FORTIFY_COST[0]
+    };
+    let view = wait_for_view(&mut owner, affordable).await;
     assert_eq!(
         view.strongholds.map(|s| s.kind),
         kinds,
         "BR-SK08: both public"
     );
-    // 5 starting Energy buys tier 1 (3 Energy) on the Rapid Fire branch.
+    // TW-01 costs 6 Energy: wait for the authoritative affordable view, then buy Rapid Fire.
     let intent = PlayerIntention::Fortify { branch: 1 };
     send(&mut owner, &ClientMsg::Intent { seq: 1, intent }).await;
     let me = owner_seat.index();

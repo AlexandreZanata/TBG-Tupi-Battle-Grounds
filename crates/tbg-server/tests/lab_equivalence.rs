@@ -1,6 +1,6 @@
 //! P16-C step 5 (D-33, contract C4): the real server, driven by its own
 //! clock, plays exactly the match a headless replay of its applied
-//! intentions produces. C4a runs the server at a 5 ms tick (the test
+//! intentions produces. C4a runs the server at a 1 ms tick (the test
 //! convention), C4b at the production 50 ms tick (1×, `--ignored`).
 //! Equality at both speeds is what lets the balance lab run without a clock.
 
@@ -70,7 +70,7 @@ async fn server_equals_headless(tick_ms: u64) {
 
 #[tokio::test]
 async fn c4a_fast_server_match_equals_headless_replay() {
-    server_equals_headless(5).await;
+    server_equals_headless(1).await;
 }
 
 #[tokio::test]
