@@ -3188,6 +3188,60 @@ comparison after the fix (20.3125 points). This is screening evidence, not the
 full C7 result or D-33 acceptance. The original 256-pair C7 test and its 10-point
 match/20-point duel criteria remain intact and queued to hosted CI.
 
+## INT-03 — Isolate healing-canary controls without changing a threshold (2026-11-02)
+
+After INT-02 the full 256-pair C7 price canary passed SiegeWalker, then exposed
+Bloomkeeper x2 HP/healing at 0.88 -> 0.80 against the shipped Bot. Scaling a
+Ruleset changes both armies: that opponent can buy the same buffed healer.
+The value engine already has BotAvoid(kind) for exactly this confound. Retain
+the original observation and add that isolated control for pure-healer C7 rows,
+using the same 256 paired seeds and +0.10 gain. All duel/match thresholds,
+mutations, budgets, original rows and assertions for other kinds remain.
+This is calibration of the canary, not acceptance or tuning of the live roster.
+
+Inspection also found that BotAvoid passed through the outer reaction schedule
+and the shipped Bot's own schedule, slowing the control twice. Like Bot, it now
+owns its internal cadence directly. A new active-simulation regression compares
+Bot and BotAvoid when the avoided kind is absent from the pool: actions and
+state hashes must match. Neither change affects the production bot or gameplay.
+Local Rust execution was deferred when the shared validation lock returned 75;
+the exact new test and unchanged full C7 remain queued to protected hosted CI.
+
+## INT-04 — Preserve C7 measurements while avoiding unused mutant rows (2026-11-02)
+
+For every single-kind mutation C7 rebuilt a full 46-base-form matrix, although
+it only consumes that mutated kind's row and weak/oppressive membership. The
+reference matrix remains complete. Mutant measurements now use a test-only
+helper that calls the reference pair builder for every target/opponent pair,
+all three unchanged budgets, both seat orders and the same duel limit. No
+opponent, target kind, sample, threshold or assertion is omitted. Other rows
+are explicitly unmeasured and are never consumed by this test or a live gate.
+
+An equivalence regression compares the whole target score row, averages and
+both consumed flags against the complete reference builder for normal, x2
+HP/damage and x3 cost rules. This is a reduction of unconsumed work, not a
+shorter battle, smaller statistical sample or additional pass criterion.
+Local compilation remains deferred under the earlier shared-lock contention;
+the new proof and complete original C7 run in required hosted CI.
+
+## INT-05 — Owner-authorized controlled wounded-army healing canary (2026-11-02)
+
+The owner explicitly approved changing the healing fixture while retaining
+256 paired seeds, the +0.10 score-gain requirement and every live value.
+INT-03's isolated policy still started at 0.93, leaving insufficient headroom.
+Retain both earlier observations; add an equal-Energy wounded-army control
+using the original damaging kinds, all existing duel budgets, both seat orders
+and 25/50/75 percent initial combat-unit HP. The controlled opponent never
+fields the mutated healer. No Shop policy runs, and the canonical duel arena
+disables Stronghold fire/regeneration; no live ruleset is changed.
+
+Each case starts in contact, with the healer behind its escorts. Extinction
+or the unchanged duel 90-second bound decides the score from fighting HP;
+a pure healer cannot win after its escorts die. Both variants use identical
+initial rosters, wounds, seed and physical seats. A dedicated 256-pair
+regression requires unsaturated baseline headroom and the unchanged planted
+x2 HP/heal gain. This is canary sensitivity, not online balance acceptance.
+
 ## D-105 · Gods expansion reuses counted-hit hooks and one public link event — 2026-11-02 (Proposed, GD-04)
 
 **Context.** The owner asked for two new Gods champions with a chained lightning

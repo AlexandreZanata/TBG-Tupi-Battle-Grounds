@@ -9,7 +9,9 @@ with five-form low-poly kits, refined Ogres, Abyssals, Gods/Colossus and rolling
 healing casks. Online FULL_POOL remains the separately gated 46-champion roster.
 The existing Proposed tower changes, broader BattleLine, original pushing and
 intrinsic body colors are retained. Widening the road no longer widens the
-preferred departure formation before contact.
+preferred departure formation before contact. CROWD-EXIT-01 also bounds live
+walking envelopes to the actual body and held equipment, while engaged Colossus
+arms and Ogre Archer equipment retain directional clearance.
 
 Blue stays left and red stays right for every desktop player and spectator.
 Online and Practice sides are randomized; the side announcement, private controls,

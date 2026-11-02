@@ -108,3 +108,123 @@ walk, attack), 1600x1000: boot_ready=true, scene_waiting=false, zero pending
 images/texts and zero failed images, normal process exit in 9.55 seconds. The
 native image was inspected. This is Linux package evidence only; Windows and
 browser rendered correspondence remain unobserved.
+
+## Full-match fixture assumptions after TW-01 and SIDE-01
+
+The canceled 05c42d9 test log exposed three independent fixture assumptions.
+C4a and reconnect bots could exceed their unchanged wall deadline under the
+stronger towers and random server seeds. Their synthetic fast clock is now
+1 ms (already used by other integration fixtures), retaining the same complete
+natural match, replay hash/outcome and wrong-seed checks; production remains
+50 ms and no deadline increases. C4b still exercises 50 ms when explicitly run.
+
+The Fortification fixture spent its initial 5 Energy on the now-6-Energy first
+tier, then waited forever for an impossible accepted view. Wait for the actual
+affordable server view before sending the intention; view waits now have the
+existing 10-second total bound instead of restarting on every ping. No rejection
+or authority check is removed.
+
+The rematch reload fixture could read P71's frozen previous-result MatchStart
+as the new game. SIDE-01 gives each game independent seats, exposing that stale
+comparison. Track the previous result id and require both new seats to name the
+same distinct rematch id; keep the challenge-mode and opposite-seat assertions.
+The original scenario passed once locally, consistent with a seat-dependent
+flake; a previous CI run failed. No runtime player behavior changes here.
+
+Scoped online validation passed on the corrected fixtures: rematch reload 0.21 s,
+real Fortification/reconnect/replay 0.47 s, bot reconnect 4.51 s, and C4a complete
+natural-match replay equivalence 28.41 s. Every original outcome/hash/wrong-seed
+assertion remains. No full local server/workspace suite or ignored C4b was run.
+
+## Isolated healing control (INT-03)
+
+The completed 747e2ad balance job 125354555002 passed the earlier SiegeWalker
+canaries and failed on the pure healer: shared-roster scores 0.88 -> 0.80.
+The prior test only measured a buff applied to both armies. Add the value
+engine's existing BotAvoid control, retaining the old observation and identical
+256-pair/+0.10 requirement. Fix its double reaction clock before interpreting
+that control. No live stat or gate threshold changes.
+
+The new absent-kind cadence regression was written, but its first local command
+returned lock-busy (75); it did not run. Respect the shared lock and defer the
+new controller check/full C7 to hosted CI. The earlier 32-pair screens remain
+screening evidence only. Do not claim the isolated healing criterion passed.
+
+INT-04 avoids rebuilding unrelated mutant duel rows: the full reference matrix
+stays, and every consumed target/opponent/budget/seat result is measured through
+the same pair builder. A new exact equivalence test protects row scores,
+averages and weak/oppressive classification for all three mutation cases.
+No samples, duel duration, prices, gate thresholds or canary assertions change.
+The test-only helper is not exported by the balance library or used in reports.
+Local compile/run is deferred to hosted CI while the shared host validation
+front remains contended; no lock polling, extra target or parallelism bypass.
+
+## Hosted result at 3fb894d (2026-11-02 16:02 UTC)
+
+Native Linux/Windows, quality, clippy, WASM and desktop UI passed. The
+complete required test lane passed all targets except the stalled-spectator
+fixture: its natural match exceeded the existing 120-second bot budget.
+BR-M07 imposes no match deadline; use the existing spectator replay's
+20-second surrender, preserving both completion and no-detachment assertions.
+Production clocks, bots and spectator handling do not change.
+
+INT-03 cadence and INT-04 exact-row equivalence passed in the balance lane.
+C7 still failed Bloomkeeper: shared 0.88 -> 0.80; isolated 0.93 -> 1.00.
+
+> blocked: Two completed healing-canary runs miss the unchanged +0.10
+> requirement. The isolated baseline leaves less than 0.10 headroom. Do not
+> lower a threshold, change live balance or keep adding convenient policies.
+> Owner confirmation was requested for a controlled wounded-army healing
+> fixture at the same 256 pairs/+0.10 criterion. The protected merge remains
+> blocked; the current healthy VPS generation is preserved.
+
+Scoped validation: `cargo test -p tbg-server --test spectate
+a_spectator_that_never_reads_is_dropped_and_the_seats_finish -- --exact
+--nocapture` passed (1 scenario, 20.02 seconds) under the shared lock with two
+build jobs. The shared spectator helper and production behavior are unchanged.
+
+New front discovered during monitoring: PR #51 at 5357045 adds P74 economic
+auxiliaries and builds on the earlier champion head. It conflicts with main.
+Read-only review found appended wire view fields without a protocol bump,
+a second incompatible R13 identity, and auxiliary state skipped by serde.
+These must be reconciled and explicitly validated before that front can be
+released; do not merge it solely because it includes the champion ancestry.
+
+## Exact CROWD-EXIT-01 integration requested by the owner
+
+Merge 73c7a07c28833d6663a11dda65332a578a8c4a3a normally, preserving
+its complete overhead, live-body and regression changes. Resolve the
+earlier 41ebc27 formation fix in favor of HOME_HALF_WIDTH, retaining
+its two useful regressions. TUNDRA-01 9233cd021e5b9af04976bba1f6422f3e2ab3bc21,
+SIDE-01 11cf5af323975f738992147dc76b71f0b2475fbd and 683477aeb3f5
+were already ancestors. Two supplied abbreviated hashes differed from
+the actual objects; exact requested terminal SHA and its ancestry were used.
+The later GD-03 and P74 commits remain in PR #51 and are not silently
+included in this explicitly bounded integration.
+
+PR heads #41 bf6da86, #43 19f4cfb and #44 9fb7be0 are exact ancestors of
+this consolidated branch. Do not discard or close them as merged into main
+before main actually contains those histories. No branch is deleted.
+
+Local focused union (client crowd, side01_, envelopes, gd02_, Shatterback
+clearance; core practice_bot side01_; server ranked side01_) used
+`flock -n -E 75 /tmp/tbg-validation-1000.lock` and CARGO_BUILD_JOBS=2.
+It returned 75 before any command ran: deferred, shared validation slot busy.
+Do not poll or bypass the lock. Rustfmt on the affected files, source routing
+and seven patch-note entries passed; git diff --check passed.
+The main checkout's nine dirty/untracked files were hashed before integration;
+no checkout, stash or reset was performed there.
+
+## INT-05 controlled-fixture result (owner approved)
+
+The owner approved the controlled wounded-army scenario without reducing
+the 256 paired seeds, +0.10 gain or any live values. The dedicated regression
+passed under the shared lock with CARGO_BUILD_JOBS=2:
+`cargo test -p tbg-balance --test wounded_army_control -- --nocapture
+--test-threads=1` (1 passed, 11.04 s). Its predeclared grid covers all nine
+original damaging kinds, budgets 20/40/60 and 25/50/75 percent starting HP,
+with equal Energy and both physical seat orders. Baseline score 0.273438;
+x2 HP/heal score 0.519531 (+24.609375 percentage points). No parameter sweep,
+live rule adjustment or acceptance claim is involved. Full hosted C7 is
+still required; the earlier shared/isolated observations remain in its
+assertion and diagnostics. The new helper is test-only.

@@ -627,12 +627,13 @@ allow overtaking and regroup after separation. Test both sides near each tower,
 ordinary bodies and measured equipment. The focused numerical regression is
 mechanism evidence; all runtime/platform observations remain pending.
 
+
 ## CROWD-EXIT-01 — Tower-exit contact fidelity, natural regrouping and bounded arm/bazooka clearance (2026-11-02)
 
 Shared Linux/Windows/desktop web path (`crates/tbg-client/src/crowd.rs`,
 `crates/tbg-client/src/sync/crowd_ecs.rs`, `crates/tbg-client/src/art/overhead.rs`):
 `Solver::solve` keeps `Params::half_width = 2.1` for the outer road clamp while
-keeping RESTORE-03's `FORMATION_HALF_WIDTH = 1.1` (`[-0.66, +0.66]`) for initial tower-exit
+restoring `HOME_HALF_WIDTH = 1.1` (`[-0.66, +0.66]`) for initial tower-exit
 birth offsets and the lateral regrouping spring target. Units no longer spawn
 or drift toward `±1.26` without contact, yet dense pileups can still push out
 to `±2.1` on the widened road and regroup into the center band afterward.
@@ -695,3 +696,14 @@ Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/
   actually taken and the focused tests run. Windows and desktop-web
   observations are **pending**; no parity is claimed from shared code or
   compilation.
+
+### CROWD-EXIT-01 consolidation receipt (2026-11-02)
+
+Normal merge of exact source 73c7a07c28833d6663a11dda65332a578a8c4a3a
+retains HOME_HALF_WIDTH and all live-body/overhead changes. The earlier
+RESTORE-03 regressions remain alongside both new tower-exit regressions.
+Source routing and patch-note checks passed. The requested local focused
+union was deferred: the shared nonblocking validation lock returned 75
+before compilation; no test ran or passed in that attempt. Hosted CI on
+the consolidated head remains required. Windows/browser rendered parity
+is still pending, independently of shared source and numerical tests.

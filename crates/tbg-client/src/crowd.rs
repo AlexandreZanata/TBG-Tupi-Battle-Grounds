@@ -63,8 +63,7 @@ impl Default for Params {
     }
 }
 
-// The widened road changes the collision boundary, not the original preferred formation.
-const FORMATION_HALF_WIDTH: f32 = 1.1;
+pub const HOME_HALF_WIDTH: f32 = 1.1;
 
 pub fn home_lane(id: u32) -> f32 {
     let h = id.wrapping_mul(0x9E37_79B9) >> 16;
@@ -87,16 +86,17 @@ impl Solver {
         let order = &mut self.order;
         assert_eq!(bodies.len(), state.len());
         let dt = dt.clamp(0.0, 1.0 / 30.0);
+        let home_width = p.half_width.min(HOME_HALF_WIDTH);
         for (b, o) in bodies.iter().zip(state.iter_mut()) {
             if !o.init {
                 *o = Offset {
                     home: home_lane(b.id),
-                    dz: home_lane(b.id) * FORMATION_HALF_WIDTH,
+                    dz: home_lane(b.id) * home_width,
                     init: true,
                     ..*o
                 };
             }
-            let target = o.home * FORMATION_HALF_WIDTH;
+            let target = o.home * home_width;
             o.vel_z += (target - o.dz) * p.home_k * dt;
             o.vel_z *= (-p.damping * dt).exp();
             o.dz += o.vel_z * dt;

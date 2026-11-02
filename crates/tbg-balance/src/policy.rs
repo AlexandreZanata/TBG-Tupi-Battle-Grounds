@@ -268,6 +268,10 @@ impl Controller {
         if self.policy == Policy::Bot {
             return self.bot.decide(view);
         }
+        // A filtered bot owns the same internal clock; a second reaction gate biases its control.
+        if let Policy::BotAvoid(kind) = self.policy {
+            return self.avoid(view, kind);
+        }
         if self.wait > 0 {
             self.wait -= 1;
             // A fallback bot keeps its own pace between our decisions.
