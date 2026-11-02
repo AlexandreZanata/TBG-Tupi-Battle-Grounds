@@ -20,7 +20,11 @@ use tbg_core::{
 mod layout;
 use layout::spawn;
 
-const CARD_W: f32 = 233.;
+const CARD_W: f32 = if cfg!(target_os = "android") {
+    164.
+} else {
+    233.
+};
 const CARD_H: f32 = CARD_W * 1180. / 820.;
 
 #[derive(Component)]

@@ -32,6 +32,7 @@ pub fn spawn(
     .with_children(|grid| {
         language(grid, assets, lang);
         audio(grid, assets, sounds, volume, lang);
+        #[cfg(not(target_os = "android"))]
         video(grid, assets, window, lang);
         account_panel(grid, assets, account, lang);
     });

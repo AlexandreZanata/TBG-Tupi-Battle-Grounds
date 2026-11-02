@@ -60,7 +60,7 @@ fn show(
     mut clear: ResMut<ClearColor>,
     mut scenery: Query<&mut Visibility, With<crate::arena::ArenaScene>>,
     mut model: Query<(Entity, &mut Transform, &mut Animator), ModelFilter>,
-    #[cfg(tbg_desktop)] mut demo: Query<
+    #[cfg(tbg_native_ui)] mut demo: Query<
         &mut Visibility,
         (
             With<crate::sync::lobby_battle::DemoUnit>,
@@ -82,7 +82,7 @@ fn show(
             };
         }
 
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         for mut visible in &mut demo {
             *visible = if active {
                 Visibility::Hidden

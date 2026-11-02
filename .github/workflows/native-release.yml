@@ -140,7 +140,7 @@ jobs:
       # The shipped feature set (tbg-core without `lab`), single-threaded:
       # the workspace suite in ci.yml does not test this configuration.
       - name: Test the native client
-        run: cargo test --locked -p tbg-client --bin tbg-client --features ui-acceptance -- --test-threads=1
+        run: cargo test --locked -p tbg-client --lib --features ui-acceptance -- --test-threads=1
       - name: Build the release client
         run: |
           cargo build --locked --release -p tbg-client --features ui-acceptance
@@ -224,7 +224,7 @@ jobs:
           # rust-cache exports its input; disarm it until compilation completes.
           'CACHE_ON_FAILURE=false' >> $env:GITHUB_ENV
           . ./scripts/windows-env.ps1
-          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance --no-run --timings
+          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --lib --target x86_64-pc-windows-msvc --features ui-acceptance --no-run --timings
           if ($LASTEXITCODE) { throw 'Windows platform regressions did not compile' }
           # Save completed dependencies even if a later test or packaging step fails.
           'CACHE_ON_FAILURE=true' >> $env:GITHUB_ENV
@@ -232,7 +232,7 @@ jobs:
         shell: pwsh
         run: |
           . ./scripts/windows-env.ps1
-          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --bin tbg-client --target x86_64-pc-windows-msvc --features ui-acceptance platform:: -- --test-threads=1
+          cargo --config .github/cargo-windows-release.toml test --locked --release -p tbg-client --lib --target x86_64-pc-windows-msvc --features ui-acceptance platform:: -- --test-threads=1
           if ($LASTEXITCODE) { throw 'Windows platform regressions failed' }
       - name: Build the MSVC release client
         shell: pwsh

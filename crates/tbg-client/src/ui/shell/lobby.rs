@@ -1,14 +1,19 @@
 //! Browser-aligned lobby entry point and private-room panel.
 
+#[cfg(not(target_os = "android"))]
 mod cards;
 pub(super) mod chrome;
+#[cfg(not(target_os = "android"))]
 mod home;
+#[cfg(not(target_os = "android"))]
 mod modes;
+#[cfg(not(target_os = "android"))]
 mod profile;
 
 use super::{button, data::Data, kit, Account, Action, Lang, Panel, Shell, UiAction};
 use bevy::prelude::*;
 
+#[cfg(not(target_os = "android"))]
 pub use home::spawn;
 
 pub fn friends(root: &mut ChildSpawnerCommands, lang: Lang) {

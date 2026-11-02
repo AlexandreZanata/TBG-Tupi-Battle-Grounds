@@ -21,7 +21,10 @@ enum Control {
 }
 
 pub fn plugin(app: &mut App) {
+    #[cfg(not(target_os = "android"))]
     app.add_systems(Update, (keyboard, render).chain());
+    #[cfg(target_os = "android")]
+    let _ = app;
 }
 
 fn insert(form: &mut ActiveForm, value: &str) {

@@ -35,6 +35,16 @@ pub(super) fn spawn(
                     Node {
                         width: px(1036),
                         max_width: percent(96),
+                        max_height: if cfg!(target_os = "android") {
+                            percent(96)
+                        } else {
+                            Val::Auto
+                        },
+                        overflow: if cfg!(target_os = "android") {
+                            Overflow::scroll_y()
+                        } else {
+                            Overflow::default()
+                        },
                         padding: UiRect::axes(px(28), px(18)),
                         border: UiRect::all(px(3)),
                         border_radius: BorderRadius::all(px(5)),
@@ -74,7 +84,7 @@ pub(super) fn spawn(
                     modal
                         .spawn(Node {
                             width: percent(100),
-                            column_gap: px(16),
+                            column_gap: px(if cfg!(target_os = "android") { 8 } else { 16 }),
                             justify_content: JustifyContent::Center,
                             ..default()
                         })

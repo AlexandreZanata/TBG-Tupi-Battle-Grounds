@@ -22,6 +22,12 @@ pub fn get(scope: Scope, key: &str) -> Option<String> {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
+        #[cfg(target_os = "android")]
+        let scope = if super::android::persistent_preference(key) {
+            scope
+        } else {
+            Scope::Session
+        };
         native::get(scope, key)
     }
 }
@@ -33,6 +39,12 @@ pub fn set(scope: Scope, key: &str, value: &str) -> bool {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
+        #[cfg(target_os = "android")]
+        let scope = if super::android::persistent_preference(key) {
+            scope
+        } else {
+            Scope::Session
+        };
         native::update(scope, key, Some(value))
     }
 }
@@ -43,25 +55,46 @@ pub fn remove(scope: Scope, key: &str) {
         let _ = s.remove_item(key);
     }
     #[cfg(not(target_arch = "wasm32"))]
-    native::update(scope, key, None);
+    {
+        #[cfg(target_os = "android")]
+        let scope = if super::android::persistent_preference(key) {
+            scope
+        } else {
+            Scope::Session
+        };
+        native::update(scope, key, None);
+    }
 }
 
 /// Native legacy removal is serialized by the auth process lock; web owns this under Web Locks.
 #[cfg(not(target_arch = "wasm32"))]
 pub fn remove_if_matches(scope: Scope, key: &str, expected: &str) -> bool {
+    #[cfg(target_os = "android")]
+    let scope = if super::android::persistent_preference(key) {
+        scope
+    } else {
+        Scope::Session
+    };
     native::remove_if_matches(scope, key, expected)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn data_dir() -> Option<std::path::PathBuf> {
-    if let Some(path) = std::env::var_os("TBG_DATA_DIR") {
-        return Some(path.into());
+    #[cfg(target_os = "android")]
+    {
+        return bevy::android::ANDROID_APP.get()?.internal_data_path();
     }
-    Some(
-        directories::ProjectDirs::from("", "", "tupi-battle-grounds")?
-            .data_dir()
-            .to_path_buf(),
-    )
+    #[cfg(not(target_os = "android"))]
+    {
+        if let Some(path) = std::env::var_os("TBG_DATA_DIR") {
+            return Some(path.into());
+        }
+        Some(
+            directories::ProjectDirs::from("", "", "tupi-battle-grounds")?
+                .data_dir()
+                .to_path_buf(),
+        )
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]

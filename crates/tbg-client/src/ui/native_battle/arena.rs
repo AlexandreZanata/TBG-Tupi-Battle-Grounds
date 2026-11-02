@@ -57,7 +57,7 @@ fn spawn(
         .spawn((
             Node {
                 position_type: PositionType::Absolute,
-                top: px(92),
+                top: px(if cfg!(target_os = "android") { 58 } else { 92 }),
                 width: percent(100),
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
@@ -93,7 +93,7 @@ fn spawn(
         .spawn((
             Node {
                 position_type: PositionType::Absolute,
-                top: px(134),
+                top: px(if cfg!(target_os = "android") { 90 } else { 134 }),
                 width: percent(100),
                 justify_content: JustifyContent::Center,
                 ..default()

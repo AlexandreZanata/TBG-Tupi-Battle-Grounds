@@ -73,7 +73,12 @@ fn main() {
     if desktop {
         println!("cargo:rustc-cfg=tbg_desktop");
     }
-    native_art_manifest(desktop);
+    println!("cargo:rustc-check-cfg=cfg(tbg_native_ui)");
+    let native_ui = desktop || std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("android");
+    if native_ui {
+        println!("cargo:rustc-cfg=tbg_native_ui");
+    }
+    native_art_manifest(native_ui);
     println!("cargo:rerun-if-env-changed=TBG_DEFAULT_SERVER");
     println!("cargo:rerun-if-env-changed=TBG_SOURCE_COMMIT");
     let dir =

@@ -1893,5 +1893,18 @@
   "battle.side.blue_description": "Sua Fortaleza fica à esquerda. Seu exército avança à direita.",
   "battle.side.red_description": "Sua Fortaleza fica à direita. Seu exército avança à esquerda.",
   "battle.side.spectator": "Azul contra Vermelho",
-  "battle.side.common": "Azul à esquerda · Vermelho à direita"
+  "battle.side.common": "Azul à esquerda · Vermelho à direita",
+  "android.done": "Concluir",
+  "android.cancel": "Cancelar",
+  "android.reveal": "Mostrar chave de recuperação",
+  "android.play": "JOGAR",
+  "android.collection": "SUA COLEÇÃO",
+  "android.offline": "Treino · jogar offline",
+  "android.rotate": "Vire o celular na horizontal para continuar",
+  "android.temporary": "Sessão temporária · credenciais apenas na memória",
+  "android.home": "Início",
+  "android.create": "Criar conta",
+  "android.sign_in": "Entrar",
+  "android.arenas": "Arenas",
+  "android.live": "Ao vivo"
 }

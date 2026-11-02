@@ -91,9 +91,13 @@ class WindowsWorkflow(unittest.TestCase):
         self.assertEqual(len(cargo), 3)
         for line in cargo:
             for required in ["--config .github/cargo-windows-release.toml", "--locked", "--release",
-                             "-p tbg-client --bin tbg-client", "--target x86_64-pc-windows-msvc",
+                             "-p tbg-client", "--target x86_64-pc-windows-msvc",
                              "--features ui-acceptance"]:
                 self.assertIn(required, line)
+        # Unit tests live in the shared library since the Android lib/bin split.
+        self.assertIn("-p tbg-client --lib", cargo[0])
+        self.assertIn("-p tbg-client --lib", cargo[1])
+        self.assertIn("-p tbg-client --bin tbg-client", cargo[2])
         self.assertIn("--no-run", cargo[0])
         self.assertIn("platform:: -- --test-threads=1", cargo[1])
         self.assertIn(" build ", cargo[2])

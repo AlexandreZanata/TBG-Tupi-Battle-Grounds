@@ -1893,5 +1893,18 @@
   "battle.side.blue_description": "Your Stronghold is on the left. Your army advances right.",
   "battle.side.red_description": "Your Stronghold is on the right. Your army advances left.",
   "battle.side.spectator": "Blue vs Red",
-  "battle.side.common": "Blue on the left · Red on the right"
+  "battle.side.common": "Blue on the left · Red on the right",
+  "android.done": "Done",
+  "android.cancel": "Cancel",
+  "android.reveal": "Show recovery key",
+  "android.play": "PLAY",
+  "android.collection": "YOUR COLLECTION",
+  "android.offline": "Practice · play offline",
+  "android.rotate": "Turn your phone sideways to continue",
+  "android.temporary": "Temporary session · credentials stay in memory",
+  "android.home": "Home",
+  "android.create": "Create",
+  "android.sign_in": "Sign in",
+  "android.arenas": "Arenas",
+  "android.live": "Live"
 }

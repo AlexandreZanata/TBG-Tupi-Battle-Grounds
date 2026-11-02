@@ -8,18 +8,18 @@
 
 use bevy::prelude::*;
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 use super::{ActionQueue, UiAction};
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 mod helper;
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 mod native;
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 mod view;
 
 /// What the update overlay currently says.
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum UpdState {
     /// Not managed by the launcher, or nothing to say.
@@ -47,7 +47,7 @@ pub enum UpdState {
 }
 
 /// The update UI state shared by its systems.
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 #[derive(Resource, Default)]
 pub struct Updater {
     pub state: UpdState,
@@ -60,7 +60,7 @@ pub struct Updater {
     pending_play: Option<UiAction>,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 impl Updater {
     /// An update is being applied: no new play may start (U09).
     pub fn applying(&self) -> bool {
@@ -69,7 +69,7 @@ impl Updater {
 }
 
 /// Is `action` one of the update overlay's own buttons?
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 fn ours(action: &UiAction) -> bool {
     matches!(
         action,
@@ -85,7 +85,7 @@ fn ours(action: &UiAction) -> bool {
 
 /// Runs before `actions::apply`: handles the update buttons and, while an
 /// update is applying, drops every other action (the Update/Play race).
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 pub(super) fn take_actions(
     mut queue: ResMut<ActionQueue>,
     mut updater: ResMut<Updater>,
@@ -130,15 +130,15 @@ pub(super) fn take_actions(
 }
 
 /// The browser has no installer to drive (new builds arrive on reload).
-#[cfg(target_arch = "wasm32")]
+#[cfg(any(target_arch = "wasm32", target_os = "android"))]
 pub(super) fn take_actions() {}
 
 pub fn plugin(app: &mut App) {
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
     {
         app.init_resource::<Updater>();
         native::plugin(app);
     }
-    #[cfg(target_arch = "wasm32")]
+    #[cfg(any(target_arch = "wasm32", target_os = "android"))]
     let _ = app;
 }

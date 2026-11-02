@@ -997,3 +997,37 @@ See [RELEASES](RELEASES.md) for activation and compatibility boundaries,
 Automation is prepared; enabling it requires a real verified main artifact and an
 observed first delivery per family. Native TUF custody, privileged admin and email
 recovery are not implicitly activated by these pipelines.
+## 28. Independent native Android prototype (P69)
+
+Architecture §§21–24 are reserved by separate planning workstreams. P69
+starts directly from reviewed Linux native.3 commit `014b0e0`, with no
+dependency on P68 Windows or new authentication implementation. See
+[P69](phases/P69-android-native-prototype.md), GAME-DESIGN §22 and D-98.
+
+One shared `tbg-client` library/app builder serves desktop/web and Android.
+A thin Gradle/GameActivity Kotlin host loads the ARM64 cdylib; Bevy/winit
+owns rendering/event loop. Android platform services own lifecycle, insets,
+IME, clipboard, safe links, private nonsecret preferences and audio focus.
+Separate desktop-only dependencies from Android; use APK AssetManager rather
+than a desktop executable/source path. No second game engine or KMP/Compose
+layer is needed for this prototype.
+
+Mobile UI selects a landscape presentation profile and reuses the kit,
+assets, catalogs and UiAction routing. Touch distinguishes tap/inspect/
+scroll/cancel/pointer ownership without introducing game automation. The
+horizontal frontend is distinct from the existing portrait mobile web UI;
+desktop appearance remains unchanged. A system override/resize is handled
+safely, not by resetting an online match.
+
+Core/server rules, protocol, content and authority remain identical to the
+matching Linux revision/mode. Reuse an existing trace probe on Linux/Android
+ABI and test actual packaged cross-play. Suspension does not stop online
+combat or extend the reconnect window. There is no new backend deployment,
+schema, auth service or Android-specific simulation.
+
+The inspected POCO X6 Pro is the physical reference: Android 16/API 36,
+arm64-v8a, 2712×1220 landscape physical reference, 480 dpi, 4 KB pages.
+Source/toolchain/signing/artifact identity and real layout/performance/
+lifecycle evidence gate delivery. One phone does not certify all Android
+devices, 16 KB runtime or public-store readiness. P68 remains separately
+owned; any later common-contract integration is reviewed explicitly.
