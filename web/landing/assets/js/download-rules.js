@@ -5,7 +5,9 @@ const KINDS = { linux: ['appimage', 'tarball'], windows: ['installer', 'zip'] };
 
 export function detectedOS(platform = '', agent = '') {
   const value = `${platform} ${agent}`;
-  if (/Android|iPhone|iPad|iPod/i.test(value)) return null;
+  // Android user agents also name Linux, so they are matched first.
+  if (/Android/i.test(value)) return 'android';
+  if (/iPhone|iPad|iPod/i.test(value)) return null;
   if (/Windows|Win32|Win64/i.test(value)) return 'windows';
   if (/Linux|X11/i.test(value)) return 'linux';
   return null;

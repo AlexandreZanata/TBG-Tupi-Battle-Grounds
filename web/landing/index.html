@@ -280,8 +280,16 @@
             <button class="btn btn-gold" type="button" data-open-downloads="linux" data-i18n="downloads.options">Ver opções de download</button>
             <small class="platform-recommended" data-recommended="linux" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
           </article>
+          <article class="platform platform-native frame" aria-labelledby="android-title" data-platform="android">
+            <img class="platform-icon" src="/assets/icons/android.svg" width="56" height="56" alt=""/>
+            <header><h3 id="android-title" data-i18n="android.title">Android</h3><span class="badge" data-platform-status="android"></span></header>
+            <p class="platform-version" data-platform-version="android"></p>
+            <p data-i18n="android.requirements">Celulares e tablets Android</p>
+            <button class="btn btn-gold" type="button" data-open-downloads="android" data-i18n="android.cta">Ver detalhes</button>
+            <small class="platform-recommended" data-recommended="android" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
+          </article>
         </div>
-        <p class="fine-print" data-i18n="play.others">Pacotes para macOS e celulares ainda não estão disponíveis. Você também pode jogar no navegador do computador.</p>
+        <p class="fine-print" data-i18n="play.others">Pacotes para macOS e iOS ainda não estão disponíveis. Você também pode jogar no navegador do computador.</p>
       </div>
     </section>
   </main>
@@ -303,9 +311,13 @@
   </footer>
 
   <dialog class="native-dialog frame" data-native-dialog aria-labelledby="native-dialog-title">
-    <header class="native-dialog-heading"><div><p class="eyebrow" data-i18n="downloads.eyebrow">Seu próximo campo de batalha</p><h2 id="native-dialog-title"></h2></div><button class="native-close" type="button" data-close-downloads aria-label="Fechar" data-i18n-attr="aria-label=viewer.close">×</button></header>
+    <header class="native-dialog-heading">
+      <img class="native-dialog-icon" src="/assets/icons/windows.svg" width="64" height="64" alt="" data-native-icon>
+      <div class="native-dialog-titles"><p class="eyebrow" data-i18n="downloads.eyebrow">Seu próximo campo de batalha</p><h2 id="native-dialog-title"></h2><p class="native-release-meta" data-native-meta></p></div>
+      <button class="native-close" type="button" data-close-downloads aria-label="Fechar" data-i18n-attr="aria-label=viewer.close">×</button>
+    </header>
     <div data-native-content></div>
-    <p class="fine-print" data-i18n="downloads.source">Arquivos publicados no repositório original do GitHub. Nenhuma conta é necessária para baixar.</p>
+    <p class="fine-print native-source" data-i18n="downloads.source">Arquivos publicados no repositório original do GitHub. Nenhuma conta é necessária para baixar.</p>
   </dialog>
 
   <dialog class="viewer" data-viewer aria-label="Captura ampliada" data-i18n-attr="aria-label=viewer.label">
