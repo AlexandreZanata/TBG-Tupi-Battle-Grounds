@@ -750,6 +750,7 @@ private free currency, quote roundtrips and reconnect passed independently.
 Packaged integrated Linux capture and Windows/browser rendered observations
 remain pending; no parity is inferred from these tests or shared code.
 
+
 ### 2026-11-02 — Accurate session warnings and persistence recovery
 
 Linux reference: a confirmed signed-in account shows no temporary-storage
@@ -800,3 +801,28 @@ settings-update-check/current/download/idle-restart. No champion motion changes.
 Focused evidence and pending Windows/real-browser observations are in
 [the settings delivery report](../phases/NATIVE-SETTINGS-UPDATES.md). Shared code
 and Linux checks cannot certify cross-platform visual or behavioral parity.
+
+
+### Final integrated desktop observations (2026-11-02)
+
+The released shared P74/GD-04 presentation is wire 38/R15. Actual integrated
+Linux PR-package captures cover Colossus/Volthar/Astreon five-form Idle/Walk/
+Attack boards and Forest Practice; all 395 package files were verified. Official
+colossus.3 source 6d96245 also captured first-ready-Running Red-side Forest
+Practice at 1600x1000, with boot_ready=true and failed_images=0. The existing
+P74 and SIDE-01 screen coverage therefore has a concrete integrated Linux smoke,
+not just numerical/source tests.
+
+Published desktop web at 1280x720 was observed on Red-side Forest Practice:
+84-champion catalog, own Red tower on the right and Blue tower on the left,
+side notice, both Auxiliary cards, Merchant hire, three purchases -> FREE(1)
+reroll -> consumed, Miner preparation -> active countdown, and Colossus/Astreon
+shop portraits. The existing P74 HUD/construction and SIDE-01 cases have this
+scoped browser observation. No shared presentation code changed during delivery.
+
+This does not close the Windows column, all-eight-Arena rendered coverage,
+spectator/Blue-side browser coverage, or matched-frame GD-04/P74 motion rows.
+Those remain pending; no pixel parity or renderer tolerance is inferred.
+See [the production report](../phases/DELIVERY-consolidation-production-20261102.md)
+for actual sources, evidence and limitations.
+

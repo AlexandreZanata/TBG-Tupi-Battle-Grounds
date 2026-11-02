@@ -3,44 +3,79 @@ import { el, clear } from '../shared/dom.js';
 import { t } from './i18n.js';
 import { available, detectedOS } from './download-rules.js';
 
+const PLATFORMS = ['windows', 'linux', 'android'];
+// Each platform lists its options in recommended-first order; Android has no package yet.
+const ORDER = { windows: ['installer', 'zip'], linux: ['appimage', 'tarball'], android: [] };
+const FORMATS = { installer: '.exe', zip: '.zip', appimage: '.AppImage', tarball: '.tar.gz' };
+const labels = { installer: 'downloads.install', zip: 'downloads.portable', appimage: 'downloads.appimage', tarball: 'downloads.tarball' };
+const descriptions = { installer: 'downloads.windows.install', zip: 'downloads.windows.portable', appimage: 'downloads.linux.appimage', tarball: 'downloads.linux.tarball' };
+// Text shown while a platform has no verified package.
+const PENDING = {
+  windows: { status: 'state.preparing', short: 'downloads.pending', long: 'downloads.pending' },
+  linux: { status: 'state.preparing', short: 'downloads.pending', long: 'downloads.pending' },
+  android: { status: 'state.soon', short: 'android.pending.short', long: 'android.pending' },
+};
+
 let current = null;
 let opened = null;
 let initialized = false;
-const choice = detectedOS(navigator.userAgentData?.platform ?? navigator.platform, navigator.userAgent);
-const labels = { installer: 'downloads.install', zip: 'downloads.portable', appimage: 'downloads.appimage', tarball: 'downloads.tarball' };
-const descriptions = { installer: 'downloads.windows.install', zip: 'downloads.windows.portable', appimage: 'downloads.linux.appimage', tarball: 'downloads.linux.tarball' };
+const platformName = navigator.userAgentData?.platform ?? navigator.platform;
+// Android only highlights its availability card; detectedOS stays desktop-only.
+const choice = /Android/i.test(`${platformName} ${navigator.userAgent}`) ? 'android' : detectedOS(platformName, navigator.userAgent);
 
-function option(asset) {
-  const details = el('details', { class: 'native-checksum' },
-    el('summary', { text: t('downloads.checksum') }), el('code', { text: asset.sha256 }));
-  return el('article', { class: 'native-option' },
-    el('h3', { text: t(labels[asset.kind]) }), el('p', { text: t(descriptions[asset.kind]) }),
-    el('a', { class: 'btn btn-gold', href: asset.url, rel: 'noopener noreferrer' },
-      el('span', { text: t(labels[asset.kind]) }), el('small', { text: t('linux.size', { size: (asset.bytes / 1048576).toFixed(1) }) })), details);
+function option(asset, recommended) {
+  const size = t('linux.size', { size: (asset.bytes / 1048576).toFixed(1) });
+  return el('article', { class: `native-option${recommended ? ' is-best' : ''}` },
+    el('div', { class: 'native-option-body' },
+      el('h3', {},
+        el('span', { text: t(labels[asset.kind]) }),
+        recommended && el('span', { class: 'badge badge-ok', text: t('downloads.best') })),
+      el('p', { text: t(descriptions[asset.kind]) }),
+      el('p', { class: 'native-option-meta' },
+        el('span', { class: 'native-format', text: FORMATS[asset.kind] }), el('span', { text: size }))),
+    el('a', { class: `btn ${recommended ? 'btn-play' : 'btn-gold'} native-option-cta`, href: asset.url, rel: 'noopener noreferrer' },
+      el('span', { text: t('downloads.get') })),
+    el('details', { class: 'native-checksum' },
+      el('summary', { text: t('downloads.checksum') }), el('code', { text: asset.sha256 })));
+}
+
+function notes(release) {
+  const items = [];
+  if (opened === 'windows') items.push(el('p', { class: 'native-callout native-callout-warn', text: t('downloads.unsigned') }));
+  if (release.visual_acceptance !== 'passed') items.push(el('p', { class: 'native-callout', text: t('downloads.pixels.pending') }));
+  items.push(el('a', { class: 'native-notes-link', href: `https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v${release.version}`, rel: 'noopener noreferrer', text: t('downloads.notes') }));
+  return el('div', { class: 'native-notes' }, items);
+}
+
+function renderHeading(ready) {
+  document.querySelector('#native-dialog-title').textContent = t(`${opened}.title`);
+  document.querySelector('[data-native-icon]')?.setAttribute('src', `/assets/icons/${opened}.svg`);
+  const meta = document.querySelector('[data-native-meta]');
+  if (!meta) return;
+  if (!ready) {
+    clear(meta).append(el('span', { class: 'badge badge-warn', text: t(PENDING[opened].status) }));
+    return;
+  }
+  clear(meta).append(
+    el('span', { class: 'native-version', text: t('downloads.version', { version: current[opened].version }) }),
+    el('span', { class: 'badge badge-info', text: t('downloads.beta') }));
 }
 
 function renderDialog() {
-  const dialog = document.querySelector('[data-native-dialog]');
   const content = document.querySelector('[data-native-content]');
-  if (!dialog || !content || !opened) return;
-  document.querySelector('#native-dialog-title').textContent = t(`${opened}.title`);
-  clear(content);
-  const icon = el('img', { class: 'platform-icon', src: `/assets/icons/${opened}.svg`, width: 56, height: 56, alt: '' });
-  content.append(icon);
-  if (!available(current, opened)) {
-    content.append(el('p', { class: 'state-note', text: t('downloads.pending') }));
+  if (!content || !opened) return;
+  const ready = available(current, opened);
+  renderHeading(ready);
+  clear(content).append(el('p', { class: 'native-requirements', text: t(`${opened}.requirements`) }));
+  if (!ready) {
+    content.append(el('p', { class: 'native-pending', text: t(PENDING[opened].long) }));
     return;
   }
   const release = current[opened];
-  content.append(el('div', { class: 'native-release-meta' },
-    el('strong', { text: t('downloads.version', { version: release.version }) }),
-    el('span', { class: 'badge badge-info', text: t('downloads.beta') })));
-  content.append(el('p', { class: 'fine-print', text: t(`${opened}.requirements`) }));
-  const order = opened === 'windows' ? ['installer', 'zip'] : ['appimage', 'tarball'];
-  content.append(el('div', { class: 'native-options' }, order.map(kind => option(release.assets.find(asset => asset.kind === kind)))));
-  if (opened === 'windows') content.append(el('p', { class: 'fine-print', text: t('downloads.unsigned') }));
-  if (release.visual_acceptance !== 'passed') content.append(el('p', { class: 'fine-print', text: t('downloads.pixels.pending') }));
-  content.append(el('a', { href: `https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v${release.version}`, rel: 'noopener noreferrer', text: t('downloads.notes') }));
+  content.append(
+    el('div', { class: 'native-options' },
+      ORDER[opened].map((kind, index) => option(release.assets.find(asset => asset.kind === kind), index === 0))),
+    notes(release));
 }
 
 function initialize() {
@@ -62,24 +97,26 @@ function initialize() {
   });
 }
 
+function renderCard(os) {
+  const ready = available(current, os);
+  const status = document.querySelector(`[data-platform-status="${os}"]`);
+  if (status) {
+    status.textContent = t(ready ? 'state.available' : PENDING[os].status);
+    status.classList.toggle('badge-ok', ready);
+    status.classList.toggle('badge-warn', !ready);
+  }
+  const version = document.querySelector(`[data-platform-version="${os}"]`);
+  if (version) version.textContent = ready ? t('downloads.version', { version: current[os].version }) : t(PENDING[os].short);
+  document.querySelector(`[data-platform="${os}"]`)?.classList.toggle('is-recommended', choice === os);
+  const badge = document.querySelector(`[data-recommended="${os}"]`);
+  if (badge) badge.hidden = choice !== os;
+}
+
 export function renderNative(config) {
   initialize();
   current = config;
   const note = document.querySelector('[data-os-note]');
   if (note) note.textContent = t(`downloads.detect.${choice ?? 'unknown'}`);
-  for (const os of ['windows', 'linux']) {
-    const ready = available(config, os);
-    const status = document.querySelector(`[data-platform-status="${os}"]`);
-    if (status) {
-      status.textContent = t(ready ? 'state.available' : 'state.preparing');
-      status.classList.toggle('badge-ok', ready);
-      status.classList.toggle('badge-warn', !ready);
-    }
-    const version = document.querySelector(`[data-platform-version="${os}"]`);
-    if (version) version.textContent = ready ? t('downloads.version', { version: config[os].version }) : t('downloads.pending');
-    document.querySelector(`[data-platform="${os}"]`)?.classList.toggle('is-recommended', choice === os);
-    const badge = document.querySelector(`[data-recommended="${os}"]`);
-    if (badge) badge.hidden = choice !== os;
-  }
+  for (const os of PLATFORMS) renderCard(os);
   renderDialog();
 }

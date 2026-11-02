@@ -65,6 +65,11 @@ function render() {
 export async function loadChampions() {
   try {
     data = await fetchJson('/data/champions.json');
+    // Hero counts follow the published catalog so they never go stale.
+    for (const [key, list] of [['champions', data.champions], ['factions', data.factions]]) {
+      const node = document.querySelector(`[data-stat="${key}"]`);
+      if (node) node.textContent = String(list.length);
+    }
   } catch {
     failed = true;
   }
