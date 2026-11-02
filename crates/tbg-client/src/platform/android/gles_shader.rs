@@ -7,7 +7,9 @@ pub fn adapt(
     adapter: Res<bevy::render::renderer::RenderAdapterInfo>,
     mut done: Local<bool>,
 ) {
-    if adapter.backend != bevy::render::settings::Backend::Gl {
+    if !bevy::render::settings::Backends::from(adapter.backend)
+        .contains(bevy::render::settings::Backends::GL)
+    {
         *done = true;
         return;
     }
