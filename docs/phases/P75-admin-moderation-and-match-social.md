@@ -574,6 +574,7 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S4 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_recovery`: discovered FK snapshot, key format, two-slot revocation, generic replies, code budgets and secret-at-rest canaries | Test run queued S14; real socket closure and full UI recovery remain pending. |
 | S3 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_identity` and preserved P67 offline scenarios; BR-P01/02 helper amended with canon | Compilations/tests queued S14; live verification and desktop captures pending. |
 | S2 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Mail capture, two-writer lease, retry exhaustion, queue bound, code-at-rest and Debug canaries | Cold compilation and tests queued for S14; SMTP never contacted. |
 | S1 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Appended IC-13 history-after-v12 and damaged-shape tests | Compilation cold; tests queued for S14. Legacy recovery fixture API conversion follows in S3. |
@@ -584,6 +585,10 @@ compatibility; visual parity needs real captures.
 - Visual correspondence (Linux / Windows / web):
 
 ### Deviations, blocked items, residual risks
+- S4 reuses the exact `revoke_account` barrier through `revoke_scope` while holding the existing D-97 coordinator lock; calling `revoke_account` recursively would deadlock. SQL revocation is also committed with key rotation.
+- The recovery FK snapshot treats `account_owner` as auth/session ownership (revoked on recovery), alongside `auth_sessions`; all other non-recovery account FK tables are discovered rather than enumerated.
+- The P67 offline link fixture remains test-only for its historical contracts; production uses only typed codes and the live P75 tables. No fixture-only schema installer remains.
+
 
 ### PR
 - URL, branch, final commit, pending owner gates:

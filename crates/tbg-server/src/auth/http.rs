@@ -55,7 +55,25 @@ struct Recovery {
     account_key: String,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RecoveryRequest {
+    name: String,
+    email: String,
+    locale: String,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Recover {
+    name: String,
+    code: String,
+    device_id: String,
+    persistent: bool,
+    registration_retry_key: String,
+}
+
 enum Output {
+    Accepted,
     Grant(Grant),
     Confirmed(FamilyId),
     LoggedOut { clear_cookie: bool },
@@ -185,6 +203,26 @@ async fn execute(
     ip: IpAddr,
 ) -> Result<Output, Error> {
     match operation {
+        "recovery-request" => {
+            let i: RecoveryRequest = parse(body)?;
+            auth.recovery_request(i.name, i.email, i.locale, ip).await;
+            Ok(Output::Accepted)
+        }
+        "recover" => {
+            let i: Recover = parse(body)?;
+            Ok(Output::Grant(
+                auth.recover(
+                    i.name,
+                    i.code,
+                    &i.device_id,
+                    i.persistent,
+                    &i.registration_retry_key,
+                    channel,
+                    ip,
+                )
+                .await?,
+            ))
+        }
         "login" => {
             let input: Login = parse(body)?;
             Ok(Output::Grant(
@@ -273,6 +311,7 @@ fn credential(
 
 fn render(output: Output, channel: Channel, now: i64) -> Result<Response, Error> {
     match output {
+        Output::Accepted => Ok((StatusCode::ACCEPTED, Json(json!({"ok":true}))).into_response()),
         Output::Grant(grant) => {
             if now >= grant.expires_at || now >= grant.family.expires_at {
                 return Err(Error::Unauthorized);
@@ -327,6 +366,7 @@ fn set_cookie(response: &mut Response, cookie: String) -> Result<(), Error> {
 
 fn failure(error: Error) -> Response {
     let (status, code) = match error {
+        Error::CodeInvalid => (StatusCode::UNAUTHORIZED, "code_invalid"),
         Error::RegistrationClosed => (StatusCode::SERVICE_UNAVAILABLE, "registration_closed"),
         Error::EmailLimit => (StatusCode::CONFLICT, "email_limit"),
         Error::EmailBlocked => (StatusCode::FORBIDDEN, "email_blocked"),

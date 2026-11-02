@@ -21,6 +21,7 @@ use crate::{
 mod access;
 pub(crate) mod http;
 mod origin;
+mod recovery;
 mod rotation;
 mod tokens;
 pub(crate) use origin::websocket as websocket_origin;
@@ -38,6 +39,7 @@ const RETRY_SECONDS: i64 = 300;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Error {
+    CodeInvalid,
     RegistrationClosed,
     EmailLimit,
     EmailBlocked,

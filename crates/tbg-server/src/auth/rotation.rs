@@ -151,7 +151,7 @@ impl Service {
         }
     }
 
-    async fn issue(
+    pub(super) async fn issue(
         &self,
         state: &mut State,
         request: NewFamily,

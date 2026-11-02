@@ -63,7 +63,7 @@ impl Service {
             .await
     }
 
-    async fn revoke_scope(
+    pub(super) async fn revoke_scope(
         &self,
         state: &mut State,
         scope: RevocationScope,

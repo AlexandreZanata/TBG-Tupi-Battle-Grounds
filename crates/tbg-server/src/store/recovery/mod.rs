@@ -34,5 +34,6 @@ pub(crate) mod mail;
 pub(crate) mod proof;
 #[cfg(test)]
 pub(crate) use fixture::{Accepted, Recovery};
+pub mod rotate;
 #[cfg(test)]
 pub(crate) mod tests;

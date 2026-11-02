@@ -86,7 +86,12 @@ pub(crate) fn start(
             };
             // At most one mail in flight; backlog cannot spawn unbounded work.
             let _ = once(&store, &transport, &settings, &holder, now, &metrics).await;
-            let _ = store.release(move |db| mail_outbox::prune(db, now)).await;
+            let _ = store
+                .release(move |db| {
+                    let _ = crate::store::recovery::service::maintenance(db, now);
+                    mail_outbox::prune(db, now)
+                })
+                .await;
         }
     });
 }
