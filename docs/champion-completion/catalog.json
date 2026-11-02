@@ -1,5 +1,5 @@
 {
-  "status": "Linux preview 0.1.2-cc.2 installed with current PR44 laboratory (9fb7be0), stable healing-support posture, CC17 roster and ring-only bodies. Targeted checks passed; competitive balance and Windows/desktop-web parity pending.",
+  "status": "Superseded by OG-01 Linux preview 0.1.2-ogres.1: current PR44 laboratory, CC17, stable support posture and 72 authored champions across eight Factions. Competitive balance and Windows/game-web visual parity pending.",
   "baseline_commit": "0e23a1ac2f601b182bcfcc03b25acce76e69f962",
   "owner_scope": "All 17 champions; initial five-form low-poly images, then scoped implementation, validation and local Linux installation. No push or public deployment.",
   "form_order": [
@@ -1082,9 +1082,9 @@
   ],
   "body_identity": "Owner rule 2026-11-01: remove body affiliation plaques and their trim; fixed intrinsic materials on every Evolution, identical for both seats. Team ownership uses foot rings only.",
   "linux_preview": {
-    "version": "0.1.2-cc.2",
-    "source_commit": "c1d3e204618ba5506ce0ada4caeca90a1c6e90db",
+    "version": "0.1.2-ogres.1",
+    "source_commit": "e44f0f3a3db5c8c11e02618b1e1cd294ff174878",
     "pr44_head": "9fb7be01ac08cbed3bce1aa466d7243418490957",
-    "screenshot": "support-facing-fix/final/installed-rear-heal.png"
+    "screenshot": "http://localhost:8964/final/ogre-crowd.png"
   }
 }

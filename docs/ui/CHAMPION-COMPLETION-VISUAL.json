@@ -662,8 +662,11 @@
       "26 preview badges"
     ],
     "unit_evidence": "59 core and 8 client targeted tests passed on candidate 9; 45 new forms below 6000 triangles; 385 ring-only forms; 220 support cases",
-    "linux": "native capture and final installation pending",
+    "linux": "Installed 0.1.2-ogres.1 / e44f0f3; 370 asset hashes verified; real mixed-crowd Training and attacked rear-heal witnesses passed",
     "windows": "pending actual same-source visual/motion comparison",
-    "desktop_web": "pending actual game visual/motion comparison; landing browser check pending"
+    "desktop_web": "pending actual game visual/motion comparison; landing browser check pending",
+    "evidence": ".local/ogre-faction-2026-11-01/final/linux-verification.json",
+    "source_commit": "e44f0f3a3db5c8c11e02618b1e1cd294ff174878",
+    "landing": "Observed in desktop browser: 72 cards, 8 nine-count Faction filters, 26 preview badges, PT/EN labels and nine Ogre portraits loaded"
   }
 }

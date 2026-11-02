@@ -1,6 +1,8 @@
 # Ogre faction and Machine replacement
 
-Status: implementation and focused validation in progress on `codex/ogre-faction`.
+**Delivered locally:** Linux preview 0.1.2-ogres.1, code source e44f0f3, installed
+and native-witness verified; GitHub PR publication is the final step.
+Branch: `codex/ogre-faction`.
 Owner-authorized scope and initial numeric proposals: GAME-DESIGN OG-01 and
 DECISIONS OG-01. Nine new champions, 45 new forms, existing Ogre Archer transfer
 and range equality, equipment clearance, landing catalog, GitHub PR. The
@@ -127,3 +129,52 @@ were observed. Its first image observation found the dev server's startup
 manifest had been created before the newly tracked portrait files; only that
 owned local server was restarted. Final image loading and install witness
 are recorded below. This static landing check does not verify game-web parity.
+
+## Final installed Linux evidence
+
+Installed code source: `e44f0f3a3db5c8c11e02618b1e1cd294ff174878`.
+Version: `0.1.2-ogres.1`; contract: `w34-r9-89698dcd4bcb5ddd`.
+Native final build passed in 5.88 s; installed directory:
+`/home/iiii/.local/opt/tupi-battle-grounds-champion-preview/0.1.2-ogres.1-e44f0f3a3db5`.
+Launch: `/home/iiii/.local/bin/tbg-champions`, desktop entry **TBG · 72 Champions Preview**.
+Binary SHA-256:
+`0113690b2eb9c235a3f478644dec096610ece7b91f7637503d07027829a4d50f`.
+All **370** installed asset hashes matched. Original game data/installation
+and the root checkout's owner changes were preserved.
+
+The installed executable passed both opt-in native Training journeys, with
+boot ready and zero pending/failed images/texts. Hide Mender under real incoming
+damage kept foot yaw 0 for 60 rear-patient frames. The separate mixed crowd
+uses real core placement/combat for two Ogre Archers (Base/A2), Basalt, Hook,
+Hide Mender, Rivet and five enemies. The captured active battle was inspected:
+foot rings, held weapons, arms and the current PR44 laboratory are visible.
+This is bounded scene evidence, not a proof that every possible saturated
+crowd can avoid overlap within the existing cosmetic lane-offset caps.
+
+Evidence, relative to the original checkout:
+`.local/ogre-faction-2026-11-01/final/{linux-verification.json,linux-install-receipt.json,native-build.log,rear-heal.log,ogre-crowd.log}`.
+The receipt records exact binary/assets and the PNG hashes. The captured
+support witness reports:
+
+```text
+Support rear-heal visual regression passed: kind=HideMender, rear_frames=60, attacked=true, max_foot_yaw=0
+```
+
+Desktop landing observation after restarting only the owned dev server:
+72-card English total, eight nine-count filters, 26 preview badges; nine-card
+Ogre filter, Portuguese names/count and **all nine portraits loaded**. The
+current public page still advertises 46/seven; repository changes are prepared
+for the requested PR, with no public deployment performed.
+
+Final local checks: affected rustfmt, `git diff --check`, desktop source routing,
+web reference/i18n/content/release checks passed. Later documentation commits
+do not change the installed code revision. A new PR carries the retained CC17
+work, support fix and owner-selected PR44 baseline together with OG-01.
+
+Deferred: actual Windows and desktop game-web visual/motion comparison for
+all affected clips/forms/seats; full D-33 competitive acceptance of the preview
+roster (including mixed teams, all forms/budgets and specialist counters);
+owner look/fun sign-off. The exact next platform scenario is the same Training
+rear-heal and mixed-crowd setup plus the ten five-form lineups, compared with
+Linux. Full workspace suites, release packaging, multiplayer campaigns, merge
+and public deployment were not run or claimed.

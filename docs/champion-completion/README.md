@@ -1,5 +1,9 @@
 # Champion completion production catalog
 
+**Current preview:** [OG-01](../ogre-faction/README.md), version 0.1.2-ogres.1,
+with 72 authored champions across eight Factions. Earlier delivery notes below
+retain their original validation context.
+
 Owner-authorized seventeen-champion preview based on main `0e23a1a`.
 The [catalog](catalog.json) defines bilingual names, default skins, four Evolution
 names, geometry, weapon/projectile, life clips, signature victory, and crowd intent.
