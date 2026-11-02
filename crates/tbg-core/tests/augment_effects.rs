@@ -195,7 +195,8 @@ fn bounty_and_stone_mend_credit_the_killer() {
 
 #[test]
 fn tower_fury_counts_only_stronghold_kills() {
-    let mut s = arena(9);
+    // TW-01: zero configured tower damage now means no fire; this scenario needs a real shot.
+    let mut s = running(9);
     s.players[0].augments.add(22);
     let dead = spawn(&mut s, Seat::B, UnitKind::Archer, 500);
     s.units.iter_mut().find(|u| u.id == dead).unwrap().hp = 1;

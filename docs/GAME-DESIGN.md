@@ -2432,3 +2432,22 @@ Register ruleset 13 / `b66993d9e87a9cfc` for equivalent integer divisibility syn
 required by the pinned compiler lints. Keep every value, outcome branch,
 wire tag and summary version from revision 12. This is source maintenance,
 not an additional balance adjustment or full D-33 acceptance.
+
+## INT-01 — Proposed consolidation of existing TW-01 / GD-01 contracts (2026-11-02)
+
+R13 keeps the exact R12 tower values and traces. Extend the explicit revision
+selectors and append its canonical C2 traces; retain all historical rows. The
+registered roster is 87 kinds (82 conventional, five summons), including Gods/
+Colossus and its four Evolution forms. FULL_POOL remains 46. These are existing
+TW-01/GD-01 values, not another activation or balance change.
+
+CC-ID03's old PR44 tick/winner fixtures describe the period before TW-01. Append
+R13's already registered TW-01 outcomes/ticks instead of claiming stronger towers
+preserve old combat. Unit-ability fixtures isolate towers where tower damage is
+not their subject; carrier-protection fixtures keep the carrier alive throughout
+their sampling window. The Furnace multiplier fixture retains its explicit old
+53-damage incoming shot only to measure the unchanged 36-damage hit and 26-HP burn.
+The Shop-enabled-but-unused comparison keeps the same canonical pool on both
+sides; the private preview's deliberate 82-champion pool is a separate feature.
+No new competitive number, rule, source identity or online-roster activation is
+introduced by this reconciliation. D-33 acceptance remains separate.
