@@ -11,7 +11,9 @@
 set -euo pipefail
 
 DB="${TBG_DB:-/var/lib/tbg/tbg.sqlite3}"
-ADMIN=(sudo -u tbg /opt/tbg/bin/tbg-release-admin --db "$DB")
+# The automatic controller runs sandboxed as root without privilege escalation, where sudo refuses.
+if [ "$(id -u)" = 0 ]; then AS_TBG=(runuser -u tbg --); else AS_TBG=(sudo -u tbg); fi
+ADMIN=("${AS_TBG[@]}" /opt/tbg/bin/tbg-release-admin --db "$DB")
 usage="usage: release-slot.sh start <a|b> <generation> <binary> [build] | retire <a|b>"
 cmd="${1:?$usage}"
 slot="${2:?$usage}"

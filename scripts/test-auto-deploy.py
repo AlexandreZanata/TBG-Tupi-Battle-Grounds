@@ -75,14 +75,18 @@ class DeploymentGuards(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     policy.unpack(root/'a.tgz', root/'verified', SOURCE)
 
-    def test_automatic_activation_refuses_contract_schema_slots_and_existing_drain(self):
+    def test_automatic_activation_refuses_contract_schema_and_existing_drain(self):
         live = {'contract': CONTRACT, 'slot': None, 'shutdown': False}
         policy.compatible(manifest(), live, 10)
-        cases = [({**live, 'contract': 'w30-r2-'+'0'*16}, 10), (live, 11),
-                 ({**live, 'slot': 'a'}, 10), ({**live, 'shutdown': True}, 10)]
+        cases = [({**live, 'contract': 'w30-r2-'+'0'*16}, 10), (live, 11), ({**live, 'shutdown': True}, 10)]
         for status, schema in cases:
             with self.subTest(status=status, schema=schema), self.assertRaises(ValueError):
                 policy.compatible(manifest(), status, schema)
+
+    def test_the_single_process_path_never_restarts_a_release_slot_host(self):
+        policy.single_process({'slot': None})
+        with self.assertRaises(ValueError):
+            policy.single_process({'slot': 'a'})
 
     def test_verifier_binds_repo_workflow_main_source_and_hosted_builder(self):
         import pull
@@ -239,7 +243,8 @@ class ControllerSafety(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.state = Path(self.temporary.name)
         self.patches = [patch.multiple(control, STATE=self.state, HOLD=self.state/'operator-hold.json'),
-                        patch.multiple(pull, STATE=self.state, JOURNAL=self.state/'transition.json')]
+                        patch.multiple(pull, STATE=self.state, JOURNAL=self.state/'transition.json'),
+                        patch.object(pull.slots, 'in_slot_mode', return_value=False)]
         for item in self.patches:
             item.start()
 

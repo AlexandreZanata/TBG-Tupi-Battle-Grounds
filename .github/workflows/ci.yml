@@ -46,6 +46,8 @@ jobs:
         run: |
           python3 scripts/test-ci-required-checks.py
           python3 scripts/test-auto-deploy.py
+          python3 scripts/test-slot-deploy.py
+          shellcheck deploy/release-slot.sh deploy/slot-bootstrap.sh deploy/auto/install.sh
           python3 scripts/test-web-deploy.py
           python3 scripts/test-static-deploy.py
           python3 scripts/test-static-assets.py
