@@ -2,7 +2,8 @@
 Description=Check for verified Linux and Windows downloads every ten minutes
 
 [Timer]
-OnBootSec=2min
+OnActiveSec=200s
+AccuracySec=1s
 OnUnitInactiveSec=10min
 RandomizedDelaySec=30s
 Unit=tbg-native-catalog.service
