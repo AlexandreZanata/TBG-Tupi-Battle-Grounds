@@ -96,6 +96,9 @@ pub enum ConnEvent {
 }
 
 pub enum MatchCmd {
+    ModerationForfeit {
+        seat: Seat,
+    },
     /// `seat` is stamped by the connection task, never read from the client.
     Intent {
         conn_id: u64,
@@ -136,6 +139,10 @@ pub enum MatchCmd {
 }
 
 pub enum LobbyCmd {
+    ModerationBan {
+        account: AccountId,
+        reply: oneshot::Sender<bool>,
+    },
     /// P66: another slot claimed this session's account (cross-slot BR-P03).
     OwnerLost {
         token: Token,

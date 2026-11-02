@@ -39,6 +39,10 @@ const RETRY_SECONDS: i64 = 300;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Error {
+    Suspended {
+        until: Option<u64>,
+        reason: tbg_core::protocol::SuspensionReason,
+    },
     CodeInvalid,
     RegistrationClosed,
     EmailLimit,
@@ -62,6 +66,7 @@ pub(crate) enum Error {
 impl From<db::Error> for Error {
     fn from(value: db::Error) -> Self {
         match value {
+            db::Error::Suspended { until, reason } => Self::Suspended { until, reason },
             db::Error::RegistrationClosed => Self::RegistrationClosed,
             db::Error::EmailLimit => Self::EmailLimit,
             db::Error::EmailBlocked => Self::EmailBlocked,

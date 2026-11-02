@@ -50,6 +50,13 @@ impl Match {
 
     pub(super) fn command(&mut self, cmd: MatchCmd) {
         match cmd {
+            MatchCmd::ModerationForfeit { seat } => {
+                if self.state.outcome.is_none() {
+                    self.record(seat, None);
+                    self.state.forfeit(seat);
+                    self.end_detail = Some(crate::ranked::EndDetail::Moderation);
+                }
+            }
             MatchCmd::Intent {
                 conn_id,
                 seat,

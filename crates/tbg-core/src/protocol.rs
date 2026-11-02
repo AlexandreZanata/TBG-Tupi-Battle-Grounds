@@ -5,7 +5,9 @@
 use serde::{Deserialize, Serialize};
 
 mod history;
+mod social;
 pub use history::*;
+pub use social::*;
 
 use crate::arcana::{self, ArcanaPreset};
 use crate::intent::{PlayerIntention, Rejection};

@@ -365,7 +365,15 @@ fn set_cookie(response: &mut Response, cookie: String) -> Result<(), Error> {
 }
 
 fn failure(error: Error) -> Response {
+    if let Error::Suspended { until, reason } = error {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({"error":"account_suspended","until":until,"reason":reason.as_str()})),
+        )
+            .into_response();
+    }
     let (status, code) = match error {
+        Error::Suspended { .. } => (StatusCode::FORBIDDEN, "account_suspended"),
         Error::CodeInvalid => (StatusCode::UNAUTHORIZED, "code_invalid"),
         Error::RegistrationClosed => (StatusCode::SERVICE_UNAVAILABLE, "registration_closed"),
         Error::EmailLimit => (StatusCode::CONFLICT, "email_limit"),

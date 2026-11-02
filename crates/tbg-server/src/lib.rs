@@ -28,6 +28,7 @@ mod lobby;
 pub mod mail;
 mod match_task;
 pub mod metrics;
+pub mod moderation;
 mod names;
 mod patch_notes;
 pub mod player_history;
@@ -154,6 +155,16 @@ pub async fn run_with(
         config.clone(),
     ));
     auth::Service::start(&auth);
+    if let Some(store) = &store {
+        moderation::feed::start(
+            store.clone(),
+            config.clone(),
+            lobby_tx.clone(),
+            auth.clone(),
+        )
+        .await
+        .map_err(std::io::Error::other)?;
+    }
     // P47: the lobby publishes the live snapshot; the API only reads it.
     let (live_tx, live_rx) = watch::channel(Arc::default());
     tokio::spawn(lobby::run(

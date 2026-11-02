@@ -51,7 +51,15 @@ impl Lobby {
         let mut listed: Vec<(u32, Instant, LiveId, LiveRow)> = self
             .live
             .iter()
-            .filter(|(_, m)| m.listing == Listing::Public)
+            .filter(|(_, m)| {
+                m.listing == Listing::Public
+                    && !m.players.iter().any(|p| {
+                        self.config
+                            .auth_clock
+                            .now()
+                            .is_ok_and(|now| self.config.moderation.hidden(&p.name, now))
+                    })
+            })
             .map(|(id, m)| {
                 let row = live_row(*id, m, now);
                 (
@@ -91,6 +99,14 @@ impl Lobby {
         let mut seen = HashSet::new();
         let mut accounts = Vec::new();
         for (token, s) in &self.sessions {
+            if s.account.as_ref().is_some_and(|(id, _)| {
+                self.config
+                    .auth_clock
+                    .now()
+                    .is_ok_and(|now| self.config.moderation.banned(*id, now))
+            }) {
+                continue;
+            }
             if matches!(s.state, SessionState::InMatch { .. }) {
                 counts.in_battle += 1;
             }

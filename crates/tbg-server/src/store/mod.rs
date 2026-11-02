@@ -17,11 +17,13 @@ use crate::ranked::{JournalEntry, RankedReceipt};
 
 mod accounts;
 mod arcanas;
+pub mod audit;
 pub mod auth_sessions;
 mod history;
 pub mod integrity_admin;
 pub mod leaderboard;
 mod matches;
+pub mod moderation;
 pub mod player_history;
 mod ranked;
 pub mod release;
@@ -76,6 +78,12 @@ pub struct Store {
 }
 
 impl Store {
+    pub(crate) async fn refresh_leaderboard(&self, now: i64) {
+        if let Some(Ok(snapshot)) = self.release(move |db| leaderboard::build_at(db, now)).await {
+            self.snapshot_tx.send_replace(StdArc::new(snapshot));
+        }
+    }
+
     pub fn open(path: &Path) -> rusqlite::Result<Store> {
         Store::open_with(path, crate::ranked::policy::RankedPolicy::default())
     }

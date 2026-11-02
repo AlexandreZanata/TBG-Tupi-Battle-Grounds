@@ -147,6 +147,10 @@ pub enum Reply {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
+    Suspended {
+        until: Option<u64>,
+        reason: tbg_core::protocol::SuspensionReason,
+    },
     RegistrationClosed,
     EmailLimit,
     EmailBlocked,
@@ -284,6 +288,7 @@ fn issue_family(
     if let Some(input) = email {
         super::recovery::service::enroll(&tx, account, &input, issue.now).map_err(Error::from)?;
     }
+    guard_ban(&tx, account, issue.now)?;
     let count:u32=tx.query_row("SELECT COUNT(*) FROM auth_sessions WHERE account_id=?1 AND revoked_at IS NULL AND expires_at>?2",params![account,issue.now],|r|r.get(0))?;
     if count >= 10 {
         return Err(Error::FamilyLimit);
@@ -327,6 +332,7 @@ fn lookup(
     let row=conn.query_row("SELECT s.id,s.account_id,s.device_id,s.created_at,s.expires_at,t.generation,t.consumed_at,t.operation_hash,s.keep_signed_in FROM auth_refresh_tokens t JOIN auth_sessions s ON s.id=t.session_id WHERE t.token_hash=?1 AND s.client_kind=?2 AND s.revoked_at IS NULL AND s.expires_at>?3",params![hash.as_slice(),channel.as_str(),now],|r| {
         Ok((r.get::<_,Vec<u8>>(0)?,r.get(1)?,r.get::<_,Vec<u8>>(2)?,r.get(3)?,r.get(4)?,r.get(5)?,r.get(6)?,r.get::<_,Option<Vec<u8>>>(7)?,r.get::<_,bool>(8)?))
     }).optional()?.ok_or(Error::Unauthorized)?;
+    guard_ban(conn, row.1, now)?;
     Ok(Row {
         family: Family {
             id: row.0.try_into().map_err(|_| Error::Unavailable)?,
@@ -444,4 +450,20 @@ impl From<super::recovery::Error> for Error {
             _ => Self::Unavailable,
         }
     }
+}
+
+fn guard_ban(db: &Connection, account: i64, now: i64) -> Result<(), Error> {
+    let state = super::moderation::state(db, account).map_err(|_| Error::Unavailable)?;
+    if state.banned(now) {
+        return Err(Error::Suspended {
+            until: state
+                .ban_until
+                .filter(|v| *v != super::moderation::PERMANENT)
+                .map(|v| v as u64),
+            reason: state
+                .reason
+                .unwrap_or(tbg_core::protocol::SuspensionReason::Other),
+        });
+    }
+    Ok(())
 }

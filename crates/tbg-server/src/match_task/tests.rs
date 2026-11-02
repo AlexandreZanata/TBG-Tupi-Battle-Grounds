@@ -312,3 +312,51 @@ async fn challenge_initial_detached_forfeits() {
     ));
     assert_eq!(metrics.matches_running.load(Relaxed), 0);
 }
+
+/// IC-19/BR-MD02: a ban uses the same forfeit outcome without a voluntary surrender signal.
+#[test]
+fn br_md02_ban_forfeit_settles_like_a_surrender() {
+    let (transport, _receiver) = mpsc::channel(256);
+    let players = Seat::BOTH.map(|seat| Player {
+        token: [seat.index() as u8; 16],
+        name: format!("Player {seat:?}"),
+        conn: Some(ConnHandle::new(seat.index() as u64 + 1, transport.clone())),
+        account: None,
+        arcanas: ArcanaPreset::NEUTRAL,
+        stronghold: tbg_core::StrongholdKind::Classic,
+    });
+    let mut state = MatchState::new(1);
+    while !state.is_live() {
+        state.step();
+    }
+    state.players[0].energy = 100_000;
+    let mut game = Match {
+        result_id: [63; 16],
+        state,
+        players,
+        detached_at: [None; 2],
+        pause_left: [std::time::Duration::ZERO; 2],
+        seen: [true; 2],
+        paused: false,
+        stats: Default::default(),
+        pending: Default::default(),
+        applied: [false; 2],
+        mode: MatchMode::Casual,
+        metrics: Arc::new(Metrics::default()),
+        replay: None,
+        live: None,
+        spectators: Vec::new(),
+        pending_spectate: Vec::new(),
+        end_detail: None,
+        reached_running: false,
+        summary: Default::default(),
+    };
+
+    let mut expected = game.state.clone();
+    expected.forfeit(Seat::A);
+    game.command(MatchCmd::ModerationForfeit { seat: Seat::A });
+    assert!(game.state == expected);
+    assert_eq!(game.end_detail, Some(EndDetail::Moderation));
+    assert_eq!(game.stats[0].surrender_tick, None);
+    assert!(!game.stats[0].surrendered);
+}

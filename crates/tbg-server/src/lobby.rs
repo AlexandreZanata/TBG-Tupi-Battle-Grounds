@@ -29,6 +29,7 @@ mod challenge;
 mod leaderboard;
 mod live;
 mod matchmaking;
+mod moderation;
 mod ownership;
 mod player_challenges;
 mod presence;
@@ -243,6 +244,9 @@ impl Lobby {
 
     fn handle(&mut self, cmd: LobbyCmd) {
         match cmd {
+            LobbyCmd::ModerationBan { account, reply } => {
+                let _ = reply.send(self.moderation_ban(account));
+            }
             LobbyCmd::AuthenticatedHello {
                 resume,
                 conn,
