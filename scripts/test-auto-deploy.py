@@ -227,5 +227,103 @@ class DeploymentGuards(unittest.TestCase):
         self.assertNotIn('ssh ', text)
 
 
+
+class ControllerSafety(unittest.TestCase):
+    """Automation never restarts the only game process, loops on a failed rollback or spends quota blindly."""
+
+    def setUp(self):
+        import control
+        import github
+        import pull
+        self.control, self.github, self.pull = control, github, pull
+        self.temporary = tempfile.TemporaryDirectory()
+        self.state = Path(self.temporary.name)
+        self.patches = [patch.multiple(control, STATE=self.state, HOLD=self.state/'operator-hold.json'),
+                        patch.multiple(pull, STATE=self.state, JOURNAL=self.state/'transition.json')]
+        for item in self.patches:
+            item.start()
+
+    def tearDown(self):
+        for item in reversed(self.patches):
+            item.stop()
+        self.temporary.cleanup()
+
+    def release(self):
+        prefix = 'https://github.com/' + policy.REPOSITORY + '/releases/download/server-' + SOURCE + '/'
+        names = ['tbg-backend-' + SOURCE + '.tar.gz', 'provenance.jsonl']
+        return {'tag_name': 'server-' + SOURCE, 'assets': [{'name': n, 'browser_download_url': prefix + n} for n in names]}
+
+    def run_backend(self, window=False, **changes):
+        options = dict(candidate=lambda *a: self.release(), api=lambda path: {'status': 'ahead'},
+                       fetch=lambda url, limit: b'package', verify=lambda *a, **k: None,
+                       unpack=lambda *a: manifest(), recover=lambda: None)
+        options.update(changes)
+        with patch.multiple(self.pull, **options):
+            self.pull.run({'minimum_source': 'c' * 40, 'public_health': 'https://api.tupibg.com/health'},
+                          True, False, window)
+
+    def test_busy_lock_defers_and_the_runner_exits_zero(self):
+        import fcntl
+        with (self.state/'lock').open('w') as held:
+            fcntl.flock(held, fcntl.LOCK_EX)
+            with self.assertRaises(self.control.Deferred):
+                with self.control.deployment_lock():
+                    self.fail('a second promotion must not start')
+            self.control.run_controller(lambda: (_ for _ in ()).throw(self.control.Deferred('busy')))
+        with self.assertRaises(SystemExit) as failed:
+            self.control.run_controller(lambda: (_ for _ in ()).throw(ValueError('forged')))
+        self.assertEqual(failed.exception.code, 1)
+
+    def test_timer_never_restarts_the_single_game_process(self):
+        with patch.object(self.pull, 'activate') as activate_backend:
+            with self.assertRaisesRegex(ValueError, 'maintenance-window'):
+                self.run_backend()
+            activate_backend.assert_not_called()
+            self.assertFalse((self.state/'checked.json').exists(), 'a policy refusal is not a candidate outcome')
+
+    def test_failed_rollback_holds_automation_until_an_operator_releases_it(self):
+        def broken(*args):
+            (self.state/'transition.json').write_text('{}')
+            raise ValueError('rollback health failed; operator required')
+        with patch.object(self.pull, 'activate', side_effect=broken):
+            with self.assertRaises(ValueError):
+                with patch.multiple(self.pull, candidate=lambda *a: self.release(), api=lambda p: {'status': 'ahead'},
+                                    fetch=lambda u, m: b'p', verify=lambda *a, **k: None, unpack=lambda *a: manifest()):
+                    self.pull.run({'minimum_source': 'c' * 40, 'public_health': 'x'}, True, False, True)
+        self.assertTrue((self.state/'operator-hold.json').exists())
+        recovered = []
+        with patch.multiple(self.pull, recover=lambda: recovered.append(1), candidate=lambda *a: self.fail('no work')):
+            with self.assertRaises(self.control.OperatorHold):
+                self.pull.run({'minimum_source': 'c' * 40}, True, False)
+        self.assertEqual(recovered, [], 'no further stop/start loop while held')
+        self.control.release_hold()
+        self.assertFalse((self.state/'operator-hold.json').exists())
+
+    def test_forged_candidate_is_latched_but_network_failure_is_retried(self):
+        import subprocess
+        forged = subprocess.CalledProcessError(1, ['gh', 'attestation', 'verify'])
+        with self.assertRaises(subprocess.CalledProcessError):
+            self.run_backend(verify=lambda *a, **k: (_ for _ in ()).throw(forged), window=True)
+        self.assertEqual(json.loads((self.state/'checked.json').read_text())['outcome'], 'rejected')
+        (self.state/'checked.json').unlink()
+        from urllib.error import URLError
+        with self.assertRaises(URLError):
+            self.run_backend(fetch=lambda url, limit: (_ for _ in ()).throw(URLError('offline')), window=True)
+        self.assertFalse((self.state/'checked.json').exists())
+
+    def test_unchanged_api_answers_are_conditional_and_quota_is_logged(self):
+        calls = []
+        def answer(url, maximum, headers=None):
+            calls.append(headers or {})
+            if len(calls) == 1:
+                return 200, {'ETag': '"v1"', 'X-RateLimit-Remaining': '59'}, b'[{"tag_name": "web-x"}]'
+            return 304, {'X-RateLimit-Remaining': '59'}, b''
+        with patch.multiple(self.github, CACHE=self.state/'api-cache', request=answer):
+            first = self.github.api('/releases?per_page=100')
+            second = self.github.api('/releases?per_page=100')
+        self.assertEqual(first, second)
+        self.assertEqual(calls[1], {'If-None-Match': '"v1"'})
+
+
 if __name__ == '__main__':
     unittest.main()

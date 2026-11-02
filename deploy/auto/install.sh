@@ -11,7 +11,7 @@ if systemctl is-enabled --quiet tbg-auto-deploy.timer || systemctl is-active --q
 fi
 install -d -m 755 /opt/tbg/deploy /opt/tbg/releases /srv/tbg/web /srv/tbg/landing /srv/tbg/admin /srv/tbg/downloads
 install -d -m 700 /var/lib/tbg-deploy
-install -m 644 "$HERE/policy.py" "$HERE/activate.py" "$HERE/pull.py" "$HERE/web_policy.py" "$HERE/web_activate.py" "$HERE/web_pull.py" "$HERE/static_policy.py" "$HERE/static_activate.py" "$HERE/static_pull.py" "$HERE/native_policy.py" "$HERE/native_pull.py" /opt/tbg/deploy/
+install -m 644 "$HERE/policy.py" "$HERE/activate.py" "$HERE/control.py" "$HERE/github.py" "$HERE/pull.py" "$HERE/web_policy.py" "$HERE/web_activate.py" "$HERE/web_pull.py" "$HERE/static_policy.py" "$HERE/static_activate.py" "$HERE/static_pull.py" "$HERE/native_policy.py" "$HERE/native_pull.py" /opt/tbg/deploy/
 install -m 644 "$HERE/tbg-auto-deploy.service" "$HERE/tbg-auto-deploy.timer" "$HERE/tbg-web-deploy.service" "$HERE/tbg-web-deploy.timer" "$HERE/tbg-static-deploy.service" "$HERE/tbg-static-deploy.timer" "$HERE/tbg-native-catalog.service" "$HERE/tbg-native-catalog.timer" /etc/systemd/system/
 systemctl daemon-reload
 printf 'Installed, disabled. Review the runbook and private config before activation.\n'
