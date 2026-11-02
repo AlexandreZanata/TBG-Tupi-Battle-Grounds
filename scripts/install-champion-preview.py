@@ -10,7 +10,6 @@ from pathlib import Path
 import shlex
 import shutil
 import subprocess
-import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 
