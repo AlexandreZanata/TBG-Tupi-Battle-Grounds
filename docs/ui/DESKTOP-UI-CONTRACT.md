@@ -650,3 +650,25 @@ exit with and without contact, overtaking, dense pileups, and all five
 Evolution forms of `Colossus`, `SiegeWalker`, `GustDrummer`, `Shatterback`,
 Ogres and Abyssals. Linux targeted regressions and native preview installation
 are verified; Windows and desktop game-web visual observations remain pending.
+
+## GD-03 — Colossus body turn and 3D obelisk-tip strike alignment (2026-11-02)
+
+Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/motion.rs`,
+`crates/tbg-client/src/art/anim.rs`):
+- `Animator::observe` treats active combat action clips (`AttackMelee`,
+  `AttackRanged`, `Cast`) with an active `aim_at` as engaged immediately, even
+  while walk-stop hysteresis (`STOP_SECS`) is still settling or when crowd
+  offsets nudge root `x`.
+- `colossus::motion::pose` turns `Joint::Root` toward `m.aim` during
+  `AttackMelee`, `AttackRanged`, `Cast` and `Hit` (`tools::face`), centers the
+  obelisk on the body midline during the strike (`at.x = 0` at `Strike`),
+  places both hands symmetrically on the shaft, and solves the chest-space
+  strike pitch and longitudinal slide so the obelisk ray and its pyramidion tip
+  (`Vec3::new(0.0, 1.27, 0.0)`) align directly with `m.aim.target` in 3D across
+  all five Evolution forms.
+- Coverage: all five `Colossus` forms (`Base`, `A1`, `A2`, `B1`, `B2`), both
+  seats, on-axis and off-axis lateral targets on the widened road, close and
+  max-range combat targets, and arm/hand clearance envelopes (`gd01_colossus`,
+  `gd02_colossus`, `gd03_colossus`). Linux targeted regressions and native
+  preview installation are verified; Windows and desktop web visual
+  observations remain pending.
