@@ -10,7 +10,9 @@ mod modes;
 #[cfg(not(target_os = "android"))]
 mod profile;
 
-use super::{button, data::Data, kit, Account, Action, Lang, Panel, Shell, UiAction};
+use super::{button, kit, Action, Lang, UiAction};
+#[cfg(not(target_os = "android"))]
+use super::{data::Data, Account, Panel, Shell};
 use bevy::prelude::*;
 
 #[cfg(not(target_os = "android"))]

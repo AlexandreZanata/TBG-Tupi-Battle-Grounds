@@ -26,11 +26,12 @@ type Buttons<'w, 's> = Query<
 #[allow(clippy::too_many_arguments)]
 pub fn mouse_and_keys(
     mouse: Res<ButtonInput<MouseButton>>,
-    #[cfg(target_os = "android")] (pointer, state): (
+    // Grouped so the Android touch inputs keep the system under Bevy's parameter limit.
+    #[cfg(target_os = "android")] (pointer, state, scale): (
         Res<super::super::mobile::input::Pointer>,
         Res<State<crate::GameState>>,
+        Res<UiScale>,
     ),
-    #[cfg(target_os = "android")] scale: Res<UiScale>,
     keys: Res<ButtonInput<KeyCode>>,
     mut window: Single<&mut Window>,
     buttons: Buttons,
@@ -44,8 +45,10 @@ pub fn mouse_and_keys(
     mut social_focus: Local<Option<super::super::social::Action>>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     lang: Res<Lang>,
-    mut lights: Query<&mut DirectionalLight>,
-    mut volume: ResMut<bevy::audio::GlobalVolume>,
+    (mut lights, mut volume): (
+        Query<&mut DirectionalLight>,
+        ResMut<bevy::audio::GlobalVolume>,
+    ),
 ) {
     #[cfg(target_os = "android")]
     if pointer.consumed
