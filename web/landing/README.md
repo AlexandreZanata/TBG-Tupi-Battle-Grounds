@@ -1,6 +1,6 @@
 # Landing (`tupibg.com`)
 
-Static landing page: header, hero, the game's pillars, how a match plays, champions by
+Static, responsive (desktop and phone) landing page: header, hero, the game's pillars, how a match plays, champions by
 Faction, the eight Arenas, real captures, patch notes, platforms and footer, plus draft
 contact/privacy/terms pages and a 404 page.
 
@@ -11,6 +11,7 @@ contact/privacy/terms pages and a 404 page.
 | `index.html`, `contact/`, `privacy/`, `terms/`, `404.html` | Pages; pt-BR text is authored in the HTML |
 | `assets/css/landing.css` | Layout and sections (tokens/base come from `web/shared`) |
 | `assets/js/main.js`, `page.js` | Entry points (home page; secondary pages) |
+| `assets/js/nav.js` | Compact-screen section menu, scrolled header state and section reveal (the page works without it) |
 | `assets/js/i18n.js` + `assets/i18n/{pt-BR,en}.json` | Language switch for `[data-i18n]` text and `[data-i18n-attr]` attributes |
 | `assets/js/release.js` + `config/release.json` | Availability gates for the browser game and the Linux package |
 | `assets/js/champions.js`, `arenas.js`, `news.js`, `gallery.js` | Data-driven sections and the screenshot viewer |
