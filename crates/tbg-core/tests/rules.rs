@@ -235,8 +235,11 @@ fn unequal_strongholds_do_not_end_by_time() {
         s.step();
     }
     assert_eq!(s.outcome, None);
-    assert_eq!(s.players[0].stronghold_hp, 4_499);
-    assert_eq!(s.players[1].stronghold_hp, 4_500);
+    assert_eq!(
+        s.players[0].stronghold_hp,
+        tbg_core::content::STRONGHOLD_HP - 1
+    );
+    assert_eq!(s.players[1].stronghold_hp, tbg_core::content::STRONGHOLD_HP);
 }
 
 #[test]

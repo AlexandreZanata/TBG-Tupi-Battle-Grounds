@@ -58,6 +58,10 @@ fn leechroot_ignores_strongholds_and_summons() {
     // the walk ends before Stronghold fire lands.
     let mut s = state(21);
     let leech = s.lab_spawn_at(Seat::A, UnitKind::Leechroot, 0, 0, 14_000);
+    // Keep the subject alive under TW-01 fire until the Stronghold-exclusion hit.
+    let i = s.unit_index(leech).expect("Leechroot must exist");
+    s.units[i].hp = 10_000;
+    s.units[i].max_hp = 10_000;
     let mut hit_sh = false;
     for _ in 0..200 {
         for e in s.step() {
@@ -172,6 +176,10 @@ fn carried_units_cannot_be_targeted() {
     // filter every tie would go to it.
     let passenger = s.lab_spawn_at(Seat::A, UnitKind::Archer, 0, 0, 10_000);
     let crab = s.lab_spawn_at(Seat::A, UnitKind::CargoCrab, 0, 0, 10_050);
+    // Target exclusion is measured only while carried: keep the carrier alive for the full window.
+    let i = s.unit_index(crab).expect("crab must exist");
+    s.units[i].hp = 10_000;
+    s.units[i].max_hp = 10_000;
     let _farwatch = s.lab_spawn_at(Seat::B, UnitKind::Farwatch, 0, 0, 14_000);
     step_n(&mut s, 60);
     // Boarded despite the enemy in range.
@@ -330,6 +338,10 @@ fn passenger_death_frees_the_crab() {
     let mut s = state(36);
     let passenger = s.lab_spawn_at(Seat::A, UnitKind::Archer, 0, 0, 10_000);
     let crab = s.lab_spawn_at(Seat::A, UnitKind::CargoCrab, 0, 0, 10_050);
+    // Target exclusion is measured only while carried: keep the carrier alive for the full window.
+    let i = s.unit_index(crab).expect("crab must exist");
+    s.units[i].hp = 10_000;
+    s.units[i].max_hp = 10_000;
     step_n(&mut s, 20);
     let i = s.unit_index(crab).expect("crab must live");
     assert_eq!(s.units[i].fx.passenger, Some(passenger));

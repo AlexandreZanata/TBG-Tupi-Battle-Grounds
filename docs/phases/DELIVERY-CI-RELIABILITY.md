@@ -55,3 +55,17 @@ surviving the switch and later retirement: 54 slot tests and 21 pull-policy test
 passed. No timeout, required CI gate or normal automatic compatibility guard was
 relaxed. The first new fixture failed because the fake host still announced its
 constant old contract; its start identity now models the intended candidate.
+
+> blocked: the superseded hosted f058d66 test log reached runtime and exposed
+> historical TW-01 revision selectors that omitted R13, missing GD-01 rows/C2
+> registration, and unit-only fixtures invalidated by tripled tower fire. No
+> assertion is removed and no CI gate is relaxed. INT-01 reconciles those specific
+> contracts and fixture preconditions, with the exact affected target union queued.
+
+INT-01 targeted consolidation completed: 126 scenarios across the 14 named core
+integration targets passed. The initial union passed 125 and exposed one last
+literal 4500 HP in the Bombard exclusion scenario; that assertion now compares
+against the captured pre-combat HP and its focused rerun passed. Seven source
+patch-note entries passed at R13/b66993d9e87a9cfc. The combined slot policy has
+57 passing cases. No core source, balance value, timeout, required check or
+historical trace row changed; no local full suite or audit benchmark was run.

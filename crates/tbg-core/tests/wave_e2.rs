@@ -6,7 +6,10 @@
 use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind};
 
 fn rules() -> &'static Ruleset {
-    Ruleset::canon()
+    // Isolate the unit ability; TW-01 Stronghold fire has separate real-shot contracts.
+    let mut rules = Ruleset::canon().clone();
+    rules.stronghold_damage = 0;
+    Box::leak(Box::new(rules))
 }
 
 fn state(seed: u64) -> MatchState {

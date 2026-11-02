@@ -144,7 +144,10 @@ fn br_s14_each_intention_sees_the_previous_shop_and_is_deterministic() {
 #[test]
 fn enabled_but_unused_preserves_canon_behavior() {
     let mut a = MatchState::new(7);
-    let mut b = MatchState::with_preview(7, [tbg_core::ArcanaPreset::NEUTRAL; 2]);
+    // Compare only the Shop feature; with_preview now intentionally uses the 82-kind pool.
+    let mut rules = tbg_core::Ruleset::canon().clone();
+    rules.shop = tbg_core::Ruleset::preview().shop;
+    let mut b = MatchState::with_rules(7, Box::leak(Box::new(rules)));
     for _ in 0..100 {
         assert_eq!(a.step(), b.step());
     }

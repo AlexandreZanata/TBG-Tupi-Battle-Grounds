@@ -6,7 +6,10 @@
 use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind};
 
 fn rules() -> &'static Ruleset {
-    Ruleset::canon()
+    // Isolate the unit ability; TW-01 Stronghold fire has separate real-shot contracts.
+    let mut rules = Ruleset::canon().clone();
+    rules.stronghold_damage = 0;
+    Box::leak(Box::new(rules))
 }
 
 fn state(seed: u64) -> MatchState {
@@ -280,7 +283,10 @@ fn deathblow_can_trade() {
 // Stronghold shot plus the first burn leave it alive to report.
 #[test]
 fn no_multiplier_vs_strongholds() {
-    let mut s = state(53);
+    // Freeze the original incoming 53 shot to isolate the unit's multiplier/burn contract.
+    let mut rules = Ruleset::canon().clone();
+    rules.stronghold_damage = 53;
+    let mut s = MatchState::lab(53, Box::leak(Box::new(rules)), [ArcanaPreset::NEUTRAL; 2]);
     let furnace = s.lab_spawn_at(Seat::A, UnitKind::BloodFurnace, 0, 0, 15_000);
     let i = s.unit_index(furnace).expect("furnace must exist");
     s.units[i].hp = 100;
