@@ -23,7 +23,7 @@ fn ring_only_all_340_forms_share_identical_body_meshes_for_both_seats() {
                 assert!(
                     spec.parts
                         .iter()
-                        .all(|p| p.node != rig::Node::Secondary(rig::Spring::Tabard)),
+                        .all(|p| !matches!(p.node, rig::Node::Secondary(rig::Spring::Tabard))),
                     "remove the old affiliation plate and trim instead of repainting it"
                 );
             }
