@@ -25,3 +25,13 @@ separately; none are certified at this preparation checkpoint.
 
 Native catalog publication distributes verified links. TUF installation and
 signing remain disabled. Windows/browser rendered parity remains pending.
+
+
+Preceding colossus.2 consolidation merged normally as 8c5074356140861a7992ba758c1ed8e47e0f4bdd
+(PR #53) after all required lanes and both native packages passed at ed17725.
+Hosted job 125463067620 passed the corrected P73 journal-failure outcome case,
+P74 Red-seat auxiliary/reconnect flow and exact-once cross-generation Ranked
+settlement. This work front's native version policy and all 12 native release
+policy tests passed locally. No local compilation/full suite was needed for
+the version/comment-only witness. First production activation is still pending;
+this PR must wait for its observed completion before merge.
