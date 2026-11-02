@@ -21,3 +21,13 @@ never certify Ranked or rendered platform parity from this probe.
 The native version-policy tests (12) and static source checks passed. Source
 comments do not change Rust behavior; no local compiler/full suite was needed.
 Publication and installation remain pending at this preparation checkpoint.
+
+
+Preceding consolidation merged normally as f1ee218564762147df179b0908c0d26316543964
+(PR #48) after every required lane and both native factories passed at a035282.
+Hosted test job 125438186290 passed the army scenario, guest promotion/rollback,
+and exact-once Ranked settlement; release_slots reports six passed and one
+intentionally ignored deployed-account probe. Complete hosted balance and its
+unchanged C7 threshold passed. Linux artifact identity is the PR merge ref
+7fe1f3fd176e0335b486a92a232f4164c09f63fa; that is pre-publication visual evidence,
+not a main release receipt. Exact-main publication/application remains to be observed.
