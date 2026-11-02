@@ -52,6 +52,8 @@ jobs:
           python3 scripts/test-native-catalog.py
           python3 scripts/test-native-artifacts.py
           python3 scripts/test-native-package.py
+          python3 scripts/test-native-inputs.py
+          python3 scripts/check-native-inputs.py
           node scripts/test-native-downloads.cjs
           python3 web/scripts/check.py
           python3 scripts/test-ci-test-lanes.py

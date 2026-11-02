@@ -1,0 +1,4 @@
+# Keep hashed rules, locked dependencies and shipped text assets byte-identical on every OS.
+* text=auto eol=lf
+# Historical archive contents remain verbatim.
+archive/** -text
