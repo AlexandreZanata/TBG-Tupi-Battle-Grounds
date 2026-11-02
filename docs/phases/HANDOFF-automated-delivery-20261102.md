@@ -68,13 +68,12 @@ recommendation is a coordinated w32 release after automation is active; #41 and 
 Main is protected: PR + green `check`, merge commit only (squash/rebase would break the deployment-floor
 ancestry: the deployed source `8be248e` must stay an ancestor of main).
 
-Commits on the PR branch after `70827a7` (oldest first): `…` (#42/#46 merges), controllers/CI/native work,
-`8a00f22` docs, `14f6c2c` slot-a switch + script, then `1e56dd1` slot coordinator, `222d2f5` server supports,
-`582cb6a` client re-admission, `07db0ff` rehearsal harness, `1cf7747` docs/D-104, and a final commit
-"second review round" (see `git log` — it adds `slot_host.py` to the installer, Busy/OperatorRequired split,
-crash variants, server exit code).
-CI on `1cf7747`: **all `ci` lanes and both native builds passed**. CI on the final commit was **not observed**
-(started right before this handoff): run `gh pr checks 49`.
+Commits on the PR branch after `70827a7` (the last five are mine for the slot work): `1e56dd1` slot coordinator,
+`222d2f5` server supports, `582cb6a` client re-admission, `07db0ff` rehearsal harness, `1cf7747` docs/D-104,
+`7a524c2` second review round, `dcedd69` final numbers and this handoff (earlier: #42/#46 merges, controllers,
+CI and native publication work, `8a00f22`, `14f6c2c` slot-a switch). CI on `1cf7747`: **all `ci` lanes and both
+native builds passed**. CI on `dcedd69` was **not observed** (it started right before this handoff):
+run `gh pr checks 49`.
 
 ## 3. What is live on the VPS right now (2026-11-02 ~12:50Z)
 
