@@ -574,6 +574,7 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S6 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_admin`: bootstrap, claim, session cookie, separation, CSRF/Origin, idle expiry, atomic audit failure, append-only guards; trusted proxy unit case | API area inventory completes S7; tests queued S14; no real email or host CLI action. |
 | S5 | This step commit | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | Moderation reversibility, two-slot issuance/expiry, optimistic race, exact forfeit state and no voluntary surrender signal | S9 adds suspension wire delivery; S7 extends API and switch tests; full targeted run S14. |
 | S4 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_recovery`: discovered FK snapshot, key format, two-slot revocation, generic replies, code budgets and secret-at-rest canaries | Test run queued S14; real socket closure and full UI recovery remain pending. |
 | S3 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_identity` and preserved P67 offline scenarios; BR-P01/02 helper amended with canon | Compilations/tests queued S14; live verification and desktop captures pending. |
@@ -586,6 +587,8 @@ compatibility; visual parity needs real captures.
 - Visual correspondence (Linux / Windows / web):
 
 ### Deviations, blocked items, residual risks
+- S6 pre-session mutations use a Secure host-only nonce cookie from unauthenticated `GET /session`, echoed in the CSRF header, plus exact Origin and JSON. Once signed in, CSRF is session-bound and reconstructed from the opaque session token. This defines the necessary pre-authentication CSRF bootstrap absent from the planning API.
+
 - S4 reuses the exact `revoke_account` barrier through `revoke_scope` while holding the existing D-97 coordinator lock; calling `revoke_account` recursively would deadlock. SQL revocation is also committed with key rotation.
 - The recovery FK snapshot treats `account_owner` as auth/session ownership (revoked on recovery), alongside `auth_sessions`; all other non-recovery account FK tables are discovered rather than enumerated.
 - The P67 offline link fixture remains test-only for its historical contracts; production uses only typed codes and the live P75 tables. No fixture-only schema installer remains.

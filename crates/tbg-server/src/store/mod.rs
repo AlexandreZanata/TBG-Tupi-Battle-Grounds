@@ -24,6 +24,7 @@ pub mod integrity_admin;
 pub mod leaderboard;
 mod matches;
 pub mod moderation;
+pub mod operators;
 pub mod player_history;
 mod ranked;
 pub mod release;

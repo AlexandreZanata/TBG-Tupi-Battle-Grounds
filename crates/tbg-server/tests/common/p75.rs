@@ -14,6 +14,7 @@ use tbg_server::{
 static NEXT: AtomicU64 = AtomicU64::new(0);
 pub const NOW: i64 = 1_000_000;
 pub struct Server {
+    pub shared: tbg_server::Shared,
     pub url: String,
     pub db: PathBuf,
     pub clock: Clock,
@@ -48,8 +49,10 @@ impl Server {
             ..Config::default()
         };
         change(&mut config);
-        let task = tokio::spawn(tbg_server::run(config, listener));
+        let shared = tbg_server::Shared::default();
+        let task = tokio::spawn(tbg_server::run_with(config, listener, shared.clone()));
         Self {
+            shared,
             url,
             db,
             clock,

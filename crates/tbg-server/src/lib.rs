@@ -15,6 +15,7 @@ use axum::{Json, Router};
 use tokio::net::TcpListener;
 use tokio::sync::{mpsc, watch};
 
+pub mod admin;
 mod api;
 pub mod auth;
 pub mod botclient;
@@ -30,6 +31,7 @@ mod match_task;
 pub mod metrics;
 pub mod moderation;
 mod names;
+pub mod operator_cli;
 mod patch_notes;
 pub mod player_history;
 pub mod presence;
@@ -66,6 +68,7 @@ pub(crate) struct AppState {
 /// Handles the binary keeps to drive graceful shutdown.
 #[derive(Clone, Default)]
 pub struct Shared {
+    pub admin_address: Arc<OnceLock<SocketAddr>>,
     pub metrics: Arc<Metrics>,
     /// P66: set by `run_with`; the shutdown drain reads its gate and load.
     pub release: Arc<OnceLock<Arc<release::Runtime>>>,
@@ -154,6 +157,17 @@ pub async fn run_with(
         config.auth_clock.clone(),
         config.clone(),
     ));
+    if let Some(store) = &store {
+        if !config.bootstrap_email.0.is_empty() {
+            let address = config.bootstrap_email.0.clone();
+            let now = auth.now().map_err(|_| std::io::Error::other("clock"))?;
+            store
+                .release(move |db| store::operators::bootstrap(db, &address, now))
+                .await
+                .ok_or_else(|| std::io::Error::other("operator store unavailable"))?
+                .map_err(|_| std::io::Error::other("operator bootstrap refused"))?;
+        }
+    }
     auth::Service::start(&auth);
     if let Some(store) = &store {
         moderation::feed::start(
@@ -190,6 +204,7 @@ pub async fn run_with(
         local_live: live_rx,
         release,
     };
+    let _admin = admin::listener::start(state.clone(), &shared.admin_address).await?;
     let mut app = Router::new()
         .route("/api/me/account", get(identity::http::handler))
         .route("/api/me/email", post(identity::http::handler))

@@ -4,6 +4,7 @@ use std::path::PathBuf;
 
 #[derive(Clone, Debug)]
 pub struct Config {
+    pub admin: crate::admin::settings::Settings,
     pub moderation: crate::moderation::cache::Cache,
     pub mail: crate::mail::settings::Settings,
     pub mail_capture: Option<crate::mail::transport::MailCapture>,
@@ -72,6 +73,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
+            admin: crate::admin::settings::Settings::default(),
             moderation: crate::moderation::cache::Cache::default(),
             mail: crate::mail::settings::Settings::default(),
             mail_capture: None,
@@ -140,6 +142,7 @@ impl Config {
                 .unwrap_or(default)
         };
         Config {
+            admin: crate::admin::settings::Settings::from_env(),
             moderation: crate::moderation::cache::Cache::default(),
             mail: crate::mail::settings::Settings::from_env(),
             mail_capture: None,
