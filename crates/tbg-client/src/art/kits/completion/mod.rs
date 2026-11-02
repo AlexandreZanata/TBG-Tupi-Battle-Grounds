@@ -507,7 +507,9 @@ pub fn snapshot_pose(
 
 /// Measured idle/walk half-width plus reserved clearance; equipment folds between attacks.
 pub fn crowd_radius(kind: UnitKind, tier: u8) -> Option<f32> {
-    if let Some(radius) = super::ogres::radius(kind, tier) {
+    if let Some(radius) =
+        super::abyssals::radius(kind, tier).or_else(|| super::ogres::radius(kind, tier))
+    {
         return Some(radius);
     }
     const BASE: [f32; 17] = [

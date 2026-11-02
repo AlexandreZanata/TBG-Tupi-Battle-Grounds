@@ -52,6 +52,9 @@ pub(crate) fn heal_action(
     st: &Stats,
     ev: &mut Vec<Event>,
 ) -> bool {
+    if crate::barrel::launch(state, u, id, st) {
+        return true;
+    }
     let Some(ability) = of(state, u) else {
         return false;
     };

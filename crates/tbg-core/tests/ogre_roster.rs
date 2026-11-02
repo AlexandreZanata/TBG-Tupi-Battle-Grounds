@@ -1,4 +1,4 @@
-//! OG-01 Proposed: range equality, appended identities and the private 72-champion roster.
+//! OG-01 Proposed: range equality, appended identities and the private authored roster (updated by AB-01/OG-02).
 use tbg_core::{
     content::{def, effective_stats},
     Archetype, Faction,
@@ -17,8 +17,8 @@ fn ogre_range_matches_archer_in_every_evolution() {
 }
 #[test]
 fn ogre_roster_has_nine_per_faction_and_balanced_roles() {
-    assert_eq!(COMPLETION_POOL.len(), 72);
-    assert_eq!(FACTIONS.len(), 8);
+    assert_eq!(COMPLETION_POOL.len(), 81);
+    assert_eq!(FACTIONS.len(), 9);
     assert_eq!(FULL_POOL.len(), 46);
     assert_eq!(Faction::Ogres.index(), 7);
     assert_eq!(SiegeWalker as usize, 5);
@@ -45,7 +45,7 @@ fn ogre_roster_has_nine_per_faction_and_balanced_roles() {
             .filter(|&&k| def(k).faction == Faction::Ogres && def(k).archetype == role)
             .count()
     });
-    assert_eq!(counts, [1, 3, 2, 2, 1]);
+    assert_eq!(counts, [1, 3, 2, 1, 2]);
     for k in [
         BasaltBulwark,
         CinderMaul,

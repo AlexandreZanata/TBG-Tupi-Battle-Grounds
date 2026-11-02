@@ -6,7 +6,7 @@ pub fn plan(t: u8) -> Proportions {
 pub fn spec(t: u8, b: u8) -> FigureSpec {
     let p = plan(t);
     let f = Form::of(t, b);
-    let mut v = ogre(&p, FISH_BACK, cloth(f, OILSKIN_YELLOW));
+    let mut v = ogre(&p, Color::srgb(0.48, 0.51, 0.26), cloth(f, OILSKIN_YELLOW));
 
     for x in [-0.09, 0.09] {
         v.push(

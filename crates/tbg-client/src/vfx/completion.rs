@@ -15,9 +15,116 @@ pub fn impact(c: &mut Commands, a: &VfxAssets, k: UnitKind, t: u8, b: u8, at: Ve
                 &a.gold
             }
         }
+        NacreDuelist | ReefLancer | TrenchFist | PearlSlinger | AbyssHarpooner | UndertowHerald
+        | TrenchLamplighter | FoamWeaver => {
+            if b == 1 {
+                &a.violet
+            } else {
+                &a.turquoise
+            }
+        }
+        PodSnapper => &a.green,
         _ => &a.amber,
     };
     match k {
+        NacreDuelist | ReefLancer => {
+            spawn(
+                c,
+                &a.crescent,
+                mat,
+                at,
+                Motion::Sweep {
+                    size: 0.24 * power,
+                    turn: if k == ReefLancer { 0.45 } else { 1.1 },
+                },
+                0.0,
+                0.17,
+            );
+        }
+        TrenchFist => {
+            chips(c, a, &a.bone, at, 4, 0.10);
+            spawn(
+                c,
+                &a.ring,
+                mat,
+                at.with_y(0.04),
+                Motion::Grow {
+                    radius: 0.25 * power,
+                },
+                0.0,
+                0.20,
+            );
+        }
+        PearlSlinger => {
+            chips(c, a, &a.white, at, 3, 0.065);
+            spawn(c, &a.ball, mat, at, Motion::Flash { size: 0.08 }, 0.0, 0.10);
+        }
+        AbyssHarpooner => {
+            spawn(
+                c,
+                &a.chip,
+                &a.bone,
+                at,
+                Motion::Segment {
+                    size: Vec3::new(0.02, 0.02, 0.20),
+                },
+                0.0,
+                0.15,
+            );
+        }
+        UndertowHerald => {
+            for i in 0..2 {
+                spawn(
+                    c,
+                    &a.ring,
+                    mat,
+                    at.with_y(0.05),
+                    Motion::Grow {
+                        radius: 0.22 + i as f32 * 0.10,
+                    },
+                    i as f32 * 0.05,
+                    0.22,
+                );
+            }
+        }
+        TrenchLamplighter => {
+            spawn(
+                c,
+                &a.ring,
+                &a.amber,
+                at.with_y(0.05),
+                Motion::Grow {
+                    radius: 0.28 * power,
+                },
+                0.0,
+                0.22,
+            );
+            chips(c, a, &a.white, at, 3, 0.05);
+        }
+        FoamWeaver => {
+            spawn(
+                c,
+                &a.ring,
+                mat,
+                at,
+                Motion::Grow { radius: 0.19 },
+                0.0,
+                0.26,
+            );
+            spawn(c, &a.ball, &a.white, at, Motion::Rise, 0.05, 0.22);
+        }
+        PodSnapper => {
+            chips(c, a, &a.green, at, 3, 0.045);
+            spawn(
+                c,
+                &a.ball,
+                &a.amber,
+                at,
+                Motion::Flash { size: 0.06 },
+                0.0,
+                0.10,
+            );
+        }
         Gravecutter | EclipseDancer | Leafcutter => spawn(
             c,
             &a.crescent,
@@ -262,17 +369,27 @@ pub fn impact(c: &mut Commands, a: &VfxAssets, k: UnitKind, t: u8, b: u8, at: Ve
             );
         }
         GustDrummer => {
-            for i in 0..2 {
+            spawn(
+                c,
+                &a.ring,
+                &a.green,
+                at.with_y(0.04),
+                Motion::Grow {
+                    radius: area.splash.max(0.20),
+                },
+                0.0,
+                0.35,
+            );
+            chips(c, a, &a.root, at.with_y(0.15), 4, 0.08);
+            for x in [-0.10, 0.0, 0.10] {
                 spawn(
                     c,
-                    &a.ring,
-                    &a.white,
-                    at,
-                    Motion::Grow {
-                        radius: 0.18 + i as f32 * 0.10,
-                    },
-                    i as f32 * 0.045,
-                    0.20,
+                    &a.ball,
+                    &a.green,
+                    at + Vec3::X * x,
+                    Motion::Rise,
+                    0.0,
+                    0.28,
                 );
             }
         }

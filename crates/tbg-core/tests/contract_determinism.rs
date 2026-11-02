@@ -143,6 +143,12 @@ fn bot_matches_are_frozen() {
             (7, 0x981a89b67d681f3d, 9982, Seat::B, StrongholdDestroyed),
             (42, 0x750b2a389290829d, 10382, Seat::A, StrongholdDestroyed),
         ],
+        // AB-01/OG-02: ninth Synergy slot and empty rolling-cask state; staged tuning is private.
+        (10, 0x523044fc973bac39) => [
+            (1, 0x4b854f968429a97c, 4044, Seat::B, StrongholdDestroyed),
+            (7, 0x70c562418d530b55, 9982, Seat::B, StrongholdDestroyed),
+            (42, 0xcea96d41f552661d, 10382, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

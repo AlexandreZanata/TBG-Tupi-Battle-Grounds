@@ -386,6 +386,17 @@ pub enum Event {
         unit: UnitId,
         x: i32,
     },
+    /// OG-02: exact collision facts remain drawable after the caster disappears.
+    BarrelBurst {
+        source: UnitId,
+        seat: Seat,
+        contact: UnitId,
+        center: i32,
+        radius: i32,
+        tier: u8,
+        branch: u8,
+        tick: Tick,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -400,6 +411,8 @@ pub struct MatchState {
     pub players: [PlayerState; 2],
     /// Always sorted by id (new units get the next, larger id).
     pub units: Vec<Unit>,
+    /// OG-02 launch snapshots survive caster death and serialize for replay.
+    pub barrels: Vec<crate::barrel::Barrel>,
     pub next_unit_id: UnitId,
     pub outcome: Option<Outcome>,
     /// Augment draw, cycle and open round (BR-AG01–08).

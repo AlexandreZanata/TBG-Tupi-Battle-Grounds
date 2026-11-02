@@ -149,6 +149,14 @@ fn c2_per_tick_traces_are_frozen() {
             (1000, 0x2f5fcbb3660cdd4c, 0xc80e2d0725d28b4d, 8869),
             (65535, 0x322f254d7eb09476, 0xa8b07cb5b9434daf, 19759),
         ],
+        // AB-01/OG-02: appended state layout and unchanged established trace behavior.
+        (10, 0x523044fc973bac39) => [
+            (1, 0xc3480c1818db1fbd, 0x4b854f968429a97c, 4044),
+            (7, 0x06a09918e8635c48, 0x70c562418d530b55, 9982),
+            (42, 0x704873a9ca6f4feb, 0xcea96d41f552661d, 10382),
+            (1000, 0x1aac595c5725aaba, 0xfe7914eff893639d, 8869),
+            (65535, 0x5212bdb98903fc74, 0x8279f6a0fad3e661, 19759),
+        ],
         revision => panic!("register an explicit canonical trace for {revision:?}"),
     };
     for (seed, t, h, tick) in goldens {

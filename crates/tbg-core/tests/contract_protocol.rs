@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 34,
-        "OG-01: append an eighth Faction; protocol 34 rejects older snapshot layouts, preserving message tags"
+        PROTOCOL_VERSION, 35,
+        "AB-01/OG-02: ninth Faction and rolling casks require wire 35, preserving message tags"
     );
 }
 
@@ -409,6 +409,7 @@ fn cc_id01_v32_completion_facts_and_short_cast_roundtrip_without_reordering_old_
         channel_target: Some(23),
         channel_pulses: 3,
         beam_center: Some(5200),
+        barrel_ready_in: 0,
     };
     let special = SpecialView {
         ready_in: 0,
@@ -435,4 +436,23 @@ fn og01_new_faction_and_kind_tags_are_appended() {
     assert_eq!(encode(&tbg_core::UnitKind::Stridulator), [67]);
     assert_eq!(encode(&tbg_core::UnitKind::BasaltBulwark), [68]);
     assert_eq!(encode(&tbg_core::UnitKind::RivetBallista), [76]);
+}
+
+// AB-01/OG-02: appended identities and replay-visible rolling projectiles use wire 35.
+#[test]
+fn ab01_og02_tags_are_appended_and_barrels_roundtrip_in_both_public_views() {
+    assert_eq!(encode(&tbg_core::Faction::Abyssals), [8]);
+    assert_eq!(encode(&tbg_core::UnitKind::NacreDuelist), [77]);
+    assert_eq!(encode(&tbg_core::UnitKind::PodSnapper), [85]);
+    let state = tbg_core::MatchState::new(1);
+    let view = state.view_for(tbg_core::Seat::A, &[]);
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::MatchView>(&encode(&view)),
+        Ok(view)
+    );
+    let public = state.public_view(&[], 0);
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::PublicView>(&encode(&public)),
+        Ok(public)
+    );
 }

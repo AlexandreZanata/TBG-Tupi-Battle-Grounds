@@ -6,7 +6,7 @@ pub fn plan(t: u8) -> Proportions {
 pub fn spec(t: u8, b: u8) -> FigureSpec {
     let p = plan(t);
     let f = Form::of(t, b);
-    let mut v = ogre(&p, DARK_LEATHER, cloth(f, LINEN));
+    let mut v = ogre(&p, OGRE_SKIN, cloth(f, LINEN));
 
     v.push(
         part(

@@ -3011,3 +3011,40 @@ eighth Synergy array entry changes snapshot bytes: wire revision 34, ruleset
 Ogres on load. Keep prior identity ledger entries and append this revision.
 The private authored roster is 72, online 46; public cards state preview
 availability. Balance and cross-platform visual acceptance remain distinct.
+
+## AB-01 / OG-02 — Abyssal roster, Trident transfer and rolling remedy (2026-11-01)
+
+Owner authorized refining the nine Ogres against the attached Hook Brawler
+reference, replacing Gust Drummer with a long-reload healing-cask Support,
+and creating the next Faction, Abyssals. Before further implementation the
+owner requested moving existing Trident into Abyssals with a replacement.
+Trident moves from Plants and fills the Abyssal Tank slot. Pod Snapper is
+its Ranged Plant replacement; the earlier Nacre Bastion concept is reserved,
+not implemented or counted. Eight new Abyssals plus one Plant preserve nine
+per Faction: 81 authored conventional champions in nine Factions.
+
+New numeric rules and complete ability parameters are Proposed in
+GAME-DESIGN AB-01/OG-02. Existing kind indices are preserved, nine kinds and
+one Faction append. Wire 35 carries the ninth Synergy slot, active rolling
+barrels and basic-heal reload facts; revision 10 includes the new watched
+barrel simulation. Legacy four/seven/eight-Faction summary records zero-extend.
+The online FULL_POOL remains 46, with Trident's owner-requested Faction change.
+New kinds remain private-preview-only pending D-33 competitive acceptance.
+
+A cask follows integer swept collision with living units of either seat,
+then heals allies around the contact point and minimally damages an enemy
+interceptor. Travel is finite, survives caster death and freezes with combat.
+This must live in core state and both views; a cosmetic pre-decided projectile
+would fail the requested interception behavior. Client drawing shares the
+unit snapshot timeline; body identity uses foot rings only. Built-in imagegen
+references remain distinct from real native captures. Windows/game-web visual
+correspondence and owner look/fun acceptance require actual observation.
+
+AB-01's initial 108 duels exposed a weak Nacre Duelist and a strong Pearl
+Slinger. Two targeted follow-ups (12, then six seat-swapped duels) produced
+Proposed final Nacre 430/64/22/1050/54 and Pearl 340/52/24/4100/48, splash 14.
+The final Pearl panel has Archer as a counter. Full competitive acceptance
+and mixed-team validation remain pending; no threshold or release gate changed.
+Revision 10's final source hash is `523044fc973bac39`. The five canonical trace
+fixtures preserve the observed end ticks/outcomes; checksums change with the
+ninth Synergy slot and rolling-cask state layout. Older fixtures remain intact.

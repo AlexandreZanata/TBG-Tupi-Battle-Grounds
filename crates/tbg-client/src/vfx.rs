@@ -50,6 +50,7 @@ pub struct VfxAssets {
     /// Lit vertex colors, for painted projectile meshes.
     pub(super) painted: Handle<StandardMaterial>,
     pub(super) shots: shots::ShotMeshes,
+    pub(super) casks: [Handle<Mesh>; 5],
 }
 
 #[derive(Clone, Copy)]
@@ -84,6 +85,7 @@ pub(crate) struct Vfx {
     dur: f32,
 }
 
+pub(crate) mod barrels;
 pub(crate) mod completion;
 mod effects;
 pub(crate) mod flame;
@@ -95,6 +97,8 @@ pub use flame::profane_flame;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(completion::plugin)
+        .add_systems(OnExit(crate::GameState::Training), barrels::clear_system)
+        .add_systems(OnExit(crate::GameState::InMatch), barrels::clear_system)
         .add_systems(PreStartup, init)
         .add_systems(Update, (animate, shots::fly))
         .add_systems(
@@ -195,6 +199,7 @@ fn init(
         oil,
         painted,
         shots,
+        casks: barrels::meshes(&mut meshes),
     });
 }
 

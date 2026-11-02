@@ -19,6 +19,8 @@ mod polish_motion;
 mod reserve;
 // P73 synthetic fixtures exist only where their "LOCAL VISUAL FIXTURE" label
 // is also compiled, never in a plain debug build.
+#[cfg(tbg_desktop)]
+mod barrel;
 #[cfg(feature = "ui-acceptance")]
 mod social;
 #[cfg(tbg_desktop)]
@@ -173,6 +175,7 @@ fn capture(
     #[cfg(tbg_desktop)] match_info: Res<crate::sync::MatchInfo>,
     #[cfg(tbg_desktop)] loading: Res<crate::ui::native_loading::Status>,
     #[cfg(tbg_desktop)] support_probe: Option<Res<training::SupportProbe>>,
+    #[cfg(tbg_desktop)] barrel_probe: Option<Res<barrel::Status>>,
     mut started: Local<bool>,
     #[cfg(tbg_desktop)] mut ready_at: Local<Option<f32>>,
 ) {
@@ -203,6 +206,9 @@ fn capture(
         // Shader/font work can outlive the requested delay on a busy machine.
         // Capture the ready scene, never the loading overlay in front of it.
         if !loading.boot_ready || loading.scene_waiting {
+            return;
+        }
+        if barrel_probe.is_some_and(|probe| !probe.ready) {
             return;
         }
         if support_probe.is_some_and(|probe| !probe.ready) {

@@ -62,12 +62,18 @@ pub struct View {
     pub channel_target: Option<UnitId>,
     pub channel_pulses: u8,
     pub beam_center: Option<i32>,
+    pub barrel_ready_in: u16,
 }
 
 pub fn view(u: &Unit, now: Tick) -> Option<View> {
     let left = |until: Tick| until.saturating_sub(now).min(u32::from(u16::MAX)) as u16;
     let fx = &u.fx.completion;
     let result = View {
+        barrel_ready_in: if u.kind == UnitKind::GustDrummer {
+            u.cooldown
+        } else {
+            0
+        },
         echo_ticks: if fx.echo.amount > 0 {
             left(fx.echo.until)
         } else {
@@ -83,8 +89,10 @@ pub fn view(u: &Unit, now: Tick) -> Option<View> {
         charged: fx.charged,
         channel_target: fx.channel.map(|c| c.target),
         channel_pulses: fx.channel.map_or(0, |c| c.left),
-        beam_center: (matches!(u.kind, UnitKind::Prismancer | UnitKind::ClayBinder)
-            && u.fx.special.is_some())
+        beam_center: (matches!(
+            u.kind,
+            UnitKind::Prismancer | UnitKind::ClayBinder | UnitKind::TrenchLamplighter
+        ) && u.fx.special.is_some())
         .then_some(fx.beam_center),
     };
     (result != View::default()).then_some(result)

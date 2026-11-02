@@ -103,6 +103,8 @@ fn frames(
             animator.present(clip, t);
             if tbg_core::content::def(unit).faction == tbg_core::Faction::Ogres
                 || crate::art::kits::ogres::contains(unit)
+                || tbg_core::content::def(unit).faction == tbg_core::Faction::Abyssals
+                || crate::art::kits::abyssals::contains(unit)
             {
                 commands.entity(root).insert((animator, layout));
                 continue;

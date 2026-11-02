@@ -7,6 +7,12 @@ pub const SPARK_MELEE_RANGE: i32 = 1_600;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    /// OG-02: launched at basic-heal resolution; collision decides the area heal.
+    Barrel {
+        speed: i32,
+        radius: i32,
+        damage: u16,
+    },
     Finisher {
         below_bp: u16,
         bonus_bp: u16,
@@ -118,6 +124,51 @@ const fn form(kind: UnitKind, slot: u8) -> [super::Ability; 2] {
         0
     };
     let value = match kind {
+        UnitKind::NacreDuelist => Ability::Opportunity {
+            every: 3,
+            bonus_bp: 3_500 + a * 1_000,
+        },
+        UnitKind::ReefLancer => Ability::Pierce {
+            every: 3,
+            ratio_bp: 4_500 + b * 1_000,
+            behind: 1_000,
+        },
+        UnitKind::TrenchFist => Ability::Crusher {
+            max_hp_bp: 250 + a * 100,
+            cap: 22 + b * 8,
+        },
+        UnitKind::PearlSlinger => Ability::Sweep {
+            every: 3,
+            damage: 14 + a * 6,
+            radius: 650 + b as i32 * 200,
+            targets: 2,
+        },
+        UnitKind::AbyssHarpooner => Ability::Bleeder {
+            damage: 4 + a,
+            pulses: 3,
+        },
+        UnitKind::UndertowHerald => Ability::Rhythm {
+            period: 170 - b * 15,
+            bp: 2_000,
+            ticks: 30 + a * 10,
+            radius: 850,
+            targets: 3,
+        },
+        UnitKind::TrenchLamplighter => Ability::Beam {
+            period: 180,
+            damage: 30 + a * 10,
+            radius: 700 + b as i32 * 200,
+            targets: 3,
+        },
+        UnitKind::FoamWeaver => Ability::Echo {
+            heal: 16 + b * 6,
+            ticks: 70,
+        },
+        UnitKind::PodSnapper => Ability::Spark {
+            every: 3,
+            damage: 18 + b * 6,
+            ticks: 60,
+        },
         UnitKind::BasaltBulwark => Ability::Crusher {
             max_hp_bp: 300 + a * 100,
             cap: 24 + b * 8,
@@ -142,10 +193,10 @@ const fn form(kind: UnitKind, slot: u8) -> [super::Ability; 2] {
             radius: 750 + b as i32 * 150,
             targets: 3,
         },
-        UnitKind::GustDrummer => Ability::Interrupt {
-            period: 180 - a * 15,
-            lock_ticks: 8 + b * 2,
-            windup: 12,
+        UnitKind::GustDrummer => Ability::Barrel {
+            speed: 220,
+            radius: 1_250 + b as i32 * 250,
+            damage: 8 + b * 2,
         },
         UnitKind::HideMender => Ability::Regrowth {
             heal: 4 + b * 2,

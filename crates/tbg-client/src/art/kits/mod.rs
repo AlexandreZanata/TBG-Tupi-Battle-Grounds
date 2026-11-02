@@ -3,6 +3,7 @@
 //! projectile or melee impact), registered by `UnitKind`. Plain data and
 //! function pointers; units without a kit keep the shared library.
 
+pub(crate) mod abyssals;
 mod acidmaw;
 pub mod aim;
 mod antidote_brewer;
@@ -284,7 +285,9 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
-        _ => ogres::kit(kind).or_else(|| completion::kit(kind)),
+        _ => abyssals::kit(kind)
+            .or_else(|| ogres::kit(kind))
+            .or_else(|| completion::kit(kind)),
     }
 }
 

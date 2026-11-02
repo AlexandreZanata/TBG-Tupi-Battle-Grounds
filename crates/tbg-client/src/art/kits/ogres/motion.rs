@@ -5,7 +5,7 @@ use super::super::{
 };
 use crate::art::{
     anim::{Clip, Pose},
-    rig::Joint::*,
+    rig::{Joint::*, Socket},
 };
 use bevy::prelude::*;
 use tbg_core::UnitKind::{self, *};
@@ -13,7 +13,22 @@ pub fn pose(k: UnitKind, m: &Moment, p: &mut Pose) {
     let plan = super::plan(k, m.tier);
     match m.clip {
         Clip::Idle => moves::idle(m, p, &plan, if k == BasaltBulwark { 0.9 } else { 0.5 }),
-        Clip::Walk => moves::walk(m, p, if k == FlintRunner { 12.0 } else { 4.0 }, 2.0),
+        Clip::Walk => {
+            moves::walk(m, p, if k == FlintRunner { 12.0 } else { 6.0 }, 2.5);
+            let sway = m
+                .walk
+                .map_or(0.0, |phase| (phase * std::f32::consts::TAU).sin());
+            tools::add(
+                p,
+                Chest,
+                [
+                    if k == HookBrawler { 5.0 } else { 2.0 },
+                    -3.0 * sway,
+                    1.5 * sway,
+                ],
+            );
+            tools::add(p, Head, [-2.0, 2.0 * sway, 0.0]);
+        }
         Clip::AttackMelee | Clip::AttackRanged | Clip::Cast => action(k, m, p, &plan),
         Clip::Hit => moves::hit(m, p, 0.65),
         Clip::Spawn => moves::spawn(
@@ -64,6 +79,11 @@ fn hold(k: UnitKind, m: &Moment, p: &mut Pose, plan: &crate::art::rig::Proportio
     } else {
         0.0
     };
+    let lower = if k == GustDrummer && matches!(m.clip, Clip::Cast) && m.special_ready {
+        tools::hold(m.t, [0.05, 0.19, 0.30, 0.50])
+    } else {
+        0.0
+    };
     let (right, left) = match k {
         BasaltBulwark => (
             Vec3::new(-0.25, 0.02, 0.20 + beat * 0.15),
@@ -74,8 +94,8 @@ fn hold(k: UnitKind, m: &Moment, p: &mut Pose, plan: &crate::art::rig::Proportio
             Vec3::new(0.23, 0.07, 0.14),
         ),
         HookBrawler => (
-            Vec3::new(-0.22, 0.09, 0.19 + beat * 0.18),
-            Vec3::new(0.22, 0.11, 0.12),
+            Vec3::new(-0.28, 0.01 + beat * 0.20, 0.11 + beat * 0.20),
+            Vec3::new(0.28, 0.03 + beat * 0.06, 0.10 + beat * 0.10),
         ),
         FlintRunner => (
             Vec3::new(-0.20, -0.02, 0.12 + beat * 0.20),
@@ -85,10 +105,16 @@ fn hold(k: UnitKind, m: &Moment, p: &mut Pose, plan: &crate::art::rig::Proportio
             Vec3::new(-0.23, 0.03, 0.17),
             Vec3::new(0.22, 0.13 + beat * 0.06, 0.21),
         ),
-        GustDrummer => (
-            Vec3::new(-0.12, 0.19 + beat * 0.08, 0.25),
-            Vec3::new(0.12, 0.19 + (1.0 - beat) * 0.06, 0.25),
-        ),
+        GustDrummer => {
+            if m.special_ready {
+                (
+                    Vec3::new(-0.25, 0.12 - 0.24 * lower, 0.29 + 0.15 * lower),
+                    Vec3::new(0.25, 0.12 - 0.24 * lower, 0.29 + 0.15 * lower),
+                )
+            } else {
+                (Vec3::new(-0.20, -0.06, 0.10), Vec3::new(0.16, 0.05, 0.13))
+            }
+        }
         HideMender => (
             Vec3::new(-0.18, 0.13, 0.25 + beat * 0.04),
             Vec3::new(0.15, 0.11, 0.23),
@@ -102,18 +128,30 @@ fn hold(k: UnitKind, m: &Moment, p: &mut Pose, plan: &crate::art::rig::Proportio
             Vec3::new(0.12, 0.12, 0.28),
         ),
     };
+    if k == GustDrummer {
+        p[crate::art::rig::Node::Prop(Socket::WeaponR).index()].1 =
+            Vec3::new(0.0, -0.24 * lower, 0.15 * lower);
+    }
     tools::reach(
         p,
         false,
         right,
-        Some(Quat::IDENTITY),
+        Some(if k == GustDrummer {
+            Quat::from_rotation_y(-std::f32::consts::FRAC_PI_2)
+        } else {
+            Quat::IDENTITY
+        }),
         (plan, Vec3::new(-0.6, -0.8, 0.5)),
     );
     tools::reach(
         p,
         true,
         left,
-        Some(Quat::IDENTITY),
+        Some(if k == GustDrummer {
+            Quat::from_rotation_y(std::f32::consts::FRAC_PI_2)
+        } else {
+            Quat::IDENTITY
+        }),
         (plan, Vec3::new(0.6, -0.8, 0.5)),
     );
 }
@@ -124,7 +162,14 @@ fn action(k: UnitKind, m: &Moment, p: &mut Pose, plan: &crate::art::rig::Proport
     let (pitch, yaw) = match k {
         BasaltBulwark => (8.0, 10.0),
         CinderMaul => (20.0, -14.0),
-        HookBrawler => (5.0, 22.0),
+        HookBrawler => (
+            9.0,
+            if m.variant.is_multiple_of(2) {
+                24.0
+            } else {
+                -24.0
+            },
+        ),
         FlintRunner => (12.0, -20.0),
         ClayBinder => (-8.0, 6.0),
         GustDrummer => (10.0, 0.0),
@@ -172,14 +217,15 @@ fn victory(k: UnitKind, m: &Moment, p: &mut Pose) {
             hold(
                 k,
                 &Moment {
-                    clip: Clip::Cast,
-                    t: t % 0.5,
+                    clip: Clip::Idle,
+                    special_ready: true,
                     ..*m
                 },
                 p,
                 &plan,
             );
-            tools::add(p, Head, [10.0 * pulse, 0.0, 0.0]);
+            tools::add(p, Chest, [-6.0 * pulse.abs(), 8.0 * pulse, 0.0]);
+            tools::add(p, Head, [7.0 * pulse, 0.0, 0.0]);
         }
         HideMender => {
             tools::set(p, UpperArmR, [-80.0, 0.0, -15.0]);

@@ -49,7 +49,7 @@ pub fn profile_for_faction(faction: Faction) -> DeathProfile {
             pitch_deg: -10.0,
             jitter_amplitude: 0.0,
         },
-        Faction::Monsters | Faction::Ogres => DeathProfile {
+        Faction::Monsters | Faction::Ogres | Faction::Abyssals => DeathProfile {
             faction,
             duration: 0.70,
             sink_depth: -0.25,
@@ -121,7 +121,7 @@ pub fn evaluate(faction: Faction, dead_for: f32, base_scale: f32, base_yaw: f32)
             );
             (pos, rot, sc)
         }
-        Faction::Monsters | Faction::Ogres => {
+        Faction::Monsters | Faction::Ogres | Faction::Abyssals => {
             let rot = Quat::from_rotation_y(base_yaw)
                 * Quat::from_rotation_x(p.pitch_deg.to_radians() * e);
             let pos = Vec3::new(0.0, p.sink_depth * e, 0.0);
@@ -158,6 +158,7 @@ mod tests {
             Faction::Celestials,
             Faction::Insects,
             Faction::Ogres,
+            Faction::Abyssals,
         ] {
             let p = profile_for_faction(f);
             assert_eq!(p.faction, f);
@@ -172,7 +173,9 @@ mod tests {
                 Faction::Undead => assert!(fallen.translation.y <= p.sink_depth),
                 Faction::Machines => assert!(fallen.rotation != Quat::IDENTITY),
                 Faction::Plants => assert!(fallen.scale.y < 0.5),
-                Faction::Monsters | Faction::Ogres => assert!(fallen.rotation != Quat::IDENTITY),
+                Faction::Monsters | Faction::Ogres | Faction::Abyssals => {
+                    assert!(fallen.rotation != Quat::IDENTITY)
+                }
                 Faction::Celestials => assert!(fallen.translation.y > 0.0),
                 Faction::Insects => assert!(fallen.scale.y < 0.7),
             }

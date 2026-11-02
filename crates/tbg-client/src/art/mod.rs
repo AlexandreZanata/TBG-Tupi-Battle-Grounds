@@ -8,6 +8,8 @@ use std::collections::HashMap;
 use bevy::prelude::*;
 use tbg_core::{UnitKind, ALL_KINDS};
 
+#[cfg(test)]
+mod abyssal_tests;
 mod adapter;
 pub mod aim;
 pub mod anim;

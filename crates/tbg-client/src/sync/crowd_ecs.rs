@@ -123,8 +123,9 @@ pub(super) fn update(
             body.half_length = (depth.y - depth.x) * 0.5;
         }
         if visual.kind() == UnitKind::Shatterback
-            || visual.kind() == UnitKind::SiegeWalker
+            || matches!(visual.kind(), UnitKind::SiegeWalker | UnitKind::Trident)
             || crate::art::kits::ogres::contains(visual.kind())
+            || crate::art::kits::abyssals::contains(visual.kind())
         {
             let (tier, branch) = visual.form();
             let form = library.get(visual.kind(), tier, branch);

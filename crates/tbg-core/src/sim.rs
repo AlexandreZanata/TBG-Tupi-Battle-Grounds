@@ -102,6 +102,7 @@ impl MatchState {
                 ..player(i as u64 + 1)
             }),
             units: Vec::new(),
+            barrels: Vec::new(),
             next_unit_id: 1,
             outcome: None,
             augments: AugmentState::new(seed, first_round),
@@ -171,6 +172,7 @@ impl MatchState {
         crate::support::bonds(self);
         crate::support::boarding(self, ev);
         combat::run_units(self, ev);
+        crate::barrel::advance(self, ev);
     }
 
     /// The seat gives up (or its reconnect window expired): the other wins.

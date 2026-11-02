@@ -66,6 +66,7 @@ pub enum ShotKind {
     BloodBolt,
     /// Ogre expansion: separate mesh, timing and impact recipes by kind.
     Ogre(tbg_core::UnitKind, u8, u8),
+    Abyssal(tbg_core::UnitKind, u8, u8),
     BellEcho(u8, u8),
     BoneQuill(u8, u8),
     Broth(u8, u8),
@@ -76,6 +77,12 @@ pub enum ShotKind {
 
 #[derive(Clone, Copy)]
 enum Body {
+    Pearl,
+    Harpoon,
+    ConchPulse,
+    LanternShard,
+    FoamPearl,
+    PodSeed,
     OgrePebble,
     ClayClod,
     Stitch,
@@ -167,6 +174,31 @@ fn look(kind: ShotKind) -> Look {
     use ShotKind::*;
     let smoke = |every, size| Trail::Smoke { every, size };
     let (body, arc, secs, trail, roll, impact) = match kind {
+        Abyssal(k, t, b) => {
+            use tbg_core::UnitKind::*;
+            let (body, arc, secs, roll) = match k {
+                PearlSlinger => (Body::Pearl, 0.12, UNIT_FLIGHT, 4.0),
+                AbyssHarpooner => (Body::Harpoon, 0.01, UNIT_FLIGHT, 0.0),
+                UndertowHerald => (Body::ConchPulse, 0.02, CAST_FLIGHT, 3.0),
+                TrenchLamplighter => (Body::LanternShard, 0.04, CAST_FLIGHT, 2.0),
+                FoamWeaver => (Body::FoamPearl, 0.06, CAST_FLIGHT, 0.0),
+                _ => (Body::PodSeed, 0.08, UNIT_FLIGHT, 7.0),
+            };
+            (
+                Some((body, 1.0 + f32::from(t.min(2)) * 0.08)),
+                arc,
+                secs,
+                Trail::Motes(if k == PodSnapper {
+                    Mote::Spore
+                } else if b == 1 {
+                    Mote::Violet
+                } else {
+                    Mote::Water
+                }),
+                roll,
+                Impact::Champion(k, t, b),
+            )
+        }
         Ogre(k, t, b) => {
             use tbg_core::UnitKind::*;
             let (body, arc, secs, trail, roll) = match k {
@@ -570,6 +602,12 @@ pub fn arc(kind: ShotKind) -> f32 {
 
 /// Shared projectile meshes, built along +Z (nose forward) once.
 pub struct ShotMeshes {
+    pearl: Handle<Mesh>,
+    harpoon: Handle<Mesh>,
+    conch_pulse: Handle<Mesh>,
+    lantern_shard: Handle<Mesh>,
+    foam_pearl: Handle<Mesh>,
+    pod_seed: Handle<Mesh>,
     ogre_pebble: Handle<Mesh>,
     clay_clod: Handle<Mesh>,
     stitch: Handle<Mesh>,
@@ -645,6 +683,35 @@ impl ShotMeshes {
             ));
         }
         Self {
+            pearl: build(vec![
+                (Ball(0.065), IVORY, Transform::IDENTITY),
+                (Ring(0.009, 0.07, 360.0), TURQUOISE, Transform::IDENTITY),
+            ]),
+            harpoon: build(vec![
+                (Cyl(0.009, 0.32), OAK, along(0.0)),
+                (Cone(0.033, 0.12), IVORY, along(0.20)),
+                (Prism(0.05, 0.025), IVORY, along(0.13)),
+            ]),
+            conch_pulse: build(vec![
+                (Ring(0.012, 0.09, 300.0), IVORY, along(0.0)),
+                (Ring(0.008, 0.05, 300.0), TURQUOISE, along(0.02)),
+            ]),
+            lantern_shard: build(vec![
+                (Prism(0.055, 0.16), AMBER, along(0.0)),
+                (Ring(0.01, 0.06, 360.0), IVORY, along(0.0)),
+            ]),
+            foam_pearl: build(vec![
+                (Ball(0.055), IVORY, Transform::IDENTITY),
+                (Ball(0.026), TURQUOISE, Transform::from_xyz(0.05, 0.02, 0.0)),
+            ]),
+            pod_seed: build(vec![
+                (
+                    Ball(0.055),
+                    IVORY,
+                    Transform::from_scale(Vec3::new(0.75, 0.8, 1.35)),
+                ),
+                (Prism(0.035, 0.06), MOSS, along(-0.04)),
+            ]),
             ogre_pebble: build(vec![
                 (Bevel(0.10, 0.08, 0.12, 0.02), ROCK, Transform::IDENTITY),
                 (
@@ -859,6 +926,12 @@ impl ShotMeshes {
     }
     fn get(&self, body: Body) -> &Handle<Mesh> {
         match body {
+            Body::Pearl => &self.pearl,
+            Body::Harpoon => &self.harpoon,
+            Body::ConchPulse => &self.conch_pulse,
+            Body::LanternShard => &self.lantern_shard,
+            Body::FoamPearl => &self.foam_pearl,
+            Body::PodSeed => &self.pod_seed,
             Body::OgrePebble => &self.ogre_pebble,
             Body::ClayClod => &self.clay_clod,
             Body::Stitch => &self.stitch,

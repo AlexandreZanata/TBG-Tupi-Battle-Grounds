@@ -114,6 +114,7 @@ fn most_damaged_ally(state: &MatchState, u: &Unit, range: i32) -> Option<UnitId>
         .units
         .iter()
         .filter(|a| a.seat == u.seat && a.hp > 0 && a.hp < a.max_hp)
+        .filter(|a| u.kind != crate::UnitKind::GustDrummer || a.id != u.id)
         .filter(|a| (a.x - u.x).abs() <= range)
         .map(|a| (i64::from(a.hp) * BP / i64::from(a.max_hp), a.id))
         .min()

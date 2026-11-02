@@ -668,5 +668,59 @@
     "evidence": ".local/ogre-faction-2026-11-01/final/linux-verification.json",
     "source_commit": "e44f0f3a3db5c8c11e02618b1e1cd294ff174878",
     "landing": "Observed in desktop browser: 72 cards, 8 nine-count Faction filters, 26 preview badges, PT/EN labels and nine Ogre portraits loaded"
+  },
+  "ab01_og02": {
+    "status": "Implementation; final native source captures pending",
+    "version": "0.1.3-abyssals.1",
+    "wire": 35,
+    "ruleset": 10,
+    "ruleset_source_hash": "523044fc973bac39",
+    "champions": 81,
+    "factions": 9,
+    "new_kinds": [
+      "NacreDuelist",
+      "ReefLancer",
+      "TrenchFist",
+      "PearlSlinger",
+      "AbyssHarpooner",
+      "UndertowHerald",
+      "TrenchLamplighter",
+      "FoamWeaver",
+      "PodSnapper"
+    ],
+    "transferred_kind": "Trident",
+    "replaced_kit": "GustDrummer -> Barrel Keeper",
+    "ogre_forms": 45,
+    "new_forms": 45,
+    "clips": [
+      "Idle",
+      "Walk",
+      "AttackMelee",
+      "AttackRanged",
+      "Cast",
+      "Hit",
+      "Spawn",
+      "Evolve",
+      "Death",
+      "Victory"
+    ],
+    "shared_presentation": "One native kit/rig/palette/effects path; authoritative rolling-cask snapshots use unit timeline; blue/red ownership only on foot circles",
+    "coverage": [
+      "Both seats",
+      "Five forms per champion",
+      "Close/far/rear aim",
+      "13 Supports / 260 posture cases at 30 and 120 Hz",
+      "Real cask travel/interception/area impact/reload",
+      "Pause/reset/source death/reconnect",
+      "Actual held-mesh clearance"
+    ],
+    "linux": {
+      "geometry_tests": "10 passed before final cask-pose/clearance refinements; exact rerun queued",
+      "native_captures": "pending",
+      "look_fun": "owner validation pending"
+    },
+    "windows": "Actual visual/motion comparison pending",
+    "desktop_game_web": "Actual visual/motion comparison pending",
+    "landing": "81 entries prepared; final native portraits/browser observation pending"
   }
 }

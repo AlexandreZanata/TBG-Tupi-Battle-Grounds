@@ -31,7 +31,9 @@ pub(super) fn cue(
                 shots::fire(commands, fx.vfx, ShotKind::Blood, a, b, Area::default());
             }
         }
-        Event::AbilityStarted { .. } | Event::AbilityResolved { .. } => {
+        Event::AbilityStarted { .. }
+        | Event::AbilityResolved { .. }
+        | Event::BarrelBurst { .. } => {
             super::special_cues::cue(commands, fx, map, visuals, ev);
         }
         Event::ProfaneFlame {

@@ -410,3 +410,26 @@ English/Portuguese titles and explicit preview-only availability. Counts derive
 from core roster sources. Desktop Linux/browser observation, Windows and
 same-source web motion comparisons are recorded in
 [the expansion report](../phases/OGRE-FACTION.md); pending until observed.
+
+## AB-01 / OG-02 — Marine faction, organic Ogres and healing casks (2026-11-01)
+
+Affected: all nine Ogre champions and five Evolution forms (Hook Brawler
+reference anatomy/coat/hooks; Barrel Keeper replacing Gust Drummer); eight
+new Abyssals plus existing Trident and the Pod Snapper Plant replacement;
+roster filters, bilingual names/facts, Shop portraits, gallery lineups,
+locomotion/aim/actions, specials, impacts, spawn/evolve/hit/death/victory,
+actual mesh equipment clearance and support rear-target posture.
+
+Shared presentation: one native kit/rig/palette/animation path for Linux,
+Windows and desktop web. Only foot rings identify seats; no body plaques or
+team recolors. All marine figures remain grounded. Rolling barrels use the
+same authoritative snapshot interpolation as units, including both seats,
+reconnect, source death, interception, area burst, reload visibility and pause.
+No local collision/heal decision or platform-specific effect is permitted.
+
+Matrix and motion coverage: the same five forms × ten life/action clips per
+affected champion, close/far/rear aim, both seats, pause/reset/reconnect and
+30/120 Hz support posture. Linux is the reference; native captures and scoped
+motion witnesses will be recorded in the phase report. Windows and desktop
+game-web comparison are pending. A shared implementation or native build is
+not parity evidence. Static landing review is separate from game-web parity.

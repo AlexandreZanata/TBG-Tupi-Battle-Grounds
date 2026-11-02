@@ -339,7 +339,11 @@ impl Animator {
             counter: self.counter,
             armor_flash: self.armor_flash,
             special: self.special,
-            special_ready: self.special_ready,
+            special_ready: if self.kind == UnitKind::GustDrummer {
+                self.completion.is_none_or(|v| v.barrel_ready_in == 0)
+            } else {
+                self.special_ready
+            },
             special_aim: self.special_aim,
         };
         if let Some(kit) = self.kit {
@@ -538,6 +542,18 @@ fn show_loaded(
     a: &Animator,
     visibility: &mut Query<&mut Visibility, Without<Animator>>,
 ) {
+    if a.kind == UnitKind::GustDrummer {
+        if let Ok(mut visible) =
+            visibility.get_mut(a.joints[rig::Node::Prop(rig::Socket::WeaponR).index()])
+        {
+            *visible = if a.completion.is_none_or(|v| v.barrel_ready_in == 0) {
+                Visibility::Inherited
+            } else {
+                Visibility::Hidden
+            };
+        }
+        return;
+    }
     let loaded = match kit.attack {
         Attack::Shot { loaded, .. } | Attack::CountedShot { loaded, .. } => loaded,
         _ => None,

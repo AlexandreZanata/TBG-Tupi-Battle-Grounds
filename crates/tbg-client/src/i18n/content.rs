@@ -130,6 +130,15 @@ fn unit_msgs(kind: UnitKind) -> UnitMsgs {
         UnitKind::HideMender=>u(Msg::UnitHideMenderName,UNIT_HIDE_MENDER_FORM_NAME,Msg::UnitHideMenderGood,Msg::UnitHideMenderWeak),
         UnitKind::PebbleSlinger=>u(Msg::UnitPebbleSlingerName,UNIT_PEBBLE_SLINGER_FORM_NAME,Msg::UnitPebbleSlingerGood,Msg::UnitPebbleSlingerWeak),
         UnitKind::RivetBallista=>u(Msg::UnitRivetBallistaName,UNIT_RIVET_BALLISTA_FORM_NAME,Msg::UnitRivetBallistaGood,Msg::UnitRivetBallistaWeak),
+        UnitKind::NacreDuelist=>u(Msg::UnitNacreDuelistName,UNIT_NACRE_DUELIST_FORM_NAME,Msg::UnitNacreDuelistGood,Msg::UnitNacreDuelistWeak),
+        UnitKind::ReefLancer=>u(Msg::UnitReefLancerName,UNIT_REEF_LANCER_FORM_NAME,Msg::UnitReefLancerGood,Msg::UnitReefLancerWeak),
+        UnitKind::TrenchFist=>u(Msg::UnitTrenchFistName,UNIT_TRENCH_FIST_FORM_NAME,Msg::UnitTrenchFistGood,Msg::UnitTrenchFistWeak),
+        UnitKind::PearlSlinger=>u(Msg::UnitPearlSlingerName,UNIT_PEARL_SLINGER_FORM_NAME,Msg::UnitPearlSlingerGood,Msg::UnitPearlSlingerWeak),
+        UnitKind::AbyssHarpooner=>u(Msg::UnitAbyssHarpoonerName,UNIT_ABYSS_HARPOONER_FORM_NAME,Msg::UnitAbyssHarpoonerGood,Msg::UnitAbyssHarpoonerWeak),
+        UnitKind::UndertowHerald=>u(Msg::UnitUndertowHeraldName,UNIT_UNDERTOW_HERALD_FORM_NAME,Msg::UnitUndertowHeraldGood,Msg::UnitUndertowHeraldWeak),
+        UnitKind::TrenchLamplighter=>u(Msg::UnitTrenchLamplighterName,UNIT_TRENCH_LAMPLIGHTER_FORM_NAME,Msg::UnitTrenchLamplighterGood,Msg::UnitTrenchLamplighterWeak),
+        UnitKind::FoamWeaver=>u(Msg::UnitFoamWeaverName,UNIT_FOAM_WEAVER_FORM_NAME,Msg::UnitFoamWeaverGood,Msg::UnitFoamWeaverWeak),
+        UnitKind::PodSnapper=>u(Msg::UnitPodSnapperName,UNIT_POD_SNAPPER_FORM_NAME,Msg::UnitPodSnapperGood,Msg::UnitPodSnapperWeak),
     }
 }
 
@@ -164,6 +173,7 @@ pub fn faction(lang: Lang, faction: Faction) -> &'static str {
         Faction::Celestials => Msg::FactionCelestials,
         Faction::Insects => Msg::FactionInsects,
         Faction::Ogres => Msg::FactionOgres,
+        Faction::Abyssals => Msg::FactionAbyssals,
     })
 }
 

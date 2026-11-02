@@ -128,6 +128,7 @@ pub struct MatchView {
     pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
+    pub barrels: Vec<crate::barrel::Barrel>,
     pub synergy: [[u8; FACTION_COUNT]; 2],
     /// Both seats' Augment copies (public, BR-AG09).
     pub augments: [AugmentCounts; 2],
@@ -196,6 +197,7 @@ impl MatchState {
                 .filter(|u| u.hp > 0)
                 .map(|u| unit_view(u, self.tick, self.rules))
                 .collect(),
+            barrels: self.barrels.clone(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
             augment_round: round,

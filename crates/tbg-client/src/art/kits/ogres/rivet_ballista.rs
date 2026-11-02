@@ -1,7 +1,10 @@
 //! Rivet Ballista: five native forms with its own equipment and silhouette.
 use super::common::*;
 pub fn plan(t: u8) -> Proportions {
-    super::common::plan(t, 1.05, 0.50, 0.32)
+    let mut p = super::common::plan(t, 1.05, 0.50, 0.32);
+    p.arm = 0.22;
+    p.head = 0.15;
+    p
 }
 pub fn spec(t: u8, b: u8) -> FigureSpec {
     let p = plan(t);

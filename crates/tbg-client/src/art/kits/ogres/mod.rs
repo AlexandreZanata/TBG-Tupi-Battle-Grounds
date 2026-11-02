@@ -1,4 +1,5 @@
 //! Ogre expansion kits and Machine replacement, sharing the native rig and event timing.
+mod anatomy;
 mod basalt_bulwark;
 mod cinder_maul;
 mod clay_binder;
@@ -24,6 +25,12 @@ use tbg_core::UnitKind;
 static ANATOMY: Anatomy = Anatomy {
     rest: crate::art::rig::rest,
     parent: Node::parent,
+    springs: false,
+    planted_legs: true,
+};
+static BARREL_ANATOMY: Anatomy = Anatomy {
+    rest: gust_drummer::rest,
+    parent: gust_drummer::parent,
     springs: false,
     planted_legs: true,
 };
@@ -134,7 +141,7 @@ static CLAY_BINDER: Kit = Kit {
     durations: DURATIONS,
 };
 static GUST_DRUMMER: Kit = Kit {
-    anatomy: Some(&ANATOMY),
+    anatomy: Some(&BARREL_ANATOMY),
     figure: gust_drummer::spec,
     pose: |m, p| motion::pose(UnitKind::GustDrummer, m, p),
     gait: Gait {
@@ -144,11 +151,7 @@ static GUST_DRUMMER: Kit = Kit {
         sink: 0.09,
         stomp: false,
     },
-    attack: Attack::Melee {
-        from: Node::Prop(Socket::WeaponR),
-        tip: |_, _| Vec3::new(0.0, 0.0, 0.25),
-        impact: |t, b| Impact::Champion(UnitKind::GustDrummer, t, b),
-    },
+    attack: Attack::None,
     evolve: Burst::Champion(UnitKind::GustDrummer),
     durations: DURATIONS,
 };

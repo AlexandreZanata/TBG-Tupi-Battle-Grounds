@@ -63,6 +63,8 @@ pub enum Faction {
     Insects,
     /// Owner-authorized Ogre faction; appended to preserve wire indices.
     Ogres,
+    /// AB-01: ancient marine civilization, including the existing Trident.
+    Abyssals,
 }
 
 impl Faction {
@@ -81,6 +83,7 @@ impl Faction {
             Faction::Celestials => "Celestials",
             Faction::Insects => "Insects",
             Faction::Ogres => "Ogres",
+            Faction::Abyssals => "Abyssals",
         }
     }
 }
@@ -196,6 +199,15 @@ pub enum UnitKind {
     HideMender,
     PebbleSlinger,
     RivetBallista,
+    NacreDuelist,
+    ReefLancer,
+    TrenchFist,
+    PearlSlinger,
+    AbyssHarpooner,
+    UndertowHerald,
+    TrenchLamplighter,
+    FoamWeaver,
+    PodSnapper,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -215,7 +227,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 77] = [
+pub const ALL_KINDS: [UnitKind; 86] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -293,6 +305,15 @@ pub const ALL_KINDS: [UnitKind; 77] = [
     UnitKind::HideMender,
     UnitKind::PebbleSlinger,
     UnitKind::RivetBallista,
+    UnitKind::NacreDuelist,
+    UnitKind::ReefLancer,
+    UnitKind::TrenchFist,
+    UnitKind::PearlSlinger,
+    UnitKind::AbyssHarpooner,
+    UnitKind::UndertowHerald,
+    UnitKind::TrenchLamplighter,
+    UnitKind::FoamWeaver,
+    UnitKind::PodSnapper,
 ];
 
 impl UnitKind {
@@ -370,7 +391,7 @@ pub const FULL_POOL: [UnitKind; 46] = [
 
 /// Owner-authorized local champion preview; the online pool remains FULL_POOL.
 #[rustfmt::skip]
-pub const COMPLETION_POOL: [UnitKind; 72] = [
+pub const COMPLETION_POOL: [UnitKind; 81] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -443,6 +464,15 @@ pub const COMPLETION_POOL: [UnitKind; 72] = [
     UnitKind::HideMender,
     UnitKind::PebbleSlinger,
     UnitKind::RivetBallista,
+    UnitKind::NacreDuelist,
+    UnitKind::ReefLancer,
+    UnitKind::TrenchFist,
+    UnitKind::PearlSlinger,
+    UnitKind::AbyssHarpooner,
+    UnitKind::UndertowHerald,
+    UnitKind::TrenchLamplighter,
+    UnitKind::FoamWeaver,
+    UnitKind::PodSnapper,
 ];
 
 /// All playable archetypes, in glossary order.
@@ -455,7 +485,7 @@ pub const ARCHETYPES: [Archetype; 5] = [
 ];
 
 /// Number of Factions, including the owner-authorized Ogre expansion.
-pub const FACTION_COUNT: usize = 8;
+pub const FACTION_COUNT: usize = 9;
 
 /// All factions, in glossary order (also their synergy index).
 pub const FACTIONS: [Faction; FACTION_COUNT] = [
@@ -467,6 +497,7 @@ pub const FACTIONS: [Faction; FACTION_COUNT] = [
     Faction::Celestials,
     Faction::Insects,
     Faction::Ogres,
+    Faction::Abyssals,
 ];
 
 /// Status effect applied to the primary target of a hit.

@@ -407,9 +407,9 @@ fn completion_cc17_rhythm_keeps_standard_root_priority_and_two_victim_cap() {
 }
 
 #[test]
-fn completion_pool_is_local_only_and_all_eight_factions_have_nine_conventional_kinds() {
+fn completion_pool_is_local_only_and_all_nine_factions_have_nine_conventional_kinds() {
     assert_eq!(crate::FULL_POOL.len(), 46);
-    assert_eq!(crate::COMPLETION_POOL.len(), 72);
+    assert_eq!(crate::COMPLETION_POOL.len(), 81);
     for faction in crate::FACTIONS {
         assert_eq!(
             crate::COMPLETION_POOL
@@ -470,7 +470,7 @@ fn completion_seeded_mixed_preview_remains_deterministic_with_both_evolution_bra
 
 #[cfg(feature = "training")]
 #[test]
-fn completion_all_85_forms_start_and_advance_in_private_training() {
+fn completion_all_175_forms_start_and_advance_in_private_training() {
     use crate::training::{
         Opponent, SessionId, TrainingCommand, TrainingScenario, TrainingSession, TrainingUnitSpec,
         SCHEMA,
@@ -527,7 +527,7 @@ fn completion_all_85_forms_start_and_advance_in_private_training() {
             covered += 1;
         }
     }
-    assert_eq!(covered, 85);
+    assert_eq!(covered, 175);
 }
 
 #[test]
@@ -557,10 +557,10 @@ fn completion_ogre_sweep_and_stitches_keep_allied_damage_and_pulse_contracts() {
     assert_eq!(get(&s, ally).fx.completion.regrowth.left, 0);
 }
 #[test]
-fn completion_ogre_drum_interrupts_specials_and_preserves_basic_windup() {
-    // OG-01: the drum uses the existing interrupt/ward/lockout contract, not a new aggro rule.
+fn completion_shared_interrupt_preserves_basic_windup_after_og02_replacement() {
+    // OG-02 removes the drum interrupt; Gorgehowl retains this shared correctness contract.
     let mut s = arena();
-    let a = add(&mut s, GustDrummer, Seat::A, 4000);
+    let a = add(&mut s, Gorgehowl, Seat::A, 4000);
     let b = add(&mut s, Whisperer, Seat::B, 4700);
     let i = s.unit_index(b).unwrap();
     s.units[i].fx.special = Some(PendingCast {

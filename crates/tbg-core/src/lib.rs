@@ -9,6 +9,7 @@ mod acidmaw;
 mod afflictions;
 pub mod arcana;
 pub mod augment;
+pub mod barrel;
 mod bonehorn;
 pub mod bot;
 mod bot_shop;

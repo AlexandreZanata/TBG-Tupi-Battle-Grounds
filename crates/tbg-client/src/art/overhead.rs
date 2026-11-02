@@ -25,11 +25,15 @@ pub fn height(
     let mut top = 0.0f32;
     let mut radius = 0.0f32;
     let mut depth = Vec2::new(f32::INFINITY, f32::NEG_INFINITY);
-    let equipment = kind == UnitKind::SiegeWalker || super::kits::ogres::contains(kind);
+    let equipment = matches!(kind, UnitKind::SiegeWalker | UnitKind::Trident)
+        || super::kits::ogres::contains(kind)
+        || super::kits::abyssals::contains(kind);
     let clips = [
         Clip::Idle,
         Clip::Walk,
-        if equipment {
+        if kind == UnitKind::GustDrummer {
+            Clip::Cast
+        } else if equipment {
             Clip::AttackRanged
         } else {
             Clip::AttackMelee

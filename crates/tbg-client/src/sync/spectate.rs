@@ -28,6 +28,7 @@ pub fn match_view(view: &PublicView) -> MatchView {
         strongholds: view.strongholds,
         shields: view.shields,
         units: view.units.clone(),
+        barrels: view.barrels.clone(),
         synergy: view.synergy,
         augments: view.augments,
         // Only seat A's flag fits the seat-shaped round; the HUD says "choosing".

@@ -182,7 +182,11 @@ fn roster_composition() {
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
     // CC-ID01: append seventeen local-preview tags; production Shop remains 46.
-    assert_eq!(UNITS.len(), 68 + 9, "OG-01 appends nine kinds");
+    assert_eq!(
+        UNITS.len(),
+        68 + 9 + 9,
+        "AB-01 appends nine kinds after OG-01"
+    );
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     // Owner activation: all 51 registered kinds, 46 conventional Shop entries.
     assert_eq!(tbg_core::FULL_POOL.len(), 46);
@@ -548,7 +552,11 @@ fn evolution_forms_are_frozen() {
     // Preserve the previous fixture and append explicit changed/new OG-01 definitions.
     let mut frozen: Vec<&str> = FORMS.lines().collect();
     frozen.splice(20..24, OGRE_ARCHER_FORMS.lines());
-    frozen.extend(OGRE_NEW_FORMS.lines());
+    let mut ogre: Vec<&str> = OGRE_NEW_FORMS.lines().collect();
+    // OG-02 preserves the historical drum fixture and appends its replacement.
+    ogre.splice(20..24, BARREL_KEEPER_FORMS.lines());
+    frozen.extend(ogre);
+    frozen.extend(ABYSSAL_NEW_FORMS.lines());
     assert_eq!(shipped.len(), frozen.len(), "form count changed");
     for (got, want) in shipped.iter().zip(frozen) {
         assert_eq!(got, want);
@@ -594,10 +602,12 @@ fn proposed_p59_bases_match_section_13() {
         (PyreWarden, Undead, Tank, 6, [800, 12, 10, 2_800, 23]),
         (Drillnest, Machines, Ranged, 5, [900, 0, 44, 4_500, 23]),
     ];
-    for (kind, faction, archetype, energy, mut base) in rows {
+    for (kind, mut faction, archetype, energy, mut base) in rows {
         // D-101 / Proposed P70 reach: preserve the original P59 reference row
         // above while applying its explicitly documented later exception.
         if kind == Trident {
+            // AB-01: the owner moves the marine Tank from Plants to Abyssals.
+            faction = Abyssals;
             base[3] = 2_000;
         }
         let d = def(kind);
@@ -678,3 +688,7 @@ Rivet Ballista/Rail Guide: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0
 Rivet Ballista/Needle Engine: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
 Rivet Ballista/Triple Magazine: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
 Rivet Ballista/Rivet Storm: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+
+// Proposed AB-01 / OG-02: appended form facts, guarded with the canon change.
+const BARREL_KEEPER_FORMS:&str="Barrel Keeper/Field Cask: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nBarrel Keeper/Balm Reserve: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nBarrel Keeper/Rolling Remedy: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nBarrel Keeper/Harvest Cask: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1000 dmg+=0 hit=-";
+const ABYSSAL_NEW_FORMS:&str="Nacre Duelist/Ivory Edge: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nNacre Duelist/Tideblade: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nNacre Duelist/Foam Edges: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nNacre Duelist/Nacre Dance: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Reef Watch: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Guard Trident: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Coral Barbs: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nReef Lancer/Current Huntress: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Seastone Fist: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Keelbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Salt Gauntlets: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nTrench Fist/Abyssal Quake: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Pearl Pouch: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Tide Eye: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Split Shell: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nPearl Slinger/Pearl Rain: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Nacre Harpoon: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Trench Sight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Barbed Spear: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nAbyss Harpooner/Abyss Hunt: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Resonant Conch: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Undertow Voice: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Tide Horn: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nUndertow Herald/Maelstrom Call: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Amber Lantern: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Deep Beacon: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Saltglass: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nTrench Lamplighter/Abyss Eye: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nFoam Weaver/Foam Chalice: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nFoam Weaver/Nacre Spring: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-\nFoam Weaver/Tide Threads: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nFoam Weaver/Surf Mantle: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Ironpod: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Royal Seeder: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Split Husk: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-\nPod Snapper/Harvest Burst: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";

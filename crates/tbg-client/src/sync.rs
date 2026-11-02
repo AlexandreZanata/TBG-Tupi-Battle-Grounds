@@ -95,6 +95,7 @@ pub fn plugin(app: &mut App) {
     lobby_battle::plugin(app);
     app.init_resource::<MatchInfo>()
         .init_resource::<LatestView>()
+        .init_resource::<crate::vfx::barrels::Entities>()
         .init_resource::<ViewBuffer>()
         .init_resource::<UnitEntities>()
         .init_resource::<QueueInfo>()
@@ -165,6 +166,7 @@ pub(crate) fn sync_units(
     mut visuals: events::Visuals,
     mut fx_res: FxResources,
     mut training: ResMut<crate::training::Trial>,
+    mut barrels: ResMut<crate::vfx::barrels::Entities>,
     state: Res<State<GameState>>,
     #[cfg(tbg_desktop)] mut demo: ResMut<lobby_battle::Demo>,
 ) {
@@ -213,10 +215,12 @@ pub(crate) fn sync_units(
         dummies: &dummies,
     };
     // Borrowed, not cloned: the frame lives only while units are placed.
-    let placed = timeline
-        .frame(now, time.delta_secs_f64())
-        .map(|f| scene.place(f.from, f.to, f.alpha));
+    let placed = timeline.frame(now, time.delta_secs_f64()).map(|f| {
+        crate::vfx::barrels::place(scene.commands, vfx, &mut barrels, f.from, f.to, f.alpha);
+        scene.place(f.from, f.to, f.alpha)
+    });
     let Some((you, alive)) = placed else {
+        crate::vfx::barrels::clear(scene.commands, &mut barrels);
         return;
     };
     let mut fx = events::Fx {

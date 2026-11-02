@@ -346,3 +346,29 @@ The original arena geometry/camera remains fixed. Procedural offshore isles, lig
 - All five forms preserve this rule, including carried/summoned champions.
 - Ground rings retain team identity while Root/Slow appear in HUD status badges.
 - Portraits come from the corrected engine models; do not paint over old badges.
+
+
+## AB-01 / OG-02 authored expansion and Ogre refinement
+
+Owner reference: the Hook Brawler five-form illustration supplied 2026-11-01.
+Refine all nine Ogres with tapered organic muscles, large readable jaws/brows,
+fitted wrist/shin wraps and layered garments, preserving individual equipment.
+Hook Brawler specifically carries hanging curved hook blades, a tied bandana,
+a split slate coat, rope on A and chains on B. Tier-two seafoam crystals are
+intrinsic artifacts, never seat-colored rectangles. Ogre Archer retains its
+shoulder-bombard rig and actual-mesh crowd envelope. Barrel Keeper replaces
+the drum with one two-hand wooden cask, brewing apron and remedy accessories;
+rolling and reload visibility follow authoritative state.
+
+Abyssals are a grounded ancient marine civilization: nacre, shell ribs,
+sea-green/slate skin, ivory countershading, dark sea-plum wraps and restrained
+amber/seafoam light. Faces, fins, weapon geometry and proportions distinguish
+every champion. Trident is the existing Tank. No marine wing/flight movement,
+wet transparent full-body material or team-body recolor is introduced.
+The Plant replacement Pod Snapper uses bark, curled leaves and split pod jaws
+around three readable seeds. It must not resemble a mushroom caster.
+
+Every new champion has Base/A1/A2/B1/B2 silhouettes, +8/+16 percent tier scale,
+material progression and a tier-two artifact. Concepts and engine captures
+have separate source/hash manifests. Team identity is **only** the existing
+blue/red foot circle; no square body plaque, team tabard or ownership paint.

@@ -291,13 +291,13 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
         .rot([-12.0, 0.0, 0.0]),
         part(
             Body(Head),
-            Box(0.22, 0.085, 0.15),
+            Bevel(0.23, 0.105, 0.17, 0.027),
             OGRE_SKIN,
             [0.0, -0.08, 0.05],
         ),
         part(
             Body(Head),
-            Box(0.05, 0.05, 0.05),
+            Bevel(0.065, 0.06, 0.07, 0.017),
             OGRE_SKIN,
             [0.0, -0.005, 0.135],
         ),
@@ -406,7 +406,7 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             part(Body(upper), Ball(0.1), OGRE_SKIN, [0.0, -0.02, 0.0]),
             part(
                 Body(upper),
-                Frustum(0.09, 0.075, a),
+                Frustum(0.105, 0.078, a),
                 OGRE_SKIN,
                 [0.0, -a * 0.5, 0.0],
             ),
@@ -418,7 +418,7 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             ),
             part(
                 Body(fore),
-                Box(0.155, 0.11, 0.155),
+                Bevel(0.16, 0.12, 0.155, 0.023),
                 DARK_LEATHER,
                 [0.0, -a * 0.6, 0.0],
             ),

@@ -108,7 +108,7 @@ mod tests {
                 }
             }
         }
-        assert_eq!(cases, 220);
+        assert_eq!(cases, 260);
     }
 
     #[test]

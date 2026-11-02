@@ -126,3 +126,53 @@ fn ogre_bazooka_and_arms_fit_cached_clearance_in_every_form() {
         }
     }
 }
+
+#[test]
+fn ogre_barrel_cask_and_hands_fit_cached_cast_clearance_in_all_forms() {
+    let kind = UnitKind::GustDrummer;
+    for (t, b) in FORMS {
+        let mut meshes = Assets::<Mesh>::default();
+        let form = native_form((kits::kit(kind).unwrap().figure)(t, b), &mut meshes);
+        let (_, depth, width) = overhead::height(&form, &meshes, kind, t, b);
+        let mut anim = anim::Animator::new(
+            [Entity::PLACEHOLDER; NODE_COUNT],
+            form.plan,
+            Entity::PLACEHOLDER,
+            kind,
+            1,
+        );
+        anim.form = (t, b);
+        for clip in [anim::Clip::Idle, anim::Clip::Walk, anim::Clip::Cast] {
+            for step in 0..31 {
+                let pose = anim.clearance_pose(
+                    clip,
+                    step as f32 * anim.duration(clip) / 31.0,
+                    Some(Vec3::new(0.0, 0.6, 3.0)),
+                    step as f32 * 1.6 / 31.0,
+                );
+                let world = presentation::pose_world(kind, &form.plan, &pose);
+                for node in rig::nodes() {
+                    for layer in [&form.meshes, &form.glow] {
+                        let Some(VertexAttributeValues::Float32x3(vertices)) = layer[node.index()]
+                            .as_ref()
+                            .and_then(|h| meshes.get(h))
+                            .and_then(|m| m.attribute(Mesh::ATTRIBUTE_POSITION))
+                        else {
+                            continue;
+                        };
+                        for point in vertices {
+                            let at = world[node.index()].transform_point3(Vec3::from(*point))
+                                * form.plan.scale;
+                            assert!(
+                                at.x.abs() <= width + 0.001
+                                    && at.z >= depth.x - 0.001
+                                    && at.z <= depth.y + 0.001,
+                                "OG-02 unreserved cask/arm {t}/{b} {clip:?}: {at:?}"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -2082,3 +2082,113 @@ The earth pulse's already-authoritative center is visible in the public facts,
 so its telegraph survives snapshots/reconnects. Drum interruption remains
 special-only and never cancels a basic windup. These values remain Proposed;
 the second targeted screen and limitations are in the expansion report.
+
+## Rolling remedy — Proposed OG-02 (owner, 2026-11-01)
+
+The owner replaces Gust Drummer with **Barrel Keeper / Mestre do Barril**.
+The stable `GustDrummer` id is retained. Its Archetype becomes Support; the
+former interrupt is removed. Ogres deliberately now have two Supports and
+one Control, preserving nine champions. No other Ogre combat kit changes.
+
+Proposed base: cost 2400, HP 460, damage 0, interval **200 ticks / 10 s**,
+range 3000, speed 38, healing 90. The ordinary six-tick heal windup launches
+a finite rolling cask toward the most damaged **other** ally in range. The
+usual attack-speed/Slow interval rules apply; there is no second short heal
+or invisible instant healing at release. A1/A2 each add 1500 bp healing;
+B1 adds 250 range and B2 adds 1000 bp healing, plus normal Evolution growth.
+
+Launch snapshots heal amount, damage, radius, tier/branch and owner. The
+barrel travels at 220 milli-tiles/tick, at most the launch range, in its locked
+one-dimensional direction. Swept contact radius is 180. It collides with the
+first living targetable conventional unit or summon of either seat, excluding
+the caster; distance then unit id resolve ties. It never homes, targets a
+Stronghold or passes through an intervening full-health ally. A missed cask
+expires without healing. A launched barrel survives caster death and is part
+of deterministic replay, seat views and PublicView. Paused combat freezes it.
+
+Any contact bursts healing 90 (snapshot-scaled by form/bonuses) to all living
+allies within 1250 milli-tiles of the collision point, including the caster
+and carried allies in the area. Healing reduction and max-HP clamps apply.
+An intercepting enemy alone takes 8 auxiliary damage; no enemy area damage,
+control, on-hit proc or resurrection. B branch adds 250 radius and 2 damage
+per tier. At most one active barrel per caster. Clients interpolate these
+facts on the same snapshot timeline as units; they never decide collisions.
+The cask carried by the model is hidden during authoritative reload.
+
+## Abyssals and Plant replacement — Proposed AB-01 (owner, 2026-11-01)
+
+Append **Abyssals / Abissais** after Ogres. Move existing **Trident / Tridente**
+from Plants to Abyssals, preserving its id, stats, abilities and Evolutions;
+Faction-dependent bonuses now follow Abyssals. Add **Pod Snapper / Estala-Vagens**
+as the Plants replacement, an authored Ranged champion. The Abyssal roster is
+Trident plus eight new champions: one Tank, three Dps, two Ranged, two Control,
+one Support. Nine new kinds append after RivetBallista; no old tag is reordered.
+The authored private preview has **81 conventional champions, nine Factions,
+nine each**. FULL_POOL stays 46; new kinds are not activated online.
+
+Proposed Abyssal Synergy: the existing Movement effect grants +500/+1000 bp
+at the established 2/4 living-unit thresholds, under the shared movement cap.
+
+Initial base columns below are cost, HP, damage, interval ticks, range,
+movement per tick and healing. Every value is **Proposed**, requiring D-33
+screening and separate competitive acceptance. Form A1/A2 each add 1500 bp
+damage (healing for Foam Weaver), B1 adds 250 range, B2 adds 1500 bp attack
+speed, besides normal Evolution growth. Bilingual forms and art briefs:
+[the Abyssal catalog](abyssal-faction/catalog.json).
+
+- Nacre Duelist: 2400/370/57/22/950/54/0; Opportunity every 3 hits, +3500 bp
+  against a winding basic attack; A +1000 bp/tier.
+- Reef Lancer: 2400/410/58/26/1300/48/0; every 3 hits pierces one enemy
+  within 1000 behind the primary, 4500 bp damage, B +1000 bp/tier.
+- Trench Fist: 2400/480/62/30/850/42/0; unit-only printed-base-HP chip of
+  250 bp, A +100 bp/tier; cap 22, B +8/tier.
+- Pearl Slinger: 2400/350/58/24/4100/48/0; every 3 hits splashes 18 damage
+  to at most two other enemies, radius 650; A +6 damage/tier, B +200 radius/tier.
+- Abyss Harpooner: 2400/360/64/26/4300/42/0; one non-stacking bleed,
+  4 damage ×3 pulses, A +1 damage/tier.
+- Undertow Herald: 2400/420/34/30/2500/40/0; every 170 ticks, Slow 2000 bp
+  for 30 ticks on at most three enemies within 850 of the primary;
+  B -15 period/tier, A +10 duration/tier.
+- Trench Lamplighter: 2400/370/42/30/3300/38/0; announced fixed-center pulse
+  every 180 ticks, 30 damage to at most three enemies within 700;
+  A +10 damage/tier, B +200 radius/tier.
+- Foam Weaver: 1800/340/0/34/2800/42/30; healing leaves a 16-HP echo for
+  70 ticks, consumed by the next nonlethal HP hit; B +6 echo/tier.
+- Pod Snapper (Plants): 2400/390/52/26/3900/40/0; every third hit applies a
+  60-tick non-stacking seed mark: another ally's next melee hit adds 18
+  auxiliary damage, B +6/tier.
+
+All reused typed primitives retain their existing targeting, attribution,
+shared caps and deterministic replacement rules. No new flight, ocean Arena,
+client targeting, stealth, teleport, economy or Shop rule is introduced.
+Wire 35 and ruleset 10 identify the ninth Synergy slot and rolling-cask state.
+
+### AB-01 bounded-screen follow-up — Proposed, supersedes the two initial rows
+
+The initial 108 seat-swapped Energy-20 duels are recorded in
+[balance-initial.csv](abyssal-faction/balance-initial.csv). They are a bounded
+screen, not the competitive gate. Nacre Duelist scored zero against each of
+Shieldbearer, Archer and Longaxe; Pearl Slinger scored one against all three.
+Before native delivery, propose **Nacre Duelist 430 HP, 64 damage, 22 interval,
+1050 range, 54 speed**, and **Pearl Slinger 330 HP, 46 damage, 26 interval,
+4000 range, 48 speed; third-hit splash 14 damage**. Cost remains 2400 each.
+Other AB-01 parameters and the staged-only boundary stay unchanged. Recheck
+only those two kinds against the same three references (12 seat-swapped duels).
+Team compositions, every form/budget, specialist counters and full competitive
+acceptance remain pending; no gate threshold is changed.
+
+The 12-duel follow-up ([raw data](abyssal-faction/balance-follow-up.csv)) gives
+Nacre Duelist score 1 against Shieldbearer and 0 against Archer/Longaxe.
+Pearl Slinger's reduced candidate scores 0 against all three; use the
+intermediate **Proposed final base 340 HP / 52 damage / 24 ticks / 4100 range /
+48 speed**, still cost 2400 and third-hit splash 14. Recheck only Pearl Slinger
+in six seat-swapped duels. This final row supersedes its two starting rows;
+no other new or established champion is retuned by this follow-up.
+
+The final six-duel Pearl Slinger screen
+([raw data](abyssal-faction/balance-final.csv)) scores 1 against Shieldbearer
+and Longaxe and 0 against Archer. Other initial candidates and Trident's
+before/after transfer retain their original screen records. These bounded
+results justify the two initial proposals only; they do not establish full
+team/form/budget balance. The final proposal is revision 10, source hash
+`523044fc973bac39`; canonical trace validation pins that exact identity.

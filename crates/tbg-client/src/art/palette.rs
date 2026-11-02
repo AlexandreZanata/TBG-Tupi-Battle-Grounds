@@ -130,6 +130,16 @@ pub const FACTIONS: [[Color; 8]; tbg_core::FACTION_COUNT] = [
     [IVORY, NAVY, GOLD, NAVY, NAVY, SKIN, IVORY, GOLD],
     [MOSS, CHITIN, AMBER, LINEN, MOSS, OGRE_SKIN, CHITIN, AMBER],
     [ROCK, DARK_LEATHER, AMBER, LINEN, RUST, OGRE_SKIN, IRON, SAP],
+    [
+        IVORY,
+        FIELD_SLATE,
+        TURQUOISE,
+        SHARK_BELLY,
+        LEATHER,
+        SHARK_SLATE,
+        IVORY,
+        AMBER,
+    ],
 ];
 pub const SLOTS: [PaletteSlot; 8] = [
     PaletteSlot::Base,

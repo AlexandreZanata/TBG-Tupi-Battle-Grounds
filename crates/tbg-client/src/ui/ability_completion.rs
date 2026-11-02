@@ -12,6 +12,18 @@ pub(super) fn text(a: Ability, lang: Lang) -> String {
     };
     let r = |value: i32| lang.compact(f64::from(value) / 1000.0, 1);
     let (msg, args): (Msg, Vec<(&str, String)>) = match a {
+        Barrel {
+            speed,
+            radius,
+            damage,
+        } => (
+            Msg::CompletionAbilityBarrel,
+            vec![
+                ("speed", r(speed * TICK_HZ as i32)),
+                ("radius", r(radius)),
+                ("damage", damage.to_string()),
+            ],
+        ),
         Finisher { below_bp, bonus_bp } => (
             Msg::CompletionAbilityFinisher,
             vec![("below", p(below_bp)), ("bonus", p(bonus_bp))],

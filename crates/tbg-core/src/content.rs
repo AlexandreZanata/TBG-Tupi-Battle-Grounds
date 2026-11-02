@@ -299,6 +299,8 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); FACTION_COUNT] = [
     (SynergyEffect::Movement, [500, 1_000]),
     // OG-01 Proposed: steady Ogre attack tempo, using the existing synergy effect.
     (SynergyEffect::AttackSpeed, [500, 1_000]),
+    // AB-01 Proposed: deliberate marine movement, under the existing movement cap.
+    (SynergyEffect::Movement, [500, 1_000]),
 ];
 
 /// One evolution form: additive modifiers on the base unit, plus the shared
@@ -1347,7 +1349,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     ]),
     unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
     unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
-    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,2_000,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
+    unit(UnitKind::Trident,"Trident",Abyssals,Tank,3_600,[1_250,55,40,2_000,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
     unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
     unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
     unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),
@@ -1517,12 +1519,13 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
             FormDef { range_add: 250, ..form("Mire Mask") },
             FormDef { atk_bp: 1_500, ..form("Quagmire Sage") },
         ]),
-    unit(UnitKind::GustDrummer, "Gust Drummer", Ogres, Control, 2400,
-        [460, 32, 28, 1900, 38, 0, 0], None, completion::forms(UnitKind::GustDrummer), [
-            FormDef { dmg_bp: 1_500, ..form("Stormbeat") },
-            FormDef { dmg_bp: 1_500, ..form("Thunderhide") },
-            FormDef { range_add: 250, ..form("Hollow Rhythm") },
-            FormDef { atk_bp: 1_500, ..form("Typhoon Drum") },
+    // OG-02 Proposed: the stable GustDrummer id now carries rolling healing barrels.
+    unit(UnitKind::GustDrummer, "Barrel Keeper", Ogres, Support, 2400,
+        [460, 0, 200, 3000, 38, 0, 90], None, completion::forms(UnitKind::GustDrummer), [
+            FormDef { heal_bp: 1_500, ..form("Field Cask") },
+            FormDef { heal_bp: 1_500, ..form("Balm Reserve") },
+            FormDef { range_add: 250, ..form("Rolling Remedy") },
+            FormDef { heal_bp: 1_000, ..form("Harvest Cask") },
         ]),
     unit(UnitKind::HideMender, "Hide Mender", Ogres, Support, 1800,
         [360, 0, 32, 2800, 38, 0, 30], None, completion::forms(UnitKind::HideMender), [
@@ -1544,6 +1547,71 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
             FormDef { dmg_bp: 1_500, ..form("Needle Engine") },
             FormDef { range_add: 250, ..form("Triple Magazine") },
             FormDef { atk_bp: 1_500, ..form("Rivet Storm") },
+        ]),
+
+    // AB-01 Proposed: eight Abyssals and the Plant replacement for Trident.
+    unit(UnitKind::NacreDuelist, "Nacre Duelist", Abyssals, Dps, 2400,
+        [430, 64, 22, 1050, 54, 0, 0], None, completion::forms(UnitKind::NacreDuelist), [
+            FormDef { dmg_bp: 1500, ..form("Ivory Edge") },
+            FormDef { dmg_bp: 1500, ..form("Tideblade") },
+            FormDef { range_add: 250, ..form("Foam Edges") },
+            FormDef { atk_bp: 1500, ..form("Nacre Dance") },
+        ]),
+    unit(UnitKind::ReefLancer, "Reef Lancer", Abyssals, Dps, 2400,
+        [410, 58, 26, 1300, 48, 0, 0], None, completion::forms(UnitKind::ReefLancer), [
+            FormDef { dmg_bp: 1500, ..form("Reef Watch") },
+            FormDef { dmg_bp: 1500, ..form("Guard Trident") },
+            FormDef { range_add: 250, ..form("Coral Barbs") },
+            FormDef { atk_bp: 1500, ..form("Current Huntress") },
+        ]),
+    unit(UnitKind::TrenchFist, "Trench Fist", Abyssals, Dps, 2400,
+        [480, 62, 30, 850, 42, 0, 0], None, completion::forms(UnitKind::TrenchFist), [
+            FormDef { dmg_bp: 1500, ..form("Seastone Fist") },
+            FormDef { dmg_bp: 1500, ..form("Keelbreaker") },
+            FormDef { range_add: 250, ..form("Salt Gauntlets") },
+            FormDef { atk_bp: 1500, ..form("Abyssal Quake") },
+        ]),
+    unit(UnitKind::PearlSlinger, "Pearl Slinger", Abyssals, Ranged, 2400,
+        [340, 52, 24, 4100, 48, 0, 0], None, completion::forms(UnitKind::PearlSlinger), [
+            FormDef { dmg_bp: 1500, ..form("Pearl Pouch") },
+            FormDef { dmg_bp: 1500, ..form("Tide Eye") },
+            FormDef { range_add: 250, ..form("Split Shell") },
+            FormDef { atk_bp: 1500, ..form("Pearl Rain") },
+        ]),
+    unit(UnitKind::AbyssHarpooner, "Abyss Harpooner", Abyssals, Ranged, 2400,
+        [360, 64, 26, 4300, 42, 0, 0], None, completion::forms(UnitKind::AbyssHarpooner), [
+            FormDef { dmg_bp: 1500, ..form("Nacre Harpoon") },
+            FormDef { dmg_bp: 1500, ..form("Trench Sight") },
+            FormDef { range_add: 250, ..form("Barbed Spear") },
+            FormDef { atk_bp: 1500, ..form("Abyss Hunt") },
+        ]),
+    unit(UnitKind::UndertowHerald, "Undertow Herald", Abyssals, Control, 2400,
+        [420, 34, 30, 2500, 40, 0, 0], None, completion::forms(UnitKind::UndertowHerald), [
+            FormDef { dmg_bp: 1500, ..form("Resonant Conch") },
+            FormDef { dmg_bp: 1500, ..form("Undertow Voice") },
+            FormDef { range_add: 250, ..form("Tide Horn") },
+            FormDef { atk_bp: 1500, ..form("Maelstrom Call") },
+        ]),
+    unit(UnitKind::TrenchLamplighter, "Trench Lamplighter", Abyssals, Control, 2400,
+        [370, 42, 30, 3300, 38, 0, 0], None, completion::forms(UnitKind::TrenchLamplighter), [
+            FormDef { dmg_bp: 1500, ..form("Amber Lantern") },
+            FormDef { dmg_bp: 1500, ..form("Deep Beacon") },
+            FormDef { range_add: 250, ..form("Saltglass") },
+            FormDef { atk_bp: 1500, ..form("Abyss Eye") },
+        ]),
+    unit(UnitKind::FoamWeaver, "Foam Weaver", Abyssals, Support, 1800,
+        [340, 0, 34, 2800, 42, 0, 30], None, completion::forms(UnitKind::FoamWeaver), [
+            FormDef { heal_bp: 1500, ..form("Foam Chalice") },
+            FormDef { heal_bp: 1500, ..form("Nacre Spring") },
+            FormDef { range_add: 250, ..form("Tide Threads") },
+            FormDef { atk_bp: 1500, ..form("Surf Mantle") },
+        ]),
+    unit(UnitKind::PodSnapper, "Pod Snapper", Plants, Ranged, 2400,
+        [390, 52, 26, 3900, 40, 0, 0], None, completion::forms(UnitKind::PodSnapper), [
+            FormDef { dmg_bp: 1500, ..form("Ironpod") },
+            FormDef { dmg_bp: 1500, ..form("Royal Seeder") },
+            FormDef { range_add: 250, ..form("Split Husk") },
+            FormDef { atk_bp: 1500, ..form("Harvest Burst") },
         ]),
 
 ];
