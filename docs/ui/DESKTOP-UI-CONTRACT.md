@@ -672,3 +672,26 @@ Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/
   `gd02_colossus`, `gd03_colossus`). Linux targeted regressions and native
   preview installation are verified; Windows and desktop web visual
   observations remain pending.
+
+### 2026-11-02 — GD-04 Gods expansion: Colossus refinement, Volthar and Astreon
+
+- Reference: Linux native client. Shared presentation only: kit figures,
+  motion, the storm/rupture VFX and the gallery framing live in
+  `crates/tbg-client/src/art/kits/{colossus,volthar,astreon}`,
+  `vfx/{shots,completion}.rs`, `sync/{actions,special_cues}.rs` and
+  `gallery/*`; no OS or target condition is introduced.
+- Affected cases: Colossus Base/A1/A2/B1/B2 (refined geometry, Idle/Walk/
+  Victory weight; GD-03 strike alignment and GD-02 clearance unchanged), new
+  Volthar and Astreon five forms in every clip (Idle, Walk, Attack, charged
+  fourth bolt / pierce, Hit, Spawn, Evolve, Death, Victory), `StormArc`
+  links, StormBolt/StormSurge projectiles, Volthar and Astreon impact and
+  Evolution bursts, training/catalog cards and shop portraits for both kinds,
+  both seats and spectators.
+- Matrix: `training-gods-{colossus,volthar,astreon}-forms`,
+  `battle-gods-two-colossus`, `battle-gods-volthar-chain` and
+  `battle-gods-astreon-pierce` join the screens; all but the two-Colossus
+  still also join `motion_screens` (matched frames 0/10/20/40).
+- Evidence: see `docs/phases/GODS-faction-expansion.md` for the Linux captures
+  actually taken and the focused tests run. Windows and desktop-web
+  observations are **pending**; no parity is claimed from shared code or
+  compilation.

@@ -97,6 +97,11 @@ pub const NAVY: Color = hex(0x1F2F5A);
 pub const MOSS: Color = hex(0x5C6B2E);
 pub const CHITIN: Color = hex(0x2C2A1E);
 pub const AMBER: Color = hex(0xD98E2B);
+// GD-04: Gods expansion — storm armor and glow, rupture graphite and crimson.
+pub const ROYAL_BLUE: Color = hex(0x2D4FA3);
+pub const STORM_BLUE: Color = hex(0x6AD6FF);
+pub const GRAPHITE: Color = hex(0x3B3F47);
+pub const CRIMSON: Color = hex(0x9E2B2B);
 
 #[derive(Clone, Copy, Debug)]
 pub enum PaletteSlot {

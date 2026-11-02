@@ -14,8 +14,28 @@ pub(super) fn pose(m: &Moment, p: &mut Pose) {
     let mut at = Vec3::ZERO;
     let mut pitch = -8.0;
     match m.clip {
-        Clip::Idle => moves::idle(m, p, &plan, 0.85),
-        Clip::Walk => moves::walk(m, p, 5.0, 2.0),
+        Clip::Idle => {
+            moves::idle(m, p, &plan, 0.85);
+            // GD-04: a slow monumental settle of the shoulders between breaths.
+            let settle = tools::wave(m.clock, 0.4, 0.7);
+            tools::add(p, UpperArmL, [2.0 * settle, 0.0, 3.0 + 1.5 * settle]);
+            tools::add(p, UpperArmR, [-2.0 * settle, 0.0, -3.0 - 1.5 * settle]);
+        }
+        Clip::Walk => {
+            moves::walk(m, p, 5.0, 2.0);
+            // GD-04: mass shifts over the planted foot; the heavy arms swing against it.
+            let phase = m.walk.unwrap_or(0.0) * std::f32::consts::TAU;
+            tools::shift(
+                p,
+                Hips,
+                [0.025 * phase.sin(), -0.01 * phase.cos().abs(), 0.0],
+            );
+            tools::add(p, Chest, [0.0, 0.0, -2.5 * phase.sin()]);
+            tools::add(p, UpperArmL, [12.0 * phase.sin(), 0.0, 6.0]);
+            tools::add(p, UpperArmR, [-12.0 * phase.sin(), 0.0, -6.0]);
+            tools::add(p, ForearmL, [-12.0, 0.0, 0.0]);
+            tools::add(p, ForearmR, [-12.0, 0.0, 0.0]);
+        }
         Clip::AttackMelee | Clip::AttackRanged | Clip::Cast => {
             let draw = tools::hold(m.t, [0.0, 0.14, 0.18, 0.30]);
             let strike = tools::hold(m.t, [0.18, 0.30, 0.48, 0.85]);
@@ -82,12 +102,17 @@ pub(super) fn pose(m: &Moment, p: &mut Pose) {
         Clip::Evolve => moves::evolve(m, p, &plan, Power::Raise),
         Clip::Death => moves::death(m, p, &plan, Fall::Kneel),
         Clip::Victory => {
+            // GD-04: a monument's salute: both fists rise in turn with a planted stomp.
             let beat = (m.clock * 2.0).sin();
-            tools::add(p, Chest, [0.0, 6.0 * beat, 0.0]);
-            tools::add(p, Head, [-6.0, 0.0, 0.0]);
-            tools::add(p, UpperArmL, [-70.0, 0.0, 20.0]);
-            tools::add(p, ForearmL, [-35.0, 0.0, 0.0]);
-            tools::shift(p, Hips, [0.0, -0.012 * beat.abs(), 0.0]);
+            let left = beat.max(0.0);
+            let right = (-beat).max(0.0);
+            tools::add(p, Chest, [-4.0, 6.0 * beat, 0.0]);
+            tools::add(p, Head, [-8.0, 0.0, 0.0]);
+            tools::add(p, UpperArmL, [-70.0 - 60.0 * left, 0.0, 20.0]);
+            tools::add(p, ForearmL, [-35.0 + 20.0 * left, 0.0, 0.0]);
+            tools::add(p, UpperArmR, [-20.0 - 110.0 * right, 0.0, -18.0]);
+            tools::add(p, ForearmR, [-30.0 + 15.0 * right, 0.0, 0.0]);
+            tools::shift(p, Hips, [0.0, -0.016 * beat.abs(), 0.0]);
         }
     }
     let weapon = &mut p[Node::Prop(Socket::WeaponR).index()];
