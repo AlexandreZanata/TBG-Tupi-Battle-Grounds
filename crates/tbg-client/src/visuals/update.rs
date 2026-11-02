@@ -82,7 +82,7 @@ pub fn update_unit_visual(
             .entity(v.status_ring)
             .try_insert(MeshMaterial3d(mat.clone()));
     }
-    let ring = &a.team[usize::from(!v.own)];
+    let ring = &a.team[v.seat.index()];
     commands
         .entity(v.ring)
         .try_insert(MeshMaterial3d(ring.clone()));

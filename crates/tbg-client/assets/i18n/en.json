@@ -1865,5 +1865,11 @@
   "unit.colossus.form.1.name": "Pillar of Dawn",
   "unit.colossus.form.2.name": "Ancient Monolith",
   "unit.colossus.form.3.name": "Eternal Monument",
-  "rejection.lane_full": "Wait for space in the BattleLine before evolving this unit."
+  "rejection.lane_full": "Wait for space in the BattleLine before evolving this unit.",
+  "battle.side.blue": "Blue side",
+  "battle.side.red": "Red side",
+  "battle.side.blue_description": "Your Stronghold is on the left. Your army advances right.",
+  "battle.side.red_description": "Your Stronghold is on the right. Your army advances left.",
+  "battle.side.spectator": "Blue vs Red",
+  "battle.side.common": "Blue on the left · Red on the right"
 }

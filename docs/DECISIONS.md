@@ -3114,3 +3114,18 @@ Remove the blanket translation. Author common brazier/fence origins for the wide
 road and move whole trees, rocks, palms, columns and temple steps at their origins.
 Protect the rendered road rectangle across all eight Arenas with geometry and
 animated-mesh regressions, including matching fire/pedestal coordinates.
+
+
+## SIDE-01 — Common blue-left/red-right presentation (2026-11-02)
+
+The owner explicitly selected a common blue-left/red-right orientation for
+every player, then requested random sides online (including Ranked) and versus
+bots, localized side announcements, validation and GitHub delivery. Remove
+viewer-relative world mirroring and keep the common camera. Public seat A/B
+already communicates side; no duplicate team-color protocol field is needed.
+Keep actual ownership for actions/private views while deriving facing, ring
+color, tower geometry/orders, HUD plates and coordinates from absolute side.
+Randomize the complete paired token order once before freezing account/loadout
+fields. Reconnection reuses that match assignment. Local Practice uses a separate
+seeded side draw and seat-aware disclosed bot assistance. No matchmaking-rating
+policy or Elo formula change is included in this presentation/assignment task.

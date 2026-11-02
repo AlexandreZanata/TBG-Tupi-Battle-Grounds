@@ -418,7 +418,9 @@ async fn ranked_matches_are_listed_with_ratings_and_their_end_unlists_them() {
     let snap = rx.borrow().clone();
     assert_eq!(snap.featured, Some(id));
     assert_eq!(snap.matches[0].mode, MatchMode::Ranked);
-    assert_eq!(snap.matches[0].players[0].rating, Some(1_300));
+    let mut ratings = snap.matches[0].players.each_ref().map(|p| p.rating);
+    ratings.sort_unstable();
+    assert_eq!(ratings, [Some(1_100), Some(1_300)]);
     lobby.handle(LobbyCmd::MatchEnded {
         tokens: [[7; 16], [8; 16]],
         live: Some(id),

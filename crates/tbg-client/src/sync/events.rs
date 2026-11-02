@@ -159,7 +159,7 @@ pub(super) fn apply_event(
             for e in map.0.values() {
                 if let Ok((v, t, _)) = visuals.get(*e) {
                     if v.own == own && v.faction == faction {
-                        vfx::synergy(commands, fx.vfx, t.translation, own);
+                        vfx::synergy(commands, fx.vfx, t.translation, seat == Seat::A);
                     }
                 }
             }
@@ -240,7 +240,7 @@ fn attack(
         Target::Stronghold(seat) => {
             // Towers aim and fire their own projectiles (arena/strongholds).
             if let Some(t) = target {
-                fx.orders.0.push((seat == you, t));
+                fx.orders.0.push((seat == Seat::A, t));
             }
             (false, 0.0)
         }

@@ -367,6 +367,160 @@ async fn await_rating(ws: &mut Ws) -> (u16, u16, Profile) {
     }
 }
 
+async fn side_view(ws: &mut Ws, sequence: u32, energy: u32) -> tbg_core::MatchView {
+    loop {
+        match recv(ws).await {
+            Some(ServerMsg::View(view))
+                if view.phase == tbg_core::Phase::Running
+                    && view.last_seq >= sequence
+                    && view.energy >= energy =>
+            {
+                return *view
+            }
+            Some(_) => {}
+            None => panic!("SIDE-01: disconnected before the authoritative view"),
+        }
+    }
+}
+
+async fn side_purchase(ws: &mut Ws) -> tbg_core::MatchView {
+    let view = side_view(ws, 0, 5 * tbg_core::content::ENERGY_SCALE).await;
+    let slot = view
+        .offers
+        .iter()
+        .position(|kind| tbg_core::content::def(*kind).cost <= view.energy)
+        .unwrap();
+    send(
+        ws,
+        &ClientMsg::Intent {
+            seq: 1,
+            intent: tbg_core::PlayerIntention::Purchase { offer: slot as u8 },
+        },
+    )
+    .await;
+    side_view(ws, 1, 0).await
+}
+
+#[tokio::test]
+async fn side01_ranked_assignment_commands_reconnect_and_account_settlement() {
+    tokio::time::timeout(Duration::from_secs(20), side_ranked_scenario())
+        .await
+        .expect("SIDE-01: Ranked scenario must finish within 20 seconds");
+}
+
+async fn side_ranked_scenario() {
+    use tbg_core::{PlayerIntention, Rejection, StrongholdKind};
+    let (url, database) = live_server("side01", 30).await;
+    let mut a = connect(&url).await;
+    let mut b = connect(&url).await;
+    send(
+        &mut a,
+        &ClientMsg::Hello {
+            version: PROTOCOL_VERSION,
+            resume: None,
+        },
+    )
+    .await;
+    let token = match recv(&mut a).await {
+        Some(ServerMsg::Welcome { token, .. }) => token,
+        other => panic!("expected Welcome: {other:?}"),
+    };
+    hello(&mut b).await;
+    let grant = auth::register(&a, "SideAlpha").await.unwrap();
+    auth::attach(&mut a, &grant, false).await;
+    assert!(matches!(
+        recv(&mut a).await,
+        Some(ServerMsg::LoggedIn { .. })
+    ));
+    register_as(&mut b, "SideBravo").await;
+    for (ws, kind) in [
+        (&mut a, StrongholdKind::Bastion),
+        (&mut b, StrongholdKind::Artillery),
+    ] {
+        send(ws, &ClientMsg::SetStronghold { kind }).await;
+        assert_eq!(recv(ws).await, Some(ServerMsg::StrongholdSelected { kind }));
+    }
+    send(&mut a, &ClientMsg::RankedMatch).await;
+    send(&mut b, &ClientMsg::RankedMatch).await;
+    let (side_a, side_b) = tokio::join!(await_seat(&mut a), await_seat(&mut b));
+    assert_eq!(side_a.other(), side_b);
+    let (view_a, view_b) = tokio::join!(side_purchase(&mut a), side_purchase(&mut b));
+    assert_eq!(view_a.you, side_a);
+    assert_eq!(view_b.you, side_b);
+    assert_eq!(
+        view_a.strongholds[side_a.index()].kind,
+        StrongholdKind::Bastion
+    );
+    assert_eq!(
+        view_b.strongholds[side_b.index()].kind,
+        StrongholdKind::Artillery
+    );
+    let enemy = view_b.units.iter().find(|u| u.seat == side_b).unwrap().id;
+    send(
+        &mut a,
+        &ClientMsg::Intent {
+            seq: 2,
+            intent: PlayerIntention::Evolve {
+                unit: enemy,
+                branch: 0,
+            },
+        },
+    )
+    .await;
+    loop {
+        match recv(&mut a).await {
+            Some(ServerMsg::Rejected { seq: 2, reason }) => {
+                assert_eq!(reason, Rejection::NotYourUnit);
+                break;
+            }
+            Some(_) => {}
+            None => panic!("SIDE-01: ownership rejection missing"),
+        }
+    }
+    side_view(&mut a, 1, tbg_core::content::FORTIFY_COST[0]).await;
+    send(
+        &mut a,
+        &ClientMsg::Intent {
+            seq: 3,
+            intent: PlayerIntention::Fortify { branch: 0 },
+        },
+    )
+    .await;
+    let fortified = side_view(&mut a, 3, 0).await;
+    assert_eq!(fortified.strongholds[side_a.index()].tier, 1);
+    assert_eq!(fortified.strongholds[side_b.index()].tier, 0);
+    drop(a);
+    let mut resumed = connect(&url).await;
+    send(
+        &mut resumed,
+        &ClientMsg::AuthenticatedHello {
+            version: PROTOCOL_VERSION,
+            resume: Some(token),
+            access: grant.access,
+        },
+    )
+    .await;
+    assert!(matches!(
+        recv(&mut resumed).await,
+        Some(ServerMsg::Welcome { .. })
+    ));
+    assert_eq!(await_seat(&mut resumed).await, side_a);
+    let restored = side_view(&mut resumed, 3, 0).await;
+    assert_eq!(restored.you, side_a);
+    assert_eq!(restored.strongholds[side_a.index()].tier, 1);
+    send(&mut b, &ClientMsg::Surrender).await;
+    let (outcome_a, outcome_b) = tokio::join!(await_end(&mut resumed), await_end(&mut b));
+    assert_eq!(outcome_a, outcome_b);
+    assert_eq!(outcome_a.winner, Some(side_a));
+    let (rating_a, rating_b) = tokio::join!(await_rating(&mut resumed), await_rating(&mut b));
+    assert_eq!((rating_a.0, rating_a.1), (1000, 1020));
+    assert_eq!(rating_a.2.name, "SideAlpha");
+    assert_eq!((rating_b.0, rating_b.1), (1000, 980));
+    assert_eq!(rating_b.2.name, "SideBravo");
+    let store = Store::open(&database.db).unwrap();
+    assert_eq!(store.ranked_match_count().await.unwrap(), 1);
+}
+
 #[tokio::test]
 async fn br_m06_ranked_surrender_is_a_loss() {
     // BR-M06/BR-R04: a surrender is a forfeit, so the ranked store settles

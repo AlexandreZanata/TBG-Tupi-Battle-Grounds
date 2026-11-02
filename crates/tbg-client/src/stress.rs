@@ -50,6 +50,11 @@ fn spawn(mut commands: Commands, assets: Res<VisualAssets>, lib: Res<FigureLibra
             tier,
             branch,
             own: i % 2 == 0,
+            seat: if i % 2 == 0 {
+                tbg_core::Seat::A
+            } else {
+                tbg_core::Seat::B
+            },
         };
         let pos = Vec3::new(
             0.5 + 15.0 * i as f32 / n as f32,

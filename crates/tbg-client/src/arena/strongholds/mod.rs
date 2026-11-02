@@ -115,7 +115,7 @@ fn visible(look: Look) -> impl Iterator<Item = Piece> {
 /// A tower root; its children are the pieces of `look`.
 #[derive(Component)]
 pub(crate) struct Tower {
-    pub own: bool,
+    pub blue: bool,
     /// Follows the authoritative view (false for gallery towers).
     live: bool,
     look: Option<Look>,
@@ -139,7 +139,7 @@ pub(crate) struct Tower {
 impl Tower {
     fn new(own: bool, live: bool) -> Self {
         Self {
-            own,
+            blue: own,
             live,
             look: None,
             gun: None,
@@ -171,20 +171,14 @@ fn spawn_towers(
         let root = commands
             .spawn((
                 Name::new(if own {
-                    "own Stronghold"
+                    "blue Stronghold"
                 } else {
-                    "enemy Stronghold"
+                    "red Stronghold"
                 }),
                 Transform::from_xyz(x, 0.0, 0.0),
                 Visibility::default(),
             ))
             .id();
-        if own {
-            // Clicking it opens the Fortification panel (ui/input.rs).
-            commands
-                .entity(root)
-                .insert(crate::ui::UiAction::SelectTower);
-        }
         dress(
             &mut commands,
             &mut art,
@@ -203,6 +197,7 @@ fn spawn_towers(
 fn sync_looks(
     mut commands: Commands,
     view: Res<LatestView>,
+    info: Res<crate::sync::MatchInfo>,
     mut art: ResMut<StrongholdArt>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut towers: Query<(Entity, &mut Tower)>,
@@ -213,11 +208,20 @@ fn sync_looks(
     let Some(v) = view.0.as_ref() else {
         return;
     };
-    let me = v.you.index();
     for (root, mut tower) in &mut towers {
-        let i = if tower.own { me } else { 1 - me };
+        if !tower.live {
+            continue;
+        }
+        let i = usize::from(!tower.blue);
+        if i == v.you.index() && !info.spectating {
+            commands
+                .entity(root)
+                .insert(crate::ui::UiAction::SelectTower);
+        } else {
+            commands.entity(root).remove::<crate::ui::UiAction>();
+        }
         let look = Look::from_view(&v.strongholds[i], v.stronghold_hp[i]);
-        if !tower.live || tower.look == Some(look) {
+        if tower.look == Some(look) {
             continue;
         }
         let same_form = tower.look.is_some_and(|old| {
@@ -245,9 +249,9 @@ fn dress(
 ) {
     commands.entity(root).despawn_related::<Children>();
     for piece in pieces(look.kind, look.form()) {
-        let at = piece.placed(tower.own);
+        let at = piece.placed(tower.blue);
         if piece.lost < parts::NEVER && piece.motion.is_none() {
-            for (mesh, loss) in art.fragments(piece.def, tower.own, meshes) {
+            for (mesh, loss) in art.fragments(piece.def, tower.blue, meshes) {
                 commands.spawn((
                     Mesh3d(mesh),
                     MeshMaterial3d(art.material.clone()),
@@ -260,7 +264,7 @@ fn dress(
             continue;
         }
         let mut child = commands.spawn((
-            Mesh3d(art.mesh(piece.def, tower.own, meshes)),
+            Mesh3d(art.mesh(piece.def, tower.blue, meshes)),
             MeshMaterial3d(art.material.clone()),
             at,
             ChildOf(root),
@@ -272,16 +276,24 @@ fn dress(
     }
     for (piece, wear) in damage::regions(look.kind) {
         commands.spawn((
-            Mesh3d(art.mesh(piece.def, tower.own, meshes)),
+            Mesh3d(art.mesh(piece.def, tower.blue, meshes)),
             MeshMaterial3d(art.material.clone()),
-            piece.placed(tower.own),
+            piece.placed(tower.blue),
             Visibility::Hidden,
             wear,
             ChildOf(root),
         ));
     }
     if look.kind == StrongholdKind::Command {
-        aura::spawn(commands, art, meshes, root, tower.own, look.form(), SETBACK);
+        aura::spawn(
+            commands,
+            art,
+            meshes,
+            root,
+            tower.blue,
+            look.form(),
+            SETBACK,
+        );
     }
     tower.look = Some(look);
     tower.gun = (look.kind == StrongholdKind::Artillery).then(|| artillery::gun(look.form()));

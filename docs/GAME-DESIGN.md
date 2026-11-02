@@ -2392,3 +2392,27 @@ equipment selector must govern cached measurement and live crowd participation.
 Keep RESTORE-02 direct pushing, the five-tile floor and immediate purchases; this
 visual clearance must never enable physical queues or block authoritative advance.
 No Colossus stats, damage, range or cost change.
+
+
+## SIDE-01 — Proposed fixed blue/red sides (2026-11-02)
+
+Owner-approved: the server independently assigns the paired participants to
+Seat A (blue, left Stronghold, advancing right) and Seat B (red, right Stronghold,
+advancing left), with equal probability, regardless of queue arrival order.
+Apply to Ranked, Casual, private rooms/invitations and each fresh rematch.
+The existing connection-bound seat owns commands and outcomes. Freeze it for
+the match, including reconnection, summaries, spectators, replay and Elo.
+Pair selection and rating calculations are unchanged.
+
+All desktop players and spectators share the same blue-left/red-right camera
+and world coordinates. The red player controls the right Stronghold; ownership
+is separate from world side/color. Body art stays intrinsic, affiliation only
+in foot rings and interface. Show the player's localized side alongside Arena
+and in its introductory banner; spectators see a neutral blue/red legend.
+
+Local Practice draws the human side from an independent seeded stream and puts
+the bot on the opposite seat. Human Arcanas/Stronghold, private views, commands
+and result interpretation follow the assigned seat. Existing disclosed Impossible
+bot assistance uses the bot's own balance/seat. Editor Training layouts retain
+their authored ally/enemy arrangement. No unit/Stronghold balance, Shop, economy,
+world width, pushing or selection order changes.

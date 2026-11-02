@@ -141,6 +141,7 @@ mod tests {
             bar: Entity::PLACEHOLDER,
             bar_fill: Entity::PLACEHOLDER,
             own: true,
+            seat: tbg_core::Seat::A,
             archetype: Archetype::Dps,
             faction: Faction::Humans,
             splash: 0.0,

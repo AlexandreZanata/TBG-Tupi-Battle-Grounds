@@ -1051,9 +1051,8 @@ async fn challenge_freezes_arcanas_through_reconnect_and_rematch() {
         })
     );
     send(&mut guest, &ClientMsg::JoinChallenge { token: invite }).await;
-    for ws in [&mut owner, &mut guest] {
-        assert_challenge_presets(ws, presets).await;
-    }
+    let owner_side = assert_challenge_presets(&mut owner, presets).await;
+    assert_challenge_presets(&mut guest, [presets[1], presets[0]]).await;
     send(
         &mut guest,
         &ClientMsg::SetArcanas {
@@ -1074,15 +1073,15 @@ async fn challenge_freezes_arcanas_through_reconnect_and_rematch() {
     drop(guest);
     let mut guest = connect(&url).await;
     hello_resume(&mut guest, guest_token).await;
-    assert_challenge_presets(&mut guest, presets).await;
+    let resumed = assert_challenge_presets(&mut guest, [presets[1], presets[0]]).await;
+    assert_eq!(resumed, owner_side.other());
     end_by_surrender(&mut owner, &mut guest).await;
     rematch_open(&mut owner).await;
     rematch_open(&mut guest).await;
     send(&mut owner, &ClientMsg::RequestRematch).await;
     send(&mut guest, &ClientMsg::RequestRematch).await;
-    for ws in [&mut owner, &mut guest] {
-        assert_challenge_presets(ws, presets).await;
-    }
+    let rematch_owner_side = assert_challenge_presets(&mut owner, presets).await;
+    assert_challenge_presets(&mut guest, [presets[1], presets[0]]).await;
     end_by_surrender(&mut guest, &mut owner).await;
     let first = tokio::time::timeout(Duration::from_secs(2), replays.recv())
         .await
@@ -1093,17 +1092,26 @@ async fn challenge_freezes_arcanas_through_reconnect_and_rematch() {
         .unwrap()
         .unwrap();
     assert_ne!(first.seed, second.seed, "BR-R09: a fresh server seed");
-    assert_eq!(first.arcanas, presets);
-    assert_eq!(second.arcanas, presets);
+    for (replay, side) in [(&first, owner_side), (&second, rematch_owner_side)] {
+        assert_eq!(replay.arcanas[side.index()], presets[0]);
+        assert_eq!(replay.arcanas[side.other().index()], presets[1]);
+    }
 }
 
-async fn assert_challenge_presets(ws: &mut Ws, expected: [tbg_core::ArcanaPreset; 2]) {
+async fn assert_challenge_presets(ws: &mut Ws, expected: [tbg_core::ArcanaPreset; 2]) -> Seat {
     loop {
         match recv(ws).await {
-            Some(ServerMsg::MatchStart { mode, arcanas, .. }) => {
+            Some(ServerMsg::MatchStart {
+                you, mode, arcanas, ..
+            }) => {
                 assert_eq!(mode, MatchMode::Challenge);
-                assert_eq!(arcanas, expected, "BR-AR05: frozen presets in seat order");
-                return;
+                assert_eq!(
+                    arcanas[you.index()],
+                    expected[0],
+                    "BR-AR05: own frozen preset"
+                );
+                assert_eq!(arcanas[you.other().index()], expected[1]);
+                return you;
             }
             Some(_) => {}
             None => panic!("socket closed before MatchStart"),

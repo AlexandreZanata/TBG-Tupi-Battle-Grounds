@@ -134,6 +134,9 @@ impl Lobby {
         if self.refuse_expired_pair(tokens, mode, listing) {
             return;
         }
+        // SIDE-01: arrival order never assigns blue/red; every account-bound
+        // field and connection follows the same randomized seat ordering.
+        let tokens = assign_sides(tokens, random_bytes::<1>()[0]);
         // P9: queue wait per paired session (the joiner waited ~0 ms).
         for t in tokens {
             if let Some(t0) = self.queued_at.remove(&t) {
@@ -235,6 +238,32 @@ impl Lobby {
                 );
             }
         }
+    }
+}
+
+fn assign_sides(mut tokens: [Token; 2], draw: u8) -> [Token; 2] {
+    if draw & 1 != 0 {
+        tokens.swap(0, 1);
+    }
+    tokens
+}
+
+#[cfg(test)]
+mod side_tests {
+    use super::assign_sides;
+
+    #[test]
+    fn side01_arrival_order_has_equal_blue_and_red_assignments() {
+        let first = [1; 16];
+        let second = [2; 16];
+        let mut blue = 0;
+        for draw in 0..=u8::MAX {
+            let seats = assign_sides([first, second], draw);
+            assert_ne!(seats[0], seats[1]);
+            assert!(seats.contains(&first) && seats.contains(&second));
+            blue += usize::from(seats[0] == first);
+        }
+        assert_eq!(blue, 128);
     }
 }
 

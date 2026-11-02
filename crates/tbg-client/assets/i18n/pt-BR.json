@@ -1865,5 +1865,11 @@
   "unit.colossus.form.1.name": "Pilar da Aurora",
   "unit.colossus.form.2.name": "Monólito Ancestral",
   "unit.colossus.form.3.name": "Monumento Eterno",
-  "rejection.lane_full": "Aguarde espaço na BattleLine para evoluir esta unidade."
+  "rejection.lane_full": "Aguarde espaço na BattleLine para evoluir esta unidade.",
+  "battle.side.blue": "Lado azul",
+  "battle.side.red": "Lado vermelho",
+  "battle.side.blue_description": "Sua Fortaleza fica à esquerda. Seu exército avança à direita.",
+  "battle.side.red_description": "Sua Fortaleza fica à direita. Seu exército avança à esquerda.",
+  "battle.side.spectator": "Azul contra Vermelho",
+  "battle.side.common": "Azul à esquerda · Vermelho à direita"
 }

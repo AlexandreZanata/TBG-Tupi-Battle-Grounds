@@ -581,3 +581,25 @@ The bounds check also exposed a remaining Tundra foreground fir/coastal-rock
 overlap; moving that complete fir/crystal group to z=3.4 fixes it without
 narrowing the road. Runtime installation and platform observations follow in
 the SIDE-01 receipt; tests alone do not establish visual parity.
+
+
+## SIDE-01 — Absolute blue/red sides and common camera (2026-11-02)
+
+Linux/Windows/desktop web share the same camera transform, viewport framing
+and authoritative world projection: blue A left, red B right for participants
+and spectators. No per-player coordinate reflection or negative mesh scaling.
+Actual ownership independently controls Shop, Evolution, Fortification, result
+and private UI; red humans command the right Stronghold. Foot rings/materials,
+figure/weapon yaw, crowd direction, tower looks/fire/aura/wear, barrel motion and
+bursts, HP fills, crests, names and ratings use the absolute side. Intrinsic
+champion body colors remain unchanged.
+
+Arena chip and five-second introduction identify Blue side/Red side in both
+languages; viewers get a neutral legend. All online modes/random fresh rematches
+and local Practice assign sides without dependence on arrival order. Frozen
+identity survives reconnect; replay/history/statistics retain canonical seats.
+Coverage: both human sides, bot on either side/difficulty, all tower kinds,
+units/Evolution forms, movement/aim/heal/area/casks, command ownership, reconnect,
+spectating and ranked settlement. Native captures are reference observations,
+not Windows/web parity evidence. The SIDE-01 phase receipt records actual checks
+and leaves all unobserved platforms/cases pending.

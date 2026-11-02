@@ -1,11 +1,9 @@
 //! `ServerMsg` → world: match info, the render timeline (P30-C), unit
-//! entities, event cues. The only place that mirrors coordinates: the
-//! player's own Stronghold is always at world x = 0.
+//! entities and event cues in a common blue-left/red-right world.
 
 use std::collections::HashMap;
 
 use bevy::prelude::*;
-use tbg_core::content::LANE_LEN;
 use tbg_core::{MatchView, Outcome, Seat, UnitId};
 
 use crate::art::FigureLibrary;
@@ -142,17 +140,14 @@ fn render_units(state: Res<State<GameState>>, shell: Res<crate::ui::shell::Shell
     matches!(*state.get(), GameState::InMatch | GameState::Training)
 }
 
-/// Lane x in milli-tiles → world x, mirrored for seat B.
+/// Authoritative lane x in milli-tiles, identical for every viewer.
 pub fn world_x(x: i32, you: Seat) -> f32 {
     world_tile(x as f32 / 1000.0, you)
 }
 
-/// Lane x in tiles → world x, mirrored for seat B.
-pub fn world_tile(t: f32, you: Seat) -> f32 {
-    match you {
-        Seat::A => t,
-        Seat::B => LANE_LEN as f32 / 1000.0 - t,
-    }
+/// Common world orientation; ownership never changes presentation coordinates.
+pub fn world_tile(t: f32, _you: Seat) -> f32 {
+    t
 }
 
 #[allow(clippy::too_many_arguments)] // the one system that turns views into the scene
@@ -287,11 +282,7 @@ impl Scene<'_, '_, '_, '_, '_> {
                 .filter(|n| n.id == u.id)
                 .map_or(u.lane_z, |n| n.lane_z);
             let z = f32::from(u.lane_z) + (f32::from(to_z) - f32::from(u.lane_z)) * alpha;
-            let pos = Vec3::new(
-                world_x(x.round() as i32, you),
-                0.0,
-                z / 1000.0 * if you == Seat::A { 1.0 } else { -1.0 },
-            );
+            let pos = Vec3::new(world_x(x.round() as i32, you), 0.0, z / 1000.0);
             match self
                 .map
                 .0
@@ -324,6 +315,7 @@ impl Scene<'_, '_, '_, '_, '_> {
                         tier: u.tier,
                         branch: u.branch,
                         own: u.seat == you,
+                        seat: u.seat,
                     };
                     let e = if self.dummies.contains(&u.id) {
                         visuals::spawn_training_dummy(
@@ -376,3 +368,35 @@ fn clear_units(
 }
 
 pub(crate) mod cleanup;
+
+#[cfg(test)]
+mod side_tests {
+    use super::*;
+
+    #[test]
+    fn side01_players_and_spectators_share_world_coordinates_and_facing() {
+        for viewer in Seat::BOTH {
+            assert_eq!(world_x(0, viewer), 0.);
+            assert_eq!(world_x(16_000, viewer), 16.);
+            assert_eq!(world_x(4_750, viewer), 4.75);
+            for seat in Seat::BOTH {
+                let mut populated = tbg_core::MatchState::new(41);
+                while populated.phase != tbg_core::Phase::Running {
+                    populated.step();
+                }
+                populated.players[seat.index()].energy = 20 * tbg_core::content::ENERGY_SCALE;
+                populated
+                    .apply_intention(seat, 1, tbg_core::PlayerIntention::Purchase { offer: 0 })
+                    .unwrap();
+                let unit = populated
+                    .view_for(viewer, &[])
+                    .units
+                    .into_iter()
+                    .find(|u| u.seat == seat)
+                    .unwrap();
+                let anchor = crowd_ecs::LaneAnchor::from_view(&unit, viewer, false);
+                assert_eq!(anchor.body.facing, seat.dir() as f32);
+            }
+        }
+    }
+}

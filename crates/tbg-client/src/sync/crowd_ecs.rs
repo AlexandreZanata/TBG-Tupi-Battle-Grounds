@@ -35,12 +35,12 @@ impl LaneAnchor {
                         look.kind.is_summon(),
                     )
                 },
-                facing: if look.own { 1.0 } else { -1.0 },
+                facing: look.seat.dir() as f32,
                 ghost: false,
             },
         }
     }
-    pub fn from_view(u: &UnitView, you: Seat, physical: bool) -> Self {
+    pub fn from_view(u: &UnitView, _you: Seat, physical: bool) -> Self {
         Self {
             authoritative: physical,
             pos: Vec3::ZERO,
@@ -55,7 +55,7 @@ impl LaneAnchor {
                 } else {
                     radius(tbg_core::content::def(u.kind).archetype, u.is_summon())
                 },
-                facing: if u.seat == you { 1.0 } else { -1.0 },
+                facing: u.seat.dir() as f32,
                 ghost: u.fx & (1 << 14) != 0,
             },
         }

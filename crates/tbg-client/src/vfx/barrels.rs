@@ -186,7 +186,6 @@ fn draw(
     };
     let scale = 1.16 * 1.2 * (1.0 + 0.08 * f32::from(b.tier.min(2)));
     let x = crate::sync::world_tile(x / 1000.0, you);
-    let z = z * if you == tbg_core::Seat::A { 1.0 } else { -1.0 };
     let transform = Transform::from_xyz(x, 0.205 * scale, z)
         .with_scale(Vec3::splat(scale))
         .with_rotation(Quat::from_rotation_z(-x / (0.205 * scale)));

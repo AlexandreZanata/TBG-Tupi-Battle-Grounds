@@ -38,7 +38,7 @@ pub(super) fn fire(time: Res<Time>, mut towers: Query<(&mut Tower, &Transform)>)
         }
         let interval = tower.gun.map_or(1.0, |g| g.interval);
         let clock = time.elapsed_secs();
-        let ahead = if tower.own { 1.0 } else { -1.0 };
+        let ahead = if tower.blue { 1.0 } else { -1.0 };
         let dummy = Vec3::new(
             ahead * (4.0 + 1.5 * (clock * 0.7).sin()),
             0.6,
@@ -69,7 +69,7 @@ pub(super) fn animate(
 pub(super) fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
     let rest = moving.rest;
     let clock_since = tower.pending.map_or(tower.since, |waited| waited - 0.06);
-    let aimed = gun_rotation(tower.own, tower.yaw, tower.pitch);
+    let aimed = gun_rotation(tower.blue, tower.yaw, tower.pitch);
     match moving.motion {
         Motion::Kick(distance) => {
             let k = kick(tower.since / recover(tower));

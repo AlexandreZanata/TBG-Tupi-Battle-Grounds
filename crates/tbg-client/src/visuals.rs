@@ -38,6 +38,7 @@ pub struct UnitLook {
     pub tier: u8,
     pub branch: u8,
     pub own: bool,
+    pub seat: tbg_core::Seat,
 }
 
 /// What a unit aims at: another unit's visual, or a fixed point (a
@@ -48,7 +49,7 @@ pub enum AimTarget {
     Point(Vec3),
 }
 
-/// Stronghold shots of this frame, (own tower, target), for the towers to
+/// Stronghold shots of this frame, (blue tower, target), for the towers to
 /// aim and fire their own projectiles (`arena::strongholds`).
 #[derive(Resource, Default)]
 pub struct TowerOrders(pub Vec<(bool, AimTarget)>);
@@ -72,6 +73,7 @@ pub struct UnitVisual {
     venom_badge: Option<Entity>,
     control_badge: Option<Entity>,
     pub own: bool,
+    pub seat: tbg_core::Seat,
     pub archetype: Archetype,
     pub faction: Faction,
     /// Splash radius in tiles (0 = none), for the splash-ring effect.
@@ -248,13 +250,13 @@ fn spawn_form_visual(
         look.kind,
         UnitKind::Bonehorn | UnitKind::Drillnest | UnitKind::Weaver
     ) {
-        if look.own {
+        if look.seat == tbg_core::Seat::A {
             std::f32::consts::FRAC_PI_2
         } else {
             -std::f32::consts::FRAC_PI_2
         }
     } else {
-        yaw(look.own)
+        yaw(look.seat == tbg_core::Seat::A)
     };
     let rot = Quat::from_rotation_y(base_yaw);
     let figure_root = commands
@@ -271,11 +273,15 @@ fn spawn_form_visual(
         form.meshes(look.own),
         &lib.material,
     );
-    let ring_mat = &a.team[usize::from(!look.own)];
+    let ring_mat = &a.team[look.seat.index()];
     let ring_scale = Vec3::splat(0.85 * form.plan.scale);
     let ring = commands
         .spawn(mesh(
-            if look.own { &a.ring } else { &a.enemy_ring },
+            if look.seat == tbg_core::Seat::A {
+                &a.ring
+            } else {
+                &a.enemy_ring
+            },
             ring_mat,
             Transform::from_xyz(0.0, 0.02, 0.0).with_scale(ring_scale),
         ))
@@ -311,6 +317,7 @@ fn spawn_form_visual(
         venom_badge: None,
         control_badge: None,
         own: look.own,
+        seat: look.seat,
         archetype: d.archetype,
         faction: d.faction,
         splash: 0.0,

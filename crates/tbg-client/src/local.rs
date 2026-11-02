@@ -1,4 +1,4 @@
-//! Practice match: `tbg-core` stepped in the browser, the bot on seat B.
+//! Practice match: shared simulation with independently drawn human/bot sides.
 //! Produces exactly the `ServerMsg`s the real server sends, so the rest of
 //! the client cannot tell practice from online play.
 
@@ -7,6 +7,7 @@ use tbg_core::protocol::{ClientMsg, ServerMsg};
 use tbg_core::{ArcanaPreset, Event, MatchState, Phase, PlayerIntention, Seat, StrongholdKind};
 
 pub struct LocalMatch {
+    you: Seat,
     result_id: tbg_core::protocol::ResultId,
     state: MatchState,
     bot: PracticeBot,
@@ -36,11 +37,15 @@ impl LocalMatch {
         .and_then(|s| s.parse::<u8>().ok())
         .unwrap_or(1)
         .min(3);
-        let presets = [arcanas, ArcanaPreset::DEFAULT];
+        let you = practice_side(seed);
+        let mut presets = [ArcanaPreset::DEFAULT; 2];
+        presets[you.index()] = arcanas;
         let selectable = StrongholdKind::SELECTABLE;
         let bot_kind = selectable[(seed % selectable.len() as u64) as usize];
+        let mut kinds = [bot_kind; 2];
+        kinds[you.index()] = stronghold;
         let mut state = MatchState::with_preview(seed, presets)
-            .with_strongholds([stronghold, bot_kind])
+            .with_strongholds(kinds)
             .with_arena(arena);
         if let Some(n) = army {
             while state.phase != Phase::Running {
@@ -81,6 +86,7 @@ impl LocalMatch {
         );
         result_id[15] = 1;
         LocalMatch {
+            you,
             result_id,
             state,
             bot: PracticeBot::new(seed ^ 0x5eed, difficulty),
@@ -88,7 +94,7 @@ impl LocalMatch {
             events: Vec::new(),
             outbox: vec![ServerMsg::MatchStart {
                 result_id,
-                you: Seat::A,
+                you,
                 you_name: "You".into(),
                 you_rating: None,
                 opponent: if difficulty == 3 {
@@ -125,22 +131,22 @@ impl LocalMatch {
             return;
         }
         for (seq, intent) in std::mem::take(&mut self.queue) {
-            if let Err(reason) = self.state.apply_intention(Seat::A, seq, intent) {
+            if let Err(reason) = self.state.apply_intention(self.you, seq, intent) {
                 self.outbox.push(ServerMsg::Rejected { seq, reason });
             }
         }
-        let bonus = self.bot.regen_bonus(&self.state);
+        let bot = self.you.other();
+        let bonus = self.bot.regen_bonus_for(&self.state, bot);
         self.events.extend(self.state.step());
-        self.state.players[1].energy = self.state.players[1].energy.saturating_add(bonus);
+        self.state.players[bot.index()].energy =
+            self.state.players[bot.index()].energy.saturating_add(bonus);
         let over = self.state.outcome.is_some();
         if self.state.clock.is_multiple_of(2) || over {
-            let view = self.state.view_for(Seat::A, &self.events);
+            let view = self.state.view_for(self.you, &self.events);
             self.outbox.push(ServerMsg::View(Box::new(view)));
-            let bot_view = self.state.view_for(Seat::B, &self.events);
+            let bot_view = self.state.view_for(bot, &self.events);
             if let Some(intent) = self.bot.decide(&bot_view) {
-                let _ = self
-                    .state
-                    .apply_intention(Seat::B, self.state.clock, intent);
+                let _ = self.state.apply_intention(bot, self.state.clock, intent);
             }
             self.events.clear();
         }
@@ -157,5 +163,66 @@ impl LocalMatch {
             });
             self.ended = true;
         }
+    }
+}
+
+fn practice_side(seed: u64) -> Seat {
+    // A separate stream keeps the side draw independent of shops and bot choices.
+    let mut rng = tbg_core::Pcg32::new(seed, 0x5349_4445);
+    let drawn = if rng.below(2) == 0 { Seat::A } else { Seat::B };
+    #[cfg(all(any(debug_assertions, feature = "ui-acceptance"), tbg_desktop))]
+    if crate::config::url_param("capture").is_some() {
+        return match crate::config::url_param("capture_side").as_deref() {
+            Some("blue") => Seat::A,
+            Some("red") => Seat::B,
+            _ => drawn,
+        };
+    }
+    drawn
+}
+
+#[cfg(test)]
+mod side_tests {
+    use super::*;
+
+    #[test]
+    fn side01_practice_draws_both_sides_and_keeps_human_commands_and_loadout() {
+        let mut seen = [false; 2];
+        let preset = ArcanaPreset::complete([2, 2, 2, 2, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0]).unwrap();
+        for seed in 0..64 {
+            let mut game = LocalMatch::new(
+                seed,
+                preset,
+                StrongholdKind::Command,
+                None,
+                tbg_core::Arena::Forest,
+            );
+            let start = game.take_outbox();
+            assert!(matches!(start[0], ServerMsg::MatchStart { you, .. } if you == game.you));
+            assert_eq!(game.state.player(game.you).arcanas, preset);
+            assert_eq!(
+                game.state.player(game.you.other()).arcanas,
+                ArcanaPreset::DEFAULT
+            );
+            seen[game.you.index()] = true;
+            assert_eq!(
+                game.state.player(game.you).stronghold,
+                StrongholdKind::Command
+            );
+            while game.state.phase != Phase::Running {
+                game.state.step();
+            }
+            game.state.players[game.you.index()].energy = 20 * tbg_core::content::ENERGY_SCALE;
+            let energy = game.state.player(game.you).energy;
+            game.send(ClientMsg::Intent {
+                seq: 17,
+                intent: PlayerIntention::Purchase { offer: 0 },
+            });
+            game.tick();
+            assert!(game.state.player(game.you).energy < energy);
+            assert!(game.state.units.iter().any(|u| u.seat == game.you));
+            assert!(game.state.view_for(game.you, &[]).last_seq >= 17);
+        }
+        assert_eq!(seen, [true, true]);
     }
 }

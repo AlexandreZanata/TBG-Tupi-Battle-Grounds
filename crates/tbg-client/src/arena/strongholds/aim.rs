@@ -116,7 +116,7 @@ pub(super) fn solve(own: bool, t: &Turret, root: Vec3, target: Vec3) -> (f32, f3
 pub(super) fn orders(mut orders: ResMut<TowerOrders>, mut towers: Query<&mut Tower>) {
     for (own, target) in orders.0.drain(..) {
         for mut tower in &mut towers {
-            if tower.live && tower.own == own {
+            if tower.live && tower.blue == own {
                 if tower.look.is_some_and(|l| l.damage == 20) {
                     continue;
                 }
@@ -162,7 +162,7 @@ pub(super) fn track(
         if target.is_none() || tower.idle > FORGET {
             tower.target = None;
         }
-        let own = tower.own;
+        let own = tower.blue;
         let goal = match (tower.turret, target) {
             (Some(t), Some(at)) => Some(solve(own, &t, root.translation, at)),
             _ => None,
@@ -200,7 +200,7 @@ fn fire(commands: &mut Commands, vfx: &VfxAssets, tower: &Tower, root: Vec3, at:
         ..default()
     };
     let Some(t) = tower.turret else {
-        let from = root + side(tower.own, top(tower.kind()));
+        let from = root + side(tower.blue, top(tower.kind()));
         impacts::muzzle(
             commands,
             vfx,
@@ -222,7 +222,7 @@ fn fire(commands: &mut Commands, vfx: &VfxAssets, tower: &Tower, root: Vec3, at:
 
 fn release_frame(tower: &Tower, turret: &Turret) -> Transform {
     let form = tower.look.map_or(Form::Base, |l| l.form());
-    let expected = side(tower.own, turret.pivot);
+    let expected = side(tower.blue, turret.pivot);
     let weapon = super::pieces(tower.kind(), form).into_iter().find(|p| {
         matches!(
             p.motion,
@@ -231,17 +231,17 @@ fn release_frame(tower: &Tower, turret: &Turret) -> Transform {
                     | super::parts::Motion::Mounted(_)
                     | super::parts::Motion::Aim
             )
-        ) && p.placed(tower.own).translation.distance(expected) < 0.01
+        ) && p.placed(tower.blue).translation.distance(expected) < 0.01
     });
     if let Some(piece) = weapon {
         let moving = super::motion::Moving {
             motion: piece.motion.unwrap_or(super::parts::Motion::Aim),
-            rest: piece.placed(tower.own),
+            rest: piece.placed(tower.blue),
         };
         return super::motion::pose(&moving, tower, 0.0);
     }
-    Transform::from_translation(pivot_at(tower.own, turret, Vec3::ZERO, tower.yaw))
-        .with_rotation(gun_rotation(tower.own, tower.yaw, tower.pitch))
+    Transform::from_translation(pivot_at(tower.blue, turret, Vec3::ZERO, tower.yaw))
+        .with_rotation(gun_rotation(tower.blue, tower.yaw, tower.pitch))
 }
 
 #[cfg(test)]
