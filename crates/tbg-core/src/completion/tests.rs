@@ -475,13 +475,16 @@ fn completion_seeded_mixed_preview_remains_deterministic_with_both_evolution_bra
 
 #[cfg(feature = "training")]
 #[test]
-fn completion_all_180_forms_start_and_advance_in_private_training() {
+fn completion_all_preview_forms_start_and_advance_in_private_training() {
     use crate::training::{
         Opponent, SessionId, TrainingCommand, TrainingScenario, TrainingSession, TrainingUnitSpec,
         SCHEMA,
     };
     let mut covered = 0;
-    for kind in crate::COMPLETION_POOL.into_iter().skip(46) {
+    for kind in crate::COMPLETION_POOL
+        .into_iter()
+        .skip(crate::FULL_POOL.len())
+    {
         for (tier, branch) in [(0, 0), (1, 0), (2, 0), (1, 1), (2, 1)] {
             let scenario = TrainingScenario {
                 schema: SCHEMA,
@@ -532,7 +535,10 @@ fn completion_all_180_forms_start_and_advance_in_private_training() {
             covered += 1;
         }
     }
-    assert_eq!(covered, 180);
+    assert_eq!(
+        covered as usize,
+        (crate::COMPLETION_POOL.len() - crate::FULL_POOL.len()) * 5
+    );
 }
 
 #[test]
