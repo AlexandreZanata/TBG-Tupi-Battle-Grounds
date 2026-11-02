@@ -85,7 +85,8 @@ fn spawn(
                 chip.spawn(chrome::icon(&assets, "island", 14., accent));
                 chip.spawn(label(name.clone(), 14.));
                 chip.spawn(kit::muted("·", 13.));
-                chip.spawn((label(side_name.clone(), 13.), TextColor(side_color)));
+                chip.spawn(label(side_name.clone(), 13.))
+                    .insert(TextColor(side_color));
             });
         });
     commands
@@ -132,7 +133,9 @@ fn spawn(
                     TextLayout::justify(Justify::Center),
                 ));
                 banner.spawn(kit::muted(lang.key("arenas.symmetric"), 10.));
-                banner.spawn((label(side_name.clone(), 17.), TextColor(side_color)));
+                banner
+                    .spawn(label(side_name.clone(), 17.))
+                    .insert(TextColor(side_color));
                 banner.spawn((
                     label(side_description.clone(), 12.),
                     TextLayout::justify(Justify::Center),
