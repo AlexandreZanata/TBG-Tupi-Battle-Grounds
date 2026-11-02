@@ -50,3 +50,42 @@ pub fn collect(
         ..default()
     };
 }
+
+/// Internal render-target census every ten seconds: windows, cameras and UI roots.
+pub fn census(
+    time: Res<Time<Real>>,
+    windows: Query<(Entity, &Window, Has<bevy::window::PrimaryWindow>)>,
+    cameras: Query<(Entity, &Camera, &bevy::camera::RenderTarget, Has<Camera3d>)>,
+    nodes: Query<&ComputedNode>,
+    roots: Query<&ComputedNode, (With<Node>, Without<ChildOf>)>,
+    mut next: Local<f64>,
+) {
+    let now = time.elapsed_secs_f64();
+    if now < *next {
+        return;
+    }
+    *next = now + 10.;
+    for (entity, window, primary) in &windows {
+        info!(
+            "TBG_ANDROID_CENSUS window {entity} primary={primary} physical={}x{} scale={}",
+            window.physical_width(),
+            window.physical_height(),
+            window.scale_factor()
+        );
+    }
+    for (entity, camera, target, is_3d) in &cameras {
+        info!(
+            "TBG_ANDROID_CENSUS camera {entity} 3d={is_3d} active={} order={} target={target:?} viewport={:?} size={:?}",
+            camera.is_active,
+            camera.order,
+            camera.viewport.as_ref().map(|v| (v.physical_position, v.physical_size)),
+            camera.physical_viewport_size()
+        );
+    }
+    let sizes: Vec<_> = roots.iter().map(|n| n.size).take(4).collect();
+    info!(
+        "TBG_ANDROID_CENSUS ui_nodes={} roots={} root_sizes={sizes:?}",
+        nodes.iter().count(),
+        roots.iter().count()
+    );
+}

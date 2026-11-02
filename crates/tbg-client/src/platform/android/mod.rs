@@ -39,7 +39,7 @@ pub fn plugin(app: &mut App) {
         .add_plugins(crate::ui::mobile::plugin)
         .add_systems(Update, (lifecycle::poll, gles_shader::adapt));
     #[cfg(feature = "android-loopback")]
-    app.add_systems(Update, telemetry::collect);
+    app.add_systems(Update, (telemetry::collect, telemetry::census));
 }
 pub fn persistent_preference(key: &str) -> bool {
     matches!(
