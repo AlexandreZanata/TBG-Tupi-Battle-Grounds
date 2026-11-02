@@ -310,3 +310,24 @@ The 190-form scenario passed with the CI-equivalent lab+training feature
 combination and its fully qualified exact name. An earlier training-only
 command selected zero tests and is not counted as evidence. Source hash
 remains cc459351581b7763 because completion/tests.rs is classified test-only.
+
+The 5e1bee4 test lane exposed two intermittent client-fixture races. Army
+sync sent buys during the existing Augment selection and assumed every
+rejection was Energy. Preserve the no-cap assertion, handle the legitimate
+Paused race, send only after acknowledgement, and end by controlled surrender
+after twelve purchases and a real synchronized death (BR-U07/BR-M07).
+
+The slot test left its finished sockets unread while waiting for directory
+idle; they could expire and create new reconnect receipts. Keep all four
+clients answering pings through the unchanged retirement assertions. Add
+exact load diagnostics on timeout; no production gate, grace or timeout is
+relaxed. The first local diagnostic attempt returned lock-busy (75) and
+did not execute; no lock polling or bypass was used.
+
+The revised local fixture check also deferred with lock-busy (75). Formatting
+and diff inspection passed; execution is delegated to the protected hosted
+lane. Keep the exact load diagnostics if the slot wait recurs rather than
+relaxing a retirement guard. The prior failure log did not include the
+blocking counter, so unread-client expiry is a fixture-hardening hypothesis,
+not a claimed production root cause. All production source and R15 values
+remain unchanged by this fixture-only commit.

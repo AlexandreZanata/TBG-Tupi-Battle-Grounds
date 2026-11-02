@@ -650,13 +650,15 @@ async fn br_m06_surrender_forfeits_once() {
 async fn br_u07_online_army_stays_in_sync() {
     // D-32 test 10: a real client buys the cheapest affordable offer all
     // match long. Its army rebuilt from Spawn/Death events equals the
-    // server's view on every frame, and only Energy ever refuses a purchase.
+    // server's view on every frame. Energy and the existing Augment pause
+    // may refuse a raced purchase; a unit cap must never do so.
     let url = server(30).await;
     let bot = tokio::spawn(play_one(fast(&url), 21));
     let mut ws = connect(&url).await;
     hello(&mut ws).await;
     send(&mut ws, &ClientMsg::QuickMatch).await;
     let (mut seq, mut refused) = (0u32, 0u32);
+    let (mut own_deaths, mut finishing) = (0u32, false);
     let mut mine = std::collections::BTreeSet::new();
     while let Some(msg) = recv(&mut ws).await {
         match msg {
@@ -667,7 +669,7 @@ async fn br_u07_online_army_stays_in_sync() {
                             mine.insert(unit);
                         }
                         tbg_core::Event::Death { unit } => {
-                            mine.remove(&unit);
+                            own_deaths += u32::from(mine.remove(&unit));
                         }
                         _ => {}
                     }
@@ -679,11 +681,21 @@ async fn br_u07_online_army_stays_in_sync() {
                     .map(|u| u.id)
                     .collect();
                 assert_eq!(mine, seen, "client and server armies diverged");
-                let live = v.phase == tbg_core::Phase::Running;
+                let live = v.phase == tbg_core::Phase::Running && v.augment_round.is_none();
                 let cheapest = (0..v.offers.len())
                     .min_by_key(|&i| tbg_core::content::def(v.offers[i]).cost)
                     .unwrap_or(0);
-                if live && v.energy >= tbg_core::content::def(v.offers[cheapest]).cost {
+                // BR-M07 has no natural-match deadline. Finish only after actual
+                // purchases and a synchronized death have exercised BR-U07.
+                if !finishing && v.last_seq.saturating_sub(refused) >= 12 && own_deaths > 0 {
+                    send(&mut ws, &ClientMsg::Surrender).await;
+                    finishing = true;
+                }
+                if !finishing
+                    && live
+                    && v.last_seq >= seq
+                    && v.energy >= tbg_core::content::def(v.offers[cheapest]).cost
+                {
                     seq += 1;
                     let intent = PlayerIntention::Purchase {
                         offer: cheapest as u8,
@@ -692,7 +704,8 @@ async fn br_u07_online_army_stays_in_sync() {
                 }
             }
             ServerMsg::Rejected { reason, .. } => {
-                assert_eq!(reason, Rejection::NotEnoughEnergy, "only Energy gates");
+                assert!(matches!(reason, Rejection::NotEnoughEnergy | Rejection::Paused),
+                    "BR-U07/BR-AG13: no unit cap; only Energy or a raced selection pause: {reason:?}");
                 refused += 1;
             }
             ServerMsg::MatchEnd { .. } => {
