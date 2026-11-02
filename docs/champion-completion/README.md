@@ -35,3 +35,10 @@ The local artifact `engine-final/capture-manifest.json` records 67 refreshed
 portraits and 17 five-form lineups with original build provenance. All 84
 captures passed readiness and content-hash checks. Portrait WebP encoding
 is pixel-identical to engine output and within the established 40 KiB budget.
+
+
+Linux preview installed as **TBG · 17 Champions Preview**. Launch with
+`~/.local/bin/tbg-champions`; use Troops for all five forms and animation
+controls, then the Training editor or local Practice. The installed revision
+and exact checks are recorded in the phase report. The original game/data
+are preserved. Windows and desktop-web visual parity remain pending.

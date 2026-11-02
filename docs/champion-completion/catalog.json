@@ -1,5 +1,5 @@
 {
-  "status": "Implemented local preview; focused core/client contracts and 84 ready native captures passed. Competitive balance and Windows/desktop-web visual parity remain Proposed/pending.",
+  "status": "Installed Linux local preview 0.1.1-cc.1; focused core/client contracts, 84 ready art captures and three installed-build scenes passed. Competitive balance and Windows/desktop-web visual parity remain Proposed/pending.",
   "baseline_commit": "0e23a1ac2f601b182bcfcc03b25acce76e69f962",
   "owner_scope": "All 17 champions; initial five-form low-poly images, then scoped implementation, validation and local Linux installation. No push or public deployment.",
   "form_order": [

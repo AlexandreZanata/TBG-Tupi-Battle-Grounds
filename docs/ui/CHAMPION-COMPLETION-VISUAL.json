@@ -425,11 +425,17 @@
   },
   "evidence": {
     "linux": {
-      "status": "84 ready native captures observed: 67 roster portraits, 17 five-form idle/walk/attack lineups",
+      "status": "Observed on installed Linux debug preview: 84 ready art captures plus Troops, blue/red foot-ring range and Training lifecycle scenes",
       "compilation": "native cargo check passed with existing local ALSA SDK",
       "geometry": "85 forms sampled; maximum 2938 triangles; paired grip and 3-second loop seam tests passed",
       "capture_manifest": ".local/champion-concepts-2026-11-01/engine-final/capture-manifest.json",
-      "provenance": "Per-image source/build hashes retained; initial loading overlays rejected and preserved separately. Runtime installation smoke checks pending."
+      "provenance": "Per-image source/build hashes retained; initial loading overlays rejected and preserved separately. Runtime installation smoke checks pending.",
+      "installed_source": "4bce5e93c055c5752a905bb50857cf22a2536cbd",
+      "installed_version": "0.1.1-cc.1",
+      "installed_binary_sha256": "f697d95e551202772b31cc9ef7c8c1c8220262cf9ef6c32c4779f7fd782cd6ea",
+      "installed_assets_verified": 357,
+      "installation_receipt": ".local/champion-concepts-2026-11-01/linux-installed-verification.json",
+      "remaining": "Subjective look/fun, dense live formations, unsampled motion/settings and both-seat status comparison remain pending."
     },
     "windows": {
       "status": "pending packaged same-source captures and motion comparison"
@@ -570,7 +576,7 @@
       "both seats",
       "Root/Slow/mark"
     ],
-    "linux": "All 340 form contracts and all-kind budgets/distinction passed. 67 portraits refreshed; 17 five-form lineups captured. Local install smoke checks pending.",
+    "linux": "All 340 body contracts passed. Refreshed 67 portraits; captured all 85 new forms. Installed Troops/range/Training scenes passed; blue/red ownership disks visibly observed, with body plaques absent. Root/Slow HUD transition verified by scoped ECS test; physical both-seat status/motion comparison pending.",
     "windows": "pending actual packaged visual comparison",
     "desktop_web": "pending actual browser visual and motion comparison"
   }

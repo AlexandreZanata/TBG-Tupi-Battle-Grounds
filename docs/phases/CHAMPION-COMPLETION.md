@@ -1,5 +1,13 @@
 # Champion completion — seventeen authored kits and local Linux preview
 
+**Current delivery (2026-11-01): implemented and installed as a separate Linux
+preview; all 17 champions and 85 forms are available in Troops/Training and
+the 63-champion local Practice pool. Blue/red foot rings identify teams; body
+affiliation plates are removed across all 68 registered kinds. Earlier
+checkpoint notes below are historical; final installed evidence is at the end.
+Windows/web parity, subjective visual/fun approval and competitive balance
+remain pending. No push or public deployment was performed.
+
 **Owner request, 2026-11-01.** Keep all seventeen concepts, complete every
 champion's appearance and behavior, show the initial low-poly base and four
 Evolution references, then implement, validate and install locally on Linux.
@@ -202,3 +210,47 @@ will be stored beside the captures. Windows/desktop-web visual and motion
 comparison, dense-formation runtime review, subjective look/fun approval,
 D-33 measured competitive balance, full suite and production activation remain
 unverified. No production server/client deployment is included.
+
+
+### Installed Linux delivery
+
+- Installed code/assets revision: `4bce5e93c055c5752a905bb50857cf22a2536cbd`.
+  Version `0.1.1-cc.1`, protocol 32, contract `w32-r3-0c28263061714c3f`,
+  native debug target `x86_64-unknown-linux-gnu`.
+- Executable SHA-256: `f697d95e551202772b31cc9ef7c8c1c8220262cf9ef6c32c4779f7fd782cd6ea`.
+- Installer: `python3 scripts/install-champion-preview.py --binary
+  <artifact-root>/engine-install-renderer/tbg-client`. Installed separately
+  at `~/.local/opt/tupi-battle-grounds-champion-preview/0.1.1-cc.1-4bce5e93c055`,
+  with launcher `~/.local/bin/tbg-champions` and desktop entry
+  `~/.local/share/applications/tbg-champions-preview.desktop`. Existing game
+  installation, data and root checkout changes are preserved.
+- Final locked native build passed in 2.21 s; installed binary, Cargo.lock
+  receipt and every copied asset hash matched the committed installation.
+- All 67 portrait WebPs were independently compared with their ready PNGs:
+  pixel difference zero, each within 40 KiB.
+- Actual installed-build captures in Portuguese passed: Troops selected
+  Prismancer and displayed 63 champions; the native range showed blue/red
+  foot disks with unmarked bodies; Training passed pause, exact one-step,
+  reset identity and stale-command rejection. All three scenes reported
+  boot ready, no pending images/texts and no failed images.
+- The first Training launch used an unsupported hyphenated debug flag and
+  opened Lobby. That attempt is preserved; the corrected native environment
+  parameter `TBG_CAPTURE_PANEL=training` passed the lifecycle journey.
+- The preview launcher was started for owner validation with isolated data.
+  Captures and receipt: `.local/champion-concepts-2026-11-01/installed-linux/`
+  and `linux-installed-verification.json` in the original checkout.
+- Browser inspection confirmed the localhost gallery's seventeen sections,
+  bilingual names, actual 85 forms, concept disclosures and download link.
+  Fixed image dimensions preserve anchor positions while lazy images load.
+
+Validation level: targeted consolidation, not full suite. All compilation,
+Rust tests and native scene batches used the shared nonblocking host lock;
+Cargo jobs and rendering CPU affinity were capped at two. No balance gate,
+benchmark, workspace suite, production match activation or deployment ran.
+
+Deferred: Windows packaged same-source captures plus strict comparison via
+`scripts/check-desktop-ui.py --compare ...`; desktop-web build and matching
+actual browser motion/effect observations; dense formations and owner look/fun
+review. The D-33 competitive balance gate and full workspace suite need a
+separate explicit owner request. This documentation/review-gallery-only delivery report
+commit does not change the installed game source/assets revision above.
