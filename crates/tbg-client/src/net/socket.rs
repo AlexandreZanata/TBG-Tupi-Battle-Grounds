@@ -1,4 +1,4 @@
-//! A compatible delivery re-admits new play; existing matches resume their original slot.
+//! New play follows active admission; existing matches reconnect to their original slot.
 //! Socket pump and reconnect backoff: 0.25 s, 0.5 s, 1 s, then every 2 s
 //! until `GIVE_UP` (the server window is 30 s). A frame that runs after the
 //! tab becomes visible again retries at once when a retry is due. A socket
