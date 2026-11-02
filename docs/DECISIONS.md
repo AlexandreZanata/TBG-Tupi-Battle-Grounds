@@ -3223,3 +3223,21 @@ HP/damage and x3 cost rules. This is a reduction of unconsumed work, not a
 shorter battle, smaller statistical sample or additional pass criterion.
 Local compilation remains deferred under the earlier shared-lock contention;
 the new proof and complete original C7 run in required hosted CI.
+
+## INT-05 — Owner-authorized controlled wounded-army healing canary (2026-11-02)
+
+The owner explicitly approved changing the healing fixture while retaining
+256 paired seeds, the +0.10 score-gain requirement and every live value.
+INT-03's isolated policy still started at 0.93, leaving insufficient headroom.
+Retain both earlier observations; add an equal-Energy wounded-army control
+using the original damaging kinds, all existing duel budgets, both seat orders
+and 25/50/75 percent initial combat-unit HP. The controlled opponent never
+fields the mutated healer. No Shop policy runs, and the canonical duel arena
+disables Stronghold fire/regeneration; no live ruleset is changed.
+
+Each case starts in contact, with the healer behind its escorts. Extinction
+or the unchanged duel 90-second bound decides the score from fighting HP;
+a pure healer cannot win after its escorts die. Both variants use identical
+initial rosters, wounds, seed and physical seats. A dedicated 256-pair
+regression requires unsaturated baseline headroom and the unchanged planted
+x2 HP/heal gain. This is canary sensitivity, not online balance acceptance.

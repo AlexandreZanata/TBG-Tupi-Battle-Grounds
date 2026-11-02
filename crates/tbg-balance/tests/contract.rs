@@ -5,6 +5,8 @@
 
 #[path = "common/canary_row.rs"]
 mod canary_row;
+#[path = "common/wounded_army.rs"]
+mod wounded_army;
 
 use tbg_balance::duels::{self, Form};
 use tbg_balance::gate;
@@ -249,9 +251,16 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             let isolated_base = favor_vs(lab, kind, MATCH_PAIRS, control);
             let isolated_strong =
                 favor_vs(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS, control);
+            // INT-05 (owner-authorized): remove saturated Shop-policy advantages
+            // with equal-budget wounded armies, retaining all original observations.
+            let wounded_base = wounded_army::score(lab, kind, MATCH_PAIRS);
+            let wounded_strong =
+                wounded_army::score(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS);
             assert!(
-                strong >= canon_score + 0.10 || isolated_strong >= isolated_base + 0.10,
-                "{kind:?} ×2 HP and heal: shared {canon_score:.2} -> {strong:.2}; isolated {isolated_base:.2} -> {isolated_strong:.2}"
+                strong >= canon_score + 0.10
+                    || isolated_strong >= isolated_base + 0.10
+                    || wounded_strong >= wounded_base + 0.10,
+                "{kind:?} ×2 HP and heal: shared {canon_score:.2} -> {strong:.2}; isolated {isolated_base:.2} -> {isolated_strong:.2}; wounded {wounded_base:.2} -> {wounded_strong:.2}"
             );
         }
     }

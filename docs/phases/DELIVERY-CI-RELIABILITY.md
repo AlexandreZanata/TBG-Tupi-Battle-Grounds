@@ -214,3 +214,17 @@ Do not poll or bypass the lock. Rustfmt on the affected files, source routing
 and seven patch-note entries passed; git diff --check passed.
 The main checkout's nine dirty/untracked files were hashed before integration;
 no checkout, stash or reset was performed there.
+
+## INT-05 controlled-fixture result (owner approved)
+
+The owner approved the controlled wounded-army scenario without reducing
+the 256 paired seeds, +0.10 gain or any live values. The dedicated regression
+passed under the shared lock with CARGO_BUILD_JOBS=2:
+`cargo test -p tbg-balance --test wounded_army_control -- --nocapture
+--test-threads=1` (1 passed, 11.04 s). Its predeclared grid covers all nine
+original damaging kinds, budgets 20/40/60 and 25/50/75 percent starting HP,
+with equal Energy and both physical seat orders. Baseline score 0.273438;
+x2 HP/heal score 0.519531 (+24.609375 percentage points). No parameter sweep,
+live rule adjustment or acceptance claim is involved. Full hosted C7 is
+still required; the earlier shared/isolated observations remain in its
+assertion and diagnostics. The new helper is test-only.
