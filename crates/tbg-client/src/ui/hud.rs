@@ -4,7 +4,7 @@
 
 use bevy::prelude::*;
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 use super::BUTTON;
 use super::{label, screen, UiAction};
 use crate::sync::MatchInfo;
@@ -12,10 +12,10 @@ use crate::GameState;
 
 #[derive(Component)]
 pub(super) enum Hud {
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     Clock,
     Hp(usize),
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     HpLabel(usize),
     Spectators,
     PrivateControls,
@@ -23,28 +23,28 @@ pub(super) enum Hud {
     Portrait(usize),
     EnergyFill,
     Info,
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     Card(usize),
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     CardText(usize),
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     CardStrip(usize),
     Augments,
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     CouncilStatus,
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     CouncilRow,
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     CouncilOption(usize),
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     CouncilOptionText(usize),
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     Forgo,
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     ForgoText,
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn council_card(i: usize) -> impl Bundle {
     (
         Node {
@@ -62,7 +62,7 @@ fn council_card(i: usize) -> impl Bundle {
     )
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn forgo_card() -> impl Bundle {
     (
         Node {
@@ -93,7 +93,7 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bundle {
     (
         Node {
@@ -116,13 +116,13 @@ pub(super) fn bar(fill: Hud, color: Color, width: f32, height: f32) -> impl Bund
     )
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn card(i: usize, narrow: bool) -> impl Bundle {
     (
         Node {
             width: px(if narrow {
                 82.0
-            } else if cfg!(tbg_desktop) {
+            } else if cfg!(tbg_native_ui) {
                 166.0
             } else {
                 154.0
@@ -152,7 +152,7 @@ fn card(i: usize, narrow: bool) -> impl Bundle {
                     width: percent(100),
                     height: px(if narrow {
                         52
-                    } else if cfg!(tbg_desktop) {
+                    } else if cfg!(tbg_native_ui) {
                         145
                     } else {
                         76
@@ -169,7 +169,7 @@ fn card(i: usize, narrow: bool) -> impl Bundle {
     )
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn row(gap: f32) -> Node {
     Node {
         flex_direction: FlexDirection::Row,
@@ -179,7 +179,7 @@ fn row(gap: f32) -> Node {
     }
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn spawn(
     mut commands: Commands,
     info: Res<MatchInfo>,
@@ -266,7 +266,7 @@ fn spawn(
         });
 }
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 fn spawn(
     mut commands: Commands,
     info: Res<MatchInfo>,
@@ -288,6 +288,16 @@ fn spawn(
                 Node {
                     position_type: PositionType::Absolute,
                     bottom: px(super::native_battle::SHOP_BOTTOM),
+                    left: if cfg!(target_os = "android") {
+                        px(12)
+                    } else {
+                        Val::Auto
+                    },
+                    right: if cfg!(target_os = "android") {
+                        px(12)
+                    } else {
+                        Val::Auto
+                    },
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
                     row_gap: px(6),
@@ -300,7 +310,11 @@ fn spawn(
                 shop.spawn((label("", 11.), Hud::Info));
                 shop.spawn((
                     Node {
-                        width: px(862),
+                        width: if cfg!(target_os = "android") {
+                            percent(100)
+                        } else {
+                            px(862)
+                        },
                         flex_direction: FlexDirection::Column,
                         row_gap: px(10),
                         ..default()

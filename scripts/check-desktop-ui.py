@@ -12,7 +12,7 @@ CONTRACT=ROOT/'docs/ui/desktop-ui-contract.json'
 def source_errors(root=ROOT):
     errors=[]
     sources=list((root/'crates/tbg-client/src/ui').rglob('*.rs'))
-    sources += [root/'crates/tbg-client/src'/name for name in ['main.rs','sync.rs','sync/messages.rs','local.rs','training/preview.rs','visuals/assets.rs','capture.rs']]
+    sources += [root/'crates/tbg-client/src'/name for name in ['main.rs','lib.rs','app.rs','sync.rs','sync/messages.rs','local.rs','training/preview.rs','visuals/assets.rs','capture.rs']]
     pattern=re.compile(r'\bcfg(?:!|_attr)?\s*\([^)]*(?:target_os\s*=\s*"(?:linux|windows)"|\bunix\b|\bwindows\b)',re.S)
     for path in sources:
         raw=path.read_text();lines=raw.splitlines()
@@ -21,7 +21,7 @@ def source_errors(root=ROOT):
             if path.name=='main.rs' and 'windows_subsystem' in lines[line-1]:continue
             errors.append(f'{path.relative_to(root)}:{line}: OS-specific presentation condition')
     build=(root/'crates/tbg-client/build.rs').read_text()
-    for required in ['CARGO_CFG_TARGET_OS','cargo:rustc-check-cfg=cfg(tbg_desktop)','cargo:rustc-cfg=tbg_desktop','native_art_manifest(desktop)']:
+    for required in ['CARGO_CFG_TARGET_OS','cargo:rustc-check-cfg=cfg(tbg_desktop)','cargo:rustc-cfg=tbg_desktop','let native_ui = desktop ||', 'native_art_manifest(native_ui)']:
         if required not in build:errors.append(f'build.rs is missing {required}')
     return errors
 

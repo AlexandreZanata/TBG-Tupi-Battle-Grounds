@@ -49,6 +49,11 @@ impl NetLink {
             return;
         };
         let url = url.clone();
+        #[cfg(target_os = "android")]
+        if !crate::platform::android::socket_endpoint_allowed(&url) {
+            self.lost(now);
+            return;
+        }
         // D-97 + P66: auth HTTP must reach the generation that verifies this Access.
         crate::auth::set_endpoint(endpoint);
         self.auth_epoch = view.epoch;

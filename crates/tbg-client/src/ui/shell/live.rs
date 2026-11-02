@@ -10,14 +10,14 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, lang: Lang) {
             p.spawn(kit::muted(lang.key("live.unavailable"), 16.));
         }
         let Some(live) = &data.live else {
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             {
                 if data.live_pending() {
                     crate::ui::native_loading::rows(p, 3);
                 }
                 return;
             }
-            #[cfg(not(tbg_desktop))]
+            #[cfg(not(tbg_native_ui))]
             {
                 p.spawn(kit::muted(lang.key("live.loading"), 18.));
                 return;

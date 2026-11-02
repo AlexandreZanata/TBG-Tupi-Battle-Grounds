@@ -175,9 +175,16 @@
       }
     ]
   },
-  "required_platforms": [
-    "linux",
-    "windows",
-    "web"
+  "change_records": [
+    {
+      "id": "p69-main-mobile-integration",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Existing full screen and motion matrix; Android adaptive landscape counterpart",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    }
   ]
 }

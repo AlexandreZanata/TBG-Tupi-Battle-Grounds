@@ -2640,3 +2640,43 @@ sensitive re-entry 5 min; mail retries up to 8 with backoff to 6 h; outbox
 180 days; rejected emoji sheets 30 days; global pending emojis ≤ 500;
 initial switches: chat off, emojis on, custom display off, uploads off,
 reports on, registration on. All are owner decisions O-P75-01…13.
+
+## 23. Native Android landscape prototype — Proposed, P69 (owner request)
+
+P69 is independent of the Windows/authentication workstream P68. Sections
+18–21 are reserved on other planning branches, not dependencies imported by
+this Linux-based phase. D-98 and [P69](phases/P69-android-native-prototype.md)
+define execution, with no runtime change delivered by this documentation.
+
+| Rule | Contract |
+|---|---|
+| BR-AN01 | The native Android game is designed and played in landscape, with the phone held horizontally. Existing mobile browser portrait behavior and desktop layouts stay unchanged |
+| BR-AN02 | Android reuses the installable Linux client's exact shared core/ruleset/content for the same mode and source revision; it does not have its own champion stats, economy, combat speed, bot rules or outcomes |
+| BR-AN03 | Online authority, seat ownership, PlayerIntentions, rejection/ack and protocol remain shared with Linux; no Android-only wire or backend authority |
+| BR-AN04 | Energy, Shop, Evolution, Synergy, Stronghold/Fortification, Arcanas, Augments, roster/forms/summons and existing mode gates remain identical; no mobile unit cap or automatic assistance |
+| BR-AN05 | Touch changes presentation/operation only: one deliberate tap produces one existing action, cancellation/scroll/inspect does not also purchase, and critical information/actions remain accessible without hover/keyboard |
+| BR-AN06 | Online time never pauses on Android suspension. The existing 30-second reconnect and forfeit rules are preserved; Back/rotation/background behavior cannot grant a special pause or grace |
+| BR-AN07 | Mobile layout preserves the same medieval identity, art/animation/content and useful game information. Cosmetic cost may follow existing quality settings, never hide competitive state or remove roster entries |
+| BR-AN08 | P69 adds no Windows package or new authentication system. Existing manual AccountKey login may be reused in process memory; no new plaintext key/token persistence in preferences, logs, backups or URLs |
+| BR-AN09 | Android and Linux comparison builds identify the same execution SHA, core, ruleset and matching mode. Core trace equivalence and packaged cross-play complement physical-device UI tests |
+| BR-AN10 | The prototype runs as a genuine ARM64 Android application. Emulator/boot success alone is insufficient; required phone/gameplay/installation evidence and honest deferred gates determine completion |
+
+Proposed prototype configuration and validation inputs, not combat values:
+
+| Setting | Proposal |
+|---|---|
+| Primary reference | Owner's POCO X6 Pro, Android 16/API 36, ARM64; 2712×1220 px landscape reference before insets |
+| Display density | Observed 480 dpi; estimate about 904×407 dp before insets, with actual Android/Bevy mapping still to measure |
+| Orientation | sensorLandscape, both horizontal directions, with safe handling of OS/form-factor overrides; no global phone rotation change |
+| Effective critical touch target | At least 48×48 dp after runtime scale/inset mapping |
+| Initial ABI | arm64-v8a / aarch64-linux-android only; other ABIs are not certified |
+| Proposed install floor | Android 12/API 31, subject to exact engine/NDK/audio verification; older-OS support requires its own evidence |
+| Reference compile/target SDK | API 36 for the inspected Android 16 phone; pin a compatible full toolchain tuple |
+| Frame observation | Existing 30-unit reference scene at least 30 fps; 60 fps is a measured optimization goal. Neither value imposes a unit cap |
+| Device observation | One controlled ten-minute consolidated session; no automatic broad soak/benchmark campaign |
+| Memory-page evidence | Inspected phone uses 4096-byte pages; check 16 KB native/package alignment and separately report untested 16 KB runtime |
+| Prototype application ID | io.github.alexandrezanata.tbg.prototype, separate from other game installations; monotonically increasing versionCode and stable private test signing |
+
+No competitive balance number, Rating rule, seed, simulation fixture or
+headless trace is changed by this phase. Differences between Linux Practice
+preview and online CANON are preserved rather than unified for Android.

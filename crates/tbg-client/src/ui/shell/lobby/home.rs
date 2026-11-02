@@ -1,6 +1,6 @@
 //! Home-screen placement matches the browser and leaves the middle arena unobscured.
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 use super::super::header;
 use super::{cards, modes, profile, Account, Data, Lang, Shell};
 use bevy::prelude::*;
@@ -13,7 +13,7 @@ pub fn spawn(
     assets: &AssetServer,
     lang: Lang,
 ) {
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     header::spawn(root, data, account, assets, lang);
     modes::spawn(root, account, assets, lang);
     profile::spawn(root, data, account, assets, lang);

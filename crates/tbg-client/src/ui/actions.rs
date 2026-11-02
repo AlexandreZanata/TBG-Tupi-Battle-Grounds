@@ -102,7 +102,7 @@ pub(super) fn apply(
             inspected.0 = None;
             tower_open.0 = false;
         }
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         let action = match action {
             UiAction::PracticeArena(arena) => {
                 config::save_arena(arena);
@@ -295,7 +295,7 @@ pub(super) fn apply(
                 }
             }
             // Linux presentation actions are consumed before this system.
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             UiAction::ShowArenaBanner
             | UiAction::CloseArenaBanner
             | UiAction::PickAugment(_)
@@ -451,7 +451,7 @@ pub(super) fn apply(
             }
             UiAction::CloseInspect => {
                 inspected.0 = None;
-                #[cfg(tbg_desktop)]
+                #[cfg(tbg_native_ui)]
                 {
                     selected.0 = None;
                 }

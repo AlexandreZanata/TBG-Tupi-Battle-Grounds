@@ -35,19 +35,19 @@ fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
         .with_children(|root| {
             root.spawn((
                 Node {
-                    width: if cfg!(tbg_desktop) {
+                    width: if cfg!(tbg_native_ui) {
                         px(208)
                     } else {
                         Val::Auto
                     },
-                    height: if cfg!(tbg_desktop) {
+                    height: if cfg!(tbg_native_ui) {
                         px(186)
                     } else {
                         Val::Auto
                     },
                     flex_direction: FlexDirection::Column,
                     align_items: AlignItems::Center,
-                    justify_content: if cfg!(tbg_desktop) {
+                    justify_content: if cfg!(tbg_native_ui) {
                         JustifyContent::Center
                     } else {
                         JustifyContent::FlexStart
@@ -56,7 +56,7 @@ fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
                     border_radius: BorderRadius::all(px(14)),
                     ..default()
                 },
-                BackgroundColor(if cfg!(tbg_desktop) {
+                BackgroundColor(if cfg!(tbg_native_ui) {
                     Color::srgba(0.12, 0.11, 0.08, 0.73)
                 } else {
                     Color::srgba(0.04, 0.08, 0.12, 0.88)
@@ -64,17 +64,17 @@ fn spawn(mut commands: Commands, lang: Res<crate::i18n::Lang>) {
                 children![
                     super::label(
                         lang.t(crate::i18n::Msg::HudStarting),
-                        if cfg!(tbg_desktop) { 28. } else { 20. }
+                        if cfg!(tbg_native_ui) { 28. } else { 20. }
                     ),
                     (
                         Text::new(""),
                         TextFont {
-                            font: if cfg!(tbg_desktop) {
+                            font: if cfg!(tbg_native_ui) {
                                 super::kit::display_font().into()
                             } else {
                                 default()
                             },
-                            font_size: FontSize::Px(if cfg!(tbg_desktop) { 100. } else { 72. }),
+                            font_size: FontSize::Px(if cfg!(tbg_native_ui) { 100. } else { 72. }),
                             ..default()
                         },
                         TextColor(Color::srgb_u8(0xF5, 0xDF, 0xB6)),

@@ -26,6 +26,12 @@ type Buttons<'w, 's> = Query<
 #[allow(clippy::too_many_arguments)]
 pub fn mouse_and_keys(
     mouse: Res<ButtonInput<MouseButton>>,
+    // Grouped so the Android touch inputs keep the system under Bevy's parameter limit.
+    #[cfg(target_os = "android")] (pointer, state, scale): (
+        Res<super::super::mobile::input::Pointer>,
+        Res<State<crate::GameState>>,
+        Res<UiScale>,
+    ),
     keys: Res<ButtonInput<KeyCode>>,
     mut window: Single<&mut Window>,
     buttons: Buttons,
@@ -39,9 +45,18 @@ pub fn mouse_and_keys(
     mut social_focus: Local<Option<super::super::social::Action>>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     lang: Res<Lang>,
-    mut lights: Query<&mut DirectionalLight>,
-    mut volume: ResMut<bevy::audio::GlobalVolume>,
+    (mut lights, mut volume): (
+        Query<&mut DirectionalLight>,
+        ResMut<bevy::audio::GlobalVolume>,
+    ),
 ) {
+    #[cfg(target_os = "android")]
+    if pointer.consumed
+        || super::super::auth_ui::blocks_menu(*state.get())
+        || window.height() > window.width()
+    {
+        return;
+    }
     if !crate::config::bevy_ui() || super::textform::is_open(&form) {
         return;
     }
@@ -64,13 +79,43 @@ pub fn mouse_and_keys(
             button_focus.0=Some(ordered[index].0);
         }
     }
-    let mut selected = None;
+    let mut selected = Vec::new();
+    #[cfg(target_os = "android")]
+    let mut releases: Vec<Vec2> = pointer.taps.iter().map(|tap| tap.1).collect();
+    #[cfg(not(target_os = "android"))]
+    let mut releases = Vec::new();
     if mouse.just_released(MouseButton::Left) {
-        if let Some(p) = window.cursor_position() {
-            selected = ordered.iter().position(|(_, _, _, node, t, _, clip)| {
-                node.contains_point(**t, p * window.scale_factor())
-                    && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
-            });
+        if let Some(point) = window.cursor_position() {
+            #[cfg(target_os = "android")]
+            let duplicate =
+                pointer.touch_frame && pointer.taps.iter().any(|tap| tap.1.distance(point) < 2.);
+            #[cfg(not(target_os = "android"))]
+            let duplicate = false;
+            if !duplicate {
+                releases.push(point);
+            }
+        }
+    }
+    for p in releases {
+        if let Some(index) = ordered.iter().position(|(_, _, _, node, t, _, clip)| {
+            let hit = {
+                #[cfg(target_os = "android")]
+                {
+                    super::super::mobile::input::hit(
+                        node,
+                        **t,
+                        p * window.scale_factor(),
+                        window.scale_factor() * scale.0,
+                    )
+                }
+                #[cfg(not(target_os = "android"))]
+                {
+                    node.contains_point(**t, p * window.scale_factor())
+                }
+            };
+            hit && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
+        }) {
+            selected.push(index);
         }
     }
     if keys.just_pressed(KeyCode::Tab) && !ordered.is_empty() {
@@ -80,7 +125,7 @@ pub fn mouse_and_keys(
         && !keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight])
         && !ordered.is_empty()
     {
-        selected = Some(*focus % ordered.len());
+        selected.push(*focus % ordered.len());
     }
     if keys.just_pressed(KeyCode::Escape) {
         shell.panel = Panel::Lobby;
@@ -112,7 +157,7 @@ pub fn mouse_and_keys(
                     _ => None,
                 });
     }
-    if let Some(index) = selected {
+    for index in selected {
         *focus = index;
         *social_focus = match ordered[index].1 {
             Some(Action::Social(a)) => Some(*a),
@@ -125,14 +170,14 @@ pub fn mouse_and_keys(
         }
         if let Some(Action::Catalog(action)) = action {
             training.0.push(*action);
-            return;
+            continue;
         }
         if let Some(Action::Download) = action {
             queue.0.push(UiAction::UpdateOpen);
             return;
         }
         if let Some(action) = action {
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             if matches!(action, Action::Open(_)) {
                 queue.0.push(UiAction::CloseRanking);
             }
@@ -223,7 +268,7 @@ fn video_audio(
 ) {
     match action {
         Action::Fullscreen => {
-            #[cfg(not(target_arch = "wasm32"))]
+            #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
             crate::platform::window::toggle_fullscreen(window);
             #[cfg(target_arch = "wasm32")]
             if let Some(doc) = web_sys::window().and_then(|w| w.document()) {
@@ -258,9 +303,18 @@ fn video_audio(
 
 pub fn scroll(
     mut events: MessageReader<MouseWheel>,
+    #[cfg(target_os = "android")] pointer: Res<super::super::mobile::input::Pointer>,
     window: Single<&Window>,
     mut lists: Query<(&ComputedNode, &UiGlobalTransform, &mut ScrollPosition)>,
 ) {
+    #[cfg(target_os = "android")]
+    if let Some((p, delta)) = pointer.drag {
+        for (node, t, mut position) in &mut lists {
+            if node.contains_point(*t, p * window.scale_factor()) {
+                position.0.y = (position.0.y - delta.y).max(0.);
+            }
+        }
+    }
     let Some(p) = window.cursor_position().map(|p| p * window.scale_factor()) else {
         events.clear();
         return;

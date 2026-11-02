@@ -1,16 +1,16 @@
 //! User-visible audio, language, video and account preferences, plus kit review.
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 use super::button;
 use super::{kit, Account, Action, Lang, Panel, Sounds, UiAction};
 use bevy::prelude::*;
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 mod native;
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub use native::spawn;
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 pub fn spawn(
     root: &mut ChildSpawnerCommands,
     account: &Account,

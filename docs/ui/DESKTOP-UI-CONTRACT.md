@@ -825,3 +825,22 @@ spectator/Blue-side browser coverage, or matched-frame GD-04/P74 motion rows.
 Those remain pending; no pixel parity or renderer tolerance is inferred.
 See [the production report](../phases/DELIVERY-consolidation-production-20261102.md)
 for actual sources, evidence and limitations.
+
+## 2026-11-02 — P69 main integration and mobile adaptation
+
+Owner explicitly requests landscape Android composition adapted to compact
+phone dimensions while retaining Linux art, information, rules and motion.
+Desktop Linux/Windows/web exact presentation requirements remain unchanged.
+Android uses the same presentation modules/assets with a mobile composition;
+its geometry is compared by information, accessibility and style, not desktop
+pixel dimensions. Lobby scenery fills the window with controls inside real
+lateral safe bounds; match scenery is edge-to-edge and controls stay safe.
+
+The shared bin-to-lib extraction carries all current main plugins and #57
+account/update fixes. Desktop and web retain their existing presentation.
+Affected cases: loading, lobby/navigation, account/error/forms, profile/ranking/
+history, news/notes, Troops/forms/abilities/previews, Arcanas/Strongholds/Arenas,
+Practice/Training, battle/HUD/Shop/auxiliaries/details, War Council, settings,
+confirmations/results/Victory/reconnect and return cleanup. All observations
+for this integrated source are pending; shared routing/builds never prove parity.
+See [P69 current execution](../phases/P69-mobile-20261102.md).

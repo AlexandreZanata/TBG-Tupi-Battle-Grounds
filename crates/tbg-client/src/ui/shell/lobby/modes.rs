@@ -5,14 +5,14 @@ use bevy::prelude::*;
 
 pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetServer, lang: Lang) {
     // Both columns end at 67%, leaving the same 1% gap above their lower panels.
-    let rect = [2., 17., 27.5, if cfg!(tbg_desktop) { 50. } else { 45. }];
+    let rect = [2., 17., 27.5, if cfg!(tbg_native_ui) { 50. } else { 45. }];
     let mut panel = root.spawn(chrome::panel(rect));
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     panel.insert(Node {
         row_gap: px(9),
         ..chrome::panel_node(rect)
     });
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     panel.insert((
         BackgroundColor(chrome::WOOD),
         Node {
@@ -59,8 +59,8 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
                     align_items: AlignItems::Center,
                     column_gap: px(13),
                     padding: UiRect::axes(px(14), px(5)),
-                    border: UiRect::all(px(if cfg!(tbg_desktop) { 1. } else { 2. })),
-                    border_radius: BorderRadius::all(px(if cfg!(tbg_desktop) { 4. } else { 5. })),
+                    border: UiRect::all(px(if cfg!(tbg_native_ui) { 1. } else { 2. })),
+                    border_radius: BorderRadius::all(px(if cfg!(tbg_native_ui) { 4. } else { 5. })),
                     ..default()
                 },
                 chrome::skin(mode_color(ranked), true, ranked),
@@ -74,7 +74,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
                     assets,
                     icon,
                     37.,
-                    if ranked && !cfg!(tbg_desktop) {
+                    if ranked && !cfg!(tbg_native_ui) {
                         Color::srgb_u8(200, 236, 255)
                     } else {
                         kit::GOLD
@@ -98,7 +98,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, account: &Account, assets: &AssetS
 }
 
 fn mode_color(ranked: bool) -> Color {
-    if cfg!(tbg_desktop) {
+    if cfg!(tbg_native_ui) {
         chrome::METAL
     } else if ranked {
         Color::srgb_u8(18, 88, 148)
