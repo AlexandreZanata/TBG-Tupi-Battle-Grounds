@@ -825,4 +825,3 @@ spectator/Blue-side browser coverage, or matched-frame GD-04/P74 motion rows.
 Those remain pending; no pixel parity or renderer tolerance is inferred.
 See [the production report](../phases/DELIVERY-consolidation-production-20261102.md)
 for actual sources, evidence and limitations.
-
