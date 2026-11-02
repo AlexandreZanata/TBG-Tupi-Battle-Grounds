@@ -610,13 +610,17 @@
       "rear injured ally while caster is attacked",
       "repeated Cast/Hit/Idle/Walk",
       "rear-angle boundary jitter",
+      "live rear patient retained through zero walking aim weight",
       "target loss and retarget",
       "hostile/non-support aiming",
       "Spawn/Evolution/Death/Victory unchanged"
     ],
-    "unit_evidence": "five focused scenarios passed, including 200 repeated-animation cases",
-    "linux": "native rear-patient witness and install pending",
+    "unit_evidence": "six unique focused scenarios passed, including 200 repeated-animation cases and full-second walking aim fade",
+    "linux": "observed native rear-patient casts under incoming damage; 60 frames, max foot yaw 0; final installed Nectar Nurse witness passed",
     "windows": "pending actual motion comparison",
-    "desktop_web": "pending actual browser motion comparison"
+    "desktop_web": "pending actual browser motion comparison",
+    "version": "0.1.2-cc.2",
+    "source_commit": "c1d3e204618ba5506ce0ada4caeca90a1c6e90db",
+    "evidence": ".local/champion-concepts-2026-11-01/support-facing-fix/final/linux-verification.json"
   }
 }

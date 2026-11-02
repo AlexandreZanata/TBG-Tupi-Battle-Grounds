@@ -1,8 +1,10 @@
 # Champion completion — seventeen authored kits and local Linux preview
 
 **Latest laboratory update:** the owner-selected PR44 head 9fb7be0 is now
-installed as preview 0.1.2-cc.1. See [the PR44 update report](CHAMPION-COMPLETION-PR44.md)
-for current source, screenshots and validation. The original delivery below
+installed with the support-facing fix as preview 0.1.2-cc.2. See
+[the support-facing report](SUPPORT-FACING-FIX.md) for current installed code
+and [the PR44 update report](CHAMPION-COMPLETION-PR44.md) for laboratory
+integration, screenshots and validation. The original delivery below
 is retained as historical evidence.
 
 **Original delivery (2026-11-01): implemented and installed as a separate Linux

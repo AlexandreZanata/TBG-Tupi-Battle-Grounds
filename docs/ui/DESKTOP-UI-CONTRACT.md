@@ -381,5 +381,9 @@ Shared paths: art/anim.rs, art/anim/support_facing.rs and sync/events.rs.
 Coverage: both seats, all forms, 30/120 Hz, rear/side/front patients, target
 loss, repeated hits and casts; paired grips and projectile timing. The
 [focused report](../phases/SUPPORT-FACING-FIX.md) records the failing-before/
-passing-after evidence. Linux native witness/install are pending at this
-checkpoint; Windows and desktop-web actual motion comparison remain pending.
+passing-after evidence. Linux preview 0.1.2-cc.2 (code c1d3e20) is installed:
+the actual rear-patient witness passed with incoming damage, 60 observed
+frames and maximum local foot yaw 0. Both original and new support kits were
+observed; the final installed witness used Nectar Nurse. Six unique focused
+tests include 200 form/seat/frame-rate cases and walking aim-fade continuity.
+Windows and desktop-web actual motion comparison remain pending.

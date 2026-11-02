@@ -45,7 +45,13 @@ are preserved. Windows and desktop-web visual parity remain pending.
 
 
 Current laboratory baseline: **PR44, head 9fb7be0**, installed preview
-**0.1.2-cc.1**. This replaces the earlier laboratory, retains all seventeen
+**0.1.2-cc.2**. This replaces the earlier laboratory, retains all seventeen
 champions and ring-only bodies, and includes the latest P71/P73 presentation.
 See [the PR44 integration/install report](../phases/CHAMPION-COMPLETION-PR44.md)
 for exact source, commands, captures and deferred checks.
+
+The current preview also fixes friendly-target Support posture: feet keep
+their lane heading while the torso follows rear patients, including under
+incoming hits and walking aim fades. See the
+[support-facing report](../phases/SUPPORT-FACING-FIX.md) for installed source
+and focused regression/native evidence.

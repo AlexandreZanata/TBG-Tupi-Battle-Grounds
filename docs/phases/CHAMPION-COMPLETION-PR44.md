@@ -1,5 +1,9 @@
 # CC17 preview — current PR44 laboratory integration
 
+**Subsequent client correction:** preview 0.1.2-cc.2 keeps this laboratory
+baseline and adds stable healing-support posture. Current installed source
+and regression evidence are in [the support-facing report](SUPPORT-FACING-FIX.md).
+
 **Delivered:** Linux preview 0.1.2-cc.1, installed source 9d4841b, including
 PR44 head 9fb7be0. Actual installed editor capture and asset hashes passed.
 The notes below retain earlier integration checkpoints and final evidence.
