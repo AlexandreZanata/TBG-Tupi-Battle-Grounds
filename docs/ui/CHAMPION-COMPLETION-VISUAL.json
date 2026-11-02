@@ -622,5 +622,48 @@
     "version": "0.1.2-cc.2",
     "source_commit": "c1d3e204618ba5506ce0ada4caeca90a1c6e90db",
     "evidence": ".local/champion-concepts-2026-11-01/support-facing-fix/final/linux-verification.json"
+  },
+  "ogre_expansion": {
+    "scope": "OG-01; eight new Ogres + existing SiegeWalker + one replacement Machine; nine new kits and 45 forms",
+    "roster": "72 conventional kinds; 8 Factions; 9 per Faction; 26 staged preview-only kinds",
+    "shared_paths": [
+      "art/kits/ogres",
+      "art/kits/siege_walker",
+      "art/overhead.rs",
+      "sync/crowd_ecs.rs",
+      "vfx/shots.rs",
+      "vfx/completion.rs"
+    ],
+    "motions": [
+      "idle",
+      "walk",
+      "attack",
+      "cast",
+      "hit",
+      "spawn",
+      "evolve",
+      "death",
+      "victory",
+      "special windup",
+      "reload"
+    ],
+    "equipment_cases": [
+      "all five Ogre Archer forms",
+      "arms and bazooka vertex envelopes",
+      "close/far engaged aim and reload ages",
+      "both seats and oblique yaw",
+      "bounded cosmetic offsets and mixed crowd",
+      "no presentation pedestal; ring-only ownership"
+    ],
+    "landing_cases": [
+      "72 actual-model portraits",
+      "8 Faction filters with 9 cards each",
+      "pt-BR and English",
+      "26 preview badges"
+    ],
+    "unit_evidence": "59 core and 8 client targeted tests passed on candidate 9; 45 new forms below 6000 triangles; 385 ring-only forms; 220 support cases",
+    "linux": "native capture and final installation pending",
+    "windows": "pending actual same-source visual/motion comparison",
+    "desktop_web": "pending actual game visual/motion comparison; landing browser check pending"
   }
 }

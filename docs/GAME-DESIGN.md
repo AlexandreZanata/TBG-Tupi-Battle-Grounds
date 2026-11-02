@@ -2066,3 +2066,19 @@ B2 adds 1500 bp attack speed. The standard Evolution rules remain unchanged.
 Basalt chip ratio is 300 bp, A +100 bp/tier. Source values are initial **Proposed**
 local-preview values; D-33 targeted screening and full competitive acceptance
 are recorded separately in the expansion report.
+
+### OG-01 tuning candidate 9 — Proposed, D-33 initial-screen response
+
+The initial non-healer values above are preserved as the ruleset-8 proposal.
+The first bounded D-33 screen found all eight new solo kits losing the three
+reference matchups. Candidate 9 raises their base combat value without changing
+the requested Ogre Archer range, Energy costs, abilities, forms or roster:
+Basalt Bulwark 1080/42/26/900/40; Cinder Maul 420/64/28/900/43;
+Hook Brawler 380/56/24/1000/50; Flint Runner 340/46/20/800/62;
+Clay Binder 380/44/30/3200/36; Gust Drummer 460/32/28/1900/38;
+Pebble Slinger 360/60/22/4100/48; Rivet Ballista 340/65/22/4300/40.
+Order is HP/damage/interval/range/speed. Hide Mender remains unchanged.
+The earth pulse's already-authoritative center is visible in the public facts,
+so its telegraph survives snapshots/reconnects. Drum interruption remains
+special-only and never cancels a basic windup. These values remain Proposed;
+the second targeted screen and limitations are in the expansion report.

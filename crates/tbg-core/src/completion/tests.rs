@@ -577,3 +577,23 @@ fn completion_ogre_drum_interrupts_specials_and_preserves_basic_windup() {
     assert!(get(&s, b).fx.special.is_none());
     assert_eq!(get(&s, b).windup, Some((Target::Unit(a), 5)));
 }
+
+#[test]
+fn completion_ogre_earth_telegraph_is_snapshot_authoritative() {
+    let mut s = arena();
+    let a = add(&mut s, ClayBinder, Seat::A, 4000);
+    let b = add(&mut s, BoneBrute, Seat::B, 6000);
+    let i = s.unit_index(a).unwrap();
+    special_start(&mut s, i, 6000);
+    s.units[i].fx.special = Some(PendingCast {
+        target: Some(b),
+        left: 6,
+    });
+    let u = get(&s, a);
+    assert_eq!(state::view(&u, s.tick).unwrap().beam_center, Some(6000));
+    s.units[i].fx.special = None;
+    assert_eq!(
+        state::view(&get(&s, a), s.tick).and_then(|v| v.beam_center),
+        None
+    );
+}

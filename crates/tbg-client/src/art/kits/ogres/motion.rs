@@ -55,6 +55,7 @@ pub fn pose(k: UnitKind, m: &Moment, p: &mut Pose) {
     }
     if !matches!(m.clip, Clip::Spawn | Clip::Evolve | Clip::Death) {
         hold(k, m, p, &plan);
+        special(k, m, p);
     }
 }
 fn hold(k: UnitKind, m: &Moment, p: &mut Pose, plan: &crate::art::rig::Proportions) {
@@ -198,4 +199,28 @@ fn victory(k: UnitKind, m: &Moment, p: &mut Pose) {
         }
     }
     tools::plant(p, &plan, tools::stance(&plan, 1.15, 0.02));
+}
+
+fn special(k: UnitKind, m: &Moment, p: &mut Pose) {
+    let Some(t) = m.special else {
+        return;
+    };
+    let cue = tools::hold(t, [0.0, 0.12, 0.30, 0.70]);
+    match k {
+        UnitKind::ClayBinder => {
+            tools::add(p, UpperArmL, [-35.0 * cue, 0.0, 0.0]);
+            tools::add(p, Head, [-15.0 * cue, 0.0, 0.0]);
+        }
+        UnitKind::GustDrummer => {
+            let lift = tools::hold(t, [0.0, 0.18, 0.45, 0.60]);
+            tools::add(p, UpperArmL, [-40.0 * lift, 0.0, 0.0]);
+            tools::add(p, UpperArmR, [-40.0 * lift, 0.0, 0.0]);
+            tools::add(
+                p,
+                Chest,
+                [10.0 * tools::hold(t, [0.45, 0.58, 0.65, 0.78]), 0.0, 0.0],
+            );
+        }
+        _ => {}
+    }
 }

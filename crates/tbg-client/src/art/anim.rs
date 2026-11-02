@@ -154,7 +154,9 @@ impl Animator {
         self.special = Some(0.0);
     }
     pub fn resolve_special(&mut self) {
-        let contact = if self.kind == UnitKind::Gorgehowl {
+        let contact = if self.kind == UnitKind::GustDrummer {
+            0.60
+        } else if self.kind == UnitKind::Gorgehowl {
             0.10
         } else {
             f32::from(tbg_core::content::WINDUP) / tbg_core::content::TICK_HZ as f32

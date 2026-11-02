@@ -50,3 +50,46 @@ from the previous baseline (requested range/Faction change). Earlier fixtures
 remain intact; OG-01 has an explicit appended source identity and baseline.
 All compiling commands used the nonblocking shared host lock and two jobs.
 No full suite ran. Native installation and actual captures remain next.
+
+## Candidate 9 scoped consolidation
+
+Protocol 34 / ruleset 9 / source hash `89698dcd4bcb5ddd`.
+**59 core and 8 client targeted tests passed.** The final core selection adds
+the authoritative earth-center scenario; the new test caught a Prismancer-only
+center initializer before commit. The initializer now follows the typed Beam
+ability; public earth telegraphs use the same locked point. Client checks
+cover Ogre special anticipation and retained support/weapon/body behavior.
+Server check passed in 1.12 s. The existing unrelated `Layout::clear` warning
+remains. No full workspace or release checks ran.
+
+Commands, under `/tmp/tbg-validation-1000.lock`, `CARGO_BUILD_JOBS=2`, existing
+root target cache, offline/locked:
+
+```bash
+cargo test --offline --locked -p tbg-core --lib --test ogre_roster --test contract_constants --test contract_ruleset_version --test contract_determinism --test contract_lab -- ogre_ completion_ synergies every_core_source current_hash bot_matches c2_ --test-threads=1
+cargo test --offline --locked -p tbg-client --bin tbg-client -- ogre_ support_ the_bombard_points ownership --test-threads=1
+cargo check --offline --locked -p tbg-server --bin tbg-server
+cargo run --offline --locked -p tbg-balance --example ogre_screen
+cargo test --offline --locked -p tbg-core --test contract_protocol --test contract_protocol_server --test contract_roster --test contract_release_identity -- --test-threads=1
+```
+
+The last four named contract targets add 29 checks; they pin the appended
+Faction/kind discriminants, stable message tags/bytes, exact range/roster/forms
+and computed release identity. Earlier fixture tables and canonical traces
+are preserved with explicit OG-01 amendments. One approval review expired
+before starting the contract command; the single retry completed normally.
+
+Final D-33 bounded screen: [balance-final.csv](../ogre-faction/balance-final.csv),
+148 seat-order duels. Basalt wins Shieldbearer/Longaxe and loses Archer;
+Cinder wins Shieldbearer; Pebble Slinger wins Shieldbearer/Longaxe; Rivet wins
+all three references. Hook, Flint and the two control specialists lose these
+three solo matchups. This small panel does **not** establish competitive
+balance or counters for every form; team compositions, special-ability
+opponents, other Energy budgets and the complete gate remain pending.
+Hide Mender is excluded from solo-duel screening. Values remain Proposed and
+new kinds stay private-preview only; no threshold was weakened or gate claimed.
+
+Local review: `http://localhost:8964/`. Its nine concept sheets are available;
+actual engine portraits and five-form lineups are being added next. Native
+figures share one vertex-color rig pipeline across desktop targets. Linux
+native observation is next; Windows/game-web visual motion remains pending.

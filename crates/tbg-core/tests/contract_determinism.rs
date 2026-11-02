@@ -137,6 +137,12 @@ fn bot_matches_are_frozen() {
             (7, 0x981a89b67d681f3d, 9982, Seat::B, StrongholdDestroyed),
             (42, 0x750b2a389290829d, 10382, Seat::A, StrongholdDestroyed),
         ],
+        // OG-01 candidate 9 changes staged kinds only; canonical traces remain frozen.
+        (9, 0x89698dcd4bcb5ddd) => [
+            (1, 0xdc6ddee0ab7abe7e, 4044, Seat::B, StrongholdDestroyed),
+            (7, 0x981a89b67d681f3d, 9982, Seat::B, StrongholdDestroyed),
+            (42, 0x750b2a389290829d, 10382, Seat::A, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

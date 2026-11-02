@@ -47,7 +47,7 @@ fn interruptible(state: &MatchState, v: &Unit) -> bool {
 }
 
 pub(crate) fn special_start(state: &mut MatchState, i: usize, center: i32) {
-    if state.units[i].kind == UnitKind::Prismancer {
+    if matches!(of(state, &state.units[i]), Some(Ability::Beam { .. })) {
         state.units[i].fx.completion.beam_center = center;
     }
 }

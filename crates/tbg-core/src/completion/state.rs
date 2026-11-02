@@ -83,8 +83,9 @@ pub fn view(u: &Unit, now: Tick) -> Option<View> {
         charged: fx.charged,
         channel_target: fx.channel.map(|c| c.target),
         channel_pulses: fx.channel.map_or(0, |c| c.left),
-        beam_center: (u.kind == UnitKind::Prismancer && u.fx.special.is_some())
-            .then_some(fx.beam_center),
+        beam_center: (matches!(u.kind, UnitKind::Prismancer | UnitKind::ClayBinder)
+            && u.fx.special.is_some())
+        .then_some(fx.beam_center),
     };
     (result != View::default()).then_some(result)
 }

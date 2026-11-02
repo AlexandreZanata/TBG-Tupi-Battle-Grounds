@@ -124,7 +124,27 @@ fn staged_waves_match_section_11() {
 
 #[test]
 fn base_stats_match_game_design_table() {
-    for row in &ROSTER {
+    // OG-01 appends the requested transfer/range; the previous table stays frozen.
+    let ogre = Row {
+        kind: UnitKind::SiegeWalker,
+        faction: Faction::Ogres,
+        archetype: Archetype::Ranged,
+        cost: 5,
+        hp: 700,
+        damage: 85,
+        heal: 0,
+        every_cs: 250,
+        range_ct: 450,
+        speed_ct: 66,
+        splash_ct: 150,
+        on_hit: None,
+    };
+    for legacy in &ROSTER {
+        let row = if legacy.kind == UnitKind::SiegeWalker {
+            &ogre
+        } else {
+            legacy
+        };
         let u: &UnitDef = def(row.kind);
         let name = u.name;
         assert_eq!(u.kind, row.kind, "UNITS order must follow UnitKind");
@@ -162,7 +182,7 @@ fn roster_composition() {
     // `UnitKind` order, and stay out of the pool and out of `ALL_KINDS`.
     let kinds: Vec<UnitKind> = UNITS.iter().map(|u| u.kind).collect();
     // CC-ID01: append seventeen local-preview tags; production Shop remains 46.
-    assert_eq!(UNITS.len(), 68);
+    assert_eq!(UNITS.len(), 68 + 9, "OG-01 appends nine kinds");
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     // Owner activation: all 51 registered kinds, 46 conventional Shop entries.
     assert_eq!(tbg_core::FULL_POOL.len(), 46);
@@ -180,7 +200,8 @@ fn roster_composition() {
             .iter()
             .take(27)
             .filter(|u| u.faction == f && u.kind.is_conventional());
-        assert_eq!(sold.count(), n, "{f:?}");
+        let expected = if f == Faction::Machines { n - 1 } else { n };
+        assert_eq!(sold.count(), expected, "{f:?}");
     }
     for a in [
         Archetype::Tank,
@@ -524,7 +545,10 @@ fn evolution_forms_are_frozen() {
         .iter()
         .flat_map(|u| u.forms.iter().map(move |f| form_line(u.name, f)))
         .collect();
-    let frozen: Vec<&str> = FORMS.lines().collect();
+    // Preserve the previous fixture and append explicit changed/new OG-01 definitions.
+    let mut frozen: Vec<&str> = FORMS.lines().collect();
+    frozen.splice(20..24, OGRE_ARCHER_FORMS.lines());
+    frozen.extend(OGRE_NEW_FORMS.lines());
     assert_eq!(shipped.len(), frozen.len(), "form count changed");
     for (got, want) in shipped.iter().zip(frozen) {
         assert_eq!(got, want);
@@ -610,3 +634,47 @@ fn proposed_drills_match_section_13_4_and_stay_outside_shop_pools() {
         assert!(!tbg_core::types::UNIT_KINDS.contains(&kind));
     }
 }
+
+// OG-01 Proposed: explicit appended Evolution definitions.
+const OGRE_ARCHER_FORMS: &str =
+    "Ogre Archer/Longshot: hp=0 dmg=0 atk=0 speed=0 range+=1500 splash+=0 heal=0 dmg+=0 hit=-
+Ogre Archer/Artillery: hp=0 dmg=5000 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Ogre Archer/Shrapnel: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=1000 heal=0 dmg+=0 hit=-
+Ogre Archer/Concussion: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=root 16t";
+const OGRE_NEW_FORMS: &str =
+    "Basalt Bulwark/Cairn Guard: hp=1500 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Basalt Bulwark/Stonewall: hp=1500 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Basalt Bulwark/Cracked Guard: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Basalt Bulwark/Quake Bastion: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Coalbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Ember Anvil: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Twin Brands: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Cinder Maul/Furnace Fists: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Ironhook: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Anchorbreaker: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Barbed Loop: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Hook Brawler/Chainmaster: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Trailblade: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Flint Gale: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Sparksprinter: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Flint Runner/Obsidian Rush: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Clay Seal: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Earthlock: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Mire Mask: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Clay Binder/Quagmire Sage: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Stormbeat: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Thunderhide: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Hollow Rhythm: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Gust Drummer/Typhoon Drum: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Hide Mender/Field Stitch: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Hide Mender/Leather Surgeon: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=1500 dmg+=0 hit=-
+Hide Mender/Spirit Spool: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Hide Mender/Ancestral Seam: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Counterweight: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Cliffshot: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Split Pouch: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Pebble Slinger/Hail Sling: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Rail Guide: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Needle Engine: hp=0 dmg=1500 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Triple Magazine: hp=0 dmg=0 atk=0 speed=0 range+=250 splash+=0 heal=0 dmg+=0 hit=-
+Rivet Ballista/Rivet Storm: hp=0 dmg=0 atk=1500 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";

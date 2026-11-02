@@ -497,7 +497,7 @@ pub fn snapshot_pose(
     if k == UnitKind::NectarNurse && f.channel_target.is_some() {
         motion::channel_pose(m, p);
     }
-    if k == UnitKind::Hushfang && f.charged {
+    if matches!(k, UnitKind::Hushfang | UnitKind::FlintRunner) && f.charged {
         p[Body(Joint::Head).index()].0.x -= 5.0;
         p[Node::Secondary(crate::art::rig::Spring::Back).index()]
             .0

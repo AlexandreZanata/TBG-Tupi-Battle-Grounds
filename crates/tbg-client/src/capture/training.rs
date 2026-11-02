@@ -44,6 +44,32 @@ fn journey(
             catalog.enemies = vec![placed(UnitKind::Shieldbearer, 8_600)];
             catalog.dummies = false;
         }
+        if crate::config::url_param("capture_ogre_crowd").is_some() {
+            use tbg_core::{training::TrainingUnitSpec, UnitKind::*};
+            let placed = |kind, tier, branch, x| TrainingUnitSpec {
+                x: Some(x),
+                tier,
+                branch,
+                ..TrainingUnitSpec::base(kind)
+            };
+            catalog.allies = vec![
+                placed(SiegeWalker, 0, 0, 7800),
+                placed(SiegeWalker, 2, 0, 7400),
+                placed(BasaltBulwark, 0, 0, 8400),
+                placed(HookBrawler, 0, 0, 8200),
+                placed(HideMender, 0, 0, 6000),
+                placed(RivetBallista, 0, 0, 6900),
+            ];
+            catalog.enemies = vec![
+                placed(Shieldbearer, 0, 0, 10400),
+                placed(Longaxe, 0, 0, 11100),
+                placed(BoneBrute, 0, 0, 10900),
+                placed(Hexer, 0, 0, 12300),
+                placed(Archer, 0, 0, 12900),
+            ];
+            catalog.dummies = false;
+            eprintln!("Ogre crowd scene configured through the authoritative Training catalog");
+        }
         queue.0.push(Action::Open(Tab::Editor));
         *stage = 1;
         return;

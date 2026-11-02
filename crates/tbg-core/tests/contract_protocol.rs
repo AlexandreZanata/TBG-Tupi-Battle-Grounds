@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 33,
-        "CC-ID03: protocol 33 combines D-103 history with local champion facts; old tags remain stable"
+        PROTOCOL_VERSION, 34,
+        "OG-01: append an eighth Faction; protocol 34 rejects older snapshot layouts, preserving message tags"
     );
 }
 
@@ -427,4 +427,12 @@ fn cc_id01_v32_completion_facts_and_short_cast_roundtrip_without_reordering_old_
         postcard::from_bytes::<(View, SpecialView)>(&bytes),
         Ok((facts, special))
     );
+}
+
+#[test]
+fn og01_new_faction_and_kind_tags_are_appended() {
+    assert_eq!(encode(&tbg_core::Faction::Ogres), [7]);
+    assert_eq!(encode(&tbg_core::UnitKind::Stridulator), [67]);
+    assert_eq!(encode(&tbg_core::UnitKind::BasaltBulwark), [68]);
+    assert_eq!(encode(&tbg_core::UnitKind::RivetBallista), [76]);
 }
