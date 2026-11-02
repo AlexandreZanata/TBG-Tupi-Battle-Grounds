@@ -13,6 +13,11 @@ use crate::config;
 /// Give up reconnecting after this long (server window is 30 s).
 pub(crate) const GIVE_UP: f64 = 30.0;
 
+/// A draining slot refuses new play with `ServerFull`; the request is asked again through admission
+/// (which names the promoted slot) at most this often per window before the player is told.
+const READMIT_MAX: u32 = 3;
+const READMIT_WINDOW: f64 = 30.0;
+
 /// The server pings every second; this much silence means the link is gone.
 /// Above the server's 3 s stale-controller limit, so the resume takes the seat back.
 const SILENT: f64 = 4.0;
@@ -126,6 +131,36 @@ impl NetLink {
         }
     }
 
+    /// P66 (D-92): new play was refused because this slot is being drained for a release. Drop the
+    /// link to it and ask admission again; the next `Welcome` repeats the same request there.
+    fn readmit(&mut self, now: f64) -> bool {
+        let asking = !self.in_match
+            && !self.watching
+            && !matches!(self.mode, super::Mode::Probe | super::Mode::Watch(_))
+            && matches!(
+                self.route,
+                super::admission::Route::Ready { fresh: true, .. }
+            );
+        if !asking {
+            return false;
+        }
+        if now - self.readmit_at > READMIT_WINDOW {
+            self.readmits = 0;
+        }
+        if self.readmits >= READMIT_MAX {
+            return false;
+        }
+        self.readmits += 1;
+        self.readmit_at = now;
+        self.socket = None;
+        self.opened = false;
+        self.heard_at = None;
+        self.outq.clear();
+        self.route = super::admission::Route::start(None, now);
+        self.status = NetStatus::Connecting;
+        true
+    }
+
     /// P71: views that keep arriving with a clock that stands still mean the
     /// server paused the match for a player's reconnect (BR-M03).
     fn note_clock(&mut self, clock: u64, now: f64) {
@@ -197,6 +232,9 @@ impl NetLink {
                 self.send(ClientMsg::Pong { id }, now);
                 None
             }
+            ServerMsg::Error {
+                code: protocol::ErrorCode::ServerFull,
+            } if self.readmit(now) => None,
             ServerMsg::VersionMismatch { .. } => {
                 self.status = NetStatus::Failed(NetFailure::VersionMismatch);
                 crate::platform::storage::set(
@@ -288,7 +326,85 @@ mod tests {
                 endpoint: "/ws".into(),
                 fresh: true,
             },
+            readmits: 0,
+            readmit_at: 0.0,
         }
+    }
+
+    fn full() -> ServerMsg {
+        ServerMsg::Error {
+            code: protocol::ErrorCode::ServerFull,
+        }
+    }
+
+    /// P66 (D-92): a slot drained for a release refuses new play; the link asks admission again
+    /// (the promoted slot answers) and repeats the request there, instead of showing "server full".
+    #[test]
+    fn p66_a_draining_slots_refusal_is_asked_again_through_admission() {
+        let mut net = link(Mode::Quick);
+        net.opened = true;
+        assert!(net.handle(full(), 5.0).is_none(), "the player is not told");
+        assert!(matches!(
+            net.route,
+            crate::net::admission::Route::Pending { .. }
+        ));
+        assert_eq!(net.status, NetStatus::Connecting);
+        assert!(net.socket.is_none() && !net.opened);
+        assert_eq!(
+            net.mode,
+            Mode::Quick,
+            "the same request is repeated after the next Welcome"
+        );
+    }
+
+    /// Only a link that asked for new play on a slot admission chose is moved; a match, a watch, an
+    /// idle probe and a resumed route report the error, and a server that stays full tells the player.
+    #[test]
+    fn p66_other_refusals_and_repeated_ones_reach_the_player() {
+        let mut in_match = link(Mode::Quick);
+        in_match.in_match = true;
+        let mut resumed = link(Mode::Quick);
+        resumed.route = crate::net::admission::Route::Ready {
+            url: "ws://127.0.0.1:8080/ws/slot-a".into(),
+            endpoint: "/ws/slot-a".into(),
+            fresh: false,
+        };
+        let mut watching = link(Mode::Quick);
+        watching.watching = true;
+        for mut net in [
+            link(Mode::Probe),
+            link(Mode::Watch(7)),
+            in_match,
+            resumed,
+            watching,
+        ] {
+            assert!(matches!(
+                net.handle(full(), 5.0),
+                Some(ServerMsg::Error { .. })
+            ));
+        }
+        let mut net = link(Mode::Quick);
+        for second in 0..READMIT_MAX {
+            net.route = crate::net::admission::Route::Ready {
+                url: "ws://127.0.0.1:8080/ws/slot-b".into(),
+                endpoint: "/ws/slot-b".into(),
+                fresh: true,
+            };
+            assert!(net.handle(full(), 10.0 + f64::from(second)).is_none());
+        }
+        net.route = crate::net::admission::Route::Ready {
+            url: "ws://127.0.0.1:8080/ws/slot-b".into(),
+            endpoint: "/ws/slot-b".into(),
+            fresh: true,
+        };
+        assert!(matches!(
+            net.handle(full(), 14.0),
+            Some(ServerMsg::Error { .. })
+        ));
+        assert!(
+            net.handle(full(), 14.0 + READMIT_WINDOW + 1.0).is_none(),
+            "a later window asks again"
+        );
     }
 
     /// P71 (BR-M03): a clock that stands still while views keep arriving is the
