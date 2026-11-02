@@ -2945,11 +2945,13 @@ release and the migration review stay human). Automation never stops a slot that
 match, a pending result or ranked authority, never reloads Caddy and never restores a
 database backup.
 
-Server and client carry three small supports and no wire change: `lobby_waiting` in `/metrics`
+Server and client carry small supports and no wire change: `lobby_waiting` in `/metrics`
 (so the coordinator can wait), a draining slot refuses its stranded waiters with the existing
-`ServerFull`, and an admitting slot without ranked authority asks for it every second instead
-of every fifth; a client asks admission again (at most three times in 30 s) when a draining slot
-answers `ServerFull` to a new request. Rematch offers, spectators and per-process listings do
+`ServerFull`, an admitting slot without ranked authority asks for it every second instead
+of every fifth, a slot that has just started answers admission from the database, a server task
+that stops by itself exits non-zero so `Restart=on-failure` revives the slot; a client asks
+admission again (at most three times in 30 s) when a draining slot answers `ServerFull` to a
+new request. Rematch offers, spectators and per-process listings do
 not follow a promotion and stay documented limits.
 
 **Reopens when** the contract or schema must change in one step (a coordinated release with

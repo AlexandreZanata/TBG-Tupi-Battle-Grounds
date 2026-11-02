@@ -132,8 +132,9 @@ directory before the journal. Phases, outcomes and commands: `deploy/auto/README
 Supports without any wire or schema change: `lobby_waiting` in `/metrics`; a draining slot
 refuses its stranded waiters with `ServerFull`; an admitting slot without ranked authority
 asks every second; a slot that has just started answers admission from the database (the
-rehearsal found it answering "unavailable" for one probe); a client asks admission again
-(3 times in 30 s) when a draining slot refuses new play.
+rehearsal found it answering "unavailable" for one probe); a server whose task stops by itself
+now exits non-zero, so the slot unit's `Restart=on-failure` revives it (it used to exit 0 and stay
+down); a client asks admission again (3 times in 30 s) when a draining slot refuses new play.
 
 ### Local rehearsal (`scripts/rehearse-slot-release.py`)
 
@@ -144,13 +145,13 @@ play a bounded 20 s match, continuously, across: release 1 (`8be248e` → this b
 2 with a lone player queued for 30 s (the coordinator waited, then promoted), and a drill
 where a candidate promotes but the public route never follows it (rolled back).
 
-| Final run (coordinator v2) | Result |
-|----------------------------|--------|
-| Matches completed | 70 (45 on slot a, 25 on slot b), 28 of them ranked |
+| Final run (coordinator after the second review) | Result |
+|-------------------------------------------------|--------|
+| Matches completed | 60 (40 on slot a, 20 on slot b), 24 of them ranked |
 | Failed attempts (match, admission, registration) | 0 |
-| Admission probes at 10 Hz through all three events | 2995, 0 failed; median 0.4 ms, max 72 ms |
+| Admission probes at 10 Hz through all three events | 2541, 0 failed; median 0.5 ms, max 80 ms |
 | Health failures | 0 |
-| Release 1 / release 2 / rollback drill | old slot retired after 46.6 s / 79.6 s (28 s waiting for the lobby) / rolled back after 9 s; the rejected slot finished the 5 matches it had admitted and retired after 68.6 s in total |
+| Release 1 / release 2 / rollback drill | old slot retired after 46.6 s / 84.6 s (28 s of it waiting for the lobby) / rolled back after 8 s, the rejected slot retired 10 s later |
 
 Earlier runs found, and the final run confirms the fixes of: the "unavailable" window of a
 just-started slot, ranked bots running out of deterministic names after 10 matches
@@ -189,9 +190,24 @@ sandbox. Its findings, all reproduced or confirmed in the code, are fixed:
   slot stopped under load and a closed journal. Mutation checks confirm the tests fail when a
   guard is removed.
 
-Residual risks the reviewer listed: the controller runs at `Nice=15` with idle I/O (the
-timing-critical steps are light and retried), and verification passes through Cloudflare at
-about 1.5 requests per second for at most 60 s (a block would cause a safe false rollback).
+A second read-only review of the rework found, and these are fixed too: the installer did not
+copy `slot_host.py`, which would have broken all four controllers at import after the documented
+reinstall (a test now checks the installer against the imports of every controller); a rejected
+slot that had exited cleanly was never retired and ended in a hold (it is retired when it lists no
+work, and the server now exits non-zero when its task stops, so systemd restarts it); a manual
+rollback landing inside the verification window was treated as a refused rollback; a busy database
+during cleanup or rollback held the controller (it is now a retry, with 20 attempts for rollback);
+a hanging `--build-info` escaped uncaught; a host without the directory table was treated as locked;
+a drain that outlives a day now fails loudly instead of waiting silently. The crash replay now
+covers six outcomes (verification fails, never ready, promotion refused, reply lost, successor dies
+while the old slot drains) and the test host also flags stopping the last admitting slot.
+
+Residual risks: the controller runs at `Nice=15` with idle I/O (the timing-critical steps are
+light and retried); verification passes through Cloudflare at about 1.5 requests per second for
+at most 60 s (a block would cause a safe false rollback); a held controller or a stuck drain only
+shows up in `status.py` and the unit's failed state, nothing pages anyone; and the first promotion
+leaves the `8be248e` generation (no lobby gauge or waiter refusal) for waiting players to strand
+until the idle grace.
 
 ### Gaps from the 2026-11-02 analysis
 
@@ -211,7 +227,7 @@ about 1.5 requests per second for at most 60 s (a block would cause a safe false
 
 Local, work-front level (no full suite, per AGENTS.md):
 
-- Python: `test-slot-deploy.py` (43, including every crash point), `test-auto-deploy.py` (21),
+- Python: `test-slot-deploy.py` (51, including every crash point of six outcomes), `test-auto-deploy.py` (21),
   `test-web-deploy.py` (14), `test-static-deploy.py` (11), `test-native-catalog.py` (7),
   `test-native-release-policy.py` (12), `test-ci-required-checks.py` (11),
   `test-native-inputs.py`, `check-native-inputs.py`, `check-native-version.py --base origin/main`,
