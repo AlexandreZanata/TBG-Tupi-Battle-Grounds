@@ -30,6 +30,8 @@ pub fn plugin() -> RenderPlugin {
     };
     RenderPlugin {
         render_creation: render_creation.into(),
+        // ponytail: P69 diagnostic — compile pipelines synchronously so failures surface at once.
+        synchronous_pipeline_compilation: true,
         ..Default::default()
     }
 }
