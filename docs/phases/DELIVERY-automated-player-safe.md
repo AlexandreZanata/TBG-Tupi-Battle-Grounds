@@ -285,3 +285,19 @@ account and entered no public queue or Ranked match. This observation does not
 certify all Ranked/reconnect scenarios or visual parity. The final protocol-36
 consolidation, its attended coordinated switch and a subsequent compatible merge
 observed through timers remain pending at this checkpoint.
+
+
+## Observed consolidated production delivery (2026-11-02, evening UTC)
+
+The owner-authorized normal merges now include #48/#53/#54 and all original
+P73/laboratory/champion/P74/Gods fronts. The first exact-main coordinated
+w31 -> w38-r15 activation completed at 19:09:36 UTC (source 8c507), with an
+anonymous private match preserved through promotion and old-slot retirement.
+Four staggered timers were enabled afterward. Following the compatible #54
+merge at 19:10:44 UTC, all four families advanced to source 6d96245 through
+natural timer firings; no manual deployment controller/timer action was used.
+The compatible private witness verified both Auxiliaries, equal outcomes and
+zero failures/restarts. Official Linux colossus.3 is installed with all 395 files
+checked. Full observed timestamps, sources, limitations and retirement closure
+are in [the production consolidation report](DELIVERY-consolidation-production-20261102.md).
+Earlier deferred/owner instructions above describe historical checkpoints.

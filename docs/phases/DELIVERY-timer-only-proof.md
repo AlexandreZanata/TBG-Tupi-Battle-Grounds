@@ -35,3 +35,21 @@ settlement. This work front's native version policy and all 12 native release
 policy tests passed locally. No local compilation/full suite was needed for
 the version/comment-only witness. First production activation is still pending;
 this PR must wait for its observed completion before merge.
+
+
+## Observed timer-only update
+
+PR #54 merged as 6d96245bef217f3a11376e941e64fe882d125696 at 19:10:44 UTC.
+After this boundary no apply CLI/controller/timer start/restart, controller
+installation or daemon reload was used. Natural timers promoted b/source 6d96245
+and refreshed the web/static/native catalog. At 19:34:45 UTC all four receipts
+named the source above, public entry hashes matched, health was 200/ok and both
+Linux/Windows colossus.3 downloads were available.
+
+A real private pair was confirmed on old a/source 8c507 before promotion. It
+verified Merchant's three purchases/free reroll and Miner's active phase.
+Both guests finished with equal outcomes, zero failures/restarts and 3,005/3,001
+views. The next natural backend timer retired old a at 19:41:04 UTC; the
+19:42:24 read-only snapshot confirmed no transition journal or operator hold.
+The complete timeline and terminal old-slot observation are in
+[the production report](DELIVERY-consolidation-production-20261102.md).
