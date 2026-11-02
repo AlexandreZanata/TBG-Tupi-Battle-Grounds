@@ -35,7 +35,12 @@ __TBG_DOMAIN__ {
 	# P73 privacy barrier: public profiles/history never fall back to an older slot.
 	# Keep slot a privacy-aware even when its match admission is draining/rolled back.
 	handle /api/players/* {
-		header Cache-Control "private, no-store"
+		# Deferred so it replaces the upstream profile cache header instead of
+		# being sent next to it.
+		header {
+			Cache-Control "private, no-store"
+			defer
+		}
 		reverse_proxy 127.0.0.1:8080
 	}
 	# Legacy `/ws` clients, health and the read-only APIs (P13 ranking with
