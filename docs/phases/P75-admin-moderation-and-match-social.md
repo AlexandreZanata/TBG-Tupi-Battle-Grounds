@@ -574,6 +574,7 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S7 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Every area route inventoried with success/unauthenticated denial; moderator ceiling, current disabled state, masked-email projection | Runtime tests queued S14; console walkthrough pending S12. |
 | S6 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_admin`: bootstrap, claim, session cookie, separation, CSRF/Origin, idle expiry, atomic audit failure, append-only guards; trusted proxy unit case | API area inventory completes S7; tests queued S14; no real email or host CLI action. |
 | S5 | This step commit | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | Moderation reversibility, two-slot issuance/expiry, optimistic race, exact forfeit state and no voluntary surrender signal | S9 adds suspension wire delivery; S7 extends API and switch tests; full targeted run S14. |
 | S4 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_recovery`: discovered FK snapshot, key format, two-slot revocation, generic replies, code budgets and secret-at-rest canaries | Test run queued S14; real socket closure and full UI recovery remain pending. |

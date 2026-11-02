@@ -48,6 +48,7 @@ use metrics::Metrics;
 /// Shared by every request handler.
 #[derive(Clone)]
 pub(crate) struct AppState {
+    pub mail_configured: bool,
     pub auth: Arc<auth::Service>,
     pub history_reads: Arc<tokio::sync::Semaphore>,
     pub lobby: mpsc::Sender<chan::LobbyCmd>,
@@ -103,6 +104,7 @@ pub async fn run_with(
     // deploy check never passes a server that runs without its records.
     let store_failed = config.db.is_some() && store.is_none();
     let config = Arc::new(config);
+    let mut mail_configured = false;
     if let Some(store) = &store {
         let transport = config
             .mail_capture
@@ -115,6 +117,7 @@ pub async fn run_with(
                     .and_then(|c| mail::transport::Transport::smtp(&config.mail, c))
             });
         if let Some(transport) = transport {
+            mail_configured = true;
             mail::dispatch::start(
                 store.clone(),
                 Arc::new(transport),
@@ -191,6 +194,7 @@ pub async fn run_with(
         live_tx,
     ));
     let state = AppState {
+        mail_configured,
         history_reads: Arc::new(tokio::sync::Semaphore::new(4)),
         auth,
         lobby: lobby_tx,

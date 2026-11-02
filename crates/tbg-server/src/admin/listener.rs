@@ -94,6 +94,9 @@ async fn execute(
     if !request::allowed_ip(ip, &app.config.admin.allow_ips) {
         return Err(Error::Forbidden);
     }
+    let query = req.uri().query().unwrap_or("").to_owned();
+    let method = req.method().as_str().to_owned();
+    let system = json!({"mail_configured":app.mail_configured,"slot":app.release.slot(),"build":app.config.server_build,"online":app.metrics.connections.load(std::sync::atomic::Ordering::Relaxed),"live_matches":app.metrics.matches_running.load(std::sync::atomic::Ordering::Relaxed),"feed_lag":0});
     let path = req
         .uri()
         .path()
@@ -121,7 +124,7 @@ async fn execute(
             return Err(Error::Forbidden);
         }
     }
-    let _permit = app
+    let permit = app
         .history_reads
         .clone()
         .try_acquire_owned()
@@ -134,6 +137,7 @@ async fn execute(
     let second = app.config.admin.login_code;
     let ip = ip.to_string();
     store.release(move |db| {
+        let _permit=permit;
         let principal=if route.capability!=policy::Capability::Public {
             match operators::sessions::authenticate(db,&token,mutation.then_some(csrf.as_deref().unwrap_or("")),now) {
                 Ok(p)=>{if !policy::allowed(&p.role,route.capability){return Err(Error::Forbidden);}if route.sensitive&&now-p.reauth>=300{return Err(Error::Reauth);}Some(p)},
@@ -145,6 +149,15 @@ async fn execute(
                 },Err(e)=>return Err(e)
             }
         }else{None};
-        if path.starts_with("session")||path.starts_with("claim/"){session::execute(db,&path,&bytes,&token,&ip,&id,now,second)}else{let _=principal;Err(Error::Unavailable)}
+        if path.starts_with("session")||path.starts_with("claim/"){session::execute(db,&path,&bytes,&token,&ip,&id,now,second)}else{
+            let principal=principal.as_ref().ok_or(Error::Unauthorized)?;
+            if path.starts_with("emoji/")&&path.ends_with("/sheet.png") {
+                let asset=path.split('/').nth(1).and_then(|v|v.parse::<i64>().ok()).ok_or(Error::Invalid)?;
+                let bytes:Option<Vec<u8>>=db.query_row("SELECT sheet FROM emoji_assets WHERE id=?1",[asset],|r|r.get(0)).map_err(|_|Error::Invalid)?;
+                return Ok(([("content-type","image/png")],bytes.ok_or(Error::Invalid)?).into_response());
+            }
+            let context=operators::areas::Context{principal,request:&id,now,query:&query,system};
+            Ok(Json(operators::areas::authorized(db,&path,&method,&bytes,&context,&token,csrf.as_deref())?).into_response())
+        }
     }).await.ok_or(Error::Unavailable)?
 }

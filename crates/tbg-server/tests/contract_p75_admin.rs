@@ -221,3 +221,232 @@ async fn br_ad08_idle_absolute_expiry_and_key_rotation_refuse_old_sessions() {
     );
     assert_eq!(s.number("SELECT COUNT(*) FROM operators"), 1);
 }
+
+#[tokio::test]
+async fn s01_area_inventory_is_complete_with_success_and_denial_per_route() {
+    use tbg_server::admin::policy::ROUTES;
+    let s = operator::server().await;
+    let op = operator::claim(&s).await;
+    s.register("Keeper", "keeper@example.invalid").await;
+    let cases: Vec<(&str, &str, &str, serde_json::Value)> = vec![
+        ("GET", "overview", "overview", json!(null)),
+        ("GET", "accounts", "accounts?prefix=Ke", json!(null)),
+        ("GET", "accounts/{name}", "accounts/Keeper", json!(null)),
+        (
+            "POST",
+            "accounts/{name}/ban",
+            "accounts/Keeper/ban",
+            json!({"duration_hours":1,"reason":"other","expected_version":0}),
+        ),
+        (
+            "POST",
+            "accounts/{name}/unban",
+            "accounts/Keeper/unban",
+            json!({"reason":"other","expected_version":1}),
+        ),
+        (
+            "POST",
+            "accounts/{name}/chat",
+            "accounts/Keeper/chat",
+            json!({"duration_hours":1,"reason":"other","expected_version":2}),
+        ),
+        (
+            "POST",
+            "accounts/{name}/emoji",
+            "accounts/Keeper/emoji",
+            json!({"duration_hours":1,"reason":"other","expected_version":3}),
+        ),
+        (
+            "POST",
+            "accounts/{name}/revoke-sessions",
+            "accounts/Keeper/revoke-sessions",
+            json!({"reason":"other"}),
+        ),
+        (
+            "POST",
+            "accounts/{name}/send-recovery",
+            "accounts/Keeper/send-recovery",
+            json!({"reason":"other"}),
+        ),
+        ("GET", "reports", "reports", json!(null)),
+        ("GET", "reports/{id}", "reports/1", json!(null)),
+        (
+            "POST",
+            "reports/{id}/resolve",
+            "reports/1/resolve",
+            json!({"outcome":"dismissed","note":"reviewed","expected_status":"open"}),
+        ),
+        ("GET", "emoji", "emoji", json!(null)),
+        ("GET", "emoji/{id}", "emoji/1", json!(null)),
+        (
+            "GET",
+            "emoji/{id}/sheet.png",
+            "emoji/1/sheet.png",
+            json!(null),
+        ),
+        (
+            "POST",
+            "emoji/{id}/approve",
+            "emoji/1/approve",
+            json!({"reason":"reviewed"}),
+        ),
+        (
+            "POST",
+            "emoji/{id}/reject",
+            "emoji/2/reject",
+            json!({"reason":"other"}),
+        ),
+        (
+            "POST",
+            "emoji/{id}/revoke",
+            "emoji/1/revoke",
+            json!({"reason":"other"}),
+        ),
+        ("GET", "chat/terms", "chat/terms", json!(null)),
+        (
+            "POST",
+            "chat/terms",
+            "chat/terms",
+            json!({"term":"fixture","reason":"other"}),
+        ),
+        (
+            "DELETE",
+            "chat/terms/{term}",
+            "chat/terms/fixture",
+            json!({"reason":"other"}),
+        ),
+        ("GET", "settings", "settings", json!(null)),
+        (
+            "PUT",
+            "settings/{key}",
+            "settings/chat_enabled",
+            json!({"value":1,"reason":"other"}),
+        ),
+        ("GET", "email-blocks", "email-blocks", json!(null)),
+        (
+            "POST",
+            "email-blocks",
+            "email-blocks",
+            json!({"email":"blocked@example.invalid","reason":"other"}),
+        ),
+        (
+            "DELETE",
+            "email-blocks/{email}",
+            "email-blocks/blocked%40example.invalid",
+            json!({"reason":"other"}),
+        ),
+        ("GET", "operators", "operators", json!(null)),
+        (
+            "POST",
+            "operators",
+            "operators",
+            json!({"email":"mod@example.invalid","role":"moderator"}),
+        ),
+        (
+            "POST",
+            "operators/{id}/disable",
+            "operators/2/disable",
+            json!({"reason":"other"}),
+        ),
+        (
+            "POST",
+            "operators/{id}/enable",
+            "operators/2/enable",
+            json!({"reason":"other"}),
+        ),
+        ("GET", "audit", "audit", json!(null)),
+        ("GET", "system", "system", json!(null)),
+    ];
+    let inventoried: Vec<_> = ROUTES
+        .iter()
+        .filter(|r| !r.path.starts_with("claim/") && !r.path.starts_with("session"))
+        .map(|r| (r.method, r.path))
+        .collect();
+    assert_eq!(
+        inventoried,
+        cases
+            .iter()
+            .map(|(m, p, _, _)| (*m, *p))
+            .collect::<Vec<_>>(),
+        "S01 a route without a behavioral matrix row fails"
+    );
+    s.sql("INSERT INTO accounts(id,name,name_lower,key_hash,created_at) VALUES(2,'Other','other',zeroblob(32),'fixture');INSERT INTO reports(created_unix,reporter_id,target_id,reason,context,evidence_json) VALUES(1000000,1,2,'other','profile','{}');INSERT INTO emoji_assets(id,owner_account_id,content_hash,status,label,sheet,frame_px,frames,columns,delays_json,source_format,source_bytes,created_unix) VALUES(1,1,zeroblob(32),'pending','one',x'89504e47',16,1,1,'[100]','png',10,1000000),(2,1,randomblob(32),'pending','two',x'89504e47',16,1,1,'[100]','png',10,1000000);");
+    for (method, _, path, body) in cases {
+        let denied = request(
+            &op.url,
+            method,
+            &format!("/admin-api/v1/{path}"),
+            body.clone(),
+            vec![
+                ("origin".into(), "https://admin.tupibg.com".into()),
+                ("x-tbg-csrf".into(), "wrong".into()),
+            ],
+        )
+        .await;
+        assert_eq!(denied.status, 401, "unauthenticated: {method} {path}");
+        let allowed = op.request(method, path, body).await;
+        assert_eq!(
+            allowed.status, 200,
+            "owner: {method} {path}: {}",
+            allowed.body
+        );
+    }
+}
+
+#[tokio::test]
+async fn s01_moderator_and_disabled_operator_are_checked_against_current_state() {
+    let s = operator::server().await;
+    let op = operator::claim(&s).await;
+    s.register("Keeper", "private@example.invalid").await;
+    s.sql("UPDATE operators SET role='moderator' WHERE id=1;");
+    let detail = op.request("GET", "accounts/Keeper", json!(null)).await;
+    assert_eq!(detail.status, 200);
+    assert!(!detail.body.contains("private@example.invalid"), "S17");
+    for (method, path, body) in [
+        (
+            "PUT",
+            "settings/chat_enabled",
+            json!({"value":1,"reason":"other"}),
+        ),
+        (
+            "POST",
+            "operators",
+            json!({"email":"m@example.invalid","role":"moderator"}),
+        ),
+        (
+            "POST",
+            "accounts/Keeper/ban",
+            json!({"duration_hours":31*24,"reason":"other","expected_version":0}),
+        ),
+        ("GET", "audit", json!(null)),
+        ("GET", "email-blocks", json!(null)),
+    ] {
+        assert_eq!(
+            op.request(method, path, body).await.status,
+            403,
+            "moderator denied {path}"
+        );
+    }
+    assert_eq!(
+        op.request(
+            "POST",
+            "accounts/Keeper/chat",
+            json!({"duration_hours":1,"reason":"other","expected_version":0})
+        )
+        .await
+        .status,
+        200
+    );
+    s.sql("UPDATE operators SET status='disabled' WHERE id=1;");
+    assert_eq!(op.request("GET", "overview", json!(null)).await.status, 401);
+    assert_eq!(
+        op.request(
+            "POST",
+            "accounts/Keeper/chat",
+            json!({"duration_hours":1,"reason":"other","expected_version":1})
+        )
+        .await
+        .status,
+        401
+    );
+}

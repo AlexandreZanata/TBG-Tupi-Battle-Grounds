@@ -47,7 +47,7 @@ pub fn apply(db: &mut Connection, action: Action, now: i64) -> Result<State, Err
     {
         return Err(Error::Invalid);
     }
-    let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    let tx = db.savepoint()?;
     let before = state(&tx, action.account)?;
     if before.version != action.expected {
         return Err(Error::Conflict);

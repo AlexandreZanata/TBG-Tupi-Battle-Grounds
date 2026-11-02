@@ -161,3 +161,4 @@ pub fn maintenance(db: &Connection, now: i64) -> rusqlite::Result<()> {
     db.execute("DELETE FROM operator_challenges WHERE rowid IN (SELECT rowid FROM operator_challenges WHERE expires_unix<=?1 LIMIT 256)",[now])?;
     Ok(())
 }
+pub mod areas;
