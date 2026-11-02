@@ -17,6 +17,13 @@ pub enum MatchLink {
 
 impl MatchLink {
     pub fn send(&mut self, msg: ClientMsg, now: f64) {
+        #[cfg(all(target_os = "android", feature = "android-loopback"))]
+        if !matches!(self, Self::Idle) {
+            // Intents contain gameplay only; never log auth, room or resume messages.
+            if let ClientMsg::Intent { seq, intent } = &msg {
+                bevy::log::info!("TBG_ANDROID_INTENT seq={seq} {intent:?}");
+            }
+        }
         match self {
             MatchLink::Idle => {}
             MatchLink::Local(m) => m.send(msg),

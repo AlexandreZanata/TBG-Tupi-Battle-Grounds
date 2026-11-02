@@ -258,13 +258,30 @@ fn vitality(parent: &mut ChildSpawnerCommands, relative: usize) {
         });
 }
 
-fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readout, &mut Text)>) {
+fn update(
+    view: Res<LatestView>,
+    info: Res<MatchInfo>,
+    lang: Res<Lang>,
+    mut texts: Query<(&Readout, &mut Text)>,
+) {
     let Some(v) = &view.0 else { return };
     for (kind, mut text) in &mut texts {
         let want = match kind {
             Readout::Clock => {
                 let s = v.elapsed / TICK_HZ;
                 format!("{}:{:02}", s / 60, s % 60)
+            }
+            Readout::Phase if cfg!(target_os = "android") => {
+                let key = if v.phase == Phase::Countdown {
+                    "battle.get_ready"
+                } else if v.augment_round.is_some() {
+                    "council.battle_paused"
+                } else if info.ranked {
+                    "hud.ranked_badge"
+                } else {
+                    "android.battle.phase"
+                };
+                lang.key(key).to_uppercase()
             }
             Readout::Phase => if v.phase == Phase::Countdown {
                 "GET READY"
@@ -286,7 +303,15 @@ fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readou
             }
             Readout::Tower(relative) => {
                 let tower = v.strongholds[*relative];
-                format!("{:?} T{}", tower.kind, tower.tier)
+                if cfg!(target_os = "android") {
+                    format!(
+                        "{} T{}",
+                        crate::i18n::content::stronghold_name(*lang, tower.kind),
+                        tower.tier
+                    )
+                } else {
+                    format!("{:?} T{}", tower.kind, tower.tier)
+                }
             }
         };
         if text.0 != want {

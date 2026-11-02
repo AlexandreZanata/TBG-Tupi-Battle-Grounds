@@ -1918,5 +1918,6 @@
   "android.create": "Create",
   "android.sign_in": "Sign in",
   "android.arenas": "Arenas",
-  "android.live": "Live"
+  "android.live": "Live",
+  "android.battle.phase": "Battle"
 }

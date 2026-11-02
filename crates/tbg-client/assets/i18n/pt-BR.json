@@ -1918,5 +1918,6 @@
   "android.create": "Criar conta",
   "android.sign_in": "Entrar",
   "android.arenas": "Arenas",
-  "android.live": "Ao vivo"
+  "android.live": "Ao vivo",
+  "android.battle.phase": "Batalha"
 }

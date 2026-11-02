@@ -41,7 +41,8 @@ internal class NativeTextInput(private val activity: MainActivity) {
             } else {
                 InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             }
-            imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING
+            imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING or
+                EditorInfo.IME_FLAG_NO_EXTRACT_UI or EditorInfo.IME_FLAG_NO_FULLSCREEN
             filters = arrayOf(InputFilter.LengthFilter(limit))
             setText(request.optString("value").take(limit))
             setSelection(text.length)
@@ -87,7 +88,8 @@ internal class NativeTextInput(private val activity: MainActivity) {
                 if (action == EditorInfo.IME_ACTION_DONE) { submit(); true } else false
             }
             field.requestFocus()
-            modal.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+            modal.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         }
         dialog = modal
         modal.show()

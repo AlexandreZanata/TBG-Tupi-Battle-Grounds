@@ -235,6 +235,12 @@ fn update(
                             };
                             format!("{} · {}", lang.key("shop.reroll"), free_tag)
                         }
+                        Some(cost) if cfg!(target_os = "android") => format!(
+                            "{} · {}",
+                            lang.key("shop.reroll"),
+                            lang.key("common.energy_amount")
+                                .replace("{cost}", &(cost / ENERGY_SCALE).to_string())
+                        ),
                         Some(cost) => format!(
                             "{} · {} Energy",
                             lang.key("shop.reroll"),

@@ -918,3 +918,13 @@ remains a separate explicit action. Desktop/browser export and #57 updater
 behavior remain unchanged. Coverage: account backup/import/save confirmation,
 Android picker return/focus/immersive restoration and failure/cancel states.
 Compilation and observed journeys for this adapter remain pending.
+
+## 2026-11-02 — P69 landscape IME and mobile match labels
+
+Android text entry keeps the native dialog visible instead of using the IME's
+fullscreen extract editor. The dialog resizes with its keyboard; shared
+validation/masking/reveal and submission remain authoritative. Mobile match
+phase, Stronghold and paid Reroll labels use the active language; desktop
+text/geometry remain unchanged. An internal loopback-only gameplay intention
+trace records sequence/type without auth/room/resume data, enabling one-touch
+and inspection/scroll no-purchase observations. Emulator validation is pending.
