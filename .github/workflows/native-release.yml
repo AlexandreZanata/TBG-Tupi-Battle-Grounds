@@ -36,6 +36,13 @@ on:
       - 'scripts/install-linux.sh'
       - 'scripts/package-appimage.sh'
       - 'scripts/managed-bootstrap.sh'
+      - 'LICENSE'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'rust-toolchain.toml'
+      - 'scripts/native_release_policy.py'
+      - 'scripts/native-main-release.py'
+      - 'scripts/check-native-promotion.py'
+      - 'scripts/native-publication.py'
       - '.github/workflows/native-release.yml'
   pull_request:
     paths:
@@ -57,6 +64,13 @@ on:
       - 'scripts/install-linux.sh'
       - 'scripts/package-appimage.sh'
       - 'scripts/managed-bootstrap.sh'
+      - 'LICENSE'
+      - 'THIRD_PARTY_NOTICES.md'
+      - 'rust-toolchain.toml'
+      - 'scripts/native_release_policy.py'
+      - 'scripts/native-main-release.py'
+      - 'scripts/check-native-promotion.py'
+      - 'scripts/native-publication.py'
       - '.github/workflows/native-release.yml'
 
 # A newer commit cancels only the same pull request's packaging run; main,
@@ -75,9 +89,12 @@ env:
 jobs:
   # A release publishes only after the complete required suite (the same lanes
   # and fail-closed aggregator as the `check` status) passed on the exact
-  # tagged commit. It runs in parallel with the build below.
+  # tagged commit. When a main push run of ci.yml already passed on that exact
+  # commit (promotion-source checks it), its result is reused instead of
+  # re-running the whole suite for the same bytes.
   validate:
-    if: github.ref_type == 'tag'
+    needs: [promotion-source]
+    if: always() && github.ref_type == 'tag' && needs.promotion-source.outputs.ci_proven != 'true'
     uses: ./.github/workflows/ci.yml
     permissions:
       contents: read
@@ -265,11 +282,14 @@ jobs:
     permissions:
       actions: read
       contents: read
+    outputs:
+      ci_proven: ${{ steps.source.outputs.ci_proven }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - name: Verify the exact-source successful desktop build
+        id: source
         env:
           GH_TOKEN: ${{ github.token }}
           NATIVE_BUILD_RUN: ${{ inputs.promotion_run }}
@@ -279,7 +299,8 @@ jobs:
     needs: [validate, linux, windows, promotion-source]
     if: >-
       always() && github.ref_type == 'tag' && inputs.publish &&
-      needs.validate.result == 'success' &&
+      (needs.validate.result == 'success' ||
+      (needs.validate.result == 'skipped' && needs.promotion-source.outputs.ci_proven == 'true')) &&
       ((inputs.promotion_run != '' && needs.promotion-source.result == 'success') ||
       (inputs.promotion_run == '' && needs.linux.result == 'success' && needs.windows.result == 'success'))
     runs-on: ubuntu-22.04
@@ -316,12 +337,34 @@ jobs:
         env:
           BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
         run: cp "$BUNDLE" release/native-provenance.jsonl
+      # Draft first and public only when complete; a retry uploads only missing
+      # files and refuses any foreign or different asset instead of replacing it.
       - name: Publish a versioned prerelease
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            echo "Refusing to report publication success for an existing immutable release. Use a fresh reviewed tag." >&2
-            exit 1
-          fi
-          gh release create "$GITHUB_REF_NAME" release/* --verify-tag --prerelease --title "Tupi Battle Grounds $GITHUB_REF_NAME · Linux and Windows beta" --notes-file deploy/native/RELEASE-NOTES.md
+        run: >-
+          python3 scripts/native-publication.py --artifacts release --tag "$GITHUB_REF_NAME"
+          --title "Tupi Battle Grounds $GITHUB_REF_NAME · Linux and Windows beta"
+          --notes deploy/native/RELEASE-NOTES.md
+
+  # A successful main build of a new client version names its tag once and
+  # dispatches the tag-ref publication of these exact bytes. workflow_dispatch
+  # is the event GITHUB_TOKEN may start, so no personal token is involved.
+  release-main:
+    needs: [linux, windows]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Tag a new client version and publish its tested packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+          NATIVE_BUILD_RUN: ${{ github.run_id }}
+        run: python3 scripts/native-main-release.py
