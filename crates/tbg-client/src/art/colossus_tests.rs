@@ -175,3 +175,60 @@ fn gd02_colossus_clearance_pushes_a_neighbor_with_the_original_solver() {
         }
     }
 }
+
+#[test]
+fn gd03_colossus_turns_body_and_aligns_obelisk_tip_with_target_at_strike() {
+    use rig::{Joint::Root, Node::Prop, Socket::WeaponR};
+    for (tier, branch) in FORMS {
+        let mut meshes = Assets::<Mesh>::default();
+        let form = native_form(
+            (kits::kit(UnitKind::Colossus).unwrap().figure)(tier, branch),
+            &mut meshes,
+        );
+        let mut actor = anim::Animator::new(
+            [Entity::PLACEHOLDER; NODE_COUNT],
+            form.plan,
+            Entity::PLACEHOLDER,
+            UnitKind::Colossus,
+            1,
+        );
+        actor.form = (tier, branch);
+        for target in [
+            Vec3::new(0.0, 0.18, 1.35),
+            Vec3::new(0.85, 0.18, 1.10),
+            Vec3::new(-0.90, 0.22, 1.15),
+            Vec3::new(1.10, 0.32, 0.75),
+            Vec3::new(-0.65, 0.15, -1.10),
+        ] {
+            let pose = actor.clearance_pose(anim::Clip::AttackMelee, 0.30, Some(target), 0.30);
+            let expected_yaw = target.x.atan2(target.z).to_degrees();
+            assert!(
+                (pose[Root.index()].0.y - expected_yaw).abs() < 1e-3,
+                "Colossus body did not turn toward target in form {tier}/{branch}: got {}, expected {expected_yaw}",
+                pose[Root.index()].0.y
+            );
+            let world = presentation::pose_world(UnitKind::Colossus, &form.plan, &pose);
+            let weapon = world[Prop(WeaponR).index()];
+            let origin = weapon.transform_point3(Vec3::ZERO);
+            let tip = weapon.transform_point3(Vec3::new(0.0, 1.27, 0.0));
+            let axis_xz = (tip.xz() - origin.xz()).normalize();
+            let to_xz = (target.xz() - origin.xz()).normalize();
+            assert!(
+                axis_xz.perp_dot(to_xz).abs() < 1e-4 && axis_xz.dot(to_xz) > 0.999,
+                "Colossus obelisk horizontal line missed target {target:?} in form {tier}/{branch}: origin={origin:?}, tip={tip:?}"
+            );
+            let ray = (tip - origin).normalize();
+            let to_target = (target - origin).normalize();
+            assert!(
+                ray.angle_between(to_target) < 1e-3,
+                "Colossus obelisk 3D ray missed target {target:?} in form {tier}/{branch}: angle={}",
+                ray.angle_between(to_target)
+            );
+            assert!(
+                tip.distance(target) < 0.05,
+                "Colossus obelisk tip did not reach target {target:?} in form {tier}/{branch}: tip={tip:?}, dist={}",
+                tip.distance(target)
+            );
+        }
+    }
+}

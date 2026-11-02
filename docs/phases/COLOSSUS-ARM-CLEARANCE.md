@@ -72,3 +72,17 @@ arm and bazooka clearance:
   `ogre_`, `shatterback`, `p71_body_envelopes`, `side01_`, and the new
   non-contact vs contact tower-exit regressions) passed. Windows and desktop
   web visual observation remain pending.
+
+## GD-03 — Colossus body turn and obelisk-tip strike alignment (2026-11-02)
+
+- `Animator::observe` keeps `engaged = true` whenever an attack action clip is
+  active and `aim_at` is present, preventing walk-stop hysteresis or crowd nudges
+  from suppressing aim weight during combat.
+- `colossus::motion::pose` rotates `Joint::Root` toward `m.aim` during attack
+  and hit clips, centers the obelisk laterally at impact (`Strike`), places both
+  hands symmetrically on the shaft, and solves the strike pitch and longitudinal
+  slide so the obelisk tip (`Vec3::new(0.0, 1.27, 0.0)`) aims and lands directly
+  on the target across all five forms while preserving GD-02 arm/hand clearance.
+- Verified by `gd03_colossus_turns_body_and_aligns_obelisk_tip_with_target_at_strike`
+  alongside `gd01_colossus` and `gd02_colossus`. Windows and desktop web visual
+  observations remain pending.
