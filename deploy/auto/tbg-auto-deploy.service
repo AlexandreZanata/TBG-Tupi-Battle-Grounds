@@ -17,7 +17,8 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectHome=true
 ProtectSystem=strict
-ReadWritePaths=/opt/tbg/bin /opt/tbg/releases /var/backups/tbg /var/lib/tbg-deploy /var/lib/tbg
+# release-slot.sh writes the slot executable link and its environment file.
+ReadWritePaths=/opt/tbg/bin /opt/tbg/releases /opt/tbg/slots /etc/tbg /var/backups/tbg /var/lib/tbg-deploy /var/lib/tbg
 # gh uses public Sigstore metadata; no owner's home or auth token is needed.
 Environment=GH_CONFIG_DIR=/var/lib/tbg-deploy/gh
 Environment=XDG_CACHE_HOME=/var/lib/tbg-deploy/cache

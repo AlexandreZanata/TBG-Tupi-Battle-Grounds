@@ -181,12 +181,19 @@ pub(crate) async fn run(
                 None => return,
             },
             _ = cleanup.tick() => lobby.cleanup(),
-            _ = publish.tick() => lobby.publish_live(Instant::now()),
+            _ = publish.tick() => {
+                lobby.publish_live(Instant::now());
+                lobby.refuse_waiters();
+            }
         }
         lobby
             .metrics
             .queue_len
             .store(lobby.queue.len() as u64, Relaxed);
+        lobby
+            .metrics
+            .lobby_waiting
+            .store(lobby.waiting() as u64, Relaxed);
         // P10: worst lobby inbox backlog seen (join bursts must not pile up).
         let inbox = LOBBY_QUEUE.saturating_sub(lobby.self_tx.capacity()) as u64;
         lobby.metrics.lobby_inbox_max.fetch_max(inbox, Relaxed);

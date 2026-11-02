@@ -11,8 +11,9 @@ use axum::response::{IntoResponse, Response};
 use axum::Json;
 use serde_json::json;
 
-use crate::store::release::{now_unix, SlotIdentity, SlotRow};
+use crate::store::release::{now_unix, read_directory, SlotIdentity, SlotRow};
 use crate::store::release_admin::retire_blockers;
+use crate::store::Store;
 use crate::AppState;
 
 /// Where a client with a given contract may start new play.
@@ -98,6 +99,26 @@ fn params(raw: Option<String>) -> Option<(String, String, String, u8)> {
     Some((contract?, build, outcome, bucket))
 }
 
+/// The directory a slot answers admission from. A process that has only just started has not read it
+/// yet, and answering "unavailable" from that empty view would turn players away while the other slot
+/// admits (the proxy tries the first slot first): the first answers read it from the database once.
+async fn directory_view(
+    cached: std::sync::Arc<Vec<SlotRow>>,
+    slot_mode: bool,
+    store: Option<&std::sync::Arc<Store>>,
+) -> std::sync::Arc<Vec<SlotRow>> {
+    if !cached.is_empty() || !slot_mode {
+        return cached;
+    }
+    match store {
+        Some(store) => match store.release(|conn| read_directory(conn)).await {
+            Some(Ok(rows)) => std::sync::Arc::new(rows),
+            _ => cached,
+        },
+        None => cached,
+    }
+}
+
 pub(crate) async fn admission(
     ConnectInfo(peer): ConnectInfo<SocketAddr>,
     headers: HeaderMap,
@@ -120,7 +141,8 @@ pub(crate) async fn admission(
         app.metrics.record_update_outcome(&build, outcome);
     }
     let rt = &app.release;
-    let rows = rt.directory.borrow().clone();
+    let cached = rt.directory.borrow().clone();
+    let rows = directory_view(cached, rt.identity.is_some(), app.store.as_ref()).await;
     let decision = decide(
         &rows,
         rt.identity.as_ref(),

@@ -162,5 +162,57 @@ class StaticRelease(unittest.TestCase):
         self.assertNotIn('service(', text)
 
 
+    def test_hand_published_site_is_never_overwritten_without_adoption(self):
+        # 2026-11-02: an automatic promotion briefly replaced a landing that was
+        # published by hand from an unmerged branch. Drift is now refused.
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manifest = policy.unpack(bundle(root), root/'staged', SOURCE)
+            state = root/'state'
+            state.mkdir()
+            manual = '20261102T002642Z-cb68ad4e34a9'
+            for site, target in [('landing', manual), ('admin', OLD)]:
+                (root/site/'releases'/target).mkdir(parents=True)
+                (root/site/'current').symlink_to('releases/' + target)
+            receipt = state/'current.json'
+            receipt.write_text(json.dumps({'source_commit': OLD}))
+            with patch.multiple(activation, ROOT=root, STATE=state, JOURNAL=state/'journal.json', RECEIPT=receipt), \
+                 patch.object(activation, 'probe'):
+                with self.assertRaisesRegex(ValueError, 'changed outside the controller'):
+                    activation.activate(root/'staged', manifest)
+                self.assertEqual((root/'landing/current').resolve().name, manual)
+                self.assertEqual((root/'admin/current').resolve().name, OLD)
+                self.assertFalse((state/'journal.json').exists())
+                activation.activate(root/'staged', manifest, adopt=True)
+            for site in policy.SITES:
+                self.assertEqual((root/site/'current').resolve().name, SOURCE)
+
+    def test_landing_for_another_server_contract_waits_without_latch_or_redownload(self):
+        from control import Deferred
+        prefix = 'https://github.com/' + pull.REPOSITORY + '/releases/download/static-' + SOURCE + '/'
+        names = ['tbg-static-' + SOURCE + '.tar.gz', 'provenance.jsonl']
+        release = {'tag_name': 'static-' + SOURCE, 'assets': [{'name': n, 'browser_download_url': prefix + n} for n in names]}
+        with tempfile.TemporaryDirectory() as temporary:
+            state = Path(temporary)
+            receipt = state/'static-current.json'
+            receipt.write_text(json.dumps({'source_commit': OLD}))
+            with patch.multiple(static_pull, STATE=state, WAITING=state/'static-waiting.json',
+                                candidate=lambda family: release, api=lambda path: {'status': 'ahead'},
+                                verify=lambda *a, **k: None, landing_contract=lambda path: 'w32-r6-097385fee9a10b0f',
+                                status=lambda: {'contract': 'w31-r6-097385fee9a10b0f'}), \
+                 patch.object(static_pull, 'fetch', return_value=b'x') as fetch, \
+                 patch.object(static_pull.static_policy, 'unpack', return_value={'sites': {'landing': {}, 'admin': {}}}), \
+                 patch.object(static_pull.static_activate, 'RECEIPT', receipt), \
+                 patch.object(static_pull.static_activate, 'activate') as promote:
+                with self.assertRaisesRegex(Deferred, 'advertises server contract w32'):
+                    static_pull.run({'minimum_source': OLD}, True, False)
+                fetch.reset_mock()
+                with self.assertRaisesRegex(Deferred, 'waits for server contract'):
+                    static_pull.run({'minimum_source': OLD}, True, False)
+                fetch.assert_not_called()
+                promote.assert_not_called()
+            self.assertFalse((state/'static-checked.json').exists(), 'waiting is not an outcome')
+
+
 if __name__ == '__main__':
     unittest.main()

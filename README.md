@@ -108,8 +108,9 @@ Access stays in memory; optional Linux refresh persistence and the short
 match-resume record use Secret Service through one coordinator. Browser
 refresh uses a protected host cookie with exact configured origins.
 Vault/cookie failure produces a visible temporary mode. Existing manual keys
-remain valid. Official signing/automatic updates (O02), Windows support and
-two-slot server rollout are not active. See [native instructions](deploy/native/README.txt),
+remain valid. Official signing/automatic updates (O02) and Windows support are
+not active; the official host runs the two release slots (D-104) and promotes
+compatible server releases through them. See [native instructions](deploy/native/README.txt),
 the [consolidation report](docs/phases/CONSOLIDATION-20261101.md) and the
 [desktop UI contract](docs/ui/DESKTOP-UI-CONTRACT.md).
 

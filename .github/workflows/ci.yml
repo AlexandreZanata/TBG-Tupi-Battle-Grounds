@@ -46,12 +46,17 @@ jobs:
         run: |
           python3 scripts/test-ci-required-checks.py
           python3 scripts/test-auto-deploy.py
+          python3 scripts/test-slot-deploy.py
+          shellcheck deploy/release-slot.sh deploy/slot-bootstrap.sh deploy/auto/install.sh
           python3 scripts/test-web-deploy.py
           python3 scripts/test-static-deploy.py
           python3 scripts/test-static-assets.py
           python3 scripts/test-native-catalog.py
           python3 scripts/test-native-artifacts.py
           python3 scripts/test-native-package.py
+          python3 scripts/test-native-inputs.py
+          python3 scripts/test-native-release-policy.py
+          python3 scripts/check-native-inputs.py
           node scripts/test-native-downloads.cjs
           python3 web/scripts/check.py
           python3 scripts/test-ci-test-lanes.py
@@ -71,6 +76,11 @@ jobs:
         run: |
           python3 scripts/test-patch-notes.py
           python3 scripts/check-patch-notes.py --base "$PATCH_BASE"
+      # A pull request that changes shipped desktop inputs must bring a new,
+      # documented client version; its merge then publishes that version.
+      - name: Desktop version policy
+        if: github.event_name == 'pull_request'
+        run: python3 scripts/check-native-version.py --base "$PATCH_BASE"
 
   clippy:
     runs-on: ubuntu-24.04

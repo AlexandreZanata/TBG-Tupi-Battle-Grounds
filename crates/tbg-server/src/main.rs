@@ -12,10 +12,10 @@ use tbg_server::{Config, Shared};
 /// How often a waiting drain logs what it still waits for.
 const DRAIN_REPORT: Duration = Duration::from_secs(30);
 
-fn main() {
+fn main() -> std::process::ExitCode {
     if std::env::args().nth(1).as_deref() == Some("--build-info") {
         println!("{}", tbg_server::build_info::get());
-        return;
+        return std::process::ExitCode::SUCCESS;
     }
     let mut config = Config::from_env();
     // P60: an invalid integrity setting is a start-up error, never a default.
@@ -35,10 +35,12 @@ fn main() {
     if config.workers > 0 {
         rt.worker_threads(config.workers);
     }
-    rt.build().expect("tokio runtime").block_on(serve(config));
+    rt.build().expect("tokio runtime").block_on(serve(config))
 }
 
-async fn serve(config: Config) {
+/// A server task that stops by itself is a crash: exiting non-zero lets systemd's `Restart=on-failure`
+/// (the release slot units) bring the same generation back; a drained SIGTERM exit is a success.
+async fn serve(config: Config) -> std::process::ExitCode {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
@@ -53,12 +55,12 @@ async fn serve(config: Config) {
     tokio::select! {
         result = server => {
             tracing::error!("server stopped: {result:?}");
-            return;
+            return std::process::ExitCode::FAILURE;
         }
         _ = shutdown_signal() => {}
     }
     let Some(release) = shared.release.get().cloned() else {
-        return;
+        return std::process::ExitCode::SUCCESS;
     };
     release.gate.shutdown.store(true, Relaxed);
     let started = Instant::now();
@@ -83,6 +85,7 @@ async fn serve(config: Config) {
         tbg_server::release::retire(&release, store).await;
     }
     tracing::info!(waited_s = started.elapsed().as_secs(), "shutdown: done");
+    std::process::ExitCode::SUCCESS
 }
 
 async fn shutdown_signal() {
