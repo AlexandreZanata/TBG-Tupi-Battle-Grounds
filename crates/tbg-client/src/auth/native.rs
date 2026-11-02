@@ -101,7 +101,7 @@ pub(super) fn run(mut work: Work) -> Result<Outcome, Failure> {
         if let Some(s) = &store {
             vault = restore_resume(&work.origin, s);
         }
-        work.remember = store.as_ref().is_some_and(|s| remember_requested(s));
+        work.remember = store.as_ref().is_some_and(remember_requested);
     }
     if !matches!(work.operation, Operation::Logout)
         && store

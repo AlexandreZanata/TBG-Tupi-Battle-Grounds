@@ -169,3 +169,28 @@ its first sandboxed attempt could not resolve GitHub. The patch-note check
 first rejected the incomplete new metadata, which was corrected before push.
 Only the public trust anchor is tracked; no private signing keys or release
 archives are included in the PR.
+
+## PR #57 CI follow-up
+
+The owner explicitly authorized following CI, fixing failures, merging only
+after it passes, and reinstalling Linux only after the GitHub release is public
+and the existing automatic site catalog points to it. This authorizes the
+ordinary GitHub beta-release path; it does not activate the separate O02 TUF
+signing/custody proposal. Account data, old installs and the ranked contract
+must remain intact.
+
+The first completed PR run `41531688272` passed quality, desktop-ui, WASM,
+workspace tests and balance; native packaging run `41531688519` also passed.
+The actual failing Clippy log, job `125573928632`, identified only
+`clippy::redundant_closure` at `auth/native.rs:104`. Passing
+`remember_requested` directly to `is_some_and` preserves the exact restore
+predicate without changing authentication or concurrency behavior.
+
+Before pushing that fix, `cargo fmt -p tbg-client -- --check`, scoped
+`cargo clippy --offline --locked -p tbg-client --bin tbg-client -- -D warnings`,
+and the single
+`br_as04_11_confirmation_retry_retains_identity_and_recovers_persistence`
+regression passed under the shared host lock with two build jobs and the
+existing root cache. The test's existing unused `Layout::clear` warning is
+unrelated; default-feature Clippy passed without suppressing any warning.
+No workflow, lint setting, game rule or backend route was changed to pass CI.
