@@ -1,0 +1,11 @@
+{
+  "automatic_download_verify_restart_health": true,
+  "from": "linux-20261102-8f78e5a",
+  "to": "linux-20261102-edab60c",
+  "source_commit": "edab60c2ce8ab53a814612cd8b67a8c36bc1f7b0",
+  "preferences_preserved": true,
+  "post_update_notes_match_running_build": true,
+  "contract": "w38-r15-cc459351581b7763",
+  "owner_account_used": false,
+  "owner_shortcuts_modified": false
+}

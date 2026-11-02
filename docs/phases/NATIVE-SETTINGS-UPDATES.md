@@ -84,10 +84,9 @@ uses the existing root cache, /tmp/tbg-validation-1000.lock and two jobs.
 - `cargo fmt -p tbg-client -p tbg-update`, `python3 -m py_compile` for the
   changed scripts, shared desktop routing gate and `git diff --check`: passed.
 
-Pending delivery at this report revision: committed release build, signed
-repository/bootstrap rehearsal, Linux captures, initial static channel
-activation and owner installation. Actual Windows and real desktop-browser
-observations remain pending consolidation; no parity or full-suite claim.
+Actual Windows and real desktop-browser observations remain pending
+consolidation; no parity or full-suite claim. Initial static channel activation
+and owner installation await the explicit O02 decision described below.
 
 ## Pre-activation rehearsal
 
@@ -103,5 +102,45 @@ Review additionally identified a same-frame Ranked-vs-automatic-restart race
 once a download was fully staged. Online play intents now win before automatic
 Now/Restart actions are consumed, and a new regression keeps Ranked queued and
 the update staged for a later idle point. The three affected BR-UP02 cases
-passed after this correction. A new final artifact is built for this change;
-sequence 1 remains an isolated rehearsal baseline, not the owner's installation.
+passed after this correction (29 distinct focused client cases in total).
+The final source is `edab60c2ce8ab53a814612cd8b67a8c36bc1f7b0`; its Linux
+release build passed in 4m 12s and its signed package is
+`linux-20261102-edab60c`, sequence 2. Sequence 1 remains an isolated rehearsal
+baseline, not the owner's installation.
+
+The actual release launcher then automatically discovered, downloaded,
+verified, staged, restarted and health-acknowledged sequence 2 from sequence 1
+against a local signed repository. The `previous` pointer retained sequence 1,
+the preference sentinel survived, and pending post-update notes named the
+running build. The resulting Linux capture shows the in-app modal on the final
+release. This journey used a loopback backend and temporary data; owner account
+and shortcuts were not touched. See `NATIVE-SETTINGS-AUTO-UPDATE-EVIDENCE.json`.
+
+The native auth/key journey was repeated with the final packaged release
+executable, using the same isolated real OS-vault/clipboard/Downloads scenario;
+all assertions passed. See `NATIVE-SETTINGS-RELEASE-KEY-EVIDENCE.json`. Inspection
+also confirmed all 374 assets in the previous installed release are retained;
+only the two translation catalogs differ intentionally.
+
+## O02 activation decision
+
+The phase explicitly requires owner approval of signing thresholds, custody,
+rotation and protected publication before real activation. The prepared Linux
+proposal uses one Ed25519 key per TUF role, threshold 1, with private keys and a
+private local backup outside git and outside the public repository. The current
+publisher loads the four role keys locally; this is owner-controlled manual
+signing, not an offline-root or protected-CI claim. No private key goes to the
+VPS. Public trust-anchor SHA-256:
+`db40abac2b2b5fbf3f19cc8fb37cbc1bed274f56223a3e4bd20771346df2d141`.
+
+Activation uses only the existing static `/updates/` route. Immutable targets
+and versioned metadata are uploaded before the atomic timestamp. An existing
+different trust root is refused; changes of signing authority require reviewed
+TUF root rotation. Old targets and installed releases remain available.
+Metadata expiry requires owner renewal even when no executable changes.
+Windows signing/budget and the remaining broader P66 milestone acceptance are
+pending; this focused Linux delivery does not claim completion of that phase.
+
+The explicit O02 question was submitted after the final release and automatic
+upgrade rehearsal were ready. Until answered, real publication, private-key
+custody activation and owner shortcut migration remain pending.
