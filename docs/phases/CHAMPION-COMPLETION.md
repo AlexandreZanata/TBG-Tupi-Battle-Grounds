@@ -168,3 +168,11 @@ empty affiliation-only builders and one test fixture needing the added badge;
 these were removed/updated before the successful batch. Unused removed-flag
 imports were also cleaned. Source-routing and `git diff --check` passed.
 Logs are in the ignored artifact directory `validation/ring-only-checks.json`.
+
+
+Capture review rejected loading overlays in part of the first native run.
+Original images/logs remain preserved. The opt-in capture now waits for actual
+boot/scene readiness, not only elapsed time. The capture script checks readiness
+and content hashes, reuses only valid captures with per-image build provenance,
+and recaptures rejected images. Siege Walker's affiliation-only hip plate and
+hem were removed entirely after visual review; its portrait is invalidated.

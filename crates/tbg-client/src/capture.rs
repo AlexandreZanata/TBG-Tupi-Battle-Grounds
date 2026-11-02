@@ -144,6 +144,11 @@ fn capture(
     }
     #[cfg(tbg_desktop)]
     {
+        // Shader/font work can outlive the requested delay on a busy machine.
+        // Capture the ready scene, never the loading overlay in front of it.
+        if !loading.boot_ready || loading.scene_waiting {
+            return;
+        }
         if crate::config::url_param("capture_panel").as_deref() == Some("arena_train")
             && *state.get() != crate::GameState::InMatch
         {

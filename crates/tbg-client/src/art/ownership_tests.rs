@@ -19,6 +19,14 @@ fn ring_only_all_340_forms_share_identical_body_meshes_for_both_seats() {
         for (tier, branch) in FORMS {
             let spec = (kit.figure)(tier, branch);
             no_ownership_paint(&spec, &format!("{kind:?} {tier}/{branch}"));
+            if kind == UnitKind::SiegeWalker {
+                assert!(
+                    spec.parts
+                        .iter()
+                        .all(|p| p.node != rig::Node::Secondary(rig::Spring::Tabard)),
+                    "remove the old affiliation plate and trim instead of repainting it"
+                );
+            }
             let form = native_form(spec, &mut meshes);
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
         }
