@@ -314,10 +314,11 @@ fn cargo_draw(
     let mut common = Vec::new();
     let mut strong = Vec::new();
     let mut any = Vec::new();
+    // GD-04: the new Gods never join Smuggler cargo, so its tables stay pre-GD-04.
     for k in crate::types::ALL_KINDS
         .iter()
         .copied()
-        .filter(|k| k.is_conventional())
+        .filter(|k| k.is_conventional() && !matches!(k, UnitKind::Volthar | UnitKind::Astreon))
     {
         let cost = rules.def(k).cost;
         if cost == crate::content::ENERGY_SCALE * 3 {

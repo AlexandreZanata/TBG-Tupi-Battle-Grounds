@@ -28,7 +28,7 @@ use crate::view::{MatchView, PublicView};
 /// and carrier events plus `UnitView::fx`; v13: Stronghold kinds and
 /// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
 /// Older peers are refused by the handshake.
-pub const PROTOCOL_VERSION: u16 = 36;
+pub const PROTOCOL_VERSION: u16 = 37;
 
 /// Public result identity, independent of the combat seed and session token.
 pub type ResultId = [u8; 16];

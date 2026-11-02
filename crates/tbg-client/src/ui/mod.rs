@@ -7,6 +7,7 @@ use tbg_core::{Rejection, UnitId};
 
 mod ability_completion;
 pub(crate) mod ability_details;
+mod ability_gods;
 mod ability_legacy;
 pub mod account;
 mod account_ui;

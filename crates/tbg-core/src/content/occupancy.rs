@@ -103,6 +103,9 @@ pub fn footprint(kind: UnitKind, tier: u8) -> Footprint {
         FoamWeaver => (1350, 800, 750, 650),
         PodSnapper => (1550, 800, 800, 600),
         Colossus => (4250, 6450, 2150, 2200),
+        // GD-04 authored provisional envelopes, pending the native mesh export.
+        Volthar => (3900, 2600, 2300, 1900),
+        Astreon => (3700, 4600, 2400, 1800),
     };
     let growth = 100 + 8 * i32::from(tier.min(2));
     let scaled = |n: i32| (n * growth + 99) / 100;

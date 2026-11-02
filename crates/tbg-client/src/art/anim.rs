@@ -419,8 +419,11 @@ impl Animator {
             }
             walk = None;
         }
-        if self.kind == UnitKind::Trident {
-            kits::trident::motion::finish_blend(&mut pose, &self.plan);
+        match self.kind {
+            UnitKind::Trident => kits::trident::motion::finish_blend(&mut pose, &self.plan),
+            UnitKind::Astreon => kits::astreon::motion::finish_blend(&mut pose, &self.plan),
+            UnitKind::Volthar => kits::volthar::motion::finish_blend(&mut pose, &self.plan),
+            _ => {}
         }
         self.last = pose;
         (pose, walk)
@@ -441,7 +444,10 @@ impl Animator {
             self.heading = local.normalize_or(Vec3::Z);
         }
         self.special_aim = self.special_at.map(|w| frame.inverse().transform_point3(w));
-        let engaged = self.aim_at.is_some() && self.base != Clip::Walk;
+        let attacking = self
+            .action
+            .is_some_and(|(c, _)| matches!(c, Clip::AttackMelee | Clip::AttackRanged | Clip::Cast));
+        let engaged = self.aim_at.is_some() && (self.base != Clip::Walk || attacking);
         let goal = if engaged { 1.0 } else { 0.0 };
         let rate = dt / if engaged { AIM_IN } else { AIM_OUT };
         let weight = self.aim.map_or(0.0, |a| a.weight);

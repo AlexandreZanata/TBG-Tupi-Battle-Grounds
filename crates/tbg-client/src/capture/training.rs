@@ -135,6 +135,9 @@ fn journey(
             ];
             catalog.dummies = false;
         }
+        if let Some(scene) = crate::config::url_param("capture_gods") {
+            gods_scene(&mut catalog, &scene);
+        }
         if crate::config::url_param("capture_legacy_crowd").is_some() {
             use tbg_core::{training::TrainingUnitSpec, UnitKind::*};
             let placed = |kind, x| TrainingUnitSpec {
@@ -160,6 +163,8 @@ fn journey(
     let Some(s) = &trial.session else { return };
     let id = s.id();
     match *stage {
+        // GD-04 battle evidence keeps the authoritative trial running.
+        2 if crate::config::url_param("capture_gods").is_some() => {}
         2 if if crate::config::url_param("capture_barrel").is_some() {
             !s.state().barrels.is_empty()
         } else {
@@ -210,6 +215,50 @@ fn journey(
         }
         _ => {}
     }
+}
+
+/// GD-04 Gods battle scenes through the same authoritative Training catalog.
+fn gods_scene(catalog: &mut crate::training::Catalog, scene: &str) {
+    use tbg_core::{training::TrainingUnitSpec, UnitKind::*};
+    let placed = |kind, tier, branch, x| TrainingUnitSpec {
+        x: Some(x),
+        tier,
+        branch,
+        ..TrainingUnitSpec::base(kind)
+    };
+    let (selected, allies, enemies) = match scene {
+        "volthar" => (
+            Volthar,
+            vec![placed(Volthar, 2, 0, 6200), placed(Volthar, 2, 1, 5200)],
+            [10_400, 10_900, 11_400, 11_900, 12_400, 12_900, 13_400]
+                .into_iter()
+                .map(|x| placed(Archer, 0, 0, x))
+                .collect(),
+        ),
+        "astreon" => (
+            Astreon,
+            vec![placed(Astreon, 0, 0, 8200), placed(Astreon, 2, 1, 7400)],
+            vec![
+                placed(Colossus, 0, 0, 10_600),
+                placed(BoneBrute, 0, 0, 10_200),
+            ],
+        ),
+        _ => (
+            Colossus,
+            vec![placed(Colossus, 2, 0, 8200), placed(Colossus, 2, 1, 7000)],
+            vec![
+                placed(Shieldbearer, 0, 0, 11_200),
+                placed(BoneBrute, 0, 0, 11_600),
+                placed(Archer, 0, 0, 12_300),
+                placed(Sawbot, 0, 0, 11_900),
+            ],
+        ),
+    };
+    catalog.selected = selected;
+    catalog.allies = allies;
+    catalog.enemies = enemies;
+    catalog.dummies = false;
+    eprintln!("GD-04 {scene} scene configured through the authoritative Training catalog");
 }
 
 #[derive(Resource, Default)]

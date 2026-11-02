@@ -635,3 +635,14 @@ normally publish its branch and open a GitHub PR targeting `main`, per the
 owner's explicit instruction. This scoped exception does not authorize
 force-push, direct main changes, merge, auto-merge or deployment. Unrun
 acceptance must be listed in a Draft PR rather than claimed complete.
+
+## Gods expansion: Colossus refinement, Volthar and Astreon (owner, 2026-11-02)
+
+**GD-04 — implemented, Draft review pending**, `phase/gods-faction-expansion`,
+based on PR #48 (`codex/ogre-faction` `747e2ad`) plus the unpushed Colossus
+fixes CROWD-EXIT-01 and GD-03. Refines the Colossus visually (stats and
+abilities unchanged; branch B stays dark) and adds Volthar (Storm Judgment
+chain lightning) and Astreon (Verdict Lance max-HP pierce) to the local preview
+pool with five forms each. Wire 37, ruleset 14, D-105; values Proposed. See
+[the phase report](phases/GODS-faction-expansion.md). Windows/web parity,
+D-33 balance acceptance and owner look/fun sign-off remain pending.

@@ -628,6 +628,7 @@ ordinary bodies and measured equipment. The focused numerical regression is
 mechanism evidence; all runtime/platform observations remain pending.
 
 
+
 ## CROWD-EXIT-01 — Tower-exit contact fidelity, natural regrouping and bounded arm/bazooka clearance (2026-11-02)
 
 Shared Linux/Windows/desktop web path (`crates/tbg-client/src/crowd.rs`,
@@ -662,3 +663,48 @@ union was deferred: the shared nonblocking validation lock returned 75
 before compilation; no test ran or passed in that attempt. Hosted CI on
 the consolidated head remains required. Windows/browser rendered parity
 is still pending, independently of shared source and numerical tests.
+
+## GD-03 — Colossus body turn and 3D obelisk-tip strike alignment (2026-11-02)
+
+Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/motion.rs`,
+`crates/tbg-client/src/art/anim.rs`):
+- `Animator::observe` treats active combat action clips (`AttackMelee`,
+  `AttackRanged`, `Cast`) with an active `aim_at` as engaged immediately, even
+  while walk-stop hysteresis (`STOP_SECS`) is still settling or when crowd
+  offsets nudge root `x`.
+- `colossus::motion::pose` turns `Joint::Root` toward `m.aim` during
+  `AttackMelee`, `AttackRanged`, `Cast` and `Hit` (`tools::face`), centers the
+  obelisk on the body midline during the strike (`at.x = 0` at `Strike`),
+  places both hands symmetrically on the shaft, and solves the chest-space
+  strike pitch and longitudinal slide so the obelisk ray and its pyramidion tip
+  (`Vec3::new(0.0, 1.27, 0.0)`) align directly with `m.aim.target` in 3D across
+  all five Evolution forms.
+- Coverage: all five `Colossus` forms (`Base`, `A1`, `A2`, `B1`, `B2`), both
+  seats, on-axis and off-axis lateral targets on the widened road, close and
+  max-range combat targets, and arm/hand clearance envelopes (`gd01_colossus`,
+  `gd02_colossus`, `gd03_colossus`). Linux targeted regressions and native
+  preview installation are verified; Windows and desktop web visual
+  observations remain pending.
+
+### 2026-11-02 — GD-04 Gods expansion: Colossus refinement, Volthar and Astreon
+
+- Reference: Linux native client. Shared presentation only: kit figures,
+  motion, the storm/rupture VFX and the gallery framing live in
+  `crates/tbg-client/src/art/kits/{colossus,volthar,astreon}`,
+  `vfx/{shots,completion}.rs`, `sync/{actions,special_cues}.rs` and
+  `gallery/*`; no OS or target condition is introduced.
+- Affected cases: Colossus Base/A1/A2/B1/B2 (refined geometry, Idle/Walk/
+  Victory weight; GD-03 strike alignment and GD-02 clearance unchanged), new
+  Volthar and Astreon five forms in every clip (Idle, Walk, Attack, charged
+  fourth bolt / pierce, Hit, Spawn, Evolve, Death, Victory), `StormArc`
+  links, StormBolt/StormSurge projectiles, Volthar and Astreon impact and
+  Evolution bursts, training/catalog cards and shop portraits for both kinds,
+  both seats and spectators.
+- Matrix: `training-gods-{colossus,volthar,astreon}-forms`,
+  `battle-gods-two-colossus`, `battle-gods-volthar-chain` and
+  `battle-gods-astreon-pierce` join the screens; all but the two-Colossus
+  still also join `motion_screens` (matched frames 0/10/20/40).
+- Evidence: see `docs/phases/GODS-faction-expansion.md` for the Linux captures
+  actually taken and the focused tests run. Windows and desktop-web
+  observations are **pending**; no parity is claimed from shared code or
+  compilation.

@@ -255,6 +255,8 @@ fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> Unit
                         .max(crate::jawguard::counter(u))
                         .max(crate::mantis::counter(u))
                         .max(crate::hornet::counter(u))
+                        .max(crate::volthar::counter(u))
+                        .max(crate::astreon::counter(u))
                         .max(crate::completion::counter(u)),
                 ) << FX_COUNTER_SHIFT;
             if u.is_summon() {

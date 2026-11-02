@@ -79,6 +79,8 @@ pub(crate) fn resolve_hit(
         crate::mantis::bonus(state, attacker, target),
     ));
     amount = amount.saturating_add(completion_bonus);
+    amount = amount.saturating_add(crate::volthar::bonus(state, attacker, target, st));
+    amount = amount.saturating_add(crate::astreon::bonus(state, attacker, target, st));
     // R13: a weakened attacker's basic hit loses its weakening before any bonus.
     let weaken = crate::roster_slots::weaken_now(&attacker.fx, state.tick);
     if weaken > 0 {
@@ -115,11 +117,15 @@ pub(crate) fn resolve_hit(
     if purification.is_some() {
         crate::celestial_archer::strip(state, target);
     }
+    // GD-04: the capped pierce joins after offensive percentages, before defenses.
+    amount = amount.saturating_add(crate::astreon::pierce(state, attacker, target));
     amount = crate::drillnest::bonus(state, attacker, target, amount);
     let removed = damage(state, target, amount, ev);
     crate::celestial_archer::completed(state, attacker, target, ev);
     crate::jawguard::completed(state, attacker, target);
     crate::mantis::completed(state, attacker, target, ev);
+    crate::astreon::completed(state, attacker, target, ev);
+    crate::volthar::completed(state, attacker, target, st, ev);
     crate::ravager::completed(state, attacker, target);
     crate::acidmaw::completed(state, attacker, target, st, ev);
     crate::trigger::completed(state, attacker, target, st, ev);

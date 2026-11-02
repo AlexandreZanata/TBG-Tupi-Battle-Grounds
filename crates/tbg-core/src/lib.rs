@@ -8,6 +8,7 @@ pub mod account;
 mod acidmaw;
 mod afflictions;
 pub mod arcana;
+pub(crate) mod astreon;
 pub mod augment;
 pub mod barrel;
 mod bonehorn;
@@ -66,6 +67,7 @@ mod trident;
 mod trigger;
 pub mod types;
 pub mod view;
+pub(crate) mod volthar;
 mod weaver;
 mod whisperer;
 

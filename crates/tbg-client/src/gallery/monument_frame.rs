@@ -8,7 +8,7 @@ use crate::art::{
 use bevy::{mesh::VertexAttributeValues, prelude::*};
 use tbg_core::UnitKind;
 
-pub(super) fn bounds(lib: &FigureLibrary, meshes: &Assets<Mesh>) -> (Vec3, Vec3) {
+pub(super) fn bounds(kind: UnitKind, lib: &FigureLibrary, meshes: &Assets<Mesh>) -> (Vec3, Vec3) {
     let direction = Vec3::new(0., 1.2, 10.).normalize();
     let right = Vec3::Y.cross(direction).normalize();
     let up = direction.cross(right);
@@ -16,12 +16,12 @@ pub(super) fn bounds(lib: &FigureLibrary, meshes: &Assets<Mesh>) -> (Vec3, Vec3)
     let mut lo = Vec3::splat(f32::INFINITY);
     let mut hi = Vec3::splat(f32::NEG_INFINITY);
     for (col, (tier, branch)) in FORMS.into_iter().enumerate() {
-        let form = lib.get(UnitKind::Colossus, tier, branch);
+        let form = lib.get(kind, tier, branch);
         let mut actor = Animator::new(
             [Entity::PLACEHOLDER; NODE_COUNT],
             form.plan,
             Entity::PLACEHOLDER,
-            UnitKind::Colossus,
+            kind,
             1,
         );
         actor.native = form.native;
@@ -29,18 +29,17 @@ pub(super) fn bounds(lib: &FigureLibrary, meshes: &Assets<Mesh>) -> (Vec3, Vec3)
         for (row, (clip, time)) in [
             (Clip::Idle, 0.4),
             (Clip::Walk, 0.15),
-            (Clip::AttackMelee, 0.30),
+            super::lineup::attack(kind),
         ]
         .into_iter()
         .enumerate()
         {
             let root = Mat4::from_scale_rotation_translation(
                 Vec3::splat(form.plan.scale),
-                Quat::from_rotation_y(super::figures::yaw(UnitKind::Colossus).to_radians()),
+                Quat::from_rotation_y(super::figures::yaw(kind).to_radians()),
                 super::layout::Layout::Monument(row, col).position(false),
             );
-            let pose =
-                presentation::pose_world(UnitKind::Colossus, &form.plan, &actor.pose(clip, time));
+            let pose = presentation::pose_world(kind, &form.plan, &actor.pose(clip, time));
             for node in rig::nodes() {
                 let matrix = root * pose[node.index()];
                 for layer in [&form.meshes, &form.glow] {

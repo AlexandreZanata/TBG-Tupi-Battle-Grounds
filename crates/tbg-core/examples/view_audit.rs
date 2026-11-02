@@ -254,6 +254,7 @@ fn event_name(event: &Event) -> &'static str {
         Event::ProfaneFlame { .. } => "ProfaneFlame",
         Event::DrillFused { .. } => "DrillFused",
         Event::BarrelBurst { .. } => "BarrelBurst",
+        Event::StormArc { .. } => "StormArc",
     }
 }
 

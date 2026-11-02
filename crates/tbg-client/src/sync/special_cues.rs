@@ -109,6 +109,7 @@ fn resolved(
     if crate::art::kits::completion::kit(kind).is_some()
         || crate::art::kits::ogres::contains(kind)
         || crate::art::kits::abyssals::contains(kind)
+        || matches!(kind, UnitKind::Volthar | UnitKind::Astreon)
     {
         let at = Vec3::new(world_x(center, fx.you), 0.6, 0.0);
         let form = map

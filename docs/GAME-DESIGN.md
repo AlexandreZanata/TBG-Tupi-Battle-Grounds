@@ -2451,3 +2451,72 @@ The Shop-enabled-but-unused comparison keeps the same canonical pool on both
 sides; the private preview's deliberate 82-champion pool is a separate feature.
 No new competitive number, rule, source identity or online-roster activation is
 introduced by this reconciliation. D-33 acceptance remains separate.
+
+## GD-04 — Proposed Gods expansion: Volthar and Astreon (2026-11-02)
+
+Owner request, values **Proposed** (D-33 acceptance pending). Append two Gods
+champions after Colossus to the local Practice/Training preview pool (84 kinds);
+FULL_POOL stays 46 and online canon is unchanged. Every form row changes only
+the champion's ability; Evolution costs and stat contracts are the common ones.
+Gods keeps its zero-bonus Synergy row (BR-Y02): a Gods Synergy is an owner
+decision, not part of this phase. Ruleset **14** / `f354f651c056d615`, wire **37**.
+
+**Volthar — Deus da Tempestade (Storm God)**, Ranged, 12 600 sub-Energy
+(**21 Energy**), HP **2200**, damage **130**, interval **30 ticks** (1.5 s),
+range **5500**, movement **35** milli-tiles/tick (0.7 tile/s), no splash.
+
+*Storm Judgment / Julgamento Elétrico.* Each Volthar counts its own completed
+basic hits on enemy units (Stronghold hits never count, never reset). The fourth
+resets the count and starts one discharge from the primary: up to `jumps` links,
+each to the nearest living targetable enemy unit within `radius` of the previous
+link (longitudinal distance, ties by lower id), never one already struck, never
+an ally, never a Stronghold. Each link deals its share of static basic damage as
+auxiliary damage (damage reduction and shields apply; no basic-hit hooks, no
+lifesteal, no further discharge). The chain stops when no link qualifies. A link
+killed by its jump still anchors the next one.
+
+| Form | Jumps | Radius | Shares (bp of basic) | Trigger hit | Extra |
+|------|-------|--------|----------------------|-------------|-------|
+| Base | 3 | 2200 | 7000 / 5000 / 3500 | — | — |
+| A1 Storm Herald / Arauto da Tempestade | 4 | 2200 | 7000 / 5000 / 3500 / **2500** | — | — |
+| A2 Celestial Sovereign / Soberano Celestial | 4 | 2800 | 8000 / 6000 / 4500 / 3500 | — | — |
+| B1 Hammer of Wrath / Martelo da Ira | 3 | 2200 | 7000 / 5000 / 3500 | +3500 bp | — |
+| B2 Divine Tempest / Tempestade Divina | 3 | 2200 | 7000 / 5000 / 3500 | +5500 bp, Root 10 ticks | 3000 bp to ≤ 2 |
+
+The A1 fourth share (2500) is an agent proposal: the request named four links
+but only three shares. B1/B2 add their trigger share once to the primary, before
+situational percentages (BR-X01); B2 replaces B1. B2's Root uses the ordinary
+on-hit path (ward and control immunity block it). B2's extra discharge picks
+the nearest living enemies to the primary within 2200 that the chain missed.
+
+**Astreon — Deus da Ruptura (Rupture God)**, DPS, 13 800 sub-Energy
+(**23 Energy**), HP **1900**, damage **190**, interval **40 ticks** (2 s), range
+**2200** (spear reach between melee and Ranged), movement **37** milli-tiles/tick
+(0.74 tile/s; 0.75 is not an integer per tick), no splash.
+
+*Verdict Lance / Lança do Veredito.* Each Astreon tracks completed basic hits
+on one marked enemy unit. A hit on another unit restarts the sequence at one; a
+windup on anything but the marked unit, a Stronghold hit or the marked unit's
+death clears it. On the `every`-th consecutive hit the basic hit adds
+`min(max_hp × share, cap)` of the target's **max HP** after offensive percentages
+and before damage reduction and shields (not true damage), then the sequence
+restarts. B forms add an execution share of static basic damage on that same hit
+when the target's HP is below 40 % of its max HP at hit resolution (BR-X11).
+No splash, lifesteal or control immunity is added.
+
+| Form | Every | Max-HP share | Cap | Below 40 % |
+|------|-------|--------------|-----|------------|
+| Base | 4 | 500 bp | 240 | — |
+| A1 Giant Piercer / Perfurador de Gigantes | 3 | 500 bp | 240 | — |
+| A2 Primordial Lance / Lança Primordial | 3 | 700 bp | 300 | — |
+| B1 Final Sentence / Sentença Final | 4 | 500 bp | 240 | +3500 bp |
+| B2 Absolute Verdict / Veredito Absoluto | 4 | 500 bp | 240 | +6000 bp (replaces B1) |
+
+Presentation: the server emits a public `StormArc {unit, from, to, jump}` per
+link (jump 0 = B2 extra) and the existing `AbilityResolved`; clients only draw
+them. Both counters share the existing public per-kind progress bits; every
+other system (Synergy rows, Arcanas, Augments, Interest, Shop, Evolution costs,
+Strongholds, carry rules) applies unchanged. Smuggler cargo keeps its pre-GD-04
+draw table: Volthar and Astreon never come out of a crate, so canonical online
+matches and their traces are identical to revision 13. PK-01 lab footprints are authored
+provisionally until the native mesh export measures the new forms.

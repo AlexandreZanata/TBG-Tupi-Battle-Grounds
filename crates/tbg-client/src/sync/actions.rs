@@ -77,6 +77,12 @@ pub(super) fn cue(
                 anim.resolve_special();
             }
         }
+        // GD-04: draw exactly the server-chosen link, never a client-picked target.
+        Event::StormArc { from, to, .. } => {
+            if let (Some(a), Some(b)) = (chest(map, visuals, from), chest(map, visuals, to)) {
+                shots::fire(commands, fx.vfx, ShotKind::StormArc, a, b, Area::default());
+            }
+        }
         Event::CorrosiveSplash { primary, to, .. } => {
             if let (Some(a), Some(b)) = (chest(map, visuals, primary), chest(map, visuals, to)) {
                 shots::fire(commands, fx.vfx, ShotKind::Acid, a, b, Area::default());
