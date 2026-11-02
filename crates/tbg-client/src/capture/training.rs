@@ -90,7 +90,8 @@ fn journey(
                 if crate::config::url_param("capture_barrel_intercept").is_some() {
                     7200
                 } else {
-                    8600
+                    // Both Furnaces can attack here without walking into the caster.
+                    5900
                 },
             )];
             catalog.dummies = false;

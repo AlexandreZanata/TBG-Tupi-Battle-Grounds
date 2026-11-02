@@ -133,3 +133,36 @@ set, `scripts/capture-abyssal-training.py` for five authoritative Training scene
 `web/scripts/sync_content.py`, `web/scripts/check.py`, and
 `scripts/install-champion-preview.py` for the source-stamped local Linux preview.
 Only Nacre Duelist's changed geometry test is repeated after the blade adjustment.
+
+The first barrel native witness timed out: rear melee allies walked until they
+were within the cask's same-tick contact sweep, so no in-flight state remained
+for the probe's pause/flight gate. Its allied-contact scene now places the
+opponent behind the allies, keeping both Furnaces in attack range without
+walking next to the caster. The intercept scene remains separate. This only
+changes opt-in capture setup, not combat. The helper now owns a process group
+and closes its entire Xvfb/client group on timeout. No timed-out image is accepted.
+A command also referenced a not-yet-created temporary runner and exited 127
+without compiling; the runner was created and syntax-checked before use.
+
+### Completed image/static checks
+
+All 38 accepted captures are ready with zero failed images. The revised Nacre
+pair is from `523b49b`; the 36 unchanged images preserve `da23db2` provenance.
+The post-blade `abyssal_all_45_forms` test passed (one case, 0.07 s).
+Nineteen compact native sheets total about 1.2 MiB; eleven compact concept/owner
+reference encodings total 913,414 bytes. No native executable or original large
+PNG is committed. `web/scripts/check.py` passed: landing 155 files / 4,036 KiB,
+admin-public 16 / 240 KiB, admin-preview 150 / 2,310 KiB; generated catalogs
+are current. The catalog has 81 conventional entries, nine nine-count Factions
+and 35 preview badges. Native public download gates remain pending.
+
+The owned landing server was restarted on 8604 after new portrait paths existed;
+the reference/native gallery runs on 8965. An initial identity guard retained
+the old process because its script argument was absolute; inspection then
+normalized the known script path before replacing only the matching process.
+
+> blocked: desktop browser observation reported `browser.user is unavailable`
+> when binding/reloading the existing tab. The documented recovery on the same
+> browser also failed. Stop this browser validation step; preserve the user's
+> tabs and report actual visual observation as pending. Static checks and native
+> screenshots do not replace browser evidence. No website screenshot is claimed.

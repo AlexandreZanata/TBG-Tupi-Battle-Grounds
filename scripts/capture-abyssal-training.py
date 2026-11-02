@@ -5,6 +5,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 
 
@@ -12,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--cases', nargs='+', choices=['barrel-allies', 'barrel-intercept', 'abyssal-crowd', 'barrel-rear', 'foam-rear'])
     args = parser.parse_args()
     binary, out = args.binary.resolve(), args.output.resolve()
     out.mkdir(parents=True, exist_ok=True)
@@ -24,6 +26,8 @@ def main():
              ('barrel-rear', 'GustDrummer', {'TBG_CAPTURE_SUPPORT_REAR':'1'}, 'Support rear-heal visual regression passed:'),
              ('foam-rear', 'FoamWeaver', {'TBG_CAPTURE_SUPPORT_REAR':'1'}, 'Support rear-heal visual regression passed:')]
     for name, kind, flags, witness in cases:
+        if args.cases and name not in args.cases:
+            continue
         png, log = out/f'{name}.png', out/f'{name}.log'
         env = {k:v for k,v in os.environ.items() if not k.startswith('TBG_')}
         env.pop('WAYLAND_DISPLAY', None)
@@ -34,7 +38,15 @@ def main():
         cpus = ','.join(str(c) for c in sorted(os.sched_getaffinity(0))[:2])
         command = ['taskset', '-c', cpus, 'xvfb-run', '-a', '-s', '-screen 0 1600x1000x24', str(binary)]
         with log.open('w') as handle:
-            subprocess.run(command, env=env, stdout=handle, stderr=handle, timeout=120, check=True)
+            process = subprocess.Popen(command, env=env, stdout=handle, stderr=handle, start_new_session=True)
+            try:
+                code = process.wait(timeout=120)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGTERM)
+                process.wait(timeout=5)
+                raise SystemExit(f'Timed out; owned capture process group closed: {log}')
+            if code:
+                raise SystemExit(f'Capture exited {code}: {log}')
         text = log.read_text()
         for required in [witness, 'Training journey passed:', 'boot_ready=true, scene_waiting=false, pending_images=0, pending_texts=0, failed_images=0']:
             if required not in text:

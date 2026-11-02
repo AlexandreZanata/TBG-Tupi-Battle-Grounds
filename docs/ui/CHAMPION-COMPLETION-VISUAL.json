@@ -670,7 +670,7 @@
     "landing": "Observed in desktop browser: 72 cards, 8 nine-count Faction filters, 26 preview badges, PT/EN labels and nine Ogre portraits loaded"
   },
   "ab01_og02": {
-    "status": "Implementation; final native source captures pending",
+    "status": "Source and native model capture complete; final Linux Training/install pending",
     "version": "0.1.3-abyssals.1",
     "wire": 35,
     "ruleset": 10,
@@ -715,12 +715,13 @@
       "Actual held-mesh clearance"
     ],
     "linux": {
-      "geometry_tests": "10 passed before final cask-pose/clearance refinements; exact rerun queued",
-      "native_captures": "pending",
-      "look_fun": "owner validation pending"
+      "geometry_tests": "11 targeted client tests passed; changed Nacre blade geometry test passed again after the silhouette adjustment",
+      "native_captures": "38 ready native images: 19 portraits and 19 five-form/three-pose sheets, with original renderer source/binary hashes preserved per record",
+      "look_fun": "owner validation pending",
+      "capture_manifest": "docs/abyssal-faction/previews/manifest.json"
     },
     "windows": "Actual visual/motion comparison pending",
     "desktop_game_web": "Actual visual/motion comparison pending",
-    "landing": "81 entries prepared; final native portraits/browser observation pending"
+    "landing": "Static checks passed: 81 entries, nine Faction counts of nine, 35 preview badges. Desktop browser visual observation blocked by browser.user unavailable."
   }
 }

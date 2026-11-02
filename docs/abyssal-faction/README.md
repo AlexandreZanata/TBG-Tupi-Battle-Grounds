@@ -31,3 +31,40 @@ Linux is the visual reference. Windows/game-web visual correspondence,
 competitive balance acceptance and owner look/fun sign-off remain pending.
 
 The current final Pearl Slinger screen is `balance-final.csv`. The earlier `balance-final-changed.csv` records the intermediate candidate before the last measured adjustment, and is not the current tuning result.
+
+## Actual native review sheets
+
+Each sheet contains five forms in three poses. These are engine captures,
+with per-image build/source hashes in [the manifest](previews/manifest.json).
+The compact images use WebP format encoding; original PNGs and ready logs are
+preserved in the ignored local artifact directory.
+
+### Refined Ogres
+
+- [SiegeWalker](previews/siegewalker-forms.webp)
+- [BasaltBulwark](previews/basaltbulwark-forms.webp)
+- [CinderMaul](previews/cindermaul-forms.webp)
+- [HookBrawler](previews/hookbrawler-forms.webp)
+- [FlintRunner](previews/flintrunner-forms.webp)
+- [ClayBinder](previews/claybinder-forms.webp)
+- [GustDrummer](previews/gustdrummer-forms.webp)
+- [HideMender](previews/hidemender-forms.webp)
+- [PebbleSlinger](previews/pebbleslinger-forms.webp)
+
+### Abyssals
+
+- [Trident](previews/trident-forms.webp)
+- [NacreDuelist](previews/nacreduelist-forms.webp)
+- [ReefLancer](previews/reeflancer-forms.webp)
+- [TrenchFist](previews/trenchfist-forms.webp)
+- [PearlSlinger](previews/pearlslinger-forms.webp)
+- [AbyssHarpooner](previews/abyssharpooner-forms.webp)
+- [UndertowHerald](previews/undertowherald-forms.webp)
+- [TrenchLamplighter](previews/trenchlamplighter-forms.webp)
+- [FoamWeaver](previews/foamweaver-forms.webp)
+
+### Plant replacement
+
+- [PodSnapper](previews/podsnapper-forms.webp)
+
+Local review gallery: `http://localhost:8965/`. Landing preview: `http://localhost:8604/#champions`. These loopback services are not a public deployment.

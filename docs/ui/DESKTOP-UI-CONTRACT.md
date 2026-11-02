@@ -433,3 +433,5 @@ affected champion, close/far/rear aim, both seats, pause/reset/reconnect and
 motion witnesses will be recorded in the phase report. Windows and desktop
 game-web comparison are pending. A shared implementation or native build is
 not parity evidence. Static landing review is separate from game-web parity.
+
+AB-01/OG-02 evidence: 38 ready Linux engine captures (95 forms, three poses), 11 targeted client cases and a post-blade geometry follow-up. Native Training witnesses and installed-build receipt are recorded separately in the phase report. Static landing checks passed for 81 entries; actual browser inspection is pending because the browser session reports `browser.user is unavailable`. This is not game-web parity evidence.
