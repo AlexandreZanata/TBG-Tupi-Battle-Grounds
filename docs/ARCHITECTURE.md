@@ -322,8 +322,9 @@ its owner decision is recorded in the P15 report.
   Legacy proportions and evolution scale remain compatible. Existing
   client lane prominence is retained for the Archer candidate.
 - **Batching:** parts are merged per joint, cached per form, and shared
-  across instances. Archer team-color variants are cached in vertex
-  colors, so both teams retain the one shared material. Bow strings and
+  across instances and both seats. Owner rule (2026-11-01): bodies use fixed
+  intrinsic vertex colors; no affiliation plaques or team-color body variants.
+  Blue/red foot rings carry ownership (ART-DIRECTION §2). Bow strings and
   arrow geometry are shared assets. Hit flash uses the existing tint material.
 - **Color/light:** named palette constants, three vertex values (0.82,
   1.0, 1.12), baked sky/ground fill and a small normal-based rim; one warm

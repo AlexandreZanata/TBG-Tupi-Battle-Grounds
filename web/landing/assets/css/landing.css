@@ -293,3 +293,7 @@ body{overflow-x:clip}
   .lang-switch button{min-width:40px;padding:0 9px}
   .hero-stats strong{font-size:1.25rem}
 }
+.native-release-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+
+/* Preview availability follows the source roster, independent of Faction. */
+.champion-preview{display:inline-block;margin:.2rem 0;padding:.15rem .5rem;border:1px solid var(--gold,#c9a13b);border-radius:999px;font-size:.75rem;color:var(--gold,#c9a13b)}

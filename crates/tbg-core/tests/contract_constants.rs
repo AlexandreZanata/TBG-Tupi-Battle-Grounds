@@ -62,8 +62,13 @@ fn shop_slots_stronghold_and_evolution() {
     );
     assert_eq!((BEETLES_PER_NESTER, BEETLES_PER_PLAYER), ([2, 3], 6));
     assert_eq!(BEETLE_LIFETIME, secs(10));
-    assert_eq!(STRONGHOLD_HP, 4_500);
-    assert_eq!(STRONGHOLD_DAMAGE, 53);
+    // TW-01 Proposed: retain the legacy literals and pin the requested revision explicitly.
+    let tower = if matches!(tbg_core::ruleset_version::RULESET_VERSION, 11..=15) {
+        (6750, 159)
+    } else {
+        (4500, 53)
+    };
+    assert_eq!((STRONGHOLD_HP, STRONGHOLD_DAMAGE), tower);
     assert_eq!(u32::from(STRONGHOLD_INTERVAL), secs(1));
     assert_eq!(STRONGHOLD_RANGE, 6 * TILE);
     assert_eq!(EVOLVE_COST, [2 * ENERGY_SCALE, 4 * ENERGY_SCALE]);
@@ -89,6 +94,11 @@ fn synergies() {
             (SynergyEffect::Damage, [500, 1_000]),
             (SynergyEffect::MaxHp, [500, 1_000]),
             (SynergyEffect::Movement, [500, 1_000]),
+            // OG-01 Proposed: Ogre tempo at the existing 2/4 thresholds.
+            (SynergyEffect::AttackSpeed, [500, 1_000]),
+            // AB-01/GD-01: marine movement; Gods deliberately have no bonus.
+            (SynergyEffect::Movement, [500, 1_000]),
+            (SynergyEffect::Movement, [0, 0]),
         ]
     );
 }

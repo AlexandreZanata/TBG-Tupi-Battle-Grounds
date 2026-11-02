@@ -1,0 +1,59 @@
+{
+  "generator": "built-in image_gen",
+  "prompts": "docs/ogre-faction/image-prompts.json",
+  "purpose": "concept references, not engine screenshots or imported meshes",
+  "forms": [
+    "base",
+    "A1",
+    "A2",
+    "B1",
+    "B2"
+  ],
+  "images": [
+    {
+      "kind": "BasaltBulwark",
+      "image": "concepts/basaltbulwark.png",
+      "sha256": "1dcb99516e3ecc5be49658b81753098aaca2690d4fbeb8a03e5699b259f7fcd7"
+    },
+    {
+      "kind": "CinderMaul",
+      "image": "concepts/cindermaul.png",
+      "sha256": "3c9f2c8d1ddf6e476c9de25faf92862aa05fcafb9bdfa482bae07e178a5926ae"
+    },
+    {
+      "kind": "HookBrawler",
+      "image": "concepts/hookbrawler.png",
+      "sha256": "8025d4b0bc848d6ce8855f048b94c5a8c5e0f899e67834a8df4cc2d743c3bdba"
+    },
+    {
+      "kind": "FlintRunner",
+      "image": "concepts/flintrunner.png",
+      "sha256": "84a641a9bd38623ad31673e5aba43b7cb6ffea5031fd20016881976696a1e8a6"
+    },
+    {
+      "kind": "ClayBinder",
+      "image": "concepts/claybinder.png",
+      "sha256": "2a574821bf6e7c8c7e5b46e334f32b6ac50408f2b5220d3349ca98a6d4ec9566"
+    },
+    {
+      "kind": "GustDrummer",
+      "image": "concepts/gustdrummer.png",
+      "sha256": "2f8b20ebfbaaa42b9af3c4fa0fff03d69550f7427fd09ddf1857b1bff9935e6b"
+    },
+    {
+      "kind": "HideMender",
+      "image": "concepts/hidemender.png",
+      "sha256": "32c1d1483f4847776bec82c969bcbc0cf5ddd2f8f73f32bbf636e792c4acaf5f"
+    },
+    {
+      "kind": "PebbleSlinger",
+      "image": "concepts/pebbleslinger.png",
+      "sha256": "66c04ab6dea3fc96cfe51d16239faffc948c4d27a3de8c4e63fa8c30f16bdaf8"
+    },
+    {
+      "kind": "RivetBallista",
+      "image": "concepts/rivetballista.png",
+      "sha256": "1a24b73dbc09b0eb4db349342102f708cef1f0ad5147a8bff672c4d5faee33b3"
+    }
+  ]
+}

@@ -68,12 +68,6 @@ fn robe(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             if f.b { MOSS } else { RAG },
             [0.0, t.y * 0.95, -0.02],
         ),
-        part(
-            Body(Hips),
-            Box(0.06, 0.2, 0.02),
-            LINEN,
-            [t.x * 0.2, -0.08, t.z * 0.5],
-        ),
     ]);
     // Ragged hem: tatters round the skirt.
     for i in 0..6 {

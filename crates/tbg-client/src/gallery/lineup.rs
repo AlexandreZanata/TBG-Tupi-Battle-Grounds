@@ -8,7 +8,10 @@ use tbg_core::{Archetype, UnitKind};
 
 /// The attack row's clip and moment: the full draw just before a ranged
 /// Release, the windup peak of a swing, the raised hands of a cast.
-fn attack(unit: UnitKind) -> (Clip, f32) {
+pub(super) fn attack(unit: UnitKind) -> (Clip, f32) {
+    if unit == UnitKind::Colossus || unit == UnitKind::Astreon {
+        return (Clip::AttackMelee, 0.30);
+    }
     match tbg_core::content::def(unit).archetype {
         Archetype::Ranged => (Clip::AttackRanged, 0.15),
         Archetype::Tank | Archetype::Dps => (Clip::AttackMelee, 0.22),
@@ -26,10 +29,23 @@ pub fn spawn(
     let poses = [(Clip::Idle, 0.4), (Clip::Walk, 0.15), attack(unit)];
     for (row, (clip, t)) in poses.into_iter().enumerate() {
         for (col, form) in FORMS.into_iter().enumerate() {
-            let layout = Layout::Lineup(row, col);
+            let layout = if super::monument(unit) {
+                Layout::Monument(row, col)
+            } else {
+                Layout::Lineup(row, col)
+            };
             let pos = layout.position(portrait);
             let (root, mut animator) = spawn_one(commands, lib, unit, form, pos, material);
             animator.present(clip, t);
+            if tbg_core::content::def(unit).faction == tbg_core::Faction::Ogres
+                || crate::art::kits::ogres::contains(unit)
+                || tbg_core::content::def(unit).faction == tbg_core::Faction::Abyssals
+                || tbg_core::content::def(unit).faction == tbg_core::Faction::Gods
+                || crate::art::kits::abyssals::contains(unit)
+            {
+                commands.entity(root).insert((animator, layout));
+                continue;
+            }
             let stage = commands
                 .spawn((
                     Mesh3d(lib.stage.clone()),

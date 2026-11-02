@@ -1,18 +1,33 @@
-TBG 0.1.2-rc.3 — Linux and Windows beta candidate
+TBG 0.1.4-colossus.3 — Compatible delivery verification beta
 
-Protocol 31, schema 10, ruleset 6 / 097385fee9a10b0f.
+This immutable follow-up preserves colossus.2 gameplay, presentation and match compatibility.
+Miner and Merchant provide authoritative War Auxiliary choices during a match.
+The consolidated preview includes Volthar, Astreon and the refined Colossus,
+while preserving the original contact-based pushing and randomized match sides.
+The Linux preview installer reads the committed version and preserves existing data.
 
-Same gameplay, protocol and contract as 0.1.2-rc.1. This version is
-published by the automatic main pipeline: one exact-source build per platform,
-promoted byte for byte, built with the pinned Rust 1.99.0 from LF-normalized
-sources. While the server switches to a new release, a request the old server
-refuses is now asked again through the server's admission step (at most three
-times in 30 seconds) instead of showing "server full".
+Protocol 38, schema 10 (P73 history schema 11 remains opt-in), ruleset 15 /
+cc459351581b7763. This contract requires a coordinated release from protocol 31;
+compatible-only delivery must not bypass its production contract gate.
 
-Shared Bevy desktop interface, 46 conventional champions, eight Arenas, local
-training, winner celebrations, illustrated cards/Augments and protected sessions.
-This candidate includes the already documented P70/P71 Proposed changes; it is not
-a new competitive balance acceptance.
+The local Practice/Training preview contains 84 champions across ten Factions,
+with five-form low-poly kits, refined Ogres, Abyssals, Gods/Colossus, Volthar and Astreon and rolling
+healing casks. Online FULL_POOL remains the separately gated 46-champion roster.
+The existing Proposed tower changes, broader BattleLine, original pushing and
+intrinsic body colors are retained. Widening the road no longer widens the
+preferred departure formation before contact. CROWD-EXIT-01 also bounds live
+walking envelopes to the actual body and held equipment, while engaged Colossus
+arms and Ogre Archer equipment retain directional clearance.
+
+Blue stays left and red stays right for every desktop player and spectator.
+Online and Practice sides are randomized; the side announcement, private controls,
+Stronghold, reconnection and result ownership follow the assigned seat. P73 adds
+participant-bound social state and opt-in private history; laboratory refinements
+and the landing dialog scroll fix are included.
+
+Includes reviewed A/B backend delivery and bounded re-admission (three retries
+within 30 seconds), main-based publication and exact-source native packages.
+Native publication does not install an update on a player's computer.
 
 Linux: x86_64 archive and AppImage (glibc 2.35+, Vulkan).
 Windows: x86_64 MSVC portable ZIP and per-user installer (Windows 11, DirectX 12).
@@ -34,8 +49,11 @@ separate gated mechanisms. Preserve existing accounts, preferences and older pac
 Source, individual asset checksums and the exact compatible contract are in
 `tbg-native-release.json`; `native-provenance.jsonl` binds the artifacts to GitHub CI.
 
-This candidate preserves the landing download-dialog scroll fix and corrects a
-release heartbeat snapshot that could retain already-completed writer work.
-Queued player work, running matches and pending results still block retirement.
-The wire/gameplay contract and database schema remain unchanged. Version rc.2
-keeps its existing source tag; no published bytes or tags are replaced.
+Ruleset 15 consolidates P74 and GD-04, including serialized auxiliary state and
+the owning seat's reroll quote. Miner and Merchant keep the proposed 6/4 Energy
+costs and single-hire lifecycle. Two new Gods remain in the local preview.
+No competitive acceptance is implied.
+
+D-104 retirement load is sampled inside its serialized writer turn, excluding
+only the observation itself. Later queued work, running matches, reconnect
+receipts and Ranked results remain protected during delivery.

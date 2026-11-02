@@ -385,18 +385,10 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 }
 
 /// Fungus on the spore branch: shoulder sacs, then a cluster on the back.
-/// A team sash over the shoulder and a team blossom on the head: the side
-/// reads from the match camera.
-fn colors(v: &mut Vec<PartSpec>, p: &Proportions) {
+/// An intrinsic blossom ornament, independent of the player seat.
+fn colors(v: &mut Vec<PartSpec>, _p: &Proportions) {
     v.extend([
-        part(
-            Body(Chest),
-            Box(0.07, 0.46, 0.03),
-            LINEN,
-            [0.02, p.torso.y * 0.5, 0.15],
-        )
-        .rot([-4.0, 0.0, 34.0]),
-        part(Body(Head), Ball(0.045), LINEN, [-0.09, 0.15, 0.06]),
+        part(Body(Head), Ball(0.045), BLOSSOM, [-0.09, 0.15, 0.06]),
         part(Body(Head), Ball(0.022), GOLD, [-0.09, 0.15, 0.1]),
     ]);
 }

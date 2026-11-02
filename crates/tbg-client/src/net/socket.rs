@@ -1,3 +1,4 @@
+//! New play follows active admission; existing matches reconnect to their original slot.
 //! Socket pump and reconnect backoff: 0.25 s, 0.5 s, 1 s, then every 2 s
 //! until `GIVE_UP` (the server window is 30 s). A frame that runs after the
 //! tab becomes visible again retries at once when a retry is due. A socket
@@ -182,7 +183,10 @@ impl NetLink {
             self.note_clock(u64::from(v.clock), now);
         }
         match msg {
-            ServerMsg::MatchStart { result_id, .. } | ServerMsg::MatchEnd { result_id, .. }
+            ServerMsg::MatchStart { result_id, .. }
+            | ServerMsg::MatchEnd { result_id, .. }
+            | ServerMsg::PersonalMatchResult { result_id, .. }
+            | ServerMsg::MatchHistoryStatus { result_id, .. }
                 if self.discarded_result == Some(result_id) =>
             {
                 None

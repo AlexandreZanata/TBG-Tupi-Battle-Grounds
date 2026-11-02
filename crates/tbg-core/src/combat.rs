@@ -52,7 +52,9 @@ pub(crate) fn run_units(state: &mut MatchState, ev: &mut Vec<Event>) {
     // spawns happen before it and removal happens afterwards.
     let mut formations = FormationIndex::new();
     for idx in 0..state.units.len() {
+        let before = state.units[idx].x;
         advance_unit(state, idx, ev, &mut formations);
+        crate::completion::movement(state, idx, before);
         crate::specials::advance(state, idx, ev);
     }
     // ...and again after everyone moved.
@@ -94,6 +96,9 @@ fn advance_unit(
         return;
     }
     let st = state.stats_of(&u);
+    if crate::completion::channeling(&u) {
+        return;
+    }
     if let Some((target, ticks)) = u.windup {
         if ticks > 1 {
             state.units[idx].windup = Some((target, ticks - 1));
@@ -138,8 +143,10 @@ fn advance_unit(
                 let (target, betrayed) = crate::support::betray_windup(state, &u, st.range, target);
                 crate::ravager::retarget(state, idx, target);
                 crate::mantis::retarget(state, idx, target);
+                crate::astreon::retarget(state, idx, target);
                 state.units[idx].windup = Some((target, WINDUP));
                 state.units[idx].fx.betray = betrayed;
+                crate::completion::prepare_heal(state, idx, target, &st);
                 ev.push(Event::AttackStart {
                     from: Target::Unit(u.id),
                     to: target,
@@ -216,7 +223,7 @@ fn advance_unit(
             let mut x = u.x + u.seat.dir() * speed;
             x = formations.clamp(state, &u, x);
             x = escort_clamp(state, &u, x);
-            state.units[idx].x = x.clamp(0, LANE_LEN);
+            crate::occupancy::move_unit(state, idx, x.clamp(0, LANE_LEN));
         }
     }
 }
@@ -269,6 +276,9 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
         }
         // Kind and Fortification shape the real shot (BR-SK03, BR-SK06).
         let tower = state.stronghold(seat);
+        if tower.damage <= 0 {
+            continue;
+        }
         let sx = stronghold_x(seat);
         let target = state
             .units
@@ -311,13 +321,9 @@ pub(crate) fn stronghold_fire(state: &mut MatchState, ev: &mut Vec<Event>) {
             crate::lab::stronghold(state, seat, removed);
             let killed = was_alive && state.unit_index(id).is_some_and(|i| state.units[i].hp <= 0);
             if killed && removed > 0 {
-                if let Some((max, ticks)) = augment::tower_fury_rule(&state.player(seat).augments) {
-                    let until = state.tick.saturating_add(u32::from(ticks));
-                    let p = state.player_mut(seat);
-                    p.fury_stacks = p.fury_stacks.saturating_add(1).min(max);
-                    p.fury_until = until;
-                }
+                crate::stronghold_power::killed(state, seat);
             }
+            crate::stronghold_power::collateral(state, seat, id, amount, ev);
             state.player_mut(seat).stronghold_cooldown = tower.interval;
         }
     }
@@ -351,7 +357,7 @@ pub(crate) fn remove_dead(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
     // P46: drain the shrapnel queue before removal. Chains terminate:
     // shrapnel only spawns on plate breaks, and plates only decrease.
-    while !state.shrapnel.is_empty() {
+    while crate::completion::death_bursts(state, ev) || !state.shrapnel.is_empty() {
         let queue = std::mem::take(&mut state.shrapnel);
         for s in queue {
             let enemy = s.seat.other();

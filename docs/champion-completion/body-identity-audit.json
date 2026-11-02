@@ -1,0 +1,404 @@
+{
+  "baseline": "e1eae31c44a2b09a2df05bc8a8ccdc34543ce665",
+  "owner_rule": "Foot rings alone identify teams. Remove affiliation geometry; keep authored equipment and faction materials seat-independent.",
+  "scope": "68 registered kinds, all five presentation forms; active kits, retained fallback and palette paths",
+  "files": [
+    {
+      "source": "crates/tbg-client/src/art/kits/acidmaw/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/antidote_brewer/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 1
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/archer/model.rs",
+      "previous_ally_color_references": 4,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 1
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/beetling/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 1
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/blood_furnace/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 8
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/bloodweaver/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/bloomkeeper/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 8
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/bombard/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/bone_brute/model.rs",
+      "previous_ally_color_references": 3,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 15
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/bonehorn/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/bulwark/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/capybara/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/cargo_crab/model.rs",
+      "previous_ally_color_references": 5,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/cargo_crate/mod.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 1
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/celestial_archer/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/common/body.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 20
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/common/gear.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/cragclaw.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/dawnmender.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/eclipse_dancer.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/forms.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 8
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/gorgehowl.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/hushfang.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/motion.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/motion/victory.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/prismancer.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/spinehurler.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/starbreaker.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/completion/sunlancer.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/crowcaller/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/demolisher/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 1
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/drillnest/drills.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 5
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/drillnest/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 5
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/drumguard/model.rs",
+      "previous_ally_color_references": 4,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/farwatch/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/hexer/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/hornet/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/jawguard/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 5
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/justiciar/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/leechroot/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 8
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/longaxe/model.rs",
+      "previous_ally_color_references": 3,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 9
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/luminous_oracle/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/mantis/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/nester/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/oilpress/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 8
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/old_finn/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 5
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/puppetmaster/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/pyre_warden/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 1
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/rampart/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 12
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/rattle_tick/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/ravager/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 1
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/rootcaller/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/rotcap/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/sawbot/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/shatterback/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 9
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/shieldbearer/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 10
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/siege_walker/model.rs",
+      "previous_ally_color_references": 4,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 13,
+      "additional_review": "Removed complete generic hip tabard and its metal hem, plus the leftover affiliation crest trim; no repaint substitute."
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/smuggler/model.rs",
+      "previous_ally_color_references": 3,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 12
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/solar_sentinel/model.rs",
+      "previous_ally_color_references": 0,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/trident/model.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/trigger/model.rs",
+      "previous_ally_color_references": 3,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 12
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/weaver/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 6
+    },
+    {
+      "source": "crates/tbg-client/src/art/kits/whisperer/model.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 7
+    },
+    {
+      "source": "crates/tbg-client/src/art/mod.rs",
+      "previous_ally_color_references": 1,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 34
+    },
+    {
+      "source": "crates/tbg-client/src/art/palette.rs",
+      "previous_ally_color_references": 6,
+      "remaining_ally_color_references": 1,
+      "removed_lines": 0
+    },
+    {
+      "source": "crates/tbg-client/src/art/roster/humans/shieldbearer_v2.rs",
+      "previous_ally_color_references": 2,
+      "remaining_ally_color_references": 0,
+      "removed_lines": 42
+    }
+  ]
+}

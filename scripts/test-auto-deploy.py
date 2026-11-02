@@ -232,6 +232,25 @@ class DeploymentGuards(unittest.TestCase):
 
 
 
+class TimerScheduling(unittest.TestCase):
+    """A host restart must not coalesce all four nonblocking controllers into one lock race."""
+
+    def test_family_starts_are_staggered_beyond_jitter_and_clock_coalescing(self):
+        import configparser
+        starts = []
+        for name in ['tbg-auto-deploy', 'tbg-web-deploy', 'tbg-static-deploy', 'tbg-native-catalog']:
+            config = configparser.ConfigParser()
+            config.read(ROOT/'deploy/auto'/f'{name}.timer')
+            timer = config['Timer']
+            self.assertNotIn('OnBootSec', timer)
+            self.assertEqual(timer['OnUnitInactiveSec'], '10min')
+            self.assertEqual(timer['AccuracySec'], '1s')
+            starts.append(int(timer['OnActiveSec'].removesuffix('s')))
+        self.assertEqual(starts, sorted(starts))
+        self.assertTrue(all(b - a > 31 for a, b in zip(starts, starts[1:])))
+        self.assertLessEqual(starts[-1], 300)
+
+
 class ControllerSafety(unittest.TestCase):
     """Automation never restarts the only game process, loops on a failed rollback or spends quota blindly."""
 

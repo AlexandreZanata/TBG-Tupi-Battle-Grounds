@@ -19,6 +19,7 @@ function card(champion, labels) {
   return el('li', { class: 'champion' },
     el('img', { src: `/${champion.portrait}`, width: 200, height: 200, loading: 'lazy', alt: '' }),
     el('h3', { text: pick(champion.name, lang()) }),
+    ...(champion.availability === 'preview' ? [el('span', { class: 'champion-preview', text: t('champions.preview') })] : []),
     el('p', { text: `${labels.archetype[champion.archetype]} · ${labels.faction[champion.faction]}` }));
 }
 

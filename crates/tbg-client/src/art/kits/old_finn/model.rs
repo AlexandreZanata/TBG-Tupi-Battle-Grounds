@@ -79,35 +79,6 @@ fn clothing(v: &mut Vec<PartSpec>, p: &Proportions, f: Form, coat: Color) {
     for y in [0.10, 0.19, 0.28] {
         v.push(part(Body(Chest), Ball(0.019), BRASS, [0.0, y, 0.174]));
     }
-    // A fitted neckerchief knot and tails preserve the team marker as clothing.
-    v.extend([
-        part(
-            Body(Chest),
-            Box(0.16, 0.045, 0.05),
-            LINEN,
-            [0.0, p.torso.y, 0.11],
-        ),
-        part(
-            Body(Chest),
-            Ball(0.032),
-            LINEN,
-            [0.0, p.torso.y - 0.025, 0.15],
-        ),
-        part(
-            Body(Chest),
-            Box(0.035, 0.085, 0.018),
-            LINEN,
-            [-0.025, p.torso.y - 0.065, 0.16],
-        )
-        .rot([0.0, 0.0, -18.0]),
-        part(
-            Body(Chest),
-            Box(0.035, 0.07, 0.018),
-            LINEN,
-            [0.025, p.torso.y - 0.065, 0.16],
-        )
-        .rot([0.0, 0.0, 18.0]),
-    ]);
     for (arm, fore, shin, foot) in [
         (UpperArmL, ForearmL, ShinL, FootL),
         (UpperArmR, ForearmR, ShinR, FootR),

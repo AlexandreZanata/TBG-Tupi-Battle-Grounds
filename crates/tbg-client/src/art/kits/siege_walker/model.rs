@@ -1,4 +1,4 @@
-//! Siege Walker figure: a hulking ogre gunner of the Ironworks carrying a
+//! Siege Walker figure: a hulking ogre gunner of the Ogre faction carrying a
 //! shoulder bombard. Evolutions change the bombard (the silhouette piece),
 //! the armor (large surfaces) and, at tier 2, add a glowing signature.
 
@@ -107,7 +107,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let p = plan(tier);
     let mut v = Vec::with_capacity(120);
     legs(&mut v, &p, f);
-    hips(&mut v, f);
+    hips(&mut v);
     chest(&mut v, &p, f);
     head(&mut v, f);
     arms(&mut v, &p, f);
@@ -156,8 +156,7 @@ fn legs(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     }
 }
 
-fn hips(v: &mut Vec<PartSpec>, f: Form) {
-    let cloth = if f.b { RUST } else { LINEN };
+fn hips(v: &mut Vec<PartSpec>) {
     v.extend([
         part(Body(Hips), Box(0.42, 0.17, 0.29), TROUSERS, [0.0, 0.0, 0.0]),
         part(
@@ -179,26 +178,6 @@ fn hips(v: &mut Vec<PartSpec>, f: Form) {
             LEATHER,
             [-0.19, 0.02, 0.12],
         ),
-        // Team loincloth on the tabard spring, iron-weighted hem.
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.2, 0.27, 0.02),
-            cloth,
-            [0.0, -0.08, 0.0],
-        ),
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.2, 0.035, 0.026),
-            IRON,
-            [0.0, -0.2, 0.0],
-        ),
-        part(
-            Secondary(Spring::Tabard),
-            Box(0.06, 0.06, 0.025),
-            LINEN,
-            [0.0, -0.06, 0.004],
-        )
-        .rot([0.0, 0.0, 45.0]),
     ]);
 }
 
@@ -312,13 +291,13 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
         .rot([-12.0, 0.0, 0.0]),
         part(
             Body(Head),
-            Box(0.22, 0.085, 0.15),
+            Bevel(0.23, 0.105, 0.17, 0.027),
             OGRE_SKIN,
             [0.0, -0.08, 0.05],
         ),
         part(
             Body(Head),
-            Box(0.05, 0.05, 0.05),
+            Bevel(0.065, 0.06, 0.07, 0.017),
             OGRE_SKIN,
             [0.0, -0.005, 0.135],
         ),
@@ -362,7 +341,7 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
         );
     }
     match (f.a, f.b, f.t2) {
-        // Artillery: a plumed great helm in gunmetal and gold.
+        // Artillery: a great helm in gunmetal and gold.
         (true, _, true) => {
             v.push(
                 part(Body(Head), Ball(0.142), GUNMETAL, [0.0, 0.05, -0.01])
@@ -373,18 +352,6 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
                 Box(0.3, 0.035, 0.29),
                 GOLD,
                 [0.0, 0.035, -0.01],
-            ));
-            v.push(part(
-                Secondary(Spring::HeadGear),
-                Box(0.04, 0.14, 0.26),
-                LINEN,
-                [0.0, 0.17, -0.03],
-            ));
-            v.push(part(
-                Secondary(Spring::HeadGear),
-                Box(0.045, 0.04, 0.27),
-                GOLD,
-                [0.0, 0.1, -0.03],
             ));
         }
         // Concussion: an iron face guard with glowing slits.
@@ -439,7 +406,7 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             part(Body(upper), Ball(0.1), OGRE_SKIN, [0.0, -0.02, 0.0]),
             part(
                 Body(upper),
-                Frustum(0.09, 0.075, a),
+                Frustum(0.105, 0.078, a),
                 OGRE_SKIN,
                 [0.0, -a * 0.5, 0.0],
             ),
@@ -451,7 +418,7 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             ),
             part(
                 Body(fore),
-                Box(0.155, 0.11, 0.155),
+                Bevel(0.16, 0.12, 0.155, 0.023),
                 DARK_LEATHER,
                 [0.0, -a * 0.6, 0.0],
             ),
@@ -485,12 +452,6 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
 fn back(v: &mut Vec<PartSpec>, f: Form) {
     let b = Secondary(Spring::Back);
-    // A team pennant on a pole: the side reads from the match camera.
-    v.extend([
-        part(b, Cyl(0.014, 0.62), WOOD, [0.12, 0.22, -0.16]),
-        part(b, Box(0.02, 0.15, 0.2), LINEN, [0.12, 0.44, -0.27]),
-        part(b, Box(0.022, 0.03, 0.2), GOLD, [0.12, 0.36, -0.27]),
-    ]);
     if f.t2 {
         // A furnace-boiler that feeds the great guns; glowing firebox.
         v.extend([

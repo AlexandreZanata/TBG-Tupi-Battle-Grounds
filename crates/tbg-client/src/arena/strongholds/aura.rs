@@ -9,7 +9,7 @@ use tbg_core::{Ruleset, StrongholdKind};
 
 /// Half the BattleLine's width: the arc stops at the lane edges, where the
 /// aura matters, so it never paints the meadow or the cliffs.
-const LANE_HALF: f32 = 1.54;
+const LANE_HALF: f32 = crate::arena::ground::LANE_WIDTH * 0.5 + 0.04;
 const WIDTH: f32 = 0.07;
 const SEGMENTS: usize = 16;
 

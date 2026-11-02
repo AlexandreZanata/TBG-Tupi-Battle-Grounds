@@ -1,5 +1,5 @@
 //! The shared rig-v2 anatomy (the Archer v2 family) and dress pieces:
-//! tunics, belts, team tabards, capes, hoods, helmets, pauldrons, beards.
+//! tunics, belts, capes, hoods, helmets, pauldrons, beards.
 //! Coordinates are in each joint's space; figures face +Z, left is +X.
 
 use bevy::prelude::*;

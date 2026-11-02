@@ -64,10 +64,40 @@ pub enum ShotKind {
     WebSpit,
     SlashWave,
     BloodBolt,
+    /// GD-04 Volthar: hammer lightning, the counted charged bolt and one chain link.
+    StormBolt,
+    StormSurge,
+    StormArc,
+    /// Ogre expansion: separate mesh, timing and impact recipes by kind.
+    Ogre(tbg_core::UnitKind, u8, u8),
+    Abyssal(tbg_core::UnitKind, u8, u8),
+    BellEcho(u8, u8),
+    BoneQuill(u8, u8),
+    Broth(u8, u8),
+    DawnThread(u8, u8),
+    PrismShard(u8, u8),
+    IvoryNeedle(u8, u8),
 }
 
 #[derive(Clone, Copy)]
 enum Body {
+    Pearl,
+    Harpoon,
+    ConchPulse,
+    LanternShard,
+    FoamPearl,
+    PodSeed,
+    OgrePebble,
+    ClayClod,
+    Stitch,
+    Rivet,
+    BellEcho,
+    BoneQuill,
+    Broth,
+    DawnThread,
+    PrismShard,
+    IvoryNeedle,
+
     Shell,
     LongShell,
     GreatShell,
@@ -90,6 +120,7 @@ enum Body {
     RadiantArrow,
     Stamp,
     Stinger,
+    Lightning,
 }
 
 #[derive(Clone, Copy)]
@@ -148,6 +179,105 @@ fn look(kind: ShotKind) -> Look {
     use ShotKind::*;
     let smoke = |every, size| Trail::Smoke { every, size };
     let (body, arc, secs, trail, roll, impact) = match kind {
+        Abyssal(k, t, b) => {
+            use tbg_core::UnitKind::*;
+            let (body, arc, secs, roll) = match k {
+                PearlSlinger => (Body::Pearl, 0.12, UNIT_FLIGHT, 4.0),
+                AbyssHarpooner => (Body::Harpoon, 0.01, UNIT_FLIGHT, 0.0),
+                UndertowHerald => (Body::ConchPulse, 0.02, CAST_FLIGHT, 3.0),
+                TrenchLamplighter => (Body::LanternShard, 0.04, CAST_FLIGHT, 2.0),
+                FoamWeaver => (Body::FoamPearl, 0.06, CAST_FLIGHT, 0.0),
+                _ => (Body::PodSeed, 0.08, UNIT_FLIGHT, 7.0),
+            };
+            (
+                Some((body, 1.0 + f32::from(t.min(2)) * 0.08)),
+                arc,
+                secs,
+                Trail::Motes(if k == PodSnapper {
+                    Mote::Spore
+                } else if b == 1 {
+                    Mote::Violet
+                } else {
+                    Mote::Water
+                }),
+                roll,
+                Impact::Champion(k, t, b),
+            )
+        }
+        Ogre(k, t, b) => {
+            use tbg_core::UnitKind::*;
+            let (body, arc, secs, trail, roll) = match k {
+                PebbleSlinger => (Body::OgrePebble, 0.14, UNIT_FLIGHT, smoke(0.02, 0.035), 9.0),
+                ClayBinder => (Body::ClayClod, 0.08, CAST_FLIGHT, smoke(0.02, 0.06), 3.0),
+                HideMender => (Body::Stitch, 0.04, CAST_FLIGHT, Trail::Sparks, 0.0),
+                _ => (Body::Rivet, 0.01, UNIT_FLIGHT, Trail::Sparks, 0.0),
+            };
+            (
+                Some((body, 1.0 + f32::from(t.min(2)) * 0.08)),
+                arc,
+                secs,
+                trail,
+                roll,
+                Impact::Champion(k, t, b),
+            )
+        }
+        BellEcho(t, b) => (
+            Some((Body::BellEcho, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            CAST_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Violet } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::LastlightCantor, t, b),
+        ),
+        BoneQuill(t, b) => (
+            Some((Body::BoneQuill, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Turquoise } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::Spinehurler, t, b),
+        ),
+        Broth(t, b) => (
+            Some((Body::Broth, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.14,
+            CAST_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Turquoise } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::MireTender, t, b),
+        ),
+        DawnThread(t, b) => (
+            Some((Body::DawnThread, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            CAST_FLIGHT,
+            if b == 1 {
+                Trail::Motes(Mote::Water)
+            } else {
+                Trail::Sparks
+            },
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::Dawnmender, t, b),
+        ),
+        PrismShard(t, b) => (
+            Some((Body::PrismShard, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            UNIT_FLIGHT,
+            if b == 1 {
+                Trail::Motes(Mote::Water)
+            } else {
+                Trail::Sparks
+            },
+            6.0,
+            Impact::Champion(tbg_core::UnitKind::Prismancer, t, b),
+        ),
+        IvoryNeedle(t, b) => (
+            Some((Body::IvoryNeedle, 1.0 + f32::from(t.min(2)) * 0.08)),
+            0.03,
+            UNIT_FLIGHT,
+            Trail::Motes(if b == 1 { Mote::Water } else { Mote::Spore }),
+            0.0,
+            Impact::Champion(tbg_core::UnitKind::Needlewing, t, b),
+        ),
+
         Shell => (
             Some((Body::Shell, 1.0)),
             0.06,
@@ -424,6 +554,23 @@ fn look(kind: ShotKind) -> Look {
             14.0,
             Impact::Cleanse,
         ),
+        StormBolt | StormSurge => (
+            Some((Body::Lightning, if kind == StormSurge { 1.6 } else { 1.0 })),
+            0.0,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            9.0,
+            Impact::Sparks,
+        ),
+        // The link already landed on the server; it only has to be readable.
+        StormArc => (
+            Some((Body::Lightning, 0.8)),
+            0.0,
+            0.06,
+            Trail::Sparks,
+            14.0,
+            Impact::Sparks,
+        ),
         BloodBolt => (
             Some((Body::Orb, 0.6)),
             0.04,
@@ -477,6 +624,23 @@ pub fn arc(kind: ShotKind) -> f32 {
 
 /// Shared projectile meshes, built along +Z (nose forward) once.
 pub struct ShotMeshes {
+    pearl: Handle<Mesh>,
+    harpoon: Handle<Mesh>,
+    conch_pulse: Handle<Mesh>,
+    lantern_shard: Handle<Mesh>,
+    foam_pearl: Handle<Mesh>,
+    pod_seed: Handle<Mesh>,
+    ogre_pebble: Handle<Mesh>,
+    clay_clod: Handle<Mesh>,
+    stitch: Handle<Mesh>,
+    rivet: Handle<Mesh>,
+    bell_echo: Handle<Mesh>,
+    bone_quill: Handle<Mesh>,
+    broth: Handle<Mesh>,
+    dawn_thread: Handle<Mesh>,
+    prism_shard: Handle<Mesh>,
+    ivory_needle: Handle<Mesh>,
+
     shell: Handle<Mesh>,
     long_shell: Handle<Mesh>,
     great_shell: Handle<Mesh>,
@@ -492,6 +656,7 @@ pub struct ShotMeshes {
     sun_mote: Handle<Mesh>,
     radiant_arrow: Handle<Mesh>,
     stamp: Handle<Mesh>,
+    lightning: Handle<Mesh>,
     stinger: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
@@ -541,6 +706,103 @@ impl ShotMeshes {
             ));
         }
         Self {
+            pearl: build(vec![
+                (Ball(0.065), IVORY, Transform::IDENTITY),
+                (Ring(0.009, 0.07, 360.0), TURQUOISE, Transform::IDENTITY),
+            ]),
+            harpoon: build(vec![
+                (Cyl(0.009, 0.32), OAK, along(0.0)),
+                (Cone(0.033, 0.12), IVORY, along(0.20)),
+                (Prism(0.05, 0.025), IVORY, along(0.13)),
+            ]),
+            conch_pulse: build(vec![
+                (Ring(0.012, 0.09, 300.0), IVORY, along(0.0)),
+                (Ring(0.008, 0.05, 300.0), TURQUOISE, along(0.02)),
+            ]),
+            lantern_shard: build(vec![
+                (Prism(0.055, 0.16), AMBER, along(0.0)),
+                (Ring(0.01, 0.06, 360.0), IVORY, along(0.0)),
+            ]),
+            foam_pearl: build(vec![
+                (Ball(0.055), IVORY, Transform::IDENTITY),
+                (Ball(0.026), TURQUOISE, Transform::from_xyz(0.05, 0.02, 0.0)),
+            ]),
+            pod_seed: build(vec![
+                (
+                    Ball(0.055),
+                    IVORY,
+                    Transform::from_scale(Vec3::new(0.75, 0.8, 1.35)),
+                ),
+                (Prism(0.035, 0.06), MOSS, along(-0.04)),
+            ]),
+            ogre_pebble: build(vec![
+                (Bevel(0.10, 0.08, 0.12, 0.02), ROCK, Transform::IDENTITY),
+                (
+                    Box(0.03, 0.07, 0.08),
+                    IVORY,
+                    Transform::from_xyz(0.02, 0.0, 0.0),
+                ),
+            ]),
+            clay_clod: build(vec![
+                (Ball(0.08), RUST, Transform::IDENTITY),
+                (Cone(0.055, 0.11), AMBER, along(0.06)),
+            ]),
+            stitch: build(vec![
+                (Cyl(0.009, 0.16), IVORY, along(0.0)),
+                (
+                    Ring(0.006, 0.028, 360.0),
+                    BRASS,
+                    Transform::from_xyz(0.0, 0.0, -0.09),
+                ),
+            ]),
+            rivet: build(vec![
+                (Cyl(0.016, 0.16), STEEL, along(0.0)),
+                (Cyl(0.04, 0.035), BRASS, along(-0.08)),
+                (Cone(0.02, 0.07), IRON, along(0.11)),
+            ]),
+
+            bell_echo: build(vec![
+                (Ring(0.012, 0.07, 300.0), GLOW, Transform::IDENTITY),
+                (Box(0.025, 0.08, 0.015), BONE, Transform::IDENTITY),
+            ]),
+            bone_quill: build(vec![
+                (Cyl(0.012, 0.32), IVORY, along(0.0)),
+                (Cone(0.035, 0.12), IVORY, along(0.21)),
+                (
+                    Box(0.06, 0.012, 0.05),
+                    TURQUOISE,
+                    Transform::from_xyz(0.0, 0.0, -0.12),
+                ),
+            ]),
+            broth: build(vec![
+                (
+                    Ball(0.055),
+                    SAP,
+                    Transform::from_scale(Vec3::new(1.0, 0.65, 1.5)),
+                ),
+                (
+                    Box(0.025, 0.025, 0.04),
+                    MOSS,
+                    Transform::from_xyz(0.025, 0.0, 0.01),
+                ),
+            ]),
+            dawn_thread: build(vec![
+                (Ring(0.01, 0.065, 180.0), GOLD, Transform::IDENTITY),
+                (Ball(0.026), IVORY, Transform::IDENTITY),
+            ]),
+            prism_shard: build(vec![
+                (
+                    Prism(0.085, 0.20),
+                    IVORY,
+                    along(0.02).with_scale(Vec3::new(1.0, 1.0, 0.5)),
+                ),
+                (Box(0.035, 0.02, 0.12), GOLD, Transform::IDENTITY),
+            ]),
+            ivory_needle: build(vec![
+                (Cyl(0.008, 0.39), IVORY, along(0.0)),
+                (Cone(0.022, 0.13), IVORY, along(0.26)),
+                (Ring(0.008, 0.028, 360.0), AMBER, along(-0.12)),
+            ]),
             shell: build(shell(0.07, 0.24, BRASS)),
             long_shell: build(shell(0.055, 0.34, BRASS)),
             great_shell: build(shell(0.1, 0.32, GOLD)),
@@ -600,6 +862,26 @@ impl ShotMeshes {
             stinger: build(vec![
                 (Cyl(0.012, 0.12), AMBER, along(0.0)),
                 (Cone(0.025, 0.10), CHITIN, along(0.11)),
+            ]),
+            // A three-segment zigzag with a pale core: one merged mesh for every bolt.
+            lightning: build(vec![
+                (
+                    Box(0.03, 0.03, 0.24),
+                    STORM_BLUE,
+                    Transform::from_xyz(0.03, 0.0, 0.16).with_rotation(Quat::from_rotation_y(-0.5)),
+                ),
+                (
+                    Box(0.03, 0.03, 0.24),
+                    STORM_BLUE,
+                    Transform::from_xyz(0.0, 0.0, 0.0).with_rotation(Quat::from_rotation_y(0.5)),
+                ),
+                (
+                    Box(0.03, 0.03, 0.24),
+                    STORM_BLUE,
+                    Transform::from_xyz(0.03, 0.0, -0.16)
+                        .with_rotation(Quat::from_rotation_y(-0.5)),
+                ),
+                (Ball(0.045), IVORY, Transform::from_xyz(0.04, 0.0, 0.27)),
             ]),
             stamp: build(vec![
                 (Box(0.07, 0.07, 0.12), GOLD, Transform::IDENTITY),
@@ -687,6 +969,23 @@ impl ShotMeshes {
     }
     fn get(&self, body: Body) -> &Handle<Mesh> {
         match body {
+            Body::Pearl => &self.pearl,
+            Body::Harpoon => &self.harpoon,
+            Body::ConchPulse => &self.conch_pulse,
+            Body::LanternShard => &self.lantern_shard,
+            Body::FoamPearl => &self.foam_pearl,
+            Body::PodSeed => &self.pod_seed,
+            Body::OgrePebble => &self.ogre_pebble,
+            Body::ClayClod => &self.clay_clod,
+            Body::Stitch => &self.stitch,
+            Body::Rivet => &self.rivet,
+            Body::BellEcho => &self.bell_echo,
+            Body::BoneQuill => &self.bone_quill,
+            Body::Broth => &self.broth,
+            Body::DawnThread => &self.dawn_thread,
+            Body::PrismShard => &self.prism_shard,
+            Body::IvoryNeedle => &self.ivory_needle,
+
             Body::Shell => &self.shell,
             Body::LongShell => &self.long_shell,
             Body::GreatShell => &self.great_shell,
@@ -702,6 +1001,7 @@ impl ShotMeshes {
             Body::SunMote => &self.sun_mote,
             Body::RadiantArrow => &self.radiant_arrow,
             Body::Stamp => &self.stamp,
+            Body::Lightning => &self.lightning,
             Body::Stinger => &self.stinger,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,
@@ -948,6 +1248,34 @@ mod fish_tests {
             let shot = look(kind);
             assert_eq!(shot.body.map(|(_, scale)| scale), Some(1.0));
             assert_eq!(shot.secs, UNIT_FLIGHT);
+        }
+    }
+}
+
+#[cfg(test)]
+mod completion_tests {
+    use super::*;
+    #[test]
+    fn completion_projectiles_keep_cast_and_ranged_authoritative_contact_timing() {
+        for (t, b) in crate::art::FORMS {
+            for kind in [
+                ShotKind::BellEcho(t, b),
+                ShotKind::Broth(t, b),
+                ShotKind::DawnThread(t, b),
+            ] {
+                let style = look(kind);
+                assert!((0.22 + style.secs - 0.30).abs() < 0.0001);
+                assert!(style.body.is_some());
+            }
+            for kind in [
+                ShotKind::BoneQuill(t, b),
+                ShotKind::PrismShard(t, b),
+                ShotKind::IvoryNeedle(t, b),
+            ] {
+                let style = look(kind);
+                assert!((0.18 + style.secs - 0.30).abs() < 0.0001);
+                assert!(style.body.is_some());
+            }
         }
     }
 }

@@ -60,6 +60,37 @@ impl Bot {
             return None;
         }
         self.wait = 3 + self.rng.below(6);
+        let tower = view.strongholds[view.you.index()];
+        if army(view) >= EVOLVE_ARMY && tower.kind != StrongholdKind::Classic && tower.tier < 2 {
+            // TW-01: save for the real Fortification price instead of spending each small gain.
+            return self.fortify(view);
+        }
+        // PK-01: spend on deployed power before filling an already blocked entrance.
+        // This is an opponent preference; players retain unlimited purchases.
+        if view.queued > 0 {
+            return self
+                .fortify(view)
+                .or_else(|| self.evolve(view, 0))
+                .or_else(|| {
+                    crate::bot_shop::decide(
+                        view,
+                        self.rules,
+                        self.shop.0,
+                        self.shop.1,
+                        self.rolls,
+                        |kind| {
+                            self.rules.def(kind).damage > 0
+                                && crate::content::occupancy::footprint(kind, 0).width
+                                    <= crate::content::occupancy::WIDTH / 2
+                                && !self
+                                    .rules
+                                    .def(kind)
+                                    .ability(0, 0)
+                                    .contains(&crate::content::Ability::NoStronghold)
+                        },
+                    )
+                });
+        }
         let big_army = army(view) >= EVOLVE_ARMY;
         let shop = crate::bot_shop::decide(
             view,
@@ -122,6 +153,7 @@ impl Bot {
             .units
             .iter()
             .filter(|u| u.seat == view.you && u.tier < 2 && !u.is_summon())
+            .filter(|u| view.queued == 0 || evolution_space(view, u))
             .min_by_key(|u| u.id)?;
         // The seat's real price (Augment and arena discounts, ARENAS-G).
         if view.energy < view.evolve_costs[usize::from(unit.tier.min(1))] {
@@ -137,6 +169,35 @@ impl Bot {
             branch,
         })
     }
+}
+
+/// Conservative visible-space preference; the server still validates every Evolution.
+fn evolution_space(view: &MatchView, unit: &crate::UnitView) -> bool {
+    use crate::content::occupancy::{footprint, CELL, GAP, WIDTH};
+    let reserved = |width: i32| (width + CELL - 1) / CELL * CELL;
+    let next = footprint(unit.kind, unit.tier + 1);
+    let width = reserved(next.width);
+    let z = i32::from(unit.lane_z);
+    if z.abs() + (width + 1) / 2 > WIDTH / 2 {
+        return false;
+    }
+    !view.units.iter().any(|other| {
+        if other.id == unit.id
+            || other.seat != unit.seat
+            || other.hp <= 0
+            || other.fx & (1 << 14) != 0
+        {
+            return false;
+        }
+        let size = footprint(other.kind, other.tier);
+        let dx = (other.x - unit.x) * unit.seat.dir();
+        let gap = if dx >= 0 {
+            next.front + size.back
+        } else {
+            size.front + next.back
+        } + GAP;
+        dx.abs() < gap && (i32::from(other.lane_z) - z).abs() * 2 < width + reserved(size.width)
+    })
 }
 
 impl Bot {

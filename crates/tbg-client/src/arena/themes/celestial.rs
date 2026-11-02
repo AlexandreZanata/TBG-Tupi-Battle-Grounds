@@ -39,7 +39,7 @@ pub(super) fn build(kit: &mut Kit) {
     ] {
         block(parts, Vec3::new(8.0, y, -4.45), Vec3::new(w, 0.16, d), col);
     }
-    steps(parts, Vec3::new(8.0, 0.0, -2.92), 2.8, p.stone);
+    steps(parts, Vec3::new(8.0, 0.0, -3.10), 2.8, p.stone);
     for (x, z, h) in [
         (1.3, -3.5, 2.7),
         (3.0, -4.2, 3.35),
@@ -61,8 +61,7 @@ pub(super) fn build(kit: &mut Kit) {
         );
     }
     for x in [4.35, 11.65] {
-        guardian(parts, Vec3::new(x, 0.0, -3.18), 1.02, p.stone, p.accent);
-        planter(parts, Vec3::new(x + 0.65, 0.0, -3.26), p.stone, p.plant);
+        guardian(parts, Vec3::new(x, 0.0, -3.30), 1.02, p.stone, p.accent);
     }
     shared::crystal(
         &mut kit.glow,

@@ -19,6 +19,7 @@ impl Match {
         key: MatchKey,
         started: Instant,
         collect_stats: bool,
+        history_expected: bool,
     ) -> Option<RankedFinal> {
         let (Some((a, _)), Some((b, _))) = (self.players[0].account, self.players[1].account)
         else {
@@ -76,6 +77,7 @@ impl Match {
             factions: [self.stats[0].factions, self.stats[1].factions],
             arcanas: self.state.players.each_ref().map(|p| p.arcanas),
             stats,
+            history_expected,
         })
     }
 }

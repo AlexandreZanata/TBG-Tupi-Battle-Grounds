@@ -42,7 +42,7 @@ The browser repeats the same validation, so a malformed file stays in the safe p
 ## Content sources
 
 - Champions, Factions, Archetypes and Arena effects: `web/scripts/sync_content.py` (tbg-core
-  `FULL_POOL` and content table, client i18n names, client Arena data). Portraits and Arena
+  `COMPLETION_POOL` (81 authored kinds), `FULL_POOL` availability and content table, client i18n names, client Arena data). Portraits and Arena
   previews are the client's own renders.
 - Patch notes: `docs/patches/catalog.json` copied at staging; the page shows title, summary,
   date, version and status only (technical sections stay in the game and repository).
@@ -60,3 +60,9 @@ The browser repeats the same validation, so a malformed file stays in the safe p
 `noindex`; they state only facts about this static site and leave policy decisions open.
 `contact/` points to public GitHub issues and leaves the official channel pending. Remove
 `noindex` and add them to `sitemap.xml` only after review.
+
+OG-01 appends Ogres and lists nine champions per Faction. The 26 preview-only
+cards are visibly marked in both languages; listing them does not activate
+their online Shop pool or publish a native binary.
+
+AB-01/OG-02 expands the authored preview to 81 champions across nine Factions, with 35 preview badges. Trident is an Abyssal and Pod Snapper fills the Plants slot. The authored protocol target is 35; this is not a claim that the running public service has been upgraded. Native downloads stay pending.

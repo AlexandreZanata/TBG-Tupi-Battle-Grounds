@@ -75,11 +75,14 @@ fn details(
         ),
         15.,
     ));
-    p.spawn(kit::heading(text(&v["passive"], "name"), 17.));
-    p.spawn((
-        kit::muted(expand(&text(&v["passive"], "text"), stats), 14.),
-        detail_node(),
+    p.spawn(kit::heading(
+        lang.key(&format!(
+            "stronghold.{}.passive.name",
+            format!("{kind:?}").to_lowercase()
+        )),
+        17.,
     ));
+    p.spawn((kit::muted(passive(lang, kind, stats), 14.), detail_node()));
     for (heading, field) in [("+", "advantages"), ("-", "disadvantages")] {
         for line in v[field]
             .as_array()
@@ -164,8 +167,8 @@ pub(in crate::ui) fn expand(raw: &str, stats: &Value) -> String {
                 "spoils" | "spoilsCap" => {
                     number(raw / data["energyScale"].as_f64().unwrap_or(600.))
                 }
-                "auraBp" => format!("{}%", number(raw / 100.)),
-                "range" | "auraRange" => format!("{} tiles", number(raw / 1000.)),
+                "armorBp" | "splashBp" | "auraBp" => format!("{}%", number(raw / 100.)),
+                "splashRadius" | "range" | "auraRange" => format!("{} tiles", number(raw / 1000.)),
                 "interval" => format!("{:.2} s", raw / data["tickHz"].as_f64().unwrap_or(20.)),
                 _ => n.to_string(),
             };
@@ -216,4 +219,20 @@ pub(in crate::ui) fn branch_effect(step: &Value) -> String {
         }
     }
     parts.join(" · ")
+}
+
+/// The same localized passive copy and authoritative catalog values feed every desktop target.
+pub(in crate::ui) fn passive(lang: Lang, kind: tbg_core::StrongholdKind, stats: &Value) -> String {
+    let key = format!(
+        "stronghold.{}.passive.text",
+        format!("{kind:?}").to_lowercase()
+    );
+    expand(&lang.key(&key), stats).replace(
+        " tiles",
+        if lang == Lang::PtBr {
+            " casas"
+        } else {
+            " tiles"
+        },
+    )
 }

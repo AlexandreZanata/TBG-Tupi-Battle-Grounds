@@ -89,13 +89,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             part(Body(upper), Pill(0.04, 0.08), CHARCOAL, [0.0, -0.06, 0.0]),
             part(Body(lower), Cone(0.05, 0.15), IVORY, [0.0, -0.06, 0.02]).rot([160.0, 0.0, 0.0]),
             part(Body(hand), Cone(0.035, 0.12), IVORY, [0.0, -0.02, 0.05]).rot([65.0, 0.0, 0.0]),
-            part(
-                Body(Chest),
-                Box(0.025, 0.24, 0.16),
-                LINEN,
-                [s * 0.18, 0.27, -0.02],
-            )
-            .rot([0.0, 0.0, s * -12.0]),
             part(Body(Head), Ball(0.03), TURQUOISE, [s * 0.12, 0.045, 0.10]).glow(),
         ]);
     }

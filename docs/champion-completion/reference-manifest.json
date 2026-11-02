@@ -1,0 +1,240 @@
+[
+  {
+    "kind": "Gravecutter",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/gravecutter.png",
+    "sha256": "b30d2f70160f574f5915612133f7207732d9579bfc353da4b83d42b1df639210",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "LastlightCantor",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/lastlight-cantor.png",
+    "sha256": "032002b866b59a789f8a121da5850098b7b8e433b10c8f566794d525767ba3b8",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Cragclaw",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/cragclaw.png",
+    "sha256": "1037233266c35cfd9f41f573cf6bc9af2dc4572015866d65cfcc1353cef43a02",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Hushfang",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/hushfang.png",
+    "sha256": "a62996883ece50bbe7671432895521db20efbbf9e5f098f34d2fb6e4f7691f0b",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Spinehurler",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/spinehurler.png",
+    "sha256": "612218ab2b7f4ef612067e1f50f42dfdb031621090bfeb721ccfb6a364a73ce1",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "MireTender",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/mire-tender.png",
+    "sha256": "7d55df67e16a701e801ffaa79afe13df3cfc36a14e5a51e7927c98770dbe6518",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Gorgehowl",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/gorgehowl-v2.png",
+    "sha256": "5cd852c54b9dc40da5631de70d19cbef350a1295dca68e2b42d58605b668b9e2",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Sunlancer",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/sunlancer.png",
+    "sha256": "a4292a7ddabc473f6cdcb74b4c1e812b7941a32c50cd60cb083ee4ef79014f2a",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "EclipseDancer",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/eclipse-dancer.png",
+    "sha256": "92d5f161ff871dd15be7dfd4819280543d9b557fb55c5ba5bdeba4e95068e77d",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Starbreaker",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/starbreaker.png",
+    "sha256": "d7e0dec88e3ad4f022c417b70168e447ac8a7572b805c4ab2299220386eb012e",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Dawnmender",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/dawnmender.png",
+    "sha256": "b70f95c34244a3fe73e8095bb131846f0f18aa1a5bde7864e7015863d4c1daec",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Prismancer",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/prismancer.png",
+    "sha256": "80d4e05f0a1a102b9a12508dec3185fda586cd622394e297d375ccaf193333fa",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Leafcutter",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/leafcutter.png",
+    "sha256": "cdbb841cc35bf98edda91be14ce7ea336266661a8118c15afe90f3e6e641ea67",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Blastbeetle",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/blastbeetle.png",
+    "sha256": "a76302bf53fe7dfa2d6be819439dde9e4a37c2399bec0ab94a11a229b9a6a7be",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Needlewing",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/needlewing.png",
+    "sha256": "7370bd4e44ba6d8aad1198a5fda698474740ec973a5abf29f95dd75c0633f273",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "NectarNurse",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/nectar-nurse.png",
+    "sha256": "4d96aea1e56c027cc7d28b80e1c9d4159289c7c25fe50897a8ded8df7c2ab379",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  },
+  {
+    "kind": "Stridulator",
+    "forms": [
+      "base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "image": "evolutions/stridulator.png",
+    "sha256": "c49fa7959359c9c6a6567767c779990c346a7b28cb846804b5d2a5874012d718",
+    "tool": "image_gen.imagegen",
+    "status": "Concept reference, not an engine screenshot"
+  }
+]

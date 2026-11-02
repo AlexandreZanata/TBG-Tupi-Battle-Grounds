@@ -36,8 +36,10 @@ class PatchGateTests(unittest.TestCase):
         self.root_patch = patch.object(GATE, 'ROOT', self.root)
         self.root_patch.start()
         self.addCleanup(self.root_patch.stop)
-        self.fingerprint = self.catalog['notes'][0]['ruleset_hash']
         self.version = int(re.search(r'RULESET_VERSION: u32 = (\d+)', (self.root/'crates/tbg-core/src/ruleset_version.rs').read_text())[1])
+        # Catalog order is public history, not an implicit pointer to the current revision.
+        current = next(note for note in self.catalog['notes'] if note['ruleset_version'] == self.version)
+        self.fingerprint = current['ruleset_hash']
 
     def run_gate(self, changes='', previous=None):
         previous = self.version-1 if previous is None else previous

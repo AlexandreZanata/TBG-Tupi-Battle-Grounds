@@ -3,10 +3,12 @@
 //! projectile or melee impact), registered by `UnitKind`. Plain data and
 //! function pointers; units without a kit keep the shared library.
 
+pub(crate) mod abyssals;
 mod acidmaw;
 pub mod aim;
 mod antidote_brewer;
 mod archer;
+pub(crate) mod astreon;
 mod beetling;
 mod blood_furnace;
 mod bloodweaver;
@@ -19,7 +21,9 @@ mod capybara;
 mod cargo_crab;
 mod cargo_crate;
 mod celestial_archer;
+pub(crate) mod colossus;
 pub mod common;
+pub(crate) mod completion;
 mod crowcaller;
 mod demolisher;
 mod drillnest;
@@ -35,6 +39,7 @@ mod longaxe;
 mod luminous_oracle;
 mod mantis;
 mod nester;
+pub(crate) mod ogres;
 mod oilpress;
 mod old_finn;
 mod puppetmaster;
@@ -53,6 +58,7 @@ mod solar_sentinel;
 mod tools;
 pub(crate) mod trident;
 mod trigger;
+pub(crate) mod volthar;
 mod weaver;
 mod whisperer;
 
@@ -282,7 +288,12 @@ pub fn kit(kind: UnitKind) -> Option<&'static Kit> {
         UnitKind::Capybara => Some(&CAPYBARA),
         UnitKind::RattleTick => Some(&RATTLETICK),
         #[allow(unreachable_patterns)]
-        _ => None,
+        UnitKind::Colossus => Some(&colossus::KIT),
+        UnitKind::Volthar => Some(&volthar::KIT),
+        UnitKind::Astreon => Some(&astreon::KIT),
+        _ => abyssals::kit(kind)
+            .or_else(|| ogres::kit(kind))
+            .or_else(|| completion::kit(kind)),
     }
 }
 

@@ -177,7 +177,12 @@ fn decode(m: &StoredMatch, payload: &str, catalog: &Catalog) -> Option<MatchObs>
         let mut synergy_max = [0u8; tbg_core::FACTION_COUNT];
         let mut synergy_ticks = [[0u32; 2]; tbg_core::FACTION_COUNT];
         let factions = s["synergy_max"].as_array()?.len();
-        if factions != 4 && factions != tbg_core::FACTION_COUNT {
+        if factions != 4
+            && factions != 7
+            && factions != 8
+            && factions != 9
+            && factions != tbg_core::FACTION_COUNT
+        {
             return None;
         }
         if s["synergy_ticks"].as_array()?.len() != factions {

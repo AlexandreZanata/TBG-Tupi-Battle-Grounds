@@ -6,8 +6,8 @@
   "tickHz": 20,
   "windowTicks": 200,
   "fortifyCost": [
-    1800,
-    2400
+    3600,
+    6000
   ],
   "copy": {
     "intro": "Four towers, free for everyone. Pick the one that guards your BattleLine.",
@@ -37,14 +37,17 @@
         "Pays nothing while your army is not killing"
       ],
       "stats": {
-        "maxHp": 4185,
-        "damage": 48,
+        "maxHp": 6277,
+        "damage": 144,
         "interval": 20,
         "range": 6000,
-        "spoils": 90,
-        "spoilsCap": 360,
+        "spoils": 270,
+        "spoilsCap": 1080,
         "auraBp": 0,
-        "auraRange": 0
+        "auraRange": 0,
+        "armorBp": 0,
+        "splashBp": 0,
+        "splashRadius": 0
       },
       "branches": [
         {
@@ -53,33 +56,39 @@
             {
               "name": "Reinforced Vault",
               "delta": {
-                "hpBp": 1200
+                "hpBp": 2500
               },
               "stats": {
-                "maxHp": 4687,
-                "damage": 48,
+                "maxHp": 7846,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
-                "spoils": 90,
-                "spoilsCap": 360,
+                "spoils": 270,
+                "spoilsCap": 1080,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             },
             {
               "name": "Grand Vault",
               "delta": {
-                "hpBp": 1200
+                "hpBp": 2500
               },
               "stats": {
-                "maxHp": 5189,
-                "damage": 48,
+                "maxHp": 9415,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
-                "spoils": 90,
-                "spoilsCap": 360,
+                "spoils": 270,
+                "spoilsCap": 1080,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             }
           ],
@@ -94,34 +103,40 @@
             {
               "name": "Coinage",
               "delta": {
-                "spoilsAdd": 30
+                "spoilsAdd": 90
               },
               "stats": {
-                "maxHp": 4185,
-                "damage": 48,
+                "maxHp": 6277,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
-                "spoils": 120,
-                "spoilsCap": 360,
+                "spoils": 360,
+                "spoilsCap": 1080,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             },
             {
               "name": "Royal Mint",
               "delta": {
-                "spoilsAdd": 30,
-                "spoilsCapAdd": 180
+                "spoilsAdd": 90,
+                "spoilsCapAdd": 540
               },
               "stats": {
-                "maxHp": 4185,
-                "damage": 48,
+                "maxHp": 6277,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
-                "spoils": 150,
-                "spoilsCap": 540,
+                "spoils": 450,
+                "spoilsCap": 1620,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             }
           ],
@@ -148,7 +163,7 @@
       "summary": "Massive walls and shields that outlast any siege.",
       "passive": {
         "name": "Fortified Structure",
-        "text": "The highest Stronghold HP ({maxHp}). No other effect."
+        "text": "{maxHp} HP and {armorBp} incoming damage reduction. Fortress increases that protection."
       },
       "advantages": [
         "Highest HP of all towers ({maxHp})",
@@ -159,14 +174,17 @@
         "No effect beyond its walls"
       ],
       "stats": {
-        "maxHp": 5175,
-        "damage": 47,
+        "maxHp": 7762,
+        "damage": 141,
         "interval": 20,
         "range": 6000,
         "spoils": 0,
         "spoilsCap": 0,
         "auraBp": 0,
-        "auraRange": 0
+        "auraRange": 0,
+        "armorBp": 1500,
+        "splashBp": 0,
+        "splashRadius": 0
       },
       "branches": [
         {
@@ -175,33 +193,39 @@
             {
               "name": "Reinforced Walls",
               "delta": {
-                "hpBp": 1500
+                "hpBp": 3000
               },
               "stats": {
-                "maxHp": 5951,
-                "damage": 47,
+                "maxHp": 10090,
+                "damage": 141,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 2000,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             },
             {
               "name": "Imperial Fortress",
               "delta": {
-                "hpBp": 1500
+                "hpBp": 3000
               },
               "stats": {
-                "maxHp": 6727,
-                "damage": 47,
+                "maxHp": 12419,
+                "damage": 141,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 2500,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             }
           ],
@@ -216,33 +240,39 @@
             {
               "name": "Watchtower",
               "delta": {
-                "rangeAdd": 1000
+                "rangeAdd": 1500
               },
               "stats": {
-                "maxHp": 5175,
-                "damage": 47,
+                "maxHp": 7762,
+                "damage": 141,
                 "interval": 20,
-                "range": 7000,
+                "range": 7500,
                 "spoils": 0,
                 "spoilsCap": 0,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 1500,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             },
             {
               "name": "Royal Sentinel",
               "delta": {
-                "dmgBp": 1500
+                "dmgBp": 3000
               },
               "stats": {
-                "maxHp": 5175,
-                "damage": 54,
+                "maxHp": 7762,
+                "damage": 183,
                 "interval": 20,
-                "range": 7000,
+                "range": 7500,
                 "spoils": 0,
                 "spoilsCap": 0,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 1500,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             }
           ],
@@ -268,26 +298,29 @@
       "color": "#e98a4f",
       "summary": "A great cannon that hits harder than any other tower.",
       "passive": {
-        "name": "No passive",
-        "text": "Raw power instead: the highest Stronghold damage ({damage} per shot)."
+        "name": "Demolition Impact",
+        "text": "Shots deal {splashBp} damage to up to three other enemies within {splashRadius} of impact."
       },
       "advantages": [
         "Highest damage of all towers ({damage})",
         "Heavy Cannon hits harder; Rapid Fire reloads faster"
       ],
       "disadvantages": [
-        "Lowest HP ({maxHp})",
+        "Collateral damage does not reach towers",
         "No passive effect"
       ],
       "stats": {
-        "maxHp": 3825,
-        "damage": 58,
+        "maxHp": 5737,
+        "damage": 174,
         "interval": 20,
         "range": 6000,
         "spoils": 0,
         "spoilsCap": 0,
         "auraBp": 0,
-        "auraRange": 0
+        "auraRange": 0,
+        "armorBp": 0,
+        "splashBp": 4000,
+        "splashRadius": 1000
       },
       "branches": [
         {
@@ -296,33 +329,39 @@
             {
               "name": "Heavy Shot",
               "delta": {
-                "dmgBp": 2000
+                "dmgBp": 4000
               },
               "stats": {
-                "maxHp": 3825,
-                "damage": 69,
+                "maxHp": 5737,
+                "damage": 243,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 6000,
+                "splashRadius": 1000
               }
             },
             {
               "name": "Great Cannon",
               "delta": {
-                "dmgBp": 2000
+                "dmgBp": 4000
               },
               "stats": {
-                "maxHp": 3825,
-                "damage": 81,
+                "maxHp": 5737,
+                "damage": 313,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 8000,
+                "splashRadius": 1000
               }
             }
           ],
@@ -337,33 +376,39 @@
             {
               "name": "Quick Reload",
               "delta": {
-                "interval": 17
-              },
-              "stats": {
-                "maxHp": 3825,
-                "damage": 58,
-                "interval": 17,
-                "range": 6000,
-                "spoils": 0,
-                "spoilsCap": 0,
-                "auraBp": 0,
-                "auraRange": 0
-              }
-            },
-            {
-              "name": "Advanced Mechanism",
-              "delta": {
                 "interval": 14
               },
               "stats": {
-                "maxHp": 3825,
-                "damage": 58,
+                "maxHp": 5737,
+                "damage": 174,
                 "interval": 14,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
                 "auraBp": 0,
-                "auraRange": 0
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 4000,
+                "splashRadius": 1000
+              }
+            },
+            {
+              "name": "Advanced Mechanism",
+              "delta": {
+                "interval": 10
+              },
+              "stats": {
+                "maxHp": 5737,
+                "damage": 174,
+                "interval": 10,
+                "range": 6000,
+                "spoils": 0,
+                "spoilsCap": 0,
+                "auraBp": 0,
+                "auraRange": 0,
+                "armorBp": 0,
+                "splashBp": 4000,
+                "splashRadius": 1000
               }
             }
           ],
@@ -401,14 +446,17 @@
         "Only helps units fighting close to your tower"
       ],
       "stats": {
-        "maxHp": 4320,
-        "damage": 48,
+        "maxHp": 6480,
+        "damage": 144,
         "interval": 20,
         "range": 6000,
         "spoils": 0,
         "spoilsCap": 0,
-        "auraBp": 500,
-        "auraRange": 4000
+        "auraBp": 1500,
+        "auraRange": 5000,
+        "armorBp": 0,
+        "splashBp": 0,
+        "splashRadius": 0
       },
       "branches": [
         {
@@ -417,33 +465,39 @@
             {
               "name": "War Cry",
               "delta": {
-                "auraBpAdd": 300
+                "auraBpAdd": 750
               },
               "stats": {
-                "maxHp": 4320,
-                "damage": 48,
+                "maxHp": 6480,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
-                "auraBp": 800,
-                "auraRange": 4000
+                "auraBp": 2250,
+                "auraRange": 5000,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             },
             {
               "name": "Supreme Command",
               "delta": {
-                "auraBpAdd": 300
+                "auraBpAdd": 750
               },
               "stats": {
-                "maxHp": 4320,
-                "damage": 48,
+                "maxHp": 6480,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
-                "auraBp": 1100,
-                "auraRange": 4000
+                "auraBp": 3000,
+                "auraRange": 5000,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             }
           ],
@@ -458,33 +512,39 @@
             {
               "name": "Outpost",
               "delta": {
-                "auraRangeAdd": 1000
+                "auraRangeAdd": 1500
               },
               "stats": {
-                "maxHp": 4320,
-                "damage": 48,
+                "maxHp": 6480,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
-                "auraBp": 500,
-                "auraRange": 5000
+                "auraBp": 1500,
+                "auraRange": 6500,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             },
             {
               "name": "High Command",
               "delta": {
-                "auraRangeAdd": 1000
+                "auraRangeAdd": 1500
               },
               "stats": {
-                "maxHp": 4320,
-                "damage": 48,
+                "maxHp": 6480,
+                "damage": 144,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
                 "spoilsCap": 0,
-                "auraBp": 500,
-                "auraRange": 6000
+                "auraBp": 1500,
+                "auraRange": 8000,
+                "armorBp": 0,
+                "splashBp": 0,
+                "splashRadius": 0
               }
             }
           ],

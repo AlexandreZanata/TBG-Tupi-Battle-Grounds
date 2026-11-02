@@ -1,7 +1,7 @@
 //! Framing camera: perspective 35° FOV over the lane center.
 //!
-//! Landscape shows the lane horizontal (own Stronghold left); portrait
-//! rotates 90° around Y so the lane is vertical (own Stronghold bottom).
+//! Landscape shows blue left/red right for every player and spectator; portrait
+//! retains its existing vertical framing.
 //! Distance is recomputed on every `WindowResized` so x in [-2, 18]
 //! stays visible with ~10% margin.
 
@@ -110,8 +110,8 @@ pub(crate) fn frame(transform: &mut Transform, projection: &mut Projection, w: f
     // direction; the 10% margin covers it. Upgrade: project lane corners.
     //
     // Deviation from spec text: the spec says the landscape camera sits on
-    // the -Z side, but that mirrors the lane (own Stronghold on the right).
-    // The camera sits on +Z so own is on the left per the acceptance check.
+    // the -Z side, but that reverses the common blue-left/red-right orientation.
+    // +Z gives both players and spectators the same authoritative view.
     let offset = if portrait {
         Vec3::new(-across, up, 0.0)
     } else {
@@ -123,4 +123,21 @@ pub(crate) fn frame(transform: &mut Transform, projection: &mut Projection, w: f
 /// D-27 desktop shell breakpoint; the original phone/tablet framing stays intact.
 pub fn desktop(width: f32, height: f32) -> bool {
     width >= 1280.0 && height >= 720.0 && width > height
+}
+
+#[cfg(test)]
+mod side_tests {
+    use super::*;
+
+    #[test]
+    fn side01_desktop_camera_keeps_blue_left_and_red_right() {
+        for (width, height) in [(1280., 720.), (1440., 900.), (1920., 1080.), (2560., 1440.)] {
+            let mut camera = Transform::default();
+            let mut projection = Projection::Perspective(PerspectiveProjection::default());
+            frame(&mut camera, &mut projection, width, height);
+            assert_eq!(camera.translation.x, LANE_CENTER.x);
+            assert!(camera.translation.z > 0.);
+            assert!((camera.rotation * Vec3::X).dot(Vec3::X) > 0.99);
+        }
+    }
 }

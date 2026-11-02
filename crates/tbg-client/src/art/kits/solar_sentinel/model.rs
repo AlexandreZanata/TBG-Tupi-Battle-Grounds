@@ -44,7 +44,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             boots: GOLD,
         },
     );
-    // The ivory breastplate ends at z=0.17; its heraldry must sit on that surface.
 
     v.extend([
         part(

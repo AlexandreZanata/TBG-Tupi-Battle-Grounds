@@ -36,19 +36,24 @@ cases/motion coverage in the same change; this applies to all phases and kits.
 - **Color:** vertex colors from the palette only (no textures for units).
   Each material slot uses three values: base, shade (−18 % value), light
   (+12 % value) baked by height/normal. Saturation is reserved for faction
-  accents and team colors.
+  accents; team colors are reserved for ground identity rings/HUD.
 - **Light:** one warm key light (`#FFE9C7`), sky/ground ambient
   (`#A9C8E8` / `#6B5A43`), soft fog. A rim term (fresnel, shader-free
   approximation via vertex light baking on silhouettes) keeps figures
   separated from the ground.
-- **Team identity — owner override, 2026-11-01 (P71, planned):** units use
-  persistent ground rings — ally `#3FA9F5`, enemy `#F2545B` — with a
-  solid/notched shape distinction. Remove body bands, patches and heraldry
-  whose only purpose is team identification; clothing keeps intrinsic kit
-  colors. Status effects must not replace foot allegiance. Architectural
-  Stronghold banners remain. P70's fitted team tabards are the historical
-  implementation baseline, superseded as a design requirement by this request.
-  See [P71](phases/P71-combat-readability-and-stronghold-polish.md).
+- **Team identity — owner rule, 2026-11-01 (never optional):** ally/enemy
+  separation uses the blue (`#3FA9F5`) and red (`#F2545B`) ground rings at
+  the feet, plus existing HUD semantics. Champion bodies, armor, clothing,
+  weapons and all Evolution forms must be identical for both seats.
+  Never add affiliation plaques, colored squares, armbands, generic team
+  tabards or body labels. Remove the geometry, not merely its blue paint.
+  Intrinsic faction/character colors remain authored and seat-independent;
+  navy Celestial cloth and turquoise Monster organs are not ownership marks.
+  Temporary combat feedback remains authoritative and distinct from ownership.
+  Control statuses must not overwrite the blue/red identity ring. P71 adds a
+  separate status outline and solid/notched allegiance shape; Stronghold
+  banners remain architectural equipment.
+
 
 ## 3. Palette (start values; P15 locks them)
 
@@ -147,7 +152,7 @@ D-31): an Evolution must read at match distance without zooming. Every tier
 changes at least three things: (1) scale — tier 1 +8 %, tier 2 +16 % over
 the base form; (2) a large-surface color or material change (cloak, hood,
 armor plates — not only a trim); (3) a new silhouette piece. Tier 2 also
-carries the branch's signature artifact with an accent glow (gold or team
+carries the branch's signature artifact with an accent glow (gold or faction
 color). Branch A reads defensive/precise, branch B offensive/area. Check:
 on the 1280×800 lineup at match-camera distance a tester names base,
 tier 1, and tier 2 of every unit correctly.
@@ -311,7 +316,7 @@ To ensure tier progression reads instantly without zooming (D-31), every evoluti
 4. **Branch Identity & Signature Artifact:**
    - **Branch A (Defensive / Precision):** Reinforced armor pieces, tower shields, extended weapon lengths, balanced symmetric silhouettes.
    - **Branch B (Offensive / Area / Havoc):** Aggressive asymmetry, dual weapons, heavy warheads, spiked appendages, or auxiliary quivers/censers.
-   - **Tier 2 Signature Artifact:** Must carry the branch's capstone artifact displaying a subtle emissive glow (gold `#D9B44A` or faction/team accent).
+   - **Tier 2 Signature Artifact:** Must carry the branch's capstone artifact displaying a subtle emissive glow (gold `#D9B44A` or faction accent).
 
 ### 11.4 Detail density and rendering rules
 
@@ -333,3 +338,129 @@ Before signing off on any troop, strongpoint, or arena asset, verify the 6-point
 ## Owner-approved maritime scenery follow-up (2026-10-30)
 
 The original arena geometry/camera remains fixed. Procedural offshore isles, lighthouse, pier, sailboat and a small cascade enrich the surroundings; batched vertex-colored azure water and broken foam provide depth. The main arena keeps one warm key and cool fill, one 1024 shadow map/cascade. Offshore objects share existing PBR materials and skip shadow casting/receiving; no texture or custom water shader is introduced. The owner approved the displayed design and the specific 12.9 ms reference-case p95 acceptance bound. See [implementation, measurements and scope](art/ARENA-SEASCAPE.md) and [versioned acceptance criteria](art/ARENA-SEASCAPE-PERFORMANCE.json); broader device/download budgets remain unchanged.
+
+### Champion body ownership checklist (owner, 2026-11-01)
+
+- No blue/red affiliation plaques or generic identification geometry on bodies.
+- Own and opposing versions share the exact same body mesh/material cache.
+- All five forms preserve this rule, including carried/summoned champions.
+- Ground rings retain team identity while Root/Slow appear in HUD status badges.
+- Portraits come from the corrected engine models; do not paint over old badges.
+
+
+## AB-01 / OG-02 authored expansion and Ogre refinement
+
+Owner reference: the Hook Brawler five-form illustration supplied 2026-11-01.
+Refine all nine Ogres with tapered organic muscles, large readable jaws/brows,
+fitted wrist/shin wraps and layered garments, preserving individual equipment.
+Hook Brawler specifically carries hanging curved hook blades, a tied bandana,
+a split slate coat, rope on A and chains on B. Tier-two seafoam crystals are
+intrinsic artifacts, never seat-colored rectangles. Ogre Archer retains its
+shoulder-bombard rig and actual-mesh crowd envelope. Barrel Keeper replaces
+the drum with one two-hand wooden cask, brewing apron and remedy accessories;
+rolling and reload visibility follow authoritative state.
+
+Abyssals are a grounded ancient marine civilization: nacre, shell ribs,
+sea-green/slate skin, ivory countershading, dark sea-plum wraps and restrained
+amber/seafoam light. Faces, fins, weapon geometry and proportions distinguish
+every champion. Trident is the existing Tank. No marine wing/flight movement,
+wet transparent full-body material or team-body recolor is introduced.
+The Plant replacement Pod Snapper uses bark, curled leaves and split pod jaws
+around three readable seeds. It must not resemble a mushroom caster.
+
+Every new champion has Base/A1/A2/B1/B2 silhouettes, +8/+16 percent tier scale,
+material progression and a tier-two artifact. Concepts and engine captures
+have separate source/hash manifests. Team identity is **only** the existing
+blue/red foot circle; no square body plaque, team tabard or ownership paint.
+
+
+### GD-01 Colossus / PK-01 physical reservation (2026-11-02)
+
+Gods starts with one colossal grounded stone champion. Its sculpted ivory
+and charcoal body, geometric crown, bronze glyph bands and single tall back
+obelisk must read apart from Ogre tusks, marine shells, armored knights and
+machine barrels. The A branch is sunlit ivory/gold; B is a charcoal/amber
+monolith. Retain the same body identity across five forms; no floating prop
+swap, team plaque or pedestal. Ownership uses foot rings only.
+
+Carry the real obelisk on the back; draw with both hands, anticipate, slam at
+the canonical hit cue, then recover under its weight. Use a heavy low stride,
+kneeling stone death and slow victory salute. Stone chips and a ground shock
+ring belong to the real hit point. Gallery spacing may adapt to its size;
+gameplay scale is never shrunk to fit a screenshot. Catalog inspection uses
+the existing bounded display actor and keeps the full gameplay model intact.
+
+The authoring-only footprint exporter samples native geometry/poses including
+weapons, arms and rear aim. Export measurements to integer core profiles;
+core never imports graphics. Lateral placement is now authoritative (PK-01),
+not a second visual spring. Preserve identical interpolation and timing on
+Linux, Windows and desktop web; record each unobserved target as pending.
+
+
+### GD-04 Gods expansion: Colossus refinement, Volthar and Astreon (2026-11-02)
+
+All three Gods share the monumental scale (Colossus 1.85, Volthar 1.66,
+Astreon 1.64 body size; Colossus stays the largest), premium low-poly with
+broad facets, gold architectural trim and restrained glow. Team identity stays
+on foot rings. Reference posters are design input only: frames, text panels
+and backgrounds are never modeled.
+
+**Colossus.** Keep the stone body, the one obelisk on the back and the GD-03
+strike alignment. Carved pectoral/abdominal plates, brow, nose, jaw, thumbs and
+gold collar/knee/ankle bands replace the block look. Canonical branch A (Sun
+Obelisk, Pillar of Dawn: damage/range/splash) takes the poster's offensive
+direction (*Pilar da Ira*, *Obelisco Destruidor*): gold blades on shoulders and
+gauntlets, a ray crown and obelisk edge fins. Canonical branch B (Ancient
+Monolith, Eternal Monument: +HP) takes the defensive direction (*Bastião de
+Mármore*, *Fortaleza Divina*): stacked pauldrons, stone bracers, buttressed
+obelisk and, at tier 2, forearm tower shields, a halo and a navy banner. The
+owner keeps branch B in **dark charcoal** although the poster shows marble.
+Canonical names are unchanged; the poster names describe direction only.
+
+**Volthar — Storm God.** Athletic, white hair and broad beard, royal-blue and
+gold armor, lightning emblem, navy cape, glowing storm eyes. The rune hammer
+is a chest-parented rigid prop; the right wrist solves onto its grip in every
+clip and the left hand joins only for the charged fourth bolt and the B-branch
+heavy throw. A spinning spark cluster lives on its own socket at the head.
+A forms add a halo and taller crown (celestial), B forms a graphite heavy head
+with gold spikes and darker cape (wrath). Lightning follows only server events:
+the bolt on Release, `StormArc` links and the resolved discharge.
+
+**Astreon — Rupture God.** Graphite, gold and ivory cuirass, geometric closed
+helm with horns, beard, angular pauldrons. The very long lance is held in both
+hands on one shaft axis (Trident rig pattern): the butt trails behind the right
+hip, the point leads, the shaft never crosses the chest (automated check). The
+thrust fits its point to the authoritative target distance at contact instead
+of spearing far past it. A forms grow the blade and a crest fin (blue core at
+A2); B forms turn graphite with crimson metal and red eyes/cores.
+
+Every form must differ structurally from the previous one, not only in color.
+Visual acceptance remains owner-approved per form and per motion.
+
+### ARENA-CLEAR-01 wide-road dressing (2026-11-02)
+
+Preserve the five-tile road and its full existing paved border. Decorative solids,
+overhanging foliage and animated fire/cloth must stay outside the road rectangle.
+Author placements at compound-asset origins, keeping crystals, snow caps, trim,
+glow and fire attached. Common braziers use one origin table for pedestals and
+flames; fences and cloth share their side coordinates. Do not rebase arbitrary
+individual parts after assembly. Stronghold-attached flags remain on their tower.
+
+
+### GD-02 Colossus arm clearance (2026-11-02)
+
+Colossus shoulders, upper arms, forearms, hands and their form-specific armor
+belong to its measured crowd envelope. Use the cached posed meshes in live
+spacing as well as measurement. Cover Base/A1/A2/B1/B2 during Idle/Walk/Attack
+and both seat facings. Preserve the existing obelisk and original pushing motion.
+
+
+### ARENA-REFINE-01 scenery composition (2026-11-02)
+
+Optional scenery must respect the rendered bounds of authored landmarks and
+previously accepted independent props. Omit a blocked optional asset as a whole;
+never move individual branches, snow caps, crystals or glow away from their base.
+Keep background tree silhouettes clear of boulders/monuments, foreground rock
+gardens readable, and boilers clear of fence runs. Fitted snow shells, plantings
+on offshore islets, masonry assemblies and meshing gears remain intentional
+compound designs. This layout filtering runs only when building an Arena.

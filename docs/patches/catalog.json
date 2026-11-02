@@ -651,6 +651,301 @@
         }
       },
       "document": "docs/patches/2026-10-31-native-2.md"
+    },
+    {
+      "id": "champions-sides-wide-road",
+      "version": "0.1.4-colossus.1",
+      "date": "2026-11-02",
+      "status": "preview",
+      "kind": "gameplay-preview",
+      "ruleset_version": 13,
+      "ruleset_hash": "b66993d9e87a9cfc",
+      "title": {
+        "en": "Champions, stronger towers and shared match sides",
+        "pt-BR": "Campeões, torres reforçadas e lados compartilhados"
+      },
+      "summary": {
+        "en": "Owner-requested Proposed gameplay and desktop preview: 82 local champions, stronger Strongholds, original pushing on a wider BattleLine and random blue/red sides. Online champion availability remains separately gated; bounded evidence is not complete competitive acceptance.",
+        "pt-BR": "Prévia desktop e mudanças propostas solicitadas pelo proprietário: 82 campeões locais, Fortalezas reforçadas, empurrões originais em uma pista maior e sorteio dos lados azul/vermelho. A disponibilidade online dos campeões continua separada; evidência limitada não representa aceitação competitiva completa."
+      },
+      "changes": [
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Local champions",
+            "pt-BR": "Campeões locais"
+          },
+          "field": {
+            "en": "roster",
+            "pt-BR": "elenco"
+          },
+          "before": {
+            "en": "46 conventional champions",
+            "pt-BR": "46 campeões convencionais"
+          },
+          "after": {
+            "en": "82 preview champions across ten Factions; online FULL_POOL stays 46",
+            "pt-BR": "82 campeões de prévia em dez facções; FULL_POOL online continua com 46"
+          },
+          "reason": {
+            "en": "Complete the requested Factions while retaining the online rollout gate.",
+            "pt-BR": "Completar as facções solicitadas preservando o controle de ativação online."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Strongholds",
+            "pt-BR": "Fortalezas"
+          },
+          "field": {
+            "en": "damage, HP and Fortification",
+            "pt-BR": "dano, vida e Fortificação"
+          },
+          "before": {
+            "en": "Previous base values and upgrade prices",
+            "pt-BR": "Valores base e preços anteriores"
+          },
+          "after": {
+            "en": "Base damage x3, base HP +50%, Fortification 6/10 Energy and stronger kind effects (Proposed)",
+            "pt-BR": "Dano base x3, vida base +50%, Fortificação 6/10 de Energia e efeitos dos tipos reforçados (propostos)"
+          },
+          "reason": {
+            "en": "Owner-requested defensive strength; bounded tower cases are recorded and full acceptance remains pending.",
+            "pt-BR": "Reforço defensivo solicitado; casos limitados das torres estão registrados e a aceitação completa permanece pendente."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Colossus",
+            "pt-BR": "Colosso"
+          },
+          "field": {
+            "en": "local availability and kit",
+            "pt-BR": "disponibilidade local e conjunto"
+          },
+          "before": {
+            "en": "Unavailable",
+            "pt-BR": "Indisponível"
+          },
+          "after": {
+            "en": "Gods preview unit: 18 Energy, 2400 base HP, 170 frontal area damage and five obelisk forms",
+            "pt-BR": "Unidade de prévia dos Deuses: 18 de Energia, 2400 de vida base, 170 de dano frontal em área e cinco formas com obelisco"
+          },
+          "reason": {
+            "en": "A distinct heavy unit with documented counters and bounded evidence.",
+            "pt-BR": "Uma unidade pesada distinta, com respostas documentadas e evidência limitada."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Ogres and Abyssals",
+            "pt-BR": "Ogros e Abissais"
+          },
+          "field": {
+            "en": "kits and healing cask",
+            "pt-BR": "conjuntos e barril de cura"
+          },
+          "before": {
+            "en": "Previous roster and support kit",
+            "pt-BR": "Elenco e suporte anteriores"
+          },
+          "after": {
+            "en": "Separate Factions, Machine/Plant replacements, refined bodies and rolling area-healing casks with low enemy contact damage",
+            "pt-BR": "Facções separadas, substitutos para Máquinas/Plantas, corpos refinados e barris rolantes de cura em área com pouco dano ao contato inimigo"
+          },
+          "reason": {
+            "en": "Owner-requested silhouettes and dynamic support behavior.",
+            "pt-BR": "Silhuetas e comportamento dinâmico de suporte solicitados."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "BattleLine",
+            "pt-BR": "Pista"
+          },
+          "field": {
+            "en": "visual room and pushing",
+            "pt-BR": "espaço visual e empurrões"
+          },
+          "before": {
+            "en": "Narrower road; the first widening also expanded preferred birth offsets",
+            "pt-BR": "Pista menor; o primeiro alargamento também ampliava o afastamento inicial"
+          },
+          "after": {
+            "en": "Five-tile road, original 1.1 formation scale inside the 2.1 centre boundary, immediate deployment and contact pushing without passage queues",
+            "pt-BR": "Pista de cinco tiles, escala original de formação 1.1 dentro do limite lateral 2.1, entrada imediata e empurrões por contato sem filas de passagem"
+          },
+          "reason": {
+            "en": "Keep the original grouping while providing actual contact/overtaking room.",
+            "pt-BR": "Manter o agrupamento original com espaço para contatos e ultrapassagens."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Match sides",
+            "pt-BR": "Lados da partida"
+          },
+          "field": {
+            "en": "assignment and camera",
+            "pt-BR": "sorteio e câmera"
+          },
+          "before": {
+            "en": "Queue order assigned seats and each player saw their own tower on the left",
+            "pt-BR": "A ordem da fila definia os lados e cada jogador via a própria torre à esquerda"
+          },
+          "after": {
+            "en": "Independent blue/red draw; blue left and red right for everyone, with ownership-aware controls and side announcements",
+            "pt-BR": "Sorteio independente azul/vermelho; azul à esquerda e vermelho à direita para todos, com controles por proprietário e avisos de lado"
+          },
+          "reason": {
+            "en": "Competitive assignment and a consistent spectator view.",
+            "pt-BR": "Sorteio competitivo e visão consistente para espectadores."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Protocol and social state",
+            "pt-BR": "Protocolo e estado social"
+          },
+          "field": {
+            "en": "wire and opt-in history",
+            "pt-BR": "mensagens e histórico opcional"
+          },
+          "before": {
+            "en": "Protocol 31",
+            "pt-BR": "Protocolo 31"
+          },
+          "after": {
+            "en": "Protocol 36, participant-bound P73 features and separately gated additive history schema 11",
+            "pt-BR": "Protocolo 36, recursos P73 vinculados aos participantes e esquema adicional de histórico 11 controlado separadamente"
+          },
+          "reason": {
+            "en": "Requires coordinated delivery; no automatic cross-contract promotion or implicit production migration.",
+            "pt-BR": "Exige publicação coordenada; sem promoção automática entre contratos ou migração implícita de produção."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Preview and competitive scope",
+            "body": "The online roster remains 46. New local units, Ogre/Abyssal forms and Colossus have bounded screens; complete team/form/budget D-33 acceptance is pending. No balance threshold is weakened and no complete acceptance is claimed."
+          },
+          {
+            "title": "Presentation and continuity",
+            "body": "Team identity stays in foot rings. The road remains wide, decoration clears it and original contacts regroup. Compatible A/B releases preserve running matches; wire 31 to 36 needs an attended coordinated transition. Linux is the reference; Windows/game-web visual parity is pending."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Prévia e escopo competitivo",
+            "body": "O elenco online continua com 46. Novas unidades locais, formas dos Ogros/Abissais e Colosso têm avaliações limitadas; a aceitação D-33 completa de equipes, formas e orçamentos permanece pendente. Nenhum limite de balanceamento é reduzido e não se declara aceitação completa."
+          },
+          {
+            "title": "Apresentação e continuidade",
+            "body": "A identificação dos times permanece nos círculos dos pés. A pista segue larga, sem decoração dentro dela, e os contatos originais permitem reagrupar. Versões A/B compatíveis preservam partidas; a troca do protocolo 31 para 36 exige transição coordenada acompanhada. Linux é a referência; a comparação visual Windows/web permanece pendente."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-11-02-champions-sides.md",
+      "evidence": {
+        "accepted": false,
+        "report": "docs/colossus-fortifications/README.md"
+      }
+    },
+    {
+      "id": "auxiliaries-gods-integration",
+      "version": "0.1.4-colossus.1",
+      "date": "2026-11-02",
+      "status": "preview",
+      "kind": "gameplay-preview",
+      "ruleset_version": 15,
+      "ruleset_hash": "cc459351581b7763",
+      "title": {
+        "en": "War Auxiliaries and the Gods expansion",
+        "pt-BR": "Auxiliares de Guerra e expansão dos Deuses"
+      },
+      "summary": {
+        "en": "Miner and Merchant join the authoritative match economy. Volthar and Astreon expand the local preview to 84 champions; Colossus receives refined forms and motion. The online champion pool remains 46.",
+        "pt-BR": "Mineiro e Mercador entram na economia autoritativa da partida. Volthar e Astreon ampliam a prévia local para 84 campeões; o Colosso recebe formas e movimentos refinados. O elenco online continua com 46."
+      },
+      "changes": [
+        {
+          "category": "preview",
+          "subject": {
+            "en": "War Auxiliaries",
+            "pt-BR": "Auxiliares de Guerra"
+          },
+          "field": {
+            "en": "match economy",
+            "pt-BR": "economia da partida"
+          },
+          "before": {
+            "en": "No auxiliary contracts",
+            "pt-BR": "Sem contratos auxiliares"
+          },
+          "after": {
+            "en": "Miner: 6 Energy, 12 s preparation, +0.06 Energy/s for 180 s. Merchant: 4 Energy, one free reroll per three purchases, three activations. Each can be hired once.",
+            "pt-BR": "Mineiro: 6 de Energia, preparo de 12 s, +0,06 de Energia/s por 180 s. Mercador: 4 de Energia, um reroll gratuito a cada três compras, três ativações. Cada um pode ser contratado uma vez."
+          },
+          "reason": {
+            "en": "Owner-requested economic choices, server authority and shared off-lane presentation.",
+            "pt-BR": "Escolhas econômicas solicitadas, autoridade do servidor e apresentação compartilhada fora da pista."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Gods",
+            "pt-BR": "Deuses"
+          },
+          "field": {
+            "en": "local roster and visual forms",
+            "pt-BR": "elenco local e formas visuais"
+          },
+          "before": {
+            "en": "Colossus; 82 local champions",
+            "pt-BR": "Colosso; 82 campeões locais"
+          },
+          "after": {
+            "en": "Colossus, Volthar and Astreon; 84 local champions, refined five-form Colossus and authoritative chain/pierce effects.",
+            "pt-BR": "Colosso, Volthar e Astreon; 84 campeões locais, cinco formas refinadas do Colosso e efeitos autoritativos de corrente e perfuração."
+          },
+          "reason": {
+            "en": "Integrate GD-03/GD-04 while preserving the separate online activation gate.",
+            "pt-BR": "Integrar GD-03/GD-04 preservando o controle separado de ativação online."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Compatibility",
+            "body": "w38-r15-cc459351581b7763; wire 38 includes private reroll quotes and public auxiliary phases. Old clients require a coordinated update. Values remain Proposed; full competitive balance acceptance and Windows/browser rendered correspondence are pending."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Compatibilidade",
+            "body": "w38-r15-cc459351581b7763; o protocolo 38 inclui preços privados de reroll e fases públicas dos auxiliares. Clientes anteriores exigem atualização coordenada. Os valores permanecem Propostos; a aceitação competitiva completa e a correspondência visual Windows/navegador estão pendentes."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/DELIVERY-CI-RELIABILITY.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "targeted integration, not balance acceptance",
+          "confirmation": "pending"
+        }
+      },
+      "document": "docs/patches/2026-11-02-auxiliaries-gods.md"
     }
   ]
 }

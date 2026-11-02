@@ -252,3 +252,52 @@ everything that only exists after merge.
   once and enable the timer.
 - Owner decision: the nightly backup cron never ran because `cron` is not installed.
 - Not done by design: native TUF signing, Windows signing, mobile, any change to rules.
+
+## Owner-authorized main activation (2026-11-02, 14:06 UTC)
+
+The owner explicitly authorized merging and observing the official VPS, superseding
+the earlier no-merge request. Normal merge commits preserved all history: #49
+(main 53574b6, includes #42/#46) and #45 (main 88402b4). Protected checks remained
+mandatory. Controllers were installed from exact merged 53574b6 without restarting
+a game process or reloading Caddy.
+
+Real main backend 88402b4 passed tokenless provenance/source/contract/schema
+verification under the actual systemd sandbox (w31-r6-097385fee9a10b0f, schema 10).
+Promotion at 14:02:40 UTC sent new admission to slot b while an anonymous two-guest
+private match stayed on slot a. Both clients observed 1202 views, matching terminal
+outcomes and no disconnect or match restart during the controlled 120-second hold.
+The controller deferred retirement while work remained. Slot a retired only after
+matches, pending results and ranked inflight counters drained; the transition
+journal closed at 14:06 UTC. Public health returned 200/ok and admission named b.
+The backend timer was enabled only after that complete observed promotion.
+
+The web timer independently applied main 53574b6 at 13:48:24 UTC; no manual web
+apply was used. The rc.3 native release from main 88402b4 passed manifest provenance,
+asset digests and live-contract checks at 14:03:26 UTC. Public downloads.json named
+both Linux and Windows available. Static 88402b4 was verified, then applied with
+one explicit adoption of the hand-published landing at 14:04:04 UTC; both static
+public probes passed. Native/static timers were enabled at 14:05:30 UTC. No game
+process or player database was changed by either frontend operation.
+
+Logs and aggregate-only probe receipts are retained in
+`/data/tbg-consolidation-evidence/production-884-probe.log`. The probe created no
+account and entered no public queue or Ranked match. This observation does not
+certify all Ranked/reconnect scenarios or visual parity. The final protocol-36
+consolidation, its attended coordinated switch and a subsequent compatible merge
+observed through timers remain pending at this checkpoint.
+
+
+## Observed consolidated production delivery (2026-11-02, evening UTC)
+
+The owner-authorized normal merges now include #48/#53/#54 and all original
+P73/laboratory/champion/P74/Gods fronts. The first exact-main coordinated
+w31 -> w38-r15 activation completed at 19:09:36 UTC (source 8c507), with an
+anonymous private match preserved through promotion and old-slot retirement.
+Four staggered timers were enabled afterward. Following the compatible #54
+merge at 19:10:44 UTC, all four families advanced to source 6d96245 through
+natural timer firings; no manual deployment controller/timer action was used.
+The compatible private witness verified both Auxiliaries, equal outcomes and
+zero failures/restarts. Official Linux colossus.3 is installed with all 395 files
+checked. Full observed timestamps, sources, limitations and retirement closure
+are in [the production consolidation report](DELIVERY-consolidation-production-20261102.md).
+Earlier deferred/owner instructions above describe historical checkpoints.

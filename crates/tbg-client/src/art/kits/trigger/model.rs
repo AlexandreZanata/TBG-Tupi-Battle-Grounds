@@ -71,8 +71,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             GOLD,
             [0.0, 0.18, -0.025],
         ),
-        part(Body(Chest), Box(0.22, 0.055, 0.25), LINEN, [0.0, 0.27, 0.0]),
-        part(Body(Chest), Cone(0.08, 0.18), LINEN, [0.08, 0.15, 0.14]).rot([180.0, 0.0, -15.0]),
         part(
             Secondary(Spring::Back),
             Pill(0.04, 0.21),
@@ -133,26 +131,13 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             v.push(part(Body(foot), Ball(0.035), GOLD, [0.0, 0.03, -0.12]));
         }
     }
-    if f.a {
-        for s in [-1.0, 1.0] {
-            v.push(
-                part(
-                    Secondary(Spring::Tabard),
-                    Box(0.10, 0.31, 0.035),
-                    LINEN,
-                    [s * 0.10, -0.12, -0.13],
-                )
-                .rot([0.0, 0.0, s * 8.0]),
-            );
-        }
-        if f.t2 {
-            v.push(part(
-                Prop(Socket::Back),
-                Box(0.09, 0.14, 0.065),
-                GOLD,
-                [0.0, 0.19, 0.0],
-            ));
-        }
+    if f.a && f.t2 {
+        v.push(part(
+            Prop(Socket::Back),
+            Box(0.09, 0.14, 0.065),
+            GOLD,
+            [0.0, 0.19, 0.0],
+        ));
     }
     FigureSpec { plan: p, parts: v }
 }

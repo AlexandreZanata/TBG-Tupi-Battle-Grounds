@@ -40,10 +40,12 @@ pub(super) fn meadow(theme: Theme) -> Mesh {
     surface.finish()
 }
 
+pub(super) const LANE_WIDTH: f32 = tbg_core::content::occupancy::WIDTH as f32 / 1000.0;
+
 pub(super) fn lane(theme: Theme) -> Mesh {
     let [border, tile_color, variation, lip] = theme.palette().lane;
     let mut parts = vec![(
-        Box(18.2, 0.035, 3.34),
+        Box(18.2, 0.035, LANE_WIDTH + 0.34),
         border,
         Transform::from_xyz(8.0, -0.012, 0.0),
     )];
@@ -51,7 +53,7 @@ pub(super) fn lane(theme: Theme) -> Mesh {
         let x = -0.5 + tile as f32;
         let sand = if tile % 3 == 0 { variation } else { tile_color };
         parts.push((
-            Box(0.974, 0.036, 3.08),
+            Box(0.974, 0.036, LANE_WIDTH + 0.08),
             sand,
             Transform::from_xyz(x, 0.0, 0.0),
         ));
@@ -67,7 +69,7 @@ pub(super) fn lane(theme: Theme) -> Mesh {
         }
         // A thin sunlit lip makes each seam legible without a texture.
         parts.push((
-            Box(0.025, 0.038, 3.04),
+            Box(0.025, 0.038, LANE_WIDTH + 0.04),
             lip,
             Transform::from_xyz(x - 0.47, 0.003, 0.0),
         ));

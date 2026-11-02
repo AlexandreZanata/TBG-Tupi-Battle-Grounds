@@ -19,7 +19,7 @@ use crate::content::{
     STRONGHOLD_HP, STRONGHOLD_INTERVAL, STRONGHOLD_RANGE, SYNERGIES, SYNERGY_THRESHOLDS, UNITS,
     UNIT_KIND_COUNT,
 };
-use crate::types::{Tick, UnitKind, FACTION_COUNT, FULL_POOL};
+use crate::types::{Tick, UnitKind, COMPLETION_POOL, FACTION_COUNT, FULL_POOL};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct InterestRule {
@@ -75,6 +75,7 @@ impl Default for ShopRule {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ruleset {
     pub shop: Option<ShopRule>,
+    pub auxiliary: crate::auxiliary::AuxiliaryRule,
     pub energy_start: u32,
     /// `None` = no gameplay cap (canon); `Some` is a lab comparison only.
     pub energy_cap: Option<u32>,
@@ -111,6 +112,7 @@ pub struct Ruleset {
 /// The only ruleset used online.
 pub static CANON: Ruleset = Ruleset {
     shop: None,
+    auxiliary: crate::auxiliary::AUXILIARY_RULE,
     energy_start: ENERGY_START,
     energy_cap: None,
     regen_running: REGEN_RUNNING,
@@ -154,7 +156,7 @@ impl Ruleset {
     /// Leaked once (a few KB, freed at exit).
     pub fn preview() -> &'static Ruleset {
         Box::leak(Box::new(Ruleset {
-            pool: &FULL_POOL,
+            pool: &COMPLETION_POOL,
             shop: Some(ShopRule::default()),
             ..CANON.clone()
         }))

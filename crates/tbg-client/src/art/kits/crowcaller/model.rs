@@ -74,12 +74,6 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.0, -0.20, 0.0],
         ),
         part(
-            Secondary(Spring::Tabard),
-            Box(0.09, 0.26, 0.018),
-            LINEN,
-            [0.0, -0.18, 0.017],
-        ),
-        part(
             Body(Hips),
             Box(0.10, 0.12, 0.09),
             DARK_LEATHER,

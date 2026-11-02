@@ -35,15 +35,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
     let mut v = Vec::new();
     v.push(part(Body(Chest), Ball(0.38), BARK, [0.0, 0.09, -0.1]).scale([1.35, 0.65, 1.65]));
-    v.push(
-        part(
-            Body(Chest),
-            Ring(0.025, 0.41, 360.0),
-            LINEN,
-            [0.0, 0.03, -0.1],
-        )
-        .scale([1.2, 1.0, 1.4]),
-    );
+
     for joint in [ThighL, ThighR, UpperArmL, UpperArmR] {
         v.push(part(Body(joint), Ball(0.12), HIDE, [0.0, -0.08, 0.0]).scale([1.0, 1.45, 1.0]));
     }

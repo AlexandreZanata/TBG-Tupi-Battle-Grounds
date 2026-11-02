@@ -7,7 +7,10 @@
 use tbg_core::{ArcanaPreset, Event, MatchState, Ruleset, Seat, Target, UnitKind};
 
 fn rules() -> &'static Ruleset {
-    Ruleset::canon()
+    // Isolate the unit ability; TW-01 Stronghold fire has separate real-shot contracts.
+    let mut rules = Ruleset::canon().clone();
+    rules.stronghold_damage = 0;
+    Box::leak(Box::new(rules))
 }
 
 fn state(seed: u64) -> MatchState {
@@ -112,6 +115,7 @@ fn bombard_blast_hits_allies_fully() {
 #[test]
 fn bombard_blast_spares_the_own_stronghold() {
     let mut s = state(51);
+    let initial_hp = s.player(Seat::A).stronghold_hp;
     let bombard = s.lab_spawn_at(Seat::A, UnitKind::Bombard, 0, 0, 1_000);
     // P71 Farwatch can attack Strongholds: keep the Bombard nearer than the
     // tower so enemy fire cannot confound the friendly-blast exclusion.
@@ -124,7 +128,7 @@ fn bombard_blast_spares_the_own_stronghold() {
     );
     assert_eq!(
         s.player(Seat::A).stronghold_hp,
-        4_500,
+        initial_hp,
         "the own Stronghold took blast damage"
     );
 }

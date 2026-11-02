@@ -1,3 +1,4 @@
+//! Compatible releases retain original-generation matches until every result drains.
 //! P66 release runtime (D-92): this process's slot identity and contract,
 //! the admission gate the lobby reads, and the background task that
 //! registers the slot, reports its load, follows the shared directory and
@@ -100,7 +101,10 @@ impl Runtime {
         let jobs = store.map_or(0, |s| s.jobs_pending()) as i64;
         SlotLoad {
             matches_running: metrics.matches_running.load(Relaxed) as i64,
-            results_pending: ranked + receipts + jobs,
+            results_pending: ranked
+                + receipts
+                + jobs
+                + metrics.history_pending.load(Relaxed) as i64,
             ranked_inflight: ranked,
         }
     }

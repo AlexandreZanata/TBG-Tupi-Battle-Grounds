@@ -253,6 +253,10 @@ fn event_name(event: &Event) -> &'static str {
         Event::Crossfire { .. } => "Crossfire",
         Event::ProfaneFlame { .. } => "ProfaneFlame",
         Event::DrillFused { .. } => "DrillFused",
+        Event::BarrelBurst { .. } => "BarrelBurst",
+        Event::StormArc { .. } => "StormArc",
+        Event::AuxiliaryHired { .. } => "AuxiliaryHired",
+        Event::AuxiliaryTriggered { .. } => "AuxiliaryTriggered",
     }
 }
 
@@ -263,6 +267,13 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
     let events_bytes = field_len(&view.events);
     let header = total - units_bytes - events_bytes;
     let header_fields = [
+        ("physical_lanes", field_len(&view.physical_lanes)),
+        ("queued", field_len(&view.queued)),
+        ("barrels", field_len(&view.barrels)),
+        ("reroll_cost", field_len(&view.reroll_cost)),
+        ("auxiliaries", field_len(&view.auxiliaries)),
+        ("free_rerolls", field_len(&view.free_rerolls)),
+        ("spectators", field_len(&view.spectators)),
         ("tick", field_len(&view.tick)),
         ("phase", field_len(&view.phase)),
         ("phase_ticks_left", field_len(&view.phase_ticks_left)),
@@ -299,16 +310,28 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
         unit_max_hp += field_len(&unit.max_hp);
         unit_dynamic += field_len(&unit.id)
             + field_len(&unit.x)
+            + field_len(&unit.lane_z)
             + field_len(&unit.hp)
             + field_len(&unit.status)
-            + field_len(&unit.fx);
+            + field_len(&unit.fx)
+            + field_len(&unit.carrier)
+            + field_len(&unit.shield)
+            + field_len(&unit.reduction)
+            + field_len(&unit.special)
+            + field_len(&unit.effects);
         let x = u16::try_from(unit.x).expect("x must fit u16 for the tight-integer estimate");
         let hp = u16::try_from(unit.hp).expect("live hp must fit u16");
         unit_dynamic_tight += field_len(&unit.id)
             + field_len(&x)
+            + field_len(&unit.lane_z)
             + field_len(&hp)
             + field_len(&unit.status)
-            + field_len(&unit.fx);
+            + field_len(&unit.fx)
+            + field_len(&unit.carrier)
+            + field_len(&unit.shield)
+            + field_len(&unit.reduction)
+            + field_len(&unit.special)
+            + field_len(&unit.effects);
     }
     let unit_fields = unit_static + unit_max_hp + unit_dynamic;
     let unit_prefix = units_bytes - unit_fields;
@@ -352,6 +375,7 @@ struct UnitA {
     tier: u8,
     branch: u8,
     x: i32,
+    lane_z: i16,
     hp: i32,
     status: u8,
     fx: u16,
@@ -377,6 +401,12 @@ struct ViewA {
 /// them unchanged, so the comparison stays about the unit list.
 #[derive(Clone, Debug, Serialize)]
 struct Extra {
+    auxiliaries: [[tbg_core::AuxiliarySlotView; tbg_core::AUXILIARY_SLOTS]; 2],
+    free_rerolls: u8,
+    reroll_cost: Option<u32>,
+    physical_lanes: bool,
+    queued: u32,
+    barrels: Vec<tbg_core::barrel::Barrel>,
     clock: Tick,
     elapsed: u32,
     regen_bp: u32,
@@ -389,6 +419,12 @@ struct Extra {
 
 fn extra_of(view: &MatchView) -> Extra {
     Extra {
+        auxiliaries: view.auxiliaries,
+        free_rerolls: view.free_rerolls,
+        reroll_cost: view.reroll_cost,
+        physical_lanes: view.physical_lanes,
+        queued: view.queued,
+        barrels: view.barrels.clone(),
         clock: view.clock,
         elapsed: view.elapsed,
         regen_bp: view.regen_bp,
@@ -403,12 +439,24 @@ fn extra_of(view: &MatchView) -> Extra {
 /// The same header straight from the state, as the server would build it;
 /// the round (only during a pause) comes from the canonical view.
 fn extra_state(state: &MatchState, seat: Seat) -> Extra {
+    let private = state.view_for(seat, &[]);
     let augment_round = if state.is_live() && state.augments.selecting() {
-        state.view_for(seat, &[]).augment_round
+        private.augment_round
     } else {
         None
     };
     Extra {
+        auxiliaries: private.auxiliaries,
+        free_rerolls: private.free_rerolls,
+        reroll_cost: private.reroll_cost,
+        physical_lanes: state.physical_lanes,
+        queued: state
+            .deployments
+            .iter()
+            .filter(|u| u.seat == seat && u.summoner.is_none() && !u.kind.is_summon())
+            .count()
+            .min(u32::MAX as usize) as u32,
+        barrels: state.barrels.clone(),
         clock: state.clock,
         elapsed: state.tick.saturating_sub(content::RUNNING_START),
         regen_bp: state.rules().interest.regen_bp(state.player(seat).energy),
@@ -438,6 +486,7 @@ struct UnitStatic {
 struct UnitDynamic {
     id: UnitId,
     x: i32,
+    lane_z: i16,
     hp: i32,
     status: u8,
     fx: u16,
@@ -498,6 +547,7 @@ fn unit_dynamic(unit: &UnitView) -> UnitDynamic {
     UnitDynamic {
         id: unit.id,
         x: unit.x,
+        lane_z: unit.lane_z,
         hp: unit.hp,
         status: unit.status,
         fx: unit.fx,
@@ -574,6 +624,7 @@ fn state_dynamics(state: &MatchState) -> Vec<UnitDynamic> {
         .map(|unit| UnitDynamic {
             id: unit.id,
             x: unit.x,
+            lane_z: tbg_core::occupancy::lateral(unit) as i16,
             hp: unit.hp,
             status: status_code(unit.status),
             fx: fx_of(unit),
@@ -599,6 +650,7 @@ fn build_a_state(state: &MatchState, seat: Seat, events: &[Event]) -> ViewA {
                 tier: unit.tier,
                 branch: unit.branch,
                 x: unit.x,
+                lane_z: tbg_core::occupancy::lateral(unit) as i16,
                 hp: unit.hp,
                 status: status_code(unit.status),
                 fx: fx_of(unit),
@@ -762,6 +814,7 @@ fn rebuild_units(
             tier: stat.tier,
             branch: stat.branch,
             x: dynamic.x,
+            lane_z: dynamic.lane_z,
             hp: dynamic.hp,
             max_hp: derived_max_hp(stat, dynamic.fx, synergy, arcanas, augments, rules),
             status: dynamic.status,
@@ -783,9 +836,14 @@ fn assemble_c(
     you: Seat,
 ) -> MatchView {
     MatchView {
+        physical_lanes: view.extra.physical_lanes,
+        queued: view.extra.queued,
+        barrels: view.extra.barrels.clone(),
         reserve: [0; tbg_core::content::OFFERS],
         held_mask: 0,
-        reroll_cost: None,
+        reroll_cost: view.extra.reroll_cost,
+        auxiliaries: view.extra.auxiliaries,
+        free_rerolls: view.extra.free_rerolls,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -817,9 +875,14 @@ fn assemble_b(
     you: Seat,
 ) -> MatchView {
     MatchView {
+        physical_lanes: view.extra.physical_lanes,
+        queued: view.extra.queued,
+        barrels: view.extra.barrels.clone(),
         reserve: [0; tbg_core::content::OFFERS],
         held_mask: 0,
-        reroll_cost: None,
+        reroll_cost: view.extra.reroll_cost,
+        auxiliaries: view.extra.auxiliaries,
+        free_rerolls: view.extra.free_rerolls,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1040,6 +1103,18 @@ fn assert_same(got: &MatchView, want: &MatchView, label: &str, context: &str) {
     assert_eq!(got.last_seq, want.last_seq, "{label} last_seq {context}");
     assert_eq!(got.events, want.events, "{label} events {context}");
     assert_eq!(got.outcome, want.outcome, "{label} outcome {context}");
+    assert_eq!(
+        got.auxiliaries, want.auxiliaries,
+        "{label} auxiliaries {context}"
+    );
+    assert_eq!(
+        got.free_rerolls, want.free_rerolls,
+        "{label} free rerolls {context}"
+    );
+    assert_eq!(
+        got.reroll_cost, want.reroll_cost,
+        "{label} reroll quote {context}"
+    );
 }
 
 // ---------- Recorder ----------
@@ -1416,6 +1491,7 @@ fn rebuild_a(
             tier: unit.tier,
             branch: unit.branch,
             x: unit.x,
+            lane_z: unit.lane_z,
             hp: unit.hp,
             max_hp: derived_max_hp(
                 &stat,
@@ -1435,9 +1511,14 @@ fn rebuild_a(
         });
     }
     Ok(MatchView {
+        physical_lanes: view.extra.physical_lanes,
+        queued: view.extra.queued,
+        barrels: view.extra.barrels.clone(),
         reserve: [0; tbg_core::content::OFFERS],
         held_mask: 0,
-        reroll_cost: None,
+        reroll_cost: view.extra.reroll_cost,
+        auxiliaries: view.extra.auxiliaries,
+        free_rerolls: view.extra.free_rerolls,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1491,6 +1572,7 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             tier: unit.tier,
             branch: unit.branch,
             x: unit.x,
+            lane_z: tbg_core::occupancy::lateral(unit) as i16,
             hp: unit.hp,
             max_hp: unit.max_hp,
             status: match unit.status {
@@ -1511,9 +1593,14 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             extra: extra_state(state, you),
         };
         MatchView {
+            physical_lanes: view.extra.physical_lanes,
+            queued: view.extra.queued,
+            barrels: view.extra.barrels.clone(),
             reserve: [0; tbg_core::content::OFFERS],
             held_mask: 0,
-            reroll_cost: None,
+            reroll_cost: view.extra.reroll_cost,
+            auxiliaries: view.extra.auxiliaries,
+            free_rerolls: view.extra.free_rerolls,
             tick: state.tick,
             phase: state.phase,
             phase_ticks_left: phase_ticks_left_at(state.tick, state.phase),
@@ -1832,6 +1919,7 @@ fn integrity_tests(max_synthetic_units: usize) -> Integrity {
     let orphan = UnitDynamic {
         id: 999_999,
         x: 1_000,
+        lane_z: 0,
         hp: 1,
         status: 0,
         fx: 0,

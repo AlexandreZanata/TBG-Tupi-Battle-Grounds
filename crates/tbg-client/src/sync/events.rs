@@ -159,7 +159,7 @@ pub(super) fn apply_event(
             for e in map.0.values() {
                 if let Ok((v, t, _)) = visuals.get(*e) {
                     if v.own == own && v.faction == faction {
-                        vfx::synergy(commands, fx.vfx, t.translation, own);
+                        vfx::synergy(commands, fx.vfx, t.translation, seat == Seat::A);
                     }
                 }
             }
@@ -184,22 +184,39 @@ fn attack(
         Target::Unit(id) => map.0.get(&id).map(|e| AimTarget::Unit(*e)),
         Target::Stronghold(_) => pos_of(map, visuals, you, to).map(AimTarget::Point),
     };
+    let target_own = if let Target::Unit(id) = to {
+        map.0
+            .get(&id)
+            .and_then(|e| visuals.get(*e).ok())
+            .map(|(v, _, _)| v.own)
+    } else {
+        None
+    };
     let (shoots, splash) = match from {
         Target::Unit(id) => {
             cue(map, visuals, fx.assets, id, VisualCue::AttackStart);
-            let info =
-                map.0
-                    .get(&id)
-                    .and_then(|e| visuals.get_mut(*e).ok())
-                    .map(|(mut v, _, _)| {
-                        if let Some(t) = target {
-                            v.engage(t);
-                        }
-                        (v.archetype, v.splash, v.has_kit(), v.yaw)
-                    });
-            let (arch, splash, kit, base_yaw) = info.unwrap_or((Archetype::Tank, 0.0, false, 0.0));
+            let info = map.0.get(&id).and_then(|e| visuals.get_mut(*e).ok()).map(
+                |(mut v, _, mut anim)| {
+                    if let Some(t) = target {
+                        v.engage(t);
+                    }
+                    anim.aim_is_ally = target_own == Some(v.own);
+                    (
+                        v.archetype,
+                        v.splash,
+                        v.has_kit(),
+                        v.yaw,
+                        anim.aim_is_ally && v.archetype == Archetype::Support,
+                    )
+                },
+            );
+            let (arch, splash, kit, base_yaw, friendly_support) =
+                info.unwrap_or((Archetype::Tank, 0.0, false, 0.0, false));
             // A-1 aim (D-47) for units without a kit; kits aim themselves.
-            if let (false, Some(&e)) = (kit, map.0.get(&id)) {
+            if let Some(&e) = map.0.get(&id).filter(|_| friendly_support) {
+                // A heal and an incoming hit must not compete for whole-body facing.
+                commands.entity(e).remove::<crate::art::aim::Aim>();
+            } else if let (false, Some(&e)) = (kit, map.0.get(&id)) {
                 let hold = match arch {
                     Archetype::Ranged => 0.18,
                     Archetype::Support | Archetype::Control => 0.22,
@@ -223,7 +240,7 @@ fn attack(
         Target::Stronghold(seat) => {
             // Towers aim and fire their own projectiles (arena/strongholds).
             if let Some(t) = target {
-                fx.orders.0.push((seat == you, t));
+                fx.orders.0.push((seat == Seat::A, t));
             }
             (false, 0.0)
         }

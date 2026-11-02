@@ -8,7 +8,10 @@ pub mod account;
 mod acidmaw;
 mod afflictions;
 pub mod arcana;
+pub(crate) mod astreon;
 pub mod augment;
+pub mod auxiliary;
+pub mod barrel;
 mod bonehorn;
 pub mod bot;
 mod bot_shop;
@@ -17,6 +20,7 @@ mod capybara;
 pub mod celebration;
 mod celestial_archer;
 mod combat;
+pub mod completion;
 pub mod content;
 pub mod contract;
 mod crowcaller;
@@ -64,10 +68,12 @@ mod trident;
 mod trigger;
 pub mod types;
 pub mod view;
+pub(crate) mod volthar;
 mod weaver;
 mod whisperer;
 
 pub use arcana::ArcanaPreset;
+pub use auxiliary::{AuxiliaryKind, AuxiliaryPhase, AuxiliarySlotView, AUXILIARY_SLOTS};
 pub use intent::{PlayerIntention, Rejection};
 pub use rng::Pcg32;
 pub use ruleset::Ruleset;
@@ -76,3 +82,6 @@ pub use types::*;
 pub use view::{MatchView, PublicView, StrongholdView, UnitView};
 
 pub mod practice_bot;
+
+pub mod occupancy;
+pub mod stronghold_power;

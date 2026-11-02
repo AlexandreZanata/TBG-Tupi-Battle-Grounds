@@ -7,6 +7,7 @@ use std::sync::{
 };
 use tbg_core::protocol::{AccessToken, Profile, ServerMsg};
 
+pub(crate) mod api;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
 #[cfg(not(target_arch = "wasm32"))]

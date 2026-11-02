@@ -135,21 +135,13 @@ fn boiler(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         );
     }
     if f.a && f.t2 {
-        // Immovable Mass: a bulwark on the hips with the team's stripe.
-        v.extend([
-            part(
-                Body(Hips),
-                Box(t.x * 1.05, 0.22, 0.06),
-                IRON,
-                [0.0, -0.06, t.z * 0.7],
-            ),
-            part(
-                Body(Hips),
-                Box(t.x * 0.2, 0.2, 0.065),
-                LINEN,
-                [0.0, -0.06, t.z * 0.7],
-            ),
-        ]);
+        // Immovable Mass: an iron bulwark on the hips.
+        v.extend([part(
+            Body(Hips),
+            Box(t.x * 1.05, 0.22, 0.06),
+            IRON,
+            [0.0, -0.06, t.z * 0.7],
+        )]);
     }
     if f.b {
         // Black oil runs down the boiler.

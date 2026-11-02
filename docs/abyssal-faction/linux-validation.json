@@ -1,0 +1,68 @@
+{
+  "build": {
+    "contract": "w35-r10-523044fc973bac39",
+    "features": [],
+    "profile": "debug",
+    "protocol": 35,
+    "source_commit": "5553393ea24db4e04efde5acd7dd036777b887ae",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "0.1.3-abyssals.1"
+  },
+  "binary_sha256": "8c3955c25d6a1679fc17dba7349d2e93774f70ff31dd49f695f03fa3f16f4c6a",
+  "assets_verified": 379,
+  "isolated_installation": true,
+  "launcher": "tbg-champions",
+  "desktop_entry": "TBG · 81 Champions Preview",
+  "native_model_images": 38,
+  "native_form_count": 95,
+  "model_provenance": "previews/manifest.json",
+  "training_provenance": "training/manifest.json",
+  "training_cases_passed": 5,
+  "rear_healers": {
+    "GustDrummer": {
+      "rear_frames": 60,
+      "attacked": true,
+      "max_foot_yaw": 0
+    },
+    "FoamWeaver": {
+      "rear_frames": 60,
+      "attacked": true,
+      "max_foot_yaw": 0
+    }
+  },
+  "barrel_frames": {
+    "allies": 27,
+    "interception": 17
+  },
+  "reset_warnings": {
+    "abyssal-crowd": 3,
+    "foam-rear": 1,
+    "status": "Nonfatal already-despawned entity commands observed during reset; cleanup investigation deferred; no warning-free claim"
+  },
+  "landing_static": {
+    "champions": 81,
+    "faction_counts": [
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9,
+      9
+    ],
+    "preview_badges": 35,
+    "check": "passed",
+    "loopback_http": "200 for gallery/catalog/new portrait"
+  },
+  "landing_browser": "Blocked: browser.user is unavailable; no visual browser claim",
+  "pending": [
+    "Windows visual/motion correspondence",
+    "Desktop game-web visual/motion correspondence",
+    "Owner look/fun sign-off",
+    "Broader team/all-form competitive acceptance and full balance gate",
+    "Two stopped obsolete count/version assertion reruns",
+    "Reset cleanup warnings"
+  ]
+}

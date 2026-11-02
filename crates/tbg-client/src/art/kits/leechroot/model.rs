@@ -51,15 +51,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     maw(&mut v, &p, f);
     roots(&mut v, &p, f);
     let t = p.torso;
-    v.push(
-        part(
-            Body(Chest),
-            Box(0.05, t.y * 0.9, t.z * 1.05),
-            LINEN,
-            [t.x * 0.2, t.y * 0.5, 0.0],
-        )
-        .rot([0.0, 0.0, -25.0]),
-    );
+
     if f.a && f.t2 {
         let b = Secondary(Spring::Back);
         for (x, y, r) in [(-0.1, 0.05, 0.09), (0.09, 0.1, 0.07), (0.0, -0.08, 0.06)] {

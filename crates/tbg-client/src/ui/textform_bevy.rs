@@ -34,6 +34,7 @@ fn insert(form: &mut ActiveForm, value: &str) {
     let limit = match form.kind {
         Some(TextKind::Name) => 16,
         Some(TextKind::Room) => 5,
+        Some(TextKind::PlayerSearch) => 16,
         _ => 128,
     };
     form.edit.insert(&value, limit, |c| {

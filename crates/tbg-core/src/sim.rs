@@ -22,8 +22,7 @@ impl MatchState {
         MatchState::lab(seed, &CANON, arcanas)
     }
 
-    /// Practice preview (ROSTER-EXPANSION §F.5): the full staging pool,
-    /// offline only. Identical to canon until P44 adds new kinds.
+    /// Practice preview: expanded roster with legacy movement and immediate deployment.
     pub fn with_preview(seed: u64, arcanas: [ArcanaPreset; 2]) -> MatchState {
         MatchState::lab(seed, Ruleset::preview(), arcanas)
     }
@@ -86,6 +85,9 @@ impl MatchState {
                 reserve: [0; crate::content::OFFERS],
                 held_mask: 0,
                 reroll_streak: 0,
+                auxiliaries: [crate::auxiliary::AuxiliaryPhase::Available;
+                    crate::auxiliary::AUXILIARY_SLOTS],
+                free_rerolls: 0,
             }
         };
         let first_round = if rules.augment.round_ticks == 0 {
@@ -94,6 +96,7 @@ impl MatchState {
             RUNNING_START.saturating_add(rules.augment.round_ticks)
         };
         MatchState {
+            physical_lanes: false,
             tick: 0,
             clock: 0,
             phase: Phase::Countdown,
@@ -102,6 +105,8 @@ impl MatchState {
                 ..player(i as u64 + 1)
             }),
             units: Vec::new(),
+            deployments: Vec::new(),
+            barrels: Vec::new(),
             next_unit_id: 1,
             outcome: None,
             augments: AugmentState::new(seed, first_round),
@@ -135,6 +140,7 @@ impl MatchState {
         if self.phase != Phase::Ended {
             if self.is_live() {
                 self.regen_energy();
+                crate::auxiliary::tick(self, &mut ev);
                 if self.tick > RUNNING_START
                     && (self.tick - RUNNING_START).is_multiple_of(BOUNTY_WINDOW_TICKS)
                 {
@@ -159,17 +165,21 @@ impl MatchState {
     /// Synergy, timers, afflictions, summons, bonds, boarding, then every
     /// unit acts. Tower fire and deaths follow in the caller.
     pub(crate) fn unit_pass(&mut self, ev: &mut Vec<Event>) {
+        crate::occupancy::arrange(self);
         synergy::update(self, ev);
         combat::tick_timers(self);
         crate::roster_slots::tick_marks(self);
         crate::afflictions::tick(self, ev);
         crate::roster_slots::tick_bleed(self, ev);
         crate::roster_slots::tick_venom(self, ev);
+        crate::completion::tick(self, ev);
         summon::expire(self);
         summon::hatch(self, ev);
         crate::support::bonds(self);
         crate::support::boarding(self, ev);
         combat::run_units(self, ev);
+        crate::barrel::advance(self, ev);
+        crate::occupancy::arrange(self);
     }
 
     /// The seat gives up (or its reconnect window expired): the other wins.

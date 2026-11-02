@@ -3,6 +3,9 @@
 //! basis points (10 000 = 100%). No other file may contain balance numbers;
 //! the simulation reads them through `ruleset::CANON` (D-33).
 
+pub mod completion;
+pub mod occupancy;
+
 use crate::arcana::ArcanaValues;
 use crate::ruleset::CANON;
 use crate::types::{Archetype, Faction, OnHit, StrongholdKind, Tick, UnitKind, FACTION_COUNT};
@@ -53,15 +56,21 @@ pub const BEETLES_PER_NESTER: [usize; 2] = [2, 3];
 pub const BEETLES_PER_PLAYER: usize = 6;
 pub const BEETLE_LIFETIME: Tick = 200;
 
-pub const STRONGHOLD_HP: i32 = 4_500;
-/// P16-C lab evidence (D-33, Proposed): 65 → 53.
-pub const STRONGHOLD_DAMAGE: i32 = 53;
+pub const STRONGHOLD_HP: i32 = 6_750;
+/// TW-01 owner revision: the 53-damage reference is tripled.
+pub const STRONGHOLD_DAMAGE: i32 = 159;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
 
-/// Fortification price to tier 1 and to tier 2 (BR-SK05): 3 then 4 Energy.
+/// TW-01 Fortification price: 6 then 10 Energy.
 /// Its own price, never the unit `EVOLVE_COST` (Proposed, D-46).
-pub const FORTIFY_COST: [u32; 2] = [1_800, 2_400];
+pub const FORTIFY_COST: [u32; 2] = [3_600, 6_000];
+pub const BASTION_ARMOR_BP: i32 = 1_500;
+pub const BASTION_ARMOR_STEP_BP: i32 = 500;
+pub const ARTILLERY_SPLASH_BP: i32 = 4_000;
+pub const ARTILLERY_SPLASH_STEP_BP: i32 = 2_000;
+pub const ARTILLERY_SPLASH_RADIUS: i32 = 1_000;
+pub const ARTILLERY_SPLASH_TARGETS: usize = 3;
 
 /// One Fortification step of a kind's branch. Each field adds to the kind's
 /// base while the step is owned; `interval` replaces the base interval when
@@ -129,57 +138,56 @@ const fn kind(kind: StrongholdKind, name: &'static str, hp_bp: i32, dmg_bp: i32)
 }
 
 /// Every Stronghold kind in `StrongholdKind` order. Treasury and Command
-/// keep the product hypotheses' ratios to the reference tower (4 200/60 and
-/// 4 300/60 against 4 500/65) on today's 4 500 HP / 53 damage; Artillery
-/// and Bastion moved off theirs after the lab matrix (Proposed, D-46).
+/// keep their distinct HP ratios. TW-01 triples the former rounded damage
+/// exactly, with a small coefficient correction for integer truncation.
 #[rustfmt::skip]
 pub const STRONGHOLD_KINDS: [KindDef; 5] = [
     kind(StrongholdKind::Classic, "Classic", 0, 0),
     KindDef {
-        // 0.15 Energy a kill, at most 0.6 Energy per 10 s window.
-        spoils: 90,
-        spoils_cap: 360,
+        // TW-01: 0.45 Energy a kill, at most 1.8 Energy per 10 s window.
+        spoils: 270,
+        spoils_cap: 1080,
         branch_names: ["Armored Vault", "Mint"],
         branches: [
-            [Fortification { hp_bp: 1_200, ..fort("Reinforced Vault") },
-             Fortification { hp_bp: 1_200, ..fort("Grand Vault") }],
-            [Fortification { spoils_add: 30, ..fort("Coinage") },
-             // 0.25 Energy a kill; ceiling 0.6 -> 0.9 Energy a window.
-             Fortification { spoils_add: 30, spoils_cap_add: 180, ..fort("Royal Mint") }],
+            [Fortification { hp_bp: 2_500, ..fort("Reinforced Vault") },
+             Fortification { hp_bp: 2_500, ..fort("Grand Vault") }],
+            [Fortification { spoils_add: 90, ..fort("Coinage") },
+             // TW-01: 0.75 Energy a kill; ceiling 1.8 -> 2.7 Energy a window.
+             Fortification { spoils_add: 90, spoils_cap_add: 540, ..fort("Royal Mint") }],
         ],
-        ..kind(StrongholdKind::Treasury, "Treasury", -700, -800)
+        ..kind(StrongholdKind::Treasury, "Treasury", -700, -900)
     },
     KindDef {
         branch_names: ["Fortress", "Sentinel"],
         branches: [
-            [Fortification { hp_bp: 1_500, ..fort("Reinforced Walls") },
-             Fortification { hp_bp: 1_500, ..fort("Imperial Fortress") }],
-            [Fortification { range_add: 1_000, ..fort("Watchtower") },
-             Fortification { dmg_bp: 1_500, ..fort("Royal Sentinel") }],
+            [Fortification { hp_bp: 3_000, ..fort("Reinforced Walls") },
+             Fortification { hp_bp: 3_000, ..fort("Imperial Fortress") }],
+            [Fortification { range_add: 1_500, ..fort("Watchtower") },
+             Fortification { dmg_bp: 3_000, ..fort("Royal Sentinel") }],
         ],
-        ..kind(StrongholdKind::Bastion, "Bastion", 1_500, -1_000)
+        ..kind(StrongholdKind::Bastion, "Bastion", 1_500, -1_100)
     },
     KindDef {
         branch_names: ["Heavy Cannon", "Rapid Fire"],
         branches: [
-            [Fortification { dmg_bp: 2_000, ..fort("Heavy Shot") },
-             Fortification { dmg_bp: 2_000, ..fort("Great Cannon") }],
-            [Fortification { interval: 17, ..fort("Quick Reload") },
-             Fortification { interval: 14, ..fort("Advanced Mechanism") }],
+            [Fortification { dmg_bp: 4_000, ..fort("Heavy Shot") },
+             Fortification { dmg_bp: 4_000, ..fort("Great Cannon") }],
+            [Fortification { interval: 14, ..fort("Quick Reload") },
+             Fortification { interval: 10, ..fort("Advanced Mechanism") }],
         ],
         ..kind(StrongholdKind::Artillery, "Artillery", -1_500, 1_000)
     },
     KindDef {
-        aura_bp: 500,
-        aura_range: 4_000,
+        aura_bp: 1_500,
+        aura_range: 5_000,
         branch_names: ["War Standard", "Forward Banner"],
         branches: [
-            [Fortification { aura_bp_add: 300, ..fort("War Cry") },
-             Fortification { aura_bp_add: 300, ..fort("Supreme Command") }],
-            [Fortification { aura_range_add: 1_000, ..fort("Outpost") },
-             Fortification { aura_range_add: 1_000, ..fort("High Command") }],
+            [Fortification { aura_bp_add: 750, ..fort("War Cry") },
+             Fortification { aura_bp_add: 750, ..fort("Supreme Command") }],
+            [Fortification { aura_range_add: 1_500, ..fort("Outpost") },
+             Fortification { aura_range_add: 1_500, ..fort("High Command") }],
         ],
-        ..kind(StrongholdKind::Command, "Command", -400, -800)
+        ..kind(StrongholdKind::Command, "Command", -400, -900)
     },
 ];
 
@@ -295,6 +303,11 @@ pub const SYNERGIES: [(SynergyEffect, [i32; 2]); FACTION_COUNT] = [
     (SynergyEffect::Damage, [500, 1_000]),
     (SynergyEffect::MaxHp, [500, 1_000]),
     (SynergyEffect::Movement, [500, 1_000]),
+    // OG-01 Proposed: steady Ogre attack tempo, using the existing synergy effect.
+    (SynergyEffect::AttackSpeed, [500, 1_000]),
+    // AB-01 Proposed: deliberate marine movement, under the existing movement cap.
+    (SynergyEffect::Movement, [500, 1_000]),
+    (SynergyEffect::Movement, [0, 0]),
 ];
 
 /// One evolution form: additive modifiers on the base unit, plus the shared
@@ -371,6 +384,8 @@ const fn root(ticks: u16) -> Option<OnHit> {
 /// Fields are integers in simulation units.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Ability {
+    /// Owner-authorized local preview kits, inactive in the online pool.
+    Completion(completion::Ability),
     DrillNest {
         period: u16,
     },
@@ -582,6 +597,27 @@ pub enum Ability {
         gap: u16,
         short_range: i32,
         short_bonus_bp: u16,
+    },
+    /// GD-04 Volthar: every nth completed enemy-unit primary chains to up to
+    /// four distinct enemies; `ratios` are per jump in bp of static basic damage.
+    StormJudgment {
+        every: u8,
+        jumps: u8,
+        radius: i32,
+        ratios: [u16; 4],
+        primary_bp: u16,
+        root: u16,
+        extra_ratio: u16,
+        extra_targets: u8,
+    },
+    /// GD-04 Astreon: the nth consecutive completed hit on one enemy unit adds
+    /// max-HP damage capped before defenses, plus a low-HP execution share.
+    VerdictLance {
+        every: u8,
+        max_hp_bp: u16,
+        cap: u16,
+        low_hp_bp: u16,
+        execute_bp: u16,
     },
 }
 
@@ -972,6 +1008,61 @@ const BONEHORN_ABILITIES: [[Ability; 2]; 5] = [
     carapace(60, 2_500),
 ];
 
+#[allow(clippy::too_many_arguments)] // one call per form row reads as a table
+const fn storm(
+    jumps: u8,
+    radius: i32,
+    ratios: [u16; 4],
+    primary_bp: u16,
+    root: u16,
+    extra_ratio: u16,
+    extra_targets: u8,
+) -> [Ability; 2] {
+    [
+        Ability::StormJudgment {
+            every: 4,
+            jumps,
+            radius,
+            ratios,
+            primary_bp,
+            root,
+            extra_ratio,
+            extra_targets,
+        },
+        Ability::None,
+    ]
+}
+// GD-04: base 70/50/35 %; A1 adds a fourth 25 % jump (agent proposal); A2 +10 points
+// per jump and 2.8 tiles; B1 +35 % trigger hit; B2 +55 %, 0.5 s Root, 30 % to two more.
+const VOLTHAR_ABILITIES: [[Ability; 2]; 5] = [
+    storm(3, 2_200, [7_000, 5_000, 3_500, 0], 0, 0, 0, 0),
+    storm(4, 2_200, [7_000, 5_000, 3_500, 2_500], 0, 0, 0, 0),
+    storm(4, 2_800, [8_000, 6_000, 4_500, 3_500], 0, 0, 0, 0),
+    storm(3, 2_200, [7_000, 5_000, 3_500, 0], 3_500, 0, 0, 0),
+    storm(3, 2_200, [7_000, 5_000, 3_500, 0], 5_500, 10, 3_000, 2),
+];
+const fn verdict(every: u8, max_hp_bp: u16, cap: u16, execute_bp: u16) -> [Ability; 2] {
+    [
+        Ability::VerdictLance {
+            every,
+            max_hp_bp,
+            cap,
+            low_hp_bp: 4_000,
+            execute_bp,
+        },
+        Ability::None,
+    ]
+}
+// GD-04: base 5 % max HP capped at 240 every fourth; A1 every third; A2 7 % capped
+// at 300; B1/B2 add 35 %/60 % of basic damage below 40 % HP on the fourth.
+const ASTREON_ABILITIES: [[Ability; 2]; 5] = [
+    verdict(4, 500, 240, 0),
+    verdict(3, 500, 240, 0),
+    verdict(3, 700, 300, 0),
+    verdict(4, 500, 240, 3_500),
+    verdict(4, 500, 240, 6_000),
+];
+
 const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
 const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
 const GUARD_ABILITIES: [[Ability; 2]; 5] = [[Ability::Guard; 2]; 5];
@@ -1013,7 +1104,7 @@ use Faction::*;
 
 /// Every `UnitKind`, in enum order: `def` indexes this table by the discriminant.
 /// Kinds past the 27 of `ALL_KINDS` are inactive until their rules wave (D-66).
-pub const UNIT_KIND_COUNT: usize = 51;
+pub const UNIT_KIND_COUNT: usize = crate::ALL_KINDS.len();
 
 /// One row per kind (see `UNIT_KIND_COUNT`).
 // ponytail: `CANON` copies this table by value, so it stays a const. The lint's
@@ -1057,9 +1148,9 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         FormDef { hp_bp: 6_000, ..form("Plating") },
         FormDef { hp_bp: 6_000, splash_add: 800, ..form("Juggernaut") },
     ]),
-    unit(UnitKind::SiegeWalker, "Siege Walker", Machines, Ranged, 3_000,
-        [700, 85, 50, 6_000, 33, 1_500, 0], None, NO_ABILITIES, [
-        FormDef { range_add: 2_000, ..form("Longshot") },
+    unit(UnitKind::SiegeWalker, "Ogre Archer", Ogres, Ranged, 3_000,
+        [700, 85, 50, 4_500, 33, 1_500, 0], None, NO_ABILITIES, [
+        FormDef { range_add: 1_500, ..form("Longshot") },
         FormDef { dmg_bp: 5_000, ..form("Artillery") },
         FormDef { splash_add: 1_000, ..form("Shrapnel") },
         FormDef { on_hit: root(16), ..form("Concussion") },
@@ -1341,7 +1432,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     ]),
     unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
     unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
-    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,2_000,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
+    unit(UnitKind::Trident,"Trident",Abyssals,Tank,3_600,[1_250,55,40,2_000,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
     unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
     unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
     unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),
@@ -1355,6 +1446,281 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     unit(UnitKind::Microdrill,"Microdrill",Machines,Dps,0,[45,18,14,600,95,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
     unit(UnitKind::Duodrill,"Duodrill",Machines,Dps,0,[110,40,17,600,73,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),FormDef{dmg_bp:1500,..form("Producer B")},form("Producer B")]),
     unit(UnitKind::Megadrill,"Megadrill",Machines,Dps,0,[260,90,22,600,50,0,0],None,NO_ABILITIES,[form("Producer A"),form("Producer A"),form("Producer B"),form("Producer B")]),
+    // Champion completion: Proposed initial local-preview values.
+    unit(UnitKind::Gravecutter, "Gravecutter", Undead, Dps, 2400,
+        [300, 48, 24, 800, 54, 0, 0], None, completion::forms(UnitKind::Gravecutter), [
+            FormDef { dmg_bp: 1_500, ..form("Gravetaker") },
+            FormDef { dmg_bp: 1_500, ..form("Final Harvester") },
+            FormDef { range_add: 300, ..form("Chain Dancer") },
+            FormDef { atk_bp: 1_500, ..form("Soul Reaver") },
+        ]),
+    unit(UnitKind::LastlightCantor, "Lastlight Cantor", Undead, Support, 1800,
+        [280, 0, 32, 2800, 40, 0, 36], None, completion::forms(UnitKind::LastlightCantor), [
+            FormDef { heal_bp: 1_500, ..form("Vigil Bell") },
+            FormDef { heal_bp: 1_500, ..form("Sanctuary Bell") },
+            FormDef { range_add: 300, ..form("Funeral Choir") },
+            FormDef { atk_bp: 1_500, ..form("Last Requiem") },
+        ]),
+    unit(UnitKind::Cragclaw, "Cragclaw", Monsters, Dps, 2400,
+        [340, 44, 26, 850, 50, 0, 0], None, completion::forms(UnitKind::Cragclaw), [
+            FormDef { dmg_bp: 1_500, ..form("Edgeclaw") },
+            FormDef { dmg_bp: 1_500, ..form("Obsidian Chisel") },
+            FormDef { range_add: 300, ..form("Splitclaw") },
+            FormDef { atk_bp: 1_500, ..form("Shardsweeper") },
+        ]),
+    unit(UnitKind::Hushfang, "Hushfang", Monsters, Dps, 2400,
+        [300, 46, 24, 800, 60, 0, 0], None, completion::forms(UnitKind::Hushfang), [
+            FormDef { dmg_bp: 1_500, ..form("Silent Prowler") },
+            FormDef { dmg_bp: 1_500, ..form("Fang Warden") },
+            FormDef { range_add: 300, ..form("Flint Hunter") },
+            FormDef { atk_bp: 1_500, ..form("Midnight Pounce") },
+        ]),
+    unit(UnitKind::Spinehurler, "Spinehurler", Monsters, Ranged, 2400,
+        [260, 42, 34, 4200, 40, 0, 0], None, completion::forms(UnitKind::Spinehurler), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Needle") },
+            FormDef { dmg_bp: 1_500, ..form("Spine Lancer") },
+            FormDef { range_add: 300, ..form("Barbed Fan") },
+            FormDef { atk_bp: 1_500, ..form("Needle Phalanx") },
+        ]),
+    unit(UnitKind::MireTender, "Mire Tender", Monsters, Support, 1800,
+        [310, 0, 34, 2700, 38, 0, 34], None, completion::forms(UnitKind::MireTender), [
+            FormDef { heal_bp: 1_500, ..form("Brothkeeper") },
+            FormDef { heal_bp: 1_500, ..form("Deep Remedy") },
+            FormDef { range_add: 300, ..form("Reed Tender") },
+            FormDef { atk_bp: 1_500, ..form("Mire Sage") },
+        ]),
+    unit(UnitKind::Gorgehowl, "Gorgehowl", Monsters, Control, 2400,
+        [330, 18, 36, 1800, 42, 0, 0], None, completion::forms(UnitKind::Gorgehowl), [
+            FormDef { dmg_bp: 1_500, ..form("Deep Resonator") },
+            FormDef { dmg_bp: 1_500, ..form("Quietbreaker") },
+            FormDef { range_add: 300, ..form("Split Echo") },
+            FormDef { atk_bp: 1_500, ..form("Chasm Voice") },
+        ]),
+    unit(UnitKind::Sunlancer, "Sunlancer", Celestials, Dps, 2400,
+        [320, 44, 24, 1000, 52, 0, 0], None, completion::forms(UnitKind::Sunlancer), [
+            FormDef { dmg_bp: 1_500, ..form("Dawn Point") },
+            FormDef { dmg_bp: 1_500, ..form("Sun Pact") },
+            FormDef { range_add: 300, ..form("Ember Lance") },
+            FormDef { atk_bp: 1_500, ..form("Daybreak Oath") },
+        ]),
+    unit(UnitKind::EclipseDancer, "Eclipse Dancer", Celestials, Dps, 2400,
+        [290, 42, 22, 800, 56, 0, 0], None, completion::forms(UnitKind::EclipseDancer), [
+            FormDef { dmg_bp: 1_500, ..form("Sun Step") },
+            FormDef { dmg_bp: 1_500, ..form("Zenith Blade") },
+            FormDef { range_add: 300, ..form("Moon Step") },
+            FormDef { atk_bp: 1_500, ..form("Midnight Waltz") },
+        ]),
+    unit(UnitKind::Starbreaker, "Starbreaker", Celestials, Dps, 3000,
+        [330, 58, 34, 900, 44, 0, 0], None, completion::forms(UnitKind::Starbreaker), [
+            FormDef { dmg_bp: 1_500, ..form("Starmaul") },
+            FormDef { dmg_bp: 1_500, ..form("Constellation Breaker") },
+            FormDef { range_add: 300, ..form("Hammer Dance") },
+            FormDef { atk_bp: 1_500, ..form("Nova Forge") },
+        ]),
+    unit(UnitKind::Dawnmender, "Dawnmender", Celestials, Support, 1800,
+        [290, 0, 32, 2800, 40, 0, 34], None, completion::forms(UnitKind::Dawnmender), [
+            FormDef { heal_bp: 1_500, ..form("Calm Lantern") },
+            FormDef { heal_bp: 1_500, ..form("Sanctuary Light") },
+            FormDef { range_add: 300, ..form("Battle Beacon") },
+            FormDef { atk_bp: 1_500, ..form("Dawn Chorus") },
+        ]),
+    unit(UnitKind::Prismancer, "Prismancer", Celestials, Ranged, 2400,
+        [250, 32, 30, 4000, 42, 0, 0], None, completion::forms(UnitKind::Prismancer), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Focus") },
+            FormDef { dmg_bp: 1_500, ..form("Crystal Needle") },
+            FormDef { range_add: 300, ..form("Open Prism") },
+            FormDef { atk_bp: 1_500, ..form("Triune Prism") },
+        ]),
+    unit(UnitKind::Leafcutter, "Leafcutter", Insects, Dps, 1800,
+        [260, 34, 22, 750, 56, 0, 0], None, completion::forms(UnitKind::Leafcutter), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Mandible") },
+            FormDef { dmg_bp: 1_500, ..form("Deep Serration") },
+            FormDef { range_add: 300, ..form("Swift Saw") },
+            FormDef { atk_bp: 1_500, ..form("Amber Reaper") },
+        ]),
+    unit(UnitKind::Blastbeetle, "Blastbeetle", Insects, Dps, 1800,
+        [240, 32, 24, 700, 58, 0, 0], None, completion::forms(UnitKind::Blastbeetle), [
+            FormDef { dmg_bp: 1_500, ..form("Tight Carapace") },
+            FormDef { dmg_bp: 1_500, ..form("Amber Heart") },
+            FormDef { range_add: 300, ..form("Split Shell") },
+            FormDef { atk_bp: 1_500, ..form("Final Flash") },
+        ]),
+    unit(UnitKind::Needlewing, "Needlewing", Insects, Ranged, 2400,
+        [240, 38, 30, 3900, 48, 0, 0], None, completion::forms(UnitKind::Needlewing), [
+            FormDef { dmg_bp: 1_500, ..form("Keen Sight") },
+            FormDef { dmg_bp: 1_500, ..form("Hunt Window") },
+            FormDef { range_add: 300, ..form("Needle Volley") },
+            FormDef { atk_bp: 1_500, ..form("Amber Guide") },
+        ]),
+    unit(UnitKind::NectarNurse, "Nectar Nurse", Insects, Support, 1800,
+        [270, 0, 36, 2600, 44, 0, 12], None, completion::forms(UnitKind::NectarNurse), [
+            FormDef { heal_bp: 1_500, ..form("Honey Keeper") },
+            FormDef { heal_bp: 1_500, ..form("Golden Remedy") },
+            FormDef { range_add: 300, ..form("Silken Nectar") },
+            FormDef { atk_bp: 1_500, ..form("Hive Lifeline") },
+        ]),
+    unit(UnitKind::Stridulator, "Stridulator", Insects, Control, 2400,
+        [310, 18, 36, 1900, 42, 0, 0], None, completion::forms(UnitKind::Stridulator), [
+            FormDef { dmg_bp: 1_500, ..form("Echo Chamber") },
+            FormDef { dmg_bp: 1_500, ..form("Resonant Crown") },
+            FormDef { range_add: 300, ..form("Cutting Rhythm") },
+            FormDef { atk_bp: 1_500, ..form("Amber Chorus") },
+        ]),
+    // OG-01 Proposed: staged Ogre expansion and Machine replacement.
+    unit(UnitKind::BasaltBulwark, "Basalt Bulwark", Ogres, Tank, 3000,
+        [1080, 42, 26, 900, 40, 0, 0], None, completion::forms(UnitKind::BasaltBulwark), [
+            FormDef { hp_bp: 1_500, ..form("Cairn Guard") },
+            FormDef { hp_bp: 1_500, ..form("Stonewall") },
+            FormDef { range_add: 250, ..form("Cracked Guard") },
+            FormDef { atk_bp: 1_500, ..form("Quake Bastion") },
+        ]),
+    unit(UnitKind::CinderMaul, "Cinder Maul", Ogres, Dps, 2400,
+        [420, 64, 28, 900, 43, 0, 0], None, completion::forms(UnitKind::CinderMaul), [
+            FormDef { dmg_bp: 1_500, ..form("Coalbreaker") },
+            FormDef { dmg_bp: 1_500, ..form("Ember Anvil") },
+            FormDef { range_add: 250, ..form("Twin Brands") },
+            FormDef { atk_bp: 1_500, ..form("Furnace Fists") },
+        ]),
+    unit(UnitKind::HookBrawler, "Hook Brawler", Ogres, Dps, 2400,
+        [380, 56, 24, 1000, 50, 0, 0], None, completion::forms(UnitKind::HookBrawler), [
+            FormDef { dmg_bp: 1_500, ..form("Ironhook") },
+            FormDef { dmg_bp: 1_500, ..form("Anchorbreaker") },
+            FormDef { range_add: 250, ..form("Barbed Loop") },
+            FormDef { atk_bp: 1_500, ..form("Chainmaster") },
+        ]),
+    unit(UnitKind::FlintRunner, "Flint Runner", Ogres, Dps, 2400,
+        [340, 46, 20, 800, 62, 0, 0], None, completion::forms(UnitKind::FlintRunner), [
+            FormDef { dmg_bp: 1_500, ..form("Trailblade") },
+            FormDef { dmg_bp: 1_500, ..form("Flint Gale") },
+            FormDef { range_add: 250, ..form("Sparksprinter") },
+            FormDef { atk_bp: 1_500, ..form("Obsidian Rush") },
+        ]),
+    unit(UnitKind::ClayBinder, "Clay Binder", Ogres, Control, 2400,
+        [380, 44, 30, 3200, 36, 0, 0], slow(2_000, 20), completion::forms(UnitKind::ClayBinder), [
+            FormDef { dmg_bp: 1_500, ..form("Clay Seal") },
+            FormDef { dmg_bp: 1_500, ..form("Earthlock") },
+            FormDef { range_add: 250, ..form("Mire Mask") },
+            FormDef { atk_bp: 1_500, ..form("Quagmire Sage") },
+        ]),
+    // OG-02 Proposed: the stable GustDrummer id now carries rolling healing barrels.
+    unit(UnitKind::GustDrummer, "Barrel Keeper", Ogres, Support, 2400,
+        [460, 0, 200, 3000, 38, 0, 90], None, completion::forms(UnitKind::GustDrummer), [
+            FormDef { heal_bp: 1_500, ..form("Field Cask") },
+            FormDef { heal_bp: 1_500, ..form("Balm Reserve") },
+            FormDef { range_add: 250, ..form("Rolling Remedy") },
+            FormDef { heal_bp: 1_000, ..form("Harvest Cask") },
+        ]),
+    unit(UnitKind::HideMender, "Hide Mender", Ogres, Support, 1800,
+        [360, 0, 32, 2800, 38, 0, 30], None, completion::forms(UnitKind::HideMender), [
+            FormDef { heal_bp: 1_500, ..form("Field Stitch") },
+            FormDef { heal_bp: 1_500, ..form("Leather Surgeon") },
+            FormDef { range_add: 250, ..form("Spirit Spool") },
+            FormDef { atk_bp: 1_500, ..form("Ancestral Seam") },
+        ]),
+    unit(UnitKind::PebbleSlinger, "Pebble Slinger", Ogres, Ranged, 2400,
+        [360, 60, 22, 4100, 48, 0, 0], None, completion::forms(UnitKind::PebbleSlinger), [
+            FormDef { dmg_bp: 1_500, ..form("Counterweight") },
+            FormDef { dmg_bp: 1_500, ..form("Cliffshot") },
+            FormDef { range_add: 250, ..form("Split Pouch") },
+            FormDef { atk_bp: 1_500, ..form("Hail Sling") },
+        ]),
+    unit(UnitKind::RivetBallista, "Rivet Ballista", Machines, Ranged, 2400,
+        [340, 65, 22, 4300, 40, 0, 0], None, completion::forms(UnitKind::RivetBallista), [
+            FormDef { dmg_bp: 1_500, ..form("Rail Guide") },
+            FormDef { dmg_bp: 1_500, ..form("Needle Engine") },
+            FormDef { range_add: 250, ..form("Triple Magazine") },
+            FormDef { atk_bp: 1_500, ..form("Rivet Storm") },
+        ]),
+
+    // AB-01 Proposed: eight Abyssals and the Plant replacement for Trident.
+    unit(UnitKind::NacreDuelist, "Nacre Duelist", Abyssals, Dps, 2400,
+        [430, 64, 22, 1050, 54, 0, 0], None, completion::forms(UnitKind::NacreDuelist), [
+            FormDef { dmg_bp: 1500, ..form("Ivory Edge") },
+            FormDef { dmg_bp: 1500, ..form("Tideblade") },
+            FormDef { range_add: 250, ..form("Foam Edges") },
+            FormDef { atk_bp: 1500, ..form("Nacre Dance") },
+        ]),
+    unit(UnitKind::ReefLancer, "Reef Lancer", Abyssals, Dps, 2400,
+        [410, 58, 26, 1300, 48, 0, 0], None, completion::forms(UnitKind::ReefLancer), [
+            FormDef { dmg_bp: 1500, ..form("Reef Watch") },
+            FormDef { dmg_bp: 1500, ..form("Guard Trident") },
+            FormDef { range_add: 250, ..form("Coral Barbs") },
+            FormDef { atk_bp: 1500, ..form("Current Huntress") },
+        ]),
+    unit(UnitKind::TrenchFist, "Trench Fist", Abyssals, Dps, 2400,
+        [480, 62, 30, 850, 42, 0, 0], None, completion::forms(UnitKind::TrenchFist), [
+            FormDef { dmg_bp: 1500, ..form("Seastone Fist") },
+            FormDef { dmg_bp: 1500, ..form("Keelbreaker") },
+            FormDef { range_add: 250, ..form("Salt Gauntlets") },
+            FormDef { atk_bp: 1500, ..form("Abyssal Quake") },
+        ]),
+    unit(UnitKind::PearlSlinger, "Pearl Slinger", Abyssals, Ranged, 2400,
+        [340, 52, 24, 4100, 48, 0, 0], None, completion::forms(UnitKind::PearlSlinger), [
+            FormDef { dmg_bp: 1500, ..form("Pearl Pouch") },
+            FormDef { dmg_bp: 1500, ..form("Tide Eye") },
+            FormDef { range_add: 250, ..form("Split Shell") },
+            FormDef { atk_bp: 1500, ..form("Pearl Rain") },
+        ]),
+    unit(UnitKind::AbyssHarpooner, "Abyss Harpooner", Abyssals, Ranged, 2400,
+        [360, 64, 26, 4300, 42, 0, 0], None, completion::forms(UnitKind::AbyssHarpooner), [
+            FormDef { dmg_bp: 1500, ..form("Nacre Harpoon") },
+            FormDef { dmg_bp: 1500, ..form("Trench Sight") },
+            FormDef { range_add: 250, ..form("Barbed Spear") },
+            FormDef { atk_bp: 1500, ..form("Abyss Hunt") },
+        ]),
+    unit(UnitKind::UndertowHerald, "Undertow Herald", Abyssals, Control, 2400,
+        [420, 34, 30, 2500, 40, 0, 0], None, completion::forms(UnitKind::UndertowHerald), [
+            FormDef { dmg_bp: 1500, ..form("Resonant Conch") },
+            FormDef { dmg_bp: 1500, ..form("Undertow Voice") },
+            FormDef { range_add: 250, ..form("Tide Horn") },
+            FormDef { atk_bp: 1500, ..form("Maelstrom Call") },
+        ]),
+    unit(UnitKind::TrenchLamplighter, "Trench Lamplighter", Abyssals, Control, 2400,
+        [370, 42, 30, 3300, 38, 0, 0], None, completion::forms(UnitKind::TrenchLamplighter), [
+            FormDef { dmg_bp: 1500, ..form("Amber Lantern") },
+            FormDef { dmg_bp: 1500, ..form("Deep Beacon") },
+            FormDef { range_add: 250, ..form("Saltglass") },
+            FormDef { atk_bp: 1500, ..form("Abyss Eye") },
+        ]),
+    unit(UnitKind::FoamWeaver, "Foam Weaver", Abyssals, Support, 1800,
+        [340, 0, 34, 2800, 42, 0, 30], None, completion::forms(UnitKind::FoamWeaver), [
+            FormDef { heal_bp: 1500, ..form("Foam Chalice") },
+            FormDef { heal_bp: 1500, ..form("Nacre Spring") },
+            FormDef { range_add: 250, ..form("Tide Threads") },
+            FormDef { atk_bp: 1500, ..form("Surf Mantle") },
+        ]),
+    unit(UnitKind::PodSnapper, "Pod Snapper", Plants, Ranged, 2400,
+        [390, 52, 26, 3900, 40, 0, 0], None, completion::forms(UnitKind::PodSnapper), [
+            FormDef { dmg_bp: 1500, ..form("Ironpod") },
+            FormDef { dmg_bp: 1500, ..form("Royal Seeder") },
+            FormDef { range_add: 250, ..form("Split Husk") },
+            FormDef { atk_bp: 1500, ..form("Harvest Burst") },
+        ]),
+
+    // GD-01: a single Gods champion; the Faction deliberately has no Synergy bonus yet.
+    unit(UnitKind::Colossus, "Colossus", Gods, Tank, 10_800,
+        [2_400, 170, 110, 4_500, 22, 1_800, 0], None, NO_ABILITIES, [
+        FormDef { dmg_bp: 2_500, range_add: 1_500, ..form("Sun Obelisk") },
+        FormDef { splash_add: 600, ..form("Pillar of Dawn") },
+        FormDef { hp_bp: 3_000, ..form("Ancient Monolith") },
+        FormDef { hp_bp: 3_000, ..form("Eternal Monument") },
+    ]),
+    // GD-04: Proposed Gods expansion; every form changes only its ability row.
+    unit(UnitKind::Volthar, "Volthar", Gods, Ranged, 12_600,
+        [2_200, 130, 30, 5_500, 35, 0, 0], None, VOLTHAR_ABILITIES, [
+        form("Storm Herald"),
+        form("Celestial Sovereign"),
+        form("Hammer of Wrath"),
+        form("Divine Tempest"),
+    ]),
+    unit(UnitKind::Astreon, "Astreon", Gods, Dps, 13_800,
+        [1_900, 190, 40, 2_200, 37, 0, 0], None, ASTREON_ABILITIES, [
+        form("Giant Piercer"),
+        form("Primordial Lance"),
+        form("Final Sentence"),
+        form("Absolute Verdict"),
+    ]),
+
 ];
 
 /// Canonical Hatch rule (see `Ruleset::hatch_rule`).

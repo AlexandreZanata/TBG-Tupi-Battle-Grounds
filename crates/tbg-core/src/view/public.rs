@@ -29,6 +29,7 @@ pub struct PublicRound {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PublicView {
+    pub physical_lanes: bool,
     /// Combat tick: frozen while an Augment selection pauses the battle.
     pub tick: Tick,
     /// Selection clock: advances every step, pauses included (BR-AG13).
@@ -46,6 +47,7 @@ pub struct PublicView {
     pub strongholds: [StrongholdView; 2],
     pub shields: [i32; 2],
     pub units: Vec<UnitView>,
+    pub barrels: Vec<crate::barrel::Barrel>,
     pub synergy: [[u8; FACTION_COUNT]; 2],
     /// Both seats' Augment copies (public, BR-AG09).
     pub augments: [AugmentCounts; 2],
@@ -55,6 +57,8 @@ pub struct PublicView {
     pub outcome: Option<Outcome>,
     /// BR-LV05: a count of spectators, never who. Set by the server.
     pub spectators: u16,
+    /// Public War Auxiliary state for both seats (BR-AX11, D-106).
+    pub auxiliaries: [[crate::auxiliary::AuxiliarySlotView; crate::auxiliary::AUXILIARY_SLOTS]; 2],
 }
 
 impl MatchState {
@@ -69,6 +73,7 @@ impl MatchState {
             resolved: Seat::BOTH.map(|s| self.player(s).augment_resolved >= self.augments.round),
         });
         PublicView {
+            physical_lanes: self.physical_lanes,
             tick: self.tick,
             clock: self.clock,
             elapsed: self.tick.saturating_sub(crate::content::RUNNING_START),
@@ -89,12 +94,14 @@ impl MatchState {
                 .filter(|u| u.hp > 0)
                 .map(|u| super::unit_view(u, self.tick, self.rules))
                 .collect(),
+            barrels: self.barrels.clone(),
             synergy: [0, 1].map(|i| self.players[i].synergy),
             augments: [self.players[0].augments, self.players[1].augments],
             round,
             events: events.iter().filter(|e| is_public(e)).cloned().collect(),
             outcome: self.outcome,
             spectators,
+            auxiliaries: crate::auxiliary::views(self),
         }
     }
 }

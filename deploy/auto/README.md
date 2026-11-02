@@ -289,3 +289,39 @@ process or player data changes. The installer leaves its flag/timer disabled.
 See [the official release guide](../../docs/RELEASES.md#native-packages-and-truthful-availability)
 for the first verified release, activation and public availability checks. An old
 incompatible protocol-30 release never enables protocol-31 download buttons.
+
+## Attended wire/gameplay contract switch
+
+The owner-authorized champion consolidation uses BR-UP09's scheduled contract
+switch. Routine timers still reject every changed contract. An operator can name
+one exact reviewed contract with `pull.py --coordinated-contract <contract>`;
+this does not authorize a database migration, single-process restart, source
+rollback, signature bypass or stopping a busy generation. The normal journal,
+health/admission checks, ranked handoff and retirement gates remain in force.
+
+Before applying: require published attested main backend, web and complete Linux/
+Windows native artifacts of the same source and contract; verify the static
+candidate and schema; check lobby quietness and a free slot. Pause the backend
+and frontend timers while installing reviewed controllers. Record the source,
+old/new contracts and public admission. Run a no-apply preflight with the explicit
+contract, then the attended `--apply --recheck --coordinated-contract <contract>`.
+Once admission answers for that contract, immediately apply the matching web and
+static candidates and refresh the native catalog. Observe all public entries
+before restoring timers. Pending old matches stay on the old slot and finish
+there; resume the journal until retirement is safe. Never change a receipt by
+hand or kill a previous generation to make room.
+
+This is not a claim of seamless admission for old clients across a protocol
+change: new joins in an old tab may need a reload/update. Existing matches and
+reconnections remain on their original generation while it drains. If public
+checks fail, the coordinator returns admissions to the previous slot. Coordinate
+frontend rollback too before restoring timers; do not leave mixed entry points.
+The timer's unit never supplies `--coordinated-contract`.
+
+The four timers start at staggered offsets after activation (20/80/140/200 s)
+and use one-second timer accuracy. Their ten-minute recurring cadence remains.
+The earlier identical boot deadlines and default one-minute coalescing repeatedly
+ran backend and web together: the nonblocking lock safely deferred web, but a
+compatible public bundle remained behind. Staggering avoids that repeated startup
+race without weakening the shared lock or adding retries/API polling. Long work
+can still defer another family until its normal next run.

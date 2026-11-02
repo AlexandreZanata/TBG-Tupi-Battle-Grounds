@@ -34,6 +34,25 @@ pub(super) fn cue(
                 anim.start_special();
             }
         }
+        Event::BarrelBurst {
+            center,
+            center_z,
+            radius,
+            tier,
+            branch,
+            ..
+        } => {
+            impacts::land(
+                commands,
+                fx.vfx,
+                Impact::Champion(UnitKind::GustDrummer, tier, branch),
+                Vec3::new(world_x(center, fx.you), 0.25, center_z as f32 / 1000.0),
+                Area {
+                    splash: radius as f32 / 1000.0,
+                    ..default()
+                },
+            );
+        }
         Event::AbilityResolved { .. } => resolved(commands, fx, map, visuals, event),
         _ => {}
     }
@@ -86,6 +105,46 @@ fn resolved(
     };
     if let Some((_, _, mut anim)) = map.0.get(&unit).and_then(|e| visuals.get_mut(*e).ok()) {
         anim.resolve_special();
+    }
+    if crate::art::kits::completion::kit(kind).is_some()
+        || crate::art::kits::ogres::contains(kind)
+        || crate::art::kits::abyssals::contains(kind)
+        || matches!(kind, UnitKind::Volthar | UnitKind::Astreon)
+    {
+        let at = Vec3::new(world_x(center, fx.you), 0.6, 0.0);
+        let form = map
+            .0
+            .get(&unit)
+            .and_then(|e| visuals.get(*e).ok())
+            .map_or((0, 0), |(_, _, a)| a.form);
+        let splash = if kind == UnitKind::GustDrummer {
+            content::def(kind)
+                .ability(form.0, form.1)
+                .into_iter()
+                .find_map(|a| match a {
+                    Ability::Completion(tbg_core::content::completion::Ability::Barrel {
+                        radius,
+                        ..
+                    }) => Some(radius as f32 / 1000.0),
+                    _ => None,
+                })
+                .unwrap_or(1.25)
+        } else if kind == UnitKind::Blastbeetle {
+            0.9
+        } else {
+            0.0
+        };
+        impacts::land(
+            commands,
+            fx.vfx,
+            Impact::Champion(kind, form.0, form.1),
+            at,
+            Area {
+                splash,
+                ..Default::default()
+            },
+        );
+        return;
     }
     let (impact, target, area) = match kind {
         UnitKind::Crowcaller => (Impact::Plague, primary, Area::default()),

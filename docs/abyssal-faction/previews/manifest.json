@@ -1,0 +1,424 @@
+{
+  "surface": "Linux X11/Xvfb; actual Bevy native render",
+  "parity": "Windows/desktop web unverified",
+  "captures": [
+    {
+      "kind": "HookBrawler",
+      "file": "hookbrawler-forms.webp",
+      "sha256": "b95340ecd7cb849b6be8767407becb2f62475875f1940ff077adef176bc0233e",
+      "source_png_sha256": "f8388b5092c1e76b64ca2b4534b994c7142bb0f164a0a2469f91feb0aea8d026",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "SiegeWalker",
+      "file": "siegewalker-forms.webp",
+      "sha256": "c5286443554a06e955e652a355035d5aed8b6c72b7113c32de188006c37ab33a",
+      "source_png_sha256": "2041c984e2fea8874082f77f8e81b7a215cecbf859054fdc54d66ae618045d80",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "BasaltBulwark",
+      "file": "basaltbulwark-forms.webp",
+      "sha256": "57e97959a60b8f368567ac49c7b728c06f03a257b68822eda2de95f60e03190a",
+      "source_png_sha256": "73be6c868b18c779b19f32cd843323692c3ab44d10c6322a8835876b21af95ef",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "CinderMaul",
+      "file": "cindermaul-forms.webp",
+      "sha256": "1de9001c0cc3121ca7c510e4ec38e9520e7b033303407db26d01e53e70ccd9a7",
+      "source_png_sha256": "ad5726b76df91afe5e49b9bed2461ca702dfea151be616d0f99d00ae6f5da098",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "FlintRunner",
+      "file": "flintrunner-forms.webp",
+      "sha256": "9e089bfd7175f02c3c671985cb27d304004cefc6d9297bbd1b3a42c07b197a01",
+      "source_png_sha256": "a36c83347f3aeeba4bd145223b86fe4b7ba0b205648c27f37b4bf2fb4053bb30",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "ClayBinder",
+      "file": "claybinder-forms.webp",
+      "sha256": "0a9524d1bbe85e0c150c039393a78e979208077e9e27b197fbb5667af842e592",
+      "source_png_sha256": "94e5be3e8b07d60aaeb51adbb0013b4a8723b3d724795b8249ba3f2f237b130d",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "GustDrummer",
+      "file": "gustdrummer-forms.webp",
+      "sha256": "3f30bec8e9803bcfe164dc980016aac4d76fa16faf4429ba417378bef29796d2",
+      "source_png_sha256": "fbf44627838ded2b963bc6263e0a715dfc9b0da7d14f50d667c55d5aacc820c2",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "HideMender",
+      "file": "hidemender-forms.webp",
+      "sha256": "bbb6a565caa908fe1c08b34f923e2acf8a80494eda622ec3a05300b4de4e11c1",
+      "source_png_sha256": "e76fc2aac61e7f9d01a512f768076863b065c04fd735a7c3dc337a623bb6f429",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "PebbleSlinger",
+      "file": "pebbleslinger-forms.webp",
+      "sha256": "cc34668fc594ffcad5a41fb17fd6810379c13bd796cf1a328ad8a7bc72f35c02",
+      "source_png_sha256": "520cc5ccab42595d5f278c83447fdeb1eca14c1e4ed290cbd48b054870d42003",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "Trident",
+      "file": "trident-forms.webp",
+      "sha256": "e669e30c344b5d76bbf90c81e51d54683874f88a8437320b0a00f5a362b8cdef",
+      "source_png_sha256": "0594af83881deac9a4ed224fa84fe4abf9b33baf851319df1fdf9a1c050b05f8",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "ReefLancer",
+      "file": "reeflancer-forms.webp",
+      "sha256": "6c8e56ca84847deb48390ba3873da3803c2781946863ca8728aa52a616296ce9",
+      "source_png_sha256": "2fdbaebcb20e343c5149cac3e46ee1e860165b3274d1fa4d5ce225e20ce8b5d2",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "TrenchFist",
+      "file": "trenchfist-forms.webp",
+      "sha256": "5d79ee6e07b1bdd2ebdd0cff697227e41e6cbed8ac32284c7e5307db6e9cf6d0",
+      "source_png_sha256": "a46534a00d54791547d98c794be22f67a95659082f9e9ce13d4c3aa6ec4cf025",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "PearlSlinger",
+      "file": "pearlslinger-forms.webp",
+      "sha256": "dbd9b74ef924cd3df48eb162f80466a3c60241202991677494707599d9da4c25",
+      "source_png_sha256": "eb0fb38725e34fd7d86592f9590699a91f2852c336ca4d1be1445b4d3fb0a6d1",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "AbyssHarpooner",
+      "file": "abyssharpooner-forms.webp",
+      "sha256": "a00ec9fa76cd8511a7524d8d1a46b12f7d6c3b45524652bf37c5485c0e41ab5a",
+      "source_png_sha256": "b7f7596e107f1b9f870128f0d70cbd0d4d07bc103ee81d546e1dc88a81ca370c",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "UndertowHerald",
+      "file": "undertowherald-forms.webp",
+      "sha256": "f7674b303eda28ce07e8d9e7c8cb9f3caf491d9f91840a857208c09057ba25e9",
+      "source_png_sha256": "1f16a08dd995eaedaee1e6343b7a8ba42ceb3f7fb6b69aaff778c5e9ed5e4d83",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "TrenchLamplighter",
+      "file": "trenchlamplighter-forms.webp",
+      "sha256": "93316972f97a4990a5c010018600df606cc1dd9b9593a26c99b45478f38c6734",
+      "source_png_sha256": "695aa62d38f731f743d12d977650412b2f9fae5f0a0b05921a5a0918822eb2da",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "FoamWeaver",
+      "file": "foamweaver-forms.webp",
+      "sha256": "be1514230493cefe718acc895a256cb57022529604bdea2f546fe0e3ca0be923",
+      "source_png_sha256": "6ee95de059220933a637cb6537a11c6461cc5967b53a3da9414ccc059bbe015f",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "PodSnapper",
+      "file": "podsnapper-forms.webp",
+      "sha256": "1480bb9dc71d6f7ce04b984aaa52ca0e29005fdca36a2b793cce0551d9201ff0",
+      "source_png_sha256": "f88a9d3a4ae9323c6ca2b3397b56b70454e8d450cdccf1387bd181748e693662",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "da23db210be7d0d1cd07ddda9ee5f29036957c1c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "a6ba04c7d587385f1e91ad64e2e84513afbf6bae22ca56a6e1a48be1a8737714",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    },
+    {
+      "kind": "NacreDuelist",
+      "file": "nacreduelist-forms.webp",
+      "sha256": "2ba6f06f3a2a8a18de33378c22a24caa7f9f5ae7cce411cda632f5304519ad18",
+      "source_png_sha256": "3b8533670319bbd375cf25ec4eaf60797a9c0606ff90e88bcf799fa9a92a12c5",
+      "build": {
+        "contract": "w35-r10-523044fc973bac39",
+        "features": [],
+        "profile": "debug",
+        "protocol": 35,
+        "source_commit": "523b49b4d78346adfd9f8270c311da50b3369932",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.3-abyssals.1"
+      },
+      "binary_sha256": "baae5fc3a6c4099918c225cf3e67c7fbf13f6d4c6d4a59ee8f90e5f72762a300",
+      "size": [
+        1600,
+        1000
+      ],
+      "mode": "lineup: idle/walk/attack",
+      "encoding": "WebP quality 90; format conversion only from native Bevy screenshot"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "version": 1, "quality": "complete", "mode": "Ranked", "origin": "public_queue",
+  "ended_unix": 1793566800, "arena": "forest", "ruleset_version": 6, "source_hash": "visual-fixture",
+  "combat_ticks": 4000, "tick_hz": 20, "wall_ms": 240000,
+  "outcome": "loss", "reason": "surrender", "purchases": 3,
+  "champions": [
+    {"champion":"Archer","purchases":2,"evolution_tiers":[1,0]},
+    {"champion":"Bloomkeeper","purchases":1,"evolution_tiers":[0,0]}
+  ],
+  "evolutions": 1, "fortifications": 1,
+  "augments": [{"id":3,"copies":1}],
+  "stronghold": {"kind":"bastion","hp":1337,"max_hp":5000}
+}

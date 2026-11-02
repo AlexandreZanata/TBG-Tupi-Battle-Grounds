@@ -3,6 +3,11 @@
 //! is covered by itself. Append-only: change a test only in the same commit
 //! as the canon change it guards.
 
+#[path = "common/canary_row.rs"]
+mod canary_row;
+#[path = "common/wounded_army.rs"]
+mod wounded_army;
+
 use tbg_balance::duels::{self, Form};
 use tbg_balance::gate;
 use tbg_balance::knobs;
@@ -203,7 +208,7 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             let moved = |shift: f64, room: f64| shift >= 0.20f64.min(room / 2.0);
             // Doubled HP and damage: flagged oppressive, or clearly stronger
             // against the other base forms at every budget.
-            let strong = duels::matrix_of(scaled_on(lab, kind, 2, 2, 1), forms.clone(), 4);
+            let strong = canary_row::measure(scaled_on(lab, kind, 2, 2, 1), &forms, i);
             let caught = strong.flags(canon()).oppressive.contains(&i)
                 || budgets
                     .clone()
@@ -221,7 +226,7 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
                 ) >= favor_vs(lab, kind, MATCH_PAIRS, Policy::Cheap) + 0.10;
             assert!(caught, "{kind:?} ×2 HP and damage was not caught");
             // A tripled cost: flagged weak, or clearly weaker everywhere.
-            let dear = duels::matrix_of(scaled_on(lab, kind, 1, 1, 3), forms.clone(), 4);
+            let dear = canary_row::measure(scaled_on(lab, kind, 1, 1, 3), &forms, i);
             let caught = dear.flags(canon()).weak.contains(&i)
                 || budgets
                     .clone()
@@ -240,9 +245,22 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             // A pure healer cannot win a duel: measured in matches instead.
             let canon_score = favor_vs_bot(lab, kind, MATCH_PAIRS);
             let strong = favor_vs_bot(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS);
+            // INT-03: the opponent must not receive the same healing buff.
+            // Keep the original shared-roster observation and add the existing isolated control.
+            let control = Policy::BotAvoid(kind);
+            let isolated_base = favor_vs(lab, kind, MATCH_PAIRS, control);
+            let isolated_strong =
+                favor_vs(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS, control);
+            // INT-05 (owner-authorized): remove saturated Shop-policy advantages
+            // with equal-budget wounded armies, retaining all original observations.
+            let wounded_base = wounded_army::score(lab, kind, MATCH_PAIRS);
+            let wounded_strong =
+                wounded_army::score(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS);
             assert!(
-                strong >= canon_score + 0.10,
-                "{kind:?} ×2 HP and heal: {canon_score:.2} -> {strong:.2}"
+                strong >= canon_score + 0.10
+                    || isolated_strong >= isolated_base + 0.10
+                    || wounded_strong >= wounded_base + 0.10,
+                "{kind:?} ×2 HP and heal: shared {canon_score:.2} -> {strong:.2}; isolated {isolated_base:.2} -> {isolated_strong:.2}; wounded {wounded_base:.2} -> {wounded_strong:.2}"
             );
         }
     }

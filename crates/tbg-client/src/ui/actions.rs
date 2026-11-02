@@ -63,7 +63,10 @@ pub(super) fn apply(
     ),
     mut form: NonSendMut<ActiveForm>,
     mut ranking: ResMut<super::ranking::Ranking>,
-    mut inspected: ResMut<super::inspect::Inspected>,
+    (mut inspected, mut social_menu): (
+        ResMut<super::inspect::Inspected>,
+        (ResMut<super::shell::Shell>, ResMut<super::history::History>),
+    ),
     (mut lang_res, mut arena, mut celebration, info, mut training): (
         ResMut<crate::i18n::Lang>,
         ResMut<crate::arena::ActiveArena>,
@@ -221,6 +224,17 @@ pub(super) fn apply(
                 }
             }
             UiAction::RequestRematch => link.send(ClientMsg::RequestRematch, now),
+            UiAction::OpenPlayers => {
+                social_menu.0.panel = super::shell::Panel::Live;
+                social_menu.0.dirty = true;
+                next.set(GameState::Menu);
+            }
+            UiAction::OpenMyHistory => {
+                social_menu.1.mine();
+                social_menu.0.panel = super::shell::Panel::History;
+                social_menu.0.dirty = true;
+                next.set(GameState::Menu);
+            }
             UiAction::Watch(id) => {
                 config::save_watch(id);
                 *queue_info = QueueInfo::default();
@@ -340,7 +354,14 @@ pub(super) fn apply(
                 if pending.0.is_some() {
                     continue;
                 }
-                if let Some(cost) = extra.0 .0.as_ref().and_then(|v| v.reroll_cost) {
+                let cost = extra.0 .0.as_ref().and_then(|v| {
+                    if v.free_rerolls > 0 {
+                        Some(0)
+                    } else {
+                        v.reroll_cost
+                    }
+                });
+                if let Some(cost) = cost {
                     seq.0 += 1;
                     link.send(
                         ClientMsg::Intent {
@@ -351,6 +372,19 @@ pub(super) fn apply(
                     );
                     pending.0 = Some((u8::MAX, seq.0));
                 }
+            }
+            UiAction::HireAuxiliary(slot) => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                seq.0 += 1;
+                link.send(
+                    ClientMsg::Intent {
+                        seq: seq.0,
+                        intent: PlayerIntention::HireAuxiliary { slot },
+                    },
+                    now,
+                );
             }
             UiAction::Buy(offer) => {
                 if pending.0.is_some_and(|(slot, _)| slot == u8::MAX) {

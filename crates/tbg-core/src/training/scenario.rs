@@ -2,8 +2,8 @@
 //! A scenario names exact unit instances; it never becomes a Shop pool.
 
 use crate::content::{LANE_LEN, SPAWN_OFFSET, TICK_HZ};
-use crate::ruleset::CANON;
 use crate::types::{Arena, UnitKind};
+use crate::COMPLETION_POOL;
 
 use super::dummy::{DummyHp, DummyMode};
 
@@ -78,7 +78,7 @@ pub enum ScenarioError {
     Schema(u16),
     EmptySide(Side),
     TooMany(Side),
-    /// Not in the active Shop pool (summons and staged kinds included).
+    /// Not in the explicitly local conventional preview roster (summons excluded).
     NotPlayable {
         side: Side,
         index: usize,
@@ -116,7 +116,7 @@ impl TrainingScenario {
 fn validate_units(side: Side, units: &[TrainingUnitSpec]) -> Result<(), ScenarioError> {
     bounded(side, units.len(), MAX_UNITS_PER_SIDE)?;
     for (index, spec) in units.iter().enumerate() {
-        if spec.kind.is_summon() || !CANON.pool.contains(&spec.kind) {
+        if spec.kind.is_summon() || !COMPLETION_POOL.contains(&spec.kind) {
             return Err(ScenarioError::NotPlayable { side, index });
         }
         let form_ok = spec.tier <= 2 && spec.branch <= 1 && (spec.tier > 0 || spec.branch == 0);

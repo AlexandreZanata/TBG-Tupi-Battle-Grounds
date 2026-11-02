@@ -129,7 +129,7 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-P02 | The `AccountKey` is the long-lived manual credential: shown once at creation, never shown to other players, not recoverable on this base. P68-A delegates runtime authentication to expiring tokens (§21) without changing existing keys | Proposed (P11/P68-A) | — |
 | BR-P03 | One active account controller; explicit login/takeover can replace the old controller, including its match. P68-A allows separate persistent device families, but passive refresh/startup never takes over automatically (§21) | Proposed (P11/P68-A) | — |
 | BR-P04 | Guests may play practice, casual matches, and private rooms; ranked play needs an account | Proposed | — |
-| BR-P05 | A public profile shows name, rating, rank, record, win rate, faction mix, and the last 10 ranked results. P68-A additionally stores minimal private session-security metadata (§21), never exposing tokens/device identifiers on public profiles | Proposed (P11/P68-A) | — |
+| BR-P05 | A public profile shows name, rating, rank, record, win rate and faction mix. P73 makes the last 10 ranked results and detailed history subject to the account's Public/Only me choice (BR-AP11); private history exposes no recent rows. P68-A additionally stores minimal private session-security metadata (§21), never exposing tokens/device identifiers on public profiles | Proposed (P11/P68-A/P73) | — |
 | BR-R01 | Two queues: `Casual` (guests and accounts; private rooms are casual) and `Ranked` (accounts only) | Proposed | — |
 | BR-R02 | Matchmaking pairs the two longest-waiting players of the same queue, regardless of rating | Proposed | — |
 | BR-R03 | Every ranked match changes both players' `Rating` from both ratings (Elo, §5); win 1, draw ½, loss 0 | Proposed | — |
@@ -1738,3 +1738,846 @@ are **Proposed** initial updater limits under §19/O04. The static publication
 worker has a five-minute timeout; that limit never applies to game processes
 or match drain. Browser releases retain immutable source-addressed assets and
 legacy files; no automatic retention deletion is approved.
+
+## Proposed P73 — Active players, challenges, rematches and match history
+
+Owner request, 2026-11-01. **Implemented behind explicit rollout flags;
+production activation and acceptance remain pending.** See [P73](phases/P73-active-players-and-direct-challenges.md).
+
+- **BR-AP01 — Directory.** Active players lists every connected account
+  across the currently known service slots, with whole-directory name
+  search and paging. Preserve BR-LV06: guests count toward connected
+  sessions but are not publicly enumerated; no private room/match or
+  credential data appears. Display partial/stale coverage honestly.
+- **BR-AP02 — Availability.** Public activity does not grant permission to
+  pair. Only a genuinely Idle, connected, authorized controller in a
+  compatible admitting ownership domain can send/accept a direct invite.
+  Queues, rooms, pending link challenges, watching and matches are not
+  forcibly interrupted. Private activity may be shown only as coarse busy.
+- **BR-AP03 — Explicit consent.** Send is the inviter's explicit consent;
+  only the addressed recipient can accept. Recheck both participants at
+  acceptance; consume once and use the existing private Challenge path.
+  Crossed/replayed clicks never implicitly accept or start duplicate games.
+  Direct games do not affect rating or enter a public queue.
+- **BR-AP04 — Participant-bound notifications.** Random short-lived direct
+  invitation IDs are disclosed only to participants and authorize no bearer
+  join. Public directory rows disclose no such IDs or session/account keys.
+  Reuse existing shareable Quick Challenge links separately; they are not
+  equivalent to a recipient-bound notification.
+- **BR-AP05 — Last-opponent rematch.** Extend BR-R09 ticket eligibility to
+  completed online PvP Challenge, Casual, Ranked and human private-room
+  games. Maintain one latest valid opponent ticket per participant, the
+  existing configured rematch TTL (currently 120 s), mutual consent, fresh
+  seed and private Challenge mode with no rating effect. A private guest
+  recent-opponent card does not make guest sessions public. Practice and
+  spectators create no ticket. Opening Active players is navigation, not
+  an implicit decline; explicit leave/decline and newer activity still
+  clean up the offer.
+- **BR-AP06 — Bounded invites.** Proposed initial direct-invite TTL is 60 s,
+  with 1 outgoing invitation per controller, 5 incoming per recipient,
+  15 s per sender/recipient-pair cooldown and 512 live directed records
+  per process. Retain current general WS and invite-IP limits (currently
+  30/min), with account or guest-session keys as appropriate. These are
+  tunable initial product defaults, not proven capacity figures.
+- **BR-AP07 — Opt-out and continuity.** A retained-session setting can
+  disable incoming direct challenges and close pending incoming notices;
+  it does not disable explicit Quick Challenge links. Reconnect restores
+  only the unexpired same-session state; it does not extend TTL or revive
+  terminal records. Logout/revocation/takeover invalidate directed invites.
+  No notification or acceptance can pause, move or forfeit a live match.
+- **BR-AP08 — Global snapshot and rollout.** HTTP reads bounded public
+  snapshots; no SQL or actor mutation per directory read. Fixed release
+  slots aggregate local-only snapshots in a background task, with at most
+  2 configured local peers concurrently, 750 ms timeout, 2 MiB response
+  limit and 15 s freshness cutoff as Proposed initial limits. Internal
+  snapshots remain loopback-only and publicly denied by the proxy.
+  Incompatible/draining peers stay visible but unavailable; no cross-slot
+  match migration is introduced. Missing peers produce partial coverage,
+  never fabricated global zero. Preserve the existing 5 s client refresh
+  baseline with backoff/hidden-page suspension; private invites use WS push.
+
+- **BR-AP09 — Recorded history.** Account-bound completed online Ranked,
+  Casual, Challenge/rematch and human private-room games enter persistent
+  result/statistics history. Freeze account-to-seat ownership at admission.
+  Practice/demo/training, spectators and unbound guest sessions do not gain
+  a persistent online-account history through this feature.
+- **BR-AP10 — Authoritative statistics.** The result/reconnect and stored
+  detail use the same bounded server-terminal personal summary. Count
+  successful purchases/Evolutions/Fortifications and finalized choices;
+  freeze Stronghold HP, mode, arena, outcome and both combat/wall duration.
+  Current client Stronghold-hit amounts are not total effective damage.
+  Unsupported or missing old statistics are null/unavailable, not zero.
+- **BR-AP11 — History privacy.** The account chooses Public or Only me,
+  default private for existing/new accounts. The persisted server choice
+  governs all past/future history and legacy public `recent` routes.
+  Owner reads require authentication/ownership. Public projections contain
+  only that player's permitted summary; private-game/guest opponent data,
+  other-seat private stats and internal match/session keys are not exposed.
+  Aggregate public rating/record remains governed by existing profile rules.
+- **BR-AP12 — Idempotent recording.** One canonical terminal source key,
+  independent per-participant entry IDs and a transaction/journal boundary
+  prevent duplicates on result replay, reconnect, retry or recovery.
+  Pending and Stored are distinct; an acknowledgment of Stored requires
+  durable DB success. History failure cannot alter the outcome or Elo.
+  Preserve bounded release-slot pending work and explicit recovery gaps.
+- **BR-AP13 — Legacy integrity.** Backfill only verified account-bound
+  Ranked rows, with partial/result-only quality where needed. Reuse source
+  keys so new recording and backfill cannot duplicate a game. Never infer
+  old non-ranked ownership from names, IPs or client logs. New non-ranked
+  history begins at feature activation unless later verified data exists.
+- **BR-AP14 — Viewing-only history.** This MVP shows results and personal
+  statistics. Historical entries do not authorize replay/export, editing,
+  deletion, challenge or a retrospective rematch. Current P73 rematch
+  consent and eligibility still come from the live server-issued ticket.
+- **BR-AP15 — Bounded history reads.** Proposed list defaults are 20 rows,
+  maximum 50, with indexed keyset paging; history reads have a separate
+  initial limit of 4 concurrent requests, 2 s timeout and a 32 KiB detail
+  response bound. Reuse the existing journal pattern's 32 KiB entry and
+  32 MiB total limits for the separate history-pending directory. These
+  are initial tunable bounds, not performance guarantees. No automatic
+  history purge is authorized; retention/deletion needs an owner decision.
+- **BR-AP16 — Visibility change and rollout.** Privacy updates commit
+  atomically with a revision and require the expected revision; stale
+  concurrent saves conflict rather than silently restoring public access.
+  New public requests after commit obey the current setting. History and
+  legacy profile routes cannot bypass it through cache/old-slot fallback.
+  Enable only after compatible privacy guards reach all public-serving
+  slots; rollback preserves guards, settings, additive data and journals.
+
+The required [P73 history sub-spec](planning/P73-MATCH-HISTORY.md) defines
+recording, schema, API, security, failure/recovery, UI and H01–H18 acceptance.
+It authorizes only the described account-history persistence/privacy
+extension. No combat, economy, rating formula, authentication lifetime or
+paid infrastructure change is authorized by P73.
+
+## Champion completion — Proposed local preview (CC01–CC17)
+
+**Proposed, owner-authorized 2026-11-01.** Seventeen new conventional kinds
+complete nine champions per Faction. This initial implementation is a local
+Practice/Training preview. The online FULL_POOL keeps its existing 46 kinds;
+COMPLETION_POOL contains 63. Existing units, economy, Shop rules, Evolution
+prices, Synergy and Strongholds retain their values. Initial new numbers are
+hypotheses, not balance-lab results or production acceptance.
+
+Every new champion has one Archetype and four Evolution forms. Base and
+form display names, identity and full visual contracts are in
+[the catalog](champion-completion/catalog.json) and
+[execution phase](phases/CHAMPION-COMPLETION.md).
+
+### Initial base registry
+
+Cost is Energy. Interval is ticks; range and movement are milli-tiles and
+milli-tiles/tick. The four Supports have no damaging basic. Their base heals
+are Lastlight Cantor 36, Mire Tender 34, Dawnmender 34 and Nectar Nurse 12
+per channel pulse. All new values in this section are **Proposed**.
+
+| ID | Champion | Faction / Archetype | Cost | HP | Damage | Interval | Range | Move |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| CC01 | Gravecutter | Undead / DPS | 4 | 300 | 48 | 24 | 800 | 54 |
+| CC02 | Lastlight Cantor | Undead / Support | 3 | 280 | 0 | 32 | 2800 | 40 |
+| CC03 | Cragclaw | Monsters / DPS | 4 | 340 | 44 | 26 | 850 | 50 |
+| CC04 | Hushfang | Monsters / DPS | 4 | 300 | 46 | 24 | 800 | 60 |
+| CC05 | Spinehurler | Monsters / Ranged | 4 | 260 | 42 | 34 | 4200 | 40 |
+| CC06 | Mire Tender | Monsters / Support | 3 | 310 | 0 | 34 | 2700 | 38 |
+| CC07 | Gorgehowl | Monsters / Control | 4 | 330 | 18 | 36 | 1800 | 42 |
+| CC08 | Sunlancer | Celestials / DPS | 4 | 320 | 44 | 24 | 1000 | 52 |
+| CC09 | Eclipse Dancer | Celestials / DPS | 4 | 290 | 42 | 22 | 800 | 56 |
+| CC10 | Starbreaker | Celestials / DPS | 5 | 330 | 58 | 34 | 900 | 44 |
+| CC11 | Dawnmender | Celestials / Support | 3 | 290 | 0 | 32 | 2800 | 40 |
+| CC12 | Prismancer | Celestials / Ranged | 4 | 250 | 32 | 30 | 4000 | 42 |
+| CC13 | Leafcutter | Insects / DPS | 3 | 260 | 34 | 22 | 750 | 56 |
+| CC14 | Blastbeetle | Insects / DPS | 3 | 240 | 32 | 24 | 700 | 58 |
+| CC15 | Needlewing | Insects / Ranged | 4 | 240 | 38 | 30 | 3900 | 48 |
+| CC16 | Nectar Nurse | Insects / Support | 3 | 270 | 0 | 36 | 2600 | 44 |
+| CC17 | Stridulator | Insects / Control | 4 | 310 | 18 | 36 | 1900 | 42 |
+
+### Shared competitive reading
+
+- **CC-C01:** old kind tags remain unchanged; new tags append after Megadrill.
+  Purchases, deployment, Evolution, damage/healing and outcomes stay authoritative.
+- **CC-C02:** no new ability heals a Stronghold or receives special Stronghold
+  damage. Specials, secondary hits, healing triggers and on-death bursts affect
+  units only. Ordinary damaging basics retain ordinary Stronghold targeting.
+- **CC-C03:** all added values are integers. Timed victim families are bounded:
+  one echo, one regrowth and one solar spark. They never stack between copies.
+  Stronger replaces, equal refreshes, weaker is ignored until expiry.
+- **CC-C04:** base attack windup and existing timing remain unchanged. Gorgehowl
+  has an explicit two-tick interrupt windup, not a zero-time cancellation;
+  all other independent new specials use the shared six-tick windup.
+- **CC-C05:** A1 and A2 each add 1500 bp to basic damage (or healing for a
+  Support). B1 adds 300 range; B2 adds 1500 bp attack speed. Ability-specific
+  branch values replace their earlier step; they never sum implicitly.
+- **CC-C06:** one actual basic hit, not animation contact count, advances a
+  striker proc. Stronghold hits, secondary damage, DoTs and betrayal never
+  advance or activate new unit-only procs.
+- **CC-C07:** source death does not erase an applied echo, spark, regrowth or
+  bleed. Normal healing reductions, protections and cleanse policies apply.
+  New public durations, readiness and channel facts reconstruct after reconnect.
+- **CC-C08:** a new local protocol/schema identity accompanies any changed view
+  shape. The current production server is not silently treated as compatible.
+
+Ability parameter registry and focused regression scenarios are recorded with
+the implementation in content/completion.rs and the following execution notes.
+
+### Proposed ability parameters and identity amendment
+
+A/B are the selected branch step (0, 1 or 2). The following values are
+**Proposed** for local testing only. Percentages are integer basis points.
+
+- **CC01:** below 3500 bp victim HP, +3000 + A×1000 bp basic damage.
+- **CC02:** healing leaves one echo of 18 + B×6, lasting 80 ticks.
+  Next nonlethal HP damage consumes it once; it cannot resurrect.
+- **CC03:** every third unit hit sweeps 22 + A×8 damage within
+  900 + B×350 of the primary; at most two other enemies (three at B2).
+- **CC04:** 20 moving ticks charge +5000 + A×1500 bp on the next
+  unit basic. Any Slow/Root clears movement progress and charge.
+- **CC05:** every third unit hit pierces one enemy up to 1600 behind
+  the primary for 6000 + B×1500 bp of static basic damage.
+- **CC06:** each heal leaves 5 + B×3 healing for four pulses, 20 ticks
+  apart. Actual HP damage cancels regrowth; absorbed shield damage does not.
+- **CC07:** ready every 160 − A×20 ticks. Two-tick windup; cancel one
+  still-pending special of the closest legal enemy. Victim immunity lasts
+  80 ticks; Ward and existing control immunity protect it. No basic cancel.
+- **CC08:** every third unit hit leaves a 60-tick solar spark of
+  16 + B×6 damage. Only another conventional ally with printed base
+  range ≤1600 consumes it on a unit basic. Cleanse removes the spark.
+- **CC09:** alternate solar and lunar unit hits. A solar hit against a victim
+  above/equal 5000 bp HP adds 1500 + A×500 bp basic damage; a lunar
+  hit against a victim below that grants 600 + B×300 bp lifesteal from
+  actual enemy HP removed,
+  within the existing combined 1200 bp cap. No shield or Stronghold healing.
+- **CC10:** basic bonus is 400 + A×100 bp of the victim's printed
+  base HP, capped at 50 + A×10. Ordinary mitigation and shields still apply.
+- **CC11:** at heal preparation snapshot up to two enemies within 1200
+  of the patient; each adds 8 + B×2 healing, scaled by healing modifiers.
+- **CC12:** ready every 160 ticks; six-tick windup locks the announced
+  primary coordinate. Deal 45 + A×15 to up to three enemies within
+  800 + B×300 of that fixed coordinate even if the primary dies.
+- **CC13:** basic applies the existing single bleed family, 4 + A damage
+  for three pulses. Producer kind is retained for offline attribution.
+- **CC14:** combat death bursts once for 60 + A×15 damage within 900,
+  at most three enemies. No ally/Stronghold hit or recursive beetle burst.
+- **CC15:** every third unit hit adds 3000 + A×1000 bp if the victim
+  is winding a basic; it never cancels that attack.
+- **CC16:** heal begins a locked patient channel: 4 + B pulses separated
+  by five ticks, first pulse at 10000 + A×3000 bp healing. Remaining
+  pulses retain snapshotted base healing. Root, death, or lost range cancels.
+- **CC17:** ready every 160 − B×20 ticks; six-tick windup applies
+  standard 2000 bp Slow for 30 + A×10 ticks to at most two enemies
+  within 700 of the locked primary. Existing Root priority remains.
+
+Fusion preserves victim echo/regrowth/spark and interruption immunity,
+without inheriting a producer's attack sequence or channel. Strongest
+compatible family survives; remaining duration/pulses are conservatively
+retained. Existing summon limits and targeting rules remain unchanged.
+
+**CC-ID01:** register 68 kinds, preserve the first 51 tags, keep the
+46-kind CANON Shop, and expose 63 conventional kinds only in the local
+preview. Protocol 32 identifies the new public windup/channel/effect shape;
+31 was already used by another local preview. Ruleset revision 3 includes
+the six new gameplay modules in its source identity. Empty completion
+state and bleed producer slots change legacy state checksums, so the
+existing three golden outcome/winner/tick guards must remain intact
+while schema-only hash values are refreshed with observed evidence.
+
+**CC-ID02:** private TrainingScenario validation accepts COMPLETION_POOL,
+not the online Shop pool. All 85 forms can be placed explicitly; summons
+remain rejected. Training still bypasses economy and never sets a match
+outcome. Online intention/admission rules are unchanged.
+
+CC16 Root cancellation clears the authoritative channel immediately, including
+its public reconnect facts; no delayed visual thread survives that Root.
+
+CC-ID01 appends the 68 Proposed Evolution records to the frozen registry
+contract, preserving all 204 pre-existing rows verbatim. Names come from
+the bilingual catalog; numeric deltas follow CC-C05.
+
+
+### CC-ID03 local preview integration — Proposed, owner-selected PR44 baseline
+
+The local CC01–CC17 preview now includes PR44 head `0b56bb4` and its existing
+D-103/P71 rules and laboratory presentation. Preserve the PR's established
+values and the seventeen Proposed additions; this integration does not tune
+balance. Its combined schema/source identity uses wire 33 and ruleset 7,
+with the collision/migration documented in DECISIONS CC-ID03. The online
+FULL_POOL remains 46; local Practice/Training uses 63 conventional kinds.
+No production activation or empirical balance acceptance is implied.
+
+
+CC-ID03 measured identity migration: all three PR44 legacy reference matches
+retained their winner, Stronghold-destruction reason and tick (4044, 9982,
+10382). Empty completion fields change serialized checksums only; revision-7
+references append beside the unchanged revision-2 and revision-6 contracts.
+The additive P73 protocol/history module is explicitly excluded from combat
+source hashing because it contains transport/API schemas, guarded by wire 33.
+
+## Ogre expansion — Proposed OG-01 (owner, 2026-11-01)
+
+The owner requests an eighth Faction, **Ogres**, using the existing SiegeWalker
+identifier/displayed **Ogre Archer / Arqueiro Ogro** and eight new conventional
+champions. The owner also approves a replacement Machine to retain nine per
+Faction in the authored preview roster: **72 conventional champions**, eight
+Factions, nine each. Existing kind and Faction indices are preserved; append
+Ogres after Insects and the nine kinds after Stridulator. Summons never count.
+The private preview pool grows to 72; the established online pool remains 46
+until separate competitive balance acceptance. The public landing catalog
+lists all authored champions and visibly identifies preview-only availability.
+
+**Proposed, explicitly requested range change:** Ogre Archer moves from Machines
+to Ogres and has the Archer's exact range in every form: base 4500, A1/A2 6000,
+B1/B2 4500. Its other stats, splash, Evolution effects, large-unit rules and
+server authority are unchanged. Cosmetic equipment clearance never changes
+collision, targeting, damage or the permitted authoritative lane offsets.
+
+**Proposed Ogre Synergy:** the existing 2/4 living-unit thresholds grant +500/
+1000 bp attack speed, through the existing AttackSpeed effect and caps.
+
+The nine new definitions and all integer ability parameters are in
+`content.rs` and `content/completion.rs`; their bilingual forms and unique art
+briefs are in [the expansion catalog](ogre-faction/catalog.json). These are
+initial proposals, not a competitive balance or deployment claim. Reused typed
+ability primitives retain their unit-only targeting, deterministic ordering,
+caps, server windups and no-resurrection rules.
+
+- Basalt Bulwark: Tank, 740 HP, 34 damage, 32-tick interval, 900 range, 35 speed;
+  unit-only max-HP chip damage capped at 24 (B1/B2 cap +8 per tier).
+- Cinder Maul: Dps, 400/45/30/900/43; every third hit sweeps 20 damage into up
+  to two nearby enemies (A damage +7/tier; B radius +250/tier, B2 third target).
+- Hook Brawler: Dps, 340/40/25/1000/50; +2500 bp unit damage below 30% HP,
+  A branch +1000 bp per tier. No hook displacement is implied by the visuals.
+- Flint Runner: Dps, 300/35/22/800/62; 24 walking ticks charge a +4000 bp next
+  hit, A +1500 bp/tier. No teleportation or client-authored movement.
+- Clay Binder: Control, 360/22/34/3000/36; 20% Slow for 20 ticks on hits;
+  periodic 24-damage earth pulse, 180-tick period, 750 radius, three targets.
+  A period -15/tier; B damage +8 and radius +150/tier.
+- Gust Drummer: Control, 420/20/36/1900/38; 12-tick interrupt windup, 180-tick
+  period, eight-tick lock; A period -15/tier, B lock +2/tier.
+- Hide Mender: Support, 360 HP, zero damage, 32-tick interval, 2800 range,
+  38 speed, 30 heal; four regrowth pulses of 4 at 20-tick gaps, B +2/tier.
+- Pebble Slinger: Ranged, 280/36/28/4100/48; every third-hit opportunity
+  window adds 3000 bp against a foe's hostile windup, A +1000 bp/tier.
+- Rivet Ballista: Machines/Ranged, 290/37/30/4300/40; every third rivet
+  pierces one target within 1200 behind for 4500 bp, B +1000 bp/tier.
+
+All new units cost 2400 Energy subunits except Basalt Bulwark 3000 and Hide
+Mender 1800. All have zero base splash and base heal except Hide Mender.
+A1/A2 add 1500 bp per tier to damage (Tank HP, Support heal); B1 adds 250 range,
+B2 adds 1500 bp attack speed. The standard Evolution rules remain unchanged.
+Basalt chip ratio is 300 bp, A +100 bp/tier. Source values are initial **Proposed**
+local-preview values; D-33 targeted screening and full competitive acceptance
+are recorded separately in the expansion report.
+
+### OG-01 tuning candidate 9 — Proposed, D-33 initial-screen response
+
+The initial non-healer values above are preserved as the ruleset-8 proposal.
+The first bounded D-33 screen found all eight new solo kits losing the three
+reference matchups. Candidate 9 raises their base combat value without changing
+the requested Ogre Archer range, Energy costs, abilities, forms or roster:
+Basalt Bulwark 1080/42/26/900/40; Cinder Maul 420/64/28/900/43;
+Hook Brawler 380/56/24/1000/50; Flint Runner 340/46/20/800/62;
+Clay Binder 380/44/30/3200/36; Gust Drummer 460/32/28/1900/38;
+Pebble Slinger 360/60/22/4100/48; Rivet Ballista 340/65/22/4300/40.
+Order is HP/damage/interval/range/speed. Hide Mender remains unchanged.
+The earth pulse's already-authoritative center is visible in the public facts,
+so its telegraph survives snapshots/reconnects. Drum interruption remains
+special-only and never cancels a basic windup. These values remain Proposed;
+the second targeted screen and limitations are in the expansion report.
+
+## Rolling remedy — Proposed OG-02 (owner, 2026-11-01)
+
+The owner replaces Gust Drummer with **Barrel Keeper / Mestre do Barril**.
+The stable `GustDrummer` id is retained. Its Archetype becomes Support; the
+former interrupt is removed. Ogres deliberately now have two Supports and
+one Control, preserving nine champions. No other Ogre combat kit changes.
+
+Proposed base: cost 2400, HP 460, damage 0, interval **200 ticks / 10 s**,
+range 3000, speed 38, healing 90. The ordinary six-tick heal windup launches
+a finite rolling cask toward the most damaged **other** ally in range. The
+usual attack-speed/Slow interval rules apply; there is no second short heal
+or invisible instant healing at release. A1/A2 each add 1500 bp healing;
+B1 adds 250 range and B2 adds 1000 bp healing, plus normal Evolution growth.
+
+Launch snapshots heal amount, damage, radius, tier/branch and owner. The
+barrel travels at 220 milli-tiles/tick, at most the launch range, in its locked
+one-dimensional direction. Swept contact radius is 180. It collides with the
+first living targetable conventional unit or summon of either seat, excluding
+the caster; distance then unit id resolve ties. It never homes, targets a
+Stronghold or passes through an intervening full-health ally. A missed cask
+expires without healing. A launched barrel survives caster death and is part
+of deterministic replay, seat views and PublicView. Paused combat freezes it.
+
+Any contact bursts healing 90 (snapshot-scaled by form/bonuses) to all living
+allies within 1250 milli-tiles of the collision point, including the caster
+and carried allies in the area. Healing reduction and max-HP clamps apply.
+An intercepting enemy alone takes 8 auxiliary damage; no enemy area damage,
+control, on-hit proc or resurrection. B branch adds 250 radius and 2 damage
+per tier. At most one active barrel per caster. Clients interpolate these
+facts on the same snapshot timeline as units; they never decide collisions.
+The cask carried by the model is hidden during authoritative reload.
+
+## Abyssals and Plant replacement — Proposed AB-01 (owner, 2026-11-01)
+
+Append **Abyssals / Abissais** after Ogres. Move existing **Trident / Tridente**
+from Plants to Abyssals, preserving its id, stats, abilities and Evolutions;
+Faction-dependent bonuses now follow Abyssals. Add **Pod Snapper / Estala-Vagens**
+as the Plants replacement, an authored Ranged champion. The Abyssal roster is
+Trident plus eight new champions: one Tank, three Dps, two Ranged, two Control,
+one Support. Nine new kinds append after RivetBallista; no old tag is reordered.
+The authored private preview has **81 conventional champions, nine Factions,
+nine each**. FULL_POOL stays 46; new kinds are not activated online.
+
+Proposed Abyssal Synergy: the existing Movement effect grants +500/+1000 bp
+at the established 2/4 living-unit thresholds, under the shared movement cap.
+
+Initial base columns below are cost, HP, damage, interval ticks, range,
+movement per tick and healing. Every value is **Proposed**, requiring D-33
+screening and separate competitive acceptance. Form A1/A2 each add 1500 bp
+damage (healing for Foam Weaver), B1 adds 250 range, B2 adds 1500 bp attack
+speed, besides normal Evolution growth. Bilingual forms and art briefs:
+[the Abyssal catalog](abyssal-faction/catalog.json).
+
+- Nacre Duelist: 2400/370/57/22/950/54/0; Opportunity every 3 hits, +3500 bp
+  against a winding basic attack; A +1000 bp/tier.
+- Reef Lancer: 2400/410/58/26/1300/48/0; every 3 hits pierces one enemy
+  within 1000 behind the primary, 4500 bp damage, B +1000 bp/tier.
+- Trench Fist: 2400/480/62/30/850/42/0; unit-only printed-base-HP chip of
+  250 bp, A +100 bp/tier; cap 22, B +8/tier.
+- Pearl Slinger: 2400/350/58/24/4100/48/0; every 3 hits splashes 18 damage
+  to at most two other enemies, radius 650; A +6 damage/tier, B +200 radius/tier.
+- Abyss Harpooner: 2400/360/64/26/4300/42/0; one non-stacking bleed,
+  4 damage ×3 pulses, A +1 damage/tier.
+- Undertow Herald: 2400/420/34/30/2500/40/0; every 170 ticks, Slow 2000 bp
+  for 30 ticks on at most three enemies within 850 of the primary;
+  B -15 period/tier, A +10 duration/tier.
+- Trench Lamplighter: 2400/370/42/30/3300/38/0; announced fixed-center pulse
+  every 180 ticks, 30 damage to at most three enemies within 700;
+  A +10 damage/tier, B +200 radius/tier.
+- Foam Weaver: 1800/340/0/34/2800/42/30; healing leaves a 16-HP echo for
+  70 ticks, consumed by the next nonlethal HP hit; B +6 echo/tier.
+- Pod Snapper (Plants): 2400/390/52/26/3900/40/0; every third hit applies a
+  60-tick non-stacking seed mark: another ally's next melee hit adds 18
+  auxiliary damage, B +6/tier.
+
+All reused typed primitives retain their existing targeting, attribution,
+shared caps and deterministic replacement rules. No new flight, ocean Arena,
+client targeting, stealth, teleport, economy or Shop rule is introduced.
+Wire 35 and ruleset 10 identify the ninth Synergy slot and rolling-cask state.
+
+### AB-01 bounded-screen follow-up — Proposed, supersedes the two initial rows
+
+The initial 108 seat-swapped Energy-20 duels are recorded in
+[balance-initial.csv](abyssal-faction/balance-initial.csv). They are a bounded
+screen, not the competitive gate. Nacre Duelist scored zero against each of
+Shieldbearer, Archer and Longaxe; Pearl Slinger scored one against all three.
+Before native delivery, propose **Nacre Duelist 430 HP, 64 damage, 22 interval,
+1050 range, 54 speed**, and **Pearl Slinger 330 HP, 46 damage, 26 interval,
+4000 range, 48 speed; third-hit splash 14 damage**. Cost remains 2400 each.
+Other AB-01 parameters and the staged-only boundary stay unchanged. Recheck
+only those two kinds against the same three references (12 seat-swapped duels).
+Team compositions, every form/budget, specialist counters and full competitive
+acceptance remain pending; no gate threshold is changed.
+
+The 12-duel follow-up ([raw data](abyssal-faction/balance-follow-up.csv)) gives
+Nacre Duelist score 1 against Shieldbearer and 0 against Archer/Longaxe.
+Pearl Slinger's reduced candidate scores 0 against all three; use the
+intermediate **Proposed final base 340 HP / 52 damage / 24 ticks / 4100 range /
+48 speed**, still cost 2400 and third-hit splash 14. Recheck only Pearl Slinger
+in six seat-swapped duels. This final row supersedes its two starting rows;
+no other new or established champion is retuned by this follow-up.
+
+The final six-duel Pearl Slinger screen
+([raw data](abyssal-faction/balance-final.csv)) scores 1 against Shieldbearer
+and Longaxe and 0 against Archer. Other initial candidates and Trident's
+before/after transfer retain their original screen records. These bounded
+results justify the two initial proposals only; they do not establish full
+team/form/budget balance. The final proposal is revision 10, source hash
+`523044fc973bac39`; canonical trace validation pins that exact identity.
+
+
+## TW-01 / PK-01 / GD-01 — Proposed owner revision (2026-11-02)
+
+Owner authorizes stronger Strongholds and Fortifications, width-limited
+BattleLine occupancy, and Gods with one gigantic Colossus. These proposals
+supersede conflicting earlier numeric rows. Competitive acceptance remains
+subject to D-33; the bounded screen is not the full gate.
+
+**TW-01.** Reference Stronghold HP 6750 and damage 159 (formerly 4500/53).
+Printed base HP/damage by kind: Classic 6750/159, Treasury 6277/144,
+Bastion 7762/141, Artillery 5737/174, Command 6480/144. HP is +50%, truncated
+to integer, and damage is exactly triple each former printed value.
+Fortification costs become 3600 then 6000 sub-Energy (6 then 10 Energy).
+Existing branch lock, proportional HP rescaling and maximum tier 2 remain.
+
+- Treasury: 270 sub-Energy per eligible kill, cap 1080 per existing 200-tick
+  window; A +2500 HP bp per step; B +90 spoils per step and +540 cap at B2.
+- Bastion: 1500 bp incoming damage reduction, before shields; A +3000 HP bp
+  and +500 armor bp per step; B1 +1500 range, B2 +3000 damage bp.
+- Artillery: primary shot also damages at most three other living enemies
+  within 1000 milli-tiles, sorted by distance then ID, for 4000 bp of shot
+  damage. A +4000 damage bp and +2000 splash bp per step. B intervals 14/10
+  ticks. No friendly splash; collateral conventional kills count toward the
+  existing Tower Fury cap/duration. Zero configured tower damage means no fire,
+  including the D-33 duel Arena. It never becomes a one-damage shot.
+- Command: aura 1500 bp in 5000 milli-tiles; A +750 aura bp per step;
+  B +1500 aura radius per step. Existing eligibility and additive caps remain.
+
+**PK-01 activation.** Physical lanes are a private Practice/Training and
+explicitly opted-in lab candidate. Long-running preview bot probes exposed
+persistent stalemates, so competitive canonical matches keep legacy movement
+and presentation until D-33 acceptance. This flag is server-owned and public
+in both views; no PlayerIntention can enable it. The entire roster is
+covered in the local preview. Do not claim ranked activation or completed
+competitive acceptance.
+
+**PK-01.** The BattleLine has 5000 milli-tiles of usable lateral width,
+with a matching 5.08-tile path. Fifty integer columns of 100 reserve
+champion body, arms and held equipment. The normative per-kind base profile
+is [content/occupancy.rs](../crates/tbg-core/src/content/occupancy.rs), derived
+from the [native mesh measurements](colossus-fortifications/native-footprints.json)
+over all five forms, Idle/Walk/attack, 16 samples and six front/rear/lateral
+aim cases. Each measured bound is rounded up to 50 milli-tiles with 100 extra
+clearance; tier growth is 8% per tier. Profiles wider than the corridor occupy
+all columns and cannot be passed; their visuals may extend beyond the path.
+This conservative weapon envelope bounds dense ranged rows (two base Archers;
+capacity also depends on tier and mixed widths). A three-tile initial candidate
+blocked ranged units behind idle Supports and did not finish the bounded bot
+probe; five tiles permits those bypasses while retaining physical capacity.
+
+Capacity at a longitudinal position is the set of non-overlapping column
+reservations, not an Archetype quota or a global army cap. Same-seat following
+spacing is follower front + leader back + 100; opposing body separation is
+both body half-lengths +100. Ordinary unit reach stays root-based, with a floor at the two body
+half-lengths plus the 100-milli-tile contact gap. This lets a short melee
+attack hit touching bodies without adding free reach to ranged attacks or
+heals. Stronghold reach stays root-based. Existing
+combat targets and area radii remain longitudinal; lateral columns govern
+occupancy and passage, not a new two-dimensional targeting game.
+
+Prefer existing placed units, then front-to-back progress, seat, and stable
+ID. Preserve slots while stationary. A bypass needs a clear swept lateral
+strip, moves at most one column per tick and locks for 20 ticks on completion
+or a blocked transition. The server supplies lateral position in UnitView;
+clients interpolate it on the same snapshot timeline and apply no second
+live repulsion solver. Stress tools retain their separate cosmetic solver.
+
+Paid purchases and summons with no room wait in a deployment queue; do not
+discard them, attack, heal, block, generate Synergy or tick their action
+cooldowns while waiting. Summon expiry still advances on the combat clock.
+New births first try the base anchor. If a stationary backline blocks it,
+choose the nearest free footprint in the owner's first third of the
+BattleLine (endpoint 5333 for Seat A, mirrored for Seat B), without appearing
+beyond a living hostile front. This changes only a new unit's initial
+materialization, never teleports a deployed unit. Wait if that zone is full.
+Release them deterministically when room opens. Only the owner's queued
+count is exposed; queued identities and the enemy count are private. Training
+and the balance duel's elimination/HP accounting include waiting units.
+The Practice bot prefers Fortification/Evolution while its own entrance has
+a queue; after those upgrades it seeks narrow attackers that can use free
+strips and can attack a Stronghold. This is opponent policy, not a restriction
+on player purchases.
+An Evolution that cannot fit while preserving every deployed ally is rejected
+with LaneFull before spending Energy. A forced displacement that leaves no
+legal projection currently retains the active unit targetable; resolving all
+teleport/displacement congestion is a documented remaining limitation.
+
+Rolling-cask damage, collision and healing retain OG-02 longitudinal rules.
+Their immutable launch origin/target and exact lateral burst coordinate are
+public presentation facts so the rendered cask starts at its carrier and
+meets the actual contact lane; clients decide no hit or heal.
+
+**GD-01.** Append Gods (Deuses), currently exactly one conventional champion,
+Colossus (Colosso), Tank: cost 10800 sub-Energy = **18 Energy**, HP **2400**,
+damage **170**, interval **110 ticks**, range **4500**, movement **22**
+milli-tiles/tick, full-damage frontal splash **1800**. Base damage is exactly
+2x SiegeWalker and range equals its corresponding form. The obelisk is one
+real prop, carried vertically on the back, drawn and slammed in the attack
+direction. Splash excludes enemies behind the attacker relative to that hit.
+
+- A1 Sun Obelisk / Obelisco Solar: +2500 damage bp, +1500 range.
+- A2 Pillar of Dawn / Pilar da Aurora: +600 splash radius.
+- B1 Ancient Monolith / Monólito Ancestral: +3000 HP bp.
+- B2 Eternal Monument / Monumento Eterno: another +3000 HP bp.
+
+Existing Evolution common bonuses/costs apply. Gods has no Synergy bonus
+while its roster has only one kind. It cannot ride a Cargo Crab (Tank).
+The private authored roster becomes **82 champions / 10 Factions**: nine
+Factions of nine and Gods of one; FULL_POOL remains 46. New Gods content is
+Practice/Training preview only. Team identity stays on foot rings, with no
+body plaques or seat recoloring. Wire **36**, gameplay revision **11** identify
+the new layout/rules; older enum indices and historical fixtures are retained.
+
+
+TW-01 canonical trace identity: revision 11, source `a0a1d508c59e5841`.
+The exact tower boost changes bot outcomes/ticks; append the observed five
+canonical trace fixtures without changing any historical entry. Physical
+lanes remain false in this baseline and true in the private PK-01 scenarios.
+
+
+GD-01 bounded tuning: the first 3600-HP/70-tick candidate won all eight base
+reference duels at Energy 18 and all eight evolved counter duels at Energy 24.
+The 2400-HP/70-tick follow-up still won the eight evolved cases. The final
+Proposed candidate is **2400 HP, 110-tick interval (5.5 s)**; the owner-fixed
+18-Energy cost, 170 damage and Ogre Archer range stay intact. In the bounded
+Energy-24 base panel, Sawbot, Farwatch and Mantis beat it on both seats;
+Ravager loses. All four evolved reference forms still lose at that budget.
+This identifies initial counterplay, not full team/form/budget acceptance.
+Raw measurements and scope are in [the report](phases/COLOSSUS-FORTIFICATIONS-PACKING.md).
+
+TW-01 / GD-01 Proposed contract migration: revision 11 pins the 6750/159
+reference tower, 6/10-Energy Fortification, stronger branch/passive values and
+Gods' zero-bonus Synergy row. Historical D-46 assertions stay in the contract
+files behind their legacy revision path; unchanged ownership, spending,
+window, aura timing and proportional-rescaling assertions still apply.
+
+TW-01 opponent policy: once the existing six-unit preference threshold is
+reached, a Practice bot with an unfinished selectable Stronghold saves the
+actual next Fortification price before buying more troops. Classic matches
+are unchanged by this policy. This is a bot spending preference, never a
+player purchase restriction or a changed Fortification price.
+
+PK-01 lab boundary: ordinary lab placement hooks do not change the physical-lanes
+flag. Canonical duel matrices and gates retain canonical movement; the
+Colossus candidate screen explicitly calls the preview duel path. This keeps
+offline canon equivalent to online canon while the private proposal is tested.
+
+
+## RESTORE-01 — Proposed owner correction (2026-11-02)
+
+Supersedes PK-01 activation. The owner rejected physical passage blocking and
+waiting purchases after observing stationary armies and delayed pieces.
+Restore legacy movement in all normal constructors, including private Practice
+and Training: purchases spawn immediately, allies do not block authoritative
+progress, and Evolution never waits for footprint capacity. Keep the five-tile
+BattleLine floor, every TW-01 tower value/ability and all Gods content.
+The rejected PK-01 experiment remains explicit lab-only for historical tests;
+it must not be enabled by Practice, Training or placement hooks.
+
+Crowd separation is presentation only. Keep old pushing/overtaking and existing
+longitudinal offset bounds. Use 2.1 tiles of lateral centre clearance on the
+wide floor, a 60 Hz cosmetic solver (at most two catch-up steps), stable
+anchor/ID pair ordering, 12/s offset easing, 4 tiles/s maximum cosmetic offset
+travel and a 0.002-tile stationary deadband. New figures appear immediately;
+only cosmetic displacement is eased, never authoritative movement. Aim envelopes
+expand clearance without shifting the sort anchor. These are presentation
+parameters and cannot change attacks, outcomes, Energy or unit entry.
+Ruleset 12 identifies the changed preview default; wire 36 layout is preserved.
+Canonical replay checksums/outcomes remain those of revision 11.
+
+
+## RESTORE-02 — Proposed exact movement restoration (2026-11-02)
+
+The owner rejects RESTORE-01 cosmetic easing as well. Supersede its fixed-step,
+stable-anchor ordering, expanded aim-anchor envelope and extra display smoothing.
+Restore the pre-PK-01 client pushing/overtaking solver and direct display offset
+application exactly, changing only lateral centre clearance from 1.1 to 2.1 tiles
+to use the retained five-tile BattleLine. Preserve immediate deployment and
+authoritative legacy advancement in every normal mode. No passage capacity or
+waiting queue is reintroduced. This is presentation-only; wire/ruleset identity,
+towers and champion balance remain unchanged.
+
+## ARENA-CLEAR-01 — Proposed decorative clearance (2026-11-02)
+
+Keep the existing five-tile BattleLine and its paved border. Move arena dressing
+outside that complete road rectangle in every Arena; do not narrow it to fit
+scenery. Fire and animated cloth must share their actual pedestal/fence origins.
+Move compound props from their authored origins so geometry, glow and attachments
+stay together. Stronghold-attached banners remain part of the Stronghold.
+
+
+## GD-02 — Proposed Colossus arm clearance (2026-11-02)
+
+Use the Colossus form's measured body/arm/hand/equipment envelope in the existing
+cosmetic crowd solver, including current facing and Evolution scale. The same
+equipment selector must govern cached measurement and live crowd participation.
+Keep RESTORE-02 direct pushing, the five-tile floor and immediate purchases; this
+visual clearance must never enable physical queues or block authoritative advance.
+No Colossus stats, damage, range or cost change.
+
+
+## SIDE-01 — Proposed fixed blue/red sides (2026-11-02)
+
+Owner-approved: the server independently assigns the paired participants to
+Seat A (blue, left Stronghold, advancing right) and Seat B (red, right Stronghold,
+advancing left), with equal probability, regardless of queue arrival order.
+Apply to Ranked, Casual, private rooms/invitations and each fresh rematch.
+The existing connection-bound seat owns commands and outcomes. Freeze it for
+the match, including reconnection, summaries, spectators, replay and Elo.
+Pair selection and rating calculations are unchanged.
+
+All desktop players and spectators share the same blue-left/red-right camera
+and world coordinates. The red player controls the right Stronghold; ownership
+is separate from world side/color. Body art stays intrinsic, affiliation only
+in foot rings and interface. Show the player's localized side alongside Arena
+and in its introductory banner; spectators see a neutral blue/red legend.
+
+Local Practice draws the human side from an independent seeded stream and puts
+the bot on the opposite seat. Human Arcanas/Stronghold, private views, commands
+and result interpretation follow the assigned seat. Existing disclosed Impossible
+bot assistance uses the bot's own balance/seat. Editor Training layouts retain
+their authored ally/enemy arrangement. No unit/Stronghold balance, Shop, economy,
+world width, pushing or selection order changes.
+
+## RESTORE-03 — Proposed departure formation restoration (2026-11-02)
+
+The owner's correction concerns lateral departure before contact, not passage
+blocking. Preserve the original preferred lateral formation scale of 1.1 while
+retaining the widened road's 2.1 centre boundary. Extra road room is available
+for actual contact/overtaking; it must not itself double birth/preferred offsets.
+Keep the original separation, return motion, body/weapon clearance and immediate
+authoritative advancement. No physical queue, capacity gate or extra smoothing.
+
+## R13 — Proposed source-identity maintenance (2026-11-02)
+
+Register ruleset 13 / `b66993d9e87a9cfc` for equivalent integer divisibility syntax
+required by the pinned compiler lints. Keep every value, outcome branch,
+wire tag and summary version from revision 12. This is source maintenance,
+not an additional balance adjustment or full D-33 acceptance.
+
+## INT-01 — Proposed consolidation of existing TW-01 / GD-01 contracts (2026-11-02)
+
+R13 keeps the exact R12 tower values and traces. Extend the explicit revision
+selectors and append its canonical C2 traces; retain all historical rows. The
+registered roster is 87 kinds (82 conventional, five summons), including Gods/
+Colossus and its four Evolution forms. FULL_POOL remains 46. These are existing
+TW-01/GD-01 values, not another activation or balance change.
+
+CC-ID03's old PR44 tick/winner fixtures describe the period before TW-01. Append
+R13's already registered TW-01 outcomes/ticks instead of claiming stronger towers
+preserve old combat. Unit-ability fixtures isolate towers where tower damage is
+not their subject; carrier-protection fixtures keep the carrier alive throughout
+their sampling window. The Furnace multiplier fixture retains its explicit old
+53-damage incoming shot only to measure the unchanged 36-damage hit and 26-HP burn.
+The Shop-enabled-but-unused comparison keeps the same canonical pool on both
+sides; the private preview's deliberate 82-champion pool is a separate feature.
+No new competitive number, rule, source identity or online-roster activation is
+introduced by this reconciliation. D-33 acceptance remains separate.
+
+## GD-04 — Proposed Gods expansion: Volthar and Astreon (2026-11-02)
+
+Owner request, values **Proposed** (D-33 acceptance pending). Append two Gods
+champions after Colossus to the local Practice/Training preview pool (84 kinds);
+FULL_POOL stays 46 and online canon is unchanged. Every form row changes only
+the champion's ability; Evolution costs and stat contracts are the common ones.
+Gods keeps its zero-bonus Synergy row (BR-Y02): a Gods Synergy is an owner
+decision, not part of this phase. Ruleset **14** / `f354f651c056d615`, wire **37**.
+
+**Volthar — Deus da Tempestade (Storm God)**, Ranged, 12 600 sub-Energy
+(**21 Energy**), HP **2200**, damage **130**, interval **30 ticks** (1.5 s),
+range **5500**, movement **35** milli-tiles/tick (0.7 tile/s), no splash.
+
+*Storm Judgment / Julgamento Elétrico.* Each Volthar counts its own completed
+basic hits on enemy units (Stronghold hits never count, never reset). The fourth
+resets the count and starts one discharge from the primary: up to `jumps` links,
+each to the nearest living targetable enemy unit within `radius` of the previous
+link (longitudinal distance, ties by lower id), never one already struck, never
+an ally, never a Stronghold. Each link deals its share of static basic damage as
+auxiliary damage (damage reduction and shields apply; no basic-hit hooks, no
+lifesteal, no further discharge). The chain stops when no link qualifies. A link
+killed by its jump still anchors the next one.
+
+| Form | Jumps | Radius | Shares (bp of basic) | Trigger hit | Extra |
+|------|-------|--------|----------------------|-------------|-------|
+| Base | 3 | 2200 | 7000 / 5000 / 3500 | — | — |
+| A1 Storm Herald / Arauto da Tempestade | 4 | 2200 | 7000 / 5000 / 3500 / **2500** | — | — |
+| A2 Celestial Sovereign / Soberano Celestial | 4 | 2800 | 8000 / 6000 / 4500 / 3500 | — | — |
+| B1 Hammer of Wrath / Martelo da Ira | 3 | 2200 | 7000 / 5000 / 3500 | +3500 bp | — |
+| B2 Divine Tempest / Tempestade Divina | 3 | 2200 | 7000 / 5000 / 3500 | +5500 bp, Root 10 ticks | 3000 bp to ≤ 2 |
+
+The A1 fourth share (2500) is an agent proposal: the request named four links
+but only three shares. B1/B2 add their trigger share once to the primary, before
+situational percentages (BR-X01); B2 replaces B1. B2's Root uses the ordinary
+on-hit path (ward and control immunity block it). B2's extra discharge picks
+the nearest living enemies to the primary within 2200 that the chain missed.
+
+**Astreon — Deus da Ruptura (Rupture God)**, DPS, 13 800 sub-Energy
+(**23 Energy**), HP **1900**, damage **190**, interval **40 ticks** (2 s), range
+**2200** (spear reach between melee and Ranged), movement **37** milli-tiles/tick
+(0.74 tile/s; 0.75 is not an integer per tick), no splash.
+
+*Verdict Lance / Lança do Veredito.* Each Astreon tracks completed basic hits
+on one marked enemy unit. A hit on another unit restarts the sequence at one; a
+windup on anything but the marked unit, a Stronghold hit or the marked unit's
+death clears it. On the `every`-th consecutive hit the basic hit adds
+`min(max_hp × share, cap)` of the target's **max HP** after offensive percentages
+and before damage reduction and shields (not true damage), then the sequence
+restarts. B forms add an execution share of static basic damage on that same hit
+when the target's HP is below 40 % of its max HP at hit resolution (BR-X11).
+No splash, lifesteal or control immunity is added.
+
+| Form | Every | Max-HP share | Cap | Below 40 % |
+|------|-------|--------------|-----|------------|
+| Base | 4 | 500 bp | 240 | — |
+| A1 Giant Piercer / Perfurador de Gigantes | 3 | 500 bp | 240 | — |
+| A2 Primordial Lance / Lança Primordial | 3 | 700 bp | 300 | — |
+| B1 Final Sentence / Sentença Final | 4 | 500 bp | 240 | +3500 bp |
+| B2 Absolute Verdict / Veredito Absoluto | 4 | 500 bp | 240 | +6000 bp (replaces B1) |
+
+Presentation: the server emits a public `StormArc {unit, from, to, jump}` per
+link (jump 0 = B2 extra) and the existing `AbilityResolved`; clients only draw
+them. Both counters share the existing public per-kind progress bits; every
+other system (Synergy rows, Arcanas, Augments, Interest, Shop, Evolution costs,
+Strongholds, carry rules) applies unchanged. Smuggler cargo keeps its pre-GD-04
+draw table: Volthar and Astreon never come out of a crate, so canonical online
+matches and their traces are identical to revision 13. PK-01 lab footprints are authored
+provisionally until the native mesh export measures the new forms.
+
+
+## P74 — Proposed War Auxiliaries (`Mineiro` & `Mercador`, 2026-11-02)
+
+War Auxiliaries are off-lane economic and shop specialists hired with `Energy`
+during `Phase::Running`. They occupy two dedicated HUD slots in the bottom-right
+panel, separate from the five conventional `Shop` offers, and appear as animated
+low-poly 3D precincts and figures behind each seat's `Stronghold` outside the
+`BattleLine`.
+
+- **BR-AX01 (Slots & Availability, Proposed):** Both seats have two fixed
+  auxiliary slots (`0 = Miner / Mineiro`, `1 = Merchant / Mercador`), starting
+  in `AuxiliaryPhase::Available`.
+- **BR-AX02 (Hiring Authority, Proposed):** `PlayerIntention::HireAuxiliary { slot }`
+  is valid only during `Phase::Running` when no Augment round is open, `slot < 2`,
+  the slot is `Available`, and the seat has enough `Energy`.
+- **BR-AX03 (Single Hire per Match, Proposed):** Each auxiliary can be hired at
+  most once per seat per match (`Available -> Preparing -> Active -> Completed`);
+  repeat attempts return `Rejection::AuxiliaryAlreadyHired`.
+- **BR-AX04 (Miner Cost & Preparation, Proposed):** Hiring `Mineiro` (slot `0`)
+  costs `6` `Energy` (`3_600` sub-energy) and enters `Preparing { ticks_left: 240 }`
+  (`12 s` at `20 Hz`).
+- **BR-AX05 (Miner Active Production, Proposed):** When preparation finishes,
+  `Mineiro` enters `Active { ticks_left: 3_600, .. }` (`180 s`) and generates
+  `+0.06` `Energy`/s (`36` sub-energy/s) via exact integer Bresenham steps
+  (`(elapsed * 36) / 20 - ((elapsed - 1) * 36) / 20`), yielding `6_480`
+  sub-energy (`10.8` `Energy` gross, `+4.8` `Energy` net) before entering
+  `Completed`.
+- **BR-AX06 (No Interest Multiplier on Miner Output, Proposed):** `Mineiro`
+  production is added after `regen_energy()` and is never multiplied by
+  `InterestRule::regen_bp`.
+- **BR-AX07 (Merchant Cost & Activation, Proposed):** Hiring `Mercador` (slot `1`)
+  costs `4` `Energy` (`2_400` sub-energy) and enters
+  `Active { ticks_left: 0, progress: 0, activations_used: 0 }` immediately.
+- **BR-AX08 (Post-Hire Purchase Counter & Free Rerolls, Proposed):** Only
+  conventional champion purchases (`PlayerIntention::Purchase { offer }`) made
+  after hiring `Mercador` increment `progress`. Every `3` purchases reset
+  `progress` to `0`, increment `activations_used`, grant `+1` `free_rerolls`
+   to the seat, and emit `Event::AuxiliaryTriggered { seat, kind: Merchant }`.
+- **BR-AX09 (Free Reroll Consumption & Streak Preservation, Proposed):** While
+  `free_rerolls > 0`, `shop::reroll_cost` returns `Some(0)` and `Reroll { cost: 0 }`
+  consumes one free reroll without spending `Energy` or incrementing
+  `reroll_streak`.
+- **BR-AX10 (Merchant Cap, Proposed):** After `3` activations (`9` post-hire
+  champion purchases), `Mercador` enters `AuxiliaryPhase::Completed`; any unspent
+  `free_rerolls` remain usable.
+- **BR-AX11 (Public Precinct Visibility, Proposed):** Both seats' `AuxiliarySlotView`
+  states and `Event::{AuxiliaryHired, AuxiliaryTriggered}` are public in
+  `MatchView` and `PublicView` so both players and spectators see the 3D
+  precincts, construction animations, and Merchant Caravel ship; `free_rerolls`
+  remains private to the owning seat's `MatchView`.
+
+## INT-06 — Proposed P74/GD-04 consolidation contract (2026-11-02)
+
+The owner requested one integrated delivery of P74 and GD-04. War Auxiliary
+prices, preparation, production, purchase counts and activation caps remain
+exactly BR-AX01–BR-AX12; Volthar/Astreon remain in the 84-unit local preview
+and FULL_POOL stays 46. Wire 38 carries the combined public auxiliary phases,
+private free-reroll balance/quote and StormArc events. R15 includes auxiliary
+state in deterministic hashes and replay serialization; no phase or currency
+may disappear after a roundtrip. These repairs introduce no new balance value.

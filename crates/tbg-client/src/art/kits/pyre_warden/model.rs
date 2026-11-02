@@ -78,46 +78,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             OAK,
             [0.0, -0.06, 0.05],
         ),
-        part(Body(Chest), Cyl(0.059, 0.014), BRASS, [-0.09, 0.25, 0.112]).rot([90.0, 0.0, 0.0]),
-        part(Body(Chest), Cyl(0.045, 0.014), LINEN, [-0.09, 0.25, 0.124]).rot([90.0, 0.0, 0.0]),
-        part(
-            Body(Head),
-            Bevel(0.22, 0.065, 0.24, 0.012),
-            RED_CLOTH,
-            [0.0, 0.11, 0.0],
-        ),
-        part(
-            Body(Hips),
-            Frustum(0.16, 0.21, 0.24),
-            CHARCOAL,
-            [0.0, -0.11, -0.025],
-        )
-        .scale([1.0, 1.0, 0.72]),
-    ]);
-    let bore = muzzle(f);
-    v.extend([
-        part(
-            Prop(Socket::WeaponR),
-            Cyl(0.047, 0.012),
-            DARK,
-            bore.to_array(),
-        )
-        .rot([90.0, 0.0, 0.0]),
-        part(
-            Prop(Socket::WeaponR),
-            Ring(0.012, 0.055, 360.0),
-            BRASS,
-            bore.to_array(),
-        )
-        .rot([90.0, 0.0, 0.0]),
-        part(
-            Prop(Socket::WeaponR),
-            Cyl(0.022, 0.014),
-            FLAME_ORANGE,
-            (bore + Vec3::Z * 0.008).to_array(),
-        )
-        .rot([90.0, 0.0, 0.0])
-        .glow(),
+        part(Body(Head), Box(0.20, 0.055, 0.22), IRON, [0.0, 0.11, 0.0]),
     ]);
     for s in [-1.0, 1.0] {
         v.push(

@@ -64,12 +64,6 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             [0.0, 0.01, -0.16],
         ),
         part(
-            Secondary(Spring::Back),
-            Box(0.24, 0.36, 0.018),
-            LINEN,
-            [0.0, 0.02, -0.18],
-        ),
-        part(
             Prop(Socket::WeaponR),
             Cyl(0.022, 0.90),
             GOLD,

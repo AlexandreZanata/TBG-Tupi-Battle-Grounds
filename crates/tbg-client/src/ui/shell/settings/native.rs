@@ -15,6 +15,11 @@ pub fn spawn(
     assets: &AssetServer,
 ) {
     controls::heading(root, assets, lang);
+    root.spawn(kit::button(
+        lang.key("p73.my_history"),
+        UiAction::OpenMyHistory,
+        260.,
+    ));
     // The native resume record (P66) lives in the OS vault; the browser has none.
     #[cfg(not(target_arch = "wasm32"))]
     if !crate::platform::resume::available() {

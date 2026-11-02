@@ -1,0 +1,23 @@
+{
+  "installed": {
+    "installed": "/home/iiii/.local/opt/tupi-battle-grounds-champion-preview/0.1.4-colossus.1-a1f6446ce601",
+    "launcher": "/home/iiii/.local/bin/tbg-champions",
+    "desktop": "/home/iiii/.local/share/applications/tbg-champions-preview.desktop",
+    "version": "0.1.4-colossus.1",
+    "source_commit": "a1f6446ce60153589e95bd4edde263e18faeba26",
+    "binary_sha256": "5c5f3d6b9f87813de746a12ce03171e6ed8387a4fedb62662f085cf0a7a582f7"
+  },
+  "build": {
+    "contract": "w36-r11-a0a1d508c59e5841",
+    "features": [],
+    "profile": "debug",
+    "protocol": 36,
+    "source_commit": "a1f6446ce60153589e95bd4edde263e18faeba26",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "0.1.4-colossus.1"
+  },
+  "verified_asset_count": 380,
+  "verified_binary_sha256": "5c5f3d6b9f87813de746a12ce03171e6ed8387a4fedb62662f085cf0a7a582f7",
+  "packaging": "cached debug build; strip --strip-unneeded; no release build",
+  "visual_parity": "Windows/game-web pending"
+}

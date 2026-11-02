@@ -22,6 +22,7 @@ fn capture(
     state: Res<State<GameState>>,
     shell: Res<Shell>,
     catalog: Res<Catalog>,
+    loading: Res<crate::ui::native_loading::Status>,
     time: Res<Time>,
     mut queue: ResMut<Requests>,
     window: Single<&Window>,
@@ -29,11 +30,11 @@ fn capture(
     mut started: Local<Option<f32>>,
     mut done: Local<bool>,
 ) {
-    if *done || *state.get() != GameState::Menu {
+    if *done || *state.get() != GameState::Menu || !loading.boot_ready || loading.scene_waiting {
         return;
     }
     let name = config::url_param("unit").unwrap_or_default();
-    let Some(unit) = tbg_core::FULL_POOL
+    let Some(unit) = tbg_core::COMPLETION_POOL
         .into_iter()
         .find(|kind| format!("{kind:?}") == name)
     else {
@@ -45,13 +46,24 @@ fn capture(
             .unwrap_or(0)
             .min(max)
     };
+    let tab = match config::url_param("troops_tab").as_deref() {
+        Some("practice") => Tab::Practice,
+        Some("editor") => Tab::Editor,
+        _ => Tab::Catalog,
+    };
+    let clip = match config::url_param("troops_clip").as_deref() {
+        Some("walk") => Clip::Walk,
+        Some("attack") => Clip::AttackMelee,
+        Some("victory") => Clip::Victory,
+        _ => Clip::Idle,
+    };
     let form = (number("tier", 2), number("branch", 1));
     let Some(start) = *started else {
         queue.0.extend([
-            Action::Open(Tab::Catalog),
+            Action::Open(tab),
             Action::Select(unit),
             Action::Form(form.0, form.1),
-            Action::Clip(Clip::Idle),
+            Action::Clip(clip),
         ]);
         *started = Some(time.elapsed_secs());
         return;
@@ -60,6 +72,7 @@ fn capture(
         || shell.panel != Panel::Troops
         || catalog.selected != unit
         || catalog.form != form
+        || catalog.tab != tab
     {
         return;
     }
@@ -67,6 +80,7 @@ fn capture(
         return;
     };
     *done = true;
+    eprintln!("Loading capture: boot_ready={}, scene_waiting={}, pending_images={}, pending_texts={}, failed_images={}", loading.boot_ready, loading.scene_waiting, loading.images, loading.texts, loading.failed);
     eprintln!(
         "P70 Troops: unit={unit:?}; form={form:?}; clip={:?}; viewport={}x{}; dpi={}; camera={:?}",
         catalog.clip,

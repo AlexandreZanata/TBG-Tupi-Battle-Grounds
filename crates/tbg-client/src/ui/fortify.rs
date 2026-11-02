@@ -281,12 +281,12 @@ mod tests {
     #[test]
     fn phone_text_names_the_next_step_and_its_price() {
         let v = view(1, 0, 0);
-        assert_eq!(choice_text(&v, 0, Lang::En), "A Great Cannon | 4 Energy");
+        assert_eq!(choice_text(&v, 0, Lang::En), "A Great Cannon | 10 Energy");
         assert_eq!(title(own(&v), Lang::En), "Artillery T1 Heavy Cannon");
         // P64: same tier and price in Portuguese; the record keeps the id.
         assert_eq!(
             choice_text(&v, 0, Lang::PtBr),
-            "A Grande Canh\u{E3}o | 4 de Energia"
+            "A Grande Canh\u{E3}o | 10 de Energia"
         );
         assert_eq!(
             title(own(&v), Lang::PtBr),

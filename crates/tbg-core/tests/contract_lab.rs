@@ -133,6 +133,70 @@ fn c2_per_tick_traces_are_frozen() {
             (1000, 0x691f7d391aeaf998, 0x5916e7f9018b83fd, 8869),
             (65535, 0x3a8c4b25c812f504, 0xac5524f22bc861e9, 8613),
         ],
+        // OG-01: explicit canonical trace for the requested Ogre revision.
+        (8, 0x3d07d8f3e73671ef) => [
+            (1, 0xb28190b76fda00fb, 0xdc6ddee0ab7abe7e, 4044),
+            (7, 0x1c8f1dee7e671e96, 0x981a89b67d681f3d, 9982),
+            (42, 0x7cf4b2ac39262edd, 0x750b2a389290829d, 10382),
+            (1000, 0x2f5fcbb3660cdd4c, 0xc80e2d0725d28b4d, 8869),
+            (65535, 0x322f254d7eb09476, 0xa8b07cb5b9434daf, 19759),
+        ],
+        // OG-01 candidate 9 changes staged kinds only; canonical traces remain frozen.
+        (9, 0x89698dcd4bcb5ddd) => [
+            (1, 0xb28190b76fda00fb, 0xdc6ddee0ab7abe7e, 4044),
+            (7, 0x1c8f1dee7e671e96, 0x981a89b67d681f3d, 9982),
+            (42, 0x7cf4b2ac39262edd, 0x750b2a389290829d, 10382),
+            (1000, 0x2f5fcbb3660cdd4c, 0xc80e2d0725d28b4d, 8869),
+            (65535, 0x322f254d7eb09476, 0xa8b07cb5b9434daf, 19759),
+        ],
+        // AB-01/OG-02: appended state layout and unchanged established trace behavior.
+        (10, 0x523044fc973bac39) => [
+            (1, 0xc3480c1818db1fbd, 0x4b854f968429a97c, 4044),
+            (7, 0x06a09918e8635c48, 0x70c562418d530b55, 9982),
+            (42, 0x704873a9ca6f4feb, 0xcea96d41f552661d, 10382),
+            (1000, 0x1aac595c5725aaba, 0xfe7914eff893639d, 8869),
+            (65535, 0x5212bdb98903fc74, 0x8279f6a0fad3e661, 19759),
+        ],
+        // TW-01/PK-01/GD-01: exact tower candidate, with physical lanes staged privately.
+        (11, 0xa0a1d508c59e5841) => [
+            (1, 0x7d33b1664f3b9824, 0xae47594e85732bbc, 16625),
+            (7, 0x84d4030142b4f1c5, 0x34994c75252c5c39, 14265),
+            (42, 0x92d4133c4f4351b1, 0xec212d8ee38450d7, 23274),
+            (1000, 0x8598d51bed033353, 0x8a17aae489e3424a, 58307),
+            (65535, 0x1045dd3c5fc0a20f, 0x2f93bf36167ed04e, 24291),
+        ],
+        // RESTORE-01: canonical behavior unchanged; only private constructors restore legacy movement.
+        (12, 0x8f5a8ebb3e4f88ec) => [
+            (1, 0x7d33b1664f3b9824, 0xae47594e85732bbc, 16625),
+            (7, 0x84d4030142b4f1c5, 0x34994c75252c5c39, 14265),
+            (42, 0x92d4133c4f4351b1, 0xec212d8ee38450d7, 23274),
+            (1000, 0x8598d51bed033353, 0x8a17aae489e3424a, 58307),
+            (65535, 0x1045dd3c5fc0a20f, 0x2f93bf36167ed04e, 24291),
+        ],
+        // R13 / INT-01: equivalent source maintenance retains every R12 trace.
+        (13, 0xb66993d9e87a9cfc) => [
+            (1, 0x7d33b1664f3b9824, 0xae47594e85732bbc, 16625),
+            (7, 0x84d4030142b4f1c5, 0x34994c75252c5c39, 14265),
+            (42, 0x92d4133c4f4351b1, 0xec212d8ee38450d7, 23274),
+            (1000, 0x8598d51bed033353, 0x8a17aae489e3424a, 58307),
+            (65535, 0x1045dd3c5fc0a20f, 0x2f93bf36167ed04e, 24291),
+        ],
+        // GD-04: appended preview kinds and StormArc leave every canonical trace unchanged.
+        (14, 0xf354f651c056d615) => [
+            (1, 0x7d33b1664f3b9824, 0xae47594e85732bbc, 16625),
+            (7, 0x84d4030142b4f1c5, 0x34994c75252c5c39, 14265),
+            (42, 0x92d4133c4f4351b1, 0xec212d8ee38450d7, 23274),
+            (1000, 0x8598d51bed033353, 0x8a17aae489e3424a, 58307),
+            (65535, 0x1045dd3c5fc0a20f, 0x2f93bf36167ed04e, 24291),
+        ],
+        // INT-06: serialized P74 state changes hashes; all five R14 end ticks are unchanged.
+        (15, 0xcc459351581b7763) => [
+            (1, 0x690cb65be56a2a0a, 0x498ca4c4ecd99d8c, 16625),
+            (7, 0xa8c18a2dd89dbca9, 0xd3ae68c37379b915, 14265),
+            (42, 0x6695084b1909f037, 0x66740835064ae569, 23274),
+            (1000, 0xa73ffde0640d4369, 0x8acf4d4069f570b0, 58307),
+            (65535, 0xd8eff0a864f58a7d, 0xe247d987c99d5cca, 24291),
+        ],
         revision => panic!("register an explicit canonical trace for {revision:?}"),
     };
     for (seed, t, h, tick) in goldens {

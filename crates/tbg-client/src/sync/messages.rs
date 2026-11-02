@@ -54,6 +54,11 @@ pub(super) fn poll_link(
     mut account: ResMut<Account>,
     mut ranking: ResMut<crate::ui::ranking::Ranking>,
     mut surrender: ResMut<crate::ui::surrender::Surrender>,
+    mut social: (
+        ResMut<crate::ui::social::Social>,
+        ResMut<crate::ui::shell::Shell>,
+        ResMut<crate::ui::history::History>,
+    ),
     presentation: (
         Res<Lang>,
         ResMut<crate::ui::PendingBuy>,
@@ -216,6 +221,34 @@ pub(super) fn poll_link(
                     .play(if won { Sound::Victory } else { Sound::Defeat });
                 next.set(GameState::Result);
             }
+            ServerMsg::PersonalMatchResult { result_id, summary } => {
+                if info.result_id == Some(result_id) {
+                    info.personal = Some(summary);
+                }
+            }
+            ServerMsg::MatchHistoryStatus {
+                result_id, state, ..
+            } => {
+                if info.result_id == Some(result_id) {
+                    let changed = info.history_save != Some(state);
+                    info.history_save = Some(state);
+                    if changed && state == tbg_core::protocol::HistorySaveState::Stored {
+                        social.2.refresh_result = Some(result_id);
+                    }
+                }
+            }
+            ServerMsg::PlayerChallengeState {
+                enabled,
+                outgoing,
+                incoming,
+            } => {
+                social.0.receive(enabled, outgoing, incoming, now);
+                social.1.dirty = true;
+            }
+            ServerMsg::PlayerChallengeResult { outcome, .. } => {
+                social.0.notice = Some(outcome);
+                social.1.dirty = true;
+            }
             ServerMsg::Queued => {
                 ui.2.searching = true;
                 ui.2.room = None;
@@ -245,24 +278,24 @@ pub(super) fn poll_link(
             ServerMsg::RematchOpen { .. } if info.result_id.is_some() && info.outcome.is_none() => {
             }
             ServerMsg::RematchOpen { opponent } => {
+                rematch.opponent = opponent.clone();
+                social.1.dirty = true;
                 rematch.open = true;
                 rematch.closed = None;
-                info.challenge = true;
                 if info.opponent.is_empty() {
                     info.opponent = opponent;
-                }
-                if *state.get() != GameState::Result {
-                    next.set(GameState::Result);
                 }
             }
             ServerMsg::RematchState {
                 you_requested,
                 opponent_requested,
             } => {
+                social.1.dirty = true;
                 rematch.you_requested = you_requested;
                 rematch.opponent_requested = opponent_requested;
             }
             ServerMsg::RematchClosed { declined } => {
+                social.1.dirty = true;
                 rematch.open = false;
                 rematch.closed = Some(declined);
             }
@@ -281,8 +314,15 @@ pub(super) fn poll_link(
             } => {
                 ui.0.say(Msg::AccountTakenOver);
                 account.profile = None;
+                *social.0 = default();
+                *social.2 = default();
+                *rematch = default();
+                info.personal = None;
+                info.history_save = None;
+                crate::auth::socket_status(tbg_core::protocol::AuthStatus::Conflict);
                 *link = MatchLink::Idle;
                 next.set(GameState::Menu);
+                break;
             }
             // Post-P14 (BR-P04): a guest asked for ranked. Drop the stale
             // profile and go back to the menu instead of a raw error toast.

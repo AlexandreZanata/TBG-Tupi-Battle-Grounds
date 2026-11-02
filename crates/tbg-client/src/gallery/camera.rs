@@ -10,6 +10,7 @@ pub fn frame(
     lib: Res<crate::art::FigureLibrary>,
     meshes: Res<Assets<Mesh>>,
     mut cached: Local<Option<(tbg_core::UnitKind, (f32, f32))>>,
+    mut monument: Local<Option<(Vec3, Vec3)>>,
     window: Single<&Window>,
     camera: Single<(&mut Transform, &mut DistanceFog), With<ArenaCamera>>,
 ) {
@@ -17,31 +18,37 @@ pub fn frame(
         return;
     }
     let aspect = window.width() / window.height();
-    let (center, width, height, offset) = if options.portrait {
-        let kind = options.unit.unwrap_or(tbg_core::UnitKind::Archer);
-        let (radius, h) = cached
-            .get_or_insert_with(|| {
-                (
-                    kind,
-                    crate::art::celebration::bounds::envelope(
-                        lib.get(kind, 0, 0),
-                        &meshes,
+    let (center, width, height, offset) =
+        if options.lineup && options.unit.is_some_and(super::monument) {
+            let kind = options.unit.unwrap_or(tbg_core::UnitKind::Colossus);
+            let bounds =
+                *monument.get_or_insert_with(|| super::monument_frame::bounds(kind, &lib, &meshes));
+            super::monument_frame::target(bounds, aspect)
+        } else if options.portrait {
+            let kind = options.unit.unwrap_or(tbg_core::UnitKind::Archer);
+            let (radius, h) = cached
+                .get_or_insert_with(|| {
+                    (
                         kind,
-                        0,
-                        0,
-                    ),
-                )
-            })
-            .1;
-        (
-            Vec3::new(options.portrait_x, h * 0.45, 0.),
-            radius * options.portrait_zoom,
-            h * 0.57 * options.portrait_zoom,
-            Vec3::new(0., 0.6, 10.),
-        )
-    } else {
-        target(&options, aspect < 1.0)
-    };
+                        crate::art::celebration::bounds::envelope(
+                            lib.get(kind, 0, 0),
+                            &meshes,
+                            kind,
+                            0,
+                            0,
+                        ),
+                    )
+                })
+                .1;
+            (
+                Vec3::new(options.portrait_x, h * 0.45, 0.),
+                radius * options.portrait_zoom,
+                h * 0.57 * options.portrait_zoom,
+                Vec3::new(0., 0.6, 10.),
+            )
+        } else {
+            target(&options, aspect < 1.0)
+        };
     let distance = (width / (0.315 * aspect)).max(height / 0.315);
     let offset = if options.silhouette { Vec3::Z } else { offset };
     let (mut t, mut fog) = camera.into_inner();
@@ -120,6 +127,12 @@ fn target(options: &Gallery, portrait: bool) -> (Vec3, f32, f32, Vec3) {
         }
         _ if options.polish => super::polish::camera(),
         _ if options.frames => sheet(options, portrait),
+        _ if options.unit.is_some_and(super::monument) => (
+            Vec3::new(12.0, 3.0, 0.0),
+            15.0,
+            4.0,
+            Vec3::new(0.0, 1.2, 10.0),
+        ),
         _ if options.silhouette => (Vec3::new(8.0, 0.7, -2.8), 9.0, 3.0, Vec3::Z),
         _ if options.unit.is_some() => unit(portrait),
         _ => (

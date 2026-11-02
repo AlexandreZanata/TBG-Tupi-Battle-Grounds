@@ -1,0 +1,68 @@
+[
+  {
+    "file": "abyssharpooner.png",
+    "sha256": "877088060d89aab9592adca360caf6cd94645f608ea5610a79c8e50432610dab",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "barrelkeeper.png",
+    "sha256": "22eee33ea53fe4945ea92090f4a2511cb0c08b9a3ebf4a2c4d81b40658fa9438",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "foamweaver.png",
+    "sha256": "5c329a5b5d4fc89d08457fa2ecd0e1f878f6cf7548b44f0491803043c3e1cc6b",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "nacrebastion.png",
+    "sha256": "7d35e823dcb7bc2fc466aed0a4ad120e9370c158d1c68f611f94cfdb984dc3f2",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": true
+  },
+  {
+    "file": "nacreduelist.png",
+    "sha256": "f947011cde790b07b09287c0a0b742af57cc31ff620e1e96b7fda8eedc998172",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "pearlslinger.png",
+    "sha256": "c3bb5cb2ddb79cf1120e0467609fd0acb6c94a65e3c48972db154a5bcc4301e5",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "podsnapper.png",
+    "sha256": "f79cdb80d3a781ec7da6242487b67fa427117c6c2d8efb56a93d9470f3026653",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "reeflancer.png",
+    "sha256": "a5017b851aace306f76aa0b8522aca58f6791cccc258701d6ed1072b3d6df3d7",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "trenchfist.png",
+    "sha256": "5a064be68d730cb2a5248b83476926ebd13abb7cda7c523242a71f1057e606d2",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "trenchlamplighter.png",
+    "sha256": "d784e02a163795a76d5b11321ca3ea02e5ba76c62944a15dd4fad43d3cbea9ad",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  },
+  {
+    "file": "undertowherald.png",
+    "sha256": "fcd083626d59636dac5245a4df4980da67c2f41dd1f5ef814a937961e3405107",
+    "source": "Built-in image_gen; illustrative reference, not an engine capture",
+    "reserved": false
+  }
+]

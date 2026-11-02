@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 31,
-        "GAME-DESIGN §12 / D-97 integration v31: authenticated hello and eight Arena identities"
+        PROTOCOL_VERSION, 38,
+        "INT-06: combined P74 auxiliary views and GD-04 events require wire 38"
     );
 }
 
@@ -337,4 +337,157 @@ fn v30_arena_identities_append_without_renumbering_the_original_five() {
         assert_eq!(bytes, [id as u8]);
         assert_eq!(postcard::from_bytes::<Arena>(&bytes), Ok(arena));
     }
+}
+
+#[test]
+fn p73_appends_participant_bound_messages_and_keeps_legacy_match_end_bytes() {
+    use tbg_core::protocol::{decode_server, HistorySaveState, PlayerInviteOutcome};
+    for (tag, message) in [
+        (
+            23,
+            ClientMsg::ChallengePlayer {
+                name: "Alpha".into(),
+            },
+        ),
+        (
+            24,
+            ClientMsg::AnswerPlayerChallenge {
+                id: [1; 16],
+                accept: true,
+            },
+        ),
+        (25, ClientMsg::CancelPlayerChallenge { id: [1; 16] }),
+        (26, ClientMsg::SetPlayerChallengesEnabled { enabled: false }),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_client(&bytes).unwrap(), message);
+    }
+    for (tag, message) in [
+        (
+            33,
+            ServerMsg::PlayerChallengeState {
+                enabled: false,
+                outgoing: None,
+                incoming: Vec::new(),
+            },
+        ),
+        (
+            34,
+            ServerMsg::PlayerChallengeResult {
+                id: Some([1; 16]),
+                outcome: PlayerInviteOutcome::Cancelled,
+            },
+        ),
+        (
+            36,
+            ServerMsg::MatchHistoryStatus {
+                result_id: [2; 16],
+                entry_id: [3; 16],
+                state: HistorySaveState::Pending,
+            },
+        ),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_server(&bytes).unwrap(), message);
+    }
+}
+
+#[test]
+fn cc_id01_v32_completion_facts_and_short_cast_roundtrip_without_reordering_old_kind_tags() {
+    use tbg_core::{completion::state::View, state::PendingCast, view::SpecialView, UnitKind};
+    assert_eq!(encode(&UnitKind::Megadrill), [50]);
+    assert_eq!(encode(&UnitKind::Gravecutter), [51]);
+    assert_eq!(encode(&UnitKind::Stridulator), [67]);
+    let facts = View {
+        echo_ticks: 80,
+        regrowth_pulses: 4,
+        spark_ticks: 60,
+        interrupt_ticks: 80,
+        charged: true,
+        channel_target: Some(23),
+        channel_pulses: 3,
+        beam_center: Some(5200),
+        barrel_ready_in: 0,
+    };
+    let special = SpecialView {
+        ready_in: 0,
+        cast: Some(PendingCast {
+            target: Some(23),
+            left: 2,
+        }),
+        windup: 2,
+    };
+    let bytes = encode(&(facts, special));
+    assert!(
+        bytes.len() < 64,
+        "bounded reconnect facts must stay compact"
+    );
+    assert_eq!(
+        postcard::from_bytes::<(View, SpecialView)>(&bytes),
+        Ok((facts, special))
+    );
+}
+
+#[test]
+fn og01_new_faction_and_kind_tags_are_appended() {
+    assert_eq!(encode(&tbg_core::Faction::Ogres), [7]);
+    assert_eq!(encode(&tbg_core::UnitKind::Stridulator), [67]);
+    assert_eq!(encode(&tbg_core::UnitKind::BasaltBulwark), [68]);
+    assert_eq!(encode(&tbg_core::UnitKind::RivetBallista), [76]);
+}
+
+// AB-01/OG-02: appended identities and replay-visible rolling projectiles use wire 35.
+#[test]
+fn ab01_og02_tags_are_appended_and_barrels_roundtrip_in_both_public_views() {
+    assert_eq!(encode(&tbg_core::Faction::Abyssals), [8]);
+    assert_eq!(encode(&tbg_core::UnitKind::NacreDuelist), [77]);
+    assert_eq!(encode(&tbg_core::UnitKind::PodSnapper), [85]);
+    let state = tbg_core::MatchState::new(1);
+    let view = state.view_for(tbg_core::Seat::A, &[]);
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::MatchView>(&encode(&view)),
+        Ok(view)
+    );
+    let public = state.public_view(&[], 0);
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::PublicView>(&encode(&public)),
+        Ok(public)
+    );
+}
+
+// GD-04: the two new Gods append after Colossus; StormArc appends after BarrelBurst.
+#[test]
+fn gd04_wire37_appends_volthar_astreon_and_storm_arc() {
+    assert_eq!(encode(&tbg_core::UnitKind::Colossus), [86]);
+    assert_eq!(encode(&tbg_core::UnitKind::Volthar), [87]);
+    assert_eq!(encode(&tbg_core::UnitKind::Astreon), [88]);
+    let event = tbg_core::Event::StormArc {
+        unit: 1,
+        from: 2,
+        to: 3,
+        jump: 1,
+    };
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::Event>(&encode(&event)),
+        Ok(event)
+    );
+}
+
+// TW-01/PK-01/GD-01: identities append, lateral position and private waiting facts roundtrip.
+#[test]
+fn gd01_wire36_appends_gods_and_retains_legacy_tags() {
+    assert_eq!(encode(&tbg_core::Faction::Gods), [9]);
+    assert_eq!(encode(&tbg_core::UnitKind::Colossus), [86]);
+    assert_eq!(encode(&tbg_core::UnitKind::SiegeWalker), [5]);
+    let mut state = tbg_core::MatchState::new(8);
+    let mut view = state.view_for(tbg_core::Seat::A, &[]);
+    view.queued = 7;
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::MatchView>(&encode(&view)),
+        Ok(view)
+    );
+    state.phase = tbg_core::Phase::Running;
+    assert!(encode(&tbg_core::Rejection::LaneFull).len() <= 2);
 }

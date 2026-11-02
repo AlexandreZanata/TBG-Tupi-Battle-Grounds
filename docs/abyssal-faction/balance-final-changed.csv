@@ -1,0 +1,7 @@
+revision,kind,tier,branch,opponent,seat_a_score,seat_b_score,mean_score,budget
+candidate-final,NacreDuelist,0,0,Shieldbearer,1,1,1,20
+candidate-final,NacreDuelist,0,0,Archer,0,0,0,20
+candidate-final,NacreDuelist,0,0,Longaxe,0,0,0,20
+candidate-final,PearlSlinger,0,0,Shieldbearer,0,0,0,20
+candidate-final,PearlSlinger,0,0,Archer,0,0,0,20
+candidate-final,PearlSlinger,0,0,Longaxe,0,0,0,20

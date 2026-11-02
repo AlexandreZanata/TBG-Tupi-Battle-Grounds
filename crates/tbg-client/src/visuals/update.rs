@@ -63,6 +63,7 @@ pub fn update_unit_visual(
     super::status_badges::bleed(commands, v.bleed_badge, u);
     super::status_badges::shield(commands, a, v, u);
     super::status_badges::hostile(commands, a, v, u);
+    super::status_badges::control(commands, a, v, u);
     let status = match u.status {
         1 => Some(&a.slowed),
         2 => Some(&a.rooted),
@@ -81,7 +82,7 @@ pub fn update_unit_visual(
             .entity(v.status_ring)
             .try_insert(MeshMaterial3d(mat.clone()));
     }
-    let ring = &a.team[usize::from(!v.own)];
+    let ring = &a.team[v.seat.index()];
     commands
         .entity(v.ring)
         .try_insert(MeshMaterial3d(ring.clone()));

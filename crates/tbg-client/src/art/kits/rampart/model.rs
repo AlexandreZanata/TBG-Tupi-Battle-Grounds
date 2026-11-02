@@ -1,7 +1,7 @@
 //! Rampart figure: an ogre of the Ironworks in riveted plate carrying a
 //! mobile wall of oak and iron on the left arm, an iron gauntlet on the
 //! right. Branch A (Bastion) grows the wall and its plating, then crowns
-//! it with merlons and a team banner; branch B (Spiked) studs the wall
+//! it with merlons and a gold-edged wall; branch B (Spiked) studs the wall
 //! with spikes, then mounts a hot battering ram on the right arm.
 
 use bevy::prelude::*;
@@ -147,20 +147,6 @@ fn wall(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             DARK,
             [x, y + tall * 0.17, z + 0.005],
         ),
-        part(
-            c,
-            Cyl(wide * 0.18, 0.075),
-            BRASS,
-            [x, y - tall * 0.05, z + 0.025],
-        )
-        .rot([90.0, 0.0, 0.0]),
-        part(
-            c,
-            Box(wide * 0.16, tall * 0.15, 0.018),
-            LINEN,
-            [x, y - tall * 0.05, z + 0.070],
-        )
-        .rot([0.0, 0.0, 45.0]),
     ]);
     for (dx, dy) in [(-0.4, -0.35), (0.4, -0.35), (-0.4, 0.35), (0.4, 0.35)] {
         v.push(part(
@@ -187,26 +173,12 @@ fn wall(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
                 [x + k * wide, y + tall * 0.55, z],
             ));
         }
-        v.extend([
-            part(
-                c,
-                Cyl(0.012, 0.5),
-                WOOD,
-                [x + wide * 0.45, y + tall * 0.75, z - 0.02],
-            ),
-            part(
-                c,
-                Box(0.2, 0.14, 0.015),
-                LINEN,
-                [x + wide * 0.45 - 0.1, y + tall * 0.9, z - 0.02],
-            ),
-            part(
-                c,
-                Box(wide + 0.03, 0.03, 0.07),
-                GOLD,
-                [x, y + tall * 0.47, z],
-            ),
-        ]);
+        v.extend([part(
+            c,
+            Box(wide + 0.03, 0.03, 0.07),
+            GOLD,
+            [x, y + tall * 0.47, z],
+        )]);
     }
     if f.b {
         for (dx, dy) in [(-0.3, 0.25), (0.3, 0.25), (-0.3, -0.25), (0.3, -0.25)] {

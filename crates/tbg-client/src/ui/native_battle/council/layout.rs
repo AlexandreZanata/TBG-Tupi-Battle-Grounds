@@ -183,7 +183,6 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             },
             BackgroundColor(chrome::INK),
             BorderColor::all(Color::NONE),
-            BoxShadow::default(),
             OptionCard(i),
             UiAction::Disabled,
             CouncilControl,
@@ -227,20 +226,6 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
                 },
                 Picture::Frame(i),
                 ZIndex(2),
-            ));
-            card.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    top: percent(59.5),
-                    left: percent(12),
-                    right: percent(12),
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                kit::heading("", 11.),
-                TextLayout::justify(Justify::Center),
-                Field::Rarity(i),
-                ZIndex(3),
             ));
             card.spawn(Node {
                 position_type: PositionType::Absolute,

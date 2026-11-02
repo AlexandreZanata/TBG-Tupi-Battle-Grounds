@@ -97,6 +97,11 @@ pub const NAVY: Color = hex(0x1F2F5A);
 pub const MOSS: Color = hex(0x5C6B2E);
 pub const CHITIN: Color = hex(0x2C2A1E);
 pub const AMBER: Color = hex(0xD98E2B);
+// GD-04: Gods expansion — storm armor and glow, rupture graphite and crimson.
+pub const ROYAL_BLUE: Color = hex(0x2D4FA3);
+pub const STORM_BLUE: Color = hex(0x6AD6FF);
+pub const GRAPHITE: Color = hex(0x3B3F47);
+pub const CRIMSON: Color = hex(0x9E2B2B);
 
 #[derive(Clone, Copy, Debug)]
 pub enum PaletteSlot {
@@ -104,38 +109,50 @@ pub enum PaletteSlot {
     Shade,
     Accent,
     Linen,
-    Team,
+    Cloth,
     Skin,
     Metal,
     Glow,
 }
 
-pub const FACTIONS: [[Color; 8]; 7] = [
-    [STEEL, OAK, GOLD, LINEN, ALLY, SKIN, STEEL, GOLD],
-    [BONE, RUST, GLOW, VIOLET, ENEMY, BONE, RUST, GLOW],
+pub const FACTIONS: [[Color; 8]; tbg_core::FACTION_COUNT] = [
+    [STEEL, OAK, GOLD, LINEN, LEATHER, SKIN, STEEL, GOLD],
+    [BONE, RUST, GLOW, VIOLET, VIOLET, BONE, RUST, GLOW],
     [
         GUNMETAL,
         BRASS,
         ORANGE,
         DARK_LEATHER,
-        ALLY,
+        BRASS,
         OGRE_SKIN,
         GUNMETAL,
         ORANGE,
     ],
-    [BARK, LEAF, BLOSSOM, LEAF, ENEMY, BARK, SAP, SAP],
+    [BARK, LEAF, BLOSSOM, LEAF, LEAF_DARK, BARK, SAP, SAP],
     [
-        CHARCOAL, DARK, TURQUOISE, IVORY, ALLY, GUNMETAL, IVORY, TURQUOISE,
+        CHARCOAL, DARK, TURQUOISE, IVORY, GUNMETAL, GUNMETAL, IVORY, TURQUOISE,
     ],
-    [IVORY, NAVY, GOLD, NAVY, ALLY, SKIN, IVORY, GOLD],
-    [MOSS, CHITIN, AMBER, LINEN, ALLY, OGRE_SKIN, CHITIN, AMBER],
+    [IVORY, NAVY, GOLD, NAVY, NAVY, SKIN, IVORY, GOLD],
+    [MOSS, CHITIN, AMBER, LINEN, MOSS, OGRE_SKIN, CHITIN, AMBER],
+    [ROCK, DARK_LEATHER, AMBER, LINEN, RUST, OGRE_SKIN, IRON, SAP],
+    [
+        IVORY,
+        FIELD_SLATE,
+        TURQUOISE,
+        SHARK_BELLY,
+        LEATHER,
+        SHARK_SLATE,
+        IVORY,
+        AMBER,
+    ],
+    [IVORY, ROCK, GOLD, LINEN, FIELD_SLATE, IVORY, GOLD, AMBER],
 ];
 pub const SLOTS: [PaletteSlot; 8] = [
     PaletteSlot::Base,
     PaletteSlot::Shade,
     PaletteSlot::Accent,
     PaletteSlot::Linen,
-    PaletteSlot::Team,
+    PaletteSlot::Cloth,
     PaletteSlot::Skin,
     PaletteSlot::Metal,
     PaletteSlot::Glow,

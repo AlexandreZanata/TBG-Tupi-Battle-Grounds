@@ -6,11 +6,13 @@
 > **reviewer** (a strong model such as Claude or Codex) checks every phase
 > before the next one starts.
 
-Current main-consolidation candidate: [player-safe delivery report](phases/PLAYER-safe-consolidation.md),
-joining #37/#38/#39 and earlier desktop/game fronts. Its targeted validation and
-manual host bootstrap do not close native signing, email/admin authorization, balance,
-Windows device acceptance or first attested automatic activation gates. Mobile remains
-outside this candidate. See [official release operations](RELEASES.md).
+Current production consolidation: [observed delivery report](phases/DELIVERY-consolidation-production-20261102.md),
+including the earlier #37/#38/#39 fronts, P73/laboratory, P74, champions and Gods.
+Runtime-bearing main source is 6d96245 (wire 38/R15, native colossus.3). Four-family
+compatible delivery was observed through the VPS timers after an attended contract
+switch. Native signing/TUF, email/admin authorization, Proposed preview balance,
+Windows device/full rendered correspondence and owner look/fun acceptance remain
+separate gates. Mobile remains excluded. See [official release operations](RELEASES.md).
 
 ## Order of work
 
@@ -578,7 +580,102 @@ awaits owner-provided connection settings and verified host identity. See
 
 `phase/main-auto-deploy` prepares CI-gated, attested backend candidates and a
 VPS-pull controller with compatibility guards, match drain and durable rollback.
-This keeps the owner's PC as the SSH maintenance channel. The timer is not
-installed/enabled; main integration and the first real attested package/verifier
-acceptance remain prerequisites. Native signing and frontend publication remain
-separate. See [the preparation report](phases/MAIN-auto-deploy-preparation.md).
+This keeps the owner's PC as the SSH maintenance channel. At this historical
+preparation checkpoint the timer was not installed/enabled. The owner-authorized
+2026-11-02 consolidation subsequently completed exact-main activation and enabled
+all four timers; see [observed production delivery](phases/DELIVERY-consolidation-production-20261102.md).
+Native signing remains separate. Original evidence remains in
+[the preparation report](phases/MAIN-auto-deploy-preparation.md).
+
+## Active players, direct challenges and rematches (2026-11-01)
+
+**P73 — merged; targeted consolidation validated; final device/owner acceptance pending**,
+`phase/p73-active-players-challenges`, based on `origin/main` at `e2a18af`
+and the P72 shared Bevy web/native interface at `2da0a35`.
+**Historical consolidation, 2026-11-01:** merged onto main `70827a7` in
+`codex/consolidate-open-fronts` with protocol 32 and D-103; compiling
+acceptance was deferred at that checkpoint. On 2026-11-02, #41/#44 were
+integrated by #48 and the randomized-side history fixture was corrected in #53.
+Protected integrated CI and real WebSocket scenarios passed at wire 38/R15. See
+[the consolidation report](phases/CONSOLIDATION-open-fronts-20261101.md).
+See the [execution report](planning/P73-EXECUTION-REPORT.md) for real scoped
+validation, native fixture captures and deferred final/browser acceptance.
+Read [the phase](phases/P73-active-players-and-direct-challenges.md),
+[source audit and D01–D16/H01–H18 cases](planning/P73-PLAN-MANIFEST.json) and
+[the executor prompt](planning/P73-EXECUTION-PROMPT.md).
+
+Extend the current Live/online surface with a complete paged/searchable
+global online-account directory, accurate availability, participant-bound
+Accept/Decline/Cancel invitations, retained-session opt-out and last-opponent
+rematches from Result or Active players. Guests remain counted, not publicly
+enumerated. Reuse P39 private casual pairing and rematch consent, P47
+snapshots and P71 auth/admission continuity; all resulting Challenge games
+remain unrated. Preserve the existing link challenge and live-watch flows.
+
+**Owner extension, 2026-11-01:** [Match history and account privacy](planning/P73-MATCH-HISTORY.md)
+is part of P73. Add persistent account-bound online results and own
+statistics, list/detail views and a saved Public/Only me setting (default
+private), including guards for legacy `recent` APIs. The sub-spec and
+[conceptual additive schema](planning/P73-HISTORY-SCHEMA.sql) cover source
+identity, terminal summaries, idempotent journals/transactions, verified
+Ranked backfill, private projections, slot-aware API, migration/rollback
+and H01–H18 validation. No replay or old-history rematch action is added.
+
+Order: freeze P72/wire ownership -> directory/global snapshot accuracy ->
+bounded direct-invitation lifecycle -> rematch eligibility/navigation ->
+history persistence/privacy/API -> shared localized frontend -> one
+targeted consolidation. Two-slot presence
+must actually aggregate snapshots rather than labeling one slot global;
+unsupported/incompatible/draining targets remain unavailable without moving
+an active match. Proposed BR-AP rules/defaults are documented in GAME-DESIGN.
+
+The original implementation allocated protocol 32 (D-103; main already used 31)
+and explicitly gated additive schema 11. That work front changed no production
+flags, database or deployment. The later owner-authorized consolidation released
+the integrated code at wire 38/R15 while retaining schema 10 and disabled history
+migration/collection/API/public flags on the official host. Full Windows/rendered
+correspondence and owner look/fun acceptance remain pending; protected CI and
+scoped browser observations do not close those gates. Local full-suite/heavy
+validation still requires the owner's explicit scoped request. See
+[the production report](phases/DELIVERY-consolidation-production-20261102.md).
+
+**P73 execution handoff authorization, 2026-11-01:** after implementation,
+normally publish its branch and open a GitHub PR targeting `main`, per the
+owner's explicit instruction. This scoped exception does not authorize
+force-push, direct main changes, merge, auto-merge or deployment. Unrun
+acceptance must be listed in a Draft PR rather than claimed complete.
+
+## Gods expansion: Colossus refinement, Volthar and Astreon (owner, 2026-11-02)
+
+**GD-04 — merged and packaged in the local preview; final balance/device/owner acceptance pending**, `phase/gods-faction-expansion`,
+based on PR #48 (`codex/ogre-faction` `747e2ad`) plus the unpushed Colossus
+fixes CROWD-EXIT-01 and GD-03. Refines the Colossus visually (stats and
+abilities unchanged; branch B stays dark) and adds Volthar (Storm Judgment
+chain lightning) and Astreon (Verdict Lance max-HP pierce) to the local preview
+pool with five forms each. Initial wire 37/R14/D-105 was integrated at wire 38/R15;
+values remain Proposed and the online FULL_POOL remains 46. Linux captures and
+packaging are observed in the production report; complete device/motion parity
+remains pending. See
+[the phase report](phases/GODS-faction-expansion.md). Windows/web parity,
+D-33 balance acceptance and owner look/fun sign-off remain pending.
+
+
+## P74 — War Auxiliaries (`Mineiro` & `Mercador`), 3D Precincts & Construction Animations (2026-11-02)
+
+Spec: [`docs/phases/P74-war-auxiliaries.md`](phases/P74-war-auxiliaries.md).
+Status: merged through #51/#48, integrated and released at wire 38/R15. Scoped
+rules, state/wire/privacy/reconnect tests, authoritative production private-room
+flow and Linux/desktop-web HUD observations passed. Complete Windows/rendered
+motion correspondence remains pending; see
+[observed production delivery](phases/DELIVERY-consolidation-production-20261102.md).
+Authoritative `Mineiro` (cost 6 Energy, 12s preparation, +0.06 Energy/s for 180s
+outside Interest multipliers, single-hire per match) and `Mercador` (cost 4
+Energy, counts post-hire champion purchases `0..3` to grant 1 free reroll per 3
+purchases up to 3 activations/9 purchases without increasing `reroll_streak`).
+Bottom-right navy-and-gold `Auxiliares (0/2)` HUD panel with 3D portraits and
+free-reroll indicator on the Reroll button. Procedural low-poly 3D `Mineiro`
+(mine outcrop, timber shoring, swinging lantern, rails, ore cart) and `Mercador`
+(red-and-cream striped market stall, balance-scales banner, crates/sacks, timber
+pier over water, and wave-bobbing wooden Merchant Caravel ship) with 3-stage
+construction animations, active work/delivery loops, and theme-harmonized
+palettes across all eight Arenas.

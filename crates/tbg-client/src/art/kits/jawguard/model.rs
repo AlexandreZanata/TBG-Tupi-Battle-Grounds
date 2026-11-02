@@ -103,12 +103,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             AMBER,
             [s * 0.13, 0.025, 0.15],
         ));
-        v.push(part(
-            Body(Chest),
-            Box(0.035, 0.25, 0.29),
-            LINEN,
-            [s * 0.29, 0.15, 0.0],
-        ));
+
         let n = if s < 0.0 {
             Socket::WeaponR
         } else {

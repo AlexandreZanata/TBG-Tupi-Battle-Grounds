@@ -374,7 +374,9 @@ async fn players_see_the_watcher_count_and_the_match_arena() {
 async fn a_spectator_that_never_reads_is_dropped_and_the_seats_finish() {
     let url = server(200).await;
     let base = http_base(&url);
-    let (bot_a, bot_b) = spawn_bots(&url, None);
+    // BR-M07 has no match deadline; BR-LV09 requires seats to finish despite
+    // a stalled watcher. Use the same bounded surrender as the watcher replay.
+    let (bot_a, bot_b) = spawn_bots(&url, Some(Duration::from_secs(20)));
     let listed = wait_listed(&base, 1).await;
     let id = parse_id(listed["featured"].as_str().unwrap());
 

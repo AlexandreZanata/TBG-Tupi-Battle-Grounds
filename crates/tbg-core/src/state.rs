@@ -64,6 +64,10 @@ pub struct Stack {
 /// All zeroes until the unit's wave lands; never part of views in P43.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct UnitFx {
+    /// PK-01: first occupied lateral cell plus one; zero means not yet placed.
+    pub lane_slot: u8,
+    pub lane_goal: u8,
+    pub lane_lock_until: Tick,
     pub poison: [Stack; 6],
     pub fish: [Stack; 3],
     pub confused_until: Tick,
@@ -114,6 +118,8 @@ pub struct UnitFx {
     pub special: Option<PendingCast>,
     /// R18/P58 §3.2: one venom family, separate from bleed and Rotcap stacks.
     pub venom: Bleed,
+    /// Champion-completion local-preview state; fixed-size and replay-visible.
+    pub completion: crate::completion::state::Fx,
 }
 
 /// One special locked at start; the ordinary basic windup stays independent.
@@ -131,6 +137,8 @@ pub struct Bleed {
     pub next: Tick,
     pub left: u8,
     pub source: Option<Seat>,
+    /// Attribution for shared non-stacking bleed producers; old bleeds default to Trident.
+    pub producer: Option<UnitKind>,
 }
 
 /// A Slow queued behind a Root (R19).
@@ -231,6 +239,9 @@ pub struct PlayerState {
     pub reserve: [u8; OFFERS],
     pub held_mask: u8,
     pub reroll_streak: u8,
+    /// P74 (BR-AX01–BR-AX10): War Auxiliaries state and accumulated Merchant free rerolls.
+    pub auxiliaries: [crate::auxiliary::AuxiliaryPhase; crate::auxiliary::AUXILIARY_SLOTS],
+    pub free_rerolls: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -382,10 +393,42 @@ pub enum Event {
         unit: UnitId,
         x: i32,
     },
+    /// OG-02: exact collision facts remain drawable after the caster disappears.
+    BarrelBurst {
+        source: UnitId,
+        seat: Seat,
+        contact: UnitId,
+        center: i32,
+        center_z: i32,
+        radius: i32,
+        tier: u8,
+        branch: u8,
+        tick: Tick,
+    },
+    /// GD-04: one authoritative Storm Judgment link; jump 0 is a B2 extra discharge.
+    StormArc {
+        unit: UnitId,
+        from: UnitId,
+        to: UnitId,
+        jump: u8,
+    },
+    /// P74: a seat hired one of its War Auxiliaries (`Mineiro` or `Mercador`).
+    AuxiliaryHired {
+        seat: Seat,
+        slot: u8,
+        kind: crate::auxiliary::AuxiliaryKind,
+    },
+    /// P74: an auxiliary completed an activation cycle (Merchant 3rd purchase or Miner completion).
+    AuxiliaryTriggered {
+        seat: Seat,
+        kind: crate::auxiliary::AuxiliaryKind,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MatchState {
+    /// PK-01 candidate: private Practice/Training until long-run competitive acceptance.
+    pub physical_lanes: bool,
     /// The combat clock: frozen while an Augment selection pauses the
     /// battle, so every tick-based rule counts effective combat (BR-AG12).
     pub tick: Tick,
@@ -396,6 +439,10 @@ pub struct MatchState {
     pub players: [PlayerState; 2],
     /// Always sorted by id (new units get the next, larger id).
     pub units: Vec<Unit>,
+    /// Paid or summoned overflow waiting for physical lane capacity.
+    pub deployments: Vec<Unit>,
+    /// OG-02 launch snapshots survive caster death and serialize for replay.
+    pub barrels: Vec<crate::barrel::Barrel>,
     pub next_unit_id: UnitId,
     pub outcome: Option<Outcome>,
     /// Augment draw, cycle and open round (BR-AG01–08).

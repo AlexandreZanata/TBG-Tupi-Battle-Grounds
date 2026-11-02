@@ -21,8 +21,8 @@ pub struct Stride {
 
 #[derive(Default)]
 pub struct FootLocks {
-    anchors: [Option<Vec2>; 2],
-    cycles: [i32; 2],
+    anchors: [Option<Vec2>; 4],
+    cycles: [i32; 4],
 }
 
 pub const LEGS: [(Joint, Joint, Joint); 2] = [
@@ -32,7 +32,85 @@ pub const LEGS: [(Joint, Joint, Joint); 2] = [
 
 impl FootLocks {
     pub fn reset(&mut self) {
-        self.anchors = [None; 2];
+        self.anchors = [None; 4];
+    }
+    /// The additional planted pair reuses spare rig sockets, never extra entities or simulation bodies.
+    pub fn apply_auxiliary(
+        &mut self,
+        pose: &mut Pose,
+        s: &Stride,
+        frame: Mat4,
+        p: &Proportions,
+        g: &Gait,
+    ) {
+        use rig::{
+            Node::{Prop, Secondary},
+            Socket, Spring,
+        };
+        let inv = frame.inverse();
+        let hips = Mat4::from_rotation_translation(
+            ik::quat(pose[Joint::Hips.index()].0),
+            rig::rest(Node::Body(Joint::Hips), p) + pose[Joint::Hips.index()].1,
+        );
+        let stride = g.cycle(p.leg);
+        let scale = frame.transform_vector3(Vec3::X).length();
+        for (side, (u, l, foot)) in [
+            (
+                Secondary(Spring::Back),
+                Prop(Socket::StringTop),
+                Prop(Socket::Back),
+            ),
+            (
+                Secondary(Spring::Tabard),
+                Prop(Socket::StringBottom),
+                Prop(Socket::Nock),
+            ),
+        ]
+        .into_iter()
+        .enumerate()
+        {
+            let raw = s.phase + (1 - side) as f32 * 0.5;
+            let k = raw.rem_euclid(1.0);
+            let contact = k < 0.5;
+            let swing = ((k - 0.5) * 2.0).clamp(0.0, 1.0);
+            let along = if contact {
+                stride * (0.25 - k)
+            } else {
+                stride * (-0.25 + 0.5 * swing * swing * (3.0 - 2.0 * swing))
+            };
+            let lift = if contact {
+                0.0
+            } else {
+                (swing * std::f32::consts::PI).sin() * p.leg * g.lift
+            };
+            let start = super::kits::completion::auxiliary_rest(u, p);
+            let ground = Vec3::new(start.x * 1.4, 0.05 + lift, -0.10) + s.dir * along;
+            let mut world = frame.transform_point3(ground);
+            let slot = side + 2;
+            if contact && s.lock {
+                let anchor = match self.anchors[slot] {
+                    Some(a)
+                        if self.cycles[slot] == raw.floor() as i32
+                            && a.distance(world.xz()) < stride * 0.6 * scale =>
+                    {
+                        a
+                    }
+                    _ => world.xz(),
+                };
+                self.anchors[slot] = Some(anchor);
+                self.cycles[slot] = raw.floor() as i32;
+                world.x = anchor.x;
+                world.z = anchor.y;
+            } else {
+                self.anchors[slot] = None;
+            }
+            let target = hips.inverse().transform_point3(inv.transform_point3(world));
+            let (a, b) = ik::two_bone(start, target, p.leg * 0.55, p.leg * 0.55, Vec3::NEG_Z);
+            pose[u.index()].0 = ik::degrees(a);
+            pose[l.index()].0 = ik::degrees(b);
+            let hr = ik::quat(pose[Joint::Hips.index()].0);
+            pose[foot.index()].0 = ik::degrees((hr * a * b).inverse());
+        }
     }
     /// Pose hips and both legs for this frame. `frame` maps root-joint
     /// space to the world.

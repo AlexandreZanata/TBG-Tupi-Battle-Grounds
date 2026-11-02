@@ -25,6 +25,7 @@ pub struct MarkView {
 }
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct EffectsView {
+    pub completion: Option<crate::completion::state::View>,
     /// Crowcaller timed mark, or Mantis sequence focus (ticks=0: no deadline).
     pub mark: Option<MarkView>,
     pub bleed: Option<DotView>,
@@ -89,6 +90,7 @@ pub(super) fn project(rules: &Ruleset, u: &Unit, now: Tick) -> Option<EffectsVie
         None
     };
     let effects = EffectsView {
+        completion: crate::completion::state::view(u, now),
         mark,
         bleed: dot(&u.fx.bleed, now),
         venom: dot(&u.fx.venom, now),

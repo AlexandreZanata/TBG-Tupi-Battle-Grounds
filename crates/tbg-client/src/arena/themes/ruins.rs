@@ -13,12 +13,12 @@ use bevy::prelude::*;
 pub(super) fn build(kit: &mut Kit) {
     // A few legible architectural groups replace the evenly spaced forest of columns.
     for (x, z, s) in [
-        (-1.4, -3.05, 1.05),
+        (-1.4, -3.7, 1.05),
         (1.25, -3.75, 1.35),
         (4.0, -4.45, 1.10),
         (12.0, -4.45, 1.10),
         (14.75, -3.75, 1.35),
-        (17.4, -3.05, 1.05),
+        (17.4, -3.7, 1.05),
     ] {
         column(&mut kit.props, Vec3::new(x, 0.0, z), s);
     }
@@ -46,26 +46,7 @@ pub(super) fn build(kit: &mut Kit) {
         Transform::from_xyz(8.0, 2.75, -3.40)
             .with_rotation(Quat::from_rotation_z(std::f32::consts::FRAC_PI_4)),
     ));
-    for (x, z, s) in [
-        (0.1, -4.5, 0.95),
-        (3.0, -4.7, 1.05),
-        (6.7, -4.8, 0.70),
-        (9.4, -4.8, 0.80),
-        (13.0, -4.7, 1.15),
-        (16.0, -4.5, 0.95),
-        (1.2, 3.6, 0.62),
-        (14.9, 3.7, 0.70),
-    ] {
-        pine(&mut kit.props, Vec3::new(x, 0.0, z), s);
-    }
-    for (i, at, s) in scatter(0xa6e5).into_iter().filter(|(i, _, _)| i % 3 != 2) {
-        match i % 4 {
-            0 => masonry(&mut kit.props, at, s * 1.3),
-            1 => shrub(&mut kit.props, at, s * 1.1),
-            2 => flowers(&mut kit.props, at, s),
-            _ => boulder(&mut kit.props, at, s, rgb(0xa8ad8c)),
-        }
-    }
+
     for (x, z, s, angle) in [
         (2.0, 3.65, 1.0, -0.65),
         (5.3, 4.4, 1.1, 0.48),
@@ -79,8 +60,8 @@ pub(super) fn build(kit: &mut Kit) {
         (6.1, -4.8, 0.75),
         (9.5, -4.8, 0.8),
         (13.6, -3.9, 0.75),
-        (16.0, -3.1, 0.55),
-        (1.7, 3.1, 0.7),
+        (16.0, -3.3, 0.55),
+        (1.7, 3.7, 0.7),
         (5.0, 3.8, 0.8),
         (11.8, 3.6, 0.7),
         (15.0, 3.2, 0.75),
@@ -120,6 +101,38 @@ pub(super) fn build(kit: &mut Kit) {
                 at + Vec3::new(0.35, size * 0.5, 0.20),
                 size * 0.4,
             );
+        }
+    }
+    for (_, at, s) in crate::arena::dressing::spaced(
+        &kit.props,
+        &kit.glow,
+        [
+            (0.1, -4.5, 0.95),
+            (3.0, -4.7, 1.05),
+            (6.7, -4.8, 0.70),
+            (9.4, -4.8, 0.80),
+            (13.0, -4.7, 1.15),
+            (16.0, -4.5, 0.95),
+            (1.2, 3.6, 0.62),
+            (14.9, 3.7, 0.70),
+        ]
+        .into_iter()
+        .enumerate()
+        .map(|(i, (x, z, s))| (i, Vec3::new(x, 0., z), s))
+        .collect(),
+        0.8,
+    ) {
+        pine(&mut kit.props, at, s);
+    }
+    for (i, at, s) in scatter(0xa6e5, &kit.props, &kit.glow)
+        .into_iter()
+        .filter(|(i, _, _)| i % 3 != 2)
+    {
+        match i % 4 {
+            0 => masonry(&mut kit.props, at, s * 1.3),
+            1 => shrub(&mut kit.props, at, s * 1.1),
+            2 => flowers(&mut kit.props, at, s),
+            _ => boulder(&mut kit.props, at, s, rgb(0xa8ad8c)),
         }
     }
 }

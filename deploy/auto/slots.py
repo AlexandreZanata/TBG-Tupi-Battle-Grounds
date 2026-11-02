@@ -142,10 +142,12 @@ def preflight_host(host):
     return current, idle
 
 
-def preflight(host, manifest):
+def preflight(host, manifest, coordinated_contract=None):
     """Read-only: the active slot and the idle one for this candidate, or why it cannot start."""
     current, idle = preflight_host(host)
-    if current['contract'] != manifest['contract']:
+    if coordinated_contract is not None:
+        require(manifest['contract'] == coordinated_contract, 'candidate differs from the operator-confirmed contract')
+    if current['contract'] != manifest['contract'] and coordinated_contract is None:
         raise Rejected('contract change staged: coordinated client release required', manifest['source_commit'])
     if host.schema() != manifest['database_schema']:
         raise Rejected('database change staged: migration review required', manifest['source_commit'])
@@ -371,14 +373,14 @@ def promote(host, journal, config):
     receipt(journal)
 
 
-def activate(host, staged, manifest, config, ignore_lobby=False):
+def activate(host, staged, manifest, config, ignore_lobby=False, coordinated_contract=None):
     """Install the candidate into the idle slot and make it the admitting one; resumable via the journal.
 
     `ignore_lobby` is an operator decision (an urgent fix in a busy hour): players still waiting in a queue,
     room or invitation are then refused by the draining slot and ask admission again instead of being awaited.
     """
     source = manifest['source_commit']
-    active, idle = preflight(host, manifest)
+    active, idle = preflight(host, manifest, coordinated_contract)
     if not ignore_lobby:
         await_quiet(host, active['slot'], QUIET_WINDOW)
     try:
@@ -394,7 +396,7 @@ def activate(host, staged, manifest, config, ignore_lobby=False):
     generation = generation_for(source)
     previous = STATE/'current.json'
     journal = {'source_commit': source, 'generation': generation, 'from': active['slot'], 'to': idle, 'phase': 'installing',
-               'started': host.now(), 'manifest': manifest,
+               'started': host.now(), 'manifest': manifest, 'coordinated_contract': coordinated_contract,
                'previous_receipt': json.loads(previous.read_text()) if previous.exists() else None}
     save(journal)
     try:
