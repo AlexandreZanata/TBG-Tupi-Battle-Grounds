@@ -501,3 +501,11 @@ purchases into a crowded line, twelve mixed large/ranged figures, free advanceme
 Evolution among allies, crowded idle/turning, 30/60/120 Hz, pause and both seats.
 Targeted tests and the Linux native witness are recorded in the restoration
 report. Windows/desktop game-web visual observation remains pending.
+
+RESTORE-01 Linux receipt: source `ef0975c`, R12 installed with all 380 asset
+hashes verified. One native witness observed twelve allied root entities plus
+one opponent, no queue and 30 stable paused frames. Ten Archers share an
+artificial initial anchor and can occlude each other; this evidence certifies
+entity entry and bounded motion, not universal non-overlap. Core tests cover
+immediate purchases and continued advancement. Exact commands, hashes and
+remaining platform observations are in `docs/phases/LEGACY-CROWD-RESTORATION.md`.

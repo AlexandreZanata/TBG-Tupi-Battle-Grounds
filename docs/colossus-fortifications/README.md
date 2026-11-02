@@ -79,3 +79,8 @@ lossless engine output; the Evolution sheet is the original native PNG.
 [Installed build verification](installed-validation.json) records all 380 asset
 hashes and the exact debug binary. Local review: <http://localhost:8966/>;
 updated 82-champion landing: <http://localhost:8604/#champions>.
+
+Current movement/install evidence supersedes the historical queue witness and
+installation above: [RESTORE-01 Linux receipt](../phases/LEGACY-CROWD-RESTORATION.md).
+Source `ef0975c` installs R12, restores immediate entry/legacy progression and
+retains the wide floor, tower changes and all Colossus forms.
