@@ -6,10 +6,6 @@ use bevy::prelude::*;
 #[derive(Component)]
 pub struct SafeFrame;
 
-/// Backgrounds cover the surface; only interactive presentation is inset.
-#[derive(Component)]
-pub(in crate::ui) struct FullBleed;
-
 pub fn apply(
     mut commands: Commands,
     window: Single<&Window>,

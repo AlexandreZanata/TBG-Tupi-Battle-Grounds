@@ -57,6 +57,8 @@ pub fn census(
     windows: Query<(Entity, &Window, Has<bevy::window::PrimaryWindow>)>,
     cameras: Query<(Entity, &Camera, &bevy::camera::RenderTarget, Has<Camera3d>)>,
     nodes: Query<&ComputedNode>,
+    visible_nodes: Query<&InheritedVisibility, With<Node>>,
+    meshes: Query<(&InheritedVisibility, &ViewVisibility), With<Mesh3d>>,
     roots: Query<&ComputedNode, (With<Node>, Without<ChildOf>)>,
     mut next: Local<f64>,
 ) {
@@ -87,5 +89,12 @@ pub fn census(
         "TBG_ANDROID_CENSUS ui_nodes={} roots={} root_sizes={sizes:?}",
         nodes.iter().count(),
         roots.iter().count()
+    );
+    info!(
+        "TBG_ANDROID_VISIBILITY ui_visible={} meshes={} inherited_visible={} in_view={}",
+        visible_nodes.iter().filter(|v| v.get()).count(),
+        meshes.iter().count(),
+        meshes.iter().filter(|(v, _)| v.get()).count(),
+        meshes.iter().filter(|(_, v)| v.get()).count()
     );
 }

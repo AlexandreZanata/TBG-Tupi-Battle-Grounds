@@ -43,8 +43,6 @@ fn spawn(mut commands: Commands) {
             },
             BackgroundColor(Color::srgb_u8(7, 15, 22)),
             Veil,
-            #[cfg(target_os = "android")]
-            crate::ui::mobile::insets::FullBleed,
             Decoration,
             GlobalZIndex(-100),
         ))

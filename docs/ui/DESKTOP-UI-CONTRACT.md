@@ -877,3 +877,8 @@ Coverage: lobby, header, every menu page, laboratory catalog/forms/clips/editor/
 Practice, touch cancellation/scroll, native text input, loading/safe-area
 transitions. Android runtime checks and same-source Linux/Windows/web
 observations for this new composition remain pending.
+
+P69 candidate 19's separate full-bleed UI root failed to present content on the
+emulator. The next candidate restores the previously observed single UI-root
+hierarchy; loading-edge coverage remains pending while geometry/UI visibility
+are diagnosed. No desktop root or presentation path changes.
