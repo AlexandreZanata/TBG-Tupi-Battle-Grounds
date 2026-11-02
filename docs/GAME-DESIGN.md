@@ -2416,3 +2416,12 @@ and result interpretation follow the assigned seat. Existing disclosed Impossibl
 bot assistance uses the bot's own balance/seat. Editor Training layouts retain
 their authored ally/enemy arrangement. No unit/Stronghold balance, Shop, economy,
 world width, pushing or selection order changes.
+
+## RESTORE-03 — Proposed departure formation restoration (2026-11-02)
+
+The owner's correction concerns lateral departure before contact, not passage
+blocking. Preserve the original preferred lateral formation scale of 1.1 while
+retaining the widened road's 2.1 centre boundary. Extra road room is available
+for actual contact/overtaking; it must not itself double birth/preferred offsets.
+Keep the original separation, return motion, body/weapon clearance and immediate
+authoritative advancement. No physical queue, capacity gate or extra smoothing.

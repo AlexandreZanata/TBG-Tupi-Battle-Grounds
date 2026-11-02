@@ -63,6 +63,9 @@ impl Default for Params {
     }
 }
 
+// The widened road changes the collision boundary, not the original preferred formation.
+const FORMATION_HALF_WIDTH: f32 = 1.1;
+
 pub fn home_lane(id: u32) -> f32 {
     let h = id.wrapping_mul(0x9E37_79B9) >> 16;
     (h % 1000) as f32 / 1000.0 * 1.2 - 0.6
@@ -88,12 +91,12 @@ impl Solver {
             if !o.init {
                 *o = Offset {
                     home: home_lane(b.id),
-                    dz: home_lane(b.id) * p.half_width,
+                    dz: home_lane(b.id) * FORMATION_HALF_WIDTH,
                     init: true,
                     ..*o
                 };
             }
-            let target = o.home * p.half_width;
+            let target = o.home * FORMATION_HALF_WIDTH;
             o.vel_z += (target - o.dz) * p.home_k * dt;
             o.vel_z *= (-p.damping * dt).exp();
             o.dz += o.vel_z * dt;
@@ -222,6 +225,49 @@ mod tests {
         let dx = (b[j].anchor_x + s[j].dx) - (b[i].anchor_x + s[i].dx);
         let dz = s[j].dz - s[i].dz;
         (dx * dx + dz * dz).sqrt()
+    }
+
+    #[test]
+    fn restore03_road_width_does_not_spread_departing_units_before_contact() {
+        let mut narrow = Params::default();
+        narrow.half_width = 1.1;
+        let wide = Params::default();
+        let bodies = [body(4, 0.5), body(7, 2.0)];
+        let mut old = [Offset::default(); 2];
+        let mut current = old;
+        for _ in 0..120 {
+            solve(&bodies, &mut old, 1.0 / 60.0, &narrow);
+            solve(&bodies, &mut current, 1.0 / 60.0, &wide);
+        }
+        assert_eq!(
+            current, old,
+            "RESTORE-03: extra road room must not change the departure formation"
+        );
+        let mut alone = [Offset::default()];
+        for _ in 0..120 {
+            solve(&bodies[..1], &mut alone, 1.0 / 60.0, &wide);
+        }
+        assert_eq!(
+            current[0], alone[0],
+            "a noncontacting newcomer must not repel the first unit"
+        );
+    }
+
+    #[test]
+    fn restore03_contact_still_pushes_and_regroups_after_the_neighbor_leaves() {
+        let bodies = [body(4, 4.0), body(7, 4.0)];
+        let mut offsets = run(&bodies, 240);
+        assert!(gap(&bodies, &offsets, 0, 1) > 0.8 * 0.9);
+        for _ in 0..600 {
+            solve(
+                &bodies[..1],
+                &mut offsets[..1],
+                1.0 / 60.0,
+                &Params::default(),
+            );
+        }
+        assert!((offsets[0].dz - home_lane(4) * 1.1).abs() < 0.001);
+        assert!(offsets[0].dx.abs() < 0.001);
     }
 
     #[test]

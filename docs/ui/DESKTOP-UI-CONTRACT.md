@@ -617,3 +617,12 @@ and leaves all unobserved platforms/cases pending.
 - Local synthetic Windows-autocrlf checkout tests and input guards passed.
   Same-source final packages and the existing pixel/motion matrix remain the
   acceptance evidence; line-ending tests do not certify visual parity.
+
+## RESTORE-03 — Departure before contact
+
+Linux/Windows/desktop web use the same original 1.1 preferred formation scale
+inside the retained 2.1 lateral boundary. A departing unit that does not contact
+another cannot repel it merely because the road grew. Real contacts still push,
+allow overtaking and regroup after separation. Test both sides near each tower,
+ordinary bodies and measured equipment. The focused numerical regression is
+mechanism evidence; all runtime/platform observations remain pending.
