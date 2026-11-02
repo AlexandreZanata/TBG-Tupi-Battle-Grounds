@@ -82,6 +82,15 @@ class WorkflowPolicy(unittest.TestCase):
                     with self.subTest(workflow=name, line=line.strip()):
                         self.assertRegex(line, PINNED)
 
+    def test_ubuntu_22_jobs_set_up_the_python_they_run(self):
+        # 22.04's system Python 3.10 lacks APIs the scripts use; backend
+        # release run 41361428350 failed on hashlib.file_digest.
+        for name, text in workflow_texts().items():
+            for job, body in GATE.workflow_jobs(text).items():
+                if 'ubuntu-22.04' in body and re.search(r'(?m)^\s*(?:-\s+)?(?:run:\s*)?python3\s', body):
+                    with self.subTest(workflow=name, job=job):
+                        self.assertIn('actions/setup-python@', body)
+
     def test_toolchain_file_pins_the_workflow_compiler(self):
         # rust-toolchain.toml overrides the action's toolchain input on Linux.
         channel = tomllib.loads((ROOT/'rust-toolchain.toml').read_text())['toolchain']['channel']
