@@ -69,6 +69,8 @@ workspace sources touched before reuse (stale cross-worktree crates avoided).
 | `cargo test -p tbg-core --features lab` (lib + all 44 integration targets) | all pass after extending the explicit revision selectors to R14 (see below) |
 | `cargo test -p tbg-client --bin tbg-client` | 224 tests: all pass (2 count fixtures and one purchase-energy fixture updated for the 84-kind preview pool) |
 | `cargo check -p tbg-server --bins --tests` | passes |
+| `cargo test -p tbg-server --test online --test spectate` (after merging PR #48 head `267593e`) | 32 + 6 passed (protocol 37, public `StormArc`) |
+| `cargo test -p tbg-client --bin tbg-client` after that merge | 222 passed, 2 ignored |
 | `cargo build -p tbg-balance --release --example gods_screen` + run | CSV in `docs/media/gd04/gods-screen.csv` |
 | `git diff --check`, `cargo fmt --all -- --check` | clean |
 
@@ -78,8 +80,8 @@ the new Gods would have changed another champion's crates. GD-04 excludes them
 from cargo; R14 (`f354f651c056d615`) now reproduces every R13 canonical trace,
 outcome and tick (`contract_determinism`, `contract_lab`, `CC-ID03`).
 
-Not run (deferred, owner/consolidation): workspace clippy, `tbg-server` test
-suite, browser/WASM build, D-33 balance gate, Windows/Wine packages, browser
+Not run (deferred, owner/consolidation): workspace clippy, the rest of the
+`tbg-server` test suite, browser/WASM build, D-33 balance gate, Windows/Wine packages, browser
 and Windows visual captures, live online match captures.
 
 ## 4. First-order value analysis (Proposed values, not a gate)
