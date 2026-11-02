@@ -574,6 +574,7 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S1 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Appended IC-13 history-after-v12 and damaged-shape tests | Compilation cold; tests queued for S14. Legacy recovery fixture API conversion follows in S3. |
 
 ### Consolidation (S14)
 - Commands and real output:

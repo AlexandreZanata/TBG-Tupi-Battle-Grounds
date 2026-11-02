@@ -253,3 +253,50 @@ async fn a_partial_or_foreign_v9_shape_refuses_to_open() {
     assert_eq!(count(&foreign, "SELECT COUNT(*) FROM auth_sessions"), 1);
     let _ = std::fs::remove_file(foreign);
 }
+
+/// IC-13: a v12 marker cannot hide the separately opted-in history v11.
+#[tokio::test]
+async fn p75_history_installs_after_12_and_reopens_without_changes() {
+    let p = populated().await;
+    let before = count(&p, "SELECT COUNT(*) FROM accounts");
+    drop(Store::open_history(&p, Default::default(), true).unwrap());
+    assert_eq!(
+        count(
+            &p,
+            "SELECT COUNT(*) FROM schema_version WHERE version IN (11,12)"
+        ),
+        2
+    );
+    assert_eq!(count(&p, "SELECT COUNT(*) FROM accounts"), before);
+    let db = rusqlite::Connection::open(&p).unwrap();
+    let dump = |db: &rusqlite::Connection| -> Vec<(String, String)> {
+        let mut stmt = db
+            .prepare("SELECT name,sql FROM sqlite_master WHERE sql IS NOT NULL ORDER BY name")
+            .unwrap();
+        stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))
+            .unwrap()
+            .map(Result::unwrap)
+            .collect()
+    };
+    let shape = dump(&db);
+    drop(Store::open_history(&p, Default::default(), true).unwrap());
+    assert_eq!(dump(&db), shape);
+    assert_eq!(count(&p, "SELECT COUNT(*) FROM admin_settings"), 6);
+    let _ = std::fs::remove_file(p);
+}
+
+/// IC-13/S13: partial P75 tables or missing append-only guards fail closed.
+#[tokio::test]
+async fn p75_partial_or_foreign_shape_aborts_without_repair() {
+    for damage in [
+        "DROP TABLE operator_sessions",
+        "DROP TRIGGER admin_audit_no_update",
+        "DROP INDEX operators_single_owner",
+    ] {
+        let p = populated().await;
+        sql(&p, damage);
+        assert!(Store::open(&p).is_err(), "{damage}");
+        assert_eq!(count(&p, "SELECT COUNT(*) FROM accounts"), 1);
+        let _ = std::fs::remove_file(p);
+    }
+}

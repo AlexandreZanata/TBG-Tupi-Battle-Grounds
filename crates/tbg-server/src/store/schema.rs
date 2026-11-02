@@ -16,7 +16,7 @@
 use rusqlite::Connection;
 
 /// Latest ordered database migration, also bound into deployment metadata.
-pub(super) const CURRENT_VERSION: i64 = 10;
+pub(super) const CURRENT_VERSION: i64 = 12;
 
 const MATCHES_V1: &str = "CREATE TABLE IF NOT EXISTS matches (
     id INTEGER PRIMARY KEY,
@@ -194,10 +194,10 @@ const RELEASE_INDEXES: &str =
     "CREATE INDEX IF NOT EXISTS account_owner_by_slot ON account_owner(slot);";
 
 /// One feature's tables and the columns its code reads and writes.
-struct Feature {
-    tables: &'static str,
-    indexes: &'static str,
-    shape: &'static [(&'static str, &'static [&'static str])],
+pub(super) struct Feature {
+    pub(super) tables: &'static str,
+    pub(super) indexes: &'static str,
+    pub(super) shape: &'static [(&'static str, &'static [&'static str])],
 }
 
 const RELEASE: Feature = Feature {
@@ -289,7 +289,7 @@ fn columns(tx: &Connection, table: &str) -> rusqlite::Result<Option<Vec<String>>
     Ok(Some(names))
 }
 
-fn foreign_shape(table: &str) -> rusqlite::Error {
+pub(super) fn foreign_shape(table: &str) -> rusqlite::Error {
     rusqlite::Error::SqliteFailure(
         rusqlite::ffi::Error::new(rusqlite::ffi::SQLITE_SCHEMA),
         Some(format!("unexpected existing shape for {table}")),
@@ -401,14 +401,22 @@ fn migrate_once(conn: &mut Connection) -> rusqlite::Result<()> {
         tx.execute_batch(RELEASE_INDEXES)?;
         tx.execute_batch(super::auth_sessions::INDEXES)?;
     }
+    ensure(&tx, &super::p75::FEATURE)?;
+    super::p75::verify(&tx)?;
+    tx.execute("INSERT OR IGNORE INTO admin_settings(key,value,updated_unix) VALUES ('chat_enabled',0,0),('emoji_enabled',1,0),('custom_emoji_enabled',0,0),('emoji_uploads_enabled',0,0),('reports_enabled',1,0),('registration_enabled',1,0)", [])?;
+    tx.execute("INSERT INTO schema_version(version) SELECT 12 WHERE NOT EXISTS(SELECT 1 FROM schema_version WHERE version=12)", [])?;
     tx.commit()
 }
 
 /// P73 is additive and installed only through the explicit history migration flag.
 pub(super) fn migrate_history(conn: &mut Connection) -> rusqlite::Result<()> {
     let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
-    let version: i64 = tx.query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))?;
-    if version < 11 {
+    let installed: bool = tx.query_row(
+        "SELECT EXISTS(SELECT 1 FROM schema_version WHERE version=11)",
+        [],
+        |r| r.get(0),
+    )?;
+    if !installed {
         tx.execute_batch(include_str!("player_history/schema.sql"))?;
         tx.execute("INSERT INTO schema_version(version) VALUES(11)", [])?;
     }

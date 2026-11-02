@@ -12,7 +12,6 @@ pub(crate) mod email;
 mod limits;
 pub(crate) mod mail;
 pub(crate) mod proof;
-mod schema;
 #[cfg(test)]
 pub(crate) mod tests;
 
@@ -53,7 +52,7 @@ pub(crate) struct Recovery {
 impl Recovery {
     /// Callers are isolated fixtures. Live Store::open never calls this installer.
     pub(crate) fn fixture(mut conn: Connection) -> Result<Self, Error> {
-        schema::install(&mut conn)?;
+        super::schema::migrate(&mut conn)?;
         Ok(Self {
             conn,
             mail: Capture::default(),
