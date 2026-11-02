@@ -18,9 +18,9 @@ struct Totals {
     reasons: [u32; 3],
     faction_wins: [u32; tbg_core::FACTION_COUNT],
     faction_games: [u32; tbg_core::FACTION_COUNT],
-    purchases: [u32; 10],
+    purchases: Vec<u32>,
     /// Per kind: (games a seat bought it, games that seat won).
-    bought_won: [(u32, u32); 10],
+    bought_won: Vec<(u32, u32)>,
     evolutions: u32,
     comebacks: u32,
     decided_at_2min: u32,
@@ -50,7 +50,11 @@ fn main() {
         Some("cheap") => Policy::Cheap,
         _ => Policy::Bot,
     };
-    let mut t = Totals::default();
+    let mut t = Totals {
+        purchases: vec![0; tbg_core::content::UNIT_KIND_COUNT],
+        bought_won: vec![(0, 0); tbg_core::content::UNIT_KIND_COUNT],
+        ..Default::default()
+    };
     for seed in 0..n {
         if !play(seed, policy, &mut t) {
             eprintln!("match {seed} did not end");
@@ -75,7 +79,7 @@ fn play(seed: u64, policy: Policy, t: &mut Totals) -> bool {
     let mut s = MatchState::new(seed);
     let mut bots = [Bot::new(2 * seed + 1), Bot::new(2 * seed + 2)];
     let mut bought = [[0u32; tbg_core::FACTION_COUNT]; 2];
-    let mut kinds = [[false; 10]; 2];
+    let mut kinds = [[false; tbg_core::content::UNIT_KIND_COUNT]; 2];
     let mut hp_at_2min = None;
     let mut last = Instant::now();
     let decide = |seat: Seat, view: &MatchView| {
@@ -104,7 +108,8 @@ fn play(seed: u64, policy: Policy, t: &mut Totals) -> bool {
             | PlayerIntention::Fortify { .. }
             | PlayerIntention::Reserve { .. }
             | PlayerIntention::Release { .. }
-            | PlayerIntention::Reroll { .. } => {}
+            | PlayerIntention::Reroll { .. }
+            | PlayerIntention::HireAuxiliary { .. } => {}
         },
         Moment::Intention { .. } => {}
         Moment::Stepped { state } => {

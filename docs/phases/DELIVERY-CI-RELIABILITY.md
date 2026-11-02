@@ -291,3 +291,9 @@ C5 exact preflight (1), wound/cadence/Favor control union (4), and the
 R15 Ranked SIDE-01 command/reconnect/account-settlement case (1).
 These use the shared lock and two jobs; the hosted complete lane remains
 mandatory and no unrelated local suite was run.
+
+CI a557c6a found the legacy core balance example's exhaustive intention
+match. Propagate HireAuxiliary there without treating it as a champion
+purchase. Its ten-entry purchase counters are also sized to UNIT_KIND_COUNT
+so canonical purchases cannot index outside them. All core examples now
+compile with lab enabled; no benchmark or example simulation was executed.
