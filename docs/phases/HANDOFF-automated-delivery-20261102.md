@@ -1,5 +1,14 @@
 # Handoff — automatic player-safe delivery for TBG (2026-11-02, about 12:50 UTC)
 
+> Evening consolidation checkpoint: the owner subsequently authorized normal
+> merges. #48/#53/#54 and all original code fronts are integrated on main.
+> Read [the production consolidation report](DELIVERY-consolidation-production-20261102.md)
+> for current facts before acting. The original numbered instructions below
+> are historical evidence, not a request to repeat activation or installation.
+> The compatible timer-only proof began at 19:10:44 UTC; no manual deployment
+> controller/timer action is permitted during that observation. No force push,
+> tag/asset overwrite or player-data restoration was authorized.
+
 For the next agent (any model). The owner writes Portuguese: **talk to them in Portuguese; keep code,
 comments, repo docs and commits in English** (AGENTS.md rule 7). Read `AGENTS.md` first, then this file,
 then `docs/phases/DELIVERY-automated-player-safe.md` (the evidence report) and `deploy/auto/README.md`

@@ -59,3 +59,17 @@ Release notes now describe colossus.2 as the initial consolidated activation,
 matching the immutable-tag stop above. The timer-only witness remains the
 subsequent colossus.3 release. This documentation update changes no Rust code;
 the two corrected P73 test results remain valid.
+
+
+## First activation observed
+
+Corrected PR #53 merged as 8c5074356140861a7992ba758c1ed8e47e0f4bdd. Its
+exact-main four-family artifacts were published and provenance/hash/contract/
+schema verified before application. The actual sandbox no-apply check passed.
+New slot a admitted w38-r15 while the old w31 private pair on b completed
+with equal outcomes, 1,801 views per guest, zero failures and zero restarts.
+The unchanged guards deferred retirement until real work drained; reviewed
+resume completed without editing counters or receipts. All four sources and
+public hashes converged and old b retired by 19:09:36 UTC; timers were enabled
+only afterward. The subsequent compatible #54 delivery is recorded in
+[the production report](DELIVERY-consolidation-production-20261102.md).
