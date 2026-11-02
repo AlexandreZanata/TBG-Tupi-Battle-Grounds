@@ -43,3 +43,7 @@ Source, individual asset checksums and the exact compatible contract are in
 
 Ruleset 13 registers equivalent Rust 1.99 lint fixes; gameplay values and branches
 are unchanged from the ruleset-12 preview. No competitive acceptance is implied.
+
+D-104 retirement load is sampled inside its serialized writer turn, excluding
+only the observation itself. Later queued work, running matches, reconnect
+receipts and Ranked results remain protected during delivery.

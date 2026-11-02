@@ -142,15 +142,20 @@ pub async fn run(runtime: Arc<Runtime>, store: Arc<Store>, metrics: Arc<Metrics>
 async fn tick(
     runtime: &Runtime,
     store: &Arc<Store>,
-    metrics: &Metrics,
+    metrics: &Arc<Metrics>,
     id: &SlotIdentity,
     handoff: bool,
 ) {
-    let load = Runtime::load(metrics, Some(store));
+    let metrics = metrics.clone();
+    let observed_store = store.clone();
     let serving = runtime.gate.serving.load(Relaxed);
     let job_id = id.clone();
     let result = store
         .release(move |conn| -> rusqlite::Result<(bool, Vec<SlotRow>)> {
+            // Earlier jobs have finished by this writer turn. Exclude only this
+            // observation; every other queued job still protects retirement.
+            let mut load = Runtime::load(&metrics, Some(&observed_store));
+            load.results_pending = load.results_pending.saturating_sub(1);
             let now = release::now_unix();
             let mine = release::heartbeat(conn, &job_id.slot, &job_id.generation, load, now)?;
             if mine && serving {
@@ -200,3 +205,6 @@ pub async fn retire(runtime: &Runtime, store: &Store) {
         .await;
     tracing::info!("release slot retired: {done:?}");
 }
+
+#[cfg(test)]
+mod tests;
