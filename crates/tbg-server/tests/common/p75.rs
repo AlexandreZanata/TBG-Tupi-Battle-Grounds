@@ -177,3 +177,49 @@ pub async fn request(
     .await
     .unwrap()
 }
+
+pub struct BinaryReply {
+    pub status: u16,
+    pub bytes: Vec<u8>,
+}
+pub async fn bytes_request(
+    url: &str,
+    method: &str,
+    path: &str,
+    bytes: Vec<u8>,
+    mime: &str,
+    access: Option<&str>,
+) -> BinaryReply {
+    let url = format!("{url}{path}");
+    let method = method.to_owned();
+    let mime = mime.to_owned();
+    let access = access.map(str::to_owned);
+    tokio::task::spawn_blocking(move || {
+        let agent = ureq::Agent::config_builder()
+            .max_redirects(0)
+            .http_status_as_error(false)
+            .timeout_global(Some(Duration::from_secs(5)))
+            .build()
+            .new_agent();
+        let mut req = ureq::http::Request::builder()
+            .uri(url)
+            .method(method.as_str())
+            .header("content-type", mime)
+            .header("x-tbg-client", "native");
+        if let Some(access) = access {
+            req = req.header("authorization", format!("Bearer {access}"));
+        }
+        let mut r = agent.run(req.body(bytes).unwrap()).unwrap();
+        BinaryReply {
+            status: r.status().as_u16(),
+            bytes: r
+                .body_mut()
+                .with_config()
+                .limit(1048576)
+                .read_to_vec()
+                .unwrap(),
+        }
+    })
+    .await
+    .unwrap()
+}

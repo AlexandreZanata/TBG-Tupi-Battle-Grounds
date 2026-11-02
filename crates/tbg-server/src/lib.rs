@@ -22,6 +22,7 @@ pub mod botclient;
 pub mod build_info;
 mod chan;
 pub mod config;
+pub mod emoji;
 pub mod identity;
 mod limits;
 pub mod live;
@@ -50,6 +51,8 @@ use metrics::Metrics;
 /// Shared by every request handler.
 #[derive(Clone)]
 pub(crate) struct AppState {
+    pub emoji_work: Arc<tokio::sync::Semaphore>,
+    pub emoji_cache: Arc<emoji::cache::Cache>,
     pub mail_configured: bool,
     pub auth: Arc<auth::Service>,
     pub history_reads: Arc<tokio::sync::Semaphore>,
@@ -196,6 +199,8 @@ pub async fn run_with(
         live_tx,
     ));
     let state = AppState {
+        emoji_work: Arc::new(tokio::sync::Semaphore::new(2)),
+        emoji_cache: Arc::default(),
         mail_configured,
         history_reads: Arc::new(tokio::sync::Semaphore::new(4)),
         auth,
@@ -212,6 +217,22 @@ pub async fn run_with(
     };
     let _admin = admin::listener::start(state.clone(), &shared.admin_address).await?;
     let mut app = Router::new()
+        .route(
+            "/api/me/emoji",
+            get(emoji::upload::handler)
+                .post(emoji::upload::handler)
+                .layer(DefaultBodyLimit::max(1048576)),
+        )
+        .route(
+            "/api/me/emoji/slots",
+            axum::routing::put(emoji::upload::handler),
+        )
+        .route(
+            "/api/me/emoji/{id}",
+            axum::routing::delete(emoji::upload::handler),
+        )
+        .route("/api/me/emoji/{id}/sheet.png", get(emoji::upload::handler))
+        .route("/api/emoji/{asset}", get(emoji::serve::handler))
         .route("/api/me/reports", post(reports::handler))
         .route("/api/me/account", get(identity::http::handler))
         .route("/api/me/email", post(identity::http::handler))

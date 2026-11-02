@@ -574,6 +574,7 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S10 | This step commit | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | `contract_p75_emoji`: hostile dimensions/truncation/polyglots/frame count, standard IDs, private upload → approval → equip → revoke, content hash and cache reauthorization | Tests queued S14; 2 s timing and real animated-client presentation pending. |
 | S9 | This step commit | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | Appended wire goldens; real two-seat chat/guest boundary and replay hash test; sanitizer and limit contracts | Tests queued S14; actual spectator attachment/reconnect/mid-match checks pending extension. |
 | S8 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_reports`: participant eligibility, duplicate race, frozen transcript, forged target rejection, privacy and daily bound | S9 populates live transcript/loadouts; tests and real-client filing queued S14. |
 | S7 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Every area route inventoried with success/unauthenticated denial; moderator ceiling, current disabled state, masked-email projection | Runtime tests queued S14; console walkthrough pending S12. |

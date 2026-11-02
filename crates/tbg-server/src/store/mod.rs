@@ -19,6 +19,7 @@ mod accounts;
 mod arcanas;
 pub mod audit;
 pub mod auth_sessions;
+pub mod emoji;
 mod history;
 pub mod integrity_admin;
 pub mod leaderboard;
