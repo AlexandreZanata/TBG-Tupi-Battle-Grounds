@@ -61,7 +61,8 @@ impl Match {
             | tbg_core::PlayerIntention::Forgo { .. }
             | tbg_core::PlayerIntention::Reserve { .. }
             | tbg_core::PlayerIntention::Release { .. }
-            | tbg_core::PlayerIntention::Reroll { .. } => {}
+            | tbg_core::PlayerIntention::Reroll { .. }
+            | tbg_core::PlayerIntention::HireAuxiliary { .. } => {}
         }
     }
 

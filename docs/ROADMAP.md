@@ -635,3 +635,30 @@ normally publish its branch and open a GitHub PR targeting `main`, per the
 owner's explicit instruction. This scoped exception does not authorize
 force-push, direct main changes, merge, auto-merge or deployment. Unrun
 acceptance must be listed in a Draft PR rather than claimed complete.
+
+## Gods expansion: Colossus refinement, Volthar and Astreon (owner, 2026-11-02)
+
+**GD-04 — implemented, Draft review pending**, `phase/gods-faction-expansion`,
+based on PR #48 (`codex/ogre-faction` `747e2ad`) plus the unpushed Colossus
+fixes CROWD-EXIT-01 and GD-03. Refines the Colossus visually (stats and
+abilities unchanged; branch B stays dark) and adds Volthar (Storm Judgment
+chain lightning) and Astreon (Verdict Lance max-HP pierce) to the local preview
+pool with five forms each. Wire 37, ruleset 14, D-105; values Proposed. See
+[the phase report](phases/GODS-faction-expansion.md). Windows/web parity,
+D-33 balance acceptance and owner look/fun sign-off remain pending.
+
+
+## P74 — War Auxiliaries (`Mineiro` & `Mercador`), 3D Precincts & Construction Animations (2026-11-02)
+
+Spec: [`docs/phases/P74-war-auxiliaries.md`](phases/P74-war-auxiliaries.md).
+Authoritative `Mineiro` (cost 6 Energy, 12s preparation, +0.06 Energy/s for 180s
+outside Interest multipliers, single-hire per match) and `Mercador` (cost 4
+Energy, counts post-hire champion purchases `0..3` to grant 1 free reroll per 3
+purchases up to 3 activations/9 purchases without increasing `reroll_streak`).
+Bottom-right navy-and-gold `Auxiliares (0/2)` HUD panel with 3D portraits and
+free-reroll indicator on the Reroll button. Procedural low-poly 3D `Mineiro`
+(mine outcrop, timber shoring, swinging lantern, rails, ore cart) and `Mercador`
+(red-and-cream striped market stall, balance-scales banner, crates/sacks, timber
+pier over water, and wave-bobbing wooden Merchant Caravel ship) with 3-stage
+construction animations, active work/delivery loops, and theme-harmonized
+palettes across all eight Arenas.

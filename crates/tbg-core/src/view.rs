@@ -145,12 +145,15 @@ pub struct MatchView {
     /// BR-LV05: how many spectators watch this match. Set by the server
     /// when it sends the view; a count, never who (`0` from `view_for`).
     pub spectators: u16,
+    /// Public War Auxiliary state for both seats (BR-AX11, D-106).
+    pub auxiliaries: [[crate::auxiliary::AuxiliarySlotView; crate::auxiliary::AUXILIARY_SLOTS]; 2],
+    /// Private Merchant free rerolls held by the viewing seat (BR-AX08).
+    pub free_rerolls: u8,
     /// BR-S13: the viewing seat only, never the opponent or PublicView.
     #[serde(skip)]
     pub reserve: [u8; OFFERS],
     #[serde(skip)]
     pub held_mask: u8,
-    #[serde(skip)]
     pub reroll_cost: Option<u32>,
 }
 
@@ -216,6 +219,8 @@ impl MatchState {
             events: events.to_vec(),
             outcome: self.outcome,
             spectators: 0,
+            auxiliaries: crate::auxiliary::views(self),
+            free_rerolls: me.free_rerolls,
         }
     }
 }
@@ -255,6 +260,8 @@ fn unit_view(u: &crate::state::Unit, tick: Tick, rules: &crate::Ruleset) -> Unit
                         .max(crate::jawguard::counter(u))
                         .max(crate::mantis::counter(u))
                         .max(crate::hornet::counter(u))
+                        .max(crate::volthar::counter(u))
+                        .max(crate::astreon::counter(u))
                         .max(crate::completion::counter(u)),
                 ) << FX_COUNTER_SHIFT;
             if u.is_summon() {

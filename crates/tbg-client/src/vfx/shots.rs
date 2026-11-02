@@ -64,6 +64,10 @@ pub enum ShotKind {
     WebSpit,
     SlashWave,
     BloodBolt,
+    /// GD-04 Volthar: hammer lightning, the counted charged bolt and one chain link.
+    StormBolt,
+    StormSurge,
+    StormArc,
     /// Ogre expansion: separate mesh, timing and impact recipes by kind.
     Ogre(tbg_core::UnitKind, u8, u8),
     Abyssal(tbg_core::UnitKind, u8, u8),
@@ -116,6 +120,7 @@ enum Body {
     RadiantArrow,
     Stamp,
     Stinger,
+    Lightning,
 }
 
 #[derive(Clone, Copy)]
@@ -549,6 +554,23 @@ fn look(kind: ShotKind) -> Look {
             14.0,
             Impact::Cleanse,
         ),
+        StormBolt | StormSurge => (
+            Some((Body::Lightning, if kind == StormSurge { 1.6 } else { 1.0 })),
+            0.0,
+            UNIT_FLIGHT,
+            Trail::Motes(Mote::Turquoise),
+            9.0,
+            Impact::Sparks,
+        ),
+        // The link already landed on the server; it only has to be readable.
+        StormArc => (
+            Some((Body::Lightning, 0.8)),
+            0.0,
+            0.06,
+            Trail::Sparks,
+            14.0,
+            Impact::Sparks,
+        ),
         BloodBolt => (
             Some((Body::Orb, 0.6)),
             0.04,
@@ -634,6 +656,7 @@ pub struct ShotMeshes {
     sun_mote: Handle<Mesh>,
     radiant_arrow: Handle<Mesh>,
     stamp: Handle<Mesh>,
+    lightning: Handle<Mesh>,
     stinger: Handle<Mesh>,
     fish: Handle<Mesh>,
     bomb: Handle<Mesh>,
@@ -840,6 +863,26 @@ impl ShotMeshes {
                 (Cyl(0.012, 0.12), AMBER, along(0.0)),
                 (Cone(0.025, 0.10), CHITIN, along(0.11)),
             ]),
+            // A three-segment zigzag with a pale core: one merged mesh for every bolt.
+            lightning: build(vec![
+                (
+                    Box(0.03, 0.03, 0.24),
+                    STORM_BLUE,
+                    Transform::from_xyz(0.03, 0.0, 0.16).with_rotation(Quat::from_rotation_y(-0.5)),
+                ),
+                (
+                    Box(0.03, 0.03, 0.24),
+                    STORM_BLUE,
+                    Transform::from_xyz(0.0, 0.0, 0.0).with_rotation(Quat::from_rotation_y(0.5)),
+                ),
+                (
+                    Box(0.03, 0.03, 0.24),
+                    STORM_BLUE,
+                    Transform::from_xyz(0.03, 0.0, -0.16)
+                        .with_rotation(Quat::from_rotation_y(-0.5)),
+                ),
+                (Ball(0.045), IVORY, Transform::from_xyz(0.04, 0.0, 0.27)),
+            ]),
             stamp: build(vec![
                 (Box(0.07, 0.07, 0.12), GOLD, Transform::IDENTITY),
                 (Box(0.035, 0.035, 0.13), IVORY, Transform::IDENTITY),
@@ -958,6 +1001,7 @@ impl ShotMeshes {
             Body::SunMote => &self.sun_mote,
             Body::RadiantArrow => &self.radiant_arrow,
             Body::Stamp => &self.stamp,
+            Body::Lightning => &self.lightning,
             Body::Stinger => &self.stinger,
             Body::Fish => &self.fish,
             Body::Bomb => &self.bomb,

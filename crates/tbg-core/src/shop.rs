@@ -116,6 +116,9 @@ fn slot(offer: u8) -> Result<usize, Rejection> {
 }
 
 pub(crate) fn reroll_cost(s: &MatchState, seat: Seat) -> Option<u32> {
+    if s.player(seat).free_rerolls > 0 {
+        return Some(0);
+    }
     let rule = s.rules().shop?;
     let cost = rule.reroll_base.saturating_add(
         rule.reroll_step
@@ -131,6 +134,11 @@ pub(crate) fn reroll(s: &mut MatchState, seat: Seat, cost: u32) -> Result<(), Re
     }
     let pool = s.rules().pool;
     let p = &mut s.players[seat.index()];
+    if actual == 0 && p.free_rerolls > 0 {
+        p.free_rerolls -= 1;
+        new_shop(p, pool, None);
+        return Ok(());
+    }
     if !p.spend(cost) {
         return Err(Rejection::NotEnoughEnergy);
     }

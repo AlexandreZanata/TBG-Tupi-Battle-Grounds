@@ -354,7 +354,14 @@ pub(super) fn apply(
                 if pending.0.is_some() {
                     continue;
                 }
-                if let Some(cost) = extra.0 .0.as_ref().and_then(|v| v.reroll_cost) {
+                let cost = extra.0 .0.as_ref().and_then(|v| {
+                    if v.free_rerolls > 0 {
+                        Some(0)
+                    } else {
+                        v.reroll_cost
+                    }
+                });
+                if let Some(cost) = cost {
                     seq.0 += 1;
                     link.send(
                         ClientMsg::Intent {
@@ -365,6 +372,19 @@ pub(super) fn apply(
                     );
                     pending.0 = Some((u8::MAX, seq.0));
                 }
+            }
+            UiAction::HireAuxiliary(slot) => {
+                if pending.0.is_some() {
+                    continue;
+                }
+                seq.0 += 1;
+                link.send(
+                    ClientMsg::Intent {
+                        seq: seq.0,
+                        intent: PlayerIntention::HireAuxiliary { slot },
+                    },
+                    now,
+                );
             }
             UiAction::Buy(offer) => {
                 if pending.0.is_some_and(|(slot, _)| slot == u8::MAX) {

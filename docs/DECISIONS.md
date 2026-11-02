@@ -3164,3 +3164,144 @@ not follow a promotion and stay documented limits.
 a scheduled promotion), a second host is added (match ownership and routing), a measurement
 shows an interruption the rehearsal and the observed promotions did not, or capacity no longer
 fits two overlapping generations.
+
+## INT-02 — D-44 price-canary policy correction (2026-11-02)
+
+The consolidated C7 gate missed SiegeWalker's existing x3 cost mutation. No
+combat stat, threshold, sample size, duel budget or assertion is changed. The
+internal Favor controller spent on cheap redraws even while the desired offer
+was already present but unaffordable, including fallback-bot reaction ticks.
+That can remove the price canary from its own measured army before the policy
+can afford it. D-44 refresh-by-buying applies when the desired kind is absent.
+
+Favor now banks for a present preferred kind and protects it between scheduled
+decisions. If absent, its cheapest redraw and bot fallback remain. Comp retains
+its separately documented affordable-composition policy. This corrects offline
+lab controls only; the shipped bot, server simulation, online Shop and all
+player rules are unchanged. Existing source-specific reports remain historical;
+new policy-sensitive experiments must be recomputed before claiming acceptance.
+
+A held-offer regression failed before the change and both present/absent
+scenarios pass after it. A bounded 32-pair original favor-vs-Bot screen changed
+from the diagnostic's ineffective controls to a 1.000000 versus 0.796875 price
+comparison after the fix (20.3125 points). This is screening evidence, not the
+full C7 result or D-33 acceptance. The original 256-pair C7 test and its 10-point
+match/20-point duel criteria remain intact and queued to hosted CI.
+
+## INT-03 — Isolate healing-canary controls without changing a threshold (2026-11-02)
+
+After INT-02 the full 256-pair C7 price canary passed SiegeWalker, then exposed
+Bloomkeeper x2 HP/healing at 0.88 -> 0.80 against the shipped Bot. Scaling a
+Ruleset changes both armies: that opponent can buy the same buffed healer.
+The value engine already has BotAvoid(kind) for exactly this confound. Retain
+the original observation and add that isolated control for pure-healer C7 rows,
+using the same 256 paired seeds and +0.10 gain. All duel/match thresholds,
+mutations, budgets, original rows and assertions for other kinds remain.
+This is calibration of the canary, not acceptance or tuning of the live roster.
+
+Inspection also found that BotAvoid passed through the outer reaction schedule
+and the shipped Bot's own schedule, slowing the control twice. Like Bot, it now
+owns its internal cadence directly. A new active-simulation regression compares
+Bot and BotAvoid when the avoided kind is absent from the pool: actions and
+state hashes must match. Neither change affects the production bot or gameplay.
+Local Rust execution was deferred when the shared validation lock returned 75;
+the exact new test and unchanged full C7 remain queued to protected hosted CI.
+
+## INT-04 — Preserve C7 measurements while avoiding unused mutant rows (2026-11-02)
+
+For every single-kind mutation C7 rebuilt a full 46-base-form matrix, although
+it only consumes that mutated kind's row and weak/oppressive membership. The
+reference matrix remains complete. Mutant measurements now use a test-only
+helper that calls the reference pair builder for every target/opponent pair,
+all three unchanged budgets, both seat orders and the same duel limit. No
+opponent, target kind, sample, threshold or assertion is omitted. Other rows
+are explicitly unmeasured and are never consumed by this test or a live gate.
+
+An equivalence regression compares the whole target score row, averages and
+both consumed flags against the complete reference builder for normal, x2
+HP/damage and x3 cost rules. This is a reduction of unconsumed work, not a
+shorter battle, smaller statistical sample or additional pass criterion.
+Local compilation remains deferred under the earlier shared-lock contention;
+the new proof and complete original C7 run in required hosted CI.
+
+## INT-05 — Owner-authorized controlled wounded-army healing canary (2026-11-02)
+
+The owner explicitly approved changing the healing fixture while retaining
+256 paired seeds, the +0.10 score-gain requirement and every live value.
+INT-03's isolated policy still started at 0.93, leaving insufficient headroom.
+Retain both earlier observations; add an equal-Energy wounded-army control
+using the original damaging kinds, all existing duel budgets, both seat orders
+and 25/50/75 percent initial combat-unit HP. The controlled opponent never
+fields the mutated healer. No Shop policy runs, and the canonical duel arena
+disables Stronghold fire/regeneration; no live ruleset is changed.
+
+Each case starts in contact, with the healer behind its escorts. Extinction
+or the unchanged duel 90-second bound decides the score from fighting HP;
+a pure healer cannot win after its escorts die. Both variants use identical
+initial rosters, wounds, seed and physical seats. A dedicated 256-pair
+regression requires unsaturated baseline headroom and the unchanged planted
+x2 HP/heal gain. This is canary sensitivity, not online balance acceptance.
+
+## D-105 · Gods expansion reuses counted-hit hooks and one public link event — 2026-11-02 (Proposed, GD-04)
+
+**Context.** The owner asked for two new Gods champions with a chained lightning
+and a same-target max-HP pierce, in the real game, without parallel targeting or
+damage systems. Crossfire (R04) and Precise Strike (R17) already implement a
+counted fourth hit and a same-enemy sequence inside `hits::resolve_hit`.
+
+**Decision.** `volthar.rs` and `astreon.rs` follow those modules: parameters live
+in the content `Ability` table per form; counters reuse `UnitFx::attacks` and
+`mark_target`, so the serialized unit layout, replay hashes and earlier canonical
+traces are unchanged. Chain links are auxiliary hits (defenses apply, no hooks).
+One appended public `Event::StormArc` per link lets clients draw the exact
+server-chosen path; the counter reaches the client through the existing progress
+bits. Appending kinds and the event bumps wire 36 → 37 and ruleset 13 → 14.
+
+**Reopen when** a Gods Synergy is approved, when D-33 evidence moves a value, or
+if a future champion needs per-unit state that `UnitFx` cannot express.
+
+
+## D-106 — War Auxiliaries (`Mineiro` and `Mercador`) architecture (2026-11-02)
+
+**Context:** P74 introduces two purchasable off-lane War Auxiliaries (`Mineiro`
+for unmultiplied Energy production and `Mercador` for purchase-driven free
+Shop rerolls) with a dedicated bottom-right two-slot HUD panel and animated
+low-poly 3D precincts/ships across all eight Arenas.
+
+**Decision:**
+1. Keep `PlayerState::{auxiliaries, free_rerolls}` in `tbg-core` with integer-only
+   Bresenham sub-energy accounting (`36` sub-energy/s over `3_600` ticks) and
+   append `PlayerIntention::HireAuxiliary { slot }`,
+   `Rejection::{BadAuxiliarySlot, AuxiliaryAlreadyHired}`, and
+   `Event::{AuxiliaryHired, AuxiliaryTriggered}` without renumbering any existing
+   wire tag.
+2. Expose public `auxiliaries: [[AuxiliarySlotView; 2]; 2]` in both `MatchView`
+   and `PublicView`, and private `free_rerolls: u8` in `MatchView`.
+3. Render the bottom-right `Auxiliares (0/2)` navy-and-gold HUD panel in
+   `native_battle/auxiliaries.rs` without moving the five conventional Shop cards
+   or the `Energy / Interest / Army / Reroll` bar.
+4. Place the symmetric Left (`x = -2.55`) and Right (`x = +18.55`) 3D precincts
+   at `z = -3.45` (`Mineiro`) and `z = +3.45` (`Mercador`, pier, and Caravel
+   ship), strictly outside the widened `ARENA-CLEAR-01` road box
+   (`x ∈ [-1.1, 17.1], z ∈ [-2.67, 2.67]`), with theme-adapted palettes and prop
+   pad filtering across all eight Arenas.
+
+## INT-06 — Integrated P74/GD-04 wire, state and release identity (2026-11-02)
+
+The owner explicitly requested integration and testing of #51, both new Gods
+and the other agent's Colossus refinement. Merge both published histories.
+Keep the exact CROWD-EXIT-01 HOME_HALF_WIDTH solution and full live envelopes.
+The combined release uses wire 38 and ruleset 15: GD-04's wire 37/R14 and
+P74's parallel R13 are recorded historical branch identities, not conflicting
+current declarations. Preserve all older canonical registry rows; retain the
+unreleased P74 identity in a registry comment.
+
+P74 auxiliary phases and free rerolls must participate in serialized state
+and deterministic hashes. Removing serde(skip) repairs that omission; zeroed
+new fields necessarily change state hashes while unused-feature outcomes and
+ticks must remain identical. Append observed R15 baselines, never rewrite old
+rows. Serialize the owning seat's reroll quote for real network roundtrips;
+free rerolls and quotes remain absent from PublicView. Values, the 46-unit
+online Shop and proposed 84-unit local preview are unchanged.
+
+Integrated source identity after formatting: `w38-r15-cc459351581b7763` (59 watched files).

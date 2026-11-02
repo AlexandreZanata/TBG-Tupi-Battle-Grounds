@@ -268,10 +268,16 @@ impl Controller {
         if self.policy == Policy::Bot {
             return self.bot.decide(view);
         }
+        // A filtered bot owns the same internal clock; a second reaction gate biases its control.
+        if let Policy::BotAvoid(kind) = self.policy {
+            return self.avoid(view, kind);
+        }
         if self.wait > 0 {
             self.wait -= 1;
             // A fallback bot keeps its own pace between our decisions.
             return match self.policy {
+                // D-44: a present preferred offer must survive until its own affordable decision.
+                Policy::Favor(kind) if view.offers.contains(&kind) => None,
                 Policy::Favor(_) | Policy::Comp(_) => self.bot.decide(view),
                 _ => None,
             };
@@ -422,11 +428,15 @@ impl Controller {
             .flatten()
     }
 
-    /// Buy `k` whenever it is offered. The Shop only changes on a purchase
-    /// (BR-S04), so a player who wants `k` keeps buying the cheapest card to
-    /// bring new ones, as a human would; with nothing affordable it plays
-    /// like the shipped bot.
+    /// Buy `k` whenever it is offered, banking until affordable. The Shop
+    /// only changes on a purchase (BR-S04), so when `k` is absent buy the
+    /// cheapest card to bring new ones (D-44). With no affordable redraw,
+    /// use the shipped bot.
     fn favor(&mut self, view: &MatchView, k: UnitKind) -> Option<PlayerIntention> {
+        // Refresh only when the kind is absent; spending while it is unaffordable hides price changes.
+        if view.offers.contains(&k) && self.rules.def(k).cost > view.energy {
+            return None;
+        }
         self.favor_any(view, &[k])
     }
 

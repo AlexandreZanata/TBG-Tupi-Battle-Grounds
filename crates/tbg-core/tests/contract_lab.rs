@@ -181,6 +181,22 @@ fn c2_per_tick_traces_are_frozen() {
             (1000, 0x8598d51bed033353, 0x8a17aae489e3424a, 58307),
             (65535, 0x1045dd3c5fc0a20f, 0x2f93bf36167ed04e, 24291),
         ],
+        // GD-04: appended preview kinds and StormArc leave every canonical trace unchanged.
+        (14, 0xf354f651c056d615) => [
+            (1, 0x7d33b1664f3b9824, 0xae47594e85732bbc, 16625),
+            (7, 0x84d4030142b4f1c5, 0x34994c75252c5c39, 14265),
+            (42, 0x92d4133c4f4351b1, 0xec212d8ee38450d7, 23274),
+            (1000, 0x8598d51bed033353, 0x8a17aae489e3424a, 58307),
+            (65535, 0x1045dd3c5fc0a20f, 0x2f93bf36167ed04e, 24291),
+        ],
+        // INT-06: serialized P74 state changes hashes; all five R14 end ticks are unchanged.
+        (15, 0xcc459351581b7763) => [
+            (1, 0x690cb65be56a2a0a, 0x498ca4c4ecd99d8c, 16625),
+            (7, 0xa8c18a2dd89dbca9, 0xd3ae68c37379b915, 14265),
+            (42, 0x6695084b1909f037, 0x66740835064ae569, 23274),
+            (1000, 0xa73ffde0640d4369, 0x8acf4d4069f570b0, 58307),
+            (65535, 0xd8eff0a864f58a7d, 0xe247d987c99d5cca, 24291),
+        ],
         revision => panic!("register an explicit canonical trace for {revision:?}"),
     };
     for (seed, t, h, tick) in goldens {

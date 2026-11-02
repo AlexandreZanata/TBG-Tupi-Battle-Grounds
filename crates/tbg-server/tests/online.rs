@@ -1,5 +1,5 @@
 //! Integration tests over real WebSockets against an in-process server.
-//! Matches run at a 5 ms tick so a full match takes seconds.
+//! Synthetic 1 ms ticks keep full TW-01 matches bounded; production remains 50 ms.
 
 use std::time::Duration;
 
@@ -25,7 +25,7 @@ async fn server_with(config: Config) -> String {
 
 async fn server(reconnect_secs: u64) -> String {
     server_with(Config {
-        tick_ms: 5,
+        tick_ms: 1,
         reconnect_secs,
         // The window itself is under test here; P71's pause has its own file.
         pause_secs: 0,
@@ -197,10 +197,21 @@ async fn start_challenge(
     )
 }
 
-async fn end_by_surrender(ws: &mut Ws, other: &mut Ws) {
+async fn end_by_surrender(ws: &mut Ws, other: &mut Ws) -> protocol::ResultId {
     send(ws, &ClientMsg::Surrender).await;
-    let _ = await_end(ws).await;
+    let id = tokio::time::timeout(Duration::from_secs(10), async {
+        loop {
+            match recv(ws).await {
+                Some(ServerMsg::MatchEnd { result_id, .. }) => return result_id,
+                Some(_) => {}
+                None => panic!("socket closed before MatchEnd"),
+            }
+        }
+    })
+    .await
+    .expect("surrender produces a bounded result");
     let _ = await_end(other).await;
+    id
 }
 
 fn fast(url: &str) -> BotOpts {
@@ -901,7 +912,7 @@ async fn rematch_decline_closes() {
 async fn rematch_reload_keeps_offer() {
     let url = server(30).await;
     let (mut owner, mut guest, owner_token, _, _, _) = start_challenge(&url).await;
-    end_by_surrender(&mut owner, &mut guest).await;
+    let previous = end_by_surrender(&mut owner, &mut guest).await;
     let _ = rematch_open(&mut owner).await;
     let _ = rematch_open(&mut guest).await;
     send(&mut owner, &ClientMsg::RequestRematch).await;
@@ -916,9 +927,36 @@ async fn rematch_reload_keeps_offer() {
 
     let mut owner = connect(&url).await;
     hello_resume(&mut owner, owner_token).await;
-    let (a, b) = tokio::join!(challenge_start(&mut owner), challenge_start(&mut guest));
+    // P71 may replay the previous result before the new rematch. Random SIDE-01
+    // seats belong to each result id; an old MatchStart cannot identify the new seat.
+    async fn new_start(
+        ws: &mut Ws,
+        previous: protocol::ResultId,
+    ) -> (Seat, MatchMode, protocol::ResultId) {
+        tokio::time::timeout(Duration::from_secs(10), async {
+            loop {
+                match recv(ws).await {
+                    Some(ServerMsg::MatchStart {
+                        result_id,
+                        you,
+                        mode,
+                        ..
+                    }) if result_id != previous => return (you, mode, result_id),
+                    Some(_) => {}
+                    None => panic!("socket closed before the new rematch"),
+                }
+            }
+        })
+        .await
+        .expect("the new rematch starts after reload")
+    }
+    let (a, b) = tokio::join!(
+        new_start(&mut owner, previous),
+        new_start(&mut guest, previous)
+    );
     assert_eq!((a.1, b.1), (MatchMode::Challenge, MatchMode::Challenge));
     assert_ne!(a.0, b.0);
+    assert_eq!(a.2, b.2, "both seats belong to the same new rematch");
 }
 
 #[tokio::test]
@@ -1133,13 +1171,17 @@ async fn wait_for_view(
     ws: &mut Ws,
     predicate: impl Fn(&tbg_core::MatchView) -> bool,
 ) -> tbg_core::MatchView {
-    loop {
-        match recv(ws).await {
-            Some(ServerMsg::View(view)) if predicate(&view) => return *view,
-            Some(_) => {}
-            None => panic!("socket closed while waiting for a view"),
+    tokio::time::timeout(Duration::from_secs(10), async {
+        loop {
+            match recv(ws).await {
+                Some(ServerMsg::View(view)) if predicate(&view) => return *view,
+                Some(_) => {}
+                None => panic!("socket closed while waiting for a view"),
+            }
         }
-    }
+    })
+    .await
+    .expect("the required authoritative view arrives")
 }
 
 #[tokio::test]
@@ -1329,14 +1371,16 @@ async fn br_sk01_kinds_freeze_at_pairing_fortify_online_and_survive_reconnect() 
     challenge_start(&mut guest).await;
     let mut kinds = [StrongholdKind::Command; 2];
     kinds[owner_seat.index()] = StrongholdKind::Artillery;
-    let running = |v: &tbg_core::MatchView| v.phase == Phase::Running;
-    let view = wait_for_view(&mut owner, running).await;
+    let affordable = |v: &tbg_core::MatchView| {
+        v.phase == Phase::Running && v.energy >= tbg_core::content::FORTIFY_COST[0]
+    };
+    let view = wait_for_view(&mut owner, affordable).await;
     assert_eq!(
         view.strongholds.map(|s| s.kind),
         kinds,
         "BR-SK08: both public"
     );
-    // 5 starting Energy buys tier 1 (3 Energy) on the Rapid Fire branch.
+    // TW-01 costs 6 Energy: wait for the authoritative affordable view, then buy Rapid Fire.
     let intent = PlayerIntention::Fortify { branch: 1 };
     send(&mut owner, &ClientMsg::Intent { seq: 1, intent }).await;
     let me = owner_seat.index();
@@ -1449,4 +1493,146 @@ async fn celebration_finished_result_replays_to_either_seat_without_a_live_view(
             }
         }
     }
+}
+
+#[tokio::test]
+async fn p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative() {
+    use tbg_core::{auxiliary::AuxiliaryPhase, content::ENERGY_SCALE, Phase};
+    let url = server(30).await;
+    let mut a = connect(&url).await;
+    let mut b = connect(&url).await;
+    let ta = hello_token(&mut a).await;
+    let tb = hello_token(&mut b).await;
+    let invite = create_challenge(&mut a).await;
+    send(&mut b, &ClientMsg::JoinChallenge { token: invite }).await;
+    let (seat_a, _) = challenge_start(&mut a).await;
+    let (seat_b, _) = challenge_start(&mut b).await;
+    assert_eq!(seat_a.other(), seat_b);
+    let (mut buyer, token, mut other) = if seat_a == Seat::B {
+        (a, ta, b)
+    } else {
+        (b, tb, a)
+    };
+    wait_for_view(&mut buyer, |v| v.phase == Phase::Running).await;
+    send(
+        &mut buyer,
+        &ClientMsg::Intent {
+            seq: 1,
+            intent: PlayerIntention::HireAuxiliary { slot: 1 },
+        },
+    )
+    .await;
+    let hired = wait_for_view(&mut buyer, |v| v.last_seq == 1).await;
+    assert_eq!(hired.you, Seat::B);
+    assert!(matches!(
+        hired.auxiliaries[1][1].phase,
+        AuxiliaryPhase::Active { .. }
+    ));
+    assert_eq!(hired.auxiliaries[0][1].phase, AuxiliaryPhase::Available);
+    send(
+        &mut buyer,
+        &ClientMsg::Intent {
+            seq: 2,
+            intent: PlayerIntention::HireAuxiliary { slot: 255 },
+        },
+    )
+    .await;
+    expect_rejection(&mut buyer, 2, Rejection::BadAuxiliarySlot).await;
+    for seq in 3..=5 {
+        let v = wait_for_view(&mut buyer, |v| {
+            v.augment_round.is_none()
+                && v.offers
+                    .iter()
+                    .any(|&k| tbg_core::content::def(k).cost <= v.energy)
+        })
+        .await;
+        let offer = v
+            .offers
+            .iter()
+            .enumerate()
+            .min_by_key(|(_, k)| tbg_core::content::def(**k).cost)
+            .unwrap()
+            .0 as u8;
+        send(
+            &mut buyer,
+            &ClientMsg::Intent {
+                seq,
+                intent: PlayerIntention::Purchase { offer },
+            },
+        )
+        .await;
+        wait_for_view(&mut buyer, |v| v.last_seq == seq).await;
+    }
+    let ready = wait_for_view(&mut buyer, |v| v.free_rerolls == 1).await;
+    assert_eq!(ready.reroll_cost, Some(0));
+    buyer.close(None).await.unwrap();
+    let mut resumed = connect(&url).await;
+    hello_resume(&mut resumed, token).await;
+    let (seat, _) = challenge_start(&mut resumed).await;
+    assert_eq!(seat, Seat::B);
+    let restored = wait_for_view(&mut resumed, |v| v.free_rerolls == 1).await;
+    assert!(matches!(
+        restored.auxiliaries[1][1].phase,
+        AuxiliaryPhase::Active {
+            activations_used: 1,
+            ..
+        }
+    ));
+    send(
+        &mut resumed,
+        &ClientMsg::Intent {
+            seq: 6,
+            intent: PlayerIntention::Reroll { cost: 0 },
+        },
+    )
+    .await;
+    let spent = wait_for_view(&mut resumed, |v| v.last_seq == 6).await;
+    assert_eq!(spent.free_rerolls, 0);
+    send(
+        &mut resumed,
+        &ClientMsg::Intent {
+            seq: 7,
+            intent: PlayerIntention::HireAuxiliary { slot: 1 },
+        },
+    )
+    .await;
+    expect_rejection(&mut resumed, 7, Rejection::AuxiliaryAlreadyHired).await;
+    wait_for_view(&mut resumed, |v| {
+        v.energy >= 6 * ENERGY_SCALE && v.augment_round.is_none()
+    })
+    .await;
+    send(
+        &mut resumed,
+        &ClientMsg::Intent {
+            seq: 8,
+            intent: PlayerIntention::HireAuxiliary { slot: 0 },
+        },
+    )
+    .await;
+    let preparing = wait_for_view(&mut resumed, |v| v.last_seq == 8).await;
+    assert!(matches!(
+        preparing.auxiliaries[1][0].phase,
+        AuxiliaryPhase::Preparing { .. }
+    ));
+    let visible = wait_for_view(&mut other, |v| {
+        matches!(
+            v.auxiliaries[1][0].phase,
+            AuxiliaryPhase::Preparing { .. } | AuxiliaryPhase::Active { .. }
+        )
+    })
+    .await;
+    assert_eq!(visible.you, Seat::A);
+    assert_eq!(
+        visible.free_rerolls, 0,
+        "BR-AX11: the other seat never receives private free currency"
+    );
+    assert_eq!(visible.auxiliaries[0][0].phase, AuxiliaryPhase::Available);
+    send(&mut resumed, &ClientMsg::Surrender).await;
+    let (end, other_end) = tokio::time::timeout(Duration::from_secs(10), async {
+        tokio::join!(await_end(&mut resumed), await_end(&mut other))
+    })
+    .await
+    .expect("both auxiliary participants receive the result");
+    assert_eq!(end, other_end);
+    assert_eq!(end.winner, Some(Seat::A));
 }

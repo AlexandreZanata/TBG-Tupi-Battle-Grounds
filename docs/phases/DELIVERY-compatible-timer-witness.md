@@ -1,10 +1,10 @@
 # Compatible timer-only delivery witness
 
 The owner requested a second real main delivery with no manual apply command.
-This work front keeps protocol 36, ruleset 13, contract b66993d9e87a9cfc and
+This work front keeps protocol 38, ruleset 15, contract cc459351581b7763 and
 schema 10 unchanged. It advances the immutable desktop package to colossus.2
-and lets the Linux preview installer read the committed Cargo version instead
-of rejecting every package after colossus.1.
+after the complete P74/GD-04 integration. The Linux preview installer already
+reads the committed Cargo version/protocol and supports a data-directory override.
 
 Behavior-preserving comments in existing server/client/static delivery inputs
 create one concrete source-qualified candidate per family. They change no

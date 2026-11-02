@@ -63,7 +63,7 @@ fn shop_slots_stronghold_and_evolution() {
     assert_eq!((BEETLES_PER_NESTER, BEETLES_PER_PLAYER), ([2, 3], 6));
     assert_eq!(BEETLE_LIFETIME, secs(10));
     // TW-01 Proposed: retain the legacy literals and pin the requested revision explicitly.
-    let tower = if matches!(tbg_core::ruleset_version::RULESET_VERSION, 11 | 12 | 13) {
+    let tower = if matches!(tbg_core::ruleset_version::RULESET_VERSION, 11..=15) {
         (6750, 159)
     } else {
         (4500, 53)

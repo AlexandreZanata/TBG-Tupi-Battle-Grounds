@@ -858,6 +858,94 @@
         "accepted": false,
         "report": "docs/colossus-fortifications/README.md"
       }
+    },
+    {
+      "id": "auxiliaries-gods-integration",
+      "version": "0.1.4-colossus.1",
+      "date": "2026-11-02",
+      "status": "preview",
+      "kind": "gameplay-preview",
+      "ruleset_version": 15,
+      "ruleset_hash": "cc459351581b7763",
+      "title": {
+        "en": "War Auxiliaries and the Gods expansion",
+        "pt-BR": "Auxiliares de Guerra e expansão dos Deuses"
+      },
+      "summary": {
+        "en": "Miner and Merchant join the authoritative match economy. Volthar and Astreon expand the local preview to 84 champions; Colossus receives refined forms and motion. The online champion pool remains 46.",
+        "pt-BR": "Mineiro e Mercador entram na economia autoritativa da partida. Volthar e Astreon ampliam a prévia local para 84 campeões; o Colosso recebe formas e movimentos refinados. O elenco online continua com 46."
+      },
+      "changes": [
+        {
+          "category": "preview",
+          "subject": {
+            "en": "War Auxiliaries",
+            "pt-BR": "Auxiliares de Guerra"
+          },
+          "field": {
+            "en": "match economy",
+            "pt-BR": "economia da partida"
+          },
+          "before": {
+            "en": "No auxiliary contracts",
+            "pt-BR": "Sem contratos auxiliares"
+          },
+          "after": {
+            "en": "Miner: 6 Energy, 12 s preparation, +0.06 Energy/s for 180 s. Merchant: 4 Energy, one free reroll per three purchases, three activations. Each can be hired once.",
+            "pt-BR": "Mineiro: 6 de Energia, preparo de 12 s, +0,06 de Energia/s por 180 s. Mercador: 4 de Energia, um reroll gratuito a cada três compras, três ativações. Cada um pode ser contratado uma vez."
+          },
+          "reason": {
+            "en": "Owner-requested economic choices, server authority and shared off-lane presentation.",
+            "pt-BR": "Escolhas econômicas solicitadas, autoridade do servidor e apresentação compartilhada fora da pista."
+          }
+        },
+        {
+          "category": "preview",
+          "subject": {
+            "en": "Gods",
+            "pt-BR": "Deuses"
+          },
+          "field": {
+            "en": "local roster and visual forms",
+            "pt-BR": "elenco local e formas visuais"
+          },
+          "before": {
+            "en": "Colossus; 82 local champions",
+            "pt-BR": "Colosso; 82 campeões locais"
+          },
+          "after": {
+            "en": "Colossus, Volthar and Astreon; 84 local champions, refined five-form Colossus and authoritative chain/pierce effects.",
+            "pt-BR": "Colosso, Volthar e Astreon; 84 campeões locais, cinco formas refinadas do Colosso e efeitos autoritativos de corrente e perfuração."
+          },
+          "reason": {
+            "en": "Integrate GD-03/GD-04 while preserving the separate online activation gate.",
+            "pt-BR": "Integrar GD-03/GD-04 preservando o controle separado de ativação online."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Compatibility",
+            "body": "w38-r15-cc459351581b7763; wire 38 includes private reroll quotes and public auxiliary phases. Old clients require a coordinated update. Values remain Proposed; full competitive balance acceptance and Windows/browser rendered correspondence are pending."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Compatibilidade",
+            "body": "w38-r15-cc459351581b7763; o protocolo 38 inclui preços privados de reroll e fases públicas dos auxiliares. Clientes anteriores exigem atualização coordenada. Os valores permanecem Propostos; a aceitação competitiva completa e a correspondência visual Windows/navegador estão pendentes."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/DELIVERY-CI-RELIABILITY.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "targeted integration, not balance acceptance",
+          "confirmation": "pending"
+        }
+      },
+      "document": "docs/patches/2026-11-02-auxiliaries-gods.md"
     }
   ]
 }

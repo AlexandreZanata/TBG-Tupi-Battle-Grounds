@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 36,
-        "TW-01/PK-01/GD-01: lateral occupancy, private queue count and tenth Faction require wire 36"
+        PROTOCOL_VERSION, 38,
+        "INT-06: combined P74 auxiliary views and GD-04 events require wire 38"
     );
 }
 
@@ -454,6 +454,24 @@ fn ab01_og02_tags_are_appended_and_barrels_roundtrip_in_both_public_views() {
     assert_eq!(
         postcard::from_bytes::<tbg_core::PublicView>(&encode(&public)),
         Ok(public)
+    );
+}
+
+// GD-04: the two new Gods append after Colossus; StormArc appends after BarrelBurst.
+#[test]
+fn gd04_wire37_appends_volthar_astreon_and_storm_arc() {
+    assert_eq!(encode(&tbg_core::UnitKind::Colossus), [86]);
+    assert_eq!(encode(&tbg_core::UnitKind::Volthar), [87]);
+    assert_eq!(encode(&tbg_core::UnitKind::Astreon), [88]);
+    let event = tbg_core::Event::StormArc {
+        unit: 1,
+        from: 2,
+        to: 3,
+        jump: 1,
+    };
+    assert_eq!(
+        postcard::from_bytes::<tbg_core::Event>(&encode(&event)),
+        Ok(event)
     );
 }
 

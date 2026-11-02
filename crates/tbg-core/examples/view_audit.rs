@@ -254,6 +254,9 @@ fn event_name(event: &Event) -> &'static str {
         Event::ProfaneFlame { .. } => "ProfaneFlame",
         Event::DrillFused { .. } => "DrillFused",
         Event::BarrelBurst { .. } => "BarrelBurst",
+        Event::StormArc { .. } => "StormArc",
+        Event::AuxiliaryHired { .. } => "AuxiliaryHired",
+        Event::AuxiliaryTriggered { .. } => "AuxiliaryTriggered",
     }
 }
 
@@ -267,9 +270,9 @@ fn collect_shares(view: &MatchView, agg: &mut ShareAgg) {
         ("physical_lanes", field_len(&view.physical_lanes)),
         ("queued", field_len(&view.queued)),
         ("barrels", field_len(&view.barrels)),
-        ("reserve", field_len(&view.reserve)),
-        ("held_mask", field_len(&view.held_mask)),
         ("reroll_cost", field_len(&view.reroll_cost)),
+        ("auxiliaries", field_len(&view.auxiliaries)),
+        ("free_rerolls", field_len(&view.free_rerolls)),
         ("spectators", field_len(&view.spectators)),
         ("tick", field_len(&view.tick)),
         ("phase", field_len(&view.phase)),
@@ -398,6 +401,9 @@ struct ViewA {
 /// them unchanged, so the comparison stays about the unit list.
 #[derive(Clone, Debug, Serialize)]
 struct Extra {
+    auxiliaries: [[tbg_core::AuxiliarySlotView; tbg_core::AUXILIARY_SLOTS]; 2],
+    free_rerolls: u8,
+    reroll_cost: Option<u32>,
     physical_lanes: bool,
     queued: u32,
     barrels: Vec<tbg_core::barrel::Barrel>,
@@ -413,6 +419,9 @@ struct Extra {
 
 fn extra_of(view: &MatchView) -> Extra {
     Extra {
+        auxiliaries: view.auxiliaries,
+        free_rerolls: view.free_rerolls,
+        reroll_cost: view.reroll_cost,
         physical_lanes: view.physical_lanes,
         queued: view.queued,
         barrels: view.barrels.clone(),
@@ -430,12 +439,16 @@ fn extra_of(view: &MatchView) -> Extra {
 /// The same header straight from the state, as the server would build it;
 /// the round (only during a pause) comes from the canonical view.
 fn extra_state(state: &MatchState, seat: Seat) -> Extra {
+    let private = state.view_for(seat, &[]);
     let augment_round = if state.is_live() && state.augments.selecting() {
-        state.view_for(seat, &[]).augment_round
+        private.augment_round
     } else {
         None
     };
     Extra {
+        auxiliaries: private.auxiliaries,
+        free_rerolls: private.free_rerolls,
+        reroll_cost: private.reroll_cost,
         physical_lanes: state.physical_lanes,
         queued: state
             .deployments
@@ -828,7 +841,9 @@ fn assemble_c(
         barrels: view.extra.barrels.clone(),
         reserve: [0; tbg_core::content::OFFERS],
         held_mask: 0,
-        reroll_cost: None,
+        reroll_cost: view.extra.reroll_cost,
+        auxiliaries: view.extra.auxiliaries,
+        free_rerolls: view.extra.free_rerolls,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -865,7 +880,9 @@ fn assemble_b(
         barrels: view.extra.barrels.clone(),
         reserve: [0; tbg_core::content::OFFERS],
         held_mask: 0,
-        reroll_cost: None,
+        reroll_cost: view.extra.reroll_cost,
+        auxiliaries: view.extra.auxiliaries,
+        free_rerolls: view.extra.free_rerolls,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1086,6 +1103,18 @@ fn assert_same(got: &MatchView, want: &MatchView, label: &str, context: &str) {
     assert_eq!(got.last_seq, want.last_seq, "{label} last_seq {context}");
     assert_eq!(got.events, want.events, "{label} events {context}");
     assert_eq!(got.outcome, want.outcome, "{label} outcome {context}");
+    assert_eq!(
+        got.auxiliaries, want.auxiliaries,
+        "{label} auxiliaries {context}"
+    );
+    assert_eq!(
+        got.free_rerolls, want.free_rerolls,
+        "{label} free rerolls {context}"
+    );
+    assert_eq!(
+        got.reroll_cost, want.reroll_cost,
+        "{label} reroll quote {context}"
+    );
 }
 
 // ---------- Recorder ----------
@@ -1487,7 +1516,9 @@ fn rebuild_a(
         barrels: view.extra.barrels.clone(),
         reserve: [0; tbg_core::content::OFFERS],
         held_mask: 0,
-        reroll_cost: None,
+        reroll_cost: view.extra.reroll_cost,
+        auxiliaries: view.extra.auxiliaries,
+        free_rerolls: view.extra.free_rerolls,
         tick: view.tick,
         phase: view.phase,
         phase_ticks_left: phase_ticks_left_at(view.tick, view.phase),
@@ -1567,7 +1598,9 @@ fn shared_views(state: &MatchState, events: &[Event]) -> (MatchView, MatchView) 
             barrels: view.extra.barrels.clone(),
             reserve: [0; tbg_core::content::OFFERS],
             held_mask: 0,
-            reroll_cost: None,
+            reroll_cost: view.extra.reroll_cost,
+            auxiliaries: view.extra.auxiliaries,
+            free_rerolls: view.extra.free_rerolls,
             tick: state.tick,
             phase: state.phase,
             phase_ticks_left: phase_ticks_left_at(state.tick, state.phase),

@@ -5,16 +5,18 @@ preview installer reads the committed client version, so later verified packages
 remain installable without a hardcoded preview-version update. This release also
 provides the owner-authorized compatible timer-only delivery witness.
 
-Protocol 36, schema 10 (P73 history schema 11 remains opt-in), ruleset 13 /
-b66993d9e87a9cfc. This contract requires a coordinated release from protocol 31;
+Protocol 38, schema 10 (P73 history schema 11 remains opt-in), ruleset 15 /
+cc459351581b7763. This contract requires a coordinated release from protocol 31;
 compatible-only delivery must not bypass its production contract gate.
 
-The local Practice/Training preview contains 82 champions across ten Factions,
-with five-form low-poly kits, refined Ogres, Abyssals, Gods/Colossus and rolling
+The local Practice/Training preview contains 84 champions across ten Factions,
+with five-form low-poly kits, refined Ogres, Abyssals, Gods/Colossus, Volthar and Astreon and rolling
 healing casks. Online FULL_POOL remains the separately gated 46-champion roster.
 The existing Proposed tower changes, broader BattleLine, original pushing and
 intrinsic body colors are retained. Widening the road no longer widens the
-preferred departure formation before contact.
+preferred departure formation before contact. CROWD-EXIT-01 also bounds live
+walking envelopes to the actual body and held equipment, while engaged Colossus
+arms and Ogre Archer equipment retain directional clearance.
 
 Blue stays left and red stays right for every desktop player and spectator.
 Online and Practice sides are randomized; the side announcement, private controls,
@@ -46,8 +48,10 @@ separate gated mechanisms. Preserve existing accounts, preferences and older pac
 Source, individual asset checksums and the exact compatible contract are in
 `tbg-native-release.json`; `native-provenance.jsonl` binds the artifacts to GitHub CI.
 
-Ruleset 13 registers equivalent Rust 1.99 lint fixes; gameplay values and branches
-are unchanged from the ruleset-12 preview. No competitive acceptance is implied.
+Ruleset 15 consolidates P74 and GD-04, including serialized auxiliary state and
+the owning seat's reroll quote. Miner and Merchant keep the proposed 6/4 Energy
+costs and single-hire lifecycle. Two new Gods remain in the local preview.
+No competitive acceptance is implied.
 
 D-104 retirement load is sampled inside its serialized writer turn, excluding
 only the observation itself. Later queued work, running matches, reconnect

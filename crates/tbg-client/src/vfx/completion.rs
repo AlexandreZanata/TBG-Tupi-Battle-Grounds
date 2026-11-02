@@ -31,9 +31,64 @@ pub fn impact(c: &mut Commands, a: &VfxAssets, k: UnitKind, t: u8, b: u8, at: Ve
             }
         }
         PodSnapper => &a.green,
+        // GD-04: storm cyan; the rupture lance is gold, crimson on the B branch.
+        Volthar => &a.water,
+        Astreon => {
+            if b == 1 {
+                &a.blood
+            } else {
+                &a.gold
+            }
+        }
         _ => &a.amber,
     };
     match k {
+        Volthar => {
+            chips(c, a, &a.white, at, 5, 0.12 * power);
+            spawn(
+                c,
+                &a.ball,
+                mat,
+                at,
+                Motion::Flash { size: 0.22 * power },
+                0.0,
+                0.14,
+            );
+            spawn(
+                c,
+                &a.ring,
+                mat,
+                at.with_y(0.05),
+                Motion::Grow {
+                    radius: 0.45 * power,
+                },
+                0.02,
+                0.22,
+            );
+        }
+        Astreon => {
+            // A narrow piercing streak and flash on the struck unit only.
+            spawn(
+                c,
+                &a.chip,
+                mat,
+                at,
+                Motion::Segment {
+                    size: Vec3::new(0.03, 0.03, 0.42 * power),
+                },
+                0.0,
+                0.16,
+            );
+            spawn(
+                c,
+                &a.ball,
+                &a.white,
+                at,
+                Motion::Flash { size: 0.16 * power },
+                0.0,
+                0.10,
+            );
+        }
         Colossus => {
             chips(c, a, &a.bone, at, 8, 0.18 * power);
             for i in 0..2 {
@@ -631,6 +686,8 @@ pub fn evolution(c: &mut Commands, a: &VfxAssets, k: UnitKind, at: Vec3) {
         Gravecutter | LastlightCantor => &a.green,
         Cragclaw | Hushfang | Spinehurler | MireTender | Gorgehowl => &a.turquoise,
         Sunlancer | EclipseDancer | Starbreaker | Dawnmender | Prismancer => &a.gold,
+        Volthar => &a.water,
+        Astreon => &a.gold,
         _ => &a.amber,
     };
     for i in 0..3 {

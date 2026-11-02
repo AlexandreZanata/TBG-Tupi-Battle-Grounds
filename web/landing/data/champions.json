@@ -1012,6 +1012,28 @@
       "archetype": "tank",
       "portrait": "media/portraits/colossus.webp",
       "availability": "preview"
+    },
+    {
+      "id": "volthar",
+      "name": {
+        "en": "Volthar",
+        "pt-BR": "Volthar"
+      },
+      "faction": "gods",
+      "archetype": "ranged",
+      "portrait": "media/portraits/volthar.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "astreon",
+      "name": {
+        "en": "Astreon",
+        "pt-BR": "Astreon"
+      },
+      "faction": "gods",
+      "archetype": "dps",
+      "portrait": "media/portraits/astreon.webp",
+      "availability": "preview"
     }
   ]
 }

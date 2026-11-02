@@ -184,8 +184,8 @@ fn roster_composition() {
     // CC-ID01: append seventeen local-preview tags; production Shop remains 46.
     assert_eq!(
         UNITS.len(),
-        68 + 9 + 9 + 1,
-        "GD-01 appends Colossus after AB-01"
+        68 + 9 + 9 + 1 + 2,
+        "GD-01 appends Colossus after AB-01; GD-04 appends Volthar and Astreon"
     );
     assert_eq!(&kinds[..ALL_KINDS.len()], &ALL_KINDS[..]);
     // Owner activation: all 51 registered kinds, 46 conventional Shop entries.
@@ -558,6 +558,7 @@ fn evolution_forms_are_frozen() {
     frozen.extend(ogre);
     frozen.extend(ABYSSAL_NEW_FORMS.lines());
     frozen.extend(GODS_NEW_FORMS.lines());
+    frozen.extend(GODS_GD04_FORMS.lines());
     assert_eq!(shipped.len(), frozen.len(), "form count changed");
     for (got, want) in shipped.iter().zip(frozen) {
         assert_eq!(got, want);
@@ -696,3 +697,6 @@ const ABYSSAL_NEW_FORMS:&str="Nacre Duelist/Ivory Edge: hp=0 dmg=1500 atk=0 spee
 
 // GD-01 / INT-01: append Colossus without replacing any previous form row.
 const GODS_NEW_FORMS: &str = "Colossus/Sun Obelisk: hp=0 dmg=2500 atk=0 speed=0 range+=1500 splash+=0 heal=0 dmg+=0 hit=-\nColossus/Pillar of Dawn: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=600 heal=0 dmg+=0 hit=-\nColossus/Ancient Monolith: hp=3000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nColossus/Eternal Monument: hp=3000 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";
+
+// GD-04: Volthar and Astreon forms change only their ability rows.
+const GODS_GD04_FORMS: &str = "Volthar/Storm Herald: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nVolthar/Celestial Sovereign: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nVolthar/Hammer of Wrath: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nVolthar/Divine Tempest: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Giant Piercer: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Primordial Lance: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Final Sentence: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-\nAstreon/Absolute Verdict: hp=0 dmg=0 atk=0 speed=0 range+=0 splash+=0 heal=0 dmg+=0 hit=-";

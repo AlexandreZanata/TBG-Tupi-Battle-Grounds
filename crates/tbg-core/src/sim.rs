@@ -85,6 +85,9 @@ impl MatchState {
                 reserve: [0; crate::content::OFFERS],
                 held_mask: 0,
                 reroll_streak: 0,
+                auxiliaries: [crate::auxiliary::AuxiliaryPhase::Available;
+                    crate::auxiliary::AUXILIARY_SLOTS],
+                free_rerolls: 0,
             }
         };
         let first_round = if rules.augment.round_ticks == 0 {
@@ -137,6 +140,7 @@ impl MatchState {
         if self.phase != Phase::Ended {
             if self.is_live() {
                 self.regen_energy();
+                crate::auxiliary::tick(self, &mut ev);
                 if self.tick > RUNNING_START
                     && (self.tick - RUNNING_START).is_multiple_of(BOUNTY_WINDOW_TICKS)
                 {

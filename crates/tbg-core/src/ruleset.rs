@@ -75,6 +75,7 @@ impl Default for ShopRule {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Ruleset {
     pub shop: Option<ShopRule>,
+    pub auxiliary: crate::auxiliary::AuxiliaryRule,
     pub energy_start: u32,
     /// `None` = no gameplay cap (canon); `Some` is a lab comparison only.
     pub energy_cap: Option<u32>,
@@ -111,6 +112,7 @@ pub struct Ruleset {
 /// The only ruleset used online.
 pub static CANON: Ruleset = Ruleset {
     shop: None,
+    auxiliary: crate::auxiliary::AUXILIARY_RULE,
     energy_start: ENERGY_START,
     energy_cap: None,
     regen_running: REGEN_RUNNING,

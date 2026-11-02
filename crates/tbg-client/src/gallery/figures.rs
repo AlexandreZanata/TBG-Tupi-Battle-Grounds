@@ -56,7 +56,7 @@ pub fn spawn(
         roster(commands, lib, options, &material);
     } else {
         for (i, form) in FORMS.into_iter().enumerate() {
-            let layout = if unit == UnitKind::Colossus {
+            let layout = if super::monument(unit) {
                 Layout::MonumentForm(i)
             } else {
                 Layout::Form(i)

@@ -11,7 +11,7 @@ use tbg_core::{
 
 use StrongholdKind::{Artillery, Bastion, Classic, Command, Treasury};
 // TW-01 Proposed in GAME-DESIGN; historical assertions remain available below.
-const TW01: bool = matches!(tbg_core::ruleset_version::RULESET_VERSION, 11 | 12 | 13);
+const TW01: bool = matches!(tbg_core::ruleset_version::RULESET_VERSION, 11..=15);
 
 /// Running, with only the effects under test: no regen, no Interest, no
 /// Augment rounds.

@@ -7,6 +7,7 @@ use tbg_core::{Rejection, UnitId};
 
 mod ability_completion;
 pub(crate) mod ability_details;
+mod ability_gods;
 mod ability_legacy;
 pub mod account;
 mod account_ui;
@@ -103,6 +104,8 @@ pub enum UiAction {
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     LeaveWatch,
     Buy(u8),
+    #[cfg_attr(not(tbg_desktop), allow(dead_code))]
+    HireAuxiliary(u8),
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     Reserve {
         offer: u8,

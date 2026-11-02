@@ -90,7 +90,13 @@
     "training-practice-reference-layout",
     "training-practice-reference-resize",
     "war-council-no-rarity-labels",
-    "war-council-selection-no-shadow"
+    "war-council-selection-no-shadow",
+    "training-gods-colossus-forms",
+    "training-gods-volthar-forms",
+    "training-gods-astreon-forms",
+    "battle-gods-two-colossus",
+    "battle-gods-volthar-chain",
+    "battle-gods-astreon-pierce"
   ],
   "motion_screens": [
     "preview-dance",
@@ -104,7 +110,12 @@
     "training-arena-cover-resize",
     "upgrade-dialog-focus-transition",
     "training-practice-reference-resize",
-    "war-council-selection-no-shadow"
+    "war-council-selection-no-shadow",
+    "training-gods-colossus-forms",
+    "training-gods-volthar-forms",
+    "training-gods-astreon-forms",
+    "battle-gods-volthar-chain",
+    "battle-gods-astreon-pierce"
   ],
   "motion_frames": [
     0,

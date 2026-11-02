@@ -626,3 +626,126 @@ another cannot repel it merely because the road grew. Real contacts still push,
 allow overtaking and regroup after separation. Test both sides near each tower,
 ordinary bodies and measured equipment. The focused numerical regression is
 mechanism evidence; all runtime/platform observations remain pending.
+
+
+
+## CROWD-EXIT-01 — Tower-exit contact fidelity, natural regrouping and bounded arm/bazooka clearance (2026-11-02)
+
+Shared Linux/Windows/desktop web path (`crates/tbg-client/src/crowd.rs`,
+`crates/tbg-client/src/sync/crowd_ecs.rs`, `crates/tbg-client/src/art/overhead.rs`):
+`Solver::solve` keeps `Params::half_width = 2.1` for the outer road clamp while
+restoring `HOME_HALF_WIDTH = 1.1` (`[-0.66, +0.66]`) for initial tower-exit
+birth offsets and the lateral regrouping spring target. Units no longer spawn
+or drift toward `±1.26` without contact, yet dense pileups can still push out
+to `±2.1` on the widened road and regroup into the center band afterward.
+
+Live collision envelopes respect real visual volume instead of worst-case
+multi-target weapon swings: `overhead::reserves_equipment` is scoped to
+champions with explicit equipment/arm contracts (`Colossus`, `SiegeWalker`,
+`GustDrummer`); `Colossus` measures its upper-arm, forearm and hand vertices
+rather than its slammed obelisk; and `crowd_ecs::live_body` uses proportional
+walking radii while advancing unengaged (`aim.is_none()`) and directional
+envelopes when engaged (`aim.is_some()`). Exiting units do not displace
+separated allies ahead of them before contact, collide and push naturally on
+real contact, and regroup smoothly. Coverage: both seats and spectators, tower
+exit with and without contact, overtaking, dense pileups, and all five
+Evolution forms of `Colossus`, `SiegeWalker`, `GustDrummer`, `Shatterback`,
+Ogres and Abyssals. Linux targeted regressions and native preview installation
+are verified; Windows and desktop game-web visual observations remain pending.
+
+### CROWD-EXIT-01 consolidation receipt (2026-11-02)
+
+Normal merge of exact source 73c7a07c28833d6663a11dda65332a578a8c4a3a
+retains HOME_HALF_WIDTH and all live-body/overhead changes. The earlier
+RESTORE-03 regressions remain alongside both new tower-exit regressions.
+Source routing and patch-note checks passed. The requested local focused
+union was deferred: the shared nonblocking validation lock returned 75
+before compilation; no test ran or passed in that attempt. Hosted CI on
+the consolidated head remains required. Windows/browser rendered parity
+is still pending, independently of shared source and numerical tests.
+
+
+## GD-03 — Colossus body turn and 3D obelisk-tip strike alignment (2026-11-02)
+
+Shared Linux/Windows/desktop web path (`crates/tbg-client/src/art/kits/colossus/motion.rs`,
+`crates/tbg-client/src/art/anim.rs`):
+- `Animator::observe` treats active combat action clips (`AttackMelee`,
+  `AttackRanged`, `Cast`) with an active `aim_at` as engaged immediately, even
+  while walk-stop hysteresis (`STOP_SECS`) is still settling or when crowd
+  offsets nudge root `x`.
+- `colossus::motion::pose` turns `Joint::Root` toward `m.aim` during
+  `AttackMelee`, `AttackRanged`, `Cast` and `Hit` (`tools::face`), centers the
+  obelisk on the body midline during the strike (`at.x = 0` at `Strike`),
+  places both hands symmetrically on the shaft, and solves the chest-space
+  strike pitch and longitudinal slide so the obelisk ray and its pyramidion tip
+  (`Vec3::new(0.0, 1.27, 0.0)`) align directly with `m.aim.target` in 3D across
+  all five Evolution forms.
+- Coverage: all five `Colossus` forms (`Base`, `A1`, `A2`, `B1`, `B2`), both
+  seats, on-axis and off-axis lateral targets on the widened road, close and
+  max-range combat targets, and arm/hand clearance envelopes (`gd01_colossus`,
+  `gd02_colossus`, `gd03_colossus`). Linux targeted regressions and native
+  preview installation are verified; Windows and desktop web visual
+  observations remain pending.
+
+### 2026-11-02 — GD-04 Gods expansion: Colossus refinement, Volthar and Astreon
+
+- Reference: Linux native client. Shared presentation only: kit figures,
+  motion, the storm/rupture VFX and the gallery framing live in
+  `crates/tbg-client/src/art/kits/{colossus,volthar,astreon}`,
+  `vfx/{shots,completion}.rs`, `sync/{actions,special_cues}.rs` and
+  `gallery/*`; no OS or target condition is introduced.
+- Affected cases: Colossus Base/A1/A2/B1/B2 (refined geometry, Idle/Walk/
+  Victory weight; GD-03 strike alignment and GD-02 clearance unchanged), new
+  Volthar and Astreon five forms in every clip (Idle, Walk, Attack, charged
+  fourth bolt / pierce, Hit, Spawn, Evolve, Death, Victory), `StormArc`
+  links, StormBolt/StormSurge projectiles, Volthar and Astreon impact and
+  Evolution bursts, training/catalog cards and shop portraits for both kinds,
+  both seats and spectators.
+- Matrix: `training-gods-{colossus,volthar,astreon}-forms`,
+  `battle-gods-two-colossus`, `battle-gods-volthar-chain` and
+  `battle-gods-astreon-pierce` join the screens; all but the two-Colossus
+  still also join `motion_screens` (matched frames 0/10/20/40).
+- Evidence: see `docs/phases/GODS-faction-expansion.md` for the Linux captures
+  actually taken and the focused tests run. Windows and desktop-web
+  observations are **pending**; no parity is claimed from shared code or
+  compilation.
+
+## P74 — War Auxiliaries (`Mineiro` & `Mercador`) HUD Panel, 3D Precincts & Construction Animations (2026-11-02)
+
+Shared Linux/Windows/desktop web path (`crates/tbg-client/src/ui/native_battle/auxiliaries.rs`,
+`crates/tbg-client/src/ui/native_battle/resources.rs`,
+`crates/tbg-client/src/arena/auxiliaries/`):
+- Bottom-right `Auxiliares (0/2)` / `Auxiliaries (0/2)` navy-and-gold framed
+  panel (`right: 14px`, `bottom: SHOP_BOTTOM`, `SHOP_SCALE = 0.9`) with two
+  dedicated auxiliary cards (`Mineiro · Cost 6` and `Mercador · Cost 4`), 3D
+  portraits (`aux_miner.webp`, `aux_merchant.webp`), and live phase/timer/progress
+  badges, keeping the five conventional Shop cards and the
+  `Energy / Interest / Army / Reroll` bar in their exact coordinates.
+- Free-reroll readout on the `Reroll` button (`Reroll · GRÁTIS (N)` /
+  `Reroll · FREE (N)`) enabled at `0` Energy when `free_rerolls > 0`.
+- Symmetric Left (`Seat::A` / Blue, `x = -2.55`) and Right (`Seat::B` / Red,
+  `x = +18.55`) off-lane 3D precincts for `Mineiro` (`z = -3.45`: rock outcrop,
+  portal shoring, lantern, rails, ore cart, pickaxe mining loop) and `Mercador`
+  (`z = +3.45`: timber pier on pilings, red-and-cream striped market stall,
+  balance-scales banner, crates/sacks, brass spyglass lookout, and wave-bobbing
+  wooden Merchant Caravel ship), with 3-stage procedural construction animations
+  and theme-adapted palettes across all eight Arenas (`Forest`, `Tundra`,
+  `Volcanic`, `Ruins`, `Storm`, `Celestial`, `Clockwork`, `Desert`).
+- Linux targeted regressions and native preview installation are verified;
+  Windows and desktop web visual observations remain pending.
+
+### INT-06 integration coverage (2026-11-02)
+
+Shared P74/GD-04 source is integrated at wire 38/R15. Construction reads the
+authoritative remaining ticks and pauses with the Augment window; idle
+work/delivery loops use low-motion static poses when requested. The P74 HUD
+remains private to the owning seat; precinct phases are public on both sides
+and to spectators. CROWD-EXIT-01 HOME_HALF_WIDTH, walking envelopes and
+original pushing remain intact alongside the refined Colossus and both Gods.
+
+Focused numerical/source coverage passed on Linux: 35 client cases including
+all eight Arena precinct/road geometry, Gods forms/grips/clearance, both side
+orientations and live contact envelopes. Real WebSocket auxiliary ownership,
+private free currency, quote roundtrips and reconnect passed independently.
+Packaged integrated Linux capture and Windows/browser rendered observations
+remain pending; no parity is inferred from these tests or shared code.

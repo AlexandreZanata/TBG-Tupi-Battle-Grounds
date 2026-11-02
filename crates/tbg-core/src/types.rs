@@ -211,6 +211,9 @@ pub enum UnitKind {
     FoamWeaver,
     PodSnapper,
     Colossus,
+    /// GD-04: Gods expansion, appended to preserve every earlier wire index.
+    Volthar,
+    Astreon,
 }
 
 /// The staged Shop pool (summons excluded): what offers draw from until the
@@ -230,7 +233,7 @@ pub const UNIT_KINDS: [UnitKind; 10] = [
 
 /// Every kind, in `UnitKind` order (content tables, art, audio).
 #[rustfmt::skip]
-pub const ALL_KINDS: [UnitKind; 87] = [
+pub const ALL_KINDS: [UnitKind; 89] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -318,6 +321,8 @@ pub const ALL_KINDS: [UnitKind; 87] = [
     UnitKind::FoamWeaver,
     UnitKind::PodSnapper,
     UnitKind::Colossus,
+    UnitKind::Volthar,
+    UnitKind::Astreon,
 ];
 
 impl UnitKind {
@@ -395,7 +400,7 @@ pub const FULL_POOL: [UnitKind; 46] = [
 
 /// Owner-authorized local champion preview; the online pool remains FULL_POOL.
 #[rustfmt::skip]
-pub const COMPLETION_POOL: [UnitKind; 82] = [
+pub const COMPLETION_POOL: [UnitKind; 84] = [
     UnitKind::Shieldbearer,
     UnitKind::Archer,
     UnitKind::BoneBrute,
@@ -478,6 +483,8 @@ pub const COMPLETION_POOL: [UnitKind; 82] = [
     UnitKind::FoamWeaver,
     UnitKind::PodSnapper,
     UnitKind::Colossus,
+    UnitKind::Volthar,
+    UnitKind::Astreon,
 ];
 
 /// All playable archetypes, in glossary order.

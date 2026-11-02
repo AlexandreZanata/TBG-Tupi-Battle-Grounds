@@ -7,6 +7,14 @@ mod figures;
 mod layout;
 mod lineup;
 mod monument_frame;
+
+/// Gods share the monumental scale, so they share its review framing (GD-04).
+pub(crate) fn monument(kind: tbg_core::UnitKind) -> bool {
+    matches!(
+        kind,
+        tbg_core::UnitKind::Colossus | tbg_core::UnitKind::Volthar | tbg_core::UnitKind::Astreon
+    )
+}
 pub(crate) mod motion;
 mod palette;
 pub(crate) mod polish;

@@ -15,7 +15,8 @@ fn ab01_trident_moves_to_abyssals_and_pod_snapper_replaces_its_plant_slot() {
                 .iter()
                 .filter(|k| def(**k).faction == f)
                 .count(),
-            if f == Faction::Gods { 1 } else { 9 },
+            // GD-04 grows Gods from Colossus alone to Colossus, Volthar and Astreon.
+            if f == Faction::Gods { 3 } else { 9 },
             "{f:?}"
         );
     }

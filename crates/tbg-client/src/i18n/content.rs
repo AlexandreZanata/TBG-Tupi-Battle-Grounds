@@ -30,6 +30,8 @@ pub fn rejection(lang: Lang, reason: tbg_core::Rejection) -> &'static str {
         tbg_core::Rejection::NoReserve => Msg::RejectionNoReserve,
         tbg_core::Rejection::LaneFull => Msg::RejectionLaneFull,
         tbg_core::Rejection::StalePrice => Msg::RejectionStalePrice,
+        tbg_core::Rejection::BadAuxiliarySlot => Msg::RejectionBadOption,
+        tbg_core::Rejection::AuxiliaryAlreadyHired => Msg::RejectionUnavailable,
     })
 }
 
@@ -140,6 +142,8 @@ fn unit_msgs(kind: UnitKind) -> UnitMsgs {
         UnitKind::TrenchLamplighter=>u(Msg::UnitTrenchLamplighterName,UNIT_TRENCH_LAMPLIGHTER_FORM_NAME,Msg::UnitTrenchLamplighterGood,Msg::UnitTrenchLamplighterWeak),
         UnitKind::FoamWeaver=>u(Msg::UnitFoamWeaverName,UNIT_FOAM_WEAVER_FORM_NAME,Msg::UnitFoamWeaverGood,Msg::UnitFoamWeaverWeak),
         UnitKind::Colossus=>u(Msg::UnitColossusName,UNIT_COLOSSUS_FORM_NAME,Msg::UnitColossusGood,Msg::UnitColossusWeak),
+        UnitKind::Volthar=>u(Msg::UnitVoltharName,UNIT_VOLTHAR_FORM_NAME,Msg::UnitVoltharGood,Msg::UnitVoltharWeak),
+        UnitKind::Astreon=>u(Msg::UnitAstreonName,UNIT_ASTREON_FORM_NAME,Msg::UnitAstreonGood,Msg::UnitAstreonWeak),
         UnitKind::PodSnapper=>u(Msg::UnitPodSnapperName,UNIT_POD_SNAPPER_FORM_NAME,Msg::UnitPodSnapperGood,Msg::UnitPodSnapperWeak),
     }
 }

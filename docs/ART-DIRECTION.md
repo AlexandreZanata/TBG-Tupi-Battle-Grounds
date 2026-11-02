@@ -397,6 +397,46 @@ not a second visual spring. Preserve identical interpolation and timing on
 Linux, Windows and desktop web; record each unobserved target as pending.
 
 
+### GD-04 Gods expansion: Colossus refinement, Volthar and Astreon (2026-11-02)
+
+All three Gods share the monumental scale (Colossus 1.85, Volthar 1.66,
+Astreon 1.64 body size; Colossus stays the largest), premium low-poly with
+broad facets, gold architectural trim and restrained glow. Team identity stays
+on foot rings. Reference posters are design input only: frames, text panels
+and backgrounds are never modeled.
+
+**Colossus.** Keep the stone body, the one obelisk on the back and the GD-03
+strike alignment. Carved pectoral/abdominal plates, brow, nose, jaw, thumbs and
+gold collar/knee/ankle bands replace the block look. Canonical branch A (Sun
+Obelisk, Pillar of Dawn: damage/range/splash) takes the poster's offensive
+direction (*Pilar da Ira*, *Obelisco Destruidor*): gold blades on shoulders and
+gauntlets, a ray crown and obelisk edge fins. Canonical branch B (Ancient
+Monolith, Eternal Monument: +HP) takes the defensive direction (*Bastião de
+Mármore*, *Fortaleza Divina*): stacked pauldrons, stone bracers, buttressed
+obelisk and, at tier 2, forearm tower shields, a halo and a navy banner. The
+owner keeps branch B in **dark charcoal** although the poster shows marble.
+Canonical names are unchanged; the poster names describe direction only.
+
+**Volthar — Storm God.** Athletic, white hair and broad beard, royal-blue and
+gold armor, lightning emblem, navy cape, glowing storm eyes. The rune hammer
+is a chest-parented rigid prop; the right wrist solves onto its grip in every
+clip and the left hand joins only for the charged fourth bolt and the B-branch
+heavy throw. A spinning spark cluster lives on its own socket at the head.
+A forms add a halo and taller crown (celestial), B forms a graphite heavy head
+with gold spikes and darker cape (wrath). Lightning follows only server events:
+the bolt on Release, `StormArc` links and the resolved discharge.
+
+**Astreon — Rupture God.** Graphite, gold and ivory cuirass, geometric closed
+helm with horns, beard, angular pauldrons. The very long lance is held in both
+hands on one shaft axis (Trident rig pattern): the butt trails behind the right
+hip, the point leads, the shaft never crosses the chest (automated check). The
+thrust fits its point to the authoritative target distance at contact instead
+of spearing far past it. A forms grow the blade and a crest fin (blue core at
+A2); B forms turn graphite with crimson metal and red eyes/cores.
+
+Every form must differ structurally from the previous one, not only in color.
+Visual acceptance remains owner-approved per form and per motion.
+
 ### ARENA-CLEAR-01 wide-road dressing (2026-11-02)
 
 Preserve the five-tile road and its full existing paved border. Decorative solids,
