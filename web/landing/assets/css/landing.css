@@ -154,7 +154,8 @@
 .platform-native .btn{margin-top:auto}
 .platform-version{min-height:26px}
 .platform-recommended{color:var(--gold-300);font-weight:700;text-align:center}
-.native-dialog{width:min(740px,92vw);max-height:88vh;padding:30px;color:var(--text);overflow:auto}
+/* Anchor dialog focus to the viewport without moving the underlying download section. */
+.native-dialog{position:fixed;inset:0;width:min(740px,92vw);max-height:88vh;padding:30px;color:var(--text);overflow:auto}
 .native-dialog::backdrop{background:#02070de8;backdrop-filter:blur(5px)}
 .native-dialog-heading{display:flex;align-items:start;justify-content:space-between;gap:24px;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--line-strong)}
 .native-dialog-heading h2{margin:0;font-size:2rem}

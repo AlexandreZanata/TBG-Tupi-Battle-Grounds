@@ -1,8 +1,8 @@
-TBG 0.1.2-rc.2 — Linux and Windows beta candidate
+TBG 0.1.2-rc.3 — Linux and Windows beta candidate
 
 Protocol 31, schema 10, ruleset 6 / 097385fee9a10b0f.
 
-Same gameplay, protocol and contract as 0.1.2-rc.1. This is the first version
+Same gameplay, protocol and contract as 0.1.2-rc.1. This version is
 published by the automatic main pipeline: one exact-source build per platform,
 promoted byte for byte, built with the pinned Rust 1.99.0 from LF-normalized
 sources. While the server switches to a new release, a request the old server
@@ -33,3 +33,9 @@ separate gated mechanisms. Preserve existing accounts, preferences and older pac
 
 Source, individual asset checksums and the exact compatible contract are in
 `tbg-native-release.json`; `native-provenance.jsonl` binds the artifacts to GitHub CI.
+
+This candidate preserves the landing download-dialog scroll fix and corrects a
+release heartbeat snapshot that could retain already-completed writer work.
+Queued player work, running matches and pending results still block retirement.
+The wire/gameplay contract and database schema remain unchanged. Version rc.2
+keeps its existing source tag; no published bytes or tags are replaced.
