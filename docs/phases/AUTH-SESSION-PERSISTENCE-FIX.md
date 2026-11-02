@@ -90,8 +90,60 @@ Already run: `node crates/tbg-client/tests/auth-session.test.cjs` — five passe
   expected. The corrected candidate passed that scenario. Both used separate
   synthetic account/data namespaces; no owner-account token was rotated.
 
-Pending at this source commit: final committed release build, package/install
-verification and installed Linux smoke test. Packaged Windows and real desktop
+At code commit `94a0aa4`, release build, package/install verification and
+installed Linux smoke were pending; they were subsequently completed below. Packaged Windows and real desktop
 browser account/queue-return observations remain deferred to their respective
 platform consolidation; no visual parity claim. No full suite, gameplay/balance
 checks, push or public deployment is authorized or performed here.
+
+
+## Installed release validation
+
+The owner explicitly authorized waiting/retrying and completing compilation,
+focused tests and Linux installation. Final code commit:
+`94a0aa4c37a1911512fb06b5e59ade72fa9b6af1`.
+
+- `cargo build --offline --locked --release -p tbg-client --features
+  ui-acceptance --bin tbg-client`, with `TBG_SOURCE_COMMIT` set to that commit,
+  shared host lock, two jobs and the reused root target — passed, 4m 00s.
+- `python3 scripts/package-native.py --platform linux --binary
+  <root-target>/release/tbg-client --output /tmp/tbg-auth-session-package
+  --no-archive` — passed source/version/profile/contract checks.
+- Packaged `install.sh` — installed the new commit-specific release directory
+  and updated both `tbg`/`tupi-battle-grounds` launchers and the TBG desktop
+  entry. Existing installations and owner data were retained. An initial
+  verification used the wrong manifest filename; that inspection failed
+  without affecting installation. The corrected `file-manifest.json`
+  verification then passed **all 395 file sizes/SHA-256 hashes**, including
+  executable identity/profile/source and the unchanged match contract.
+- The same real-vault confirmation-outage/stale-vault/restart/revocation
+  journey was repeated against the **installed release executable** and
+  passed all required recovery and cleanup assertions. This repeat verifies
+  the release artifact rather than relying on debug-only evidence.
+- Two actual installed-client Linux/X11/Vulkan captures used a fresh synthetic
+  account, data directory, local backend and OS-vault entry. A proxy injected
+  two confirmation failures. First capture: account remains signed in,
+  HTTP-confirmation warning and Retry are visible, credential_saved=true and
+  remember=false/remember_requested=true. Second launch: same account restored,
+  confirmation succeeded, remember=true and the warning is absent. Both PNGs
+  were visually inspected at 1280x720. Runtime screenshots are in
+  `/tmp/tbg-auth-ui-smoke/{pending,recovered}.png`; this is scoped Linux
+  evidence, not Windows/web parity or a complete online-match test.
+- The local owner's old nonsecret metadata still lacked recovery intent.
+  Under the origin's OS lock, the existing vault family was matched to metadata
+  and confirmed with HTTP 200. Only remember_requested/credential_saved were
+  repaired so the corrected coordinator can restore it on the next launch.
+  A private backup of the prior nonsecret metadata was written in `/tmp`.
+  No owner credential was changed, rotated or printed, and no logout was sent.
+
+[Installed identity and boolean-only evidence](AUTH-SESSION-PERSISTENCE-INSTALLED.json)
+records the exact directory and binary digest. The installed version label is
+still `0.1.4-colossus.3`; the source SHA identifies the corrected build. Any
+already-open old process continues its old code until reopened.
+
+Remaining consolidation observations: real Windows and desktop browser
+presentation for the four added contract cases, and a real interactive queue
+round-trip/return-to-lobby on those platforms. Native queue authorization and
+renewal were covered by the focused socket regressions; the runtime captures
+covered auth persistence/restart only. No full suite, unrelated balance work,
+remote push, merge or public deployment was performed.

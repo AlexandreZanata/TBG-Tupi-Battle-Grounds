@@ -767,3 +767,12 @@ and controls propagate to Linux, Windows and desktop web. Runtime evidence and
 remaining target observations are recorded in
 [the focused report](../phases/AUTH-SESSION-PERSISTENCE-FIX.md). Native-only tests
 or synthetic JavaScript regressions do not prove cross-platform visual parity.
+
+
+Evidence for the session correction: 21 focused native auth/socket/UI tests and
+five synthetic JavaScript regressions passed. The installed Linux release was
+observed with an injected confirmation failure (account still logged in, correct
+warning and Retry visible) and on restart after recovery (same account,
+confirmed persistence, no warning). Both 1280x720 Linux captures were inspected.
+Real interactive queue-return observation and actual Windows/desktop-browser
+captures remain pending; synthetic JS and Linux observations do not prove parity.
