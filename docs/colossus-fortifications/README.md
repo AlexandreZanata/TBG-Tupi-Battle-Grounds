@@ -1,6 +1,6 @@
 # Gods, Colossus and the wide BattleLine
 
-Current owner correction: [RESTORE-01](../phases/LEGACY-CROWD-RESTORATION.md) restores immediate pieces and legacy cosmetic pushing in all normal modes. The physical-capacity proposal below is historical and disabled in Practice/Training.
+Current owner correction: [RESTORE-01](../phases/ARENA-CLEARANCE-AND-ORIGINAL-PUSHING.md) restores immediate pieces and legacy cosmetic pushing in all normal modes. The physical-capacity proposal below is historical and disabled in Practice/Training.
 
 Owner revision TW-01 / PK-01 / GD-01, 2026-11-02. All new numeric values are
 Proposed in [GAME-DESIGN](../GAME-DESIGN.md#tw-01--pk-01--gd-01--proposed-owner-revision-2026-11-02).
@@ -81,6 +81,6 @@ hashes and the exact debug binary. Local review: <http://localhost:8966/>;
 updated 82-champion landing: <http://localhost:8604/#champions>.
 
 Current movement/install evidence supersedes the historical queue witness and
-installation above: [RESTORE-01 Linux receipt](../phases/LEGACY-CROWD-RESTORATION.md).
-Source `ef0975c` installs R12, restores immediate entry/legacy progression and
+installation above: [RESTORE-01 Linux receipt](../phases/ARENA-CLEARANCE-AND-ORIGINAL-PUSHING.md).
+Source `e868927` installs R12, restores immediate entry/original direct pushing and
 retains the wide floor, tower changes and all Colossus forms.

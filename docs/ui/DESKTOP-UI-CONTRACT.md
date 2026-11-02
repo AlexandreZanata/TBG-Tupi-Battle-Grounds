@@ -529,3 +529,10 @@ steps, fire flicker, cloth sway and gears. Stronghold-attached banners are exclu
 from the decorative clearance volume. Shared code/tests do not certify platform
 parity: Linux observations and Windows/desktop web pending cases belong to the
 corresponding phase receipt.
+
+RESTORE-02 / ARENA-CLEAR-01 Linux receipt: source `e868927`, nine targeted
+client tests passed, eight real Practice scenes captured and individually
+inspected, and all 380 installed asset hashes matched. Fire sits on each shared
+brazier and the widened road remains clear. The old solver/direct-offset source
+is restored apart from its lateral bound. Per-image provenance and pending
+Windows/desktop web cases: `docs/phases/ARENA-CLEARANCE-AND-ORIGINAL-PUSHING.md`.
