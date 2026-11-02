@@ -25,7 +25,7 @@ def main():
     subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'crates', 'Cargo.toml',
                     'Cargo.lock', 'scripts/install-champion-preview.py'], cwd=ROOT, check=True)
     subprocess.run(['git', 'merge-base', '--is-ancestor',
-                    '0b56bb4e34d0e8df15fc628c428f46338bd65b67', 'HEAD'], cwd=ROOT, check=True)
+                    '9fb7be01ac08cbed3bce1aa466d7243418490957', 'HEAD'], cwd=ROOT, check=True)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     info = json.loads(subprocess.check_output([str(binary), '--build-info'], text=True))
     if (info['source_commit'] != commit or info['version'] != '0.1.2-cc.1'
@@ -39,7 +39,7 @@ def main():
     manifest = {'schema': 1, **info, 'binary_sha256': sha(binary),
                 'cargo_lock_sha256': sha(ROOT / 'Cargo.lock'), 'assets': files,
                 'scope': 'CC17 local Practice/Training preview; online roster is not activated',
-                'laboratory_baseline': 'PR44 / 0b56bb4e34d0e8df15fc628c428f46338bd65b67',
+                'laboratory_baseline': 'PR44 / 9fb7be01ac08cbed3bce1aa466d7243418490957',
                 'data_directory': str(data)}
     if slot.exists():
         existing = slot / 'preview-build.json'

@@ -312,6 +312,8 @@ mod tests {
     fn rematch_controls_follow_the_offer_without_query_conflicts() {
         // Runs the actual Bevy queries: a B0001 regression fails on update.
         let mut app = App::new();
+        // P73: `spawn` reads the link to tell local from online statistics.
+        app.insert_non_send(crate::link::MatchLink::Idle);
         app.insert_resource(MatchInfo {
             challenge: true,
             ..default()

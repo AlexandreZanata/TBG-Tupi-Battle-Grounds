@@ -69,6 +69,11 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
             ServerMsg::NetStats { .. } | ServerMsg::AuthState { .. } => {}
+            // BR-AP05 (D-103): every online PvP result, Ranked included, now
+            // opens a rematch offer; these tests assert settlement, not offers.
+            ServerMsg::RematchOpen { .. }
+            | ServerMsg::RematchState { .. }
+            | ServerMsg::RematchClosed { .. } => {}
             other => return Some(other),
         }
     }
@@ -389,6 +394,18 @@ async fn br_m06_ranked_surrender_is_a_loss() {
     assert_eq!(rb.2.wins, 1);
     let store = Store::open(&t.db).unwrap();
     assert_eq!(store.ranked_match_count().await.unwrap(), 1);
+    // BR-AP11 (D-103): profile history is Only me until the account opts in.
+    let stats = store.player_stats("sura".into()).await.unwrap();
+    assert!(stats.recent.is_empty(), "private by default");
+    drop(store);
+    let store = Store::open_history(&t.db, Default::default(), true).unwrap();
+    let db = rusqlite::Connection::open(&t.db).unwrap();
+    db.busy_timeout(Duration::from_secs(5)).unwrap();
+    db.execute(
+        "UPDATE accounts SET history_visibility = 'public' WHERE name_lower = 'sura'",
+        [],
+    )
+    .unwrap();
     let stats = store.player_stats("sura".into()).await.unwrap();
     assert_eq!(stats.recent[0].reason, "Forfeit");
 }

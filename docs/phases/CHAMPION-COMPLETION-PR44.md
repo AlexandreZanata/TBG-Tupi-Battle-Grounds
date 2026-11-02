@@ -70,3 +70,17 @@ Evolution form through normal actions. Extend its allowlist to the local
 63-entry pool and wait for real scene readiness, so the new laboratory can
 be inspected with a new champion without inventing another UI or bypassing
 authoritative commands. Actual Linux capture/installation is the next step.
+
+
+## Latest PR44 follow-up
+
+A final remote read found PR44 advanced to `9fb7be0` during capture. Merge
+that head too: its only client change fixes a rematch test fixture, its core
+classification duplicates the history-schema exclusion already fixed here,
+and its remaining changes affect server tests, proxy configuration and the
+consolidation report. No laboratory, model, motion or asset source changed
+since the successful 83-scenario batch and four Linux captures. Reuse that
+evidence, test the rematch fixture/classification once and rebuild the stamped
+installer. Installer ancestry now requires `9fb7be0`, preventing a previous
+PR revision from being selected. No proxy was deployed and no history flag
+or database was touched.

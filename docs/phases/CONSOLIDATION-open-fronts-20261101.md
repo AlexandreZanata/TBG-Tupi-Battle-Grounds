@@ -104,6 +104,31 @@ Fixed in `6f8f31f`:
   manual parity check and `chunks_exact(2)`; it now uses `is_multiple_of`
   and `as_chunks::<2>()`, with identical behavior.
 
+Later CI runs on this PR exposed more, fixed in `0b56bb4`, `3277d3a` and
+`7281c34`:
+
+- Clippy also rejected #43's eight-argument focus capture system (allowed
+  with the repository's reason-comment idiom) and the client history entry
+  parser's `chunks_exact(2)`.
+- The workspace `test` lane failed in four targets the P73 front never ran:
+  `protocol/history.rs` was not classified in `ruleset-sources.txt`; the
+  Result test lacked the `MatchLink` P73 now reads; Ranked tests did not
+  expect the BR-AP05 rematch offer that now follows every online PvP
+  result; and the BR-R07 profile tests expected public `recent` results.
+- The privacy proxy set `private, no-store` next to, not instead of, the
+  server's `public, max-age=10` profile header; the header is now deferred.
+
+## Visible behavior change on deploy
+
+With every history flag off, BR-AP11 already applies: the public profile's
+legacy `recent` list is empty for every account (the store treats a
+schema-10 database as Only me and the API requires `TBG_HISTORY_PUBLIC`).
+After this PR is deployed, profiles therefore stop showing recent matches
+until history is migrated and players opt in. This is the documented P73
+privacy default, not a regression to hide; the owner should expect it.
+The adapted tests assert the private default first and then the original
+result/delta/opponent/reason content after an opt-in.
+
 ## Identifiers
 
 - **Decision:** D-103 (D-101/D-102 already used on main; nothing renumbered).
@@ -178,9 +203,23 @@ build fixes):
 The server results predate the review fixes; the client results identified
 the build defect. None of them is evidence for the final revision.
 
+Re-run of the four targets that failed in CI, at **`7281c34`** (clean tree,
+same lock, jobs and private target):
+
+| Command | Result |
+|---------|--------|
+| `cargo test -p tbg-core --test contract_ruleset_version` | 2 passed |
+| `cargo test -p tbg-server --test leaderboard --test ranked` | 4 + 6 passed |
+| `cargo test -p tbg-client --bin tbg-client` filtered to `ui::result::tests`, `p73_`, `ui::fortify::tests::`, `br_ag05_ag11_…` | 8 passed |
+
+PR CI on `0b56bb4` ran the whole workspace (`clippy`, `wasm`, `balance`,
+`desktop-ui` passed; `test` failed only in those four targets, so the
+review-fix regressions passed there). The landing contract `quality`
+failure is an open owner decision, recorded in the PR.
+
 ### Deferred
 
-The final batch at `6f8f31f` (plus later documentation-only commits) was
+The earlier final batch at `6f8f31f` was
 **not run: shared validation slot busy** (`flock -n` exit 75; another
 front's champion preview capture held it). It was not retried in a loop,
 bypassed or waited on. Run once, from the worktree:
@@ -215,6 +254,13 @@ acceptance item listed in the
 and #43's phase reports.
 
 ## Rollout and rollback
+
+Merge order: the native publication front tagged `v0.1.2-rc.1` on
+`ebae364` (PR #42 head, protocol 31) and the landing now offers it. Merge
+#42 first. Once this PR's protocol 32 reaches the server, those desktop
+downloads become incompatible and disappear from `/downloads.json` until a
+same-source `w32` native release is published.
+
 
 Merging this PR changes the wire contract to `w32-…`. By design the
 backend auto-deploy controller then refuses the candidate (`contract change

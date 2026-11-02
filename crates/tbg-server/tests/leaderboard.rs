@@ -28,6 +28,11 @@ fn temp_db(name: &str) -> TempDb {
 }
 
 async fn live_server(name: &str) -> (String, String, TempDb) {
+    live_server_with(name, false).await
+}
+
+/// `history` enables the P73 schema and public history projection (D-103).
+async fn live_server_with(name: &str, history: bool) -> (String, String, TempDb) {
     let t = temp_db(name);
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let port = listener.local_addr().unwrap().port();
@@ -40,6 +45,8 @@ async fn live_server(name: &str) -> (String, String, TempDb) {
         // Bot fills register once per connection; the limit counts attempts.
         register_per_ip_hour: 100_000,
         db: Some(t.db.clone()),
+        history_migrate: history,
+        history_public: history,
         ..Config::default()
     };
     tokio::spawn(tbg_server::run(config, listener));
@@ -172,7 +179,7 @@ async fn wait_total(base: &str, want: u64) -> serde_json::Value {
 
 #[tokio::test]
 async fn br_r07_leaderboard_and_player_profile() {
-    let (base, url, _t) = live_server("board").await;
+    let (base, url, t) = live_server_with("board", true).await;
     ranked_win(&url, "BoardA", "BoardB").await;
     // BR-R07: both appear ordered by rating, then wins, then name.
     let board = wait_total(&base, 2).await;
@@ -206,6 +213,18 @@ async fn br_r07_leaderboard_and_player_profile() {
         ("BoardA", 1020, 1, 1, 100.0)
     );
     assert_eq!(p["joined"].as_str().unwrap().len(), 10);
+    // BR-AP11 (D-103): recent results stay Only me until the account opts in.
+    assert!(p["recent"].as_array().unwrap().is_empty());
+    assert!(p.get("key_hash").is_none() && p.get("id").is_none());
+    let db = rusqlite::Connection::open(&t.db).unwrap();
+    db.busy_timeout(Duration::from_secs(5)).unwrap();
+    db.execute(
+        "UPDATE accounts SET history_visibility = 'public' WHERE name_lower = 'boarda'",
+        [],
+    )
+    .unwrap();
+    let (_, _, body) = get(&base, "/api/players/BoardA").await;
+    let p = body_json(&body);
     assert_eq!(p["recent"].as_array().unwrap().len(), 1);
     assert_eq!(p["recent"][0]["result"], "W");
     assert_eq!(p["recent"][0]["delta"], 20);

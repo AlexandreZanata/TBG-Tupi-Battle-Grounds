@@ -62,6 +62,7 @@ exclude lib.rs module exports only
 exclude practice_bot.rs local tools and observational hooks, no normal-match outcome changes
 exclude profiling.rs benchmark counters only
 exclude protocol.rs wire format, versioned separately
+exclude protocol/history.rs P73 personal summary wire shapes (D-103), versioned with the protocol
 exclude ranked_integrity.rs settlement eligibility, policy-versioned
 exclude rating.rs Elo, versioned by GAME-DESIGN §5 and contracts
 exclude replay.rs offline replay tooling
@@ -77,4 +78,3 @@ exclude view/effects.rs cosmetic metadata, tests or read-only presentation
 exclude view/public.rs spectator presentation
 exclude view/visibility.rs presentation filtering
 exclude completion/tests.rs focused local-preview regression scenarios, no gameplay
-exclude protocol/history.rs P73 message and API data schemas; wire version guards serialization, not combat
