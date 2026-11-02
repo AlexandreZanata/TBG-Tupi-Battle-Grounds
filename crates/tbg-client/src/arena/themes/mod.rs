@@ -45,7 +45,7 @@ pub(super) fn back_row() -> Vec<(Vec3, f32)> {
     (0..46)
         .filter_map(|i| {
             let x = -3.0 + (i % 16) as f32 * 1.42 + unit() * 0.65;
-            let z = -2.9 - (i / 16) as f32 * 0.92 - unit() * 0.45;
+            let z = -3.9 - (i / 16) as f32 * 0.92 - unit() * 0.45;
             inside(x, z).then(|| (Vec3::new(x, 0.0, z), 0.75 + unit() * 0.8))
         })
         .collect()
@@ -57,7 +57,7 @@ pub(super) fn scatter(seed: u64) -> Vec<(usize, Vec3, f32)> {
     (0..100)
         .filter_map(|i| {
             let x = -3.7 + unit() * 23.4;
-            let z = (if i % 2 == 0 { 1.0 } else { -1.0 }) * (2.9 + unit() * 2.3);
+            let z = (if i % 2 == 0 { 1.0 } else { -1.0 }) * (3.5 + unit() * 1.7);
             inside(x, z).then(|| (i, Vec3::new(x, 0.0, z), 0.25 + unit() * 0.35))
         })
         .collect()
@@ -92,7 +92,11 @@ fn shore_rocks(kit: &mut Kit, theme: Theme) {
     let rim = super::geometry::outline();
     let center = Vec3::new(8.0, 0.0, 0.0);
     for i in [7, 12, 19, 25, 39, 45, 51, 57] {
-        let at = center + (rim[i] - center) * 0.93;
+        let mut at = center + (rim[i] - center) * 0.93;
+        // Keep each coastal group intact while clearing the widened road corners.
+        if at.z.abs() < 4.0 && (-1.7..17.7).contains(&at.x) {
+            at.z = at.z.signum() * 4.0;
+        }
         for (j, (dx, dz, s)) in [(-0.35, 0.0, 0.53), (0.30, 0.10, 0.37), (0.0, -0.20, 0.72)]
             .into_iter()
             .enumerate()

@@ -35,12 +35,12 @@ pub(super) fn build(kit: &mut Kit) {
         );
     }
     for (x, z, s) in [
-        (-0.1, -3.15, 1.0),
+        (-0.1, -4.0, 1.0),
         (1.0, -4.3, 1.2),
         (3.1, -4.85, 0.85),
         (12.9, -4.85, 0.85),
         (15.0, -4.3, 1.2),
-        (16.1, -3.15, 1.0),
+        (16.1, -4.0, 1.0),
         (0.7, 3.4, 0.60),
         (15.3, 3.4, 0.60),
     ] {
@@ -96,7 +96,7 @@ fn temple(parts: &mut Vec<Part>, glow: &mut Vec<Part>) {
             p.stone,
         );
     }
-    steps(parts, Vec3::new(8.0, 0.0, -2.88), 2.8, p.stone);
+    steps(parts, Vec3::new(8.0, 0.0, -3.10), 2.8, p.stone);
     block(
         parts,
         Vec3::new(8.0, 3.04, -3.59),

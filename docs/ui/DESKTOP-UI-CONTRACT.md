@@ -509,3 +509,23 @@ artificial initial anchor and can occlude each other; this evidence certifies
 entity entry and bounded motion, not universal non-overlap. Core tests cover
 immediate purchases and continued advancement. Exact commands, hashes and
 remaining platform observations are in `docs/phases/LEGACY-CROWD-RESTORATION.md`.
+
+
+## RESTORE-02 / ARENA-CLEAR-01 — Original pushing and road clearance (2026-11-02)
+
+Supersede RESTORE-01 display easing, fixed stepping, pair ordering and anchor
+changes. Linux, Windows and desktop web again use the pre-PK-01 crowd solver and
+direct offsets; only the lateral bound expands to 2.1 tiles. Normal movement and
+purchase entry stay unblocked. Coverage: both seats, pushing/overtaking, crowded
+attack/turn/walk, immediate purchases and Evolution. Towers and models are unchanged.
+
+All eight Arenas keep the five-tile floor with its full paved border clear of
+scenery. Common brazier origins place both base and fire outside the road; fence
+posts and animated cloth share side origins. Move complete scenery groups from
+their authored origins, preserving snow caps, crystals, trim and glow alignment.
+Coverage: Forest, Tundra, Volcanic, Ruins, Storm, Celestial, Clockwork and Desert;
+near/far road edges and corners, trees/canopies, rocks, palms, columns, temple
+steps, fire flicker, cloth sway and gears. Stronghold-attached banners are excluded
+from the decorative clearance volume. Shared code/tests do not certify platform
+parity: Linux observations and Windows/desktop web pending cases belong to the
+corresponding phase receipt.

@@ -1,5 +1,8 @@
 # RESTORE-01 — immediate pieces and legacy pushing
 
+Historical smoothing proposal: the owner superseded its display changes with
+RESTORE-02. See [current adjustment](ARENA-CLEARANCE-AND-ORIGINAL-PUSHING.md).
+
 Owner correction, 2026-11-02: keep the widened BattleLine and strong towers,
 restore the former advancing/pushing format, remove the visible delay and
 stationary units caused by PK-01, and only optimize presentation flicker.

@@ -2362,3 +2362,23 @@ expand clearance without shifting the sort anchor. These are presentation
 parameters and cannot change attacks, outcomes, Energy or unit entry.
 Ruleset 12 identifies the changed preview default; wire 36 layout is preserved.
 Canonical replay checksums/outcomes remain those of revision 11.
+
+
+## RESTORE-02 — Proposed exact movement restoration (2026-11-02)
+
+The owner rejects RESTORE-01 cosmetic easing as well. Supersede its fixed-step,
+stable-anchor ordering, expanded aim-anchor envelope and extra display smoothing.
+Restore the pre-PK-01 client pushing/overtaking solver and direct display offset
+application exactly, changing only lateral centre clearance from 1.1 to 2.1 tiles
+to use the retained five-tile BattleLine. Preserve immediate deployment and
+authoritative legacy advancement in every normal mode. No passage capacity or
+waiting queue is reintroduced. This is presentation-only; wire/ruleset identity,
+towers and champion balance remain unchanged.
+
+## ARENA-CLEAR-01 — Proposed decorative clearance (2026-11-02)
+
+Keep the existing five-tile BattleLine and its paved border. Move arena dressing
+outside that complete road rectangle in every Arena; do not narrow it to fit
+scenery. Fire and animated cloth must share their actual pedestal/fence origins.
+Move compound props from their authored origins so geometry, glow and attachments
+stay together. Stronghold-attached banners remain part of the Stronghold.

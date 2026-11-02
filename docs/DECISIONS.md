@@ -3099,3 +3099,18 @@ experiment for historical diagnostics; ordinary play never uses its queue.
 Stabilize the existing client-only crowd solver with a fixed presentation step,
 anchor/ID ordering and bounded displacement smoothing. Do not smooth server
 anchors or delay a newly purchased figure. Keep towers/Gods unchanged.
+
+
+## RESTORE-02 / ARENA-CLEAR-01 — Original pushing, clear wide road (2026-11-02)
+
+The owner rejects the added offset smoothing and requests exactly the former
+movement apart from more lateral room. Restore the old solver and direct offset
+application, keeping RESTORE-01 immediate entry and no normal physical lanes.
+Only the shared lateral bound differs from the pre-PK-01 movement source.
+
+The Forest widened its static dressing with a blanket part translation while
+fire retained old brazier coordinates; other kits still used narrow-lane fittings.
+Remove the blanket translation. Author common brazier/fence origins for the wider
+road and move whole trees, rocks, palms, columns and temple steps at their origins.
+Protect the rendered road rectangle across all eight Arenas with geometry and
+animated-mesh regressions, including matching fire/pedestal coordinates.

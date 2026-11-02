@@ -395,3 +395,13 @@ weapons, arms and rear aim. Export measurements to integer core profiles;
 core never imports graphics. Lateral placement is now authoritative (PK-01),
 not a second visual spring. Preserve identical interpolation and timing on
 Linux, Windows and desktop web; record each unobserved target as pending.
+
+
+### ARENA-CLEAR-01 wide-road dressing (2026-11-02)
+
+Preserve the five-tile road and its full existing paved border. Decorative solids,
+overhanging foliage and animated fire/cloth must stay outside the road rectangle.
+Author placements at compound-asset origins, keeping crystals, snow caps, trim,
+glow and fire attached. Common braziers use one origin table for pedestals and
+flames; fences and cloth share their side coordinates. Do not rebase arbitrary
+individual parts after assembly. Stronghold-attached flags remain on their tower.

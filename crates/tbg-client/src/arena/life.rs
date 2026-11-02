@@ -94,7 +94,7 @@ pub(super) fn spawn(
         ));
     }
     for x in [3.9, 12.1] {
-        for z in [-2.5, 2.5] {
+        for z in super::camp::FENCE_SIDES {
             triangles += flag(
                 commands,
                 &cloth_meshes,

@@ -22,6 +22,9 @@ mod towers;
 mod trees;
 mod water;
 
+#[cfg(test)]
+mod clearance_tests;
+
 pub(super) type Part = (Shape, Color, Transform);
 
 pub use scene::ActiveArena;

@@ -5,19 +5,21 @@ use crate::art::{mesh::Shape::*, palette::*};
 use bevy::prelude::*;
 
 pub(super) const BRAZIERS: [(f32, f32); 8] = [
-    (1.9, -2.2),
-    (14.1, -2.2),
-    (1.9, 2.4),
-    (14.1, 2.4),
+    (1.9, -3.2),
+    (14.1, -3.2),
+    (1.9, 3.4),
+    (14.1, 3.4),
     (-2.1, -1.5),
     (18.1, -1.5),
     (-1.9, 1.7),
     (17.9, 1.7),
 ];
 
+pub(super) const FENCE_SIDES: [f32; 2] = [-3.5, 3.5];
+
 pub(super) fn fences(parts: &mut Vec<Part>) {
     for x in [3.9, 12.1] {
-        for z in [-2.5, 2.5] {
+        for z in FENCE_SIDES {
             for dx in [-1.05, 0.0, 1.05] {
                 let at = Vec3::new(x + dx, 0.0, z);
                 trees::ao(parts, at, 0.16);

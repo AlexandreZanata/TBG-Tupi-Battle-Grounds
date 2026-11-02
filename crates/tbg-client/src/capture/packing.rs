@@ -1,11 +1,9 @@
-//! RESTORE-01 native witness: every piece active, cosmetic pushing bounded, no gameplay queue.
+//! Legacy-entry native witness: every piece active with no gameplay queue.
 use bevy::prelude::*;
 #[derive(Resource, Default)]
 pub(super) struct Status {
     pub ready: bool,
     frames: u32,
-    positions: Vec<(u32, Vec3)>,
-    maximum_step: f32,
 }
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<Status>()
@@ -42,25 +40,8 @@ fn observe(
     }
     positions.sort_unstable_by_key(|(id, _)| *id);
     status.frames += 1;
-    if status.frames > 60 && positions.len() == status.positions.len() {
-        for ((id, now), (old_id, before)) in positions.iter().zip(&status.positions) {
-            assert_eq!(id, old_id);
-            let step = now.distance(*before);
-            assert!(
-                step <= 0.14,
-                "RESTORE-01: cosmetic root teleported by {step}"
-            );
-        }
-        let maximum = positions
-            .iter()
-            .zip(&status.positions)
-            .map(|((_, a), (_, b))| a.distance(*b))
-            .fold(0., f32::max);
-        status.maximum_step = status.maximum_step.max(maximum);
-    }
-    status.positions = positions;
     if status.frames >= 90 {
         status.ready = true;
-        eprintln!("RESTORE-01 native witness passed: active={}, queued=0, all_twelve_allies_visible=true, bounded_frames=30, max_cosmetic_step={}, legacy_movement=true", state.units.len(), status.maximum_step);
+        eprintln!("Legacy-entry native witness passed: active={}, queued=0, all_twelve_allies_spawned=true, legacy_movement=true", state.units.len());
     }
 }

@@ -12,7 +12,7 @@ use bevy::prelude::*;
 pub(super) fn fittings(parts: &mut Vec<Part>, theme: Theme) {
     let p = theme.palette();
     for x in [3.9, 12.1] {
-        for z in [-2.5, 2.5] {
+        for z in super::super::camp::FENCE_SIDES {
             for dx in [-1.05, 0.0, 1.05] {
                 let shape = match theme {
                     Theme::Tundra => Frustum(0.07, 0.15, 0.7),
