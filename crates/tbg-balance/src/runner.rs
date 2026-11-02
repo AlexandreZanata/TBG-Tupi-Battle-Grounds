@@ -164,6 +164,11 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
                         let tier = usize::from(view.strongholds[seat.index()].tier.min(1));
                         side.spent += u64::from(m.rules.fortify_cost[tier]);
                     }
+                    PlayerIntention::HireAuxiliary { slot } => {
+                        if let Some(kind) = tbg_core::AuxiliaryKind::from_slot(slot) {
+                            side.spent += u64::from(m.rules.auxiliary.cost_of(kind));
+                        }
+                    }
                     PlayerIntention::Reserve { .. }
                     | PlayerIntention::Release { .. }
                     | PlayerIntention::Reroll { .. }
