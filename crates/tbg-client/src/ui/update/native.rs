@@ -351,7 +351,7 @@ pub(super) fn apply(
 }
 
 fn automatic(updater: Res<Updater>, mut queue: ResMut<super::ActionQueue>) {
-    if !(updater.idle && updater.automatic) {
+    if !(updater.idle && updater.automatic) || queue.0.iter().any(super::starts_online) {
         return;
     }
     let action = match &updater.state {
@@ -484,5 +484,39 @@ mod play_priority_tests {
         );
         assert!(!stage_busy(app.world().resource::<Updater>()));
         assert!(!app.world().resource::<Updater>().applying());
+    }
+}
+
+#[cfg(test)]
+mod staged_priority_tests {
+    use super::*;
+    #[test]
+    fn br_up02_ranked_click_wins_a_same_frame_automatic_restart() {
+        let updater = Updater {
+            idle: true,
+            automatic: true,
+            state: UpdState::Staged {
+                version: "0.1.4".into(),
+            },
+            ..Default::default()
+        };
+        let mut app = App::new();
+        app.insert_resource(updater)
+            .insert_resource(State::new(GameState::Menu))
+            .insert_resource(super::super::ActionQueue(vec![
+                UiAction::UpdateRestart,
+                UiAction::Ranked,
+            ]))
+            .add_message::<AppExit>()
+            .add_systems(Update, super::super::take_actions);
+        app.update();
+        assert_eq!(
+            app.world().resource::<super::super::ActionQueue>().0,
+            vec![UiAction::Ranked]
+        );
+        assert!(matches!(
+            app.world().resource::<Updater>().state,
+            UpdState::Staged { .. }
+        ));
     }
 }

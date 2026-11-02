@@ -104,6 +104,19 @@ fn ours(action: &UiAction) -> bool {
     )
 }
 
+fn starts_online(action: &UiAction) -> bool {
+    matches!(
+        action,
+        UiAction::Quick
+            | UiAction::Ranked
+            | UiAction::CreateRoom
+            | UiAction::JoinRoom(_)
+            | UiAction::CreateChallenge
+            | UiAction::JoinChallenge(_)
+            | UiAction::Watch(_)
+    )
+}
+
 /// Runs before `actions::apply`: handles the update buttons and, while an
 /// update is applying, drops every other action (the Update/Play race).
 pub(super) fn take_actions(
@@ -112,6 +125,13 @@ pub(super) fn take_actions(
     state: Res<State<crate::GameState>>,
     mut exit: MessageWriter<AppExit>,
 ) {
+    // A click to play wins over an automatic update in the same frame,
+    // including a fully staged restart. An already-active Apply stays exclusive.
+    if updater.automatic && !updater.applying() && queue.0.iter().any(starts_online) {
+        queue
+            .0
+            .retain(|action| !matches!(action, UiAction::UpdateNow | UiAction::UpdateRestart));
+    }
     let mine: Vec<UiAction> = queue.0.iter().copied().filter(ours).collect();
     queue.0.retain(|a| !ours(a));
     for action in mine {
@@ -131,21 +151,9 @@ pub(super) fn take_actions(
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
-        let online = |a: &UiAction| {
-            matches!(
-                a,
-                UiAction::Quick
-                    | UiAction::Ranked
-                    | UiAction::CreateRoom
-                    | UiAction::JoinRoom(_)
-                    | UiAction::CreateChallenge
-                    | UiAction::JoinChallenge(_)
-                    | UiAction::Watch(_)
-            )
-        };
-        if native::stage_busy(&updater) && queue.0.iter().any(online) {
-            updater.pending_play = queue.0.iter().find(|a| online(a)).copied();
-            queue.0.retain(|a| !online(a));
+        if native::stage_busy(&updater) && queue.0.iter().any(starts_online) {
+            updater.pending_play = queue.0.iter().find(|a| starts_online(a)).copied();
+            queue.0.retain(|a| !starts_online(a));
             native::apply(
                 &mut updater,
                 UiAction::UpdateCancel,

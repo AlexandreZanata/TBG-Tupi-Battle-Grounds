@@ -88,3 +88,20 @@ Pending delivery at this report revision: committed release build, signed
 repository/bootstrap rehearsal, Linux captures, initial static channel
 activation and owner installation. Actual Windows and real desktop-browser
 observations remain pending consolidation; no parity or full-suite claim.
+
+## Pre-activation rehearsal
+
+The committed `8f78e5a` release built successfully (client 3m 48s, launcher/tool
+18.64s) and was packaged/signed locally as `linux-20261102-8f78e5a`, sequence 1.
+An isolated managed bootstrap verified all 394 package files and the unchanged
+competitive contract. Three actual Linux captures were inspected: latest notes
+first despite the older backend feed, the internal current/check/automatic
+modal, and the masked one-time key-import form with the same logged-in test
+account. No owner shortcut/account was used in that rehearsal.
+
+Review additionally identified a same-frame Ranked-vs-automatic-restart race
+once a download was fully staged. Online play intents now win before automatic
+Now/Restart actions are consumed, and a new regression keeps Ranked queued and
+the update staged for a later idle point. The three affected BR-UP02 cases
+passed after this correction. A new final artifact is built for this change;
+sequence 1 remains an isolated rehearsal baseline, not the owner's installation.
