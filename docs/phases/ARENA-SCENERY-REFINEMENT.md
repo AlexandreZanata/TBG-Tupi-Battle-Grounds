@@ -63,3 +63,21 @@ installed preview slots now share identical file contents/inodes, with every
 path/content preserved after SHA comparison. The previous client test executable
 was replaced under the validation lock. Source, installed executables, sessions
 and cache directories were preserved.
+
+## Final geometry consolidation during SIDE-01
+
+All three Arena regressions passed under the shared nonblocking host lock,
+two Cargo jobs, existing native sysroot/cache, offline/locked and one test
+thread. The retained Forest anchors pass the density assertion. The bounds
+check additionally found a foreground Tundra fir/coastal-rock overlap; moving
+its complete fir/crystal group to z=3.4 fixes that overlap. No assertion, road
+width, movement, stats or solver was changed. The final command was:
+
+```sh
+cargo test --offline --locked -p tbg-client --bin tbg-client -- arena_clear01_ arena_refine01_ --test-threads=1
+```
+
+Result: 3 passed, 0 failed (1.03 s), after the relevant Tundra correction.
+Logs: `.local/blue-red-sides-2026-11-02/client-arena-final.log`. Native
+installation/captures are recorded by [SIDE-01](BLUE-RED-SIDES.md); preceding
+installed-source notes are historical. Windows/desktop web remain pending.

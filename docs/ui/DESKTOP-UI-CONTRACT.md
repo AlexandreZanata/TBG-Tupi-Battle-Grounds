@@ -573,3 +573,11 @@ insufficient Forest density; nine curated anchors restore the intended silhouett
 in source without relaxing the test. Its focused rerun returned exit 75. Final
 Arena tests, native install and new visual observations remain pending. No
 ARENA-REFINE-01 or GD-02 runtime parity is claimed.
+
+
+ARENA-REFINE-01 final consolidation (SIDE-01): all three Arena tests now pass,
+covering every Arena, the animated attachments and retained Forest density.
+The bounds check also exposed a remaining Tundra foreground fir/coastal-rock
+overlap; moving that complete fir/crystal group to z=3.4 fixes it without
+narrowing the road. Runtime installation and platform observations follow in
+the SIDE-01 receipt; tests alone do not establish visual parity.
