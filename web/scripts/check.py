@@ -239,8 +239,11 @@ def main():
         if site.name == "landing":
             check_landing_i18n(mapping, pages)
             check_release(mapping)
-        elif site.name == "admin-preview":
+        elif site.name in {"admin-preview", "admin-app"}:
             check_admin_strings(mapping)
+            api = mapping["assets/js/api/admin.js"].read_text()
+            if "X-TBG-CSRF" not in api or "credentials:'same-origin'" not in api or "method!=='GET'" not in api:
+                fail(f"{site.name}: console requests require same-origin credentials and mutation CSRF")
         elif site.name == "admin-public":
             check_admin_public(mapping)
         total = sum(source.stat().st_size for source in mapping.values())

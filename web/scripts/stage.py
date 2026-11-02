@@ -13,6 +13,8 @@ from asset_versions import rendered
 def stage(site, out):
     if site.local_only:
         raise SystemExit(f"{site.name} is a local preview only; it is never staged for publication")
+    if site.name == "admin-app":
+        print("note: admin-app requires attended console CSP activation; staging does not publish it")
     if out.exists() and any(out.iterdir()):
         raise SystemExit(f"{out} is not empty; stage into a fresh directory")
     try:
