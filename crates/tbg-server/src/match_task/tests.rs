@@ -43,6 +43,7 @@ fn online_sequence_zero_cannot_reset_duplicate_protection() {
         end_detail: None,
         reached_running: false,
         summary: Default::default(),
+        social: Default::default(),
     };
     let command = |seq| MatchCmd::Intent {
         conn_id: 1,
@@ -124,6 +125,7 @@ fn a_view_drains_events_and_keeps_the_buffer() {
         end_detail: None,
         reached_running: false,
         summary: Default::default(),
+        social: Default::default(),
     };
     for _ in 0..40 {
         let events = game.state.step();
@@ -177,6 +179,7 @@ fn a_retransmitted_evolution_never_reuses_the_ruins_discount() {
         end_detail: None,
         reached_running: false,
         summary: Default::default(),
+        social: Default::default(),
     };
     let intent = |seq, intent| MatchCmd::Intent {
         conn_id: 1,
@@ -243,6 +246,7 @@ fn p71_a_full_seat_queue_closes_the_socket_so_the_client_reconnects() {
         end_detail: None,
         reached_running: false,
         summary: Default::default(),
+        social: Default::default(),
     };
     game.send(Seat::A, ServerMsg::Ping { id: 1 });
     assert!(!handle.link.close_requested(), "room left: nothing closes");
@@ -350,6 +354,7 @@ fn br_md02_ban_forfeit_settles_like_a_surrender() {
         end_detail: None,
         reached_running: false,
         summary: Default::default(),
+        social: Default::default(),
     };
 
     let mut expected = game.state.clone();

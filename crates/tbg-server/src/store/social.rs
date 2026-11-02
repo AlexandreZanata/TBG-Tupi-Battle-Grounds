@@ -1,0 +1,33 @@
+//! Frozen online match evidence independent from optional personal history and replay.
+use rusqlite::{params, Connection};
+use serde_json::Value;
+pub struct Record {
+    pub result: [u8; 16],
+    pub ended: i64,
+    pub mode: String,
+    pub accounts: [Option<i64>; 2],
+    pub names: [String; 2],
+    pub outcome: Value,
+    pub loadouts: Value,
+    pub transcript: Value,
+}
+pub fn insert(db: &Connection, r: Record) -> rusqlite::Result<()> {
+    db.execute("INSERT OR IGNORE INTO match_social_records(result_id,ended_unix,expires_unix,mode,a_account,b_account,a_name,b_name,outcome_json,loadouts_json,transcript_json) VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9,?10,?11)",params![r.result.as_slice(),r.ended,r.ended+7*86400,r.mode,r.accounts[0],r.accounts[1],r.names[0],r.names[1],r.outcome.to_string(),r.loadouts.to_string(),r.transcript.to_string()])?;
+    Ok(())
+}
+pub fn prune(db: &Connection, now: i64) -> rusqlite::Result<()> {
+    db.execute("DELETE FROM match_social_records WHERE rowid IN (SELECT rowid FROM match_social_records WHERE expires_unix<=?1 LIMIT 256)",[now])?;
+    db.execute("DELETE FROM reports WHERE id IN (SELECT id FROM reports WHERE status<>'open' AND resolved_unix<?1 LIMIT 256)",[now-180*86400])?;
+    Ok(())
+}
+impl super::Store {
+    pub(crate) fn social_record(&self, record: Record) {
+        // The same bounded writer/fire-and-forget policy as insert_match.
+        let run = Box::new(move |db: &mut Connection| {
+            if insert(db, record).is_err() {
+                tracing::error!("social record unavailable");
+            }
+        });
+        let _ = self.tx.try_send(super::worker::StoreCmd::Release(run));
+    }
+}

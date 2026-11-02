@@ -24,6 +24,7 @@ mod live;
 mod personal;
 mod report;
 mod settle;
+mod social;
 mod spectators;
 pub(crate) mod summary;
 #[cfg(test)]
@@ -44,6 +45,7 @@ pub(crate) struct Player {
 }
 
 pub(super) struct Match {
+    pub(super) social: social::Social,
     pub(super) result_id: tbg_core::protocol::ResultId,
     pub(super) state: MatchState,
     pub(super) players: [Player; 2],
@@ -138,6 +140,7 @@ pub(crate) fn spawn(
         end_detail: None,
         reached_running: false,
         summary: Default::default(),
+        social: Default::default(),
     };
     tokio::spawn(run(m, rx, lobby, config, seed, records));
     tx
@@ -274,6 +277,13 @@ async fn run(
     if let (Some(mut replay), Some(tx)) = (m.replay.take(), &config.replays) {
         replay.final_hash = m.state.hash();
         let _ = tx.send(replay);
+    }
+    if let Some(store) = &records.store {
+        m.social_record(
+            store,
+            config.auth_clock.now().unwrap_or(0),
+            started.elapsed().as_secs(),
+        );
     }
     let ticks = u128::from(m.state.clock.max(1));
     m.metrics.matches_finished.fetch_add(1, Relaxed);

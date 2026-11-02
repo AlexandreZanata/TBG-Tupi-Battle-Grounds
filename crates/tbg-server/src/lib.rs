@@ -37,6 +37,7 @@ pub mod player_history;
 pub mod presence;
 pub mod ranked;
 pub mod release;
+mod reports;
 pub mod stats;
 pub mod store;
 mod version;
@@ -210,6 +211,7 @@ pub async fn run_with(
     };
     let _admin = admin::listener::start(state.clone(), &shared.admin_address).await?;
     let mut app = Router::new()
+        .route("/api/me/reports", post(reports::handler))
         .route("/api/me/account", get(identity::http::handler))
         .route("/api/me/email", post(identity::http::handler))
         .route("/api/me/email/verify", post(identity::http::handler))

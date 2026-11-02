@@ -82,6 +82,7 @@ pub(crate) async fn start(
             if let Ok(now) = config.auth_clock.now() {
                 let _ = store
                     .release(move |db| {
+                        let _ = crate::store::social::prune(db, now);
                         let _ = crate::store::operators::maintenance(db, now);
                         let _ = crate::store::recovery::service::maintenance(db, now);
                         crate::store::moderation::feed::prune(db, now)
