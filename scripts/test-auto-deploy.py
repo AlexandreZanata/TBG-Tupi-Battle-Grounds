@@ -325,5 +325,52 @@ class ControllerSafety(unittest.TestCase):
         self.assertEqual(calls[1], {'If-None-Match': '"v1"'})
 
 
+
+class ReleaseScope(unittest.TestCase):
+    """Relevance is measured from the last published candidate, so supersession never loses a change."""
+
+    def setUp(self):
+        spec = importlib.util.spec_from_file_location('release_scope', ROOT/'scripts/release_scope.py')
+        self.scope = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(self.scope)
+        backend = importlib.util.spec_from_file_location('backend_scope', ROOT/'scripts/backend-release-changes.py')
+        self.backend = importlib.util.module_from_spec(backend)
+        backend.loader.exec_module(self.backend)
+
+    def answers(self, compare):
+        releases = [{'tag_name': 'server-' + 'a' * 40, 'draft': False, 'published_at': '2026-11-02T00:00:00Z'},
+                    {'tag_name': 'web-' + 'f' * 40, 'draft': False, 'published_at': '2026-11-02T01:00:00Z'}]
+        return lambda path: releases if path.endswith('/releases?per_page=100') else compare
+
+    def decide(self, compare, head='d' * 40):
+        with tempfile.TemporaryDirectory() as temporary:
+            output = Path(temporary)/'out'
+            with patch.object(self.scope, 'gh', side_effect=self.answers(compare)), \
+                 patch.object(self.scope.subprocess, 'check_output', return_value=head + '\n'), \
+                 patch.dict(os.environ, {'GITHUB_REPOSITORY': 'o/r', 'GITHUB_OUTPUT': str(output)}):
+                self.scope.decide('server', self.backend.relevant, 'Backend source')
+            return output.read_text().strip()
+
+    def test_server_change_skipped_by_an_outdated_run_is_published_after_a_docs_merge(self):
+        # HEAD^..HEAD is docs-only, but the server change since the last
+        # candidate was never published because its own run saw main advance.
+        compare = {'status': 'ahead', 'files': [{'filename': 'crates/tbg-server/src/lobby.rs'},
+                                                {'filename': 'docs/README.md'}]}
+        self.assertEqual(self.decide(compare), 'deployable=true')
+
+    def test_only_unrelated_changes_since_the_candidate_publish_nothing(self):
+        compare = {'status': 'ahead', 'files': [{'filename': 'web/landing/index.html'}]}
+        self.assertEqual(self.decide(compare), 'deployable=false')
+        self.assertEqual(self.decide({}, head='a' * 40), 'deployable=false')
+
+    def test_first_publication_diverged_history_and_truncated_lists_publish(self):
+        truncated = {'status': 'ahead', 'files': [{'filename': f'docs/{n}.md'} for n in range(300)]}
+        for compare in [{'status': 'diverged', 'files': []}, truncated]:
+            with self.subTest(status=compare['status']):
+                self.assertEqual(self.decide(compare), 'deployable=true')
+        with patch.object(self.scope, 'gh', return_value=[]):
+            self.assertIsNone(self.scope.changed_paths('o/r', 'server', 'd' * 40))
+
+
 if __name__ == '__main__':
     unittest.main()
