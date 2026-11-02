@@ -10,6 +10,7 @@ pub(crate) mod ability_details;
 mod ability_gods;
 mod ability_legacy;
 pub mod account;
+pub(crate) mod account_backup;
 mod account_ui;
 mod actions;
 #[cfg(test)]
@@ -153,6 +154,7 @@ pub enum UiAction {
     // P66: the native update overlay (ui/update), handled before `apply`.
     #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     UpdateNow,
+    UpdateAutomatic,
     #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     UpdateCheck,
     #[cfg_attr(target_arch = "wasm32", allow(dead_code))]

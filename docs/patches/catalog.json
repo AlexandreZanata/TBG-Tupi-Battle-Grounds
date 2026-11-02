@@ -946,6 +946,36 @@
         }
       },
       "document": "docs/patches/2026-11-02-auxiliaries-gods.md"
+    },
+    {
+      "id": "native-settings-auto-updates",
+      "version": "0.1.4-colossus.4",
+      "date": "2026-11-02",
+      "ruleset_version": 15,
+      "status": "released",
+      "title": {
+        "en": "Account backups and in-app Linux updates",
+        "pt-BR": "Cópia da chave e atualizações dentro do aplicativo"
+      },
+      "summary": {
+        "en": "Newest-first update history, explicit protected recovery-key backup and managed in-app updates. The installed gameplay content, authoritative backend endpoint and ranked match contract are preserved.",
+        "pt-BR": "Histórico com as notas mais recentes primeiro, cópia protegida da chave e atualizações dentro do aplicativo. O conteúdo do jogo, a conexão com o backend e o contrato da ranqueada foram preservados."
+      },
+      "changes": [],
+      "sections": {
+        "en": [
+          {
+            "title": "Account and app",
+            "body": "Settings can copy or download an explicitly imported original recovery key without switching the active login. Signed updates run through the installed launcher and wait while online play is active."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Conta e aplicativo",
+            "body": "As Configurações podem copiar ou baixar uma chave original informada pelo jogador sem trocar o login ativo. Atualizações assinadas usam o iniciador instalado e aguardam enquanto houver atividade online."
+          }
+        ]
+      }
     }
   ]
 }

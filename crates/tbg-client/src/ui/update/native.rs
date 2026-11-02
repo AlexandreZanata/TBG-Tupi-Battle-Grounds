@@ -40,6 +40,7 @@ pub(super) fn plugin(app: &mut App) {
             schedule,
             pump,
             pause_online_download,
+            automatic,
             super::view::overlay,
             super::view::badge,
         )
@@ -58,8 +59,12 @@ fn read_idle(
     mut updater: ResMut<Updater>,
     state: Res<State<GameState>>,
     link: NonSend<crate::link::MatchLink>,
+    form: NonSend<crate::ui::textform::ActiveForm>,
+    account: Res<crate::ui::account::Account>,
 ) {
     updater.idle = *state.get() == GameState::Menu
+        && !crate::ui::textform::is_open(&form)
+        && matches!(account.screen, crate::ui::account::AccountScreen::None)
         && crate::config::resume_ready()
         && crate::auth::idle_for_update()
         && match &*link {
@@ -223,7 +228,7 @@ fn on_event(updater: &mut Updater, command: &str, e: Value) {
         ("stage", Some("cancelled")) => updater.state = UpdState::Off,
         (_, Some("error")) => {
             // A failed check never invalidates the installed game.
-            updater.state = if command == "check" {
+            updater.state = if command == "check" && !updater.opened {
                 UpdState::Off
             } else {
                 UpdState::Error(text(&e, "code"))
@@ -255,17 +260,34 @@ pub(super) fn apply(
 ) {
     match action {
         UiAction::UpdateCheck if updater.idle => {
+            updater.opened = true;
+            if updater.inner.managed.is_none() {
+                updater.state = UpdState::Error("setup".into());
+                return;
+            }
             updater.inner.last_check = None;
             updater.snoozed = None;
             updater.state = UpdState::Checking;
         }
-        UiAction::UpdateOpen if updater.idle => updater.snoozed = None,
-        UiAction::UpdateLater => match &updater.state {
-            UpdState::Available { build, .. } => updater.snoozed = Some(build.clone()),
-            UpdState::Staged { version } => updater.snoozed = Some(version.clone()),
-            UpdState::Error(_) => updater.state = UpdState::Off,
-            _ => {}
-        },
+        UiAction::UpdateOpen if updater.idle => {
+            updater.opened = true;
+            updater.snoozed = None;
+            if updater.inner.managed.is_none() {
+                updater.state = UpdState::Error("setup".into());
+            } else {
+                updater.inner.last_check = None;
+                updater.state = UpdState::Checking;
+            }
+        }
+        UiAction::UpdateLater => {
+            updater.opened = false;
+            match &updater.state {
+                UpdState::Available { build, .. } => updater.snoozed = Some(build.clone()),
+                UpdState::Staged { version } => updater.snoozed = Some(version.clone()),
+                UpdState::Error(_) => updater.state = UpdState::Off,
+                _ => {}
+            }
+        }
         UiAction::UpdateNow if state == GameState::Menu && updater.idle => {
             if let UpdState::Available {
                 build,
@@ -287,6 +309,10 @@ pub(super) fn apply(
             }
         }
         UiAction::UpdateCancel => {
+            if let UpdState::Downloading { build, .. } = &updater.state {
+                updater.snoozed = Some(build.clone());
+            }
+            updater.opened = false;
             updater
                 .inner
                 .queued
@@ -321,5 +347,142 @@ pub(super) fn apply(
             }
         }
         _ => {}
+    }
+}
+
+fn automatic(updater: Res<Updater>, mut queue: ResMut<super::ActionQueue>) {
+    if !(updater.idle && updater.automatic) {
+        return;
+    }
+    let action = match &updater.state {
+        UpdState::Available { build, .. } if updater.snoozed.as_deref() != Some(build) => {
+            Some(UiAction::UpdateNow)
+        }
+        UpdState::Staged { version } if updater.snoozed.as_deref() != Some(version) => {
+            Some(UiAction::UpdateRestart)
+        }
+        _ => None,
+    };
+    if let Some(action) = action {
+        queue.0.push(action);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn br_up02_automatic_updates_wait_for_idle_and_preserve_play_requests() {
+        let mut app = App::new();
+        app.insert_resource(Updater {
+            automatic: true,
+            idle: false,
+            state: UpdState::Available {
+                build: "test-build".into(),
+                version: "0.1.4".into(),
+                size: 1,
+                required: false,
+            },
+            ..Default::default()
+        })
+        .init_resource::<super::super::ActionQueue>()
+        .add_systems(Update, automatic);
+        app.update();
+        assert!(
+            app.world()
+                .resource::<super::super::ActionQueue>()
+                .0
+                .is_empty(),
+            "BR-UP02: no update starts during online activity"
+        );
+        app.world_mut().resource_mut::<Updater>().idle = true;
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<super::super::ActionQueue>()
+                .0
+                .pop(),
+            Some(UiAction::UpdateNow)
+        );
+        app.world_mut().resource_mut::<Updater>().state = UpdState::Staged {
+            version: "0.1.4".into(),
+        };
+        app.update();
+        assert_eq!(
+            app.world_mut()
+                .resource_mut::<super::super::ActionQueue>()
+                .0
+                .pop(),
+            Some(UiAction::UpdateRestart)
+        );
+        app.world_mut().resource_mut::<Updater>().automatic = false;
+        app.update();
+        assert!(app
+            .world()
+            .resource::<super::super::ActionQueue>()
+            .0
+            .is_empty());
+    }
+
+    #[test]
+    fn br_up01_manual_check_reports_failures_without_invalidating_the_game() {
+        let mut updater = Updater {
+            opened: true,
+            ..Default::default()
+        };
+        on_event(
+            &mut updater,
+            "check",
+            serde_json::json!({"event":"error","code":"unavailable"}),
+        );
+        assert_eq!(updater.state, UpdState::Error("unavailable".into()));
+        assert!(!updater.applying());
+        on_event(
+            &mut updater,
+            "check",
+            serde_json::json!({"event":"status","state":"current"}),
+        );
+        assert_eq!(updater.state, UpdState::Off);
+        assert!(
+            updater.opened,
+            "Settings keeps its in-app status modal visible"
+        );
+    }
+}
+
+#[cfg(test)]
+mod play_priority_tests {
+    use super::*;
+    #[test]
+    fn br_up02_ranked_search_cancels_a_queued_download_and_is_not_discarded() {
+        let mut updater = Updater {
+            idle: true,
+            automatic: true,
+            state: UpdState::Downloading {
+                build: "test".into(),
+                version: "0.1.4".into(),
+                done: 0,
+                total: 1,
+            },
+            ..Default::default()
+        };
+        updater
+            .inner
+            .queued
+            .push_back(vec!["stage".into(), "test".into()]);
+        let mut app = App::new();
+        app.insert_resource(updater)
+            .insert_resource(State::new(GameState::Menu))
+            .insert_resource(super::super::ActionQueue(vec![UiAction::Ranked]))
+            .add_message::<AppExit>()
+            .add_systems(Update, super::super::take_actions);
+        app.update();
+        assert_eq!(
+            app.world().resource::<super::super::ActionQueue>().0,
+            vec![UiAction::Ranked]
+        );
+        assert!(!stage_busy(app.world().resource::<Updater>()));
+        assert!(!app.world().resource::<Updater>().applying());
     }
 }

@@ -19,6 +19,7 @@ pub(super) enum Operation {
     Register(String),
     Refresh,
     Backup,
+    RecoveryKey(Option<String>),
     Logout,
     /// P66: write (`Some`) or remove the resume record, same lock and vault.
     Resume(Option<String>),
@@ -74,6 +75,9 @@ impl Vault {
 }
 
 pub(super) fn run(mut work: Work) -> Result<Outcome, Failure> {
+    if let Operation::RecoveryKey(input) = &work.operation {
+        return super::recovery_key::run(&work, input.as_deref());
+    }
     if let Operation::Resume(write) = &work.operation {
         let store = Store::open(&work.origin)?;
         return persist_resume(&work.origin, &store, write.as_deref());
@@ -118,6 +122,7 @@ pub(super) fn run(mut work: Work) -> Result<Outcome, Failure> {
         Operation::Backup => backup(&work, store.as_mut().ok_or(Failure::StorageUnavailable)?),
         Operation::Logout => logout(&work, store.as_mut()),
         Operation::Resume(_) => Err(Failure::Incompatible),
+        Operation::RecoveryKey(_) => Err(Failure::Incompatible),
     }
 }
 

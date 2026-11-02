@@ -55,10 +55,13 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--client',type=Path,required=True);parser.add_argument('--server',type=Path,required=True);parser.add_argument('--report',type=Path,required=True)
     parser.add_argument('--confirmation-outage',action='store_true',help='Inject a confirmation outage and test same-family/stale-vault recovery')
+    parser.add_argument('--key-backup',action='store_true',help='Verify manual OS-vault recovery-key backup without switching the current login')
     args=parser.parse_args();client=args.client.resolve();server=args.server.resolve()
     client_identity=json.loads(subprocess.check_output([str(client),'--build-info'],text=True))
     with tempfile.TemporaryDirectory(prefix='tbg-p68-native-auth-') as temporary:
         root=Path(temporary)
+        config=root/'config';config.mkdir()
+        (config/'user-dirs.dirs').write_text('XDG_DOWNLOAD_DIR="'+str(root/'downloads')+'"\n')
         with socket.socket() as reserved:reserved.bind(('127.0.0.1',0));port=reserved.getsockname()[1]
         backend=f'http://127.0.0.1:{port}';proxy=confirmation_proxy(backend) if args.confirmation_outage else None
         origin=f'http://127.0.0.1:{proxy.server_port}' if proxy else backend
@@ -85,11 +88,11 @@ def main():
             def read_stage():
                 if not select.select([journey.stdout],[],[],90)[0]:raise RuntimeError('native journey timed out; real vault may need owner unlock')
                 line=journey.stdout.readline()
-                if not line:raise RuntimeError('native journey ended before its acceptance stage')
+                if not line:raise RuntimeError('native journey ended before its acceptance stage: '+journey.stderr.read(4096).strip())
                 return json.loads(line)
             try:
                 running=start()
-                journey=subprocess.Popen([str(client),'--auth-native-journey','--auth-stepwise',*(['--auth-persistence-retry'] if proxy else []),'--server',origin.replace('http:','ws:')+'/ws'],cwd=root,env={**os.environ,'TBG_DATA_DIR':str(root/'client')},stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+                journey=subprocess.Popen([str(client),'--auth-native-journey','--auth-stepwise',*(['--auth-persistence-retry'] if proxy else []),*(['--auth-key-backup'] if args.key_backup else []),'--server',origin.replace('http:','ws:')+'/ws'],cwd=root,env={**os.environ,'TBG_DATA_DIR':str(root/'client'),'XDG_CONFIG_HOME':str(config)},stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
                 first=read_stage()
                 if first.get('stage')!='ready':raise RuntimeError('native journey did not reach ready')
                 stop(running);running=None
@@ -99,6 +102,7 @@ def main():
                 journey.wait(timeout=15)
                 if journey.returncode:raise RuntimeError('native acceptance returned a failure')
                 required=['synthetic_loopback_only','process_coordination','ordinary_auth_metadata_contains_no_tokens','remote_revocation','offline_pending_observed']
+                if args.key_backup:required += ['recovery_key_backup_roundtrip']
                 if proxy:required += ['confirmation_outage_recovered','stale_vault_recovered','secure_persistence']
                 if not all(report.get(key) for key in required):raise RuntimeError('native acceptance contract failed')
                 if report['secure_persistence'] and not all(report.get(key) for key in ['restored_same_family','migration_completed','vault_cleanup']):raise RuntimeError('real secure persistence acceptance incomplete')

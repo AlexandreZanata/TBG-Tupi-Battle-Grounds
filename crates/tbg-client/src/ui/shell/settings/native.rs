@@ -282,18 +282,10 @@ fn account_panel(
                 ..default()
             });
             card.spawn(kit::muted(words(lang, "APPLICATION", "APLICATIVO"), 10.));
-            if std::env::var_os("TBG_UPDATE_HELPER").is_some() {
-                card.spawn(kit::button(
-                    lang.key("update.check"),
-                    UiAction::UpdateCheck,
-                    260.,
-                ));
-            }
             card.spawn(controls::group()).with_children(|actions| {
                 actions.spawn((
                     controls::button(lang.key("native.downloads"), false),
-                    UiAction::Disabled,
-                    Action::Download,
+                    UiAction::UpdateOpen,
                 ));
                 actions.spawn((
                     controls::button(lang.key("native.kit"), false),

@@ -52,12 +52,11 @@ pub fn apply_action(
                 *saved = true;
                 toasts.say(Msg::AccountKeyCopied);
             } else if account.profile.is_some() {
-                if let Some(key) = config::load_account_key() {
-                    config::copy_text(&key);
-                    toasts.say(Msg::AccountKeyCopied);
-                } else {
-                    toasts.say(Msg::AccountNoKey);
-                }
+                super::account_backup::request(
+                    account,
+                    super::account_backup::ExportAction::Copy,
+                    toasts,
+                );
             }
         }
         UiAction::DownloadKey => {
@@ -68,16 +67,12 @@ pub fn apply_action(
                 } else {
                     toasts.say(Msg::AuthBackupFailed);
                 }
-            } else if let Some((profile, key)) =
-                account.profile.as_ref().zip(config::load_account_key())
-            {
-                if download_key(&profile.name, &key) {
-                    toasts.say(Msg::AccountKeyDownloaded);
-                } else {
-                    toasts.say(Msg::AuthBackupFailed);
-                }
-            } else {
-                toasts.say(Msg::AccountNoKey);
+            } else if account.profile.is_some() {
+                super::account_backup::request(
+                    account,
+                    super::account_backup::ExportAction::Download,
+                    toasts,
+                );
             }
         }
         UiAction::KeySaved => {

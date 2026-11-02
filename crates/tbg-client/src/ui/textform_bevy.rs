@@ -72,7 +72,7 @@ fn keyboard(
                 }
             }
             Key::Tab => {
-                let count = if form.kind == Some(TextKind::Key) {
+                let count = if matches!(form.kind, Some(TextKind::Key | TextKind::BackupKey)) {
                     4
                 } else {
                     3
@@ -272,7 +272,7 @@ fn render(
                                 kit::LINE
                             }));
                     }
-                    if form.kind == Some(TextKind::Key) {
+                    if matches!(form.kind, Some(TextKind::Key | TextKind::BackupKey)) {
                         row.spawn((
                             kit::control(lang.key("native.reveal"), true, 140.),
                             Control::Reveal,

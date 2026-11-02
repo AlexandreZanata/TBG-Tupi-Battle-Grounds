@@ -338,3 +338,42 @@ fn br_as04_11_confirmation_retry_retains_identity_and_recovers_persistence() {
     assert!(outage.secure && outage.access == recovered.access);
     *VIEW.write().unwrap() = previous;
 }
+
+#[test]
+fn br_as05_recovery_key_failures_do_not_log_out_the_current_account() {
+    let mut session = Session {
+        backup_after_login: false,
+        origin: Err(Failure::InvalidOrigin),
+        pending: None,
+        next: None,
+        refresh: Some("cd".repeat(32)),
+        family: Some("ef".repeat(16)),
+        account: Some("BackupUser".into()),
+        device: Some("01".repeat(16)),
+        access: Some(AccessToken([0xab; 32])),
+        deadline: 900.,
+        retry_at: 0.,
+        secure: true,
+        remember: true,
+        resume_write: None,
+        resume_retry_at: 0.,
+    };
+    let previous = snapshot();
+    let mut account = crate::ui::account::Account::default();
+    let mut inbox = crate::ui::account::AccountInbox::default();
+    session.complete(
+        Kind::RecoveryKey,
+        Err(Failure::InvalidKey),
+        0.,
+        &mut account,
+        &mut inbox,
+    );
+    assert!(matches!(account.key_result, Some(Err(Failure::InvalidKey))));
+    let after = snapshot();
+    assert!(
+        after.status == previous.status
+            && after.access == previous.access
+            && after.family == previous.family
+    );
+    assert!(session.access.is_some() && session.secure && session.remember && inbox.0.is_empty());
+}

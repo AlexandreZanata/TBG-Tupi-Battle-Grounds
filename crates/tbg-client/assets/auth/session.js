@@ -45,10 +45,10 @@ async function logout(credentials,access) {
   try {
     await post('logout',{},access,credentials);
     if(durable&&!write('logout_pending',null))failure('unavailable');
-    state.grant=null;state.access=null;notify();return {kind:'logged_out'};
+    state.grant=null;state.access=null;state.recoveryKey=null;notify();return {kind:'logged_out'};
   }catch(error){
     // An unrecognized cookie cannot restore an account; a lost successful reply is safe to retry.
-    if(error.message==='auth_required'&&marked){if(durable)write('logout_pending',null);state.grant=null;state.access=null;return {kind:'logged_out'};}
+    if(error.message==='auth_required'&&marked){if(durable)write('logout_pending',null);state.grant=null;state.access=null;state.recoveryKey=null;return {kind:'logged_out'};}
     return {kind:'logout_pending',error:error.message};
   }
 }
@@ -58,6 +58,15 @@ async function run(request) {
   const current=()=>state.epoch===request.epoch;
   const operation=request.kind;
   if(request.origin!==location.origin)failure('invalid_origin');
+  if(operation==='recovery-key') {
+    const name=state.grant?.profile?.name;
+    if(!name||!state.access)failure('auth_required');
+    if(request.input) {
+      if(!request.input.toLowerCase().startsWith(name.toLowerCase()+'-'))failure('auth_required');
+      state.recoveryKey=request.input;
+    }
+    return {kind:'recovery_key',key:state.recoveryKey||null};
+  }
   if(read('logout_pending')==='1'&&operation!=='logout') {
     const result=await logout('same-origin',state.access);
     if(result.kind!=='logged_out')return result;

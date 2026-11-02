@@ -319,7 +319,7 @@ mod tests {
 }
 
 /// Missing discovery support never blocks Practice or a compatible server.
-fn newer_client(value: &Value, current: &str, protocol: u16) -> Option<String> {
+pub(crate) fn newer_client(value: &Value, current: &str, protocol: u16) -> Option<String> {
     let latest = value.get("latest_client")?.as_str()?;
     let remote = semver::Version::parse(latest).ok()?;
     let current = semver::Version::parse(current).ok()?;

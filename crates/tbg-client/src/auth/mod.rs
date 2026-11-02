@@ -12,6 +12,8 @@ pub(crate) mod api;
 mod native;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_store;
+#[cfg(not(target_arch = "wasm32"))]
+mod recovery_key;
 mod transport;
 mod types;
 #[cfg(target_arch = "wasm32")]
@@ -121,6 +123,7 @@ pub enum Command {
     Migrate(String),
     Refresh,
     Backup,
+    RecoveryKey(Option<String>),
     Logout,
     ToggleRemember,
     ContinueHere,
@@ -211,6 +214,7 @@ enum Kind {
     Register,
     Refresh,
     Backup,
+    RecoveryKey,
     Logout,
     /// P66: persist the resume record (native only, never changes status).
     Resume,
@@ -413,6 +417,7 @@ impl Session {
             }
             Command::Refresh => self.start(Kind::Refresh, None),
             Command::Backup => self.start(Kind::Backup, None),
+            Command::RecoveryKey(key) => self.start(Kind::RecoveryKey, key),
             Command::Logout => self.start(Kind::Logout, None),
             _ => {}
         }
@@ -432,7 +437,7 @@ impl Session {
                 Kind::Restore | Kind::Login | Kind::Register => Status::Restoring,
                 Kind::Refresh => Status::Refreshing,
                 Kind::Logout => Status::LogoutPending,
-                Kind::Backup | Kind::Resume => view.status,
+                Kind::Backup | Kind::RecoveryKey | Kind::Resume => view.status,
             };
         }
         match result {
@@ -465,6 +470,7 @@ impl Session {
             Kind::Register => native::Operation::Register(input.unwrap_or_default()),
             Kind::Refresh => native::Operation::Refresh,
             Kind::Backup => native::Operation::Backup,
+            Kind::RecoveryKey => native::Operation::RecoveryKey(input),
             Kind::Logout => native::Operation::Logout,
             Kind::Resume => native::Operation::Resume(input),
         };
@@ -603,6 +609,14 @@ impl Session {
         account: &mut crate::ui::account::Account,
         inbox: &mut crate::ui::account::AccountInbox,
     ) {
+        if kind == Kind::RecoveryKey {
+            account.key_result = Some(match result {
+                Ok(Outcome::RecoveryKey { key }) => Ok(key),
+                Err(error) => Err(error),
+                _ => Err(Failure::Incompatible),
+            });
+            return;
+        }
         match result {
             Ok(Outcome::SignedIn {
                 grant,
@@ -644,6 +658,7 @@ impl Session {
             }
             // Resume writes settle before identity results (see `settle`).
             Ok(Outcome::Resumed) => {}
+            Ok(Outcome::RecoveryKey { .. }) => {}
             Ok(Outcome::LogoutPending(error)) => {
                 if let Ok(mut view) = VIEW.write() {
                     view.status = Status::LogoutPending;

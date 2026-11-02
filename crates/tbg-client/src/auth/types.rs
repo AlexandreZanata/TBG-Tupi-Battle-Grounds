@@ -135,6 +135,9 @@ pub(super) fn public_error(value: &Value) -> Failure {
 }
 
 pub(super) enum Outcome {
+    RecoveryKey {
+        key: Option<String>,
+    },
     Guest {
         legacy: Option<String>,
     },
