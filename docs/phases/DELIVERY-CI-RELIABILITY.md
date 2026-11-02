@@ -158,3 +158,34 @@ No samples, duel duration, prices, gate thresholds or canary assertions change.
 The test-only helper is not exported by the balance library or used in reports.
 Local compile/run is deferred to hosted CI while the shared host validation
 front remains contended; no lock polling, extra target or parallelism bypass.
+
+## Hosted result at 3fb894d (2026-11-02 16:02 UTC)
+
+Native Linux/Windows, quality, clippy, WASM and desktop UI passed. The
+complete required test lane passed all targets except the stalled-spectator
+fixture: its natural match exceeded the existing 120-second bot budget.
+BR-M07 imposes no match deadline; use the existing spectator replay's
+20-second surrender, preserving both completion and no-detachment assertions.
+Production clocks, bots and spectator handling do not change.
+
+INT-03 cadence and INT-04 exact-row equivalence passed in the balance lane.
+C7 still failed Bloomkeeper: shared 0.88 -> 0.80; isolated 0.93 -> 1.00.
+
+> blocked: Two completed healing-canary runs miss the unchanged +0.10
+> requirement. The isolated baseline leaves less than 0.10 headroom. Do not
+> lower a threshold, change live balance or keep adding convenient policies.
+> Owner confirmation was requested for a controlled wounded-army healing
+> fixture at the same 256 pairs/+0.10 criterion. The protected merge remains
+> blocked; the current healthy VPS generation is preserved.
+
+Scoped validation: `cargo test -p tbg-server --test spectate
+a_spectator_that_never_reads_is_dropped_and_the_seats_finish -- --exact
+--nocapture` passed (1 scenario, 20.02 seconds) under the shared lock with two
+build jobs. The shared spectator helper and production behavior are unchanged.
+
+New front discovered during monitoring: PR #51 at 5357045 adds P74 economic
+auxiliaries and builds on the earlier champion head. It conflicts with main.
+Read-only review found appended wire view fields without a protocol bump,
+a second incompatible R13 identity, and auxiliary state skipped by serde.
+These must be reconciled and explicitly validated before that front can be
+released; do not merge it solely because it includes the champion ancestry.
