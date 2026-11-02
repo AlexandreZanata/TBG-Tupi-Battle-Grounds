@@ -425,9 +425,11 @@
   },
   "evidence": {
     "linux": {
-      "status": "pending runtime capture",
+      "status": "84 ready native captures observed: 67 roster portraits, 17 five-form idle/walk/attack lineups",
       "compilation": "native cargo check passed with existing local ALSA SDK",
-      "geometry": "85 forms sampled; maximum 2938 triangles; paired grip and 3-second loop seam tests passed"
+      "geometry": "85 forms sampled; maximum 2938 triangles; paired grip and 3-second loop seam tests passed",
+      "capture_manifest": ".local/champion-concepts-2026-11-01/engine-final/capture-manifest.json",
+      "provenance": "Per-image source/build hashes retained; initial loading overlays rejected and preserved separately. Runtime installation smoke checks pending."
     },
     "windows": {
       "status": "pending packaged same-source captures and motion comparison"
@@ -568,7 +570,7 @@
       "both seats",
       "Root/Slow/mark"
     ],
-    "linux": "Updated captures and installation pending",
+    "linux": "All 340 form contracts and all-kind budgets/distinction passed. 67 portraits refreshed; 17 five-form lineups captured. Local install smoke checks pending.",
     "windows": "pending actual packaged visual comparison",
     "desktop_web": "pending actual browser visual and motion comparison"
   }

@@ -176,3 +176,29 @@ boot/scene readiness, not only elapsed time. The capture script checks readiness
 and content hashes, reuses only valid captures with per-image build provenance,
 and recaptures rejected images. Siege Walker's affiliation-only hip plate and
 hem were removed entirely after visual review; its portrait is invalidated.
+
+
+### Native capture checkpoint
+
+The final union contains 84 ready Linux native captures: 67 roster portraits
+and 17 five-form lineups (Idle/Walk/Attack), including the owner's three
+examples. Each PNG content hash and loading-ready log was verified. Seventy
+valid captures were reused with their original build metadata; fourteen were
+new/missing, rejected-loading or invalidated-geometry replacements. Seven
+loading overlays and the first blank Needlewing capture remain preserved
+in the original artifact directory, excluded from delivered portraits.
+The gallery links the per-image provenance manifest.
+
+The final Siege Walker change passed the 340-form ownership regression,
+all-kind budgets and distinct-form checks (two scenarios), and all-kind
+figure uniqueness: four focused scenarios, zero failures. Existing unrelated
+Layout::clear test-only warning remains. No core rules changed in this amendment.
+The six completion scenarios and HUD-badge transition test remain valid from
+the prior amended-source consolidation. Native debug build passed in 7.67 s
+with source c50ee5b; its opt-in capture waits for actual scene readiness.
+
+Installation is the next action; its receipt and installed-build smoke evidence
+will be stored beside the captures. Windows/desktop-web visual and motion
+comparison, dense-formation runtime review, subjective look/fun approval,
+D-33 measured competitive balance, full suite and production activation remain
+unverified. No production server/client deployment is included.
