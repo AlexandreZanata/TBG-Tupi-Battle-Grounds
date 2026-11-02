@@ -105,3 +105,25 @@ stone faces; Flint uses aged pale skin. The Machine replacement and existing
 Ogre Archer keep their own anatomy. This is presentation-only. Initial images
 retain their provenance; affected portraits/lineups are replaced from a new
 committed renderer, with unchanged kinds reused only through verified manifests.
+
+## Refined native assets and landing
+
+The Ogre anatomy refinement passed the three affected geometry/clearance/
+ring-only tests in 0.99 s. Native renderer build passed in 14.79 s from
+`03b9b2de158c2a6d5e75873c814e501beec7fbd8` (same shared lock, two jobs).
+All 16 affected Ogre portrait/lineup captures passed readiness and content
+hash checks. The four unchanged Ogre Archer/Rivet captures are reused with
+their original `abe7893` provenance. Final review manifest has 20 captures;
+all ten portrait WebPs are pixel-identical to their PNGs and below 40 KiB.
+Ten committed five-form sheets use WebP quality 90 and are below 400 KiB each; provenance
+is in docs/ogre-faction/native-previews.json. The full 1600×1000 originals and
+logs remain outside git. No loading screen is accepted as a capture.
+
+`python3 web/scripts/check.py` passed: landing 146 files / 3815 KiB,
+admin-public 16 / 240 KiB, admin-preview 141 / 2088 KiB; generated content
+freshness passed. The real desktop browser showed 72 cards, eight 9-count
+filters and 26 preview badges; the Ogre filter and bilingual names/counts
+were observed. Its first image observation found the dev server's startup
+manifest had been created before the newly tracked portrait files; only that
+owned local server was restarted. Final image loading and install witness
+are recorded below. This static landing check does not verify game-web parity.

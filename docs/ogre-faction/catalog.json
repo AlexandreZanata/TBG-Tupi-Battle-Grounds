@@ -39,7 +39,8 @@
           "en": "Quake Bastion",
           "pt": "Bastião Sísmico"
         }
-      ]
+      ],
+      "kit_pt": "Golpes retiram uma parcela limitada da vida máxima do alvo."
     },
     {
       "kind": "CinderMaul",
@@ -75,7 +76,8 @@
           "en": "Furnace Fists",
           "pt": "Punhos da Fornalha"
         }
-      ]
+      ],
+      "kit_pt": "A cada terceiro golpe, espalha brasas entre inimigos próximos."
     },
     {
       "kind": "HookBrawler",
@@ -111,7 +113,8 @@
           "en": "Chainmaster",
           "pt": "Mestre das Correntes"
         }
-      ]
+      ],
+      "kit_pt": "Causa mais dano a inimigos com menos de 30% de vida."
     },
     {
       "kind": "FlintRunner",
@@ -147,7 +150,8 @@
           "en": "Obsidian Rush",
           "pt": "Arrancada de Obsidiana"
         }
-      ]
+      ],
+      "kit_pt": "Caminhar carrega um golpe mais forte, consumido no contato."
     },
     {
       "kind": "ClayBinder",
@@ -183,7 +187,8 @@
           "en": "Quagmire Sage",
           "pt": "Sábio do Atoleiro"
         }
-      ]
+      ],
+      "kit_pt": "Retarda inimigos e marca o solo antes de um pulso de terra."
     },
     {
       "kind": "GustDrummer",
@@ -219,7 +224,8 @@
           "en": "Typhoon Drum",
           "pt": "Tambor do Tufão"
         }
-      ]
+      ],
+      "kit_pt": "Interrompe habilidades especiais; os ataques básicos continuam."
     },
     {
       "kind": "HideMender",
@@ -255,7 +261,8 @@
           "en": "Ancestral Seam",
           "pt": "Costura Ancestral"
         }
-      ]
+      ],
+      "kit_pt": "Aplica curas periódicas que cessam quando o aliado sofre dano."
     },
     {
       "kind": "PebbleSlinger",
@@ -291,7 +298,8 @@
           "en": "Hail Sling",
           "pt": "Estilingue de Granizo"
         }
-      ]
+      ],
+      "kit_pt": "O terceiro disparo ganha força contra um inimigo preparando ataque."
     },
     {
       "kind": "RivetBallista",
@@ -327,7 +335,8 @@
           "en": "Rivet Storm",
           "pt": "Tempestade de Rebites"
         }
-      ]
+      ],
+      "kit_pt": "A cada terceiro disparo, um rebite perfura um inimigo atrás do alvo."
     }
   ]
 }
