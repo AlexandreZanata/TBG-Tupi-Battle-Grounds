@@ -107,3 +107,29 @@ existing cache; tests used one test thread. No workspace suite ran.
 Native Linux images and training witnesses are next. Windows and desktop game
 web observation, team/all-form balance coverage and the full balance gate remain
 pending. The stopped count/wire assertion reruns are deferred under AGENTS rule 6.
+
+### Native art review and provenance
+
+The first ready capture pair used source `da23db2` / wire 35 / ruleset 10.
+A prior draft build had a mistyped source-commit metadata value; it was discarded
+before any capture. The corrected renderer's build-info records its exact SHA.
+The 19 affected champions are captured once in base portrait and five-form,
+three-pose sheets, at 400×400 and 1600×1000. PNGs are native engine output;
+Shop WebPs are lossless encodings verified with ImageMagick AE=0. Concept
+references are separately labeled; their compact WebPs are format/size encodings,
+not model renders. The unused Nacre Bastion concept is reserved, not rostered.
+
+The first Nacre Duelist image exposed a silhouette collision with Hook Brawler:
+both weapons read as hanging hooks. Its native weapon is revised into short
+forward shell-fin blades on gauntlets. Only that champion's capture pair needs
+replacement; other ready, hash-verified images retain their original renderer
+provenance. An automated patch initially left a dangling fragment, detected by
+rustfmt and repaired before compilation. This is an art follow-up, not a ruleset
+change. The gallery reuses verified unchanged captures instead of re-rendering
+unrelated champions.
+
+Planned scoped commands: `scripts/capture-champion-preview.py` for the 19-kind
+set, `scripts/capture-abyssal-training.py` for five authoritative Training scenes,
+`web/scripts/sync_content.py`, `web/scripts/check.py`, and
+`scripts/install-champion-preview.py` for the source-stamped local Linux preview.
+Only Nacre Duelist's changed geometry test is repeated after the blade adjustment.

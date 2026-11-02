@@ -57,6 +57,13 @@
         "en": "Ogres",
         "pt-BR": "Ogros"
       }
+    },
+    {
+      "id": "abyssals",
+      "name": {
+        "en": "Abyssals",
+        "pt-BR": "Abissais"
+      }
     }
   ],
   "archetypes": [
@@ -486,9 +493,9 @@
       "id": "trident",
       "name": {
         "en": "Trident",
-        "pt-BR": "Trident"
+        "pt-BR": "Tridente"
       },
-      "faction": "plants",
+      "faction": "abyssals",
       "archetype": "tank",
       "portrait": "media/portraits/trident.webp",
       "availability": "active"
@@ -848,11 +855,11 @@
     {
       "id": "gustdrummer",
       "name": {
-        "en": "Gust Drummer",
-        "pt-BR": "Tambor do Vendaval"
+        "en": "Barrel Keeper",
+        "pt-BR": "Mestre do Barril"
       },
       "faction": "ogres",
-      "archetype": "control",
+      "archetype": "support",
       "portrait": "media/portraits/gustdrummer.webp",
       "availability": "preview"
     },
@@ -887,6 +894,105 @@
       "faction": "machines",
       "archetype": "ranged",
       "portrait": "media/portraits/rivetballista.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "nacreduelist",
+      "name": {
+        "en": "Nacre Duelist",
+        "pt-BR": "Espadachim de Nácar"
+      },
+      "faction": "abyssals",
+      "archetype": "dps",
+      "portrait": "media/portraits/nacreduelist.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "reeflancer",
+      "name": {
+        "en": "Reef Lancer",
+        "pt-BR": "Lanceira do Recife"
+      },
+      "faction": "abyssals",
+      "archetype": "dps",
+      "portrait": "media/portraits/reeflancer.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "trenchfist",
+      "name": {
+        "en": "Trench Fist",
+        "pt-BR": "Punho da Fossa"
+      },
+      "faction": "abyssals",
+      "archetype": "dps",
+      "portrait": "media/portraits/trenchfist.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "pearlslinger",
+      "name": {
+        "en": "Pearl Slinger",
+        "pt-BR": "Fundeiro de Pérolas"
+      },
+      "faction": "abyssals",
+      "archetype": "ranged",
+      "portrait": "media/portraits/pearlslinger.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "abyssharpooner",
+      "name": {
+        "en": "Abyss Harpooner",
+        "pt-BR": "Arpoadora do Abismo"
+      },
+      "faction": "abyssals",
+      "archetype": "ranged",
+      "portrait": "media/portraits/abyssharpooner.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "undertowherald",
+      "name": {
+        "en": "Undertow Herald",
+        "pt-BR": "Arauto da Ressaca"
+      },
+      "faction": "abyssals",
+      "archetype": "control",
+      "portrait": "media/portraits/undertowherald.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "trenchlamplighter",
+      "name": {
+        "en": "Trench Lamplighter",
+        "pt-BR": "Faroleiro da Fossa"
+      },
+      "faction": "abyssals",
+      "archetype": "control",
+      "portrait": "media/portraits/trenchlamplighter.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "foamweaver",
+      "name": {
+        "en": "Foam Weaver",
+        "pt-BR": "Tecelã de Espuma"
+      },
+      "faction": "abyssals",
+      "archetype": "support",
+      "portrait": "media/portraits/foamweaver.webp",
+      "availability": "preview"
+    },
+    {
+      "id": "podsnapper",
+      "name": {
+        "en": "Pod Snapper",
+        "pt-BR": "Estala-Vagens"
+      },
+      "faction": "plants",
+      "archetype": "ranged",
+      "portrait": "media/portraits/podsnapper.webp",
       "availability": "preview"
     }
   ]

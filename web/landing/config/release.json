@@ -2,8 +2,8 @@
   "schema": 1,
   "about": "Availability gates read by assets/js/release.js and enforced by web/scripts/check.py. Mark a platform live or available only after it is published, verified and compatible with the server below.",
   "server": {
-    "protocol": 34,
-    "contract": "w34-r9-89698dcd4bcb5ddd"
+    "protocol": 35,
+    "contract": "w35-r10-523044fc973bac39"
   },
   "webGame": {
     "state": "live",

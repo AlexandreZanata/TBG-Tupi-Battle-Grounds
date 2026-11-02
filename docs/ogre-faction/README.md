@@ -32,3 +32,7 @@ actual source revision; review sheets use WebP quality 90, with the original PNG
 [Validation, D-33 evidence and limitations](../phases/OGRE-FACTION.md) distinguish
 observed Linux behavior from pending Windows/game-web motion, look/fun acceptance
 and full competitive balance. New values are Proposed under GAME-DESIGN OG-01.
+
+## Latest refinement
+
+The 72-champion delivery below is historical. [AB-01/OG-02](../abyssal-faction/README.md) refines all nine Ogres, replaces Gust Drummer with Barrel Keeper and expands the local preview to 81 champions. Use its new native image sheets and installation receipt; the earlier images retain their original source provenance.

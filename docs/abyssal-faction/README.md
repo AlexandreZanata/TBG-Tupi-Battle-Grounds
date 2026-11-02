@@ -29,3 +29,5 @@ No generated bitmap is presented as a rendered in-game model.
 
 Linux is the visual reference. Windows/game-web visual correspondence,
 competitive balance acceptance and owner look/fun sign-off remain pending.
+
+The current final Pearl Slinger screen is `balance-final.csv`. The earlier `balance-final-changed.csv` records the intermediate candidate before the last measured adjustment, and is not the current tuning result.

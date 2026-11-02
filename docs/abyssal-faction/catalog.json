@@ -49,9 +49,10 @@
         "pt": "Desafiante de Nácar",
         "en": "Nacre Challenger"
       },
-      "weapon": "Paired crescent nacre forearm blades; no hook or chain.",
+      "weapon": "Paired short forward nacre fin blades on the gauntlets; no hanging hook or chain.",
       "projectile": "None; compact crescent contact sweep.",
-      "victory": "Alternating torso sway with both blades tucked upward."
+      "victory": "Alternating torso sway with both blades tucked upward.",
+      "native_refinement": "The illustrative crescent blades are adapted to forward shell fins to distinguish this silhouette from Hook Brawler."
     },
     {
       "kind": "ReefLancer",

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install the committed Ogre expansion Linux preview without replacing the ordinary client or its data."""
+"""Install the committed 81-champion Linux preview without replacing the ordinary client or its data."""
 import argparse
 import hashlib
 import json
@@ -30,7 +30,7 @@ def main():
     info = json.loads(subprocess.check_output([str(binary), '--build-info'], text=True))
     if (info['source_commit'] != commit or info['version'] != '0.1.3-abyssals.1'
             or info['protocol'] != 35 or info['target'] != 'x86_64-unknown-linux-gnu'):
-        raise SystemExit('Build the committed Ogre expansion Linux source with TBG_SOURCE_COMMIT before installation')
+        raise SystemExit('Build the committed 81-champion Linux source with TBG_SOURCE_COMMIT before installation')
     prefix = args.prefix.expanduser().resolve()
     slot = prefix / 'opt/tupi-battle-grounds-champion-preview' / f"{info['version']}-{commit[:12]}"
     data = prefix / 'share/tupi-battle-grounds-champion-preview'

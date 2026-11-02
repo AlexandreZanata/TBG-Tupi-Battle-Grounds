@@ -43,3 +43,7 @@ Concept: built-in imagegen five-form reference, separate from engine output.
 Native captures, source/hash manifests and scoped evidence are recorded by
 [the phase report](../phases/ABYSSALS-OGRE-REFINEMENT.md). Windows/game-web
 visual comparison and competitive acceptance remain pending until observed.
+
+## Visual review
+
+[Illustrated five-form reference](concepts/pearlslinger.webp). The native model and its five forms are recorded separately in [the engine sheet](previews/pearlslinger-forms.webp).

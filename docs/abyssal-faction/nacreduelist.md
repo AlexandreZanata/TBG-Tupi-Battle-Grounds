@@ -22,7 +22,7 @@ Tier-one scale is 1.08 and tier-two 1.16. Pod Snapper uses bark/leaf/sap instead
 
 Every third completed hit punishes an enemy preparing a basic attack.
 
-Paired crescent nacre forearm blades; no hook or chain. None; compact crescent contact sweep. All outcomes and special centers are server-owned.
+Paired short forward nacre fin blades on the gauntlets; no hanging hook or chain. The illustrative crescent silhouette is adapted in the native model to preserve separation from Hook Brawler. None; compact crescent contact sweep. All outcomes and special centers are server-owned.
 Shared primitive bounds, healing reduction and control/bleed replacement apply.
 
 ## Motion
@@ -43,3 +43,7 @@ Concept: built-in imagegen five-form reference, separate from engine output.
 Native captures, source/hash manifests and scoped evidence are recorded by
 [the phase report](../phases/ABYSSALS-OGRE-REFINEMENT.md). Windows/game-web
 visual comparison and competitive acceptance remain pending until observed.
+
+## Visual review
+
+[Illustrated five-form reference](concepts/nacreduelist.webp). The native model and its five forms are recorded separately in [the engine sheet](previews/nacreduelist-forms.webp).
