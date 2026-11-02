@@ -54,3 +54,21 @@ not-executed test status. No Colossus source changed afterward. Linux reinstall
 and runtime/Windows/desktop web observations remain pending. The scene test's
 minimum-density failure and later busy-slot deferral are recorded in
 [the scenery receipt](ARENA-SCENERY-REFINEMENT.md).
+
+## CROWD-EXIT-01 refinement (2026-11-02)
+
+To eliminate premature lateral displacement at the tower exit while preserving
+arm and bazooka clearance:
+- `overhead::height` measures `Colossus`'s upper-arm, forearm and hand vertices
+  (`UpperArmL/R`, `ForearmL/R`, `HandL/R`) rather than its slammed obelisk
+  (`Socket::WeaponR`), and scopes `reserves_equipment` to `Colossus`,
+  `SiegeWalker` and `GustDrummer`.
+- `crowd::Solver::solve` keeps `Params::half_width = 2.1` for the widened road
+  boundary clamp while restoring `HOME_HALF_WIDTH = 1.1` for initial birth
+  offsets and lateral regrouping.
+- `crowd_ecs::live_body` applies compact walking radii while advancing without
+  an active aim target and full directional envelopes when engaged.
+- All 20 targeted client tests (`crowd`, `gd01_colossus`, `gd02_colossus`,
+  `ogre_`, `shatterback`, `p71_body_envelopes`, `side01_`, and the new
+  non-contact vs contact tower-exit regressions) passed. Windows and desktop
+  web visual observation remain pending.

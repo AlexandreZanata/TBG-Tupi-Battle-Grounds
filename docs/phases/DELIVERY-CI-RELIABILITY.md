@@ -189,3 +189,28 @@ Read-only review found appended wire view fields without a protocol bump,
 a second incompatible R13 identity, and auxiliary state skipped by serde.
 These must be reconciled and explicitly validated before that front can be
 released; do not merge it solely because it includes the champion ancestry.
+
+## Exact CROWD-EXIT-01 integration requested by the owner
+
+Merge 73c7a07c28833d6663a11dda65332a578a8c4a3a normally, preserving
+its complete overhead, live-body and regression changes. Resolve the
+earlier 41ebc27 formation fix in favor of HOME_HALF_WIDTH, retaining
+its two useful regressions. TUNDRA-01 9233cd021e5b9af04976bba1f6422f3e2ab3bc21,
+SIDE-01 11cf5af323975f738992147dc76b71f0b2475fbd and 683477aeb3f5
+were already ancestors. Two supplied abbreviated hashes differed from
+the actual objects; exact requested terminal SHA and its ancestry were used.
+The later GD-03 and P74 commits remain in PR #51 and are not silently
+included in this explicitly bounded integration.
+
+PR heads #41 bf6da86, #43 19f4cfb and #44 9fb7be0 are exact ancestors of
+this consolidated branch. Do not discard or close them as merged into main
+before main actually contains those histories. No branch is deleted.
+
+Local focused union (client crowd, side01_, envelopes, gd02_, Shatterback
+clearance; core practice_bot side01_; server ranked side01_) used
+`flock -n -E 75 /tmp/tbg-validation-1000.lock` and CARGO_BUILD_JOBS=2.
+It returned 75 before any command ran: deferred, shared validation slot busy.
+Do not poll or bypass the lock. Rustfmt on the affected files, source routing
+and seven patch-note entries passed; git diff --check passed.
+The main checkout's nine dirty/untracked files were hashed before integration;
+no checkout, stash or reset was performed there.

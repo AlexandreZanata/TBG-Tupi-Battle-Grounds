@@ -338,7 +338,7 @@ fn build_library(
     });
 }
 
-fn native_form(spec: figure::FigureSpec, meshes: &mut Assets<Mesh>) -> FigureForm {
+pub(crate) fn native_form(spec: figure::FigureSpec, meshes: &mut Assets<Mesh>) -> FigureForm {
     let built = figure::build_joint_meshes(&spec);
     let glow = figure::build_glow_meshes(&spec);
     let triangles = built

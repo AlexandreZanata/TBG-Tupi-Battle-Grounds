@@ -63,8 +63,7 @@ impl Default for Params {
     }
 }
 
-// The widened road changes the collision boundary, not the original preferred formation.
-const FORMATION_HALF_WIDTH: f32 = 1.1;
+pub const HOME_HALF_WIDTH: f32 = 1.1;
 
 pub fn home_lane(id: u32) -> f32 {
     let h = id.wrapping_mul(0x9E37_79B9) >> 16;
@@ -87,16 +86,17 @@ impl Solver {
         let order = &mut self.order;
         assert_eq!(bodies.len(), state.len());
         let dt = dt.clamp(0.0, 1.0 / 30.0);
+        let home_width = p.half_width.min(HOME_HALF_WIDTH);
         for (b, o) in bodies.iter().zip(state.iter_mut()) {
             if !o.init {
                 *o = Offset {
                     home: home_lane(b.id),
-                    dz: home_lane(b.id) * FORMATION_HALF_WIDTH,
+                    dz: home_lane(b.id) * home_width,
                     init: true,
                     ..*o
                 };
             }
-            let target = o.home * FORMATION_HALF_WIDTH;
+            let target = o.home * home_width;
             o.vel_z += (target - o.dz) * p.home_k * dt;
             o.vel_z *= (-p.damping * dt).exp();
             o.dz += o.vel_z * dt;
@@ -321,5 +321,73 @@ mod tests {
     fn deterministic_for_spectators() {
         let b: Vec<Body> = (1..=8).map(|id| body(id, 4.0 + id as f32 * 0.05)).collect();
         assert_eq!(run(&b, 120), run(&b, 120));
+    }
+
+    #[test]
+    fn tower_spawn_non_contact_contact_and_regrouping_on_widened_road() {
+        let p = Params::default();
+        assert_eq!(p.half_width, 2.1);
+
+        // 1. Units spawning at the tower exit initialize within the [-0.66, +0.66] center band, not ±1.26.
+        let spawns: Vec<Body> = (1..=16).map(|id| body(id, 0.5 + id as f32 * 2.0)).collect();
+        let mut init_state = vec![Offset::default(); spawns.len()];
+        solve(&spawns, &mut init_state, 1.0 / 60.0, &p);
+        for o in &init_state {
+            assert!(
+                o.dz.abs() <= 0.66 + 1e-4,
+                "initial tower spawn dz={} exceeded original 0.66 band",
+                o.dz
+            );
+        }
+
+        // 2. A unit exiting the tower behind an ally without contact causes zero lateral displacement,
+        //    then pushes laterally on contact while overtaking, and regroups into [-0.66, +0.66] afterwards.
+        let mut solo = [Offset::default()];
+        let mut pair = [Offset::default(); 2];
+        for f in 0..30 {
+            let t = f as f32 / 60.0;
+            let lead = body(1, 1.6 + 0.8 * t);
+            let trail = body(3, 0.5 + 0.8 * t);
+            solve(&[lead], &mut solo, 1.0 / 60.0, &p);
+            solve(&[lead, trail], &mut pair, 1.0 / 60.0, &p);
+            assert!(
+                (pair[0].dz - solo[0].dz).abs() < 1e-6,
+                "non-contact unit at tower exit displaced lead unit at frame {f}"
+            );
+        }
+
+        let mut max_sep_z = 0.0f32;
+        for f in 0..240 {
+            let t = f as f32 / 60.0;
+            let b = [body(1, 1.6 + 0.8 * t), body(3, 0.5 + 2.2 * t)];
+            solve(&b, &mut pair, 1.0 / 60.0, &p);
+            max_sep_z = max_sep_z.max((pair[1].dz - pair[0].dz).abs());
+        }
+        assert!(
+            max_sep_z > 0.35,
+            "units in contact must push laterally: {max_sep_z}"
+        );
+        for o in &pair {
+            assert!(
+                o.dz.abs() <= 0.66 + 0.02,
+                "units failed to regroup into center band after passing: dz={}",
+                o.dz
+            );
+        }
+
+        // 3. A dense pileup can still spread past the old 1.1 clamp on the widened 2.1 road.
+        let pile: Vec<Body> = (1..=10)
+            .map(|id| Body {
+                radius: 0.55,
+                half_length: 0.55,
+                ..body(id * 2, 4.0)
+            })
+            .collect();
+        let spread = run(&pile, 240);
+        let widest = spread.iter().map(|o| o.dz.abs()).fold(0.0, f32::max);
+        assert!(
+            widest > 1.1 && widest <= p.half_width + 1e-5,
+            "widest={widest}"
+        );
     }
 }
