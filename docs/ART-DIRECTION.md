@@ -405,3 +405,11 @@ Author placements at compound-asset origins, keeping crystals, snow caps, trim,
 glow and fire attached. Common braziers use one origin table for pedestals and
 flames; fences and cloth share their side coordinates. Do not rebase arbitrary
 individual parts after assembly. Stronghold-attached flags remain on their tower.
+
+
+### GD-02 Colossus arm clearance (2026-11-02)
+
+Colossus shoulders, upper arms, forearms, hands and their form-specific armor
+belong to its measured crowd envelope. Use the cached posed meshes in live
+spacing as well as measurement. Cover Base/A1/A2/B1/B2 during Idle/Walk/Attack
+and both seat facings. Preserve the existing obelisk and original pushing motion.

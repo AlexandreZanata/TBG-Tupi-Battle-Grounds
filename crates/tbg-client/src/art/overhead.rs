@@ -7,6 +7,15 @@ use super::{
 use bevy::{mesh::VertexAttributeValues, prelude::*};
 use tbg_core::UnitKind;
 
+/// Keep measured geometry and live crowd participation on the same selection.
+pub(crate) fn reserves_equipment(kind: UnitKind) -> bool {
+    matches!(
+        kind,
+        UnitKind::SiegeWalker | UnitKind::Trident | UnitKind::Colossus
+    ) || super::kits::ogres::contains(kind)
+        || super::kits::abyssals::contains(kind)
+}
+
 pub fn height(
     form: &FigureForm,
     meshes: &Assets<Mesh>,
@@ -25,11 +34,7 @@ pub fn height(
     let mut top = 0.0f32;
     let mut radius = 0.0f32;
     let mut depth = Vec2::new(f32::INFINITY, f32::NEG_INFINITY);
-    let equipment = matches!(
-        kind,
-        UnitKind::SiegeWalker | UnitKind::Trident | UnitKind::Colossus
-    ) || super::kits::ogres::contains(kind)
-        || super::kits::abyssals::contains(kind);
+    let equipment = reserves_equipment(kind);
     let clips = [
         Clip::Idle,
         Clip::Walk,

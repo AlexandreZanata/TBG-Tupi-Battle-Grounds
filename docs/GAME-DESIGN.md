@@ -2382,3 +2382,13 @@ outside that complete road rectangle in every Arena; do not narrow it to fit
 scenery. Fire and animated cloth must share their actual pedestal/fence origins.
 Move compound props from their authored origins so geometry, glow and attachments
 stay together. Stronghold-attached banners remain part of the Stronghold.
+
+
+## GD-02 — Proposed Colossus arm clearance (2026-11-02)
+
+Use the Colossus form's measured body/arm/hand/equipment envelope in the existing
+cosmetic crowd solver, including current facing and Evolution scale. The same
+equipment selector must govern cached measurement and live crowd participation.
+Keep RESTORE-02 direct pushing, the five-tile floor and immediate purchases; this
+visual clearance must never enable physical queues or block authoritative advance.
+No Colossus stats, damage, range or cost change.

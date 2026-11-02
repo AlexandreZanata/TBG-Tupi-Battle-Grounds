@@ -536,3 +536,17 @@ inspected, and all 380 installed asset hashes matched. Fire sits on each shared
 brazier and the widened road remains clear. The old solver/direct-offset source
 is restored apart from its lateral bound. Per-image provenance and pending
 Windows/desktop web cases: `docs/phases/ARENA-CLEARANCE-AND-ORIGINAL-PUSHING.md`.
+
+
+## GD-02 — Colossus arms in live crowd clearance (2026-11-02)
+
+Shared Linux/Windows/desktop web: the existing cosmetic crowd solver now reads
+Colossus's measured form envelope, including both arms/hands, armor and obelisk,
+rotated with its current aim. Measurement and live selection share one predicate
+to prevent a measured champion being omitted from crowd separation again.
+Retain original direct pushing, wide road, immediate births and no normal queues.
+Coverage: Base/A1/A2/B1/B2, Idle/Walk/Attack, near/far aim, both seat facings and
+a neighboring Archer. GD-02 tests and Linux reinstall are deferred: the shared
+validation lock returned exit 75 before compilation. The installed source remains
+`e868927`. All GD-02 runtime/platform observations are pending; see
+`docs/phases/COLOSSUS-ARM-CLEARANCE.md`.
