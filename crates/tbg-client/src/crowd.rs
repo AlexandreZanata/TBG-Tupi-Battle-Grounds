@@ -87,7 +87,6 @@ impl Solver {
         let order = &mut self.order;
         assert_eq!(bodies.len(), state.len());
         let dt = dt.clamp(0.0, 1.0 / 30.0);
-        let home_width = p.half_width.min(HOME_HALF_WIDTH);
         for (b, o) in bodies.iter().zip(state.iter_mut()) {
             if !o.init {
                 *o = Offset {
