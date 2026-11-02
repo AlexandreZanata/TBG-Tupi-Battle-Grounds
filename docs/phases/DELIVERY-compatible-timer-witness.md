@@ -54,3 +54,8 @@ CARGO_BUILD_JOBS=2 and the existing /data/tbg-ab-target cache:
 Both real-client scenarios passed (2 passed, 0 failed, 23.31 s); compilation
 completed in 3m02s. Formatting and git diff --check passed. No unrelated local
 suite, cold Bevy build or gate threshold change was used.
+
+Release notes now describe colossus.2 as the initial consolidated activation,
+matching the immutable-tag stop above. The timer-only witness remains the
+subsequent colossus.3 release. This documentation update changes no Rust code;
+the two corrected P73 test results remain valid.

@@ -1,9 +1,9 @@
-TBG 0.1.4-colossus.2 — Compatible automatic delivery verification beta
+TBG 0.1.4-colossus.2 — War Auxiliaries and Gods consolidation beta
 
-This immutable follow-up keeps the colossus.1 gameplay and presentation. The Linux
-preview installer reads the committed client version, so later verified packages
-remain installable without a hardcoded preview-version update. This release also
-provides the owner-authorized compatible timer-only delivery witness.
+Miner and Merchant now provide authoritative War Auxiliary choices during a match.
+The consolidated preview includes Volthar, Astreon and the refined Colossus,
+while preserving the original contact-based pushing and randomized match sides.
+The Linux preview installer reads the committed version and preserves existing data.
 
 Protocol 38, schema 10 (P73 history schema 11 remains opt-in), ruleset 15 /
 cc459351581b7763. This contract requires a coordinated release from protocol 31;
