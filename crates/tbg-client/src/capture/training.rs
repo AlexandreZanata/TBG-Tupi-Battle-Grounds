@@ -141,6 +141,11 @@ fn journey(
             s.active_ticks() >= 10
         } =>
         {
+            queue.0.push(Action::Control(id, 0));
+            *observed = (id.0, s.active_ticks(), time.elapsed_secs());
+            *stage = 3;
+        }
+        3 if time.elapsed_secs() > observed.2 + 0.5 => {
             assert!(matches!(
                 s.lifecycle(),
                 tbg_core::training::Lifecycle::Paused(_)
