@@ -149,3 +149,12 @@ The new absent-kind cadence regression was written, but its first local command
 returned lock-busy (75); it did not run. Respect the shared lock and defer the
 new controller check/full C7 to hosted CI. The earlier 32-pair screens remain
 screening evidence only. Do not claim the isolated healing criterion passed.
+
+INT-04 avoids rebuilding unrelated mutant duel rows: the full reference matrix
+stays, and every consumed target/opponent/budget/seat result is measured through
+the same pair builder. A new exact equivalence test protects row scores,
+averages and weak/oppressive classification for all three mutation cases.
+No samples, duel duration, prices, gate thresholds or canary assertions change.
+The test-only helper is not exported by the balance library or used in reports.
+Local compile/run is deferred to hosted CI while the shared host validation
+front remains contended; no lock polling, extra target or parallelism bypass.

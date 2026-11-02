@@ -3,6 +3,9 @@
 //! is covered by itself. Append-only: change a test only in the same commit
 //! as the canon change it guards.
 
+#[path = "common/canary_row.rs"]
+mod canary_row;
+
 use tbg_balance::duels::{self, Form};
 use tbg_balance::gate;
 use tbg_balance::knobs;
@@ -203,7 +206,7 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             let moved = |shift: f64, room: f64| shift >= 0.20f64.min(room / 2.0);
             // Doubled HP and damage: flagged oppressive, or clearly stronger
             // against the other base forms at every budget.
-            let strong = duels::matrix_of(scaled_on(lab, kind, 2, 2, 1), forms.clone(), 4);
+            let strong = canary_row::measure(scaled_on(lab, kind, 2, 2, 1), &forms, i);
             let caught = strong.flags(canon()).oppressive.contains(&i)
                 || budgets
                     .clone()
@@ -221,7 +224,7 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
                 ) >= favor_vs(lab, kind, MATCH_PAIRS, Policy::Cheap) + 0.10;
             assert!(caught, "{kind:?} ×2 HP and damage was not caught");
             // A tripled cost: flagged weak, or clearly weaker everywhere.
-            let dear = duels::matrix_of(scaled_on(lab, kind, 1, 1, 3), forms.clone(), 4);
+            let dear = canary_row::measure(scaled_on(lab, kind, 1, 1, 3), &forms, i);
             let caught = dear.flags(canon()).weak.contains(&i)
                 || budgets
                     .clone()

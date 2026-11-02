@@ -3206,3 +3206,20 @@ Bot and BotAvoid when the avoided kind is absent from the pool: actions and
 state hashes must match. Neither change affects the production bot or gameplay.
 Local Rust execution was deferred when the shared validation lock returned 75;
 the exact new test and unchanged full C7 remain queued to protected hosted CI.
+
+## INT-04 — Preserve C7 measurements while avoiding unused mutant rows (2026-11-02)
+
+For every single-kind mutation C7 rebuilt a full 46-base-form matrix, although
+it only consumes that mutated kind's row and weak/oppressive membership. The
+reference matrix remains complete. Mutant measurements now use a test-only
+helper that calls the reference pair builder for every target/opponent pair,
+all three unchanged budgets, both seat orders and the same duel limit. No
+opponent, target kind, sample, threshold or assertion is omitted. Other rows
+are explicitly unmeasured and are never consumed by this test or a live gate.
+
+An equivalence regression compares the whole target score row, averages and
+both consumed flags against the complete reference builder for normal, x2
+HP/damage and x3 cost rules. This is a reduction of unconsumed work, not a
+shorter battle, smaller statistical sample or additional pass criterion.
+Local compilation remains deferred under the earlier shared-lock contention;
+the new proof and complete original C7 run in required hosted CI.
