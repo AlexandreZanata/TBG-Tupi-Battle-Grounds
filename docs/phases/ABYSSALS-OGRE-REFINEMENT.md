@@ -32,7 +32,7 @@ correspondence remains pending until actually observed.
 
 ## Results
 
-Source implementation complete. Linux render, preview installation and local landing evidence in progress.
+Source implementation and Linux preview delivery complete; owner and remaining platform/competitive acceptance pending.
 
 ### Work-front checks
 
@@ -166,3 +166,54 @@ normalized the known script path before replacing only the matching process.
 > browser also failed. Stop this browser validation step; preserve the user's
 > tabs and report actual visual observation as pending. Static checks and native
 > screenshots do not replace browser evidence. No website screenshot is claimed.
+
+### Final Linux delivery
+
+`cargo build --offline --locked -p tbg-client --bin tbg-client` used the same
+nonblocking lock, two jobs and cached native sysroot. The installed debug preview
+is `0.1.3-abyssals.1` / source `5553393ea24db4e04efde5acd7dd036777b887ae`,
+wire 35 / ruleset 10 / `w35-r10-523044fc973bac39`. The binary SHA-256 is
+`8c3955c25d6a1679fc17dba7349d2e93774f70ff31dd49f695f03fa3f16f4c6a`.
+
+`scripts/capture-abyssal-training.py` passed all five final scenes on that exact
+binary: allied cask (27 rendered flight frames), intercepted cask (17 frames),
+mixed Abyssals, Barrel Keeper rear-heal and Foam Weaver rear-heal. Both cask
+probes observed hidden reload props, area healing and paused barrels. The enemy
+probe observed interception. Both rear-heal probes observed 60 rear-target frames
+while attacked, with max foot yaw 0. Every scene passed pause, exact one-step,
+reset identity and stale-action rejection, with zero failed image loads.
+
+Four nonfatal already-despawned entity command warnings occurred during reset:
+three in the mixed crowd and one in Foam Weaver's scene. The witnesses completed
+and their captures are ready; do not claim warning-free reset cleanup. Its
+investigation is deferred without repeating these captures. The two owned
+processes left by the first timed-out capture were identified by exact executable,
+capture destination and Xvfb display/auth arguments and closed; unrelated
+sessions were preserved. The helper now closes its own process group on timeout.
+
+`scripts/install-champion-preview.py` installed the source-stamped binary into
+its immutable isolated preview slot, updated `tbg-champions` and the desktop
+entry, and preserved ordinary installation/data. Verification matched all 379
+asset hashes, binary hash and `--build-info`. The new desktop preview was launched.
+Five compact Training screenshots plus their original PNG hashes and witness
+lines are committed separately from the model and AI reference manifests.
+
+Local HTTP returned 200 for the review gallery, 81-entry catalog and a new
+portrait. The gallery has 19 champion cards, 38 verified model images and 17
+reference images, plus five native Training screenshots. Browser visual
+observation remains blocked as recorded above; no Linux-to-web parity is claimed.
+
+### Deferred acceptance
+
+- Actual Windows and desktop game-web visual/motion comparison of the affected
+  forms, clips, effects and timeline cases in DESKTOP-UI-CONTRACT.
+- Owner look/fun review, team/all-form/budget balance and the full D-33 gate.
+- Reruns of the two stopped obsolete count/version assertions under AGENTS rule 6.
+- Investigation of the four nonfatal reset entity-command warnings.
+- No full workspace suite, release/package build, public deployment or merge ran.
+
+The ignored local receipts/logs live in `.local/abyssals-2026-11-01/final/` in
+the original checkout. Public review summaries are in
+`docs/abyssal-faction/linux-validation.json` and its referenced manifests.
+
+Shared-motion scope note: Rivet Ballista retains its original head/arm proportions, but receives the common module walking accent. The visual contract includes this Machine Walk case in the remaining platform comparison; it is not counted among the 19 newly captured champions.

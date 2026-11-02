@@ -68,3 +68,9 @@ preserved in the ignored local artifact directory.
 - [PodSnapper](previews/podsnapper-forms.webp)
 
 Local review gallery: `http://localhost:8965/`. Landing preview: `http://localhost:8604/#champions`. These loopback services are not a public deployment.
+
+## Installed Linux witness
+
+Preview `0.1.3-abyssals.1`, source `5553393`, wire 35 / ruleset 10. All 379 installed asset hashes matched. Open **TBG · 81 Champions Preview** or run `tbg-champions`. Five native Training scenes passed; their [screenshots and witnesses](training/manifest.json) and [validation summary](linux-validation.json) preserve the installed binary hash. The ordinary client and its data remain separate.
+
+[Area-heal scene](training/barrel-allies.webp) · [Enemy interception](training/barrel-intercept.webp) · [Abyssals in Training](training/abyssal-crowd.webp) · [Barrel Keeper rear-heal](training/barrel-rear.webp) · [Foam Weaver rear-heal](training/foam-rear.webp).
