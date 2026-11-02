@@ -317,3 +317,11 @@ reconnections remain on their original generation while it drains. If public
 checks fail, the coordinator returns admissions to the previous slot. Coordinate
 frontend rollback too before restoring timers; do not leave mixed entry points.
 The timer's unit never supplies `--coordinated-contract`.
+
+The four timers start at staggered offsets after activation (20/80/140/200 s)
+and use one-second timer accuracy. Their ten-minute recurring cadence remains.
+The earlier identical boot deadlines and default one-minute coalescing repeatedly
+ran backend and web together: the nonblocking lock safely deferred web, but a
+compatible public bundle remained behind. Staggering avoids that repeated startup
+race without weakening the shared lock or adding retries/API polling. Long work
+can still defer another family until its normal next run.

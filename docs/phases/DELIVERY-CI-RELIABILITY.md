@@ -69,3 +69,13 @@ against the captured pre-combat HP and its focused rerun passed. Seven source
 patch-note entries passed at R13/b66993d9e87a9cfc. The combined slot policy has
 57 passing cases. No core source, balance value, timeout, required check or
 historical trace row changed; no local full suite or audit benchmark was run.
+
+## Timer startup contention observed on the official host
+
+After the #50 controller installation all four timers shared a past two-minute
+boot deadline. Default systemd coalescing scheduled backend and web together at
+14:21:46 and 14:32:09 UTC; web deferred to the shared lock both times. This did not
+affect existing games, but automatic frontend advancement was delayed. Stagger
+activation by a minute per family and use AccuracySec=1s; keep the nonblocking
+lock, random jitter and ten-minute cadence. A policy regression requires starts
+farther apart than the 30-second jitter plus accuracy and no shared boot deadline.
