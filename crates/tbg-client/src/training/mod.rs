@@ -191,7 +191,7 @@ mod completion_catalog_tests {
         let shown = catalog.visible(crate::i18n::Lang::En);
         assert_eq!(
             shown.iter().filter(|kind| kind.is_conventional()).count(),
-            63
+            82
         );
         for kind in tbg_core::COMPLETION_POOL.into_iter().skip(46) {
             assert!(shown.contains(&kind));

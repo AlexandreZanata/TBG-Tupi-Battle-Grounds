@@ -118,6 +118,7 @@ fn p67_c19_all_canonical_forms_and_stronghold_kinds_keep_mechanical_identity() {
                             tier,
                             branch,
                             x: 7000,
+                            lane_z: 0,
                             hp: 50,
                             max_hp: 100,
                             status: 2,
