@@ -563,7 +563,13 @@ compatibility; visual parity needs real captures.
 ## Phase report (executor fills in)
 
 ### S0 freeze
-- Base SHA / allocations / owner decisions / coordination / dependency choices:
+- GitHub base: `b964875e2219bafe129b19960f7f1369307870d5` fetched on 2026-11-02; planning prerequisite fast-forwarded from `origin/docs/p75-admin-moderation-plan` (`b61764d`). Isolated worktree: `/data/tbg-p75-admin-moderation-social`.
+- Allocations confirmed: protocol 39, new ClientMsg tags 27–28, ServerMsg tags 37–41; schema 12 with independently installed history 11; D-107–D-111; GAME-DESIGN section 22.
+- Owner explicitly selected all O-P75-01–13 defaults in this execution request. Digits 1/2/3 remain the emoji shortcuts.
+- Coordination: GitHub open PR inventory contains planning #58 and native settings #57 (`23e8cb0`); P65 remains planning-only (`b2a12c6`). Neither front is modified, merged or reset. Client integration must preserve the native key-backup seam; conflict resolution with #57 remains a reviewer gate. No other agent edits this worktree.
+- Dependencies selected against primary documentation: lettre 0.11.23 (`default-features=false`, `builder,smtp-transport,tokio1-rustls,ring,webpki-roots`), image 0.25.10 (`default-features=false`, `png,gif,webp`); rfd 0.17.2 (`default-features=false`, `xdg-portal`, no GTK). Sources: https://docs.rs/crate/lettre/0.11.23/features, https://docs.rs/image/0.25.10/image/struct.ImageReader.html, https://docs.rs/crate/rfd/0.17.2/features.
+- Source audit: `protocol.rs:31` is wire 38; `store/schema.rs:19` is schema 10; `schema.rs:410` uses the unsafe MAX(version) history gate. `ui/keyboard.rs` activates Enter using implicit local focus without a preceding Tab. Runtime Enter-Enter reproduction pending: no P75 client build or running isolated game was available at S0; source inspection is not runtime evidence.
+- Validation: `git diff --check` passed. Cargo checks deferred until final scoped consolidation (new worktree has no build cache). Tests will run only at S14.
 
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
