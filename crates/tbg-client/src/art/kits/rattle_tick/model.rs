@@ -21,21 +21,23 @@ pub fn plan(t: u8) -> Proportions {
 }
 pub fn parent(n: Node) -> Option<Node> {
     match n {
+        Prop(Socket::WeaponR) => Some(Body(Chest)),
         Secondary(Spring::HeadGear) | Prop(Socket::Back) | Prop(Socket::StringTop) => {
             Some(Secondary(Spring::Back))
         }
-        Prop(Socket::Nock) => Some(Prop(Socket::StringTop)),
+        Prop(Socket::Nock) => Some(Secondary(Spring::Back)),
         Secondary(Spring::Tabard) => Some(Body(Chest)),
         _ => n.parent(),
     }
 }
 pub fn rest(n: Node, p: &Proportions) -> Vec3 {
     match n {
+        Prop(Socket::WeaponR) => Vec3::ZERO,
         Secondary(Spring::Back) => Vec3::new(0.28, 0.42, -0.05),
         Secondary(Spring::HeadGear) => Vec3::new(0.0, 0.22, 0.0),
         Prop(Socket::Back) => Vec3::new(0.09, 0.12, 0.0),
         Prop(Socket::StringTop) => Vec3::new(-0.09, 0.12, 0.0),
-        Prop(Socket::Nock) => Vec3::new(0.0, -0.15, 0.0),
+        Prop(Socket::Nock) => Vec3::new(-0.09, 0.035, 0.18),
         Secondary(Spring::Tabard) => Vec3::new(0.0, 0.20, -0.22),
         _ => rig::rest(n, p),
     }
@@ -96,7 +98,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Secondary(Spring::HeadGear),
             Cone(0.09, 0.10),
-            OAK,
+            CHARCOAL,
             [0.0, 0.08, 0.0],
         )
         .rot([0.0, 0.0, -15.0]),
@@ -112,12 +114,30 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             SKIN,
             [0.0, -0.07, 0.0],
         ),
-        part(Prop(Socket::Nock), Ball(0.07), CHARCOAL, [0.0, 0.0, 0.0]),
         part(
             Prop(Socket::Nock),
-            Cyl(0.009, 0.06),
-            LINEN,
-            [0.0, 0.07, 0.0],
+            Box(0.075, 0.09, 0.18),
+            CHARCOAL,
+            [0.0, 0.025, 0.06],
+        ),
+        part(
+            Prop(Socket::Nock),
+            Cyl(0.027, if f.b { 0.22 } else { 0.16 }),
+            STEEL,
+            [0.0, 0.045, 0.14],
+        )
+        .rot([90.0, 0.0, 0.0]),
+        part(
+            Prop(Socket::Nock),
+            Box(0.045, 0.075, 0.05),
+            DARK_LEATHER,
+            [0.0, -0.04, 0.0],
+        ),
+        part(
+            Prop(Socket::Nock),
+            Box(0.012, 0.015, 0.02),
+            BRASS,
+            [0.0, 0.08, 0.20],
         ),
     ]);
     for s in [-1.0, 1.0] {
@@ -131,12 +151,27 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             part(
                 Secondary(Spring::Back),
                 Pill(0.025, 0.13),
-                OAK,
+                CHARCOAL,
                 [s * 0.045, -0.07, 0.03],
             )
             .rot([-70.0, 0.0, 0.0]),
         );
     }
+    v.push(part(
+        Secondary(Spring::Back),
+        Box(0.16, 0.035, 0.13),
+        DARK_LEATHER,
+        [0.0, -0.025, 0.0],
+    ));
+    v.push(
+        part(
+            Secondary(Spring::Back),
+            Box(0.035, 0.16, 0.12),
+            CHARCOAL,
+            [0.035, 0.08, 0.0],
+        )
+        .rot([0.0, 0.0, -14.0]),
+    );
     club(&mut v, f);
     if f.a {
         v.push(
@@ -162,7 +197,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
             v.push(part(
                 Secondary(Spring::Back),
                 Box(0.145, 0.025, 0.12),
-                LINEN,
+                CHARCOAL,
                 [0.0, y, 0.0],
             ));
         }
@@ -195,7 +230,7 @@ fn club(v: &mut Vec<PartSpec>, f: Form) {
         [0.0, -0.40, 0.0],
     ));
     for y in [-0.32, -0.48] {
-        v.push(part(w, Box(0.21, 0.045, 0.21), IRON, [0.0, y, 0.0]));
+        v.push(part(w, Box(0.21, 0.045, 0.21), STEEL, [0.0, y, 0.0]));
         for s in [-1.0, 1.0] {
             v.push(part(w, Cone(0.025, 0.08), IRON, [s * 0.14, y, 0.0]).rot([0.0, 0.0, s * 90.0]));
         }

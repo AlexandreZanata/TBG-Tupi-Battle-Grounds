@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="meta.title">Tupi Battle Grounds — estratégia 1x1 em tempo real</title>
+  <meta name="description" content="Duelos 1x1 em tempo real com combate automático em uma única Linha de Batalha, Loja contínua, Evolução ramificada e Sinergias de Facção." data-i18n-attr="content=meta.description">
+  <meta name="theme-color" content="#081423">
+  <link rel="canonical" href="https://tupibg.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Tupi Battle Grounds">
+  <meta property="og:url" content="https://tupibg.com/">
+  <meta property="og:title" content="Tupi Battle Grounds — estratégia 1x1 em tempo real">
+  <meta property="og:description" content="Compre, envie, evolua e combine Facções até derrubar a Fortaleza inimiga.">
+  <meta property="og:image" content="https://tupibg.com/media/og-image.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Batalha real de Tupi Battle Grounds na Forja Vulcânica, com o logotipo do jogo">
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/media/icon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/BattlegroundDisplay.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/shared/tokens.css">
+  <link rel="stylesheet" href="/assets/shared/base.css">
+  <link rel="stylesheet" href="/assets/css/landing.css">
+  <script type="module" src="/assets/js/main.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main" data-i18n="nav.skip">Pular para o conteúdo</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="/" aria-label="Tupi Battle Grounds — início" data-i18n-attr="aria-label=nav.home">
+        <img src="/media/wordmark-320.webp" width="160" height="64" alt="">
+      </a>
+      <nav class="site-nav" aria-label="Seções" data-i18n-attr="aria-label=nav.label">
+        <ul>
+          <li><a href="#game" data-i18n="nav.game">O jogo</a></li>
+          <li><a href="#how-to-play" data-i18n="nav.how">Como jogar</a></li>
+          <li><a href="#champions" data-i18n="nav.champions">Campeões</a></li>
+          <li><a href="#arenas" data-i18n="nav.arenas">Arenas</a></li>
+          <li><a href="#screenshots" data-i18n="nav.screenshots">Capturas</a></li>
+          <li><a href="#news" data-i18n="nav.news">Novidades</a></li>
+          <li><a href="#play" data-i18n="nav.play">Onde jogar</a></li>
+        </ul>
+      </nav>
+      <div class="lang-switch" role="group" aria-label="Idioma" data-i18n-attr="aria-label=nav.language">
+        <button type="button" data-lang="pt-BR" lang="pt-BR" aria-pressed="true" title="Português (Brasil)">PT</button>
+        <button type="button" data-lang="en" lang="en" aria-pressed="false" title="English">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <img class="hero-backdrop" src="/media/hero-grove-1920.webp" srcset="/media/hero-grove-1280.webp 1280w, /media/hero-grove-1920.webp 1920w" sizes="100vw" width="1920" height="769" alt="" fetchpriority="high">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <p class="eyebrow" data-i18n="hero.eyebrow">Estratégia 1x1 em tempo real</p>
+          <h1 id="hero-title" class="hero-title"><img src="/media/wordmark-760.webp" width="760" height="304" alt="Tupi Battle Grounds"></h1>
+          <p class="hero-lead" data-i18n="hero.lead">Monte sua Linha de Batalha. Deixe sua marca.</p>
+          <p class="hero-text" data-i18n="hero.text">Duelos ao vivo entre dois jogadores: compre unidades na Loja, veja-as lutar sozinhas, evolua seus campeões e combine Facções até derrubar a Fortaleza inimiga.</p>
+          <div class="hero-actions">
+            <a class="btn btn-play" data-cta="web" aria-disabled="true" aria-describedby="web-state-note">
+              <span data-i18n="cta.web">Jogar no navegador</span>
+              <small data-web-soon data-i18n="state.soon">Em breve</small>
+            </a>
+            <a class="btn btn-gold" href="#play" data-i18n="cta.platforms">Onde jogar</a>
+          </div>
+          <p class="hero-note" id="web-state-note" data-web-note>
+            <span data-web-pending data-i18n="web.pending.short">O jogo no navegador ainda está em preparação.</span>
+            <span data-web-live hidden data-i18n="web.live.short">Direto no navegador do computador, sem instalação.</span>
+          </p>
+        </div>
+        <figure class="hero-shot frame">
+          <img src="/media/captures/battle-volcanic-1600.webp" srcset="/media/captures/battle-volcanic-800.webp 800w, /media/captures/battle-volcanic-1600.webp 1600w" sizes="(min-width: 1100px) 640px, 92vw" width="1600" height="900" alt="Batalha real na Forja Vulcânica: unidades dos dois lados se enfrentam na Linha de Batalha, com a Loja de cinco ofertas abaixo" data-i18n-attr="alt=hero.shot.alt">
+          <figcaption data-i18n="hero.shot.caption">Captura real do cliente nativo para Linux · Forja Vulcânica</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="game" class="section" aria-labelledby="game-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <p class="eyebrow" data-i18n="game.eyebrow">O jogo</p>
+          <h2 id="game-title" data-i18n="game.title">Estratégia sem microgerenciamento</h2>
+          <p class="section-intro" data-i18n="game.intro">A profundidade vem do que você compra, de quando envia, de como evolui e de quais Facções combina.</p>
+        </header>
+        <ul class="pillars" role="list">
+          <li class="pillar">
+            <h3 data-i18n="pillar.live.title">Duelo 1x1 ao vivo</h3>
+            <p data-i18n="pillar.live.text">Os dois jogadores agem ao mesmo tempo e o campo de batalha muda em tempo real.</p>
+          </li>
+          <li class="pillar">
+            <h3 data-i18n="pillar.line.title">Uma Linha de Batalha</h3>
+            <p data-i18n="pillar.line.text">Sem movimento lateral: as unidades avançam e lutam sozinhas em uma única pista.</p>
+          </li>
+          <li class="pillar">
+            <h3 data-i18n="pillar.shop.title">Loja contínua</h3>
+            <p data-i18n="pillar.shop.text">Cinco ofertas durante toda a partida; cada compra renova as cinco. Não existe fase de preparação.</p>
+          </li>
+          <li class="pillar">
+            <h3 data-i18n="pillar.evolution.title">Evolução ramificada</h3>
+            <p data-i18n="pillar.evolution.text">Cada unidade enviada pode evoluir por um de dois ramos, mantendo a mesma porcentagem de vida.</p>
+          </li>
+          <li class="pillar">
+            <h3 data-i18n="pillar.synergy.title">Sinergias de Facção</h3>
+            <p data-i18n="pillar.synergy.text">Com 2 e com 4 unidades vivas da mesma Facção, todas elas recebem bônus.</p>
+          </li>
+          <li class="pillar">
+            <h3 data-i18n="pillar.fair.title">Justo por design</h3>
+            <p data-i18n="pillar.fair.text">O servidor decide combate, Energia, Loja, Evolução e resultados. Sem pay-to-win: itens pagos, se existirem, serão apenas cosméticos.</p>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="how-to-play" class="section section-alt" aria-labelledby="how-title">
+      <div class="section-inner how">
+        <header class="section-head">
+          <p class="eyebrow" data-i18n="how.eyebrow">Como jogar</p>
+          <h2 id="how-title" data-i18n="how.title">Uma partida, do primeiro envio à Fortaleza</h2>
+          <p class="section-intro" data-i18n="how.intro">Antes de entrar, escolha sua Fortaleza (Tesouro, Bastião, Artilharia ou Comando) e seus Arcanos. Depois, tudo acontece ao vivo.</p>
+        </header>
+        <ol class="steps">
+          <li><h3 data-i18n="how.1.title">Mesmo ponto de partida</h3><p data-i18n="how.1.text">Depois de 3 segundos de contagem, os dois começam com a mesma Energia e cinco ofertas na Loja.</p></li>
+          <li><h3 data-i18n="how.2.title">Comprar é enviar</h3><p data-i18n="how.2.text">Escolha uma oferta que você pode pagar: a unidade surge diante da sua Fortaleza e as cinco ofertas mudam.</p></li>
+          <li><h3 data-i18n="how.3.title">Combate automático</h3><p data-i18n="how.3.text">As unidades avançam e atacam sozinhas. Tanque, DPS, Suporte, À Distância e Controle cumprem papéis diferentes.</p></li>
+          <li><h3 data-i18n="how.4.title">Evolua e combine</h3><p data-i18n="how.4.text">Selecione uma unidade sua para evoluí-la. Duas ou quatro unidades vivas de uma Facção ativam a Sinergia.</p></li>
+          <li><h3 data-i18n="how.5.title">Guarde com Juros</h3><p data-i18n="how.5.text">Cada 5 de Energia guardada acelera sua regeneração em 25%, contando até 25 de Energia.</p></li>
+          <li><h3 data-i18n="how.6.title">Conselho de Guerra</h3><p data-i18n="how.6.text">A cada 60 segundos de combate a batalha pausa e os dois escolhem entre os mesmos quatro Aprimoramentos.</p></li>
+          <li><h3 data-i18n="how.7.title">Derrube a Fortaleza</h3><p data-i18n="how.7.text">Não há relógio decidindo a partida: vence quem destruir primeiro a Fortaleza inimiga.</p></li>
+        </ol>
+        <p class="fine-print" data-i18n="how.modes">Modos: Casual, Ranqueada, Desafiar um Amigo, Sala Privada e Treino contra o Bot. Os valores de equilíbrio ainda estão em teste e podem mudar.</p>
+      </div>
+    </section>
+
+    <section id="champions" class="section" aria-labelledby="champions-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <p class="eyebrow" data-i18n="champions.eyebrow">Campeões e Facções</p>
+          <h2 id="champions-title" data-i18n="champions.title">46 campeões em 7 Facções</h2>
+          <p class="section-intro" data-i18n="champions.intro">Cada campeão pertence a uma Facção e tem um Arquétipo. Os retratos são renderizados a partir dos modelos reais do jogo.</p>
+        </header>
+        <div class="champion-filters" role="group" aria-label="Filtrar por Facção" data-i18n-attr="aria-label=champions.filter" data-champion-filters></div>
+        <p class="result-count" aria-live="polite" data-champion-count></p>
+        <ul class="champion-grid" role="list" data-champion-grid>
+          <li class="state-note" data-i18n="state.loading">Carregando…</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="arenas" class="section section-alt" aria-labelledby="arenas-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <p class="eyebrow" data-i18n="arenas.eyebrow">Arenas</p>
+          <h2 id="arenas-title" data-i18n="arenas.title">Oito campos de batalha</h2>
+          <p class="section-intro" data-i18n="arenas.intro">Cada arena tem um pequeno modificador. As regras são sempre iguais para os dois lados.</p>
+        </header>
+        <ul class="arena-grid" role="list" data-arena-grid>
+          <li class="state-note" data-i18n="state.loading">Carregando…</li>
+        </ul>
+        <p class="fine-print" data-i18n="arenas.note">Online, o servidor sorteia a arena de cada partida. No Treino contra o Bot, você escolhe onde jogar.</p>
+      </div>
+    </section>
+
+    <section id="screenshots" class="section" aria-labelledby="shots-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <p class="eyebrow" data-i18n="shots.eyebrow">Capturas</p>
+          <h2 id="shots-title" data-i18n="shots.title">Imagens reais do jogo</h2>
+          <p class="section-intro" data-i18n="shots.intro">Capturadas do cliente nativo para Linux, em partidas de Treino reais. Só recortamos e redimensionamos; nada foi pintado por cima.</p>
+        </header>
+        <ul class="shot-grid" role="list" data-gallery>
+          <li>
+            <figure>
+              <a class="shot" href="/media/captures/battle-forest-1600.webp"><img src="/media/captures/battle-forest-800.webp" width="800" height="450" loading="lazy" alt="Batalha na Floresta Verdejante, com unidades dos dois lados no centro da Linha de Batalha" data-i18n-attr="alt=shots.forest.alt"></a>
+              <figcaption data-i18n="shots.forest.caption">Floresta Verdejante · batalha em andamento</figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a class="shot" href="/media/captures/council-ruins-1600.webp"><img src="/media/captures/council-ruins-800.webp" width="800" height="450" loading="lazy" alt="Conselho de Guerra nas Ruínas Antigas: a batalha pausa e quatro Aprimoramentos são oferecidos" data-i18n-attr="alt=shots.council.alt"></a>
+              <figcaption data-i18n="shots.council.caption">Ruínas Antigas · Conselho de Guerra</figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a class="shot" href="/media/captures/battle-clockwork-1600.webp"><img src="/media/captures/battle-clockwork-800.webp" width="800" height="450" loading="lazy" alt="Batalha no Bastião Mecânico, entre engrenagens de bronze e guindastes" data-i18n-attr="alt=shots.clockwork.alt"></a>
+              <figcaption data-i18n="shots.clockwork.caption">Bastião Mecânico · batalha em andamento</figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a class="shot" href="/media/captures/battle-celestial-1600.webp"><img src="/media/captures/battle-celestial-800.webp" width="800" height="450" loading="lazy" alt="Batalha na Cidadela Celestial, entre torres de marfim e cristais azuis" data-i18n-attr="alt=shots.celestial.alt"></a>
+              <figcaption data-i18n="shots.celestial.caption">Cidadela Celestial · batalha em andamento</figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a class="shot" href="/media/captures/battle-desert-1600.webp"><img src="/media/captures/battle-desert-800.webp" width="800" height="450" loading="lazy" alt="Batalha nas Relíquias do Deserto, entre templos de arenito e palmeiras" data-i18n-attr="alt=shots.desert.alt"></a>
+              <figcaption data-i18n="shots.desert.caption">Relíquias do Deserto · batalha em andamento</figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a class="shot" href="/media/captures/battle-storm-1600.webp"><img src="/media/captures/battle-storm-800.webp" width="800" height="450" loading="lazy" alt="Batalha no Vale da Tempestade, entre árvores cobertas de gelo e água escura" data-i18n-attr="alt=shots.storm.alt"></a>
+              <figcaption data-i18n="shots.storm.caption">Vale da Tempestade · batalha em andamento</figcaption>
+            </figure>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="news" class="section section-alt" aria-labelledby="news-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <p class="eyebrow" data-i18n="news.eyebrow">Novidades</p>
+          <h2 id="news-title" data-i18n="news.title">Notas de atualização</h2>
+          <p class="section-intro" data-i18n="news.intro">As mesmas notas públicas exibidas no jogo. Versões marcadas como prévia ou candidata ainda estão em teste.</p>
+        </header>
+        <ol class="news-list" data-news-list>
+          <li class="state-note" data-i18n="state.loading">Carregando…</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="play" class="section" aria-labelledby="play-title">
+      <div class="section-inner">
+        <header class="section-head">
+          <p class="eyebrow" data-i18n="play.eyebrow">Onde jogar</p>
+          <h2 id="play-title" data-i18n="play.title">Escolha sua plataforma</h2>
+          <p class="section-intro" data-i18n="play.intro">Só anunciamos uma plataforma quando ela está publicada e compatível com os servidores atuais.</p>
+        </header>
+        <p class="download-detection" data-os-note aria-live="polite"></p>
+        <div class="platforms">
+          <article class="platform frame" aria-labelledby="web-title">
+            <header>
+              <h3 id="web-title" data-i18n="web.title">Navegador (computador)</h3>
+              <span class="badge badge-warn" data-web-pending data-i18n="state.soon">Em breve</span>
+              <span class="badge badge-ok" data-web-live hidden data-i18n="state.available">Disponível</span>
+            </header>
+            <p data-web-pending data-i18n="web.pending.text">O jogo no navegador está sendo preparado. Quando for publicado, este botão levará você direto à partida.</p>
+            <p data-web-live hidden data-i18n="web.live.text">Abra o jogo no navegador do computador, sem instalação.</p>
+            <a class="btn btn-play" data-cta="web" aria-disabled="true">
+              <span data-i18n="cta.web">Jogar no navegador</span>
+              <small data-web-soon data-i18n="state.soon">Em breve</small>
+            </a>
+          </article>
+          <article class="platform platform-native frame" aria-labelledby="windows-title" data-platform="windows">
+            <img class="platform-icon" src="/assets/icons/windows.svg" width="56" height="56" alt=""/>
+            <header><h3 id="windows-title" data-i18n="windows.title">Windows</h3><span class="badge" data-platform-status="windows"></span></header>
+            <p class="platform-version" data-platform-version="windows"></p>
+            <p data-i18n="windows.requirements">Windows 11 · x86_64 · DirectX 12</p>
+            <button class="btn btn-gold" type="button" data-open-downloads="windows" data-i18n="downloads.options">Ver opções de download</button>
+            <small class="platform-recommended" data-recommended="windows" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
+          </article>
+          <article class="platform platform-native frame" aria-labelledby="linux-title" data-platform="linux">
+            <img class="platform-icon" src="/assets/icons/linux.svg" width="56" height="56" alt=""/>
+            <header><h3 id="linux-title" data-i18n="linux.title">Linux (x86_64)</h3><span class="badge" data-platform-status="linux"></span></header>
+            <p class="platform-version" data-platform-version="linux"></p>
+            <p data-i18n="linux.requirements">glibc 2.35 ou mais recente · x86_64 · Vulkan</p>
+            <button class="btn btn-gold" type="button" data-open-downloads="linux" data-i18n="downloads.options">Ver opções de download</button>
+            <small class="platform-recommended" data-recommended="linux" hidden data-i18n="downloads.recommended">Recomendado para seu sistema</small>
+          </article>
+        </div>
+        <p class="fine-print" data-i18n="play.others">Pacotes para macOS e celulares ainda não estão disponíveis. Você também pode jogar no navegador do computador.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <img class="footer-emblem" src="/media/emblem-160.webp" width="72" height="72" alt="" loading="lazy">
+      <nav aria-label="Rodapé" data-i18n-attr="aria-label=footer.label">
+        <ul>
+          <li><a href="/contact/" data-i18n="footer.contact">Contato</a></li>
+          <li><a href="/privacy/" data-i18n="footer.privacy">Privacidade</a></li>
+          <li><a href="/terms/" data-i18n="footer.terms">Termos de uso</a></li>
+          <li><a href="https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds" rel="noopener noreferrer" data-i18n="footer.source">Código-fonte no GitHub</a></li>
+        </ul>
+      </nav>
+      <p class="credit"><span data-i18n="footer.credit">Jogo original: Tupi Battle Grounds (TBG) · Criado por</span> <a href="https://github.com/AlexandreZanata" rel="noopener noreferrer">Alexandre Zanata (@AlexandreZanata)</a> · <a href="https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds" rel="noopener noreferrer" data-i18n="footer.repo">Repositório original</a></p>
+      <p class="fine-print"><span data-i18n="footer.license">Código sob a TBG Visible Attribution License 1.0. Fontes Noto sob a SIL Open Font License 1.1.</span> <a href="/assets/fonts/OFL.txt" data-i18n="footer.fonts">Licença das fontes</a></p>
+    </div>
+  </footer>
+
+  <dialog class="native-dialog frame" data-native-dialog aria-labelledby="native-dialog-title">
+    <header class="native-dialog-heading"><div><p class="eyebrow" data-i18n="downloads.eyebrow">Seu próximo campo de batalha</p><h2 id="native-dialog-title"></h2></div><button class="native-close" type="button" data-close-downloads aria-label="Fechar" data-i18n-attr="aria-label=viewer.close">×</button></header>
+    <div data-native-content></div>
+    <p class="fine-print" data-i18n="downloads.source">Arquivos publicados no repositório original do GitHub. Nenhuma conta é necessária para baixar.</p>
+  </dialog>
+
+  <dialog class="viewer" data-viewer aria-label="Captura ampliada" data-i18n-attr="aria-label=viewer.label">
+    <button class="viewer-close" type="button" aria-label="Fechar" data-i18n-attr="aria-label=viewer.close" data-viewer-close>×</button>
+    <img alt="" data-viewer-image>
+    <p data-viewer-caption></p>
+  </dialog>
+</body>
+</html>

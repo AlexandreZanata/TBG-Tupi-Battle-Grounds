@@ -27,7 +27,7 @@ pub(crate) fn period(rules: &Ruleset, kind: UnitKind, tier: u8, branch: u8) -> O
             | Ability::SolarBarrier { period, .. }
             | Ability::BloodyRend { period, .. }
             | Ability::SwampBelly { period, .. }
-            | Ability::DoubleMayhem { period, .. }
+            | Ability::ShoulderPistol { period, .. }
             | Ability::CrowMark { period, .. } => Some(period.max(1)),
             _ => None,
         })
@@ -79,7 +79,10 @@ fn primary(state: &MatchState, u: &Unit) -> Option<u32> {
     if crate::solar_sentinel::parameters(state, u).is_some() {
         return crate::solar_sentinel::target(state, u, None);
     }
-    let range = state.stats_of(u).range + crate::weaver::extra_range(state, u);
+    let range = crate::rattle_tick::parameters(state, u).map_or_else(
+        || state.stats_of(u).range + crate::weaver::extra_range(state, u),
+        |(_, range, _)| range,
+    );
     state
         .units
         .iter()

@@ -1,0 +1,23 @@
+[Unit]
+Description=Promote attested compatible TBG landing and safe public admin
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/etc/tbg/static-deploy.enabled
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/var/lib/tbg-deploy
+ExecStart=/usr/bin/python3 /opt/tbg/deploy/static_pull.py --apply
+TimeoutStartSec=5min
+UMask=0077
+Nice=15
+IOSchedulingClass=idle
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/srv/tbg/landing /srv/tbg/admin /var/lib/tbg-deploy
+Environment=GH_CONFIG_DIR=/var/lib/tbg-deploy/gh
+Environment=XDG_CACHE_HOME=/var/lib/tbg-deploy/cache
+Environment=XDG_DATA_HOME=/var/lib/tbg-deploy/data

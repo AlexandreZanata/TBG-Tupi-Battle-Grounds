@@ -8,13 +8,56 @@ use bevy::{
 #[cfg(tbg_desktop)]
 mod arenas;
 #[cfg(tbg_desktop)]
+mod focus;
+#[cfg(tbg_desktop)]
+mod polish;
+#[cfg(tbg_desktop)]
+mod polish_live;
+#[cfg(tbg_desktop)]
+mod polish_motion;
+#[cfg(tbg_desktop)]
 mod reserve;
+// P73 synthetic fixtures exist only where their "LOCAL VISUAL FIXTURE" label
+// is also compiled, never in a plain debug build.
+#[cfg(feature = "ui-acceptance")]
+mod social;
 #[cfg(tbg_desktop)]
 mod training;
+#[cfg(tbg_desktop)]
+mod troops;
 
 pub fn plugin(app: &mut App) {
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_focus").is_some() {
+        focus::plugin(app);
+        return;
+    }
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_motion").is_some() {
+        polish_motion::plugin(app);
+        return;
+    }
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_polish_live").is_some() {
+        polish_live::plugin(app);
+        return;
+    }
+    #[cfg(tbg_desktop)]
+    if crate::config::url_param("capture_polish").is_some() {
+        polish::plugin(app);
+        return;
+    }
     if crate::config::url_param("capture").is_some() {
+        #[cfg(tbg_desktop)]
+        if crate::config::url_param("capture_panel").as_deref() == Some("troops") {
+            troops::plugin(app);
+            return;
+        }
         app.add_systems(Update, capture);
+        #[cfg(feature = "ui-acceptance")]
+        if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-")) {
+            social::plugin(app);
+        }
         #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("training") {
             training::plugin(app);
@@ -130,7 +173,19 @@ fn capture(
     #[cfg(tbg_desktop)] match_info: Res<crate::sync::MatchInfo>,
     #[cfg(tbg_desktop)] loading: Res<crate::ui::native_loading::Status>,
     mut started: Local<bool>,
+    #[cfg(tbg_desktop)] mut ready_at: Local<Option<f32>>,
 ) {
+    #[cfg(tbg_desktop)]
+    {
+        if !loading.boot_ready || loading.scene_waiting {
+            *ready_at = None;
+            return;
+        }
+        let ready = *ready_at.get_or_insert(time.elapsed_secs());
+        if time.elapsed_secs() - ready < 0.8 {
+            return;
+        }
+    }
     let delay = crate::config::url_param("capture_after")
         .and_then(|s| s.parse::<f32>().ok())
         .unwrap_or(8.0)

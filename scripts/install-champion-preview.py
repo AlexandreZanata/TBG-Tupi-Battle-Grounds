@@ -24,10 +24,12 @@ def main():
     binary = args.binary.resolve()
     subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'crates', 'Cargo.toml',
                     'Cargo.lock', 'scripts/install-champion-preview.py'], cwd=ROOT, check=True)
+    subprocess.run(['git', 'merge-base', '--is-ancestor',
+                    '0b56bb4e34d0e8df15fc628c428f46338bd65b67', 'HEAD'], cwd=ROOT, check=True)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
     info = json.loads(subprocess.check_output([str(binary), '--build-info'], text=True))
-    if (info['source_commit'] != commit or info['version'] != '0.1.1-cc.1'
-            or info['protocol'] != 32 or info['target'] != 'x86_64-unknown-linux-gnu'):
+    if (info['source_commit'] != commit or info['version'] != '0.1.2-cc.1'
+            or info['protocol'] != 33 or info['target'] != 'x86_64-unknown-linux-gnu'):
         raise SystemExit('Build the committed CC17 Linux source with TBG_SOURCE_COMMIT before installation')
     prefix = args.prefix.expanduser().resolve()
     slot = prefix / 'opt/tupi-battle-grounds-champion-preview' / f"{info['version']}-{commit[:12]}"
@@ -37,6 +39,7 @@ def main():
     manifest = {'schema': 1, **info, 'binary_sha256': sha(binary),
                 'cargo_lock_sha256': sha(ROOT / 'Cargo.lock'), 'assets': files,
                 'scope': 'CC17 local Practice/Training preview; online roster is not activated',
+                'laboratory_baseline': 'PR44 / 0b56bb4e34d0e8df15fc628c428f46338bd65b67',
                 'data_directory': str(data)}
     if slot.exists():
         existing = slot / 'preview-build.json'

@@ -14,10 +14,10 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const SPROUT: Color = Color::srgb(0.74, 0.88, 0.56);
-pub const CURE: Color = Color::srgb(0.4, 0.95, 0.85);
-const WICKER: Color = Color::srgb(0.66, 0.5, 0.28);
-const GLASS: Color = Color::srgb(0.7, 0.9, 0.95);
+const SPROUT: Color = OGRE_SKIN;
+pub const CURE: Color = TURQUOISE;
+const WICKER: Color = TRIM;
+const GLASS: Color = SKY;
 
 /// The flask in the right hand (weapon space): the cure leaves from here.
 pub const FLASK: Vec3 = Vec3::new(0.0, 0.07, 0.03);
@@ -45,7 +45,7 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             Body(Chest),
             Box(t.x * 0.7, t.y * 0.7, 0.02),
             LINEN,
-            [0.0, t.y * 0.4, t.z * 0.42],
+            [0.0, t.y * 0.4, t.z * 0.62],
         ),
         part(
             Body(Hips),
@@ -54,6 +54,11 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
             [0.0, -0.1, t.z * 0.55],
         ),
     ]);
+    for arm in [UpperArmL, UpperArmR] {
+        v.push(
+            part(Body(arm), Ball(0.075), HOOD_GREEN, [0.0, -0.045, 0.0]).scale([1.0, 1.25, 0.85]),
+        );
+    }
     head(&mut v, &p, f);
     hands(&mut v, f);
     back(&mut v, f);
@@ -133,6 +138,13 @@ fn hands(v: &mut Vec<PartSpec>, f: Form) {
 /// The herb basket, the glowing still or the cauldron.
 fn back(v: &mut Vec<PartSpec>, f: Form) {
     let b = Secondary(Spring::Back);
+    for (x, sign) in [(-0.13, -1.0), (0.13, 1.0)] {
+        v.push(
+            part(b, Ball(0.065), LEAF, [x, 0.22, -0.10])
+                .scale([0.55, 1.7, 0.45])
+                .rot([0.0, 0.0, -25.0 * sign]),
+        );
+    }
     match (f.a, f.b, f.t2) {
         (true, _, true) => v.extend([
             part(b, Ball(0.13), GLASS, [0.0, 0.0, -0.1]),

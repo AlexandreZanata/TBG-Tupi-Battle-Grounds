@@ -57,13 +57,13 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         part(
             Body(Chest),
             Lathe(BELL),
-            if f.a { IVORY } else { CHARCOAL },
+            if f.a { IVORY } else { VIOLET },
             [0.0, 0.02, 0.0],
         ),
         part(
             Body(Chest),
             Ring(0.025, 0.28, 360.0),
-            IVORY,
+            BRASS,
             [0.0, 0.045, 0.0],
         ),
         part(Body(Head), Ball(0.15), DARK, [0.0, 0.0, 0.005]).scale([1.25, 0.95, 0.55]),
@@ -114,6 +114,13 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
         );
         v.push(
             part(Prop(n), Cone(0.035, 0.15), IVORY, [s * 0.10, -0.29, 0.0]).rot([180.0, 0.0, 0.0]),
+        );
+    }
+    for s in [-1.0, 1.0] {
+        v.push(
+            part(Body(Chest), Ball(0.18), IVORY, [s * 0.12, 0.27, -0.03])
+                .scale([0.85, 0.32, 1.1])
+                .rot([0.0, 0.0, s * -20.0]),
         );
     }
     crests(&mut v, f);

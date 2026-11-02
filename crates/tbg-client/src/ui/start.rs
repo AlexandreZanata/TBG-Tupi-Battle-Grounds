@@ -70,7 +70,9 @@ fn probe_on_load(
         return;
     }
     // D-97: account sessions come from the auth coordinator, never a saved key.
-    if config::load_token().is_some() || config::url_param("probe").is_some() {
+    // BR-LV06/BR-AP03: fresh guests also need a lobby connection for presence
+    // and an explicit directed invitation. Never replace an active mode link.
+    if matches!(*link, MatchLink::Idle) {
         *link = MatchLink::Net(Box::new(NetLink::new(Mode::Probe, time.elapsed_secs_f64())));
     }
 }

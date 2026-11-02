@@ -71,11 +71,11 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
             &DOOR,
             Transform::from_translation(DOOR_AT).with_scale(Vec3::splat(door_scale)),
         ),
-        whole(&ROOF).lost(1),
+        whole(&ROOF).lost(7),
     ];
     // The Mint's presses take the storage corners.
     if !form.b() {
-        p.push(whole(&GOODS).lost(2));
+        p.push(whole(&GOODS).lost(14));
     }
     if form.a() {
         p.push(whole(&BANDS));
@@ -87,16 +87,16 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
         p.extend(mint(0.62));
         p.push(
             piece(&GEAR, along_x(0.8, 0.62, -0.1))
-                .lost(2)
+                .lost(14)
                 .moving(Motion::Turn(0.9)),
         );
     }
     if form == Form::B2 {
         p.extend(mint(-0.62));
-        p.push(whole(&FORGE).lost(1));
+        p.push(whole(&FORGE).lost(7));
         p.push(
             piece(&MEDALLION, t(0.0, 2.72, 0.0))
-                .lost(1)
+                .lost(7)
                 .moving(Motion::Turn(0.8)),
         );
     }
@@ -108,7 +108,7 @@ fn mint(x: f32) -> [Piece; 2] {
     [
         piece(&PRESS, t(x, 0.0, 0.98)),
         piece(&LEVER, t(x, 1.02, 0.98))
-            .lost(2)
+            .lost(14)
             .moving(Motion::Turn(1.6)),
     ]
 }

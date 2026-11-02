@@ -89,7 +89,12 @@ impl Lobby {
             return;
         }
         let ticket = self.rematches.remove(i);
-        self.pair(ticket.players, MatchMode::Challenge, true, Listing::Private);
+        self.pair_origin(
+            ticket.players,
+            MatchMode::Challenge,
+            Listing::Private,
+            tbg_core::protocol::MatchOrigin::Rematch,
+        );
     }
 
     /// P39 (BR-P03): a login takeover moves a seat to a new session token.

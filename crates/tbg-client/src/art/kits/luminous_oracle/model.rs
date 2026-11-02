@@ -42,7 +42,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         &p,
         &body::Look {
             skin: NAVY,
-            cloth: IVORY,
+            cloth: VIOLET,
             legs: NAVY,
             boots: GOLD,
         },
@@ -51,7 +51,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         part(
             Body(Hips),
             Frustum(0.15, 0.24, 0.40),
-            if f.b { NAVY } else { IVORY },
+            if f.b { NAVY } else { VIOLET },
             [0.0, -0.13, 0.0],
         ),
         part(Body(Head), Cone(0.22, 0.35), IVORY, [0.0, 0.12, -0.04]),
@@ -84,6 +84,12 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         )
         .glow(),
     ]);
+    v.push(part(
+        Body(Hips),
+        Ring(0.018, 0.165, 300.0),
+        GOLD,
+        [0.0, 0.04, 0.0],
+    ));
     for s in [-1.0, 1.0] {
         v.push(part(
             Body(Chest),

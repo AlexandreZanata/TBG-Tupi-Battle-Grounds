@@ -124,7 +124,7 @@ fn cuff(
         part(
             Body(fore),
             Frustum(0.15, 0.13, 0.23),
-            GUNMETAL,
+            RUST,
             [0.0, -0.10, 0.0],
         ),
         part(Body(fore), Cyl(0.16, 0.045), BRASS, [0.0, 0.02, 0.0]),
@@ -138,7 +138,7 @@ fn cuff(
         part(Body(hand), Box(0.29, 0.07, 0.12), BRASS, [0.0, -0.04, 0.19]),
     ]);
     for x in [-0.09, 0.09] {
-        v.push(part(Body(fore), Cyl(0.022, 0.24), IRON, [x, -0.09, 0.13]));
+        v.push(part(Body(fore), Cyl(0.026, 0.24), STEEL, [x, -0.09, 0.13]));
         v.push(part(Body(hand), Ball(0.029), BRASS, [x, -0.04, 0.25]));
     }
     if f.a {

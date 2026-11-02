@@ -43,13 +43,8 @@ fn cache_headers() -> [(axum::http::HeaderName, &'static str); 1] {
 
 /// P47: nginx caches JSON for an hour unless the route says otherwise (A9),
 /// so the live routes send their own `Cache-Control` on every reply.
-fn no_cache_headers() -> [(axum::http::HeaderName, &'static str); 1] {
+pub(crate) fn no_cache_headers() -> [(axum::http::HeaderName, &'static str); 1] {
     [(header::CACHE_CONTROL, "no-cache, max-age=0")]
-}
-
-/// P47: `/api/online` rows may be a few seconds old, never more.
-fn short_cache_headers() -> [(axum::http::HeaderName, &'static str); 1] {
-    [(header::CACHE_CONTROL, "public, max-age=5")]
 }
 
 pub(crate) fn limited(app: &AppState, ip: IpAddr) -> bool {
@@ -143,6 +138,7 @@ pub async fn player(
     let recent: Vec<_> = stats
         .recent
         .iter()
+        .filter(|_| app.config.history_public)
         .map(|m| {
             json!({
                 "date": m.date, "opponent": m.opponent, "result": m.result,
@@ -190,6 +186,8 @@ pub async fn live(
     let snap = app.live.borrow().clone();
     let matches: Vec<Value> = snap.matches.iter().map(live_match_json).collect();
     let body = json!({
+        "revision": snap.revision, "updated_unix": snap.updated_unix,
+        "complete": snap.complete, "stale": snap.stale,
         "online": {
             "players": snap.counts.players, "accounts": snap.counts.accounts,
             "in_battle": snap.counts.in_battle, "watching": snap.counts.watching,
@@ -217,17 +215,36 @@ pub async fn online(
             .into_response();
     }
     let snap = app.live.borrow().clone();
-    let (offset, limit) = paging(query);
-    let rows: Vec<Value> = snap
-        .accounts
+    let Ok(params) = crate::presence::DirectoryQuery::parse(query.as_deref()) else {
+        return (
+            StatusCode::BAD_REQUEST,
+            no_cache_headers(),
+            Json(json!({"error":"invalid_query"})),
+        )
+            .into_response();
+    };
+    let (offset, limit) = (params.offset, params.limit);
+    let filtered: Vec<_> = snap.accounts.iter().filter(|r| params.matches(r)).collect();
+    let rows: Vec<Value> = filtered
         .iter()
+        .copied()
         .skip(offset)
         .take(limit)
         .map(online_row_json)
         .collect();
     (
-        short_cache_headers(),
-        Json(json!({ "total": snap.accounts.len(), "rows": rows })),
+        [(
+            header::CACHE_CONTROL,
+            if snap.complete && !snap.stale {
+                "public, max-age=5"
+            } else {
+                "no-store"
+            },
+        )],
+        Json(json!({ "total": filtered.len(), "rows": rows,
+            "next_offset": (offset + rows.len() < filtered.len()).then_some(offset + rows.len()),
+            "revision": snap.revision, "updated_unix": snap.updated_unix,
+            "complete": snap.complete, "stale": snap.stale })),
     )
         .into_response()
 }
@@ -254,5 +271,5 @@ fn live_seat_json(seat: &LiveSeat) -> Value {
 }
 
 fn online_row_json(row: &OnlineRow) -> Value {
-    json!({ "name": row.name, "rating": row.rating, "status": row.status.slug() })
+    json!({ "name": row.name, "rating": row.rating, "status": row.status.slug(), "invitable": row.invitable, "slot": row.slot })
 }

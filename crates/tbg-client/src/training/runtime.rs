@@ -60,6 +60,10 @@ fn apply(
                 // Arena pages and this shared editor use the same saved choice.
                 catalog.arena = crate::config::load_arena();
                 catalog.tab = tab;
+                if tab == super::Tab::Practice {
+                    // Arena cards update storage after this persistent Catalog was created.
+                    catalog.arena = crate::config::load_arena();
+                }
                 shell.panel = Panel::Troops;
                 shell.dirty = true;
                 next.set(GameState::Menu);
@@ -122,10 +126,7 @@ fn viewer(action: Action, c: &mut Catalog) -> bool {
         Action::Tab(tab) => c.tab = tab,
         Action::Rotate(d) => c.yaw += f32::from(d) * 0.25,
         Action::Zoom(d) => c.zoom = (c.zoom + f32::from(d) * 0.1).clamp(0.6, 1.7),
-        Action::Motion => {
-            c.reduced = !c.reduced;
-            crate::config::save_reduced_motion(c.reduced);
-        }
+        Action::Motion => c.reduced = !c.reduced,
         _ => return false,
     }
     true

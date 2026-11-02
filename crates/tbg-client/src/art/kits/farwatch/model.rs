@@ -14,19 +14,19 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Proportions, Socket},
 };
 
-const COAT: Color = Color::srgb(0.27, 0.34, 0.4);
-const WOUND: Color = Color::srgb(0.9, 0.18, 0.2);
+const COAT: Color = FIELD_SLATE;
+const WOUND: Color = BLOOD_THREAD;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.0, tier);
-    p.arm = 0.2;
+    p.arm = 0.23;
     p
 }
 
 /// The bolt's tip on the crossbow (weapon socket space).
 pub const MUZZLE: Vec3 = Vec3::new(0.0, 0.05, 0.58);
 /// Where the left hand holds the fore-stock.
-pub const FORE: Vec3 = Vec3::new(0.02, 0.0, 0.3);
+pub const FORE: Vec3 = Vec3::new(0.02, 0.0, 0.14);
 
 pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     let f = Form::of(tier, branch);
@@ -41,6 +41,15 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
     body::humanoid(&mut v, &p, &look);
     body::tunic(&mut v, &p, COAT, DARK_LEATHER, LEATHER);
     body::bracers(&mut v, &p, DARK_LEATHER);
+    v.push(
+        part(
+            Body(Chest),
+            Frustum(0.13, 0.18, 0.065),
+            LINEN,
+            [0.0, p.torso.y * 0.97, 0.0],
+        )
+        .scale([1.0, 1.0, 0.75]),
+    );
     let fletch = if f.b { WOUND } else { LINEN };
     v.extend(gear::quiver(DARK_LEATHER, fletch));
     head(&mut v, &p, f);
@@ -148,6 +157,17 @@ fn crossbow(v: &mut Vec<PartSpec>, f: Form) {
         part(w, Ring(0.008, 0.05, 360.0), trim, [0.0, 0.0, 0.6]).rot([90.0, 0.0, 0.0]),
         part(w, Cyl(0.04, 0.04), trim, [0.04, 0.02, 0.02]).rot([0.0, 0.0, 90.0]),
     ]);
+    for side in [-1.0, 1.0] {
+        v.push(
+            part(
+                w,
+                Box(0.12, 0.045, 0.04),
+                IRON,
+                [side * span * 0.48, 0.05, 0.455],
+            )
+            .rot([0.0, side * 25.0, 0.0]),
+        );
+    }
     if f.a {
         let top = if f.t2 { GOLD } else { BRASS };
         v.push(part(w, Cyl(0.025, 0.3), top, [0.0, 0.13, 0.25]).rot([90.0, 0.0, 0.0]));

@@ -24,8 +24,11 @@ pub mod kits;
 mod legacy;
 pub mod melee;
 pub mod mesh;
+mod overhead;
 #[cfg(test)]
 mod ownership_tests;
+#[cfg(test)]
+mod p71_tests;
 pub mod palette;
 pub mod presentation;
 pub mod rig;
@@ -41,6 +44,9 @@ use rig::{Proportions as BodyPlan, NODE_COUNT};
 pub const FORMS: [(u8, u8); 5] = [(0, 0), (1, 0), (2, 0), (1, 1), (2, 1)];
 
 pub struct FigureForm {
+    pub overhead: f32,
+    pub occupancy: Vec2,
+    pub body_radius: f32,
     pub plan: BodyPlan,
     pub meshes: [Option<Handle<Mesh>>; NODE_COUNT],
     pub triangles: usize,
@@ -122,7 +128,9 @@ fn build_library(
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
             if let Some(kit) = kits::kit(kind) {
-                let form = native_form((kit.figure)(tier, branch), &mut meshes);
+                let mut form = native_form((kit.figure)(tier, branch), &mut meshes);
+                (form.overhead, form.occupancy, form.body_radius) =
+                    overhead::height(&form, &meshes, kind, tier, branch);
                 info!(
                     "figure {kind:?} {tier}/{branch} (kit): {} triangles, {} glow joints",
                     form.triangles,
@@ -272,6 +280,9 @@ fn build_library(
             forms.insert(
                 (kind, tier, branch),
                 FigureForm {
+                    overhead: 2.3,
+                    occupancy: Vec2::new(-0.4, 0.4),
+                    body_radius: 0.4,
                     plan: spec.plan,
                     meshes: handles,
                     triangles,
@@ -331,6 +342,9 @@ fn native_form(spec: figure::FigureSpec, meshes: &mut Assets<Mesh>) -> FigureFor
     let handles = built.map(|m| m.map(|m| meshes.add(m)));
     let glow = glow.map(|m| m.map(|m| meshes.add(m)));
     FigureForm {
+        overhead: 2.3,
+        occupancy: Vec2::new(-0.4, 0.4),
+        body_radius: 0.4,
         plan: spec.plan,
         meshes: handles,
         triangles,

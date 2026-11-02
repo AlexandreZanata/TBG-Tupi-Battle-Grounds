@@ -64,8 +64,6 @@ pub(super) enum Motion {
     Puff { vel: Vec3, size: f32 },
     /// Thrown with `vel` under gravity, tumbling, resting on the ground.
     Debris { vel: Vec3, size: f32 },
-    /// Keeps the exact segment length while its thickness fades.
-    Segment { size: Vec3 },
     /// Pops to `size` and vanishes (muzzle flashes, blast cores).
     Flash { size: f32 },
     /// Grows out of the ground to `size` (its own +Y), holds, sinks back.
@@ -86,14 +84,23 @@ pub(crate) struct Vfx {
 
 pub(crate) mod completion;
 mod effects;
+pub(crate) mod flame;
 pub mod impacts;
 pub mod shots;
+pub(crate) mod wear;
 pub use effects::{evolve, heal, puff, sparks, splash, synergy};
+pub use flame::profane_flame;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(completion::plugin)
         .add_systems(PreStartup, init)
-        .add_systems(Update, (animate, shots::fly));
+        .add_systems(Update, (animate, shots::fly))
+        .add_systems(
+            PostUpdate,
+            flame::animate
+                .after(bevy::transform::TransformSystems::Propagate)
+                .before(bevy::camera::visibility::VisibilitySystems::CheckVisibility),
+        );
 }
 
 fn init(
@@ -286,7 +293,6 @@ fn pose(v: &Vfx, k: f32) -> Transform {
                 .with_rotation(spin * v.rotation)
                 .with_scale(Vec3::splat(size * (fade * 2.0).min(1.0)))
         }
-        Motion::Segment { size } => at.with_scale(Vec3::new(size.x, size.y, size.z * fade)),
         Motion::Flash { size } => {
             let pop = (k / 0.25).min(1.0);
             at.with_scale(Vec3::splat(
@@ -310,34 +316,4 @@ fn pose(v: &Vfx, k: f32) -> Transform {
                 .with_scale(Vec3::new(size, size * (0.3 + fade), size))
         }
     }
-}
-
-/// One cheap tapered flame plus an exact ground danger strip, including on Low.
-pub fn profane_flame(commands: &mut Commands, a: &VfxAssets, start: f32, end: f32) {
-    let length = (end - start).abs();
-    let dir = if end >= start { Vec3::X } else { -Vec3::X };
-    spawn_turned(
-        commands,
-        &a.spike,
-        &a.green,
-        (
-            Vec3::new(start, 0.55, 0.0),
-            Quat::from_rotation_arc(Vec3::Y, dir),
-        ),
-        Motion::Segment {
-            size: Vec3::new(0.20, length, 0.22),
-        },
-        (0.0, 0.20),
-    );
-    spawn(
-        commands,
-        &a.chip,
-        &a.green,
-        Vec3::new((start + end) * 0.5, 0.025, 0.0),
-        Motion::Segment {
-            size: Vec3::new(length, 0.018, 0.12),
-        },
-        0.0,
-        0.28,
-    );
 }

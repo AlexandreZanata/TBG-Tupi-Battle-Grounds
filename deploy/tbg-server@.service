@@ -13,6 +13,8 @@ Conflicts=tbg-server.service
 User=tbg
 Group=tbg
 WorkingDirectory=/var/lib/tbg
+# Provisioned browser origin; no credentials belong in this file.
+EnvironmentFile=-/etc/tbg/server.env
 # TBG_ADDR, TBG_GENERATION and TBG_SERVER_BUILD of this slot.
 EnvironmentFile=/etc/tbg/slot-%i.env
 Environment=TBG_SLOT=%i

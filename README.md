@@ -1,15 +1,15 @@
 # TBG — Tupi Battle Grounds
 
 An open-source, browser-first, real-time 1v1 strategy game. Buy units from
-a rotating three-offer shop, watch them fight automatically on a single
+a rotating five-offer Shop, watch them fight automatically on a single
 lane, evolve them along branching paths, and stack faction synergies until
 one `Stronghold` falls.
 
-> **Status: MVP feature-complete, validated locally; not public yet.** Practice
-> vs bot, online quick match and private rooms, 8 units with evolutions and
-> synergies, code-built 3D figurines, effects, and sound all run in the
-> browser. Pending: validation on the production VPS, human playtests, and the
-> license file — see [ROADMAP](docs/ROADMAP.md).
+> **Status: beta integration, not balance-approved.** The shared Bevy desktop UI
+> runs on Linux and in the browser. The integrated roster has 46 conventional
+> champions and eight Arenas. Official origins and release/validation limits are
+> documented in [RELEASES](docs/RELEASES.md); email recovery, mobile, native signed
+> updater activation and real Windows visual acceptance remain separate work.
 
 ## The game
 
@@ -18,7 +18,7 @@ one `Stronghold` falls.
 | Mode | Live 1v1, both players act at the same time, 3–4 minute matches |
 | Board | One `BattleLine`; units walk and fight on their own |
 | Economy | Regenerating `Energy` spent on units and evolutions |
-| Shop | Three offers, refilled on purchase, rotating on a shared timer |
+| Shop | Five offers, refilled on purchase, rotating on a shared timer |
 | Depth | Branching `Evolution`, faction `Synergy`, `Tank`/`DPS`/`Support`/`Ranged`/`Control` roles |
 | Factions | Humans, Undead, Machines, Plants |
 | Fairness | Server-authoritative; free-to-play with cosmetics only, never pay-to-win |
@@ -47,22 +47,31 @@ archive/           legacy Unity/Nakama/Python project (read-only)
 Requires `rustup`; `rust-toolchain.toml` selects stable and installs the
 `wasm32-unknown-unknown` target.
 
+Use [DEVELOPMENT](docs/DEVELOPMENT.md) and [VALIDATION](docs/VALIDATION.md) to choose
+minimal checks per front and targeted tests at consolidation. Full suites are
+explicitly requested, not the default. [RELEASES](docs/RELEASES.md) covers protected
+automatic publication and [SCALING](docs/SCALING.md) covers measured capacity.
+
 ```bash
-cargo fmt --all -- --check
-cargo clippy --workspace -- -D warnings
-cargo test --workspace
-cargo check -p tbg-client -p tbg-core --target wasm32-unknown-unknown
+cargo fmt -p tbg-server -- --check
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 cargo check --locked -p tbg-server --bin tbg-server
 ```
 
 ## Run it locally
 
 ```bash
-cargo install --locked trunk                       # once
-(cd crates/tbg-client && trunk build --release)    # build the browser client
-TBG_AUTH_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 TBG_STATIC_DIR=crates/tbg-client/dist cargo run --release -p tbg-server
+# Once, if Trunk is not installed:
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 cargo install --locked trunk --version 0.22.1
+# Build under the shared lock; exit 75 means defer, never retry automatically.
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 bash -euc '(cd crates/tbg-client && trunk build); cargo build --locked -p tbg-server'
+TBG_AUTH_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 \
+  TBG_DB=/tmp/tbg-development.sqlite3 TBG_STATIC_DIR=crates/tbg-client/dist target/debug/tbg-server
 ```
 
-Open `http://localhost:8080/` (or `http://<your LAN IP>:8080/` on a phone).
+Open `http://localhost:8080/` in a desktop browser.
 URL options: `?autoplay=practice|quick` (a bot plays for you), `?lag=300`
 (simulated latency), `?gallery` / `?gallery=N` (art review), `?stress=30`,
 `?shadows=0`, `?room=CODE`. Bot load test:

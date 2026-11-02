@@ -1,0 +1,6 @@
+{
+  "schema": 1,
+  "server": { "protocol": 31, "contract": "w31-r6-097385fee9a10b0f" },
+  "linux": { "state": "pending" },
+  "windows": { "state": "pending" }
+}

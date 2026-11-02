@@ -4,7 +4,7 @@ mod arcanas;
 mod arenas;
 #[cfg(tbg_desktop)]
 mod catalog;
-mod data;
+pub(crate) mod data;
 mod header;
 mod input;
 mod live;
@@ -38,6 +38,8 @@ pub enum Panel {
     Strongholds,
     Arcanas,
     Live,
+    History,
+    PlayerProfile,
     Kit,
     Troops,
     PatchNotes,
@@ -45,6 +47,7 @@ pub enum Panel {
 #[derive(Component, Clone, Copy, Debug)]
 pub enum Action {
     Open(Panel),
+    Social(super::social::Action),
     Catalog(crate::training::Action),
     RoomInput,
     Stronghold(tbg_core::StrongholdKind),
@@ -134,8 +137,19 @@ fn room_text(
     mut events: MessageReader<TextEntered>,
     mut form: NonSendMut<ActiveForm>,
     mut queue: ResMut<super::ActionQueue>,
+    mut data: ResMut<data::Data>,
+    mut shell: ResMut<Shell>,
 ) {
-    for event in events.read().filter(|e| e.kind == TextKind::Room) {
+    for event in events.read() {
+        if event.kind == TextKind::PlayerSearch {
+            data.search(event.value.clone());
+            shell.dirty = true;
+            textform::close(&mut form);
+            continue;
+        }
+        if event.kind != TextKind::Room {
+            continue;
+        }
         let raw = event.value.trim().to_ascii_uppercase();
         if raw.len() == 5 && raw.bytes().all(|b| b.is_ascii_alphanumeric()) {
             if let Ok(code) = raw.as_bytes().try_into() {
@@ -158,7 +172,13 @@ fn render(
     ranking: Res<Ranking>,
     lang: Res<Lang>,
     catalog: Res<crate::training::Catalog>,
-    sounds: Res<Sounds>,
+    (sounds, social, history, rematch, time): (
+        Res<Sounds>,
+        Res<super::social::Social>,
+        Res<super::history::History>,
+        Res<crate::sync::RematchInfo>,
+        Res<Time>,
+    ),
     #[cfg(tbg_desktop)] volume: Res<bevy::audio::GlobalVolume>,
     form: NonSend<ActiveForm>,
     roots: Query<Entity, With<Root>>,
@@ -258,6 +278,24 @@ fn render(
             }
             if home {
                 lobby::spawn(root, &shell, &data, &account, &assets, *lang);
+                if social.outgoing.is_some() || !social.incoming.is_empty() {
+                    root.spawn((
+                        Node {
+                            position_type: PositionType::Absolute,
+                            right: px(24),
+                            top: percent(18),
+                            width: px(420),
+                            max_height: percent(66),
+                            overflow: Overflow::scroll_y(),
+                            flex_direction: FlexDirection::Column,
+                            ..default()
+                        },
+                        BackgroundColor(kit::PANEL),
+                    ))
+                    .with_children(|p| {
+                        super::social::cards(p, &social, *lang, time.elapsed_secs_f64())
+                    });
+                }
                 return;
             }
             #[cfg(not(tbg_desktop))]
@@ -281,8 +319,19 @@ fn render(
                 ..default()
             };
             #[cfg(tbg_desktop)]
-            let body = page_node();
+            let body = {
+                let mut node = page_node();
+                if shell.panel == Panel::Troops {
+                    node.overflow = Overflow::clip();
+                }
+                node
+            };
             root.spawn((body, scroll, Body)).with_children(|body| {
+                #[cfg(feature = "ui-acceptance")]
+                if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-"))
+                {
+                    body.spawn(kit::muted(lang.key("p73.fixture"), 16.));
+                }
                 #[cfg(tbg_desktop)]
                 if let Some(version) = &data.update {
                     body.spawn(button(
@@ -309,7 +358,14 @@ fn render(
                     Panel::Arenas => arenas::spawn(body, &assets, *lang),
                     Panel::Strongholds => strongholds::spawn(body, &assets, *lang),
                     Panel::Arcanas => arcanas::spawn(body, &shell, &assets, *lang, compact),
-                    Panel::Live => live::spawn(body, &data, *lang),
+                    Panel::Live => {
+                        live::spawn(body, &data, *lang);
+                        super::social::cards(body, &social, *lang, time.elapsed_secs_f64());
+                        super::history::rematch_card(body, &rematch, *lang);
+                        super::history::players(body, &data, &account, *lang);
+                    }
+                    Panel::History => super::history::spawn(body, &history, *lang),
+                    Panel::PlayerProfile => super::history::profile(body, &history, *lang),
                     Panel::Troops => {
                         crate::training::catalog::spawn(body, &catalog, &assets, *lang, {
                             let mut positions = [Vec2::ZERO; 2];

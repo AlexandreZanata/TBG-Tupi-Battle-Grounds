@@ -1,7 +1,7 @@
 # Themed arenas — visual edition
 
-The four environments below extend the P16-A arena with original procedural
-assets. All five arenas use the same island outline, camera, Stronghold
+The seven themed environments below extend the P16-A arena with original procedural
+assets. All eight arenas use the same island outline, camera, Stronghold
 positions and BattleLine dimensions. Verdant Forest is the unchanged default.
 This catalog describes presentation. Current arena assignment and modifiers belong to [ARENAS-G](phases/ARENAS-gameplay.md); the visual refinement changes none of those rules.
 
@@ -18,6 +18,9 @@ After `trunk serve` in `crates/tbg-client`, open:
 - [Volcanic Forge / arena 3](http://localhost:8000/?arena=volcanic).
 - [Ancient Ruins / arena 4](http://localhost:8000/?arena=ruins).
 - [Storm Valley / arena 5](http://localhost:8000/?arena=storm).
+- [Celestial Citadel / arena 6](http://localhost:8000/?arena=celestial).
+- [Clockwork Bastion / arena 7](http://localhost:8000/?arena=clockwork).
+- [Desert Relics / arena 8](http://localhost:8000/?arena=desert).
 
 `&stress=30&measure` adds the existing 30-unit visual workload and WebGL
 diagnostics. It is a rendering scene, not a simulated match. For the live
@@ -29,8 +32,8 @@ reload to inspect another environment.
 
 These local preferences never select an authoritative match arena, are not
 sent over the network, and need not match another client's preference.
-Online arena assignment, selection menus and gameplay modifiers require a
-separate rules/protocol phase.
+Online assignment and symmetric gameplay modifiers are active under
+[GAME-DESIGN §12](GAME-DESIGN.md#12-arenas-active-values-proposed-arenas-g-d-55).
 
 ## Frozen Tundra
 
@@ -86,6 +89,35 @@ overcast light replaces the warm forest key. There are no lightning
 flashes, screen shake, rain particles or dynamic weather simulation.
 
 ![Storm Valley](media/arena-reference-refinement/storm-after-1920.jpg)
+
+## Celestial Citadel
+
+Ivory masonry, gold capitals and azure crystals frame a rear citadel with a
+stepped entrance and two ceremonial guardians. Low crystal sanctuaries and
+stone planters dress the foreground; waterfall islets extend the blue seascape.
+The pale limestone lane keeps the existing dimensions and Stronghold positions.
+**Proposed symmetric effect:** troop movement +8%.
+
+## Clockwork Bastion
+
+A dark iron foundry with brass battlements, furnace grilles and coastal cranes
+stands behind a quiet slate BattleLine. Three slowly counter-rotating gears
+reuse the existing mesh/material pipeline, carry ArenaScene ownership and do
+not allocate per frame. Low boilers and riveted supply blocks stay off the lane.
+**Proposed symmetric tradeoff:** troop attack speed +8%, movement −5%.
+
+## Desert Relics
+
+Warm sandstone columns and turquoise inlays form a stepped temple, flanked by
+pointed obelisks and guardians. Coastal palms, pottery and sandstone outcrops
+replace conifers and cold rock. The blue sea contrasts with the muted sand lane.
+**Proposed symmetric effect:** base Energy regeneration −8%, added beside
+Interest before fractional accumulation.
+
+The three original owner reference PNGs are copied only to ignored local
+`.local/arena-references/` with a SHA-256 manifest. They are not textures, scene
+backgrounds, tracked assets or GitHub uploads. New catalog thumbnails are
+exported from the real game renderer. See [the implementation report](phases/ARENAS-three-new.md).
 
 ## Asset production and integration
 

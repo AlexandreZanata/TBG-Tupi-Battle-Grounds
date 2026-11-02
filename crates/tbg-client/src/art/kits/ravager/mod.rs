@@ -42,11 +42,30 @@ fn turn(p: &mut Pose, n: Node, xyz: [f32; 3]) {
 fn pose(m: &Moment, p: &mut Pose) {
     p.fill((Vec3::ZERO, Vec3::ZERO));
     match m.clip {
-        Clip::Idle | Clip::Victory => {
-            let scrape = (m.clock * 1.7).sin() * 4.0;
-            turn(p, Body(ForearmL), [0.0, scrape, 0.0]);
-            turn(p, Body(ForearmR), [0.0, -scrape, 0.0]);
+        Clip::Idle => {
+            let scrape = (m.clock * 1.7).sin();
+            turn(
+                p,
+                Body(ForearmL),
+                [-3.0 * scrape.max(0.0), scrape * 5.0, 0.0],
+            );
+            turn(
+                p,
+                Body(ForearmR),
+                [3.0 * scrape.min(0.0), -scrape * 5.0, 0.0],
+            );
+            tools::set(p, Head, [3.0, scrape * 5.0, 0.0]);
             tools::shift(p, Chest, [0.0, (m.clock * 1.8).sin() * 0.008, 0.0]);
+        }
+        Clip::Victory => {
+            let flare = 0.5 - 0.5 * (m.t / 0.8 * std::f32::consts::TAU).cos();
+            for (j, s) in [(UpperArmL, 1.0), (UpperArmR, -1.0)] {
+                tools::set(p, j, [-24.0 * flare, -s * 15.0 * flare, s * 14.0 * flare]);
+            }
+            tools::set(p, ForearmL, [-18.0 * flare, 12.0 * flare, 0.0]);
+            tools::set(p, ForearmR, [-18.0 * flare, -12.0 * flare, 0.0]);
+            tools::set(p, Head, [-12.0 * flare, 0.0, 0.0]);
+            tools::shift(p, Chest, [0.0, 0.025 * flare, -0.03 * flare]);
         }
         Clip::Walk => crawl(m, p),
         Clip::AttackMelee | Clip::AttackRanged => strike(m, p),
@@ -104,13 +123,17 @@ fn crawl(m: &Moment, p: &mut Pose) {
         turn(p, lower, [-step.max(0.0) * 25.0, 0.0, 0.0]);
     }
     tools::shift(p, Hips, [0.0, (phase * 2.0).cos() * 0.012, 0.0]);
+    tools::set(p, Chest, [3.0, phase.sin() * -3.5, 0.0]);
+    tools::set(p, Head, [-2.0, phase.sin() * 3.5, 0.0]);
 }
 
 fn strike(m: &Moment, p: &mut Pose) {
     let coil = tools::hold(m.t, [0.0, 0.18, 0.22, 0.30]);
     let cut = tools::hold(m.t, [0.22, 0.30, 0.37, 0.60]);
     let (hook, blade, s) = (UpperArmL, UpperArmR, 1.0);
-    tools::set(p, hook, [-12.0 * coil, -25.0 * coil * s, -10.0 * coil * s]);
+    tools::set(p, hook, [-18.0 * coil, -25.0 * coil * s, -10.0 * coil * s]);
+    tools::set(p, ForearmR, [-12.0 * coil + 8.0 * cut, -8.0 * cut, 0.0]);
+    tools::set(p, Head, [8.0 * coil - 5.0 * cut, -8.0 * coil, 0.0]);
     tools::set(
         p,
         blade,

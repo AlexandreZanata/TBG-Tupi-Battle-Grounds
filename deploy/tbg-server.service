@@ -7,6 +7,8 @@ Wants=network-online.target
 User=tbg
 Group=tbg
 WorkingDirectory=/var/lib/tbg
+# Provisioned browser origin; no credentials belong in this file.
+EnvironmentFile=-/etc/tbg/server.env
 Environment=TBG_ADDR=127.0.0.1:8080
 Environment=TBG_DB=/var/lib/tbg/tbg.sqlite3
 ExecStart=/opt/tbg/bin/tbg-server

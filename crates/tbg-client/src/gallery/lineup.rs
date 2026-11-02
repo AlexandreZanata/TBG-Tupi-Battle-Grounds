@@ -29,7 +29,7 @@ pub fn spawn(
             let layout = Layout::Lineup(row, col);
             let pos = layout.position(portrait);
             let (root, mut animator) = spawn_one(commands, lib, unit, form, pos, material);
-            animator.preview = Some((clip, t));
+            animator.present(clip, t);
             let stage = commands
                 .spawn((
                     Mesh3d(lib.stage.clone()),

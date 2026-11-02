@@ -14,10 +14,10 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const ROBE: Color = Color::srgb(0.3, 0.22, 0.36);
-const RAG: Color = Color::srgb(0.2, 0.15, 0.24);
-pub const HEX: Color = Color::srgb(0.78, 0.48, 1.0);
-const PLAGUE: Color = Color::srgb(0.55, 0.85, 0.25);
+const ROBE: Color = VIOLET;
+const RAG: Color = DARK;
+pub const HEX: Color = RITUAL_VIOLET;
+const PLAGUE: Color = GLOW;
 /// Staff length (socket space, +Y).
 const STAFF: f32 = 1.0;
 
@@ -64,8 +64,8 @@ fn robe(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         .scale([1.0, 1.0, 0.85]),
         part(
             Body(Chest),
-            Box(t.x * 1.1, 0.12, t.z * 0.9),
-            RAG,
+            Frustum(t.x * 0.48, t.x * 0.65, 0.12),
+            if f.b { MOSS } else { RAG },
             [0.0, t.y * 0.95, -0.02],
         ),
     ]);
@@ -161,19 +161,33 @@ fn staff(v: &mut Vec<PartSpec>, f: Form) {
         ),
         part(
             w,
-            Ball(0.025 * s),
+            Ball(0.013 * s),
             HEX,
-            [x - 0.03 * s, y + 0.09, z + 0.09 * s],
+            [x - 0.03 * s, y + 0.09, z + 0.10 * s],
         )
         .glow(),
         part(
             w,
-            Ball(0.025 * s),
+            Ball(0.013 * s),
             HEX,
-            [x + 0.03 * s, y + 0.09, z + 0.09 * s],
+            [x + 0.03 * s, y + 0.09, z + 0.10 * s],
         )
         .glow(),
     ]);
+    for side in [-1.0, 1.0] {
+        v.push(part(
+            w,
+            Ball(0.027 * s),
+            DARK,
+            [x + side * 0.03 * s, y + 0.09, z + 0.075 * s],
+        ));
+    }
+    v.push(part(
+        w,
+        Box(0.045 * s, 0.018, 0.012),
+        DARK,
+        [x, y + 0.035, z + 0.10 * s],
+    ));
     if f.a {
         v.push(
             part(w, Ring(0.01, 0.13 * s, 360.0), HEX, [x, y + 0.08, z + 0.03])

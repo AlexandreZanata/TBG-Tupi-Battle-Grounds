@@ -12,6 +12,7 @@ different configuration.
 import glob
 from pathlib import Path
 import re
+import runpy
 import sys
 import tomllib
 
@@ -22,6 +23,8 @@ CORE = 'tbg-core'
 DEP_TABLES = ('dependencies', 'dev-dependencies', 'build-dependencies')
 PLAIN_PATH_DEP = {'path', 'features', 'version'}
 CARGO_TEST = re.compile(r'\bcargo\b.*\btest\b')
+# Required-lane and scope guards must agree on the workflow's job boundaries.
+workflow_jobs = runpy.run_path(str(ROOT/'scripts/ci-required-checks.py'))['workflow_jobs']
 
 
 def dependency_specs(manifest):
@@ -89,21 +92,29 @@ def expected_scopes(manifests):
 
 def workflow_scopes(text):
     """Job id -> TEST_SCOPE value, read line by line (no YAML dependency)."""
-    scopes, job, in_jobs = {}, None, False
-    for line in text.splitlines():
-        if re.match(r'^\s*#', line):
-            continue
-        if re.match(r'^\S', line):
-            in_jobs, job = line.startswith('jobs:'), None
-            continue
-        heading = re.match(r'^  ([A-Za-z0-9_-]+):\s*$', line)
-        if in_jobs and heading:
-            job = heading.group(1)
-            continue
-        scope = re.match(r'^\s+TEST_SCOPE:\s*(.+?)\s*$', line)
-        if in_jobs and job and scope:
+    scopes = {}
+    for job, body in workflow_jobs(text).items():
+        scope = re.search(r'^\s+TEST_SCOPE:\s*(.+?)\s*$', body, re.M)
+        if scope:
             scopes[job] = scope.group(1)
     return scopes
+
+
+def balance_preflight_problems(text):
+    """C5 runs first, then the unchanged full lab lane; neither may filter away coverage."""
+    commands = []
+    for line in workflow_jobs(text).get('balance', '').splitlines():
+        found = CARGO_TEST.search(line)
+        if found and '--no-run' not in line:
+            commands.append(line[found.start():].strip())
+    expected = [
+        'cargo --config .github/cargo-ci.toml test --locked $TEST_SCOPE --test contract '
+        'c5_every_tunable_number_is_registered -- --exact --test-threads=1',
+        'cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE',
+    ]
+    return [] if commands == expected else [
+        'balance: run the exact C5 preflight before the complete unfiltered test lane'
+    ]
 
 
 def problems(expected, text):
@@ -117,7 +128,7 @@ def problems(expected, text):
     issues += [f'cargo test without the checked scope: {line}' for line in commands if '$TEST_SCOPE' not in line]
     if not commands:
         issues.append('no cargo test invocation found')
-    return issues
+    return issues + balance_preflight_problems(text)
 
 
 def main():

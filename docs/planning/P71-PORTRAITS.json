@@ -1,0 +1,416 @@
+[
+  {
+    "unit": "Shieldbearer",
+    "asset": "crates/tbg-client/assets/battle/portraits/shieldbearer.webp",
+    "asset_sha256": "004b4701faeac51c01afd5e98af42d72f5b14b1a241fc9ffb85d8c9c05a14990",
+    "original": ".local/p71-evidence/portraits-clean-01/Shieldbearer.png",
+    "original_sha256": "9c20a7bad68fb8ca021a5d811510230b3679c3adcb512de1ef2e2317553b586e",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Archer",
+    "asset": "crates/tbg-client/assets/battle/portraits/archer.webp",
+    "asset_sha256": "112fd3f1f179906b3d20c074df1f41de1ba3b213145ef44595fdb5cbb2d6325d",
+    "original": ".local/p71-evidence/portraits-clean-01/Archer.png",
+    "original_sha256": "21bdcb04b3f4caeffdb88e89f9013c92866539f72220db2a2016b3915d500c67",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "BoneBrute",
+    "asset": "crates/tbg-client/assets/battle/portraits/bonebrute.webp",
+    "asset_sha256": "d978fd0a9f3d7177bf665ab0ceed6eb0bea7db8a0e0bf2c0c718c69de20ecf00",
+    "original": ".local/p71-evidence/portraits-clean-02/BoneBrute.png",
+    "original_sha256": "71bdc5015f5f0cf37c26e60532de9d869cc90e0e87665229af95e78e04d576bc",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Hexer",
+    "asset": "crates/tbg-client/assets/battle/portraits/hexer.webp",
+    "asset_sha256": "0dbba7f7a01e55129eb6bf51a226f361e4dd923095a26f0efb2d53fe1e6488d4",
+    "original": ".local/p71-evidence/portraits-clean-02/Hexer.png",
+    "original_sha256": "373098c6335b7f5a940e0fed9e1c0ea0c11139c9bc79a0f776cfb4f0429b0f7a",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Sawbot",
+    "asset": "crates/tbg-client/assets/battle/portraits/sawbot.webp",
+    "asset_sha256": "3a905a0893fc598fda2b1850bb444cc46c5d34ec916e6dc922c41438ee59088a",
+    "original": ".local/p71-evidence/portraits-clean-03/Sawbot.png",
+    "original_sha256": "d18810fca4bc02ba90790f5add91715b24a0e4a7fbdae0d0f8de38ceeed61348",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "SiegeWalker",
+    "asset": "crates/tbg-client/assets/battle/portraits/siegewalker.webp",
+    "asset_sha256": "86e752eabce4570939a42b7193a526555b17dbedaea2eac7eb142564513e9281",
+    "original": ".local/p71-evidence/portraits-ogre-bc8ef32/SiegeWalker.png",
+    "original_sha256": "5f373b478a274a6fef88b1194a3b8647d8cb660eec18bd9fc29b54eef5442446",
+    "source_commit": "bc8ef321fb1bfda4852ccf7d7e927c1ae945d5a1",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Bloomkeeper",
+    "asset": "crates/tbg-client/assets/battle/portraits/bloomkeeper.webp",
+    "asset_sha256": "37c9b7cbac610958d33d81624607c70e431af3f66270817c0df3f4c33e4d076b",
+    "original": ".local/p71-evidence/portraits-clean-04/Bloomkeeper.png",
+    "original_sha256": "bd9720fa8eec3e2212a88d82375e4fdd9f00ada4ce343c23e209dc17ccc1496a",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Rootcaller",
+    "asset": "crates/tbg-client/assets/battle/portraits/rootcaller.webp",
+    "asset_sha256": "37faccb929236c5cafe9d5b0e6e89da2f060ba503feb6c713452e496e3ee2d10",
+    "original": ".local/p71-evidence/portraits-clean-04/Rootcaller.png",
+    "original_sha256": "46e2c8e693fc1c3c352bd9bf9c8a07a719c6c32c124a4ed1cff30445b78f9d75",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Nester",
+    "asset": "crates/tbg-client/assets/battle/portraits/nester.webp",
+    "asset_sha256": "15a5ba9247fed823842410eb775563884f310221a7fb1995acf24ba5c0045ded",
+    "original": ".local/p71-evidence/portraits-clean-05/Nester.png",
+    "original_sha256": "c4fce5fd6f86d2f19547880b57b727e3a1f0cb4314797d7eaeb90484ddb05d1c",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Rampart",
+    "asset": "crates/tbg-client/assets/battle/portraits/rampart.webp",
+    "asset_sha256": "bf271b178e7b01c6cbeed804dc754e2fa475b51789fa3e4eb34b86345619b5a4",
+    "original": ".local/p71-evidence/portraits-clean-05/Rampart.png",
+    "original_sha256": "3f234874c3f1fdd3a15d883e1970a8d09885f8bc142badd5037d911b46a7e788",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Longaxe",
+    "asset": "crates/tbg-client/assets/battle/portraits/longaxe.webp",
+    "asset_sha256": "c785535a22b8d4f70223c934ecd49c1946d306a2959bd956146181b1e4c44561",
+    "original": ".local/p71-evidence/portraits-clean-06/Longaxe.png",
+    "original_sha256": "2d137ebcf2f752e61566936c844cd67a061792bbda40331734c3fc311d617641",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Farwatch",
+    "asset": "crates/tbg-client/assets/battle/portraits/farwatch.webp",
+    "asset_sha256": "a7f441c0d4507068482ec2dbc9b3958cbc2b09b7834cfac9c2ba96c5a8fade20",
+    "original": ".local/p71-evidence/portraits-clean-06/Farwatch.png",
+    "original_sha256": "98cf6e413f1d5ebcce47cdf50b90190c7ed903fe404621e041fc0817f0026503",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Bombard",
+    "asset": "crates/tbg-client/assets/battle/portraits/bombard.webp",
+    "asset_sha256": "72021504d8f1ffca9ba6ee5183f7b1efc9e0bf2f8452a4d1edbff571eb9708fe",
+    "original": ".local/p71-evidence/portraits-clean-07/Bombard.png",
+    "original_sha256": "9cd5d77db161aa9c8801aa4cdc43a1f0c9a20da0cfb13255943975d42bb17050",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Rotcap",
+    "asset": "crates/tbg-client/assets/battle/portraits/rotcap.webp",
+    "asset_sha256": "37db4b25e847d9d0c5464aa4310d621788803a50d5308e78e5df1bc304fa5d82",
+    "original": ".local/p71-evidence/portraits-clean-07/Rotcap.png",
+    "original_sha256": "fdddfdd7f65d32657ca067fe1679809c464faa4cc158cbbf54db1284c002ca4c",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "OldFinn",
+    "asset": "crates/tbg-client/assets/battle/portraits/oldfinn.webp",
+    "asset_sha256": "845d7a29e17a65fb6421f75a58bb0c58c99067ac90cad7442f2ef67bc811b85d",
+    "original": ".local/p71-evidence/portraits-clean-08/OldFinn.png",
+    "original_sha256": "9182605119f4f48d5725fadd46c286e576168209f3c09c5b52e370f1f0d70a9b",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "AntidoteBrewer",
+    "asset": "crates/tbg-client/assets/battle/portraits/antidotebrewer.webp",
+    "asset_sha256": "446080558ba40cd969dc5132d6d71697e9901caa85c437c56324882fa9f1be3d",
+    "original": ".local/p71-evidence/portraits-clean-08/AntidoteBrewer.png",
+    "original_sha256": "603845ef929402bebda7179b85e2b27b268803c9e285b539e76d642695eb8887",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Shatterback",
+    "asset": "crates/tbg-client/assets/battle/portraits/shatterback.webp",
+    "asset_sha256": "3084fdf1057f99dc70e3666209b65804aca43b99b4b3288374d6dad93a26fa18",
+    "original": ".local/p71-evidence/portraits-clean-09/Shatterback.png",
+    "original_sha256": "af2295d1f7dca8899e78c6dfe638eb32dd32373c42cc4c35e936f050724df115",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "BloodFurnace",
+    "asset": "crates/tbg-client/assets/battle/portraits/bloodfurnace.webp",
+    "asset_sha256": "57f7bdd9a10a14e5b8ca484eb6066186fd029c5d9c45cd4f359faec931882808",
+    "original": ".local/p71-evidence/portraits-clean-09/BloodFurnace.png",
+    "original_sha256": "36ec974b5ebc7a124ac5ff839b856349907d43fe888f5bd98230e515178c0bcf",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Bloodweaver",
+    "asset": "crates/tbg-client/assets/battle/portraits/bloodweaver.webp",
+    "asset_sha256": "2d0d33a6b06a503f952a2b55fc81721bee0d619963fcf5711f8370984d50af3c",
+    "original": ".local/p71-evidence/portraits-clean-10/Bloodweaver.png",
+    "original_sha256": "cf0776e6f3face5eddac2cb00fe43b059cbf5ad57835a5d99c8398df2a31a269",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Oilpress",
+    "asset": "crates/tbg-client/assets/battle/portraits/oilpress.webp",
+    "asset_sha256": "74a0dfa7a22bf2ca878ec733c999b68bf479026463ac6a5d25b48572635d1d9a",
+    "original": ".local/p71-evidence/portraits-clean-10/Oilpress.png",
+    "original_sha256": "53c2f22f5d05f5f6e3c1c1e40144145296bffae38d01259cbaa8da5a01536df3",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Drumguard",
+    "asset": "crates/tbg-client/assets/battle/portraits/drumguard.webp",
+    "asset_sha256": "aab93e498dcefe33fecc0edaba119f93cae28b9c080954f8de4573d48f7580e9",
+    "original": ".local/p71-evidence/portraits-clean-11/Drumguard.png",
+    "original_sha256": "86fc12dfb7ec333eadc012aa4a9ee25ba1f187234bc4765627c65ac26f04dccd",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Leechroot",
+    "asset": "crates/tbg-client/assets/battle/portraits/leechroot.webp",
+    "asset_sha256": "25c61e8fcbd65bd14e18bb342b443ae53d5723e5e3bfec8692d062b0bc4da9a3",
+    "original": ".local/p71-evidence/portraits-clean-11/Leechroot.png",
+    "original_sha256": "c8cfbb1ab3ccc3f1d93293f916941291c4f6343ab930bbd8ccb69ae184723db2",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "CargoCrab",
+    "asset": "crates/tbg-client/assets/battle/portraits/cargocrab.webp",
+    "asset_sha256": "2d76d42fbc1ecf72f6bcb5c01de3edcfb2eb8d96dd31a9864b0acbd57ef63a79",
+    "original": ".local/p71-evidence/portraits-clean-12/CargoCrab.png",
+    "original_sha256": "321b52ce4c3a72625c1fbe6554d0ab06943d019b1e97300faf9e0747bf750e26",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Puppetmaster",
+    "asset": "crates/tbg-client/assets/battle/portraits/puppetmaster.webp",
+    "asset_sha256": "6d88d54c41aad9e9ae89b841a0583bd032164109d44a47a6b61530c7ebf3c514",
+    "original": ".local/p71-evidence/portraits-clean-12/Puppetmaster.png",
+    "original_sha256": "1805ecb0af5e732a0f6b574353a091ffe64de8d7be70efb2079e0290f72457ba",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Smuggler",
+    "asset": "crates/tbg-client/assets/battle/portraits/smuggler.webp",
+    "asset_sha256": "1a0509a477e4a24e7e0e74ab04cb5704aaad7d6435811175c55e3317bc54e0cc",
+    "original": ".local/p71-evidence/portraits-clean-13/Smuggler.png",
+    "original_sha256": "e62b8d617ec39c881508eeae7b8dec8120ea834b42e67ffc1e45a6f0994ea9dd",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Bonehorn",
+    "asset": "crates/tbg-client/assets/battle/portraits/bonehorn.webp",
+    "asset_sha256": "9b365026e21d7d75a188c5fe9db6467e56f32589aa6ab884d8904bfeade24543",
+    "original": ".local/p71-evidence/portraits-clean-13/Bonehorn.png",
+    "original_sha256": "ed7d0dc1be39b3820cc288ad37e19096a6e6672dd10af5eaa22ce41b0670e5e4",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Ravager",
+    "asset": "crates/tbg-client/assets/battle/portraits/ravager.webp",
+    "asset_sha256": "ae1931d5f93ec452d9b87480827ab1ed7a3afd51d14aa06fb5383ece8b46bbc9",
+    "original": ".local/p71-evidence/portraits-clean-14/Ravager.png",
+    "original_sha256": "aaf4f0d9a2fb68017e1f8094c408130e44f1bcc54cc3b254d74838139de992bf",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Acidmaw",
+    "asset": "crates/tbg-client/assets/battle/portraits/acidmaw.webp",
+    "asset_sha256": "25e1c853f934a4bf2e39dd10892e8d021c03a7ffcdb93ab204b37631b0382aa4",
+    "original": ".local/p71-evidence/portraits-clean-14/Acidmaw.png",
+    "original_sha256": "78c9886d4ef4d84c3371d679ccbb7ab32baab487e723a2a35f7a5e6c6ac60372",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Whisperer",
+    "asset": "crates/tbg-client/assets/battle/portraits/whisperer.webp",
+    "asset_sha256": "5f0fc931468fa835c5b0df081618a700ff65b98e13a16a290b2a54034390844b",
+    "original": ".local/p71-evidence/portraits-clean-15/Whisperer.png",
+    "original_sha256": "11bb3eb361120874395a9e23a10770677a5b3a170fbe5b49a4469cead00673ef",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Bulwark",
+    "asset": "crates/tbg-client/assets/battle/portraits/bulwark.webp",
+    "asset_sha256": "c7ec4abfe550392d181415dd3bbfb6da1dc245ffc3c1221a86a3f19c3d81bd76",
+    "original": ".local/p71-evidence/portraits-clean-15/Bulwark.png",
+    "original_sha256": "3197eaaef1c9eda5b589f6ad699fb573e0a83832feb9aeb006c4f6013c1ec3db",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Demolisher",
+    "asset": "crates/tbg-client/assets/battle/portraits/demolisher.webp",
+    "asset_sha256": "c4ffaa6449831e2f7596694cde15b8a77cecc8dc8d791e260ab41cabf9a29fd2",
+    "original": ".local/p71-evidence/portraits-clean-16/Demolisher.png",
+    "original_sha256": "948030a66b50ec03264da4343dc7fff5e9b76e4a0ae86e673a7f9ddac0df1e7a",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Crowcaller",
+    "asset": "crates/tbg-client/assets/battle/portraits/crowcaller.webp",
+    "asset_sha256": "5b2ee6a09a4d6bfe5645ee677316c53fede64ed97c536e23b0917d52b43a2120",
+    "original": ".local/p71-evidence/portraits-clean-16/Crowcaller.png",
+    "original_sha256": "a66075c9e8f1f1e3cd8a859e5a798fb95d967e119058d8a9ea5a443471d8fdae",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Trigger",
+    "asset": "crates/tbg-client/assets/battle/portraits/trigger.webp",
+    "asset_sha256": "62064d2bda4610dfccdbc6ce1c9a143a482ac012ae71cc07bca18e24a115c8e7",
+    "original": ".local/p71-evidence/portraits-clean-17/Trigger.png",
+    "original_sha256": "b5ab72e74d93c4dacf3410d5516b54c9fcfa5d1773f7647341952403182479f6",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "RattleTick",
+    "asset": "crates/tbg-client/assets/battle/portraits/rattletick.webp",
+    "asset_sha256": "e6db9dcc7223569c19d90cd70eaac23b050449b24498f20805d8cfcc660757a6",
+    "original": ".local/p71-evidence/portraits-followup-fbc9983/RattleTick.png",
+    "original_sha256": "c1fc089dfad80fe169b896f4d2ac40e950045ab4bea628f79ba27774717e40a6",
+    "source_commit": "fbc998366e16d3c11c6648b671ba8364f839a4a6",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Capybara",
+    "asset": "crates/tbg-client/assets/battle/portraits/capybara.webp",
+    "asset_sha256": "c8d6d25ed45f8cb23804ea358d193ec09927495f33bf684102182ecb60df4f13",
+    "original": ".local/p71-evidence/portraits-clean-18/Capybara.png",
+    "original_sha256": "929a34e2eb2bfc51e1226f4ea052f4a21466b60d82037c326b10cde3c73cd25a",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Trident",
+    "asset": "crates/tbg-client/assets/battle/portraits/trident.webp",
+    "asset_sha256": "cd70a8a6e0315cac2dd17649e3e752a6349b77a50acdd5f47cfd1acca2be3d93",
+    "original": ".local/p71-evidence/portraits-clean-18/Trident.png",
+    "original_sha256": "b7643827c458fb65da2cf2d6869f5f325b983642a6690d693cb52d1445b34eb9",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "SolarSentinel",
+    "asset": "crates/tbg-client/assets/battle/portraits/solarsentinel.webp",
+    "asset_sha256": "6d5412c575439c3082356497351954f9dfb6abd7a5534280b805334affb8f285",
+    "original": ".local/p71-evidence/portraits-clean-19/SolarSentinel.png",
+    "original_sha256": "96d1a6c734a1cba4f20434803ea4c6cbb6345d13c6e2288c2e67e0a3acb1661b",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "LuminousOracle",
+    "asset": "crates/tbg-client/assets/battle/portraits/luminousoracle.webp",
+    "asset_sha256": "59f7a1823538699ce1d8b54d59063b5c7ea81a13f73599242c710c3bda3482dc",
+    "original": ".local/p71-evidence/portraits-clean-19/LuminousOracle.png",
+    "original_sha256": "8edb9d350795270a98b2330a6b8d3d21e316b0b0698a5ba0bcc2b5c187919780",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "CelestialArcher",
+    "asset": "crates/tbg-client/assets/battle/portraits/celestialarcher.webp",
+    "asset_sha256": "da8cf3619bfab3c88e7a292702c624a5794c70a1e2b9492a64afa1d9f26524ed",
+    "original": ".local/p71-evidence/portraits-clean-20/CelestialArcher.png",
+    "original_sha256": "faddc37b2d205bfb7984851216f7480ac4c57d4a44873170cf487d3636c9f443",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Justiciar",
+    "asset": "crates/tbg-client/assets/battle/portraits/justiciar.webp",
+    "asset_sha256": "4aef54c542f22acd5afdcce5b2232361b3d24f3c97a32e239c07f848d4293a25",
+    "original": ".local/p71-evidence/portraits-clean-20/Justiciar.png",
+    "original_sha256": "342afbc1c799de5db7d8da60d33b91d65c8b423630ba06b77c2a118894f0fc07",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Jawguard",
+    "asset": "crates/tbg-client/assets/battle/portraits/jawguard.webp",
+    "asset_sha256": "fb0d3e841f1bfd4866f3bf2637253851264a86a42b0d86050afeffe8c90b0dc7",
+    "original": ".local/p71-evidence/portraits-clean-21/Jawguard.png",
+    "original_sha256": "555d4f135dff4fc843bbda98af4baf8fd8c645bf0a085fc331db8ea9ed8fbc48",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Mantis",
+    "asset": "crates/tbg-client/assets/battle/portraits/mantis.webp",
+    "asset_sha256": "9ef9d331042e03ea5a93c6c492522aba9a72cbc1fc712b45de88d523ff2315a5",
+    "original": ".local/p71-evidence/portraits-clean-21/Mantis.png",
+    "original_sha256": "09cb29e3b8fc539f560ba568edf1bcf60ca3d90517f33412aaeeaf852477ef1a",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Hornet",
+    "asset": "crates/tbg-client/assets/battle/portraits/hornet.webp",
+    "asset_sha256": "47f3a3850033cd6bf78e13a95181048dafae9fdc6fde58cd1004ee430848ab3c",
+    "original": ".local/p71-evidence/portraits-followup-fbc9983/Hornet.png",
+    "original_sha256": "cd3cd7cc832b8014045c3323f6add9fc0162c25fae3b8c06a503a3935179702b",
+    "source_commit": "fbc998366e16d3c11c6648b671ba8364f839a4a6",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Weaver",
+    "asset": "crates/tbg-client/assets/battle/portraits/weaver.webp",
+    "asset_sha256": "b26207575a9bdecb3a8a870203576b2a529c16be485250d865e7642ff4c01867",
+    "original": ".local/p71-evidence/portraits-weaver-1c0b2df/Weaver.png",
+    "original_sha256": "5560aa9fa0eb0833b6aec83374f30426a01ba50188b547a93ef72537604e7b7a",
+    "source_commit": "1c0b2df8cc4f7ff9ae0657d24384f26ec68e0810",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "PyreWarden",
+    "asset": "crates/tbg-client/assets/battle/portraits/pyrewarden.webp",
+    "asset_sha256": "cd723da9ceda4d6e7f951bb0ea9aba10929b23567806dff6e2d061bbd7c9ea39",
+    "original": ".local/p71-evidence/portraits-clean-23/PyreWarden.png",
+    "original_sha256": "3cfa88c254bedb0c8f2b28aece2ce44f4b2a42816ab6d04f03f0f790684f9132",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  },
+  {
+    "unit": "Drillnest",
+    "asset": "crates/tbg-client/assets/battle/portraits/drillnest.webp",
+    "asset_sha256": "eed7ab24d61155bdf2f864bb7546b8284cb7dba695b2414071135c9b74d08e42",
+    "original": ".local/p71-evidence/portraits-clean-23/Drillnest.png",
+    "original_sha256": "6483db8d9ad58ef48874e3895a4f6b37dd0f9ce387a7cd328fc17e8fae344a5d",
+    "source_commit": "e257fbe972b6edf0f8be083093837368bfded8a5",
+    "derivative": "Existing native-portraits.py crop/trim/resize; authentic renderer capture"
+  }
+]

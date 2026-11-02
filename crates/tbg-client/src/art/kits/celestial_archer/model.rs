@@ -60,7 +60,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         &p,
         &body::Look {
             skin: SKIN,
-            cloth: IVORY,
+            cloth: NAVY,
             legs: NAVY,
             boots: GOLD,
         },
@@ -77,7 +77,7 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
         .rot([90.0, 0.0, 0.0]),
         part(
             Body(Chest),
-            Box(0.26, 0.23, 0.09),
+            Box(0.19, 0.23, 0.09),
             if f.b { NAVY } else { IVORY },
             [0.0, 0.14, 0.10],
         ),
@@ -104,6 +104,17 @@ pub fn spec(t: u8, b: u8) -> FigureSpec {
                 .rot([0.0, 0.0, -s * 45.0]),
             );
         }
+    }
+    for (j, s) in [(UpperArmL, 1.0), (UpperArmR, -1.0)] {
+        v.push(
+            part(
+                Body(j),
+                Box(0.085, 0.04, 0.15),
+                GOLD,
+                [s * 0.015, -0.015, 0.0],
+            )
+            .rot([0.0, 0.0, s * 12.0]),
+        );
     }
     if f.a {
         for j in [UpperArmL, UpperArmR] {

@@ -31,6 +31,8 @@ pub use messages::{QueueInfo, ViewGaps};
 
 #[derive(Resource, Default)]
 pub struct MatchInfo {
+    pub personal: Option<Box<tbg_core::protocol::PersonalMatchSummary>>,
+    pub history_save: Option<tbg_core::protocol::HistorySaveState>,
     pub result_id: Option<tbg_core::protocol::ResultId>,
     pub celebration: Option<tbg_core::celebration::CelebrationCast>,
     pub you: Option<Seat>,
@@ -56,6 +58,7 @@ pub struct MatchInfo {
 /// P39: the result-screen rematch offer and its request state.
 #[derive(Resource, Default)]
 pub struct RematchInfo {
+    pub opponent: String,
     /// Ignore offers already in flight when the player explicitly leaves.
     pub dismissed: bool,
     pub open: bool,

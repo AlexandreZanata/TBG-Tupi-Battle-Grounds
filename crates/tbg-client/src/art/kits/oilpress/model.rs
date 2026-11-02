@@ -14,9 +14,8 @@ use crate::art::{
     rig::{Joint::*, Node::Body, Node::Secondary, Proportions, Spring},
 };
 
-const HOT: Color = Color::srgb(1.0, 0.55, 0.18);
-const OIL: Color = Color::srgb(0.07, 0.06, 0.08);
-const AMBER: Color = Color::srgb(0.95, 0.62, 0.12);
+const HOT: Color = ORANGE;
+const OIL: Color = CHARCOAL;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(true, 0.95, tier);
@@ -55,19 +54,17 @@ fn boiler(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let r = t.x * 0.56;
     let depth = t.z / t.x;
     v.push(
-        part(
-            Body(Chest),
-            Cyl(r, t.y * 0.95),
-            GUNMETAL,
-            [0.0, t.y * 0.5, 0.0],
-        )
-        .scale([1.0, 1.0, depth * 1.1]),
+        part(Body(Chest), Cyl(r, t.y * 0.95), RUST, [0.0, t.y * 0.5, 0.0]).scale([
+            1.0,
+            1.0,
+            depth * 1.1,
+        ]),
     );
     for y in [0.12, 0.88] {
         v.push(
             part(
                 Body(Chest),
-                Cyl(r * 1.03, 0.045),
+                Cyl(r * 1.03, 0.055),
                 BRASS,
                 [0.0, t.y * y, 0.0],
             )
@@ -187,7 +184,7 @@ fn head(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
 
 fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let a = p.arm;
-    let plate = if f.b && f.t2 { OIL } else { IRON };
+    let plate = if f.b && f.t2 { OIL } else { STEEL };
     for (upper, fore, hand, s) in [
         (UpperArmL, ForearmL, HandL, 1.0f32),
         (UpperArmR, ForearmR, HandR, -1.0),
@@ -209,7 +206,13 @@ fn arms(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             ),
             part(Body(fore), Cyl(0.105, 0.03), BRASS, [0.0, -a * 0.2, 0.0]),
             part(Body(hand), Cyl(0.06, 0.08), IRON, [0.0, -0.03, 0.0]),
-            part(Body(hand), Box(0.24, 0.07, 0.24), plate, [0.0, -0.1, 0.0]),
+            part(Body(hand), Box(0.27, 0.07, 0.27), plate, [0.0, -0.1, 0.0]),
+            part(
+                Body(hand),
+                Box(0.20, 0.02, 0.20),
+                GUNMETAL,
+                [0.0, -0.055, 0.0],
+            ),
         ]);
         if f.a {
             v.push(

@@ -50,7 +50,6 @@ pub enum Impact {
     Mind,
     Piston,
     Plague,
-    Mayhem,
     Belly,
     Rend,
     Solar,
@@ -97,7 +96,6 @@ pub fn land(commands: &mut Commands, a: &VfxAssets, impact: Impact, at: Vec3, ar
         Impact::Champion(kind, t, b) => {
             super::completion::impact(commands, a, kind, t, b, at, area)
         }
-        Impact::Mayhem => blast(commands, a, at, area.splash.max(0.3), 0.55),
         Impact::Blast => blast(commands, a, at, area.splash.max(0.6), 1.0),
         Impact::GreatBlast => {
             blast(commands, a, at, area.splash.max(0.8), 1.45);

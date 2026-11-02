@@ -222,7 +222,7 @@ pub struct ArenaRule {
     pub atk_bp: i32,
     /// Extra base Energy regeneration in bp of the base rate, beside
     /// Interest's bp (BR-E05); the existing remainder keeps it exact.
-    pub regen_bp: u32,
+    pub regen_bp: i32,
     /// Sub-Energy off each player's first successful Evolution.
     pub first_evolve_discount: u32,
 }
@@ -236,8 +236,8 @@ impl ArenaRule {
     };
 }
 
-/// Indexed by `Arena::index()`: Forest, Tundra, Volcanic, Ruins, Storm.
-pub const ARENA_RULES: [ArenaRule; 5] = [
+/// Indexed by the append-only `Arena` identity (GAME-DESIGN §12).
+pub const ARENA_RULES: [ArenaRule; crate::Arena::ALL.len()] = [
     ArenaRule::NONE,
     ArenaRule {
         move_bp: -1_000,
@@ -253,6 +253,19 @@ pub const ARENA_RULES: [ArenaRule; 5] = [
     },
     ArenaRule {
         regen_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        move_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        move_bp: -500,
+        atk_bp: 800,
+        ..ArenaRule::NONE
+    },
+    ArenaRule {
+        regen_bp: -800,
         ..ArenaRule::NONE
     },
 ];
@@ -431,12 +444,10 @@ pub enum Ability {
         protection: u16,
         protection_ticks: u16,
     },
-    DoubleMayhem {
+    ShoulderPistol {
         period: u16,
-        radius: i32,
+        range: i32,
         damage: u16,
-        bp: u16,
-        ticks: u16,
     },
     None,
     /// Nester Hatch (values unchanged, still from the Hatch rule).
@@ -691,24 +702,22 @@ const fn crow(ticks: u16, cut_bp: u16, bonus_bp: u16) -> [Ability; 2] {
         Ability::None,
     ]
 }
-const fn mayhem(period: u16, radius: i32, bp: u16) -> [Ability; 2] {
+const fn pistol(period: u16, damage: u16) -> [Ability; 2] {
     [
-        Ability::DoubleMayhem {
+        Ability::ShoulderPistol {
             period,
-            radius,
-            damage: 60,
-            bp,
-            ticks: 30,
+            range: 3_000,
+            damage,
         },
         Ability::None,
     ]
 }
 const RATTLE_TICK_ABILITIES: [[Ability; 2]; 5] = [
-    mayhem(180, 1_200, 1_500),
-    mayhem(180, 1_200, 1_500),
-    mayhem(180, 1_200, 1_500),
-    mayhem(150, 1_200, 1_500),
-    mayhem(150, 1_500, 2_000),
+    pistol(30, 12),
+    pistol(30, 12),
+    pistol(30, 12),
+    pistol(24, 12),
+    pistol(24, 18),
 ];
 const fn belly(period: u16, radius: i32, bp: u16, protection: u16) -> [Ability; 2] {
     [
@@ -970,7 +979,6 @@ const BONEHORN_ABILITIES: [[Ability; 2]; 5] = [
 const NO_ABILITIES: [[Ability; 2]; 5] = [[Ability::None; 2]; 5];
 const HATCH_ABILITIES: [[Ability; 2]; 5] = [[Ability::Hatch; 2]; 5];
 const GUARD_ABILITIES: [[Ability; 2]; 5] = [[Ability::Guard; 2]; 5];
-const NOSTRONGHOLD_ABILITIES: [[Ability; 2]; 5] = [[Ability::NoStronghold; 2]; 5];
 const BLAST_ABILITIES: [[Ability; 2]; 5] = [[Ability::Blast { friendly: true }; 2]; 5];
 
 #[allow(clippy::too_many_arguments)] // one call per roster row reads as a table
@@ -1104,7 +1112,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
         FormDef { splash_add: 400, splash_bp: 6_000, ..form("Line Breaker") },
     ]),
     unit(UnitKind::Farwatch, "Farwatch", Humans, Ranged, 1_800,
-        [150, 70, 80, 12_000, 45, 0, 0], None, NOSTRONGHOLD_ABILITIES, [
+        [150, 70, 80, 12_000, 45, 0, 0], None, NO_ABILITIES, [
         FormDef { atk_bp: 2_500, ..form("Steady Hands") },
         FormDef { vs_below_bp: 10_000, vs_below_hp_bp: 3_500, ..form("Finishing Shot") },
         FormDef { on_hit: slow(2_500, 30), ..form("Crippling Arrow") },
@@ -1337,7 +1345,7 @@ pub const UNITS: [UnitDef; UNIT_KIND_COUNT] = [
     ]),
     unit(UnitKind::RattleTick,"Rattle & Tick",Humans,Tank,3_000,[900,60,38,900,28,0,0],None,RATTLE_TICK_ABILITIES,[FormDef{hp_bp:2_000,..form("Big Brother's Fury")},FormDef{dmg_bp:2_000,..form("Big Brother's Fury")},form("Tico's Tricks"),form("Tico's Tricks")]),
     unit(UnitKind::Capybara,"Capybara",Plants,Tank,3_000,[1_300,38,40,800,23,0,0],None,CAPYBARA_ABILITIES,[FormDef{hp_bp:2_000,..form("Stone Belly")},form("Stone Belly"),form("Swamp Wave"),form("Swamp Wave")]),
-    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,1_100,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
+    unit(UnitKind::Trident,"Trident",Plants,Tank,3_600,[1_250,55,40,2_000,28,0,0],None,TRIDENT_ABILITIES,[FormDef{hp_bp:2_000,..form("Ocean Fury")},form("Ocean Fury"),form("Bloody Tide"),form("Bloody Tide")]),
     unit(UnitKind::SolarSentinel,"Solar Sentinel",Celestials,Tank,3_000,[1_050,35,40,800,28,0,0],None,SOLAR_SENTINEL_ABILITIES,[FormDef{hp_bp:2_000,..form("Light Fortress")},form("Light Fortress"),form("Group Protection"),form("Group Protection")]),
     unit(UnitKind::LuminousOracle,"Luminous Oracle",Celestials,Control,2_400,[300,15,50,3_000,38,0,0],None,LUMINOUS_ORACLE_ABILITIES,[form("Restoring Light"),form("Restoring Light"),form("Sacred Aura"),form("Sacred Aura")]),
     unit(UnitKind::CelestialArcher,"Celestial Archer",Celestials,Ranged,2_400,[210,55,40,4_000,43,0,0],None,CELESTIAL_ARCHER_ABILITIES,[FormDef{dmg_bp:1_000,..form("Divine Precision")},FormDef{dmg_bp:1_000,..form("Divine Precision")},form("Celestial Mark"),form("Celestial Mark")]),

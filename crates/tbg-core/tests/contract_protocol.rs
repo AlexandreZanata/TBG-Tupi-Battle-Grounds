@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 32,
-        "CC-ID01 v32: appended local champion tags and public completion facts/windup schema"
+        PROTOCOL_VERSION, 33,
+        "CC-ID03: protocol 33 combines D-103 history with local champion facts; old tags remain stable"
     );
 }
 
@@ -315,6 +315,82 @@ fn d97_auth_variants_append_without_exposing_secrets_in_debug() {
         ClientMsg::Reauthenticate { access: secret },
     ] {
         assert!(!format!("{message:?}").contains("PRIVATE"));
+    }
+}
+
+#[test]
+fn v30_arena_identities_append_without_renumbering_the_original_five() {
+    // GAME-DESIGN §12, BR-AR01/06: identical assignment on every peer and reconnect.
+    use tbg_core::Arena;
+    let order = [
+        Arena::Forest,
+        Arena::Tundra,
+        Arena::Volcanic,
+        Arena::Ruins,
+        Arena::Storm,
+        Arena::Celestial,
+        Arena::Clockwork,
+        Arena::Desert,
+    ];
+    for (id, arena) in order.into_iter().enumerate() {
+        let bytes = postcard::to_allocvec(&arena).expect("Arena wire identity");
+        assert_eq!(bytes, [id as u8]);
+        assert_eq!(postcard::from_bytes::<Arena>(&bytes), Ok(arena));
+    }
+}
+
+#[test]
+fn p73_appends_participant_bound_messages_and_keeps_legacy_match_end_bytes() {
+    use tbg_core::protocol::{decode_server, HistorySaveState, PlayerInviteOutcome};
+    for (tag, message) in [
+        (
+            23,
+            ClientMsg::ChallengePlayer {
+                name: "Alpha".into(),
+            },
+        ),
+        (
+            24,
+            ClientMsg::AnswerPlayerChallenge {
+                id: [1; 16],
+                accept: true,
+            },
+        ),
+        (25, ClientMsg::CancelPlayerChallenge { id: [1; 16] }),
+        (26, ClientMsg::SetPlayerChallengesEnabled { enabled: false }),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_client(&bytes).unwrap(), message);
+    }
+    for (tag, message) in [
+        (
+            33,
+            ServerMsg::PlayerChallengeState {
+                enabled: false,
+                outgoing: None,
+                incoming: Vec::new(),
+            },
+        ),
+        (
+            34,
+            ServerMsg::PlayerChallengeResult {
+                id: Some([1; 16]),
+                outcome: PlayerInviteOutcome::Cancelled,
+            },
+        ),
+        (
+            36,
+            ServerMsg::MatchHistoryStatus {
+                result_id: [2; 16],
+                entry_id: [3; 16],
+                state: HistorySaveState::Pending,
+            },
+        ),
+    ] {
+        let bytes = encode(&message);
+        assert_eq!(bytes[0], tag);
+        assert_eq!(decode_server(&bytes).unwrap(), message);
     }
 }
 

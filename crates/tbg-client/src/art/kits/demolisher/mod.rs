@@ -31,15 +31,28 @@ fn pose(m: &Moment, p: &mut Pose) {
             moves::idle(m, p, &body, 0.6);
             tools::add(p, ForearmL, [(m.clock * 1.2).sin() * 4.0, 0.0, 0.0]);
             tools::add(p, ForearmR, [(m.clock * 1.2 + 1.7).sin() * 4.0, 0.0, 0.0]);
+            tools::set(p, UpperArmL, [-6.0, 0.0, 12.0]);
+            tools::set(p, UpperArmR, [-6.0, 0.0, -12.0]);
+            tools::add(p, Head, [-5.0, 6.0 * (m.clock * 0.5).sin(), 0.0]);
         }
-        Clip::Walk => moves::walk(m, p, 9.0, 4.0),
+        Clip::Walk => {
+            moves::walk(m, p, 9.0, 4.0);
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            tools::set(p, UpperArmL, [-10.0 + 10.0 * step, 0.0, 15.0]);
+            tools::set(p, UpperArmR, [-10.0 - 10.0 * step, 0.0, -15.0]);
+            tools::set(p, ForearmL, [-10.0, 0.0, 0.0]);
+            tools::set(p, ForearmR, [-10.0, 0.0, 0.0]);
+        }
         Clip::AttackMelee | Clip::AttackRanged => {
-            moves::strike(m, p, &body, THRUST, 1.2);
-            tools::add(
-                p,
-                UpperArmL,
-                [-15.0 * tools::hold(m.t, [0.0, 0.15, 0.25, 0.5]), 0.0, 0.0],
-            );
+            let load = tools::hold(m.t, [0.0, 0.16, 0.23, 0.30]);
+            let drive = tools::hold(m.t, [0.23, 0.30, 0.38, 0.62]);
+            tools::set(p, UpperArmR, [-35.0 - 48.0 * drive, 0.0, -12.0]);
+            tools::set(p, ForearmR, [-65.0 * load - 8.0 * drive, 0.0, 0.0]);
+            tools::set(p, UpperArmL, [-18.0, 0.0, 18.0]);
+            tools::set(p, ForearmL, [-30.0, 0.0, 0.0]);
+            tools::set(p, Chest, [7.0 * drive, -9.0 * load + 12.0 * drive, 0.0]);
+            tools::face(p, m.aim, Vec3::ZERO);
+            tools::plant(p, &body, tools::stance(&body, 1.35, 0.07));
         }
         Clip::Hit => moves::hit(m, p, 0.5),
         Clip::Death => moves::death(m, p, &body, Fall::Kneel),
@@ -48,7 +61,16 @@ fn pose(m: &Moment, p: &mut Pose) {
             moves::evolve(m, p, &body, Power::Raise);
             slam(p, m.t, 0.5);
         }
-        Clip::Victory => moves::victory(m, p, &body, Cheer::Both),
+        Clip::Victory => {
+            let pump = (m.t / 0.8 * std::f32::consts::TAU).sin();
+            tools::set(p, UpperArmL, [-25.0 - 35.0 * pump.max(0.0), 0.0, 22.0]);
+            tools::set(p, UpperArmR, [-25.0 - 35.0 * (-pump).max(0.0), 0.0, -22.0]);
+            tools::set(p, ForearmL, [-20.0 - 20.0 * pump.max(0.0), 0.0, 0.0]);
+            tools::set(p, ForearmR, [-20.0 - 20.0 * (-pump).max(0.0), 0.0, 0.0]);
+            tools::set(p, Head, [-6.0, 8.0 * pump, 0.0]);
+            tools::set(p, Chest, [4.0, 0.0, 3.0 * pump]);
+            tools::plant(p, &body, tools::stance(&body, 1.4, 0.0));
+        }
         Clip::Cast => slam(p, m.t, 1.0),
     }
     if let Some(t) = m.special {

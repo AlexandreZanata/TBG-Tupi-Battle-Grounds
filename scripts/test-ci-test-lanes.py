@@ -27,6 +27,7 @@ GOOD_WORKFLOW = textwrap.dedent('''\
         env:
           TEST_SCOPE: -p tbg-balance --features tbg-core/training
         steps:
+          - run: cargo --config .github/cargo-ci.toml test --locked $TEST_SCOPE --test contract c5_every_tunable_number_is_registered -- --exact --test-threads=1
           - run: cargo --config .github/cargo-ci.toml test --locked --no-fail-fast $TEST_SCOPE
       wasm:
         steps:
@@ -127,6 +128,23 @@ class WorkflowDrift(unittest.TestCase):
     def test_a_workflow_without_cargo_test_fails(self):
         text = '\n'.join(line for line in GOOD_WORKFLOW.splitlines() if 'cargo --config' not in line)
         self.assertIn('no cargo test invocation found', LANES.problems(EXPECTED, text))
+
+    def test_missing_or_late_balance_preflight_fails(self):
+        preflight = next(line for line in GOOD_WORKFLOW.splitlines() if 'c5_every_tunable' in line)
+        full = GOOD_WORKFLOW.splitlines()[GOOD_WORKFLOW.splitlines().index(preflight) + 1]
+        for changed in [GOOD_WORKFLOW.replace(preflight + '\n', ''),
+                        GOOD_WORKFLOW.replace(preflight + '\n' + full, full + '\n' + preflight)]:
+            self.assertTrue(any('exact C5 preflight' in issue for issue in LANES.problems(EXPECTED, changed)))
+
+    def test_preflight_cannot_omit_exact_selection_or_bypass_feature_scope(self):
+        for changed in [GOOD_WORKFLOW.replace(' --exact', ''),
+                        GOOD_WORKFLOW.replace('$TEST_SCOPE --test contract', '-p tbg-balance --test contract')]:
+            self.assertNotEqual(LANES.problems(EXPECTED, changed), [])
+
+    def test_full_balance_lane_cannot_skip_the_contract_after_preflight(self):
+        changed = GOOD_WORKFLOW.replace('--no-fail-fast $TEST_SCOPE\n',
+                                         '--no-fail-fast $TEST_SCOPE -- --skip c7_planted_imbalances\n')
+        self.assertTrue(any('unfiltered test lane' in issue for issue in LANES.problems(EXPECTED, changed)))
 
     def test_scopes_outside_jobs_are_ignored(self):
         text = 'env:\n  TEST_SCOPE: --workspace\n' + GOOD_WORKFLOW

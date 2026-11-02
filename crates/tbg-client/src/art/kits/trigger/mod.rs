@@ -42,12 +42,17 @@ fn pose(m: &Moment, p: &mut Pose) {
     match m.clip {
         Clip::Idle => {
             moves::idle(m, p, &body, 0.6);
-            p[Prop(Socket::WeaponR).index()].0.z = (m.clock * 1.8).sin() * 18.0;
+            let check = tools::hold((m.clock * 0.25).rem_euclid(1.0), [0.10, 0.26, 0.38, 0.62]);
+            p[Prop(Socket::WeaponR).index()].0.z = 22.0 * check;
+            tools::add(p, Head, [6.0 * check, -10.0 * check, 0.0]);
         }
         Clip::Walk => {
             moves::walk(m, p, 6.0, 4.0);
             tools::add(p, FootL, [8.0, 0.0, 0.0]);
             tools::add(p, FootR, [8.0, 0.0, 0.0]);
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            tools::add(p, Chest, [0.0, 3.0 * step, -2.0 * step]);
+            tools::add(p, Head, [-3.0, -4.0 * step, 0.0]);
         }
         Clip::AttackRanged | Clip::AttackMelee | Clip::Cast => tools::set(
             p,
@@ -79,7 +84,16 @@ fn pose(m: &Moment, p: &mut Pose) {
             p[Secondary(Spring::HeadGear).index()].0.x =
                 30.0 * tools::hold(m.t, [0.0, 0.2, 0.5, 0.9]);
         }
-        Clip::Victory => moves::victory(m, p, &body, Cheer::Both),
+        Clip::Victory => {
+            p.fill((Vec3::ZERO, Vec3::ZERO));
+            let t = m.t.rem_euclid(0.8);
+            let flourish = tools::hold(t, [0.0, 0.14, 0.52, 0.78]);
+            tools::set(p, Head, [-4.0 * flourish, 7.0 * flourish, 0.0]);
+            p[Secondary(Spring::HeadGear).index()].0.z = -5.0 * flourish;
+            p[Prop(Socket::WeaponR).index()].0.x = 360.0 * tools::window(t, 0.16, 0.48);
+            p[Prop(Socket::OffhandL).index()].0.x = -360.0 * tools::window(t, 0.23, 0.55);
+            tools::plant(p, &body, tools::stance(&body, 1.25, 0.04));
+        }
     }
     if m.clip != Clip::Death {
         arms(m, p, &body);
@@ -100,13 +114,32 @@ fn arms(m: &Moment, p: &mut Pose, body: &crate::art::rig::Proportions) {
         } else {
             0.0
         };
-        let raised = if firing && primary { 1.0 } else { cross };
+        let check = if m.clip == Clip::Idle && !left {
+            tools::hold((m.clock * 0.25).rem_euclid(1.0), [0.10, 0.26, 0.38, 0.62])
+        } else {
+            0.0
+        };
+        let victory = if m.clip == Clip::Victory {
+            tools::hold(m.t.rem_euclid(0.8), [0.0, 0.14, 0.52, 0.78])
+        } else {
+            0.0
+        };
+        let draw = tools::hold(m.t, [0.0, 0.12, 0.25, 0.60]);
+        let raised = if firing && primary {
+            draw
+        } else {
+            cross.max(check)
+        };
         tools::reach(
             p,
             left,
             Vec3::new(
-                if left { 0.18 } else { -0.18 },
-                0.02 + 0.13 * raised,
+                if left {
+                    0.18 + 0.08 * victory
+                } else {
+                    -0.18 - 0.08 * victory
+                },
+                0.02 + 0.13 * raised + 0.12 * victory,
                 0.12 + 0.15 * raised - 0.055 * recoil - 0.035 * cross,
             ),
             Some(Quat::IDENTITY),

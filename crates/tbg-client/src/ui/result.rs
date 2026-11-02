@@ -15,7 +15,13 @@ pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Result), spawn)
         .add_systems(
             Update,
-            (count_rating, hide_for_challenge, update_rematch).run_if(in_state(GameState::Result)),
+            (
+                count_rating,
+                hide_for_challenge,
+                update_rematch,
+                update_history_status,
+            )
+                .run_if(in_state(GameState::Result)),
         );
 }
 
@@ -31,7 +37,13 @@ struct RematchButton;
 #[derive(Component)]
 struct HideForChallenge;
 
-fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, lang: Res<Lang>) {
+fn spawn(
+    mut commands: Commands,
+    info: Res<MatchInfo>,
+    stats: Res<MatchStats>,
+    lang: Res<Lang>,
+    link: NonSend<crate::link::MatchLink>,
+) {
     // P47: a watcher reads the result as a bystander, not as a seat.
     let (title, reason) = match info.outcome {
         Some(o) if info.spectating => {
@@ -61,16 +73,33 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
         None => (lang.t(Msg::ResultOver), None),
     };
     let celebrating = crate::celebration::total(&info).is_some();
-    let secs = info.last_tick / TICK_HZ;
+    let secs = info
+        .personal
+        .as_ref()
+        .and_then(|s| s.combat_ticks)
+        .unwrap_or_else(|| {
+            info.last_tick
+                .saturating_sub(tbg_core::content::RUNNING_START)
+        })
+        / TICK_HZ;
     let duration = lang
         .t(Msg::ResultDuration)
         .replace("{time}", &format!("{}:{:02}", secs / 60, secs % 60))
         .replace("{opponent}", &info.opponent);
+    let measured = |value: Option<u32>| {
+        value.map_or_else(|| lang.key("p73.unavailable_metrics"), |n| n.to_string())
+    };
+    let (purchases, evolutions) = if let Some(summary) = &info.personal {
+        (summary.purchases, summary.evolutions)
+    } else if matches!(*link, crate::link::MatchLink::Local(_)) {
+        (Some(stats.bought), Some(stats.evolutions))
+    } else {
+        (None, None)
+    };
     let summary = lang
-        .t(Msg::ResultSummary)
-        .replace("{units}", &stats.bought.to_string())
-        .replace("{evolutions}", &stats.evolutions.to_string())
-        .replace("{damage}", &stats.damage_dealt.to_string());
+        .key("p73.result_summary")
+        .replace("{purchases}", &measured(purchases))
+        .replace("{evolutions}", &measured(evolutions));
     let mut root = commands.spawn((
         screen(if celebrating {
             JustifyContent::FlexEnd
@@ -111,6 +140,10 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
             BackgroundColor(PANEL),
         ))
         .with_children(|panel| {
+            #[cfg(feature = "ui-acceptance")]
+            if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-")) {
+                panel.spawn(label(&lang.key("p73.fixture"), 14.));
+            }
             panel.spawn(label(title, if celebrating { 24. } else { 40. }));
             if let Some(reason) = reason {
                 panel.spawn(label(reason, if celebrating { 12. } else { 16. }));
@@ -142,6 +175,7 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
                 HideForChallenge,
             ));
             panel.spawn((label("", 18.0), Node::default(), RematchLabel));
+            panel.spawn((label("", 14.), HistoryStatusLabel));
             panel
                 .spawn(Node {
                     flex_direction: if celebrating {
@@ -163,6 +197,16 @@ fn spawn(mut commands: Commands, info: Res<MatchInfo>, stats: Res<MatchStats>, l
                     buttons.spawn((
                         button(lang.t(Msg::ResultPlay), UiAction::PlayAgain, 220.),
                         HideForChallenge,
+                    ));
+                    buttons.spawn(button(
+                        &lang.key("p73.players"),
+                        UiAction::OpenPlayers,
+                        220.,
+                    ));
+                    buttons.spawn(button(
+                        &lang.key("p73.my_history"),
+                        UiAction::OpenMyHistory,
+                        220.,
                     ));
                     buttons.spawn(button(lang.t(Msg::ResultMenu), UiAction::ToMenu, 220.));
                 });
@@ -205,7 +249,7 @@ fn hide_for_challenge(info: Res<MatchInfo>, mut nodes: Query<&mut Node, With<Hid
     }
 }
 
-/// P39: the rematch button and its state, only for a Challenge result.
+/// BR-AP05: offer state is independent from the original match mode and its rating.
 #[allow(clippy::type_complexity)]
 fn update_rematch(
     info: Res<MatchInfo>,
@@ -217,24 +261,25 @@ fn update_rematch(
         Query<&mut Text>,
     )>,
 ) {
-    let (label, button_text, button_visible) = if !info.challenge {
-        ("", "", false)
-    } else if !rematch.open {
-        let text = match rematch.closed {
-            Some(true) => lang.t(Msg::ResultDeclined),
-            Some(false) => lang.t(Msg::ResultExpired),
-            None => lang.t(Msg::ResultPreparing),
+    let (label, button_text, button_visible) =
+        if info.spectating || (!rematch.open && rematch.closed.is_none()) {
+            ("", "", false)
+        } else if !rematch.open {
+            let text = match rematch.closed {
+                Some(true) => lang.t(Msg::ResultDeclined),
+                Some(false) => lang.t(Msg::ResultExpired),
+                None => lang.t(Msg::ResultPreparing),
+            };
+            (text, "", false)
+        } else if rematch.you_requested && rematch.opponent_requested {
+            (lang.t(Msg::ResultStarting), "", false)
+        } else if rematch.you_requested {
+            (lang.t(Msg::ResultWaiting), "", false)
+        } else if rematch.opponent_requested {
+            (lang.t(Msg::ResultInvited), lang.t(Msg::ResultAccept), true)
+        } else {
+            ("", lang.t(Msg::ResultRematch), true)
         };
-        (text, "", false)
-    } else if rematch.you_requested && rematch.opponent_requested {
-        (lang.t(Msg::ResultStarting), "", false)
-    } else if rematch.you_requested {
-        (lang.t(Msg::ResultWaiting), "", false)
-    } else if rematch.opponent_requested {
-        (lang.t(Msg::ResultInvited), lang.t(Msg::ResultAccept), true)
-    } else {
-        ("", lang.t(Msg::ResultRematch), true)
-    };
     for (mut text, mut node) in &mut set.p0() {
         text.0 = label.into();
         node.display = if info.challenge && !label.is_empty() {
@@ -277,7 +322,15 @@ mod tests {
         .init_resource::<crate::i18n::Lang>()
         .insert_resource(Time::<()>::default())
         .add_systems(Startup, spawn)
-        .add_systems(Update, (count_rating, hide_for_challenge, update_rematch));
+        .add_systems(
+            Update,
+            (
+                count_rating,
+                hide_for_challenge,
+                update_rematch,
+                update_history_status,
+            ),
+        );
         app.update();
         let mut buttons = app
             .world_mut()
@@ -317,5 +370,23 @@ mod tests {
             .world_mut()
             .query_filtered::<&Node, With<RematchLabel>>();
         assert_eq!(labels.single(app.world()).unwrap().display, Display::None);
+    }
+}
+
+#[derive(Component)]
+struct HistoryStatusLabel;
+fn update_history_status(
+    info: Res<MatchInfo>,
+    lang: Res<Lang>,
+    mut labels: Query<&mut Text, With<HistoryStatusLabel>>,
+) {
+    let key = match info.history_save {
+        Some(tbg_core::protocol::HistorySaveState::Pending) => "p73.record_pending",
+        Some(tbg_core::protocol::HistorySaveState::Stored) => "p73.record_stored",
+        Some(tbg_core::protocol::HistorySaveState::Delayed) => "p73.record_delayed",
+        None => return,
+    };
+    for mut label in &mut labels {
+        label.0 = lang.key(key);
     }
 }

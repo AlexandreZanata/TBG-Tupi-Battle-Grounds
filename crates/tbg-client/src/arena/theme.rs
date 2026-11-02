@@ -11,6 +11,9 @@ pub(crate) enum Theme {
     Volcanic,
     Ruins,
     Storm,
+    Celestial,
+    Clockwork,
+    Desert,
 }
 
 pub(crate) struct Palette {
@@ -46,6 +49,9 @@ impl From<tbg_core::Arena> for Theme {
             tbg_core::Arena::Volcanic => Self::Volcanic,
             tbg_core::Arena::Ruins => Self::Ruins,
             tbg_core::Arena::Storm => Self::Storm,
+            tbg_core::Arena::Celestial => Self::Celestial,
+            tbg_core::Arena::Clockwork => Self::Clockwork,
+            tbg_core::Arena::Desert => Self::Desert,
         }
     }
 }
@@ -68,6 +74,9 @@ impl Theme {
             Self::Volcanic => "Volcanic Forge",
             Self::Ruins => "Ancient Ruins",
             Self::Storm => "Storm Valley",
+            Self::Celestial => "Celestial Citadel",
+            Self::Clockwork => "Clockwork Bastion",
+            Self::Desert => "Desert Relics",
         }
     }
 
@@ -77,7 +86,8 @@ impl Theme {
             Self::Volcanic => (30.0, 64.0),
             Self::Tundra => (34.0, 85.0),
             Self::Ruins => (36.0, 90.0),
-            Self::Forest => (38.0, 95.0),
+            Self::Forest | Self::Celestial | Self::Desert => (38.0, 95.0),
+            Self::Clockwork => (34.0, 85.0),
         };
         FogFalloff::Linear { start, end }
     }
@@ -176,6 +186,54 @@ impl Theme {
                 key: rgb(0xd3e2ff),
                 ambient: rgb(0xafc5e7),
                 fire: [rgb(0xff6420), rgb(0xffb83e), rgb(0xfff0bf)],
+            },
+            Self::Celestial => Palette {
+                ground: [rgb(0xd6d8bd), rgb(0xe2e2cc)],
+                lane: [rgb(0xae9664), rgb(0xe0d8bc), rgb(0xd4cfbb), rgb(0xf3e8ca)],
+                cliff: [rgb(0xe5dfc9), rgb(0xb8bec0), rgb(0x718c9c)],
+                sea: rgb(0x147ba8),
+                shore: [rgb(0xd8f6f2), rgb(0x6fcfdc), rgb(0x30a7cc)],
+                stone: rgb(0xeee6d0),
+                dark: rgb(0x8a9399),
+                accent: rgb(0xc99b43),
+                plant: rgb(0x62964c),
+                wood: rgb(0xc5aa6d),
+                sky: rgb(0xc0e3ee),
+                key: rgb(0xfff4e2),
+                ambient: rgb(0xb5d5ec),
+                fire: [rgb(0x22b9e6), rgb(0x89e2f3), rgb(0xe3fbff)],
+            },
+            Self::Clockwork => Palette {
+                ground: [rgb(0x77776c), rgb(0x848375)],
+                lane: [rgb(0x3e4a54), rgb(0x8d9498), rgb(0x7e888c), rgb(0xc1b896)],
+                cliff: [rgb(0x878574), rgb(0x626965), rgb(0x414f56)],
+                sea: rgb(0x186b8b),
+                shore: [rgb(0xc1dfdf), rgb(0x62adba), rgb(0x308aa3)],
+                stone: rgb(0x59616b),
+                dark: rgb(0x303d48),
+                accent: rgb(0xc88b43),
+                plant: rgb(0x6e8550),
+                wood: rgb(0x8c6847),
+                sky: rgb(0xabc4d1),
+                key: rgb(0xffe6c3),
+                ambient: rgb(0xaec8dc),
+                fire: [rgb(0xff6420), rgb(0xffb641), rgb(0xffecc2)],
+            },
+            Self::Desert => Palette {
+                ground: [rgb(0xd7b66e), rgb(0xe6c581)],
+                lane: [rgb(0xad894b), rgb(0xe4c78d), rgb(0xdabb7d), rgb(0xf5dcaa)],
+                cliff: [rgb(0xd6b275), rgb(0xb48c53), rgb(0x866442)],
+                sea: rgb(0x1485a3),
+                shore: [rgb(0xe0eee0), rgb(0x71c8c9), rgb(0x31a5b9)],
+                stone: rgb(0xe4c58c),
+                dark: rgb(0xa48254),
+                accent: rgb(0xc99c3d),
+                plant: rgb(0x528547),
+                wood: rgb(0x896443),
+                sky: rgb(0xd3dfca),
+                key: rgb(0xffeed0),
+                ambient: rgb(0xc2d4d6),
+                fire: [rgb(0xff6f26), rgb(0xffbe4d), rgb(0xffeec2)],
             },
         }
     }

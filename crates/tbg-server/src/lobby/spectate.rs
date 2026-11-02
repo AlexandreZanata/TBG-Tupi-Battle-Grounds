@@ -16,8 +16,12 @@ const SPECTATE_EVERY: Duration = Duration::from_secs(1);
 
 impl Lobby {
     pub(super) fn spectate(&mut self, token: Token, id: LiveId) {
-        if let Err(reason) = self.try_watch(token, id) {
-            self.send_to(token, ServerMsg::SpectateUnavailable { reason });
+        match self.try_watch(token, id) {
+            Err(reason) => self.send_to(token, ServerMsg::SpectateUnavailable { reason }),
+            Ok(()) => {
+                self.cancel_direct(token);
+                self.decline_rematch(token);
+            }
         }
     }
 

@@ -979,3 +979,20 @@ joins P66 (§22) and P68 (§24) without a second coordinator:
 
 Cross-slot revocation propagation is not implemented: two-slot rollout with
 P68 auth stays inactive until it is (D-99 limits).
+
+
+## 27. Main delivery and player continuity (prepared, 2026-11-01)
+
+The official single VPS uses Rust/systemd and Caddy. Main's fail-closed CI gates
+independent attested backend, browser and static-site publications; the host pulls
+and verifies source/workflow/ancestry provenance without a GitHub token or inbound
+runner. Browser assets have immutable source-qualified URLs and a stable entry
+pointer, preserving open tabs. Landing/public-admin updates do not touch game
+processes. Compatible backend updates drain without a forced retirement deadline.
+
+See [RELEASES](RELEASES.md) for activation and compatibility boundaries,
+[DEVELOPMENT](DEVELOPMENT.md) for the shared Bevy UI and migration procedure, and
+[SCALING](SCALING.md) for hardware measurement and the deferred multi-host design.
+Automation is prepared; enabling it requires a real verified main artifact and an
+observed first delivery per family. Native TUF custody, privileged admin and email
+recovery are not implicitly activated by these pipelines.

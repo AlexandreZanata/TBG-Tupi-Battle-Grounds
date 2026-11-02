@@ -119,6 +119,22 @@ fn c2_per_tick_traces_are_frozen() {
         (1000, 0x8423d39086a7e075u64, 0x74b875d065a507a1u64, 7559),
         (65535, 0x2c3c3a735f7b3712u64, 0x528f18fd57983ffau64, 7737),
     ];
+    // D-101: revision 2 remains frozen above. Revision 6 includes the owner's
+    // documented P70/P71 candidates; unknown source identities fail closed.
+    let goldens = match (
+        tbg_core::ruleset_version::RULESET_VERSION,
+        tbg_core::ruleset_version::ruleset_source_hash(),
+    ) {
+        (2, 0x3d56_1560_49e6_26c5) => goldens,
+        (6, 0x0973_85fe_e9a1_0b0f) => [
+            (1, 0x73626121cf33e5c9, 0xe318aa87b746f36c, 4044),
+            (7, 0xa4cbc8bd6d9434b8, 0xb796fd4f3eb12d9f, 9982),
+            (42, 0x4e31f157f00823a3, 0x52594b93cce38cf5, 10382),
+            (1000, 0x691f7d391aeaf998, 0x5916e7f9018b83fd, 8869),
+            (65535, 0x3a8c4b25c812f504, 0xac5524f22bc861e9, 8613),
+        ],
+        revision => panic!("register an explicit canonical trace for {revision:?}"),
+    };
     for (seed, t, h, tick) in goldens {
         assert_eq!(trace(seed), (t, h, tick), "seed {seed}: simulation changed");
     }

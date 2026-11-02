@@ -1,0 +1,170 @@
+# P71 execution review — native delivery consolidation
+
+Owner authorized implementation, local commits, GitHub push, then Linux native
+installation on 2026-11-01. This also applies to subsequent requested targeted
+adjustments: commit, push and reinstall each completed adjustment. No automatic
+merge, force push, public deployment or full-suite validation is authorized.
+
+Execution branch: `phase/p71-combat-visual-polish`, base `6d5d2a2`.
+Owner worktrees, installed fallback and P70 original evidence are preserved.
+
+## Earlier blocked Trident contact refinement
+
+> blocked: New Trident raised-load/downward-contact motion failed the existing
+> grip regression twice. `consolidation-fixed.log` reports `form (0, 0): grip
+> left the hand by 0.4311485`; after a post-blend IK repair and revised guard,
+> `trident-refined.log` reports the same assertion at `0.06513715` (required
+> `<0.05`). Suspected cause: unreachable/support-wrist targets or pose blends
+> across the larger raised-guard rotation; exact clip diagnosis remains open.
+> Following AGENTS.md, this step stopped. Motion/Animator/test changes were
+> restored to the P70 baseline; no failed candidate thrust is installed.
+> Trident's body-marker removal and form-aware HP bar are independent.
+
+Other steps continue. This report will record actual validation, renderer
+coverage, remaining acceptance, GitHub reference and final installed version.
+
+## Resumed consolidation (2026-11-01)
+
+The interrupted working tree contained only the final tower-collapse and
+debris-surface changes and removal of the obsolete tabard helper. They are
+retained. `collapse-check.log`: `cargo check --offline --locked -p tbg-client
+--bin tbg-client` passed in 3.13 s under the shared validation lock (2 jobs,
+existing native cache). Collapse now eases over 0.65 s; debris originates
+on the visible exterior. These are presentation changes only.
+
+Owner follow-ups queued for execution: stable Bloomkeeper support facing;
+Farwatch Stronghold targeting; separate top-center Evolution/Fortification
+choices with retained focus and outside dismissal; independent Tick pistol
+and brother-specific Evolution branches; larger humanoid-bee Hornet with a
+venom pistol connected to its abdomen. Gameplay changes require Proposed
+canon entries and targeted authoritative regression evidence.
+
+### Support facing and Farwatch follow-up
+
+Bloomkeeper now twists the upper body for healing rather than repeatedly
+turning the locomotion Root. A regression covers rear targets on either side
+of the ±180-degree boundary. Farwatch uses ordinary Guard/nearest-target
+selection and can attack an unguarded Stronghold within its unchanged range.
+This owner rule is marked Proposed in §C.2; revision 4 records the changed
+ruleset source. Native `followup-check.log` passed in 1.79 s. Focused tests
+are queued for the final consolidation; no broad balance gate ran.
+
+### Evolution and Fortification focus
+
+Linux keeps the two information cards at their original anchors. Purchase
+choices occupy a shared 390 px wide, minimum 106 px high card at y=134,
+below the timer. Arena introduction uses the same slot and is suppressed
+while a purchase card is open. Outside actions dismiss focus; purchases
+retain it until selection changes, the unit disappears, or the user closes
+it. The non-Linux Evolution card rebuilds only when identity/form/language
+changes, so the next tier replaces stale choices without reopening. Browser
+Fortification choices are also separated from the information card. Browser
+arena banner now dismisses on outside pointer presses.
+
+### Independent Tick pistol
+
+Authoritative special timer now targets troops at medium range independently
+of the club; its single-target pistol replaces the old area bomb/Slow. Branch
+A remains Rattle HP/club; B improves only Tick cadence/damage. Static branch A
+damage is explicitly excluded from Tick scaling. Three new core regressions
+passed (both seats, independent movement/basic windup/counter, no collateral,
+branch ownership). Two Farwatch targeting regressions passed, including Guard.
+`followup-targeted.log`: 3 core + 2 Farwatch + 6 P71 client tests passed.
+The client check initially found E0624 on pose sampling visibility; it was
+corrected before the successful test build. D-33 balance gate and broad
+multiplayer validation remain deferred; the values are Proposed playtest data.
+
+### Hornet follow-up
+
+Hornet's presentation scale changes from 0.94 to 1.10 (17.0% larger), retaining
+the existing Evolution growth and gameplay size/range. A fuller striped
+abdomen, larger compound eyes, dark antennae and four wings reinforce the
+humanoid bee. A broad brass/charcoal venom pistol has a green reservoir,
+visible bore and grip. Four articulated hose sections follow the abdomen and
+pistol sockets through the actual sampled pose; the hose continuity test
+passed across five forms and Idle/Walk/Attack/Death samples. Hose sections use
+existing prop slots and cached primitive meshes, with no new dependency.
+
+### Trident resumed after owner continuation
+
+The owner's request to finish the interrupted task reopens this step. A smaller
+raised carry/load is being tested against the unchanged grip/body-clearance
+contracts, instead of repeating the earlier large raised-guard candidate.
+
+The resumed guard alone failed the grip test (`trident-resumed.log`, error
+0.41407296), exposing a rotation wrap during raw Euler crossfades. The corrected
+pipeline uses quaternion short-arc interpolation and restores the two-hand
+constraint after a Trident crossfade. The existing <0.05 grip and mesh-clearance
+assertions are unchanged; blend scenarios now exercise that runtime constraint
+pass. `trident-resumed-constraints.log`: all 3 Trident regressions passed, plus
+the new rear-facing short-arc regression. The earlier blocked candidate is
+therefore superseded. Carry/load is raised 20 degrees; close contact lowers
+toward the target within the original pitch limits. Simulation range, windup,
+damage and contact event time are unchanged.
+
+### Live-projection correction
+
+The first final Bonehorn B2 combat recording (`live-50c2978-Bonehorn-B2-A-standard`,
+241 ticks) still exposed its HP against the mantle when the whole Root turned
+toward a target behind the long muzzle pivot. This capture is retained as a
+failed acceptance observation. Bonehorn now keeps the full body aligned with
+the lane, with limited head aim only, matching its long crowd footprint.
+
+Height-only overhead placement is superseded by camera-projected current-pose
+body AABBs for every unit. The client transforms eight cached corners per body
+mesh, excluding held weapons and hose props, and places the bar at least 8 px
+above the projected top. It scans no mesh vertices per frame; the camera matrix
+is computed once. Form/animation/camera changes are handled before transform
+propagation. `projected-bars-check.log` passed; the long-body perspective
+regression passed in `projected-bars-regression.log`. A new live recheck is
+required before treating Bonehorn spacing and its bar as observed passing.
+
+## Consolidated delivery candidate
+
+Final runtime source: `71bbe0b3eff7fb6fc967b28a818c353345439502`. Native binary
+SHA-256: `bf024681d417f0d8b62778102660d03dbd3c6edccf7fdad70229a2373a0e05f5`.
+The final 241-tick Bonehorn B2 recording shows the bar clear above its projected
+mantle and the body aligned with the lane. Sampled temporal frames remain local
+in `review-final/bonehorn-projection-final.jpg`; one engagement is not an
+exhaustive collision claim. Tick's real engagement observed 241 ticks and 444
+damage with no friendly damage. The Practice UI flow purchased tier1 and tier2
+without losing selection, showed separate top-center tower choices, reopened
+the arena banner and dismissed it by an outside action. All six resulting
+screenshots were inspected; a first capture-order race was corrected in
+50c2978 before the valid arena-open/dismissed pair.
+
+`P71-DELIVERY-EVIDENCE.json` indexes local originals/logs by checksum. Large
+renderer recordings and private test data are ignored, not committed. The 46
+Shop portraits are versioned; the Hornet and RattleTick follow-ups have their
+own original-capture provenance in `P71-PORTRAITS.json`.
+
+### Commands actually completed
+
+Every compiling command used the nonblocking host lock, CARGO_BUILD_JOBS=2,
+the existing root target cache and native dependency pkg-config path. Focused
+commands (some earlier results reused unchanged, no automatic full suite):
+
+- `cargo test --offline --locked -p tbg-core --features lab --lib p71_ -- --test-threads=1`: 3 passed.
+- `cargo test --offline --locked -p tbg-core --features lab --test wave_a farwatch -- --test-threads=1`: 2 passed.
+- `cargo test --offline --locked -p tbg-core --test contract_ruleset_version -- --test-threads=1`: 2 passed, ruleset revision5.
+- `cargo test --offline --locked -p tbg-client --bin tbg-client p71_ -- --test-threads=1`: 6 passed before subsequent isolated crossfade/projection regressions.
+- Client filters `healing_behind`, `open_panel_tracks`, `p71_crossfade`, `p71_trident_carries`, `p71_long_body`: each 1 passed.
+- Client filter `p70_trident_`: all 3 passed after the corrected constraints.
+- Earlier tower filter: 9 passed; crowd filter: 7 passed; Pyre jet filter: 1 passed.
+- Final `cargo check --offline --locked -p tbg-client --bin tbg-client --target wasm32-unknown-unknown`: passed (1.42s); this is compilation, not browser runtime evidence.
+- Final native `cargo build --offline --locked -p tbg-client --bin tbg-client`: passed (8.20s), embedded source71bbe0b.
+- Affected-package formatting, JavaScript syntax checks and `git diff --check`: passed.
+
+### Deferred acceptance
+
+No full suite, Clippy workspace, release/packaging, Windows build, D-33 gate or
+performance benchmark was run. New Tick stats remain Proposed pending D-33 and
+owner playtest acceptance. Native evidence does not verify browser rendering.
+The full Low-mode/two-seat temporal matrix, live multiplayer reconnect and
+subjective look/fun review remain deferred. Exact heavy commands remain in
+VALIDATION.md/P71; they require explicit owner scheduling.
+
+Delivery workflow: push the execution branch, then install the verified native
+candidate and all assets as `0.1.0-native.2-p71-71bbe0b`. Preserve the previous
+launcher/desktop settings and all existing user data; verify installed hashes.
+The local installation receipt will record the actual result.

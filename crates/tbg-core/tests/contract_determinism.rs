@@ -54,19 +54,61 @@ fn bot_matches_are_frozen() {
     // D-69: appended private Shop state; all D-68 outcomes and ticks identical.
     // D-68/D-69 integration: protocol-20 slots + Shop state; owner range correction.
     // Owner 2026-10-31: activating all 46 conventional kinds changes draws and outcomes.
-    // CC-ID01: empty completion slots and bleed producer metadata change only schema hashes.
-    // All three existing winner/reason/tick guards passed before this checksum refresh.
     let goldens = [
         (
             1,
-            0x94ec9a131890f113u64,
+            0x7890_8734_d3dc_7ec1u64,
             3_844,
             Seat::B,
             StrongholdDestroyed,
         ),
-        (7, 0x2a827c899e295037, 15_586, Seat::A, StrongholdDestroyed),
-        (42, 0xe91230a95da182e5, 5_049, Seat::B, StrongholdDestroyed),
+        (
+            7,
+            0x7ab5_0dfd_d573_5803,
+            15_586,
+            Seat::A,
+            StrongholdDestroyed,
+        ),
+        (
+            42,
+            0xc437_7231_f72a_0c57,
+            5_049,
+            Seat::B,
+            StrongholdDestroyed,
+        ),
     ];
+    // D-101: keep the revision-2 baseline above; append the documented P70/P71
+    // candidate instead of applying old outcomes to a different ruleset.
+    let goldens = match (
+        tbg_core::ruleset_version::RULESET_VERSION,
+        tbg_core::ruleset_version::ruleset_source_hash(),
+    ) {
+        (2, 0x3d56_1560_49e6_26c5) => goldens,
+        (6, 0x0973_85fe_e9a1_0b0f) => [
+            (
+                1,
+                0xe318_aa87_b746_f36c,
+                4_044,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                7,
+                0xb796_fd4f_3eb1_2d9f,
+                9_982,
+                Seat::B,
+                StrongholdDestroyed,
+            ),
+            (
+                42,
+                0x5259_4b93_cce3_8cf5,
+                10_382,
+                Seat::A,
+                StrongholdDestroyed,
+            ),
+        ],
+        revision => panic!("register an explicit canonical baseline for {revision:?}"),
+    };
     let mut observed = Vec::with_capacity(goldens.len());
     let mut expected = Vec::with_capacity(goldens.len());
     for (seed, hash, tick, winner, reason) in goldens {

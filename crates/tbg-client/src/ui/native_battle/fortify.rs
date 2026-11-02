@@ -31,10 +31,8 @@ enum Field {
     Hp,
     PassiveName,
     Passive,
-    Branch(u8),
-    Step(u8),
-    Effect(u8),
-    Cost(u8),
+    EvolutionHeading,
+    Evolution(u8),
     Note,
 }
 
@@ -180,116 +178,44 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                             ));
                         });
                 });
-            option(panel, 0);
-            option(panel, 1);
-            panel.spawn((
-                kit::heading("", 10.),
-                Node {
+        });
+    commands
+        .spawn((
+            chrome::upgrade_node(),
+            chrome::frame(chrome::GOLD),
+            Panel,
+            Visibility::Hidden,
+            UiAction::Disabled,
+            ZIndex(5),
+            DespawnOnExit(GameState::InMatch),
+        ))
+        .with_children(|panel| {
+            panel
+                .spawn(chrome::upgrade_header())
+                .with_children(|heading| {
+                    heading.spawn((kit::heading("", 12.), Field::EvolutionHeading));
+                    heading.spawn(chrome::upgrade_close(UiAction::Deselect));
+                });
+            panel
+                .spawn(Node {
                     width: percent(100),
-                    min_height: px(14),
+                    column_gap: px(6),
                     ..default()
-                },
-                Field::Note,
-            ));
+                })
+                .with_children(|row| {
+                    option(row, 0);
+                    option(row, 1);
+                });
+            panel.spawn((kit::muted("", 10.), Field::Note));
         });
 }
 
 fn option(parent: &mut ChildSpawnerCommands, branch: u8) {
-    parent
-        .spawn((
-            Node {
-                width: percent(100),
-                min_height: px(55),
-                padding: UiRect::all(px(7)),
-                border: UiRect::all(px(1)),
-                border_radius: BorderRadius::all(px(6)),
-                align_items: AlignItems::Center,
-                column_gap: px(7),
-                ..default()
-            },
-            BackgroundColor(chrome::INK),
-            BorderColor::all(chrome::GOLD),
-            Choice(branch),
-            UiAction::Disabled,
-            kit::buttons::Chrome {
-                enabled: false,
-                focused: false,
-            },
-            kit::buttons::Palette {
-                idle: chrome::INK,
-                hover: Color::srgb_u8(65, 57, 39),
-                pressed: Color::srgb_u8(35, 31, 24),
-                border: chrome::GOLD,
-            },
-        ))
-        .with_children(|button| {
-            button.spawn((
-                Node {
-                    width: px(20),
-                    height: px(20),
-                    flex_shrink: 0.,
-                    border_radius: BorderRadius::all(percent(50)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::Center,
-                    ..default()
-                },
-                BackgroundColor(chrome::GOLD),
-                Accent,
-                children![(
-                    Text::new(if branch == 0 { "A" } else { "B" }),
-                    TextFont::from_font_size(FontSize::Px(11.)),
-                    TextColor(chrome::INK)
-                )],
-            ));
-            button
-                .spawn(Node {
-                    flex_grow: 1.,
-                    flex_basis: px(0),
-                    min_width: px(0),
-                    flex_direction: FlexDirection::Column,
-                    row_gap: px(1),
-                    ..default()
-                })
-                .with_children(|copy| {
-                    copy.spawn((label("", 11.), Field::Branch(branch)));
-                    copy.spawn((kit::muted("", 10.), Field::Step(branch)));
-                    copy.spawn((kit::muted("", 9.5), Field::Effect(branch)));
-                });
-            button
-                .spawn((
-                    Node {
-                        min_width: px(39),
-                        height: px(25),
-                        flex_shrink: 0.,
-                        padding: UiRect::horizontal(px(5)),
-                        border: UiRect::all(px(1)),
-                        border_radius: BorderRadius::all(px(4)),
-                        align_items: AlignItems::Center,
-                        justify_content: JustifyContent::Center,
-                        column_gap: px(5),
-                        ..default()
-                    },
-                    BackgroundColor(Color::srgb_u8(48, 39, 31)),
-                    BorderColor::all(chrome::GOLD),
-                ))
-                .with_children(|price| {
-                    price.spawn((
-                        Node {
-                            width: px(11),
-                            height: px(11),
-                            border: UiRect::all(px(2)),
-                            border_radius: BorderRadius::all(percent(50)),
-                            ..default()
-                        },
-                        BorderColor::all(chrome::CREAM),
-                        chrome::gradient(
-                            Color::srgb_u8(255, 233, 137),
-                            Color::srgb_u8(181, 115, 13),
-                        ),
-                    ));
-                    price.spawn((label("", 13.), Field::Cost(branch)));
-                });
-        });
+    parent.spawn((
+        chrome::upgrade_choice(),
+        Choice(branch),
+        children![(label("", 10.), Field::Evolution(branch))],
+    ));
 }
 
 fn definition(v: &MatchView) -> Option<&'static Value> {
@@ -321,21 +247,28 @@ fn readouts(
     view: Res<LatestView>,
     pending: Res<PendingFortify>,
     assets: Res<AssetServer>,
-    mut texts: Query<(&Field, &mut Text, &mut TextColor)>,
+    mut texts: Query<(&Field, &mut Text, &mut TextColor, &mut Node)>,
     mut icons: Query<&mut ImageNode, With<Icon>>,
 ) {
-    if !view.is_changed() && !pending.is_changed() {
+    if !view.is_changed() && !pending.is_changed() && !lang.is_changed() {
         return;
     }
     let Some(v) = &view.0 else { return };
     let Some(def) = definition(v) else { return };
     let color = accent(v);
-    for (field, mut text, mut tint) in &mut texts {
+    for (field, mut text, mut tint, mut node) in &mut texts {
         let want = field_text(field, v, def, pending.0.is_some(), *lang);
         if text.0 != want {
             text.0 = want;
         }
-        tint.0 = field_color(field, v, pending.0.is_some(), color);
+        tint.0 = field_color(field, color);
+        if matches!(field, Field::Note) {
+            node.display = if text.0.is_empty() {
+                Display::None
+            } else {
+                Display::Flex
+            };
+        }
     }
     let path = format!(
         "battle/native/tower-{}.webp",
@@ -384,46 +317,44 @@ fn field_text(
         ),
         Field::PassiveName => value(&def["passive"], "name"),
         Field::Passive => shell::expand(&value(&def["passive"], "text"), stats),
+        Field::EvolutionHeading => format!(
+            "{} · {}",
+            crate::i18n::content::stronghold_name(lang, tower.kind),
+            lang.key("fortify.heading")
+        ),
         Field::Note => note(v, pending),
-        _ => option_text(field, v, def, pending, lang),
+        Field::Evolution(branch) => evolution_text(v, def, *branch, lang),
     }
 }
 
-fn option_text(
-    field: &Field,
-    v: &MatchView,
-    def: &Value,
-    pending: bool,
-    lang: crate::i18n::Lang,
-) -> String {
-    let (Field::Branch(branch) | Field::Step(branch) | Field::Effect(branch) | Field::Cost(branch)) =
-        field
-    else {
-        return String::new();
-    };
+fn evolution_text(v: &MatchView, def: &Value, branch: u8, lang: crate::i18n::Lang) -> String {
     let tower = fortify::own(v);
-    let path = &def["branches"][usize::from(*branch)];
-    let tier = usize::from(tower.tier.min(1));
-    let step = &path["steps"][tier];
-    let closed = fortify::offer(v, *branch, pending) == Offer::Closed;
-    match field {
-        Field::Branch(_) => {
-            crate::i18n::content::stronghold_branch(lang, tower.kind, *branch).into()
-        }
-        Field::Step(_) if closed => format!(
-            "Closed · {} chosen",
-            value(&def["branches"][usize::from(tower.branch.min(1))], "name")
-        ),
-        Field::Step(_) => format!(
-            "Tier {} · {}",
-            tier + 1,
-            crate::i18n::content::stronghold_step(lang, tower.kind, *branch, (tier + 1) as u8)
-        ),
-        Field::Effect(_) if !closed => shell::branch_effect(step),
-        Field::Cost(_) if !closed => (FORTIFY_COST[tier] / ENERGY_SCALE).to_string(),
-        Field::Cost(_) => "–".into(),
-        _ => String::new(),
+    if tower.tier >= 2 || (tower.tier == 1 && branch != tower.branch) {
+        return String::new();
     }
+    let tier = usize::from(tower.tier);
+    let step = &def["branches"][usize::from(branch)]["steps"][tier];
+    format!(
+        "{} · {} Energy\n{}\n{}",
+        crate::i18n::content::stronghold_branch(lang, tower.kind, branch),
+        FORTIFY_COST[tier] / ENERGY_SCALE,
+        lang.tf(
+            crate::i18n::Msg::FortifyStep,
+            &[
+                ("tier", &(tier + 1)),
+                (
+                    "step",
+                    &crate::i18n::content::stronghold_step(
+                        lang,
+                        tower.kind,
+                        branch,
+                        (tier + 1) as u8
+                    )
+                ),
+            ]
+        ),
+        shell::branch_effect(step),
+    )
 }
 
 fn value(value: &Value, key: &str) -> String {
@@ -444,24 +375,17 @@ fn note(v: &MatchView, pending: bool) -> String {
             FORTIFY_COST[usize::from(tower.tier.min(1))] / ENERGY_SCALE,
             v.energy as f32 / ENERGY_SCALE as f32
         ),
-        _ if tower.tier == 0 => "Tier 1 picks a branch for the rest of the match".into(),
-        _ => format!("Tier 2 completes the {branch} branch"),
+        _ => String::new(),
     }
 }
 
-fn field_color(field: &Field, v: &MatchView, pending: bool, color: Color) -> Color {
+fn field_color(field: &Field, color: Color) -> Color {
     match field {
         Field::Name => color,
         Field::PassiveName | Field::Note => chrome::GOLD,
-        Field::Cost(branch) if fortify::offer(v, *branch, pending) == Offer::Short => {
-            Color::srgb_u8(255, 179, 163)
-        }
-        Field::Hp | Field::Cost(_) => chrome::CREAM,
-        Field::Branch(branch) | Field::Step(branch)
-            if fortify::offer(v, *branch, pending) == Offer::Open =>
-        {
-            chrome::CREAM
-        }
+        Field::EvolutionHeading => kit::GOLD,
+        Field::Evolution(_) => super::super::TEXT,
+        Field::Hp => chrome::CREAM,
         _ => kit::MUTED,
     }
 }
@@ -469,18 +393,12 @@ fn field_color(field: &Field, v: &MatchView, pending: bool, color: Color) -> Col
 fn choices(
     view: Res<LatestView>,
     pending: Res<PendingFortify>,
-    mut choices: Query<(
-        &Choice,
-        &mut Node,
-        &mut UiAction,
-        &mut kit::buttons::Chrome,
-        &mut kit::buttons::Palette,
-    )>,
+    mut choices: Query<(&Choice, &mut Node, &mut UiAction, &mut kit::buttons::Chrome)>,
 ) {
     let Some(v) = &view.0 else { return };
-    for (choice, mut node, mut action, mut chrome, mut palette) in &mut choices {
+    for (choice, mut node, mut action, mut chrome) in &mut choices {
         let state = fortify::offer(v, choice.0, pending.0.is_some());
-        node.display = if state == Offer::Max {
+        node.display = if matches!(state, Offer::Max | Offer::Closed) {
             Display::None
         } else {
             Display::Flex
@@ -490,16 +408,6 @@ fn choices(
             UiAction::Fortify(choice.0)
         } else {
             UiAction::Disabled
-        };
-        palette.idle = if chrome.enabled {
-            Color::srgb_u8(48, 42, 30)
-        } else {
-            Color::srgb_u8(27, 27, 25)
-        };
-        palette.border = if state == Offer::Closed {
-            kit::LINE
-        } else {
-            Color::srgb_u8(120, 101, 68)
         };
     }
 }

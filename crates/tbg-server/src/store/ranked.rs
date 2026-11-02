@@ -122,6 +122,17 @@ pub(super) fn player_stats(
             *share = (totals[i] as f64 * 1000.0 / all as f64).round() / 10.0;
         }
     }
+    // BR-AP11: old profile consumers obey current privacy, including pre-history schemas.
+    let public = conn
+        .query_row(
+            "SELECT history_visibility='public' FROM accounts WHERE id=?1",
+            [id],
+            |r| r.get::<_, bool>(0),
+        )
+        .unwrap_or(false);
+    if !public {
+        return Ok(Some(stats));
+    }
     // Last 10 with the opponent's name joined in (one query).
     let mut recent = conn.prepare(
         "SELECT substr(m.ended_at, 1, 10), o.name,
@@ -338,6 +349,19 @@ pub(super) fn settle(
             r.combat_ticks,
         ],
     )?;
+    if r.history_expected {
+        // This non-rating hint commits atomically with the canonical Ranked row.
+        // A missing migration must never stop Elo; history records its own gap.
+        if tx
+            .execute(
+                "UPDATE ranked_matches SET history_expected=1 WHERE id=?1",
+                [entry.completion_seq],
+            )
+            .is_err()
+        {
+            tracing::warn!("history source marker unavailable; Ranked settlement is preserved");
+        }
+    }
     let facts = json!({
         "v": 1,
         "base": base,

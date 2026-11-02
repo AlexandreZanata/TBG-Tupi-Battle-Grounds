@@ -6,6 +6,9 @@
 #[path = "src/i18n/check.rs"]
 mod check;
 
+#[path = "build/windows.rs"]
+mod windows;
+
 fn escape(value: &str) -> String {
     let mut out = String::with_capacity(value.len() + 2);
     for c in value.chars() {
@@ -53,6 +56,7 @@ fn contract_source_hash() {
 }
 
 fn main() {
+    windows::resources();
     contract_source_hash();
     println!(
         "cargo:rustc-env=TBG_BUILD_TARGET={}",

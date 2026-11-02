@@ -19,9 +19,18 @@ pub(super) fn cue(
     event: Event,
 ) {
     match event {
-        Event::AbilityStarted { unit, .. } => {
+        Event::AbilityStarted {
+            unit,
+            kind,
+            primary,
+            ..
+        } => {
+            let target = primary.and_then(|id| position(map, visuals, id));
             if let Some((_, _, mut anim)) = map.0.get(&unit).and_then(|e| visuals.get_mut(*e).ok())
             {
+                if kind == UnitKind::RattleTick {
+                    anim.special_at = target;
+                }
                 anim.start_special();
             }
         }
@@ -48,8 +57,7 @@ fn area(map: &UnitEntities, visuals: &Visuals, id: UnitId) -> Area {
                     Ability::CelestialRain { radius, .. }
                     | Ability::BloodyRend { radius, .. }
                     | Ability::SwampBelly { radius, .. }
-                    | Ability::AreaCrush { radius, .. }
-                    | Ability::DoubleMayhem { radius, .. } => Some(radius),
+                    | Ability::AreaCrush { radius, .. } => Some(radius),
                     _ => None,
                 })
         })
@@ -107,7 +115,30 @@ fn resolved(
         UnitKind::Crowcaller => (Impact::Plague, primary, Area::default()),
         UnitKind::Whisperer => (Impact::Mind, primary, Area::default()),
         UnitKind::Bulwark => (Impact::Sparks, Some(unit), Area::default()),
-        UnitKind::RattleTick => (Impact::Mayhem, primary, area(map, visuals, unit)),
+        UnitKind::RattleTick => {
+            if let (Some(to), Some((visual, root, anim))) = (
+                primary.and_then(|id| position(map, visuals, id)),
+                map.0.get(&unit).and_then(|e| visuals.get(*e).ok()),
+            ) {
+                let (clip, t) = anim.clip_time();
+                let pose = anim.pose(clip, t);
+                let frame = crate::art::presentation::pose_world(kind, &anim.plan, &pose);
+                let socket = crate::art::rig::Node::Prop(crate::art::rig::Socket::Nock).index();
+                let figure = Transform::from_rotation(Quat::from_rotation_y(visual.yaw))
+                    .with_scale(Vec3::splat(anim.plan.scale));
+                let from = (root.to_matrix() * figure.to_matrix() * frame[socket])
+                    .transform_point3(Vec3::new(0.0, 0.04, 0.24));
+                crate::vfx::shots::fire(
+                    commands,
+                    fx.vfx,
+                    crate::vfx::shots::ShotKind::Bullet,
+                    from,
+                    to,
+                    Area::default(),
+                );
+            }
+            return;
+        }
         UnitKind::Capybara => (Impact::Belly, Some(unit), area(map, visuals, unit)),
         UnitKind::Trident => (Impact::Rend, primary, area(map, visuals, unit)),
         UnitKind::SolarSentinel => (Impact::Solar, primary, Area::default()),

@@ -1,6 +1,11 @@
 {
   "schema": 1,
   "reference": "linux",
+  "required_platforms": [
+    "linux",
+    "windows",
+    "web"
+  ],
   "candidate": "windows",
   "pixel_difference_limit": 0,
   "languages": [
@@ -57,13 +62,49 @@
     "loading",
     "victory-seat-a",
     "victory-seat-b",
-    "next-match-cleanup"
+    "live-players",
+    "player-invites",
+    "result-p73-actions",
+    "result-rematch",
+    "history-owner-private",
+    "history-owner-public",
+    "history-detail",
+    "history-public-profile",
+    "next-match-cleanup",
+    "preview-motion-default",
+    "preview-motion-reduced",
+    "preview-motion-resumed",
+    "preview-motion-reentry",
+    "training-arena-cover-forest",
+    "training-arena-cover-volcanic",
+    "training-arena-cover-celestial",
+    "training-arena-cover-resize",
+    "evolution-tier0-two",
+    "evolution-tier1-a-wide",
+    "evolution-tier1-b-wide",
+    "fortification-tier0-two",
+    "fortification-tier1-a-wide",
+    "fortification-tier1-b-wide",
+    "upgrade-dialog-disabled",
+    "upgrade-dialog-focus-transition",
+    "training-practice-reference-layout",
+    "training-practice-reference-resize",
+    "war-council-no-rarity-labels",
+    "war-council-selection-no-shadow"
   ],
   "motion_screens": [
     "preview-dance",
     "victory-seat-a",
     "victory-seat-b",
-    "next-match-cleanup"
+    "next-match-cleanup",
+    "preview-motion-default",
+    "preview-motion-reduced",
+    "preview-motion-resumed",
+    "preview-motion-reentry",
+    "training-arena-cover-resize",
+    "upgrade-dialog-focus-transition",
+    "training-practice-reference-resize",
+    "war-council-selection-no-shadow"
   ],
   "motion_frames": [
     0,
@@ -81,7 +122,7 @@
   ],
   "capture_index_contract": {
     "schema": 1,
-    "platform": "linux OR windows",
+    "platform": "linux OR windows OR web",
     "source_commit": "40 lowercase hexadecimal",
     "cargo_lock_sha256": "64 lowercase hexadecimal",
     "assets_sha256": "64 lowercase hexadecimal",
@@ -111,5 +152,10 @@
         "file": "relative/path.png"
       }
     ]
-  }
+  },
+  "required_platforms": [
+    "linux",
+    "windows",
+    "web"
+  ]
 }

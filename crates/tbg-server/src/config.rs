@@ -4,6 +4,13 @@ use std::path::PathBuf;
 
 #[derive(Clone, Debug)]
 pub struct Config {
+    /// Fixed loopback release-slot ports aggregated by the P73 presence snapshot.
+    pub presence_ports: [u16; 2],
+    /// P73 staged rollout: migrate explicitly, then collect, owner API, public opt-in.
+    pub history_migrate: bool,
+    pub history_collect: bool,
+    pub history_api: bool,
+    pub history_public: bool,
     /// Programmatic synthetic test clock; never configurable over HTTP or environment.
     pub auth_clock: crate::auth::Clock,
     /// Exact reviewed browser origins; never derive cookie authority from Host.
@@ -60,8 +67,16 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
+            presence_ports: [8080, 8082],
+            history_migrate: false,
+            history_collect: false,
+            history_api: false,
+            history_public: false,
             auth_clock: crate::auth::Clock::default(),
-            auth_origins: vec!["https://tbg.abastevo.com.br".into()],
+            auth_origins: vec![
+                "https://app.tupibg.com".into(),
+                "https://api.tupibg.com".into(),
+            ],
             addr: "0.0.0.0:8080".into(),
             max_connections: 2_000,
             max_per_ip: 8,
@@ -115,6 +130,14 @@ impl Config {
                 .unwrap_or(default)
         };
         Config {
+            presence_ports: [
+                num("TBG_PRESENCE_PORT_A", 8080).clamp(1, 65535) as u16,
+                num("TBG_PRESENCE_PORT_B", 8082).clamp(1, 65535) as u16,
+            ],
+            history_migrate: std::env::var("TBG_HISTORY_MIGRATE").as_deref() == Ok("1"),
+            history_collect: std::env::var("TBG_HISTORY_COLLECT").as_deref() == Ok("1"),
+            history_api: std::env::var("TBG_HISTORY_API").as_deref() == Ok("1"),
+            history_public: std::env::var("TBG_HISTORY_PUBLIC").as_deref() == Ok("1"),
             auth_clock: d.auth_clock,
             auth_origins: std::env::var("TBG_AUTH_ORIGINS")
                 .ok()

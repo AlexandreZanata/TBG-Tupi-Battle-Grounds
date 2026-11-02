@@ -14,9 +14,9 @@ use crate::art::{
     rig::{Joint::*, Node, Node::Body, Node::Prop, Node::Secondary, Proportions, Socket, Spring},
 };
 
-const COAT: Color = Color::srgb(0.36, 0.24, 0.46);
-pub const MAGIC: Color = Color::srgb(0.78, 0.48, 1.0);
-const STRING: Color = Color::srgb(0.92, 0.9, 0.85);
+const COAT: Color = SHOWMAN_VIOLET;
+pub const MAGIC: Color = RITUAL_VIOLET;
+const STRING: Color = IVORY;
 /// How far below the control the puppet hangs (socket space).
 const DROP: f32 = 0.4;
 /// The control cross's center (weapon space): the hex leaves from here.
@@ -64,7 +64,7 @@ fn coat(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
         part(
             Body(Chest),
             Frustum(t.x * 0.58, t.x * 0.44, t.y * 0.95),
-            COAT,
+            if f.a { VIOLET } else { COAT },
             [0.0, t.y * 0.5, 0.0],
         )
         .scale([1.0, 1.0, 0.72]),
@@ -88,6 +88,17 @@ fn coat(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             [0.0, 0.0, 0.0],
         ),
     ]);
+    for side in [-1.0, 1.0] {
+        v.push(
+            part(
+                Body(Chest),
+                Box(0.045, 0.21, 0.022),
+                LINEN,
+                [side * 0.075, 0.24, 0.15],
+            )
+            .rot([0.0, 0.0, side * 22.0]),
+        );
+    }
     for arm in [UpperArmL, UpperArmR] {
         v.push(part(
             Body(arm),
@@ -159,6 +170,7 @@ fn marionette(v: &mut Vec<PartSpec>, at: Node, f: Form, dress: Color) {
     if lit {
         v.push(part(at, Box(0.31, 0.012, 0.04), MAGIC, [0.0, -0.03, 0.12]).glow());
     }
+    v.push(part(at, Ball(0.026), BRASS, [0.0, -0.03, 0.12]));
     puppet(v, at, [0.0, -DROP, 0.08], dress, f.a);
     for (a, b) in [
         ([-0.15, -0.05, 0.12], [-0.07, -DROP + 0.02, 0.08]),

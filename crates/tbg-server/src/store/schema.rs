@@ -15,6 +15,9 @@
 
 use rusqlite::Connection;
 
+/// Latest ordered database migration, also bound into deployment metadata.
+pub(super) const CURRENT_VERSION: i64 = 10;
+
 const MATCHES_V1: &str = "CREATE TABLE IF NOT EXISTS matches (
     id INTEGER PRIMARY KEY,
     ended_at TEXT NOT NULL,
@@ -397,6 +400,56 @@ fn migrate_once(conn: &mut Connection) -> rusqlite::Result<()> {
         // Index definitions stay verified even on an already combined file.
         tx.execute_batch(RELEASE_INDEXES)?;
         tx.execute_batch(super::auth_sessions::INDEXES)?;
+    }
+    tx.commit()
+}
+
+/// P73 is additive and installed only through the explicit history migration flag.
+pub(super) fn migrate_history(conn: &mut Connection) -> rusqlite::Result<()> {
+    let tx = conn.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;
+    let version: i64 = tx.query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))?;
+    if version < 11 {
+        tx.execute_batch(include_str!("player_history/schema.sql"))?;
+        tx.execute("INSERT INTO schema_version(version) VALUES(11)", [])?;
+    }
+    for (table, required) in [
+        ("ranked_matches", &["history_expected"][..]),
+        (
+            "accounts",
+            &["history_visibility", "history_privacy_revision"][..],
+        ),
+        (
+            "player_match_history",
+            &[
+                "history_key",
+                "result_id",
+                "ranked_match_key",
+                "ranked_row_id",
+                "payload_json",
+                "canonical_hash",
+            ][..],
+        ),
+        (
+            "player_match_history_sides",
+            &[
+                "entry_id",
+                "account_id",
+                "history_key",
+                "seat",
+                "ended_unix",
+            ][..],
+        ),
+        (
+            "player_history_meta",
+            &["backfill_id", "backfill_target"][..],
+        ),
+    ] {
+        let Some(found) = columns(&tx, table)? else {
+            return Err(foreign_shape(table));
+        };
+        if !required.iter().all(|c| found.iter().any(|v| v == c)) {
+            return Err(foreign_shape(table));
+        }
     }
     tx.commit()
 }

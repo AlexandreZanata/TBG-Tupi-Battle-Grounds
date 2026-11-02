@@ -78,13 +78,17 @@ pub(super) fn turret() -> super::aim::Turret {
 }
 
 pub(super) fn pieces(form: Form) -> Vec<Piece> {
-    let mut p = vec![whole(&WALLS), whole(&MERLONS).lost(1), whole(&KEEP).lost(2)];
+    let mut p = vec![
+        whole(&WALLS),
+        whole(&MERLONS).lost(7),
+        whole(&KEEP).lost(14),
+    ];
     if form.a() {
         p.push(whole(&DRUMS));
     }
     if form == Form::A2 {
         p.push(whole(&BUTTRESSES));
-        p.push(whole(&CAPS).lost(1));
+        p.push(whole(&CAPS).lost(7));
     }
     if form.b() {
         p.push(whole(&SHAFT));
@@ -93,16 +97,15 @@ pub(super) fn pieces(form: Form) -> Vec<Piece> {
     let staged = t(0.0, SENTRY_TOP + STAGE, SENTRY_Z);
     match form {
         Form::B1 => p.extend([
-            piece(&LOOKOUT, top).lost(1),
-            piece(&LOOKOUT_ROOF, top).lost(1),
+            piece(&LOOKOUT, top).lost(7),
+            piece(&LOOKOUT_ROOF, top).lost(7),
         ]),
         Form::B2 => p.extend([
-            whole(&STAGE_PART).lost(1),
-            piece(&DECK, staged).lost(1),
+            whole(&STAGE_PART),
+            piece(&DECK, staged),
             piece(&BALLISTA, Transform::from_translation(turret().pivot))
-                .lost(1)
                 .aimed()
-                .moving(Motion::Aim),
+                .moving(Motion::Kick(0.045)),
         ]),
         _ => {}
     }

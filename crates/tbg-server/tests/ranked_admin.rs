@@ -34,6 +34,7 @@ fn final_for(key: MatchKey, accounts: [AccountId; 2], winner: Seat) -> RankedFin
         ruleset_source_hash: tbg_server::ranked::source_hash(),
         seats: [IntegritySeat::default(); 2],
         factions: [[0; 7]; 2],
+        history_expected: false,
         arcanas: [ArcanaPreset::DEFAULT; 2],
         stats: None,
     }

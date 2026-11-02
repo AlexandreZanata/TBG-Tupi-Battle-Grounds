@@ -446,13 +446,22 @@ pub fn valid(r: &Ruleset) -> Result<(), String> {
         .filter(|k| k.is_conventional())
     {
         let d = r.def(k);
-        // Farwatch never targets Strongholds, so the range cap does not
-        // apply to it (ROSTER-EXPANSION §C.2 role invariant).
+        // P71 keeps Farwatch's registered reach while allowing Stronghold
+        // targets. Do not extend that exception to other kinds or a larger
+        // experimental range (GAME-DESIGN §6 / ROSTER-EXPANSION §C.2).
+        let range_limit = if k == tbg_core::UnitKind::Farwatch {
+            r.stronghold_range.max(Ruleset::canon().def(k).range)
+        } else {
+            r.stronghold_range
+        };
         let no_stronghold = d
             .ability(0, 0)
             .contains(&tbg_core::content::Ability::NoStronghold);
-        if !no_stronghold && d.range > r.stronghold_range {
-            return Err(format!("{:?}: base range above the Stronghold's", k));
+        if !no_stronghold && d.range > range_limit {
+            return Err(format!(
+                "{k:?}: base range {} exceeds allowed {range_limit} milli-tiles",
+                d.range
+            ));
         }
         let cap = r.energy_cap.unwrap_or(u32::MAX);
         if d.cost < ENERGY_SCALE || d.cost > cap {

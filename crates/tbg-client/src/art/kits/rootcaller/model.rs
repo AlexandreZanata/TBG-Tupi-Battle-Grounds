@@ -16,13 +16,11 @@ use crate::art::{
     },
 };
 
-const MOSS: Color = Color::srgb(0.36, 0.5, 0.2);
-const DEEP_MOSS: Color = Color::srgb(0.18, 0.36, 0.16);
-const BARK_DARK: Color = Color::srgb(0.3, 0.21, 0.13);
-const THORN: Color = Color::srgb(0.24, 0.16, 0.1);
-const AMBER: Color = Color::srgb(1.0, 0.72, 0.25);
-const SPORE: Color = Color::srgb(0.85, 0.95, 0.4);
-const CAP_SPOT: Color = Color::srgb(0.95, 0.9, 0.78);
+const DEEP_MOSS: Color = LEAF_DARK;
+const BARK_DARK: Color = DARK_LEATHER;
+const THORN: Color = DARK_LEATHER;
+const SPORE: Color = SAP;
+const CAP_SPOT: Color = LINEN;
 
 #[derive(Clone, Copy)]
 pub struct Form {
@@ -163,6 +161,8 @@ fn trunk(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
             .rot([0.0, 0.0, 62.0])
             .scale([1.0, 1.0, 0.35]),
         part(Body(Chest), Ball(0.07), moss, [0.0, h * 0.35, 0.15]).scale([1.4, 0.8, 0.5]),
+        part(Body(Chest), Ball(0.11), BARK, [-0.10, h * 0.55, 0.09]).scale([0.8, 1.45, 0.7]),
+        part(Body(Chest), Ball(0.10), BARK_DARK, [0.10, h * 0.38, 0.09]).scale([0.85, 1.5, 0.65]),
     ]);
     for (i, a) in [0.0f32, 1.3, 2.6, 3.9, 5.1].into_iter().enumerate() {
         let (x, z) = (a.cos() * 0.19, a.sin() * 0.16);
@@ -239,6 +239,7 @@ fn head(v: &mut Vec<PartSpec>, f: Form) {
             [0.0, -0.065, 0.13],
         ),
         part(Body(Head), Cone(0.09, 0.2), MOSS, [0.0, -0.14, 0.09]).rot([160.0, 0.0, 0.0]),
+        part(Body(Head), Ball(0.09), DEEP_MOSS, [0.0, -0.10, 0.09]).scale([1.15, 1.25, 0.65]),
         part(
             Body(Head),
             Box(0.06, 0.042, 0.02),

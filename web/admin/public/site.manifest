@@ -1,0 +1,9 @@
+# Public admin placeholder: styles, fonts and brand art only. Never add scripts, data or API routes here.
+assets/shared/tokens.css    web/shared/tokens.css
+assets/shared/base.css      web/shared/base.css
+assets/fonts/               crates/tbg-client/assets/fonts/*.woff2
+assets/fonts/OFL.txt        crates/tbg-client/assets/fonts/OFL.txt
+media/emblem-256.webp       web/shared/media/emblem-256.webp
+media/wordmark-320.webp     web/landing/media/wordmark-320.webp
+media/icon-32.png           art/branding/desktop/tbg-32.png
+favicon.ico                 crates/tbg-client/assets/branding/tbg.ico

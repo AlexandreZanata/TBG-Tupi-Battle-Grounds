@@ -1,0 +1,70 @@
+# Static web frontends: landing, www redirect and the public admin placeholder.
+# Rendered by web/deploy/publish.sh into /etc/caddy/tbg-web/sites.caddy, which the main
+# Caddyfile pulls in with `import tbg-web/*.caddy`. The API/app blocks, Cloudflare client-IP
+# trust and private-route blocks stay in deploy/Caddyfile.domains.template, untouched.
+# No block here proxies to the game server: these hosts serve files only.
+
+(tbg_web_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		-Server
+	}
+}
+
+__TBG_SITE_DOMAIN__ {
+	encode zstd gzip
+	import tbg_web_headers
+	header Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+	# Verified native metadata changes independently of immutable static site releases.
+	handle /downloads.json {
+		root * /srv/tbg/downloads
+		rewrite * /current.json
+		header Cache-Control "no-cache, no-transform"
+		file_server
+	}
+	root * /srv/tbg/landing/current
+	# JS/CSS references carry a content revision; pages/data revalidate and art/fonts cache a day.
+	# no-transform preserves attested bytes and prevents CDN analytics script injection.
+	@art path /media/* /assets/fonts/* /favicon.ico /apple-touch-icon.png
+	header @art Cache-Control "public, max-age=86400, no-transform"
+	@revalidate not path /media/* /assets/fonts/* /favicon.ico /apple-touch-icon.png
+	header @revalidate Cache-Control "no-cache, no-transform"
+	file_server {
+		hide .*
+	}
+	handle_errors 404 {
+		root * /srv/tbg/landing/current
+		rewrite * /404.html
+		# file_server would answer 200 by default; keep the real status for crawlers.
+		file_server {
+			status 404
+		}
+	}
+}
+
+# Same path and query on the base domain.
+www.__TBG_SITE_DOMAIN__ {
+	import tbg_web_headers
+	redir https://__TBG_SITE_DOMAIN__{uri} permanent
+}
+
+# Placeholder only until server-side operator authorization exists
+# (docs/planning/WEB-ADMIN-AUTH-CONTRACT.md): no scripts, data, sign-in or API routes.
+__TBG_ADMIN_DOMAIN__ {
+	encode zstd gzip
+	import tbg_web_headers
+	header {
+		Content-Security-Policy "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		X-Robots-Tag "noindex, nofollow"
+		Cache-Control "no-cache, no-transform"
+	}
+	root * /srv/tbg/admin/current
+	file_server {
+		hide .*
+	}
+}

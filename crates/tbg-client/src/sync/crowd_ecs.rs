@@ -1,9 +1,9 @@
 //! Place live and spectator units using client-only crowd offsets.
 
 use bevy::prelude::*;
-use tbg_core::{Archetype, Seat, UnitView};
+use tbg_core::{Archetype, Seat, UnitKind, UnitView};
 
-use crate::{config, crowd, visuals::UnitVisual};
+use crate::{art::aim::Aim, config, crowd, visuals::UnitVisual};
 
 #[derive(Component)]
 pub(crate) struct LaneAnchor {
@@ -25,6 +25,14 @@ impl LaneAnchor {
                             look.kind.is_summon(),
                         )
                     }),
+                half_length: if look.kind == UnitKind::Bonehorn {
+                    1.35
+                } else {
+                    radius(
+                        tbg_core::content::def(look.kind).archetype,
+                        look.kind.is_summon(),
+                    )
+                },
                 facing: if look.own { 1.0 } else { -1.0 },
                 ghost: false,
             },
@@ -39,6 +47,11 @@ impl LaneAnchor {
                 radius: crate::art::kits::completion::crowd_radius(u.kind, u.tier).unwrap_or_else(
                     || radius(tbg_core::content::def(u.kind).archetype, u.is_summon()),
                 ),
+                half_length: if u.kind == UnitKind::Bonehorn {
+                    1.35 * (1.0 + f32::from(u.tier) * 0.08)
+                } else {
+                    radius(tbg_core::content::def(u.kind).archetype, u.is_summon())
+                },
                 facing: if u.seat == you { 1.0 } else { -1.0 },
                 ghost: u.fx & (1 << 14) != 0,
             },
@@ -75,7 +88,14 @@ pub(super) struct Scratch {
 pub(super) fn update(
     time: Res<Time>,
     mut scratch: Local<Scratch>,
-    mut units: Query<(&LaneAnchor, &mut CrowdState, &mut Transform, &UnitVisual)>,
+    library: Res<crate::art::FigureLibrary>,
+    mut units: Query<(
+        &LaneAnchor,
+        &mut CrowdState,
+        &mut Transform,
+        &UnitVisual,
+        Option<&Aim>,
+    )>,
 ) {
     let enabled = *scratch
         .enabled
@@ -88,12 +108,33 @@ pub(super) fn update(
     } = &mut *scratch;
     bodies.clear();
     offsets.clear();
-    for (anchor, state, _, visual) in &units {
-        bodies.push(crowd::Body {
+    for (anchor, state, _, visual, aim) in &units {
+        let mut body = crowd::Body {
             anchor_x: anchor.pos.x,
             ghost: is_ghost(visual, anchor),
             ..anchor.body
-        });
+        };
+        if visual.kind() == UnitKind::Bonehorn {
+            let (tier, branch) = visual.form();
+            let form = library.get(visual.kind(), tier, branch);
+            let depth = form.occupancy;
+            body.radius = body.radius.max(form.body_radius);
+            body.anchor_x += (depth.x + depth.y) * 0.5 * body.facing;
+            body.half_length = (depth.y - depth.x) * 0.5;
+        }
+        if visual.kind() == UnitKind::Shatterback {
+            let (tier, branch) = visual.form();
+            let form = library.get(visual.kind(), tier, branch);
+            let lunge =
+                crate::art::melee::strike_profile_for_unit(visual.kind(), tier, branch).lunge;
+            body.include_envelope(
+                form.occupancy.x,
+                form.occupancy.y + lunge,
+                form.body_radius,
+                aim.map_or(visual.yaw, |aim| aim.current_yaw),
+            );
+        }
+        bodies.push(body);
         offsets.push(state.0);
     }
     if enabled {
@@ -104,7 +145,7 @@ pub(super) fn update(
             &crowd::Params::default(),
         );
     }
-    for ((anchor, mut state, mut transform, _), offset) in units.iter_mut().zip(offsets.iter()) {
+    for ((anchor, mut state, mut transform, _, _), offset) in units.iter_mut().zip(offsets.iter()) {
         state.0 = *offset;
         let delta = if enabled {
             Vec3::new(offset.dx, 0.0, offset.dz)

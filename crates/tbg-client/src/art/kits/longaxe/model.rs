@@ -19,7 +19,7 @@ pub const HEAD_Y: f32 = HAFT * 0.72;
 
 pub fn plan(tier: u8) -> Proportions {
     let mut p = body::plan(false, 1.05, tier);
-    p.arm = 0.19;
+    p.arm = 0.26;
     p
 }
 
@@ -50,6 +50,15 @@ pub fn spec(tier: u8, branch: u8) -> FigureSpec {
 
 fn armor(v: &mut Vec<PartSpec>, p: &Proportions, f: Form) {
     let h = p.torso.y;
+    // Padded shoulder panels distinguish the polearm infantry from plate defenders.
+    for arm in [UpperArmL, UpperArmR] {
+        v.push(part(
+            Body(arm),
+            Pill(0.074, 0.045),
+            RUST,
+            [0.0, -0.035, 0.0],
+        ));
+    }
     // Quilted gambeson ribs.
     for y in [0.3, 0.55, 0.8] {
         v.push(part(

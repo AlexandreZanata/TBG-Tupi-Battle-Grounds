@@ -9,6 +9,9 @@ __TBG_DOMAIN__ {
 		reverse_proxy 127.0.0.1:8082
 	}
 	# Operator status is loopback-only; never proxy it.
+	handle /api/internal/* {
+		respond 404
+	}
 	handle /api/release {
 		respond 404
 	}
@@ -16,30 +19,41 @@ __TBG_DOMAIN__ {
 	# request naming its slot (X-TBG-Slot) reaches that slot; unnamed auth
 	# requests keep the shared route below. Named matchers keep file order.
 	@auth_slot_a {
-		path /api/auth/*
+		path /api/auth/* /api/me/*
 		header X-TBG-Slot a
 	}
 	handle @auth_slot_a {
 		reverse_proxy 127.0.0.1:8080
 	}
 	@auth_slot_b {
-		path /api/auth/*
+		path /api/auth/* /api/me/*
 		header X-TBG-Slot b
 	}
 	handle @auth_slot_b {
 		reverse_proxy 127.0.0.1:8082
 	}
+	# P73 privacy barrier: public profiles/history never fall back to an older slot.
+	# Keep slot a privacy-aware even when its match admission is draining/rolled back.
+	handle /api/players/* {
+		header Cache-Control "private, no-store"
+		reverse_proxy 127.0.0.1:8080
+	}
 	# Legacy `/ws` clients, health and the read-only APIs (P13 ranking with
 	# its own 10 s cache headers and per-IP limits, P66 admission): every
 	# slot reads the same database, so the first live slot answers and a
 	# refused connection retries the other one.
-	@shared path /ws /health /api/*
+	@shared path /ws /health /api/admission /api/live /api/online /api/leaderboard /api/version /api/patch-notes /api/patch-notes/* /api/auth/*
 	handle @shared {
 		reverse_proxy 127.0.0.1:8080 127.0.0.1:8082 {
 			lb_policy first
 			lb_try_duration 2s
 			fail_duration 10s
 		}
+	}
+	# Unknown/encoded API paths also fail closed to the privacy-aware process;
+	# they cannot fall through to an older public profile handler.
+	handle /api/* {
+		reverse_proxy 127.0.0.1:8080
 	}
 	# P66: the signed update repository (TUF). Missing files must be real
 	# 404s (clients probe the next root version); metadata revalidates,

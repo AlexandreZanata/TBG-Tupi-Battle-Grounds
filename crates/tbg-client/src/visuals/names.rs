@@ -100,7 +100,7 @@ fn position(
             .and_then(|unit| transforms.get(unit.bar).ok())
             .and_then(|bar| {
                 camera
-                    .world_to_viewport(camera_transform, bar.translation() + Vec3::Y * 0.20)
+                    .world_to_viewport(camera_transform, bar.translation() + Vec3::Y * 0.42)
                     .ok()
             });
         let Some(point) = point else {
@@ -135,6 +135,7 @@ mod tests {
             figure: Entity::PLACEHOLDER,
             joints: [Entity::PLACEHOLDER; crate::art::rig::NODE_COUNT],
             ring: Entity::PLACEHOLDER,
+            status_ring: Entity::PLACEHOLDER,
             ring_base: 1.0,
             tiers: [Entity::PLACEHOLDER; 2],
             bar: Entity::PLACEHOLDER,

@@ -48,33 +48,30 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             moves::idle(m, pose, &p, 0.4);
             let snip = tools::hold((m.clock * 0.4).rem_euclid(1.0), [0.0, 0.04, 0.08, 0.14]);
             claws(pose, 1.0, snip);
+            tools::add(pose, Joint::ForearmL, [-10.0 * snip, 0.0, 0.0]);
+            tools::add(pose, Joint::ForearmR, [8.0 * snip, 0.0, 0.0]);
+            tools::set(pose, Joint::Chest, [0.0, 0.0, 1.5 * (m.clock * 0.7).sin()]);
         }
         Clip::Walk => {
             moves::walk(m, pose, 0.0, 3.0);
             claws(pose, 1.0, 0.0);
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            tools::add(pose, Joint::UpperArmL, [5.0 * step, 0.0, 0.0]);
+            tools::add(pose, Joint::UpperArmR, [-5.0 * step, 0.0, 0.0]);
         }
         Clip::AttackMelee => {
-            moves::strike(m, pose, &p, THRUST, 1.0);
-            let k = (m.t / ATTACK).clamp(0.0, 1.0);
+            let drive = tools::hold(m.t, [0.20, 0.30, 0.38, 0.62]);
+            let load = tools::hold(m.t, [0.0, 0.15, 0.20, 0.30]);
             tools::set(
                 pose,
                 Joint::UpperArmR,
-                [
-                    -85.0 - 25.0 * tools::hold(k, [0.15, 0.30, 0.50, 0.85]),
-                    -10.0,
-                    -8.0,
-                ],
+                [-70.0 + 15.0 * load - 35.0 * drive, -10.0, -8.0],
             );
-            tools::set(
-                pose,
-                Joint::UpperArmL,
-                [
-                    -75.0 - 20.0 * tools::hold(k, [0.2, 0.4, 0.6, 0.9]),
-                    0.0,
-                    22.0,
-                ],
-            );
+            tools::set(pose, Joint::UpperArmL, [-65.0 - 8.0 * drive, 0.0, 22.0]);
             tools::set(pose, Joint::ForearmL, [-30.0, 0.0, 0.0]);
+            tools::set(pose, Joint::ForearmR, [-45.0 * load - 20.0, 0.0, 0.0]);
+            tools::set(pose, Joint::Chest, [0.0, 5.0 * drive, 0.0]);
+            tools::face(pose, m.aim, bevy::prelude::Vec3::ZERO);
         }
         Clip::Cast => {
             // Professional boarding animation: crab extends its heavy right pincer forward
@@ -134,8 +131,22 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             claws(pose, 1.3, 0.0);
         }
         Clip::Victory => {
-            moves::victory(m, pose, &p, Cheer::Both);
-            claws(pose, 1.9, (m.t * 6.0).sin() * 0.5 + 0.5);
+            let wave = (m.t / 0.8 * std::f32::consts::TAU).sin();
+            claws(pose, 1.0, 0.0);
+            tools::set(
+                pose,
+                Joint::UpperArmL,
+                [-85.0 - 30.0 * wave.max(0.0), 0.0, 20.0],
+            );
+            tools::set(
+                pose,
+                Joint::UpperArmR,
+                [-85.0 - 30.0 * (-wave).max(0.0), 0.0, -20.0],
+            );
+            tools::set(pose, Joint::Chest, [0.0, 0.0, 2.0 * wave]);
+            tools::set(pose, Joint::Spine, [0.0, 0.0, 0.0]);
+            tools::set(pose, Joint::Root, [0.0, 0.0, 0.0]);
+            pose[Joint::Root.index()].1 = bevy::prelude::Vec3::ZERO;
         }
         _ => claws(pose, 1.0, 0.0),
     }

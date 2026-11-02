@@ -36,3 +36,10 @@ binary. Triangles: 1206/1218/1230/1242/1426. Screenshot: ../../media/p59/rattle_
 These observations and the consolidation above resolve earlier pending compile,
 test and lineup entries. Full-clip/ability/HUD/live reconnect/performance/balance,
 full suite and owner look/fun acceptance remain open. No pool activation/deploy.
+
+### P71 owner override (2026-11-01, Proposed)
+
+The bomb/Slow and throwing performance above are historical. Tick now wears
+black and aims a shoulder pistol independently; see GAME-DESIGN §13.2–13.3
+and the dated DECISIONS follow-up for provisional stats and branch ownership.
+The same unit, HP pool, ordinary Rattle stats and club behavior are retained.

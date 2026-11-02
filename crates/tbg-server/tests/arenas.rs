@@ -103,7 +103,7 @@ async fn both_seats_and_a_reconnect_see_the_drawn_arena() {
 #[tokio::test]
 async fn every_new_match_draws_on_the_server() {
     // Twenty quick matches: the arena comes from the server alone and
-    // varies between matches (five arenas, P(all equal) = 5^-19).
+    // varies between matches (eight arenas, P(all equal) = 8^-19).
     let url = server().await;
     let mut seen = std::collections::BTreeSet::new();
     for _ in 0..20 {

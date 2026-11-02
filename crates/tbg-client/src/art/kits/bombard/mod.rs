@@ -51,11 +51,16 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
         Clip::Idle => {
             moves::idle(m, pose, &p, 0.7);
             let ready = m.aim.map_or(0.0, |a| a.weight);
-            carry(pose, &p, 20.0 + 20.0 * ready, 0.03 * ready);
+            let inspect =
+                tools::hold((m.clock * 0.24).fract(), [0.1, 0.22, 0.35, 0.55]) * (1.0 - ready);
+            carry(pose, &p, 20.0 + 20.0 * ready + 8.0 * inspect, 0.03 * ready);
+            tools::add(pose, Joint::Head, [12.0 * inspect, -8.0 * inspect, 0.0]);
         }
         Clip::Walk => {
             moves::walk(m, pose, 4.0, 4.0);
-            carry(pose, &p, 15.0, 0.0);
+            let step = (m.walk.unwrap_or(0.0) * std::f32::consts::TAU).sin();
+            carry(pose, &p, 18.0 + 3.0 * step.abs(), 0.008 * step.abs());
+            tools::set(pose, Joint::Head, [-3.0, 2.0 * step, -3.0 * step]);
         }
         Clip::AttackRanged => fire(m, pose, &p, f),
         Clip::Hit => {
@@ -76,8 +81,11 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
             carry(pose, &p, 20.0 + up, 0.12 * up / 60.0);
         }
         Clip::Victory => {
-            moves::victory(m, pose, &p, Cheer::Dance);
-            carry(pose, &p, 70.0, 0.1);
+            let salute = 0.5 - 0.5 * (m.t / 0.8 * std::f32::consts::TAU).cos();
+            tools::set(pose, Joint::Chest, [-4.0 * salute, 0.0, 2.0 * salute]);
+            tools::set(pose, Joint::Head, [-14.0 * salute, -8.0, 0.0]);
+            carry(pose, &p, 35.0 + 25.0 * salute, 0.025 * salute);
+            tools::plant(pose, &p, tools::stance(&p, 1.3, 0.04));
         }
         _ => carry(pose, &p, 15.0, 0.0),
     }
@@ -87,7 +95,7 @@ pub fn pose(m: &Moment, pose: &mut Pose) {
 /// level, raised by `lift`.
 fn carry(pose: &mut Pose, p: &Proportions, up: f32, lift: f32) {
     let turn = Quat::from_rotation_x(-up.to_radians());
-    moves::shoulder_arms(pose, p, Vec3::new(-0.12, -0.06 + lift, 0.2), turn, FORE);
+    moves::shoulder_arms(pose, p, Vec3::new(-0.06, 0.11 + lift, 0.14), turn, FORE);
 }
 
 /// Brace and raise the barrel to the bomb's launch angle (0–0.15 s),
@@ -102,7 +110,7 @@ fn fire(m: &Moment, pose: &mut Pose, p: &Proportions, f: Form) {
     tools::add(pose, Joint::Spine, [6.0 * brace - 12.0 * kick, 0.0, 0.0]);
     tools::add(pose, Joint::Head, [-6.0 * kick, 0.0, 0.0]);
     let turn = Quat::from_rotation_x(-up * brace.max(0.4) - 0.3 * kick);
-    let at = Vec3::new(-0.12, -0.06 + 0.08 * brace, 0.2) - turn * Vec3::Z * 0.07 * kick;
+    let at = Vec3::new(-0.06, 0.11 + 0.04 * brace, 0.14) - turn * Vec3::Z * 0.07 * kick;
     moves::shoulder_arms(pose, p, at, turn, FORE);
     let load = tools::hold(k, [0.5, 0.66, 0.82, 0.96]);
     if load > 0.0 {

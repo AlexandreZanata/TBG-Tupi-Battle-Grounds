@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "level": "targeted consolidation, not a full suite",
+  "source_commit": "71bbe0b3eff7fb6fc967b28a818c353345439502",
+  "binary_sha256": "bf024681d417f0d8b62778102660d03dbd3c6edccf7fdad70229a2373a0e05f5",
+  "native_version": "0.1.0-native.2-p71-71bbe0b",
+  "local_evidence_root": ".local/p71-evidence",
+  "items": [
+    {
+      "path": "collapse-check.log",
+      "sha256": "70f245cfe661e6bf49c9999773a68c1c6efb1f56b427cd100d5d3093588870af"
+    },
+    {
+      "path": "followup-targeted.log",
+      "sha256": "e0b3af8d14fbb60ab31b26e42be2eec8de8114296ee6f8cda304dee9469005cf"
+    },
+    {
+      "path": "followup-final-build.log",
+      "sha256": "f4aced8e04ea3078307bda31c8493277f797692a92a2bb9598d787e72d6bce9f"
+    },
+    {
+      "path": "trident-resumed.log",
+      "sha256": "ca13c911089c3292b5e99a07021fa5cd20e9210eb8347b13b5d4f3f32a3674cd"
+    },
+    {
+      "path": "trident-resumed-constraints.log",
+      "sha256": "451d7bf34758986b2af6f6e30822613de7372f993717f8a1c0125a8e460a9dd2"
+    },
+    {
+      "path": "delivery-build.log",
+      "sha256": "fa3be9672868d3f5e87fa0b538c5080384a704e8e1ff6f100737503e3dbb8d5a"
+    },
+    {
+      "path": "projected-bars-check.log",
+      "sha256": "2537fd70b56773b34768959c818474561d0e6bc01c0dfbde1ac31f9bba84580a"
+    },
+    {
+      "path": "projected-bars-regression.log",
+      "sha256": "13a240979728866193beb50c74346a9ef2a6965ae300c75d9808c97c492241e5"
+    },
+    {
+      "path": "projected-bars-delivery-build.log",
+      "sha256": "af7122ce8fd4d0d52e324660b5301bac65522beeeb7c6b5f9c98055a1b1d3234"
+    },
+    {
+      "path": "focus-50c2978/renderer.log",
+      "sha256": "06ba9693fc79e7bde123bdafe727487ebfe849b6336d82ca8aac41bc90cf3ebb"
+    },
+    {
+      "path": "motion-819ed70-final/captures.json",
+      "sha256": "a8a9c08d2e04865e06c85334ba1227a58b7f7b6dacfead9ba1587d2c1d151c6f"
+    },
+    {
+      "path": "tower-sweep-819ed70-A/capture.json",
+      "sha256": "73d4a06a888d3a80f073f3dd274e957fe87ec6bf90e4c42edd24c0b73ef87e03"
+    },
+    {
+      "path": "live-50c2978-RattleTick-Base-A-standard/captures.json",
+      "sha256": "2f63c8e9dd85c0d64fd3aa83b3af9dfe837f3b8d4261d4e5690cba3bedb90a72"
+    },
+    {
+      "path": "live-71bbe0b-Bonehorn-B2-A-standard/captures.json",
+      "sha256": "28c77ed292d2d6fe9c44f33b6cd3071fe8de63858d7f6d6649ece5a99f6343b7"
+    },
+    {
+      "path": "focus-50c2978/unit-tier-2.png",
+      "sha256": "761262f62d908ef63cc8982ac2ea8bd6c38310417bbfbe2bcf15f787c2beef64"
+    },
+    {
+      "path": "focus-50c2978/tower-choices.png",
+      "sha256": "ffaba6e6c9240dc0bc6eb31aa017279cdcc6121a2282b32f8bb519bffce607e8"
+    },
+    {
+      "path": "focus-50c2978/unit-tier-0.png",
+      "sha256": "01be77d2750e3f5934340408a04fa6d4e905f42c193bc546fb4edf05a50cbe14"
+    },
+    {
+      "path": "focus-50c2978/arena-dismissed.png",
+      "sha256": "d1a5481d4367560934f07f0b841228c29f66424b034e76ea65c4a71c8a896217"
+    },
+    {
+      "path": "focus-50c2978/arena-open.png",
+      "sha256": "426ce28d29ef29e039239c6a1b48316aec5cecaa1fc055854463c0c182a5f9b4"
+    },
+    {
+      "path": "focus-50c2978/unit-tier-1.png",
+      "sha256": "5479fbea8ce1ae6ec07cea5874ee83b7bc786f1e8915080432d2f4309447f6eb"
+    },
+    {
+      "path": "review-final/bonehorn-live.jpg",
+      "sha256": "b46fb55fb857f6ec9b7860351a0cd9ca91cacf4042e44df96fa0f8ade98556c7"
+    },
+    {
+      "path": "review-final/motion-0.jpg",
+      "sha256": "3afa0a4b91dd2ee7bf6b6bc949f009d269a59334d69f65887f3f7462d67a5d54"
+    },
+    {
+      "path": "review-final/motion-2.jpg",
+      "sha256": "61604d42815c32b01911f29a3114c98db9ea1d2c41ec751f04523a0c428ad15f"
+    },
+    {
+      "path": "review-final/towers-2.jpg",
+      "sha256": "fd47dfa46c3910d4d9c35dc003cb5746fa1ac6c3d3b573113f60ef4d25d5e9a2"
+    },
+    {
+      "path": "review-final/bonehorn-projection-final.jpg",
+      "sha256": "80387a0a60ab82291daadf08aba13293cfa0db59a42a00ae9a435f4ae7216dee"
+    },
+    {
+      "path": "review-final/towers-0.jpg",
+      "sha256": "95b3f6dec7a02b4e44724136a9911549b36ba778be16bcd69de4f862504d264a"
+    },
+    {
+      "path": "review-final/towers-1.jpg",
+      "sha256": "af16b0221dd7863394ef4db473eb9ac99f0437777dfb5220ba1b084be067577f"
+    },
+    {
+      "path": "review-final/motion-1.jpg",
+      "sha256": "4b15106f7ee16393ea7f888bbec1be2998d5a6517b13b97ec61cc90d1309243e"
+    },
+    {
+      "path": "review-final/towers-stage20.jpg",
+      "sha256": "529b0bcb68b32d8435be27e7946f53ef547c8b38c90fb8f026961b28b1420fde"
+    }
+  ],
+  "coverage_notes": [
+    "Earlier failed candidates remain preserved and are not passing evidence.",
+    "Static tower sheets at 11f60b1 cover both seats and all 21 damage states; subsequent changes affect collapse/debris/panel visibility.",
+    "Final native Practice focus capture at 50c2978 confirms tier0\u21921\u21922 retention and arena outside dismissal; later changes only concern projected bars/Bonehorn.",
+    "Final live Bonehorn B2 native recording at 71bbe0b covers one 241-tick training engagement; no exhaustive collision claim.",
+    "Motion recording at 819ed70 covers 20 normal-rate clip/recovery steps for Trident, Hornet, RattleTick and Bloomkeeper, five forms each; no live targeting claim."
+  ],
+  "deferred": [
+    "Full workspace suite, release packaging, Windows, live browser runtime, full Low-mode/two-seat temporal matrix, performance benchmark, D-33 balance acceptance, owner look/fun sign-off"
+  ]
+}

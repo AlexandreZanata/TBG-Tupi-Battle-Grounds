@@ -38,6 +38,10 @@ pub const GUEST_RATING: u16 = 1000;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct LiveSnapshot {
+    pub revision: u64,
+    pub updated_unix: i64,
+    pub complete: bool,
+    pub stale: bool,
     pub counts: Counts,
     pub featured: Option<LiveId>,
     /// Listed matches: the featured one first, then highest mean rating.
@@ -48,7 +52,7 @@ pub struct LiveSnapshot {
 
 /// BR-LV06: `players` and `accounts` count distinct sessions and accounts
 /// with a connection; `in_battle` counts seats of running matches.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Counts {
     pub players: u32,
     pub accounts: u32,
@@ -77,16 +81,20 @@ pub struct LiveSeat {
     pub tier: u8,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct OnlineRow {
+    pub invitable: bool,
+    pub slot: Option<String>,
     pub name: String,
     pub rating: u16,
     pub status: PresenceStatus,
 }
 
 /// BR-LV06: what an online account is doing right now.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum PresenceStatus {
+    Busy,
     Idle,
     Queued,
     Playing,
@@ -96,6 +104,7 @@ pub enum PresenceStatus {
 impl PresenceStatus {
     pub fn slug(self) -> &'static str {
         match self {
+            PresenceStatus::Busy => "busy",
             PresenceStatus::Idle => "idle",
             PresenceStatus::Queued => "queued",
             PresenceStatus::Playing => "playing",

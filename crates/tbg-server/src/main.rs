@@ -13,6 +13,10 @@ use tbg_server::{Config, Shared};
 const DRAIN_REPORT: Duration = Duration::from_secs(30);
 
 fn main() {
+    if std::env::args().nth(1).as_deref() == Some("--build-info") {
+        println!("{}", tbg_server::build_info::get());
+        return;
+    }
     let mut config = Config::from_env();
     // P60: an invalid integrity setting is a start-up error, never a default.
     let settings = tbg_server::ranked::policy::RankedPolicy::from_env()

@@ -3,6 +3,9 @@
 //! flight tangent, leaving a trail; it lands as its own impact. Cosmetic
 //! only — the simulation already decided the hit.
 
+#[path = "fish.rs"]
+mod fish;
+
 use bevy::prelude::*;
 
 use super::impacts::{self, Area, Impact};
@@ -38,7 +41,8 @@ pub enum ShotKind {
     /// Archer Arrow Rain (B2): smaller, faster arrows trailing sparks.
     ArrowStorm,
     Glob,
-    Fish,
+    /// Old Finn: presentation tier only; both branches share the same flight.
+    Fish(u8),
     Bomb,
     Hex,
     Petal,
@@ -442,12 +446,12 @@ fn look(kind: ShotKind) -> Look {
             8.0,
             Impact::Poison,
         ),
-        Fish => (
-            Some((Body::Fish, 1.0)),
+        Fish(tier) => (
+            Some((Body::Fish, fish::scale(tier))),
             0.5,
             FISH_FLIGHT,
             Trail::Motes(Mote::Water),
-            22.0,
+            6.0,
             Impact::Splash,
         ),
         Bomb => (
@@ -759,24 +763,7 @@ impl ShotMeshes {
                 ),
                 (Ball(0.03), MUSHROOM, Transform::from_xyz(-0.04, 0.03, 0.02)),
             ]),
-            fish: build(vec![
-                (
-                    Ball(0.07),
-                    Color::srgb(0.55, 0.65, 0.72),
-                    Transform::from_scale(Vec3::new(0.7, 0.9, 1.8)),
-                ),
-                (
-                    Cone(0.06, 0.1),
-                    Color::srgb(0.45, 0.55, 0.65),
-                    along(-0.16).with_scale(Vec3::new(1.0, 1.0, 0.25)),
-                ),
-                (Ball(0.015), DARK, Transform::from_xyz(0.035, 0.03, 0.08)),
-                (
-                    Box(0.01, 0.05, 0.08),
-                    Color::srgb(0.85, 0.55, 0.45),
-                    Transform::from_xyz(0.0, 0.07, 0.0),
-                ),
-            ]),
+            fish: build(fish::parts()),
             bomb: build(vec![
                 (Ball(0.1), DARK, Transform::IDENTITY),
                 (Cyl(0.03, 0.05), IRON, Transform::from_xyz(0.0, 0.1, 0.0)),
@@ -907,7 +894,7 @@ pub(super) fn fly(
         s.age += dt;
         s.t = (s.t + dt / l.secs).min(1.0);
         let ground = l.body.is_none();
-        let arc = if s.kind == ShotKind::Fish {
+        let arc = if matches!(s.kind, ShotKind::Fish(_)) {
             fish_arc(s.from, s.to)
         } else {
             l.arc
@@ -1062,7 +1049,32 @@ mod fish_tests {
             assert!(flight(from, to, arc, 0.5).y >= from.lerp(to, 0.5).y + FISH_MIN_APEX - 1e-5);
             assert_eq!(flight(from, to, arc, 1.0), to);
         }
-        assert!((0.22 + look(ShotKind::Fish).secs - 0.30).abs() < 1e-5);
+        for tier in 0..=2 {
+            assert!((0.22 + look(ShotKind::Fish(tier)).secs - 0.30).abs() < 1e-5);
+        }
+    }
+
+    #[test]
+    fn fish_tiers_keep_timing_and_other_shots_unchanged() {
+        // P70 S2: growing fish are presentation only; the existing arc and impact clock survive.
+        let mut previous = 0.0;
+        for tier in 0..=2 {
+            let fish = look(ShotKind::Fish(tier));
+            let Some((Body::Fish, size)) = fish.body else {
+                panic!("Fish body missing")
+            };
+            assert!(size > previous);
+            previous = size;
+            assert_eq!(fish.secs, FISH_FLIGHT);
+            assert_eq!(fish.arc, 0.5);
+            assert_eq!(fish.impact, Impact::Splash);
+        }
+        // A tier must never leak into unrelated arrows or artillery.
+        for kind in [ShotKind::Arrow, ShotKind::Shell] {
+            let shot = look(kind);
+            assert_eq!(shot.body.map(|(_, scale)| scale), Some(1.0));
+            assert_eq!(shot.secs, UNIT_FLIGHT);
+        }
     }
 }
 

@@ -6,7 +6,9 @@ mod camera;
 mod figures;
 mod layout;
 mod lineup;
+pub(crate) mod motion;
 mod palette;
+pub(crate) mod polish;
 mod range;
 mod settings;
 mod title;
@@ -41,6 +43,8 @@ pub fn plugin(app: &mut App) {
             (
                 // Animation runs in PostUpdate, after all of these.
                 cycle,
+                polish::update,
+                motion::update,
                 camera::frame,
                 layout::place.before(crate::art::anim::animate),
                 turn.after(crate::art::anim::animate),
@@ -85,11 +89,14 @@ fn spawn(
         ));
     }
     match options.mode.as_str() {
+        "matchlineup" => motion::spawn_lineup(&mut commands, &lib),
+        "motion" => motion::spawn(&mut commands, &lib),
         "palette" => palette::spawn(&mut commands, meshes, mats),
         "blockout" => blockout::spawn(&mut commands, &lib, mats, window.height() > window.width()),
         // Built by `arena::strongholds`, which owns the tower parts.
         "strongholds" => {}
         "aim" => aim::spawn(&mut commands, &lib, &options, mats, &window),
+        _ if options.polish => polish::spawn(&mut commands, &lib, &options),
         _ if options.range => {
             let unit = options.unit.unwrap_or(tbg_core::UnitKind::SiegeWalker);
             range::spawn(&mut commands, &lib, &assets, unit);
@@ -110,7 +117,10 @@ fn cycle(time: Res<Time>, options: Res<Gallery>, mut figures: Query<(&mut Animat
         }
         c.shown = Some(step);
         match CLIPS[i] {
-            base @ (Clip::Idle | Clip::Walk) => anim.set_base(base),
+            base @ (Clip::Idle | Clip::Walk) => {
+                anim.finish_action();
+                anim.set_base(base);
+            }
             clip => anim.play(clip),
         }
     }
@@ -121,12 +131,16 @@ fn turn(
     figures: Query<&Animator>,
     mut transforms: Query<&mut Transform, Without<Animator>>,
 ) {
-    if !options.turn {
+    if options.polish || (!options.turn && options.view.is_none()) {
         return;
     }
     for figure in &figures {
         if let Ok(mut t) = transforms.get_mut(figure.figure) {
-            t.rotation = Quat::from_rotation_y(time.elapsed_secs() * options.slow * 0.6);
+            let yaw = options.view.map_or_else(
+                || time.elapsed_secs() * options.slow * 0.6,
+                |view| view.yaw().to_radians(),
+            );
+            t.rotation = Quat::from_rotation_y(yaw);
         }
     }
 }

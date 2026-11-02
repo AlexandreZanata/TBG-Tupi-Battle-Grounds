@@ -10,6 +10,7 @@ pub(crate) type BattleVisuals = Or<(
     With<UnitVisual>,
     With<crate::vfx::Vfx>,
     With<crate::vfx::shots::Shot>,
+    With<crate::vfx::flame::FlameJet>,
 )>;
 
 pub(crate) fn clear(

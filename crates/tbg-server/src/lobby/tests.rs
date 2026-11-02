@@ -22,7 +22,7 @@ use crate::Config;
 
 mod recovery;
 
-fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
+pub(super) fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
     let (self_tx, self_rx) = mpsc::channel(8);
     (
         Lobby {
@@ -34,6 +34,9 @@ fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
             rooms: Vec::new(),
             challenges: Vec::new(),
             rematches: Vec::new(),
+            player_challenges: Vec::new(),
+            player_challenge_cooldowns: Vec::new(),
+            player_challenge_accounts: HashMap::new(),
             self_tx,
             config: Arc::new(Config::default()),
             metrics: Arc::new(Metrics::default()),
@@ -44,13 +47,14 @@ fn lobby() -> (Lobby, mpsc::Receiver<LobbyCmd>) {
             live_tx: watch::channel(Arc::default()).0,
             featured: None,
             ranked: None,
+            history: None,
             ranked_seen: HashMap::new(),
         },
         self_rx,
     )
 }
 
-fn add_session(
+pub(super) fn add_session(
     lobby: &mut Lobby,
     token: [u8; 16],
     state: SessionState,
@@ -70,6 +74,8 @@ fn add_session(
             arcanas: tbg_core::ArcanaPreset::DEFAULT,
             stronghold: tbg_core::StrongholdKind::DEFAULT,
             last_spectate: None,
+            player_challenges_enabled: false,
+            player_challenge_actions: Vec::new(),
             finished: None,
         },
     );
@@ -570,6 +576,8 @@ fn a_watcher_returns_to_idle_on_stop_disconnect_and_match_end() {
 fn completed_fixture(seat: Seat) -> crate::chan::CompletedResult {
     crate::chan::CompletedResult {
         delivered_to: None,
+        personal: None,
+        history: None,
         start: ServerMsg::MatchStart {
             result_id: [63; 16],
             you: seat,
