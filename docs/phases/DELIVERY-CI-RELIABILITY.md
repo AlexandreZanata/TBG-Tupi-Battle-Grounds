@@ -331,3 +331,13 @@ relaxing a retirement guard. The prior failure log did not include the
 blocking counter, so unread-client expiry is a fixture-hardening hypothesis,
 not a claimed production root cause. All production source and R15 values
 remain unchanged by this fixture-only commit.
+
+
+At a1fceb5 the army and guest-slot scenarios passed hosted CI; the equivalent
+Ranked fixture still left its four sockets unread during the idle wait.
+Reuse the responsive client loop there, preserving the two exact-once match
+rows, all account game counts and the unchanged zero-pending retirement gate.
+If the wait recurs, print the ranked, reconnect-receipt, history and Store job
+components directly from the test's Shared handles. No production code or
+retirement threshold changes. Local Rust execution remains deferred because
+the shared slot is owned by another work front; protected CI executes it.
