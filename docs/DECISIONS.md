@@ -3187,3 +3187,22 @@ from the diagnostic's ineffective controls to a 1.000000 versus 0.796875 price
 comparison after the fix (20.3125 points). This is screening evidence, not the
 full C7 result or D-33 acceptance. The original 256-pair C7 test and its 10-point
 match/20-point duel criteria remain intact and queued to hosted CI.
+
+## INT-03 — Isolate healing-canary controls without changing a threshold (2026-11-02)
+
+After INT-02 the full 256-pair C7 price canary passed SiegeWalker, then exposed
+Bloomkeeper x2 HP/healing at 0.88 -> 0.80 against the shipped Bot. Scaling a
+Ruleset changes both armies: that opponent can buy the same buffed healer.
+The value engine already has BotAvoid(kind) for exactly this confound. Retain
+the original observation and add that isolated control for pure-healer C7 rows,
+using the same 256 paired seeds and +0.10 gain. All duel/match thresholds,
+mutations, budgets, original rows and assertions for other kinds remain.
+This is calibration of the canary, not acceptance or tuning of the live roster.
+
+Inspection also found that BotAvoid passed through the outer reaction schedule
+and the shipped Bot's own schedule, slowing the control twice. Like Bot, it now
+owns its internal cadence directly. A new active-simulation regression compares
+Bot and BotAvoid when the avoided kind is absent from the pool: actions and
+state hashes must match. Neither change affects the production bot or gameplay.
+Local Rust execution was deferred when the shared validation lock returned 75;
+the exact new test and unchanged full C7 remain queued to protected hosted CI.

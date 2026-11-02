@@ -135,3 +135,17 @@ Scoped online validation passed on the corrected fixtures: rematch reload 0.21 s
 real Fortification/reconnect/replay 0.47 s, bot reconnect 4.51 s, and C4a complete
 natural-match replay equivalence 28.41 s. Every original outcome/hash/wrong-seed
 assertion remains. No full local server/workspace suite or ignored C4b was run.
+
+## Isolated healing control (INT-03)
+
+The completed 747e2ad balance job 125354555002 passed the earlier SiegeWalker
+canaries and failed on the pure healer: shared-roster scores 0.88 -> 0.80.
+The prior test only measured a buff applied to both armies. Add the value
+engine's existing BotAvoid control, retaining the old observation and identical
+256-pair/+0.10 requirement. Fix its double reaction clock before interpreting
+that control. No live stat or gate threshold changes.
+
+The new absent-kind cadence regression was written, but its first local command
+returned lock-busy (75); it did not run. Respect the shared lock and defer the
+new controller check/full C7 to hosted CI. The earlier 32-pair screens remain
+screening evidence only. Do not claim the isolated healing criterion passed.

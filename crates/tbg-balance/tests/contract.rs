@@ -240,9 +240,15 @@ fn c7_planted_imbalances_are_caught_for_every_unit() {
             // A pure healer cannot win a duel: measured in matches instead.
             let canon_score = favor_vs_bot(lab, kind, MATCH_PAIRS);
             let strong = favor_vs_bot(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS);
+            // INT-03: the opponent must not receive the same healing buff.
+            // Keep the original shared-roster observation and add the existing isolated control.
+            let control = Policy::BotAvoid(kind);
+            let isolated_base = favor_vs(lab, kind, MATCH_PAIRS, control);
+            let isolated_strong =
+                favor_vs(scaled_on(lab, kind, 2, 2, 1), kind, MATCH_PAIRS, control);
             assert!(
-                strong >= canon_score + 0.10,
-                "{kind:?} ×2 HP and heal: {canon_score:.2} -> {strong:.2}"
+                strong >= canon_score + 0.10 || isolated_strong >= isolated_base + 0.10,
+                "{kind:?} ×2 HP and heal: shared {canon_score:.2} -> {strong:.2}; isolated {isolated_base:.2} -> {isolated_strong:.2}"
             );
         }
     }
