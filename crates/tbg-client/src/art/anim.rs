@@ -431,14 +431,13 @@ impl Animator {
         self.aim = target
             .filter(|_| weight > 0.0)
             .map(|target| Aim { target, weight });
-        self.support_facing.observe(
-            if self.friendly_support() {
-                self.aim
-            } else {
-                None
-            },
-            dt,
-        );
+        // Walking fades the look weight, not the live patient's chosen rear shoulder.
+        let support_aim = self
+            .friendly_support()
+            .then_some(target)
+            .flatten()
+            .map(|target| Aim { target, weight });
+        self.support_facing.observe(support_aim, dt);
     }
 }
 pub fn animate(

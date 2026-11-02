@@ -54,3 +54,17 @@ Native witness/install are pending at this source checkpoint. Windows and
 browser visual/motion correspondence, unrelated suites and full competitive
 balance remain pending; no full suite, release packaging or deployment is
 included.
+
+### Walking continuity follow-up
+
+The shoulder latch also survives a zero aim-blend weight during walking
+while the same patient still exists. A focused full-second Walk → Idle
+regression crosses the rear angle boundary without switching shoulders.
+Four support tests passed after this refinement (0.42 s); paired-grip and
+projectile timing checks from the preceding batch remain unchanged. Six
+unique focused scenarios passed across the two batches.
+
+The first native witnesses passed for Bloomkeeper and Nectar Nurse: real
+incoming damage, 60 rear-patient frames each, maximum local foot yaw 0.
+The installed Bloomkeeper witness also passed; final-source installation
+and its new source-stamped witness are being consolidated below.

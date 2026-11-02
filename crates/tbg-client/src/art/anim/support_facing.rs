@@ -133,6 +133,42 @@ mod tests {
     }
 
     #[test]
+    fn support_keeps_rear_shoulder_while_walking_with_a_live_patient() {
+        let kind = tbg_core::UnitKind::Bloomkeeper;
+        let plan = (kits::kit(kind).unwrap().figure)(0, 0).plan;
+        let mut anim = Animator::new(
+            [Entity::PLACEHOLDER; NODE_COUNT],
+            plan,
+            Entity::PLACEHOLDER,
+            kind,
+            1,
+        );
+        anim.aim_is_ally = true;
+        anim.aim_at = Some(Vec3::new(0.01, 0.6, -2.0));
+        for _ in 0..60 {
+            anim.observe(Vec3::ZERO, &Mat4::IDENTITY, 1.0 / 60.0);
+        }
+        anim.set_base(Clip::Walk);
+        anim.aim_at = Some(Vec3::new(-0.01, 0.6, -2.0));
+        for _ in 0..60 {
+            anim.observe(Vec3::ZERO, &Mat4::IDENTITY, 1.0 / 60.0);
+        }
+        assert!(anim.aim.is_none(), "walking releases the body-aim weight");
+        assert!(
+            anim.support_facing.rear_side > 0.0,
+            "the patient is still behind"
+        );
+        anim.set_base(Clip::Idle);
+        for _ in 0..60 {
+            anim.observe(Vec3::ZERO, &Mat4::IDENTITY, 1.0 / 60.0);
+        }
+        assert!(
+            anim.support_facing.yaw > 0.0,
+            "stopping must not switch shoulders"
+        );
+    }
+
+    #[test]
     fn support_friendly_posture_preserves_authored_life_clips_and_non_support_aim() {
         for kind in ALL_KINDS.into_iter().filter(|k| k.is_conventional()) {
             let plan = (kits::kit(kind).unwrap().figure)(0, 0).plan;
