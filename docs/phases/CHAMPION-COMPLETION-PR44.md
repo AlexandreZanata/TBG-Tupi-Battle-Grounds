@@ -1,8 +1,12 @@
 # CC17 preview — current PR44 laboratory integration
 
+**Delivered:** Linux preview 0.1.2-cc.1, installed source 9d4841b, including
+PR44 head 9fb7be0. Actual installed editor capture and asset hashes passed.
+The notes below retain earlier integration checkpoints and final evidence.
+
 The owner explicitly rejected the older Linux laboratory and selected
 [PR44](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/44),
-head `0b56bb4e34d0e8df15fc628c428f46338bd65b67`, as the current visual base.
+current head `9fb7be01ac08cbed3bce1aa466d7243418490957`, as the visual base.
 This local normal merge retains that complete ancestry (P73/D-103, laboratory
 polish, Evolution and Augment presentation, P71 models/occupancy) and all
 seventeen CC champions, bilingual names and ring-only body policy.
@@ -84,3 +88,43 @@ evidence, test the rematch fixture/classification once and rebuild the stamped
 installer. Installer ancestry now requires `9fb7be0`, preventing a previous
 PR revision from being selected. No proxy was deployed and no history flag
 or database was touched.
+
+
+## Installed delivery
+
+Final installed source: `9d4841be61b3b580246a4409d70173a9234928d6`; PR44 head
+`9fb7be01ac08cbed3bce1aa466d7243418490957` is an ancestor. Version
+`0.1.2-cc.1`, contract `w33-r7-a9fa44b55cdea10b`. The latest follow-up passed
+the two classification tests and its corrected rematch fixture (one test).
+Combined unique local evidence: 60 core and 24 client scenarios passed; the
+unchanged production laboratory/model/assets evidence was reused rather than
+repeating the full batch. Final native debug build passed in 13.71 seconds.
+
+Installed binary SHA-256: `816827afb6fd1c8d4d47b9a43e823a907bc3b3e99d85a10a1859516872c8f6ea`. Every one of the
+361 copied assets matched the committed installation manifest.
+The installed editor was captured at 1600×1000 in Portuguese with Nectar
+Nurse A2 selected. It reported boot ready, zero pending images/texts and zero
+failed images. Earlier integrated-source captures also verified Prismancer's
+new catalog, the editor and the real Training lifecycle journey.
+
+The launcher remains `~/.local/bin/tbg-champions`, desktop entry
+`TBG · 17 Champions Preview`. It now resolves to
+`/home/iiii/.local/opt/tupi-battle-grounds-champion-preview/0.1.2-cc.1-9d4841be61b3`. Its build-info output was re-read and matched the
+installed source. The previous agent-started process was checked by exact executable path;
+no matching old process remained to stop. The current preview was launched
+successfully. Other game instances/data and the root checkout
+were preserved.
+
+Artifact receipt/capture: `.local/champion-concepts-2026-11-01/`
+`pr44-update/latest/linux-verification.json` and `installed-laboratory.png`.
+The earlier native gallery remains versioned reference art; its source hashes
+are not relabeled as final PR44 captures. The gallery links the current
+laboratory screenshot and records its installed version explicitly.
+
+Validation: targeted Linux consolidation under the nonblocking shared lock,
+max two Cargo jobs/render CPUs; not full suite. Source-routing and diff checks
+passed. Windows/desktop-web parity, upstream server/multiplayer acceptance,
+competitive balance and subjective look/fun remain pending. No push, public
+merge, production release, proxy application, database/history activation or
+VPS operation occurred. This final report/gallery-only commit does not modify
+the installed game source/assets revision above.

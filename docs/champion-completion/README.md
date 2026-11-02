@@ -42,3 +42,10 @@ Linux preview installed as **TBG · 17 Champions Preview**. Launch with
 controls, then the Training editor or local Practice. The installed revision
 and exact checks are recorded in the phase report. The original game/data
 are preserved. Windows and desktop-web visual parity remain pending.
+
+
+Current laboratory baseline: **PR44, head 9fb7be0**, installed preview
+**0.1.2-cc.1**. This replaces the earlier laboratory, retains all seventeen
+champions and ring-only bodies, and includes the latest P71/P73 presentation.
+See [the PR44 integration/install report](../phases/CHAMPION-COMPLETION-PR44.md)
+for exact source, commands, captures and deferred checks.

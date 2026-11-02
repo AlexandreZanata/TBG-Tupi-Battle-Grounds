@@ -579,5 +579,24 @@
     "linux": "All 340 body contracts passed. Refreshed 67 portraits; captured all 85 new forms. Installed Troops/range/Training scenes passed; blue/red ownership disks visibly observed, with body plaques absent. Root/Slow HUD transition verified by scoped ECS test; physical both-seat status/motion comparison pending.",
     "windows": "pending actual packaged visual comparison",
     "desktop_web": "pending actual browser visual and motion comparison"
+  },
+  "pr44_laboratory_update": {
+    "pr44_head": "9fb7be01ac08cbed3bce1aa466d7243418490957",
+    "installed_source": "9d4841be61b3b580246a4409d70173a9234928d6",
+    "version": "0.1.2-cc.1",
+    "contract": "w33-r7-a9fa44b55cdea10b",
+    "preserved": "17 additions, 63 conventional preview kinds, all 340 ring-only body forms",
+    "affected_cases": [
+      "Troops catalog and filters",
+      "3D laboratory courtyard and lighting",
+      "Evolution and animation controls",
+      "team editor and training report",
+      "P71 overhead/occupancy",
+      "P73 client/result surfaces"
+    ],
+    "linux": "Observed actual installed editor and integrated catalog/editor/training lifecycle; ready with no pending/failed assets",
+    "evidence": ".local/champion-concepts-2026-11-01/pr44-update/latest/linux-verification.json",
+    "windows": "pending actual same-source visual/motion comparison",
+    "desktop_web": "pending actual same-source browser visual/motion comparison"
   }
 }

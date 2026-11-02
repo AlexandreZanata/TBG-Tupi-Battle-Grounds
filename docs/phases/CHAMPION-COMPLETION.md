@@ -1,6 +1,11 @@
 # Champion completion — seventeen authored kits and local Linux preview
 
-**Current delivery (2026-11-01): implemented and installed as a separate Linux
+**Latest laboratory update:** the owner-selected PR44 head 9fb7be0 is now
+installed as preview 0.1.2-cc.1. See [the PR44 update report](CHAMPION-COMPLETION-PR44.md)
+for current source, screenshots and validation. The original delivery below
+is retained as historical evidence.
+
+**Original delivery (2026-11-01): implemented and installed as a separate Linux
 preview; all 17 champions and 85 forms are available in Troops/Training and
 the 63-champion local Practice pool. Blue/red foot rings identify teams; body
 affiliation plates are removed across all 68 registered kinds. Earlier
