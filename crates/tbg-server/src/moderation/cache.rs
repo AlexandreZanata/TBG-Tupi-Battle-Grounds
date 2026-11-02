@@ -18,8 +18,12 @@ pub(crate) struct Snapshot {
     pub settings: BTreeMap<String, bool>,
     pub terms: BTreeSet<String>,
     pub cursor: i64,
+    pub approved: std::collections::BTreeSet<[u8; 16]>,
 }
 impl Cache {
+    pub fn approved(&self, id: &[u8; 16]) -> bool {
+        self.0.read().is_ok_and(|s| s.approved.contains(id))
+    }
     pub fn banned(&self, id: i64, now: i64) -> bool {
         self.0
             .read()

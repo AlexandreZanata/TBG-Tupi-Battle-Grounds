@@ -154,6 +154,19 @@ async fn run(
     seed: u64,
     records: Records,
 ) {
+    m.social.config = Some(config.clone());
+    if let Some(store) = &records.store {
+        let accounts = m.players.each_ref().map(|p| p.account.map(|(id, _)| id));
+        if let Some(Ok(profiles)) = store
+            .release(move |db| crate::store::social::profiles(db, accounts))
+            .await
+        {
+            for (seat, (verified, slots)) in profiles.into_iter().enumerate() {
+                m.social.verified[seat] = verified;
+                m.social.loadouts[seat] = slots;
+            }
+        }
+    }
     m.metrics.matches_running.fetch_add(1, Relaxed);
     let started = Instant::now();
     let tick = Duration::from_millis(config.tick_ms);
@@ -161,6 +174,7 @@ async fn run(
     for seat in Seat::BOTH {
         let start = m.match_start(seat);
         m.send(seat, start);
+        m.send_social(seat);
     }
     let mut interval = tokio::time::interval(tick);
     interval.set_missed_tick_behavior(MissedTickBehavior::Delay);

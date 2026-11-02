@@ -10,6 +10,19 @@ impl Lobby {
             .collect();
         let mut delivered = true;
         for token in tokens {
+            let state = self.config.moderation.state(account);
+            self.send_to(
+                token,
+                ServerMsg::AccountSuspended {
+                    until_unix: state
+                        .ban_until
+                        .filter(|v| *v != crate::store::moderation::PERMANENT)
+                        .map(|v| v as u64),
+                    reason: state
+                        .reason
+                        .unwrap_or(tbg_core::protocol::SuspensionReason::Other),
+                },
+            );
             if let Some(s) = self.sessions.get(&token) {
                 if let SessionState::InMatch { tx, seat } = &s.state {
                     delivered &= tx

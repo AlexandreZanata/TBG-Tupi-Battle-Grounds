@@ -38,6 +38,7 @@ pub mod presence;
 pub mod ranked;
 pub mod release;
 mod reports;
+pub mod social;
 pub mod stats;
 pub mod store;
 mod version;

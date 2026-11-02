@@ -574,6 +574,7 @@ compatibility; visual parity needs real captures.
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S9 | This step commit | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | Appended wire goldens; real two-seat chat/guest boundary and replay hash test; sanitizer and limit contracts | Tests queued S14; actual spectator attachment/reconnect/mid-match checks pending extension. |
 | S8 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_reports`: participant eligibility, duplicate race, frozen transcript, forged target rejection, privacy and daily bound | S9 populates live transcript/loadouts; tests and real-client filing queued S14. |
 | S7 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | Every area route inventoried with success/unauthenticated denial; moderator ceiling, current disabled state, masked-email projection | Runtime tests queued S14; console walkthrough pending S12. |
 | S6 | This step commit | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_admin`: bootstrap, claim, session cookie, separation, CSRF/Origin, idle expiry, atomic audit failure, append-only guards; trusted proxy unit case | API area inventory completes S7; tests queued S14; no real email or host CLI action. |
@@ -589,6 +590,9 @@ compatibility; visual parity needs real captures.
 - Visual correspondence (Linux / Windows / web):
 
 ### Deviations, blocked items, residual risks
+- S9 freezes social profiles in one store read during pairing setup before the first MatchStart, outside all simulation ticks. The match owns frozen rights/loadouts; live restrictions and switches use the shared cache. No SQL runs during social relay.
+- D-110's explicit protocol bump updates only the existing current-version assertion in `contract_protocol`; pre-P75 encoding goldens remain untouched and P75 encodings are appended.
+
 - S6 pre-session mutations use a Secure host-only nonce cookie from unauthenticated `GET /session`, echoed in the CSRF header, plus exact Origin and JSON. Once signed in, CSRF is session-bound and reconstructed from the opaque session token. This defines the necessary pre-authentication CSRF bootstrap absent from the planning API.
 
 - S4 reuses the exact `revoke_account` barrier through `revoke_scope` while holding the existing D-97 coordinator lock; calling `revoke_account` recursively would deadlock. SQL revocation is also committed with key rotation.

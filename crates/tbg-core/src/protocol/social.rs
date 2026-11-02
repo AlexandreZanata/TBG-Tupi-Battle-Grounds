@@ -80,3 +80,25 @@ impl SuspensionReason {
         .find(|v| v.as_str() == value)
     }
 }
+
+impl EmojiRef {
+    pub fn valid(&self) -> bool {
+        match self {
+            Self::Standard { id } => *id < STANDARD_EMOJIS,
+            Self::Custom {
+                frame_px,
+                frames,
+                columns,
+                delays_ms,
+                ..
+            } => {
+                (16..=128).contains(frame_px)
+                    && (1..=24).contains(frames)
+                    && (1..=6).contains(columns)
+                    && delays_ms.len() == usize::from(*frames)
+                    && delays_ms.iter().all(|v| (50..=1000).contains(v))
+                    && delays_ms.iter().map(|v| u32::from(*v)).sum::<u32>() <= 4000
+            }
+        }
+    }
+}

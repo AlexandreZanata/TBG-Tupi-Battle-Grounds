@@ -54,6 +54,9 @@ pub(crate) async fn start(
                 } else {
                     continue;
                 }
+                if lobby.send(LobbyCmd::SocialPolicy).await.is_err() {
+                    return;
+                }
                 for (id, kind, account) in events {
                     if let Some(account) = account {
                         if kind == "ban" {

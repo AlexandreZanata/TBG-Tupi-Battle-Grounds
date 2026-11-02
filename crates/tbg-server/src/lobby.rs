@@ -36,6 +36,7 @@ mod presence;
 mod ranked;
 mod rematch;
 mod sessions;
+mod social;
 mod spectate;
 mod strongholds;
 #[cfg(test)]
@@ -244,6 +245,7 @@ impl Lobby {
 
     fn handle(&mut self, cmd: LobbyCmd) {
         match cmd {
+            LobbyCmd::SocialPolicy => self.social_policy(),
             LobbyCmd::ModerationBan { account, reply } => {
                 let _ = reply.send(self.moderation_ban(account));
             }

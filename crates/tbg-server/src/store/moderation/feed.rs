@@ -32,6 +32,18 @@ pub(crate) fn snapshot(db: &Connection) -> rusqlite::Result<crate::moderation::c
         s.query_map([], |r| r.get(0))?
             .collect::<Result<BTreeSet<_>, _>>()?
     };
+    {
+        let mut s = db.prepare(
+            "SELECT public_id FROM emoji_assets WHERE status='approved' ORDER BY id LIMIT 65537",
+        )?;
+        for id in s.query_map([], |r| r.get::<_, Vec<u8>>(0))? {
+            let id = id?.try_into().map_err(|_| rusqlite::Error::InvalidQuery)?;
+            snapshot.approved.insert(id);
+        }
+        if snapshot.approved.len() > 65536 {
+            return Err(rusqlite::Error::InvalidQuery);
+        }
+    }
     snapshot.cursor = db.query_row(
         "SELECT COALESCE(MAX(id),0) FROM moderation_events",
         [],

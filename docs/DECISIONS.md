@@ -3367,7 +3367,7 @@ is automatic.
 a pause budget against a banned player. **Reopen when** appeals, automated
 signals or ranked-integrity enforcement (P60) need to join the workflow.
 
-## D-110 · Match chat and emojis at the presentation boundary (protocol 39) — 2026-11-02 (Proposed, P75)
+## D-110 · Match chat and emojis at the presentation boundary (protocol 39) — 2026-11-02 (Proposed, P75 implementation; activation pending)
 
 **Decision.** Reopens chat and emotes (deferred in GAME-DESIGN §7 and the
 P39 decision). Text chat and emojis travel as appended WebSocket messages

@@ -138,7 +138,12 @@ pub(super) fn handle(
         | ServerMsg::PlayerChallengeState { .. }
         | ServerMsg::PlayerChallengeResult { .. }
         | ServerMsg::PersonalMatchResult { .. }
-        | ServerMsg::MatchHistoryStatus { .. } => {}
+        | ServerMsg::MatchHistoryStatus { .. }
+        | ServerMsg::MatchSocial(_)
+        | ServerMsg::Chat { .. }
+        | ServerMsg::Emoji { .. }
+        | ServerMsg::SocialRefused { .. }
+        | ServerMsg::AccountSuspended { .. } => {}
     }
     Ok(None)
 }

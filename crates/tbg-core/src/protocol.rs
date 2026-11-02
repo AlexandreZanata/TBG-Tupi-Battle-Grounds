@@ -30,7 +30,7 @@ use crate::view::{MatchView, PublicView};
 /// and carrier events plus `UnitView::fx`; v13: Stronghold kinds and
 /// Fortification (D-46); v12: Interest regen boost; v11: fifteen-node Arcanas.
 /// Older peers are refused by the handshake.
-pub const PROTOCOL_VERSION: u16 = 38;
+pub const PROTOCOL_VERSION: u16 = 39;
 
 /// Public result identity, independent of the combat seed and session token.
 pub type ResultId = [u8; 16];
@@ -177,6 +177,12 @@ pub enum ClientMsg {
     },
     SetPlayerChallengesEnabled {
         enabled: bool,
+    },
+    ChatSend {
+        text: String,
+    },
+    EmojiSend {
+        slot: u8,
     },
 }
 
@@ -362,6 +368,22 @@ pub enum ServerMsg {
         entry_id: [u8; 16],
         state: HistorySaveState,
     },
+    MatchSocial(Box<MatchSocial>),
+    Chat {
+        from: crate::Seat,
+        text: String,
+    },
+    Emoji {
+        from: crate::Seat,
+        slot: u8,
+    },
+    SocialRefused {
+        reason: SocialRefusal,
+    },
+    AccountSuspended {
+        until_unix: Option<u64>,
+        reason: SuspensionReason,
+    },
 }
 
 impl core::fmt::Debug for ServerMsg {
@@ -468,7 +490,18 @@ pub fn decode_client(bytes: &[u8]) -> Result<ClientMsg, DecodeError> {
 }
 
 pub fn decode_server(bytes: &[u8]) -> Result<ServerMsg, DecodeError> {
-    decode_exact(bytes)
+    let message: ServerMsg = decode_exact(bytes)?;
+    let valid = match &message {
+        ServerMsg::Chat { text, .. } => text.chars().count() <= CHAT_MAX_CHARS,
+        ServerMsg::Emoji { slot, .. } => *slot < 3,
+        ServerMsg::MatchSocial(s) => s.loadouts.iter().flatten().all(EmojiRef::valid),
+        _ => true,
+    };
+    if valid {
+        Ok(message)
+    } else {
+        Err(DecodeError)
+    }
 }
 
 fn decode_exact<T: for<'de> Deserialize<'de>>(bytes: &[u8]) -> Result<T, DecodeError> {

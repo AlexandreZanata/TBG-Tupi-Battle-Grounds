@@ -96,6 +96,17 @@ pub enum ConnEvent {
 }
 
 pub enum MatchCmd {
+    Chat {
+        seat: Seat,
+        conn_id: u64,
+        text: String,
+    },
+    Emoji {
+        seat: Seat,
+        conn_id: u64,
+        slot: u8,
+    },
+    SocialPolicy,
     ModerationForfeit {
         seat: Seat,
     },
@@ -139,6 +150,7 @@ pub enum MatchCmd {
 }
 
 pub enum LobbyCmd {
+    SocialPolicy,
     ModerationBan {
         account: AccountId,
         reply: oneshot::Sender<bool>,
