@@ -39,12 +39,20 @@ def modified(path):
         return '-'
 
 
+def format_time(value):
+    try:
+        return datetime.fromtimestamp(float(value), timezone.utc).strftime('%Y-%m-%d %H:%M:%SZ')
+    except (TypeError, ValueError, OSError):
+        return '-'
+
+
 def describe(name, unit, flag, receipt, check, journals):
     current, checked = read(STATE/receipt), read(STATE/check)
     lines = [f'{name}:',
              f'  timer   {systemctl("is-enabled", unit + ".timer") or "-"} / {systemctl("is-active", unit + ".timer") or "-"}'
              f'   flag {"present" if (FLAGS/(flag + ".enabled")).exists() else "absent"}'
-             f'   last run {systemctl("show", unit + ".timer", "-p", "LastTriggerUSec", "--value") or "-"}',
+             f'   last run {systemctl("show", unit + ".timer", "-p", "LastTriggerUSec", "--value") or "-"}'
+             f' ({systemctl("show", unit + ".service", "-p", "Result", "--value") or "-"})',
              f'  applied {short((current or {}).get("source_commit") or (current or {}).get("tag"))}   ({modified(STATE/receipt)})']
     if checked:
         lines.append(f'  checked {short(checked.get("source_commit") or checked.get("tag"))}: {checked.get("outcome", "?")}'
@@ -52,7 +60,8 @@ def describe(name, unit, flag, receipt, check, journals):
     for journal in journals:
         if (STATE/journal).exists():
             data = read(STATE/journal) or {}
-            lines.append(f'  JOURNAL {journal}: phase {data.get("phase", "?")} {short(data.get("source_commit"))}')
+            lines.append(f'  JOURNAL {journal}: phase {data.get("phase", "?")} {short(data.get("source_commit"))}'
+                         f' (updated {modified(STATE/journal)}, started {format_time(data.get("started"))})')
     return lines
 
 

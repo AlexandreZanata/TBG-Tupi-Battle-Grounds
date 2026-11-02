@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Release-slot coordinator on a host that obeys the real admin rules: promotion, gates, rollback, drain and crash resume."""
+import ast
 import hashlib
 import http.server
 import json
+import re
 import sqlite3
 import subprocess
 import sys
@@ -70,6 +72,7 @@ class FakeHost(slot_host.SystemHost):
         self.public_slot = None      # the public route keeps answering this slot
         self.schema_version = 10
         self.identity = None         # what --build-info says, when it should lie
+        self.inspect_error = None    # raised by --build-info (a hang, a crash)
 
     # --- time and bookkeeping -------------------------------------------------------------------------
     def now(self):
@@ -152,6 +155,8 @@ class FakeHost(slot_host.SystemHost):
         return 4096
 
     def inspect(self, staged, manifest):
+        if self.inspect_error:
+            raise self.inspect_error
         return self.identity or {key: manifest[key] for key in ['source_commit', 'contract', 'database_schema', 'target']}
 
     # --- the admin tool, with the rules of release_admin.rs -----------------------------------------------
@@ -236,6 +241,9 @@ class FakeHost(slot_host.SystemHost):
         held = self.rows.get(slot)
         if held and (held['matches_running'] or held['results_pending'] or held['state'] in {'active', 'canary'}):
             self.violations.append(f'stopped slot {slot} in state {held["state"]} with {held["matches_running"]} matches')
+        others = [r for name, r in self.rows.items() if name != slot and r['state'] == 'active' and name in self.running]
+        if held and held['state'] != 'active' and slot in self.running and not others:
+            self.violations.append(f'stopped slot {slot} while no other slot admitted players')
         if 'stop' in self.fail:
             raise OSError('systemd refused')
         if slot in self.running and held is not None and not held['matches_running'] and not held['results_pending']:
@@ -467,6 +475,81 @@ class Refusals(SlotCase):
         self.assertIn('b', self.host.running)
 
 
+class Hardening(SlotCase):
+    """Second review round: transient errors retry, finished states are recognised, and nothing waits silently for ever."""
+
+    def test_the_installer_ships_every_module_the_controllers_import(self):
+        folder = ROOT/'deploy/auto'
+        shipped = set(re.findall(r'"\$HERE/([a-z_]+)\.py"', (folder/'install.sh').read_text()))
+        local = {path.stem for path in folder.glob('*.py')}
+        self.assertEqual(local - shipped, set(), 'a controller module the installer does not copy')
+        for name in shipped:
+            for node in ast.walk(ast.parse((folder/f'{name}.py').read_text())):
+                modules = [alias.name for alias in node.names] if isinstance(node, ast.Import) else [node.module] if isinstance(node, ast.ImportFrom) and node.module else []
+                for module in modules:
+                    if module.split('.')[0] in local:
+                        self.assertIn(module.split('.')[0], shipped, f'{name}.py imports {module}')
+
+    def test_the_rejected_slot_that_exited_cleanly_is_retired_instead_of_holding_every_release(self):
+        self.host.fail.add('ws')
+        with patch.object(slots, 'SETTLE_WINDOW', 6), self.assertRaises(slots.Rejected):
+            self.go()
+        self.host.kill('b')                                              # the candidate died after the rollback
+        self.host.sleep(slot_host.FRESH_SECONDS + 30)
+        slots.resume(self.host, CONFIG)
+        self.assertEqual((self.host.rows['b']['state'], self.journal(), self.host.violations), ('retired', None, []))
+
+    def test_a_manual_rollback_inside_the_verification_window_is_not_a_failure_to_roll_back(self):
+        original = self.host.admin
+
+        def admin(*args):
+            result = original(*args)
+            if args[0] == 'ranked' and args[1] == 'b':
+                self.host.events.append((self.host.t + 3, lambda: self.host.admin_effect('rollback', 'a', ('rollback', 'a'))))
+            return result
+        self.host.admin = admin
+        with patch.object(slots, 'SETTLE_WINDOW', 12), self.assertRaises(slots.Rejected):
+            self.go()
+        self.assertEqual((self.host.active_slot(), self.journal()['phase']), ('a', 'rolled_back'))
+
+    def test_a_busy_database_during_cleanup_is_retried_on_the_next_run_and_never_holds(self):
+        self.host.fail.add('start')
+        self.host.busy = {'drain': 99, 'retire': 99}
+        with self.assertRaises(slots.Busy):
+            self.go()
+        self.assertEqual(self.journal()['phase'], 'cleanup_failed')
+        self.host.busy, self.host.fail = {}, set()
+        with self.assertRaises(control.Deferred):
+            slots.resume(self.host, CONFIG)
+        self.assertEqual((self.journal(), self.host.rows['b']['state']), (None, 'retired'))
+
+    def test_a_candidate_whose_build_info_hangs_is_rejected_once(self):
+        self.host.inspect_error = subprocess.TimeoutExpired('build-info', 10)
+        with self.assertRaises(slots.Rejected):
+            self.go()
+        self.assertEqual(self.names(), [])
+
+    def test_a_host_that_never_ran_a_slot_is_not_a_slot_host_but_a_locked_database_defers(self):
+        with patch.object(self.host, 'directory', side_effect=sqlite3.OperationalError('no such table: release_slots')):
+            self.assertFalse(slots.in_slot_mode(self.host))
+        with patch.object(self.host, 'directory', side_effect=sqlite3.OperationalError('database is locked')), \
+             self.assertRaises(control.Deferred):
+            slots.in_slot_mode(self.host)
+
+    def test_a_drain_that_outlives_a_day_stops_being_a_quiet_deferral(self):
+        self.finish_old_matches(after=10**9)
+        with self.assertRaises(control.Deferred):
+            self.go()
+        self.host.sleep(slots.MAX_DRAIN + 60)
+        with self.assertRaisesRegex(slots.OperatorRequired, 'stuck'):
+            slots.resume(self.host, CONFIG)
+        self.assertEqual(self.host.violations, [])
+
+    def test_a_slot_is_never_stopped_when_it_is_the_last_one_admitting(self):
+        self.host.stop('a')
+        self.assertTrue(self.host.violations)
+
+
 class Rollback(SlotCase):
     def test_a_candidate_the_public_proxy_does_not_route_returns_admissions_to_the_old_slot(self):
         self.host.public_slot = 'a'
@@ -569,6 +652,15 @@ class Rollback(SlotCase):
 class CrashResume(SlotCase):
     """The controller is killed before or after every state-changing step, then run again the way the timer would."""
 
+    VARIANTS = {
+        'happy path': lambda host: None,
+        'verification fails': lambda host: host.fail.add('ws'),
+        'candidate never ready': lambda host: host.fail.add('start'),
+        'promotion refused': lambda host: host.fail.add('promote'),
+        'promotion commits, reply lost': lambda host: host.lost_reply.add('promote'),
+        'successor dies while the old slot drains': lambda host: host.events.append((host.t + 20, lambda: host.kill('b'))),
+    }
+
     def converge(self, host):
         """The timer runs the controller again and again; a kill only means the next run starts from the journal."""
         rejected = False
@@ -589,40 +681,41 @@ class CrashResume(SlotCase):
                 host.sleep(60)
         self.fail('the transition never converged')
 
-    def scenario(self, point, when):
+    def fresh_host(self, variant):
+        for leftover in self.releases.iterdir():
+            for child in leftover.iterdir():
+                child.unlink()
+            leftover.rmdir()
+        for stale in self.state.glob('*.json'):
+            stale.unlink()
         host = self.host = FakeHost()
         self.finish_old_matches(after=30)
-        host.crash_at = (point, when)
-        self.converge(host)
+        self.VARIANTS[variant](host)
+        return host
 
-    def test_every_crash_point_ends_with_one_admitting_slot_and_no_slot_stopped_under_load(self):
-        probe = self.host = FakeHost()
-        self.finish_old_matches(after=30)
-        self.converge(probe)
-        total = probe.calls
-        self.assertEqual(probe.active_slot(), 'b')
-        self.assertGreaterEqual(total, 7)
-        for point in range(1, total + 2):
-            for when in ['before', 'after']:
-                with self.subTest(point=point, when=when):
-                    for leftover in self.releases.iterdir():
-                        for child in leftover.iterdir():
-                            child.unlink()
-                        leftover.rmdir()
-                    for stale in self.state.glob('*.json'):
-                        stale.unlink()
-                    self.scenario(point, when)
-                    host = self.host
-                    active = [r for r in host.directory() if r['state'] == 'active' and r['fresh']]
-                    self.assertEqual(len(active), 1, host.log)
-                    self.assertEqual(host.violations, [], host.log)
-                    self.assertIsNone(slots.load_journal())
-                    self.assertEqual(host.running, {active[0]['slot']}, host.log)
-                    receipt = self.receipt()
-                    if receipt is not None:
-                        self.assertEqual(receipt['generation'], active[0]['generation'])
-                    elif active[0]['generation'] != 'old':
-                        self.fail(f'the candidate serves without a receipt: {host.log}')
+    def test_every_crash_point_of_every_outcome_ends_with_one_admitting_slot_and_nothing_stopped_under_load(self):
+        with patch.object(slots, 'SETTLE_WINDOW', 8), patch.object(slots, 'KEEPER_WINDOW', 8):
+            for variant in self.VARIANTS:
+                probe = self.fresh_host(variant)
+                self.converge(probe)
+                total = probe.calls
+                self.assertGreaterEqual(total, 2, variant)
+                for point in range(1, total + 2):
+                    for when in ['before', 'after']:
+                        with self.subTest(variant=variant, point=point, when=when):
+                            host = self.fresh_host(variant)
+                            host.crash_at = (point, when)
+                            self.converge(host)
+                            active = [r for r in host.directory() if r['state'] == 'active' and r['fresh']]
+                            self.assertEqual(len(active), 1, host.log)
+                            self.assertEqual(host.violations, [], host.log)
+                            self.assertIsNone(slots.load_journal())
+                            self.assertEqual(host.running, {active[0]['slot']}, host.log)
+                            receipt = self.receipt()
+                            if receipt is not None:
+                                self.assertEqual(receipt['generation'], active[0]['generation'])
+                            elif active[0]['generation'] != 'old':
+                                self.fail(f'the candidate serves without a receipt: {host.log}')
 
 
 class Controller(SlotCase):
@@ -749,7 +842,7 @@ class Machine(unittest.TestCase):
                 pass
         server = http.server.HTTPServer(('127.0.0.1', 0), Proxy)
         threading.Thread(target=server.serve_forever, daemon=True).start()
-        self.addCleanup(server.shutdown)
+        self.addCleanup(server.server_close)
         base = f'http://127.0.0.1:{server.server_port}'
         self.assertTrue(self.host.public_ws(base, 'b', 'c1'))
         self.assertFalse(self.host.public_ws(base, 'a', 'c1'))
@@ -821,6 +914,7 @@ class Status(unittest.TestCase):
         self.assertIn('flag present', text)
         self.assertIn(f'checked {SOURCE[:12]}: rejected — forged', text)
         self.assertIn('JOURNAL slot-transition.json: phase promoted', text)
+        self.assertIn('(active)', text, 'the last result of each service is shown')
         self.assertIn('slot state', text)
 
 

@@ -9,6 +9,7 @@ repeating or abandoning a step.
 """
 import json
 import sqlite3
+import subprocess
 import time
 
 from activate import RELEASES, STATE, sync_directory, write_json
@@ -28,6 +29,8 @@ SETTLE_STEP = 2
 KEEPER_WINDOW = 30
 # Open idle sockets are not matches; they reconnect through admission, so they only delay retirement briefly.
 IDLE_GRACE = 120
+# A drain that outlives a day is a stuck match or result, not a long one: say so instead of waiting silently.
+MAX_DRAIN = 24 * 3600
 MIN_MEMORY_MB = 768
 MIN_DISK = 512 * 1024 * 1024
 BUSY_DATABASE = ('Db(', 'database is locked')
@@ -45,14 +48,27 @@ class OperatorRequired(ValueError):
     """The state is not one automation may repair: hold the controller until a person has looked."""
 
 
-def admin(host, *args):
+class Busy(RuntimeError):
+    """The shared database was only busy: nothing is wrong, the next run retries."""
+
+
+def busy(text):
+    return any(marker in text for marker in BUSY_DATABASE)
+
+
+def admin(host, *args, attempts=3):
     """An admin command, retried while the shared database is only busy."""
-    for _ in range(3):
+    for _ in range(attempts):
         code, text = host.admin(*map(str, args))
-        if code == 0 or not any(marker in text for marker in BUSY_DATABASE):
+        if code == 0 or not busy(text):
             break
         host.sleep(1)
     return code, text
+
+
+def refused(text, message):
+    """A failed admin step is a busy database to retry later, or a state a person has to look at."""
+    return (Busy if busy(text) else OperatorRequired)(f'{message}: {text}')
 
 
 def by_slot(host):
@@ -64,7 +80,9 @@ def in_slot_mode(host):
     try:
         rows = host.directory()
     except sqlite3.OperationalError as error:
-        raise Deferred(f'the release directory cannot be read now: {error}') from None
+        if 'locked' in str(error) or 'busy' in str(error):
+            raise Deferred(f'the release directory cannot be read now: {error}') from None
+        return JOURNAL.exists()      # no directory table: a host that never ran a slot
     return JOURNAL.exists() or any(row['state'] in {'active', 'canary', 'ready', 'draining', 'warming'} for row in rows)
 
 
@@ -177,7 +195,7 @@ def stop_unpromoted(host, slot, generation=None):
             admin(host, 'drain', slot, '--actor', ACTOR)
         code, text = admin(host, 'retire', slot, '--actor', ACTOR)
         if code != 0:
-            raise OperatorRequired(f'slot {slot} could not be retired after stopping: {text}')
+            raise refused(text, f'slot {slot} could not be retired after stopping')
 
 
 def abandon(host, journal):
@@ -259,12 +277,21 @@ def restore_receipt(journal):
 def roll_back(host, journal, reason):
     """New admissions return to the previous slot, which is still running, and the candidate slot drains."""
     save(journal, phase='rolling_back')
-    code, text = admin(host, 'rollback', journal['from'], '--actor', ACTOR)
+    # Recovery is worth a longer wait for a busy database than a routine step.
+    code, text = admin(host, 'rollback', journal['from'], '--actor', ACTOR, attempts=20)
     if code != 0:
-        raise OperatorRequired(f"rollback to slot {journal['from']} refused ({text}); operator required")
+        rows = by_slot(host)
+        if not (is_active(rows.get(journal['from'])) and not is_active(rows.get(journal['to']), journal['generation'])):
+            raise refused(text, f"rollback to slot {journal['from']} refused")
     restore_receipt(journal)
     move_ranked(host, journal['from'])
     save(journal, phase='rolled_back', retiring=journal['to'], reason=reason[:300])
+
+
+def stuck(host, journal, what):
+    """Raise instead of deferring once a drain has outlived a day."""
+    if host.now() - journal.get('started', host.now()) > MAX_DRAIN:
+        raise OperatorRequired(f'{what} for over {MAX_DRAIN // 3600} hours; a match or result is stuck')
 
 
 def drain(host, journal):
@@ -287,17 +314,21 @@ def drain(host, journal):
     row = by_slot(host).get(retiring)
     if row is None or (row['state'] == 'retired' and not host.is_active(retiring)):
         return
-    if not host.is_active(retiring) and not row['fresh']:
+    lists_work = row['matches_running'] or row['results_pending'] or row['ranked_inflight']
+    if not host.is_active(retiring) and not row['fresh'] and lists_work:
+        # Its counters are stale: either systemd brings it back or its work needs a person; an idle one retires below.
         if host.now() - row['heartbeat_unix'] > 600:
             raise OperatorRequired(f'slot {retiring} is not running but still lists work; its matches or results need review')
         raise Deferred(f'slot {retiring} is not answering; waiting for systemd to restart it')
     code, text = admin(host, 'retire-check', retiring)
     if code != 0:
+        stuck(host, journal, f'slot {retiring} has been draining')
         raise Deferred(f'slot {retiring} still drains: {text}')
     drained = journal.get('drained_at') or host.now()
     save(journal, drained_at=drained)
     metrics = host.metrics(retiring) or {'connections': 0}
     if metrics['connections'] > 0 and host.now() - drained < IDLE_GRACE:
+        stuck(host, journal, f'slot {retiring} has kept idle connections')
         raise Deferred(f"slot {retiring} has {metrics['connections']} idle connections; they reconnect through admission")
     code, text = host.retire_slot(retiring)
     if code == 3:
@@ -352,7 +383,7 @@ def activate(host, staged, manifest, config, ignore_lobby=False):
         await_quiet(host, active['slot'], QUIET_WINDOW)
     try:
         info = host.inspect(staged, manifest)
-    except (OSError, ValueError, json.JSONDecodeError) as error:
+    except (OSError, ValueError, subprocess.SubprocessError) as error:
         raise Rejected(f'the candidate cannot describe itself: {error}', source) from error
     if any(info.get(key) != manifest.get(key) for key in ['source_commit', 'contract', 'database_schema', 'target']):
         raise Rejected('candidate identity differs from its attested manifest', source)
@@ -363,7 +394,8 @@ def activate(host, staged, manifest, config, ignore_lobby=False):
     generation = generation_for(source)
     previous = STATE/'current.json'
     journal = {'source_commit': source, 'generation': generation, 'from': active['slot'], 'to': idle, 'phase': 'installing',
-               'manifest': manifest, 'previous_receipt': json.loads(previous.read_text()) if previous.exists() else None}
+               'started': host.now(), 'manifest': manifest,
+               'previous_receipt': json.loads(previous.read_text()) if previous.exists() else None}
     save(journal)
     try:
         code, text = host.start_slot(idle, generation, f'{staged}/tbg-server', source[:12])
@@ -379,6 +411,8 @@ def activate(host, staged, manifest, config, ignore_lobby=False):
             abandon(host, journal)
         except Exception as cleanup:
             save(journal, phase='cleanup_failed', reason=str(cleanup)[:300])
+            if isinstance(cleanup, (Busy, OperatorRequired)):
+                raise
             raise OperatorRequired(f'cleaning up slot {idle} failed: {cleanup}') from cleanup
         if isinstance(error, ValueError) and not isinstance(error, (Rejected, OperatorRequired)):
             raise Rejected(str(error), source) from error
