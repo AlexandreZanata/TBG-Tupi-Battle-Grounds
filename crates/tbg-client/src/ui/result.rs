@@ -282,7 +282,7 @@ fn update_rematch(
         };
     for (mut text, mut node) in &mut set.p0() {
         text.0 = label.into();
-        node.display = if info.challenge && !label.is_empty() {
+        node.display = if !label.is_empty() {
             Display::Flex
         } else {
             Display::None
@@ -371,7 +371,20 @@ mod tests {
         let mut labels = app
             .world_mut()
             .query_filtered::<&Node, With<RematchLabel>>();
-        assert_eq!(labels.single(app.world()).unwrap().display, Display::None);
+        // BR-AP05: private/casual offers retain the same waiting/closed feedback.
+        assert_eq!(labels.single(app.world()).unwrap().display, Display::Flex);
+        {
+            let mut offer = app.world_mut().resource_mut::<RematchInfo>();
+            offer.open = true;
+            offer.closed = None;
+            offer.you_requested = true;
+            offer.opponent_requested = false;
+        }
+        app.update();
+        assert_eq!(labels.single(app.world()).unwrap().display, Display::Flex);
+        assert!(texts
+            .iter(app.world())
+            .any(|t| t.0 == Lang::En.t(Msg::ResultWaiting)));
     }
 }
 

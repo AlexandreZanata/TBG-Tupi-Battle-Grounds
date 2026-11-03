@@ -954,3 +954,12 @@ positions for overflowing UI labels, without recording their contents. This
 measures Arena/Ranking layout defects before another geometry change. Guest
 Android Settings no longer claims an authenticated session lifetime; signed-in
 session information remains in Settings. Desktop presentation is unchanged.
+
+P69 measured Arena theme labels with57px allocated versus76px of glyphs,
+and an effect with60px versus109px. Android's theme/effect text now uses
+intrinsic height instead of the desktop minimum-height reservation. Desktop
+geometry is unchanged. BR-AP05 result waiting/closed feedback now remains
+visible for private/casual rematch offers on every target, matching their
+existing server eligibility; a focused regression covers the non-Challenge
+state. Neither change alters a rule, cost, deadline or outcome. Runtime
+remeasurement and same-source desktop observations remain pending.
