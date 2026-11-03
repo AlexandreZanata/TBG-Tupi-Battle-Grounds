@@ -45,6 +45,9 @@ pub(super) fn group() -> Node {
     Node {
         width: percent(100),
         column_gap: px(8),
+        #[cfg(target_os = "android")]
+        flex_wrap: FlexWrap::Wrap,
+        row_gap: px(8),
         ..default()
     }
 }
@@ -59,8 +62,8 @@ pub(super) fn button(label: String, selected: bool) -> impl Bundle {
         Node {
             flex_grow: 1.,
             flex_basis: px(0),
-            min_width: px(0),
-            min_height: px(40),
+            min_width: px(if cfg!(target_os = "android") { 48 } else { 0 }),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 40 }),
             padding: UiRect::axes(px(10), px(8)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
@@ -84,7 +87,11 @@ pub(super) fn button(label: String, selected: bool) -> impl Bundle {
         children![(
             Text::new(label),
             TextFont::from_font_size(FontSize::Px(14.)),
-            TextLayout::no_wrap(),
+            if cfg!(target_os = "android") {
+                TextLayout::default()
+            } else {
+                TextLayout::no_wrap()
+            },
             TextColor(if selected {
                 kit::GOLD
             } else {

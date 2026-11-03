@@ -3,6 +3,7 @@
 mod controls;
 use super::*;
 use crate::ui::shell::catalog;
+#[cfg(not(target_os = "android"))]
 use bevy::window::{PresentMode, WindowMode};
 
 pub fn spawn(
@@ -15,6 +16,23 @@ pub fn spawn(
     assets: &AssetServer,
 ) {
     controls::heading(root, assets, lang);
+    #[cfg(target_os = "android")]
+    root.spawn(Node {
+        width: percent(100),
+        column_gap: px(8),
+        row_gap: px(8),
+        flex_wrap: FlexWrap::Wrap,
+        ..default()
+    })
+    .with_children(|row| {
+        use crate::ui::p75::{self, Action};
+        p75::toolbar_button(row, lang, "p75.lost_key", Action::LostKey);
+        if crate::auth::snapshot().access.is_some() {
+            p75::toolbar_button(row, lang, "p75.account", Action::Account);
+            p75::toolbar_button(row, lang, "p75.emojis", Action::Emojis);
+        }
+    });
+
     root.spawn(kit::button(
         lang.key("p75.mode"),
         UiAction::P75(crate::ui::p75::Action::Mode),
@@ -27,8 +45,17 @@ pub fn spawn(
     ));
     // The native resume record (P66) lives in the OS vault; the browser has none.
     #[cfg(not(target_arch = "wasm32"))]
-    if !crate::platform::resume::available() {
-        root.spawn(kit::muted(lang.key("update.resume.temporary"), 13.));
+    if !crate::platform::resume::available()
+        && (!cfg!(target_os = "android") || account.profile.is_some())
+    {
+        root.spawn(kit::muted(
+            lang.key(if cfg!(target_os = "android") {
+                "auth.session_only"
+            } else {
+                "update.resume.temporary"
+            }),
+            13.,
+        ));
     }
     root.spawn(Node {
         grid_template_columns: RepeatedGridTrack::flex(2, 1.),
@@ -166,46 +193,49 @@ fn audio(
     );
 }
 
-fn video(parent: &mut ChildSpawnerCommands, assets: &AssetServer, window: &Window, lang: Lang) {
+fn video(parent: &mut ChildSpawnerCommands, assets: &AssetServer, _window: &Window, lang: Lang) {
     controls::section(
         parent,
         assets,
         words(lang, "Display & performance", "Tela e desempenho"),
         "settings",
         |card| {
-            let fullscreen = window.mode != WindowMode::Windowed;
-            controls::row(
-                card,
-                lang.key("native.fullscreen"),
-                "F11 / Alt+Enter".into(),
-                (
-                    controls::button(
-                        words(
-                            lang,
-                            if fullscreen { "Fullscreen" } else { "Windowed" },
-                            if fullscreen { "Tela cheia" } else { "Janela" },
+            #[cfg(not(target_os = "android"))]
+            {
+                let fullscreen = _window.mode != WindowMode::Windowed;
+                controls::row(
+                    card,
+                    lang.key("native.fullscreen"),
+                    "F11 / Alt+Enter".into(),
+                    (
+                        controls::button(
+                            words(
+                                lang,
+                                if fullscreen { "Fullscreen" } else { "Windowed" },
+                                if fullscreen { "Tela cheia" } else { "Janela" },
+                            ),
+                            fullscreen,
                         ),
-                        fullscreen,
+                        UiAction::Disabled,
+                        Action::Fullscreen,
                     ),
-                    UiAction::Disabled,
-                    Action::Fullscreen,
-                ),
-            );
-            let vsync = window.present_mode != PresentMode::AutoNoVsync;
-            controls::row(
-                card,
-                "VSync".into(),
-                words(
-                    lang,
-                    "Synchronize frames with your display",
-                    "Sincronizar os quadros com a tela",
-                ),
-                (
-                    controls::button(state(lang, vsync), vsync),
-                    UiAction::Disabled,
-                    Action::Vsync,
-                ),
-            );
+                );
+                let vsync = _window.present_mode != PresentMode::AutoNoVsync;
+                controls::row(
+                    card,
+                    "VSync".into(),
+                    words(
+                        lang,
+                        "Synchronize frames with your display",
+                        "Sincronizar os quadros com a tela",
+                    ),
+                    (
+                        controls::button(state(lang, vsync), vsync),
+                        UiAction::Disabled,
+                        Action::Vsync,
+                    ),
+                );
+            }
             let shadows = !crate::config::load_flag("video.low");
             controls::row(
                 card,
@@ -239,7 +269,14 @@ fn account_panel(
         |card| {
             if let Some(profile) = &account.profile {
                 card.spawn(kit::heading(profile.name.clone(), 18.));
-                card.spawn(kit::muted(lang.key("lobby.settings.key_note"), 12.));
+                card.spawn(kit::muted(
+                    lang.key(if cfg!(target_os = "android") {
+                        "android.account.backup_prompt"
+                    } else {
+                        "lobby.settings.key_note"
+                    }),
+                    12.,
+                ));
                 card.spawn(controls::group()).with_children(|actions| {
                     actions.spawn((
                         controls::button(lang.key("lobby.settings.copy"), false),
@@ -287,7 +324,23 @@ fn account_panel(
                 ..default()
             });
             card.spawn(kit::muted(words(lang, "APPLICATION", "APLICATIVO"), 10.));
+            #[cfg(target_os = "android")]
+            {
+                card.spawn(kit::muted(
+                    format!("TBG {}", env!("CARGO_PKG_VERSION")),
+                    12.,
+                ));
+                card.spawn(kit::muted(
+                    words(
+                        lang,
+                        "Android prototype · install updates from the provided APK.",
+                        "Protótipo Android · instale atualizações pelo APK fornecido.",
+                    ),
+                    11.,
+                ));
+            }
             card.spawn(controls::group()).with_children(|actions| {
+                #[cfg(not(target_os = "android"))]
                 actions.spawn((
                     controls::button(lang.key("native.downloads"), false),
                     UiAction::UpdateOpen,

@@ -1218,6 +1218,112 @@
         "report": "docs/phases/P75-AUXILIARIES-CONSOLIDATION.md",
         "accepted": false
       }
+    },
+    {
+      "id": "native-android-landscape",
+      "version": "0.1.4-colossus.6",
+      "date": "2026-11-02",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 16,
+      "ruleset_hash": "f2e253b98ccb313a",
+      "title": {
+        "en": "Native Android landscape",
+        "pt-BR": "Android nativo horizontal"
+      },
+      "summary": {
+        "en": "The same Linux game and medieval art with compact landscape menus, safe controls and native touch/text services. Gameplay rules and outcomes are unchanged.",
+        "pt-BR": "O mesmo jogo e arte medieval do Linux com menus horizontais compactos, controles seguros e serviços nativos de toque e texto. Regras e resultados permanecem iguais."
+      },
+      "changes": [
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Android prototype",
+            "pt-BR": "Protótipo Android"
+          },
+          "field": {
+            "en": "landscape interaction",
+            "pt-BR": "interação horizontal"
+          },
+          "before": {
+            "en": "Desktop-sized panels and incomplete native service paths",
+            "pt-BR": "Painéis de desktop e fluxos nativos incompletos"
+          },
+          "after": {
+            "en": "Compact menus, edge-to-edge scenery, safe controls and native keyboard/backup export",
+            "pt-BR": "Menus compactos, cenário de ponta a ponta, controles seguros e teclado/exportação nativos"
+          },
+          "reason": {
+            "en": "Keep existing game actions readable and reachable on landscape phones.",
+            "pt-BR": "Manter as ações existentes do jogo legíveis e acessíveis no celular deitado."
+          }
+        },
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Match chat",
+            "pt-BR": "Chat da batalha"
+          },
+          "field": {
+            "en": "expanded controls and message history",
+            "pt-BR": "controles e histórico expandidos"
+          },
+          "before": {
+            "en": "Expanded chat blocked its own pointer controls and hid older messages without keyboard focus",
+            "pt-BR": "O chat expandido bloqueava os próprios controles e ocultava mensagens antigas sem foco no teclado"
+          },
+          "after": {
+            "en": "Chat controls remain usable while gameplay is captured, and the bounded recent log stays readable",
+            "pt-BR": "Os controles de chat continuam utilizáveis com a batalha bloqueada, e o histórico recente limitado permanece legível"
+          },
+          "reason": {
+            "en": "Support touch composition and guest readers with the same server-owned chat.",
+            "pt-BR": "Permitir composição por toque e leitura por visitantes no mesmo chat controlado pelo servidor."
+          }
+        },
+        {
+          "category": "maintenance",
+          "subject": {
+            "en": "Match recovery",
+            "pt-BR": "Recuperação de partida"
+          },
+          "field": {
+            "en": "existing pause and terminal replay windows",
+            "pt-BR": "janelas existentes de pausa e reenvio do resultado"
+          },
+          "before": {
+            "en": "Clients could abandon a paused seat early or keep a frozen battle after a Welcome without recovery; cleanup could remove fresh results too soon",
+            "pt-BR": "O cliente podia abandonar cedo uma partida pausada ou manter a batalha congelada após uma conexão sem recuperação; a limpeza podia remover resultados recentes cedo demais"
+          },
+          "after": {
+            "en": "Retries await authoritative seat/result confirmation and cleanup preserves the existing terminal replay deadline",
+            "pt-BR": "As tentativas aguardam a confirmação autoritativa da partida ou resultado, e a limpeza preserva o prazo existente de reenvio do resultado"
+          },
+          "reason": {
+            "en": "Recover the same Linux/Android match without extending server grace or deciding outcomes locally.",
+            "pt-BR": "Recuperar a mesma partida Linux/Android sem ampliar a tolerância do servidor nem decidir resultados localmente."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Landscape play",
+            "body": "Compact navigation, catalogs, five Shop offers, War Auxiliaries, local Council selection and explicit confirmation retain the Linux game and art. Native keyboard and explicit document export support account recovery without persisting secrets on Android."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Jogo horizontal",
+            "body": "Navegação, catálogos, cinco ofertas da Loja, Auxiliares de Guerra, seleção local no Conselho e confirmação explícita mantêm o jogo e a arte do Linux. Teclado nativo e exportação explícita de documento apoiam a recuperação de conta sem persistir segredos no Android."
+          }
+        ]
+      },
+      "document": "docs/patches/P69-native-android-landscape.md",
+      "evidence": {
+        "report": "docs/phases/P69-mobile-20261102.md"
+      }
     }
   ]
 }

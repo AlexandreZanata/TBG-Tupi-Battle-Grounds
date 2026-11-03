@@ -14,6 +14,8 @@ use tbg_core::{
 #[derive(Component)]
 enum Readout {
     Energy,
+    EnergyLabel,
+    InterestLabel,
     Interest,
     Band,
     Army,
@@ -31,9 +33,12 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
         .spawn((
             Node {
                 width: percent(100),
-                height: px(43),
-                padding: UiRect::axes(px(15), px(5)),
-                column_gap: px(14),
+                height: px(if cfg!(target_os = "android") { 48 } else { 43 }),
+                padding: UiRect::axes(
+                    px(if cfg!(target_os = "android") { 6 } else { 15 }),
+                    px(if cfg!(target_os = "android") { 0 } else { 5 }),
+                ),
+                column_gap: px(if cfg!(target_os = "android") { 4 } else { 14 }),
                 align_items: AlignItems::Center,
                 ..default()
             },
@@ -42,14 +47,40 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 visual_box: bevy::ui::VisualBox::BorderBox,
                 ..ImageNode::new(assets.load("battle/native/resources.webp"))
             },
+            #[cfg(target_os = "android")]
+            crate::camera::mobile::BelowBattle,
         ))
         .with_children(|bar| {
-            bar.spawn(chrome::title("Energy", 17.));
+            #[cfg(target_os = "android")]
+            bar.spawn(Node {
+                width: px(48),
+                min_width: px(48),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            })
+            .with_children(|energy| {
+                energy.spawn((chrome::title("", 10.), Readout::EnergyLabel));
+                energy.spawn((label("", 13.), Readout::Energy));
+            });
+            #[cfg(not(target_os = "android"))]
+            bar.spawn((
+                chrome::title(
+                    "Energy",
+                    if cfg!(target_os = "android") {
+                        11.
+                    } else {
+                        17.
+                    },
+                ),
+                Readout::EnergyLabel,
+            ));
             bar.spawn((
                 Node {
                     flex_grow: 1.,
-                    min_width: px(70),
-                    max_width: px(240),
+                    min_width: px(if cfg!(target_os = "android") { 24 } else { 70 }),
+                    max_width: px(if cfg!(target_os = "android") { 48 } else { 240 }),
                     height: px(21),
                     border: UiRect::all(px(2)),
                     border_radius: BorderRadius::all(px(20)),
@@ -71,6 +102,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                     Hud::EnergyFill,
                 ));
             });
+            #[cfg(not(target_os = "android"))]
             bar.spawn((
                 label("", 13.),
                 Node {
@@ -80,7 +112,17 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 Readout::Energy,
             ));
             divider(bar);
-            bar.spawn(chrome::title("Interest", 17.));
+            bar.spawn((
+                chrome::title(
+                    "Interest",
+                    if cfg!(target_os = "android") {
+                        11.
+                    } else {
+                        17.
+                    },
+                ),
+                Readout::InterestLabel,
+            ));
             bar.spawn((
                 Text::new(""),
                 TextFont::from_font_size(FontSize::Px(13.)),
@@ -89,12 +131,53 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
             ));
             bar.spawn((kit::muted("", 9.), Readout::Band));
             divider(bar);
-            bar.spawn(chrome::icon(assets, "friends", 27., chrome::CREAM));
-            bar.spawn((chrome::title("", 17.), Readout::Army));
+            bar.spawn(chrome::icon(
+                assets,
+                "friends",
+                if cfg!(target_os = "android") {
+                    18.
+                } else {
+                    27.
+                },
+                chrome::CREAM,
+            ));
+            bar.spawn((
+                #[cfg(target_os = "android")]
+                Node {
+                    flex_grow: 1.,
+                    flex_basis: px(0),
+                    min_width: px(0),
+                    max_height: percent(100),
+                    height: px(48),
+                    padding: UiRect::all(px(4)),
+                    border: UiRect::all(px(1)),
+                    border_radius: BorderRadius::all(px(4)),
+                    ..default()
+                },
+                #[cfg(target_os = "android")]
+                BorderColor::all(chrome::GOLD),
+                #[cfg(target_os = "android")]
+                UiAction::ToggleBattleDetails,
+                #[cfg(target_os = "android")]
+                TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+                chrome::title(
+                    "",
+                    if cfg!(target_os = "android") {
+                        11.
+                    } else {
+                        17.
+                    },
+                ),
+                Readout::Army,
+            ));
             bar.spawn((
                 Node {
-                    min_width: px(150),
-                    height: px(30),
+                    min_width: px(if cfg!(target_os = "android") {
+                        112
+                    } else {
+                        150
+                    }),
+                    height: px(if cfg!(target_os = "android") { 48 } else { 30 }),
                     padding: UiRect::horizontal(px(8)),
                     border: UiRect::all(px(2)),
                     border_radius: BorderRadius::all(px(6)),
@@ -118,8 +201,21 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 },
             ))
             .with_children(|button| {
-                button.spawn((label("", 13.), Readout::Reroll));
+                button.spawn((
+                    #[cfg(target_os = "android")]
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
+                    #[cfg(target_os = "android")]
+                    TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+                    label("", 13.),
+                    Readout::Reroll,
+                ));
             });
+            #[cfg(target_os = "android")]
+            super::auxiliaries::spawn_toggle(bar);
         });
 }
 
@@ -145,6 +241,20 @@ fn update(
     for (kind, mut text) in &mut texts {
         let want = match kind {
             Readout::Energy => energy_text(v.energy),
+            Readout::EnergyLabel => {
+                if cfg!(target_os = "android") {
+                    lang.key("battle.energy")
+                } else {
+                    "Energy".into()
+                }
+            }
+            Readout::InterestLabel => {
+                if cfg!(target_os = "android") {
+                    lang.key("battle.interest")
+                } else {
+                    "Interest".into()
+                }
+            }
             Readout::Interest => format!("×{:.2}", v.regen_bp as f32 / 10_000.),
             Readout::Band => format!(
                 "{}/{}",
@@ -173,6 +283,12 @@ fn update(
                             };
                             format!("{} · {}", lang.key("shop.reroll"), free_tag)
                         }
+                        Some(cost) if cfg!(target_os = "android") => format!(
+                            "{} · {}",
+                            lang.key("shop.reroll"),
+                            lang.key("common.energy_amount")
+                                .replace("{cost}", &(cost / ENERGY_SCALE).to_string())
+                        ),
                         Some(cost) => format!(
                             "{} · {} Energy",
                             lang.key("shop.reroll"),

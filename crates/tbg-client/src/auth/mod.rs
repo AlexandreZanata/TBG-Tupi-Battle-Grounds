@@ -11,6 +11,7 @@ pub(crate) mod api;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
 #[cfg(not(target_arch = "wasm32"))]
+#[cfg_attr(target_os = "android", path = "android_store.rs")]
 mod native_store;
 mod recovery;
 #[cfg(not(target_arch = "wasm32"))]
@@ -366,7 +367,7 @@ impl Session {
                 {
                     return;
                 }
-                self.remember = !self.remember;
+                self.remember = !cfg!(target_os = "android") && !self.remember;
                 if let Ok(mut view) = VIEW.write() {
                     view.remember = self.remember;
                 }
@@ -763,9 +764,17 @@ impl Session {
 #[cfg(test)]
 mod tests;
 
-#[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
+#[cfg(all(
+    not(target_arch = "wasm32"),
+    not(target_os = "android"),
+    feature = "ui-acceptance"
+))]
 mod acceptance;
-#[cfg(all(not(target_arch = "wasm32"), feature = "ui-acceptance"))]
+#[cfg(all(
+    not(target_arch = "wasm32"),
+    not(target_os = "android"),
+    feature = "ui-acceptance"
+))]
 pub fn acceptance_journey() {
     match acceptance::run() {
         Ok(report) => println!("{report}"),

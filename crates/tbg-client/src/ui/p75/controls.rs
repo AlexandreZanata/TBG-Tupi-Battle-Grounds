@@ -13,6 +13,7 @@ type Buttons<'w, 's> = Query<'w, 's, ButtonRef<'static>, With<DialogButton>>;
 pub(super) fn input(
     keys: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
+    #[cfg(target_os = "android")] mut pointer: ResMut<crate::ui::mobile::input::Pointer>,
     window: Single<&Window>,
     form: NonSend<ActiveForm>,
     buttons: Buttons,
@@ -61,8 +62,28 @@ pub(super) fn input(
             panel.0.y = (panel.0.y + delta).max(0.);
         }
     }
+    #[cfg(target_os = "android")]
+    {
+        for (start, end, _) in pointer.taps.clone() {
+            let physical = end * window.scale_factor();
+            if let Some((_, action, node, transform, _, clip)) =
+                visible.iter().find(|(_, _, node, transform, _, clip)| {
+                    node.contains_point(**transform, physical)
+                        && node.contains_point(**transform, start * window.scale_factor())
+                        && clip.is_none_or(|c| c.contains_point(physical))
+                })
+            {
+                let _ = (node, transform, clip);
+                activate(action);
+            }
+        }
+        pointer.consumed = true;
+        if pointer.touch_frame {
+            return;
+        }
+    }
     if mouse.just_released(MouseButton::Left) {
-        pointer(&visible, &window);
+        mouse_pointer(&visible, &window);
     }
 }
 fn activate(action: &UiAction) {
@@ -70,7 +91,7 @@ fn activate(action: &UiAction) {
         request(*a);
     }
 }
-fn pointer(buttons: &[ButtonRef<'_>], window: &Window) {
+fn mouse_pointer(buttons: &[ButtonRef<'_>], window: &Window) {
     let Some(pos) = window.cursor_position().map(|p| p * window.scale_factor()) else {
         return;
     };

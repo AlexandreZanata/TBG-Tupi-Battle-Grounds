@@ -391,7 +391,11 @@ pub(super) fn poll_link(
     ui.1 .0 = match link.status() {
         _ if quiet => None,
         Some(NetStatus::Reconnecting { since }) => {
-            let left = (GIVE_UP - (now - since)).max(0.0);
+            let window = match &*link {
+                MatchLink::Net(n) => n.reconnect_window(),
+                _ => GIVE_UP,
+            };
+            let left = (window - (now - since)).max(0.0);
             Some(lang.tf(Msg::NetReconnecting, &[("secs", &format!("{left:.0}"))]))
         }
         Some(NetStatus::Connecting) => Some(lang.t(Msg::QueueConnecting).into()),
@@ -399,7 +403,7 @@ pub(super) fn poll_link(
         _ => None,
     };
     if let Some(NetStatus::Failed(why)) = link.status() {
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         {
             account.auto_login = false;
             account.pending = None;

@@ -8,17 +8,20 @@
 
 use bevy::prelude::*;
 
+#[cfg(not(target_os = "android"))]
 use super::{ActionQueue, UiAction};
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 mod helper;
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 mod native;
+#[cfg(not(target_os = "android"))]
 mod view;
 #[cfg(target_arch = "wasm32")]
 mod web;
 
 /// What the update overlay currently says.
+#[cfg(not(target_os = "android"))]
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum UpdState {
     /// Not managed by the launcher, or nothing to say.
@@ -46,6 +49,7 @@ pub enum UpdState {
 }
 
 /// The update UI state shared by its systems.
+#[cfg(not(target_os = "android"))]
 #[derive(Resource)]
 pub struct Updater {
     pub state: UpdState,
@@ -53,7 +57,7 @@ pub struct Updater {
     pub snoozed: Option<String>,
     /// The pending notes receipt to present, as the helper reported it.
     pub notes: Option<serde_json::Value>,
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
     inner: native::Inner,
     #[cfg(target_arch = "wasm32")]
     inner: web::Inner,
@@ -63,6 +67,7 @@ pub struct Updater {
     pending_play: Option<UiAction>,
 }
 
+#[cfg(not(target_os = "android"))]
 impl Default for Updater {
     fn default() -> Self {
         Self {
@@ -82,6 +87,7 @@ impl Default for Updater {
         }
     }
 }
+#[cfg(not(target_os = "android"))]
 impl Updater {
     /// An update is being applied: no new play may start (U09).
     pub fn applying(&self) -> bool {
@@ -90,6 +96,7 @@ impl Updater {
 }
 
 /// Is `action` one of the update overlay's own buttons?
+#[cfg(not(target_os = "android"))]
 fn ours(action: &UiAction) -> bool {
     matches!(
         action,
@@ -104,6 +111,7 @@ fn ours(action: &UiAction) -> bool {
     )
 }
 
+#[cfg(not(target_os = "android"))]
 fn starts_online(action: &UiAction) -> bool {
     matches!(
         action,
@@ -119,6 +127,7 @@ fn starts_online(action: &UiAction) -> bool {
 
 /// Runs before `actions::apply`: handles the update buttons and, while an
 /// update is applying, drops every other action (the Update/Play race).
+#[cfg(not(target_os = "android"))]
 pub(super) fn take_actions(
     mut queue: ResMut<ActionQueue>,
     mut updater: ResMut<Updater>,
@@ -144,12 +153,12 @@ pub(super) fn take_actions(
             );
             continue;
         }
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
         native::apply(&mut updater, action, *state.get(), &mut exit);
         #[cfg(target_arch = "wasm32")]
         web::apply(&mut updater, action);
     }
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
     {
         if native::stage_busy(&updater) && queue.0.iter().any(starts_online) {
             updater.pending_play = queue.0.iter().find(|a| starts_online(a)).copied();
@@ -172,12 +181,19 @@ pub(super) fn take_actions(
     }
 }
 
+#[cfg(not(target_os = "android"))]
 pub fn plugin(app: &mut App) {
     app.init_resource::<Updater>();
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
     {
         native::plugin(app);
     }
     #[cfg(target_arch = "wasm32")]
     web::plugin(app);
 }
+
+#[cfg(target_os = "android")]
+pub(super) fn take_actions() {}
+
+#[cfg(target_os = "android")]
+pub fn plugin(_app: &mut App) {}

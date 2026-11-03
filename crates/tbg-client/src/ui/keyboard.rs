@@ -8,7 +8,7 @@ pub(super) fn tabbed() -> bool {
 use crate::GameState;
 use bevy::prelude::*;
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 type Buttons<'w, 's> = Query<
     'w,
     's,
@@ -22,7 +22,7 @@ type Buttons<'w, 's> = Query<
     ),
 >;
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 type Buttons<'w, 's> = Query<
     'w,
     's,
@@ -49,7 +49,7 @@ pub(super) fn navigate(
     chat: Res<super::match_chat::Chat>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     mut queue: ResMut<ActionQueue>,
-    #[cfg(tbg_desktop)] view: Res<crate::sync::LatestView>,
+    #[cfg(tbg_native_ui)] view: Res<crate::sync::LatestView>,
 ) {
     if *match_id != info.result_id {
         *match_id = info.result_id;
@@ -78,7 +78,7 @@ pub(super) fn navigate(
         .iter()
         .filter(|entry| {
             let (_, a, n, t, v, c, ..) = entry;
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             if view.0.as_ref().is_some_and(|v| v.augment_round.is_some()) && entry.6.is_none() {
                 return false;
             }

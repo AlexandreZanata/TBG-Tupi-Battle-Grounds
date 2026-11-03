@@ -5,6 +5,8 @@ mod auxiliaries;
 mod cards;
 pub(super) mod chrome;
 mod council;
+#[cfg(target_os = "android")]
+mod details;
 mod fortify;
 mod reserve;
 mod resources;
@@ -12,8 +14,8 @@ mod score;
 mod unit_panel;
 
 pub(super) const SIDE_LEFT: f32 = 16.;
-pub(super) const SHOP_BOTTOM: f32 = 36.;
-pub(super) const SHOP_SCALE: f32 = 0.9;
+pub(super) const SHOP_BOTTOM: f32 = if cfg!(target_os = "android") { 8. } else { 36. };
+pub(super) const SHOP_SCALE: f32 = if cfg!(target_os = "android") { 1. } else { 0.9 };
 
 pub(super) use auxiliaries::spawn as auxiliaries;
 pub(super) use cards::spawn as cards;
@@ -32,7 +34,12 @@ pub(super) fn plugin(app: &mut App) {
     unit_panel::plugin(app);
     reserve::plugin(app);
     council::plugin(app);
+    #[cfg(target_os = "android")]
+    details::plugin(app);
 }
+
+#[cfg(target_os = "android")]
+pub(super) use details::spawn as details;
 
 pub(super) use council::CouncilControl;
 

@@ -15,6 +15,9 @@ use bevy::{
     prelude::*,
 };
 
+#[cfg(target_os = "android")]
+mod mobile;
+
 #[derive(Component)]
 struct Model;
 #[derive(Resource, Default)]
@@ -42,6 +45,15 @@ pub(super) fn plugin(app: &mut App) {
         );
 }
 type ModelFilter = (With<Model>, Without<ArenaCamera>);
+type PreviewFraming<'w, 's> = (
+    Single<'w, 's, &'static Window>,
+    Query<
+        'w,
+        's,
+        (&'static ComputedNode, &'static UiGlobalTransform),
+        With<super::catalog::viewer::Viewport>,
+    >,
+);
 
 #[allow(clippy::too_many_arguments)]
 fn show(
@@ -56,11 +68,11 @@ fn show(
     arena: Res<crate::arena::ActiveArena>,
     mut ambient: ResMut<GlobalAmbientLight>,
     mut camera: Single<(&mut Transform, &mut Projection, &mut DistanceFog), With<ArenaCamera>>,
-    window: Single<&Window>,
+    framing: PreviewFraming<'_, '_>,
     mut clear: ResMut<ClearColor>,
     mut scenery: Query<&mut Visibility, With<crate::arena::ArenaScene>>,
     mut model: Query<(Entity, &mut Transform, &mut Animator), ModelFilter>,
-    #[cfg(tbg_desktop)] mut demo: Query<
+    #[cfg(tbg_native_ui)] mut demo: Query<
         &mut Visibility,
         (
             With<crate::sync::lobby_battle::DemoUnit>,
@@ -68,6 +80,7 @@ fn show(
         ),
     >,
 ) {
+    let (window, _viewport) = framing;
     let (mut meshes, mut materials) = assets;
     let same_theme = preview.theme.is_none_or(|theme| theme == arena.0);
     let active = *state.get() == GameState::Menu && shell.panel == Panel::Troops;
@@ -82,7 +95,7 @@ fn show(
             };
         }
 
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         for mut visible in &mut demo {
             *visible = if active {
                 Visibility::Hidden
@@ -186,6 +199,13 @@ fn show(
     let aim = Vec3::new(8. + distance * tan * aspect * 0.025, 1.12, 0.);
     *camera.0 = Transform::from_translation(aim + Vec3::new(0., 0.22, 1.).normalize() * distance)
         .looking_at(aim, Vec3::Y);
+    #[cfg(target_os = "android")]
+    if let Some(viewport) = _viewport
+        .iter()
+        .find(|(node, _)| node.size.min_element() > 0.)
+    {
+        *camera.0 = mobile::frame(&window, viewport, radius * scale, height * scale, c.zoom);
+    }
     camera.2.color = super::stage::SKY;
     camera.2.falloff = FogFalloff::Linear {
         start: 19.,
@@ -209,11 +229,29 @@ fn drag(
     mut motion: MessageReader<MouseMotion>,
     mut wheel: MessageReader<MouseWheel>,
     mouse: Res<ButtonInput<MouseButton>>,
+    #[cfg(target_os = "android")] pointer: Res<crate::ui::mobile::input::Pointer>,
     window: Single<&Window>,
     shell: Res<Shell>,
     viewport: Query<(&ComputedNode, &UiGlobalTransform), With<super::catalog::viewer::Viewport>>,
     mut c: ResMut<Catalog>,
 ) {
+    #[cfg(target_os = "android")]
+    if pointer.touch_frame {
+        motion.clear();
+        wheel.clear();
+        if shell.panel == Panel::Troops && !c.preview_controls {
+            if let (Some(origin), Some((point, delta))) = (pointer.drag_origin(), pointer.drag) {
+                let scale = window.scale_factor();
+                if viewport.iter().any(|(node, transform)| {
+                    node.contains_point(*transform, origin * scale)
+                        && node.contains_point(*transform, point * scale)
+                }) {
+                    c.yaw += delta.x * 0.008;
+                }
+            }
+        }
+        return;
+    }
     let inside = shell.panel == Panel::Troops
         && window.cursor_position().is_some_and(|p| {
             viewport

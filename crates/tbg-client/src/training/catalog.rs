@@ -32,6 +32,8 @@ pub fn spawn(
 ) {
     parent
         .spawn(Node {
+            #[cfg(target_os = "android")]
+            width: percent(100),
             column_gap: px(10),
             align_items: AlignItems::Center,
             flex_shrink: 0.,
@@ -43,13 +45,27 @@ pub fn spawn(
                 ("editor", Tab::Editor),
                 ("practice", Tab::Practice),
             ] {
-                row.spawn(skin::control(
+                #[cfg_attr(not(target_os = "android"), allow(unused_mut))]
+                let mut _control = row.spawn(skin::control(
                     lang.key(&format!("training.{key}")),
                     Action::Tab(tab),
                     220.,
                     c.tab == tab,
                 ));
+                #[cfg(target_os = "android")]
+                _control.insert(Node {
+                    flex_grow: 1.,
+                    flex_basis: px(0),
+                    min_width: px(48),
+                    min_height: px(48),
+                    padding: UiRect::all(px(4)),
+                    border: UiRect::all(px(1)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                });
             }
+            #[cfg(not(target_os = "android"))]
             row.spawn(kit::muted(
                 format!(
                     "{} · {}",
@@ -64,30 +80,50 @@ pub fn spawn(
             width: percent(100),
             flex_grow: 1.,
             min_height: px(0),
-            column_gap: px(14),
+            column_gap: px(if cfg!(target_os = "android") { 6 } else { 14 }),
             ..default()
         })
         .with_children(|row| {
-            row.spawn(skin::panel(28.))
-                .with_children(|p| list(p, c, assets, lang, scroll[0]));
+            row.spawn(skin::panel(if cfg!(target_os = "android") {
+                30.
+            } else {
+                28.
+            }))
+            .with_children(|p| list(p, c, assets, lang, scroll[0]));
             row.spawn(Node {
-                width: percent(40),
+                width: percent(if cfg!(target_os = "android") { 36 } else { 40 }),
                 min_width: px(0),
                 flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::FlexEnd,
                 ..default()
             })
             .with_children(|p| viewer::controls(p, c, lang));
-            row.spawn((skin::panel(30.), ScrollPosition(scroll[1]), Pane(1)))
-                .with_children(|p| match c.tab {
-                    Tab::Catalog => inspector::details(p, c, lang),
-                    Tab::Editor => inspector::editor(p, c, lang),
-                    Tab::Practice => practice(p, c, assets, lang),
-                });
+            row.spawn((
+                skin::panel(if cfg!(target_os = "android") {
+                    32.
+                } else {
+                    30.
+                }),
+                ScrollPosition(scroll[1]),
+                Pane(1),
+            ))
+            .with_children(|p| match c.tab {
+                Tab::Catalog => inspector::details(p, c, lang),
+                Tab::Editor => inspector::editor(p, c, lang),
+                Tab::Practice => practice(p, c, assets, lang),
+            });
         });
 }
 fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang, scroll: Vec2) {
-    p.spawn(kit::heading(lang.key("training.catalog"), 25.));
+    #[cfg(not(target_os = "android"))]
+    p.spawn(kit::heading(
+        lang.key("training.catalog"),
+        if cfg!(target_os = "android") {
+            18.
+        } else {
+            25.
+        },
+    ));
     p.spawn(skin::control(
         if c.search.is_empty() {
             lang.key("training.search")
@@ -99,7 +135,15 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         !c.search.is_empty(),
     ));
     p.spawn(Node {
+        width: percent(100),
+        flex_direction: if cfg!(target_os = "android") {
+            FlexDirection::Column
+        } else {
+            FlexDirection::Row
+        },
         column_gap: px(6),
+        row_gap: px(6),
+        flex_shrink: 0.,
         ..default()
     })
     .with_children(|row| {
@@ -123,10 +167,15 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         ] {
             row.spawn(skin::control(label, action, 0., active))
                 .insert(Node {
-                    width: percent(50),
+                    width: if cfg!(target_os = "android") {
+                        percent(100)
+                    } else {
+                        percent(50)
+                    },
+                    flex_shrink: 0.,
                     min_width: px(0),
-                    min_height: px(40),
-                    padding: UiRect::all(px(6)),
+                    min_height: px(if cfg!(target_os = "android") { 48 } else { 40 }),
+                    padding: UiRect::all(px(if cfg!(target_os = "android") { 4 } else { 6 })),
                     border: UiRect::all(px(1)),
                     border_radius: BorderRadius::all(px(4)),
                     align_items: AlignItems::Center,
@@ -136,12 +185,13 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         }
     });
     let visible = c.visible(lang);
+    #[cfg(not(target_os = "android"))]
     p.spawn(kit::muted(lang.key("training.list_hint"), 11.));
     p.spawn((
         Node {
             width: percent(100),
             flex_grow: 1.,
-            min_height: px(0),
+            min_height: px(if cfg!(target_os = "android") { 96 } else { 0 }),
             flex_direction: FlexDirection::Column,
             overflow: Overflow::scroll_y(),
             row_gap: px(7),
@@ -151,6 +201,16 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         Pane(0),
     ))
     .with_children(|list| {
+        #[cfg(target_os = "android")]
+        list.spawn((
+            Node {
+                width: percent(100),
+                min_width: px(0),
+                flex_shrink: 0.,
+                ..default()
+            },
+            kit::muted(lang.key("training.list_hint"), 11.),
+        ));
         if visible.is_empty() {
             list.spawn(kit::muted(lang.key("training.no_results"), 15.));
         }
@@ -165,7 +225,7 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
                     border: UiRect::all(px(1)),
                     border_radius: BorderRadius::all(px(4)),
                     align_items: AlignItems::Center,
-                    column_gap: px(10),
+                    column_gap: px(if cfg!(target_os = "android") { 6 } else { 10 }),
                     ..default()
                 },
                 skin::colors(selected),
@@ -179,17 +239,46 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
                         "battle/portraits/{}.webp",
                         format!("{kind:?}").to_lowercase()
                     ),
-                    55.,
-                    55.,
+                    if cfg!(target_os = "android") {
+                        42.
+                    } else {
+                        55.
+                    },
+                    if cfg!(target_os = "android") {
+                        42.
+                    } else {
+                        55.
+                    },
                 ));
                 row.spawn(Node {
                     flex_direction: FlexDirection::Column,
                     flex_grow: 1.,
+                    #[cfg(target_os = "android")]
+                    min_width: px(0),
+                    #[cfg(target_os = "android")]
+                    flex_basis: px(0),
                     row_gap: px(4),
                     ..default()
                 })
                 .with_children(|copy| {
-                    copy.spawn(kit::heading(content::unit_name(lang, kind), 18.));
+                    copy.spawn((
+                        #[cfg(target_os = "android")]
+                        Node {
+                            width: percent(100),
+                            min_width: px(0),
+                            ..default()
+                        },
+                        kit::heading(
+                            content::unit_name(lang, kind),
+                            if cfg!(target_os = "android") {
+                                14.
+                            } else {
+                                18.
+                            },
+                        ),
+                        #[cfg(target_os = "android")]
+                        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+                    ));
                     copy.spawn(kit::muted(
                         format!(
                             "{} · {}",
@@ -199,7 +288,14 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
                         12.,
                     ));
                 });
-                row.spawn(kit::heading(">", 22.));
+                row.spawn(kit::heading(
+                    ">",
+                    if cfg!(target_os = "android") {
+                        16.
+                    } else {
+                        22.
+                    },
+                ));
             });
         }
     });

@@ -13,7 +13,7 @@ pub const LINE: Color = Color::srgb_u8(74, 88, 94);
 pub const BLUE: Color = Color::srgb_u8(47, 88, 110);
 
 /// A server-backed field has not received its first value; Linux paints its reserved slot.
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 #[derive(Component)]
 pub struct Pending(pub bool);
 
@@ -21,8 +21,14 @@ pub fn panel() -> impl Bundle {
     (
         Node {
             flex_direction: FlexDirection::Column,
-            padding: UiRect::all(px(20)),
-            row_gap: px(12),
+            padding: UiRect::all(px(if cfg!(target_os = "android") { 12 } else { 20 })),
+            row_gap: px(if cfg!(target_os = "android") { 8 } else { 12 }),
+            #[cfg(target_os = "android")]
+            flex_shrink: 0.,
+            #[cfg(target_os = "android")]
+            min_width: px(0),
+            #[cfg(target_os = "android")]
+            max_width: percent(100),
             border: UiRect::all(px(1)),
             border_radius: BorderRadius::all(px(10)),
             ..default()
@@ -59,12 +65,25 @@ pub fn display_font() -> Handle<Font> {
 pub fn heading(text: impl Into<String>, size: f32) -> impl Bundle {
     (
         Text::new(text),
-        TextFont::from_font_size(FontSize::Px(size)).with_font(display_font()),
+        TextFont::from_font_size(FontSize::Px(if cfg!(target_os = "android") {
+            size.min(26.)
+        } else {
+            size
+        }))
+        .with_font(display_font()),
         TextColor(GOLD),
     )
 }
 pub fn muted(text: impl Into<String>, size: f32) -> impl Bundle {
-    text_color(text, size, MUTED)
+    text_color(
+        text,
+        if cfg!(target_os = "android") {
+            size.min(14.)
+        } else {
+            size
+        },
+        MUTED,
+    )
 }
 pub fn image(
     assets: &AssetServer,
@@ -82,11 +101,35 @@ pub fn image(
         },
     )
 }
+/// Keep native body readouts inside their scrollable column, including unbroken input.
+pub fn paragraph(value: impl Into<String>, size: f32) -> impl Bundle {
+    (
+        muted(value, size),
+        #[cfg(target_os = "android")]
+        Node {
+            width: percent(100),
+            min_width: px(0),
+            flex_shrink: 0.,
+            ..default()
+        },
+        #[cfg(target_os = "android")]
+        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+    )
+}
+
 pub fn control(text: impl Into<String>, enabled: bool, width: f32) -> impl Bundle {
     (
         Node {
-            min_width: px(width),
-            min_height: px(42),
+            min_width: px(if cfg!(target_os = "android") {
+                48.
+            } else {
+                width
+            }),
+            #[cfg(target_os = "android")]
+            width: if width > 0. { px(width) } else { Val::Auto },
+            #[cfg(target_os = "android")]
+            max_width: percent(100),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 42 }),
             padding: UiRect::axes(px(14), px(10)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
@@ -100,7 +143,17 @@ pub fn control(text: impl Into<String>, enabled: bool, width: f32) -> impl Bundl
             enabled,
             focused: false,
         },
-        children![super::label(text, 16.)],
+        children![(
+            #[cfg(target_os = "android")]
+            Node {
+                width: percent(100),
+                min_width: px(0),
+                ..default()
+            },
+            super::label(text, 16.),
+            #[cfg(target_os = "android")]
+            TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+        )],
     )
 }
 

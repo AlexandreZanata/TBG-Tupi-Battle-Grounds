@@ -262,5 +262,357 @@
         "file": "relative/path.png"
       }
     ]
-  }
+  },
+  "change_records": [
+    {
+      "id": "p69-main-mobile-integration",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Existing full screen and motion matrix; Android adaptive landscape counterpart",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-compact-navigation-laboratory-safe-controls",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "lobby/menu/laboratory/input/loading/safe-area transitions; existing desktop cases retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-session-backup-mask",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "account login/backup-key forms and clipboard; existing desktop cases retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-scroll-modal-battle-settings",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Practice scrolling, modal navigation ownership, five Shop cards/Reroll/auxiliaries, Android settings; unchanged desktop geometry",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-android-document-backup",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "account backup download/save acknowledgement, document picker cancel/write/return; desktop export unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-landscape-ime-match-labels",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android IME/prompt/reveal/Done/Back, localized phase/Stronghold/Reroll; desktop presentation unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-menu-density-protected-forms-localization",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Arcanas/Strongholds/Arenas/Settings, save-key/modal/toast, native IME; shared native Arcana/Stronghold locale copy",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-council-ranking-rematch-intrinsic-copy",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android horizontal War Council with selected full effect, Ranking compact header/podium/sidebar, intrinsic Arena copy, external-link error; shared localized Council copy and eligible-mode rematch feedback; desktop geometry retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-training-unit-details-loading",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android Training toolbar/body, intrinsic catalog/Ranking text, combined scrollable unit/Evolution details, full-bleed loading decoration; shared native unit/Stronghold localized copy",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-small-landscape-scroll-bounds",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android header/catalog text, minimum catalog list viewport, whole-page Ranking scroll, system splash background; desktop geometry unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-short-battle-owned-scroll-auxiliary-drawer",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android short-height Shop/score/resource text bounds, Energy grouping, explicit auxiliary drawer and modal shields, scrolling across owned controls; desktop presentation/motion unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-native-ime-training-back-localized-headings",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android short-landscape native IME essential row and Training OS Back; localized native Fortification/Evolution headings with desktop geometry retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-mobile-preview-measured-camera",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android catalog model fit/center using actual preview viewport and actor bounds, preserving courtyard, explicit zoom, desktop framing and all motion",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-current-main-p75-mobile-adapters",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android P75 dialogs, account/recovery/library Settings, native chat composition and bounded emoji picker, full three-tier auxiliary drawer; current main desktop/web presentation preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-native-configuration-ime-handoff-backup-scroll",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android font/resource configuration lifecycle, reliable consecutive native IME forms, explicit key-save panel scroll; desktop/web presentation unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-overlay-configuration-owned-preview-drag",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android live navigation/cutout overlay configuration, owned touch rotation in the catalog preview with drawer exclusion; desktop mouse, models and animation preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-native-verification-code-shared-limits",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android alphanumeric verification/recovery code keyboard and Unicode scalar limits, shared Account/Library loading completion; existing desktop geometry preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-battle-visible-band-details-council",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android measured mobile battle camera, Army details drawer, Council card names; shared exclusive Council/chat layering with Linux desktop geometry preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-mobile-result-summary-actions-celebration-fit",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android winner/loser Result summary, scroll, five actions and 48dp celebration controls; shared cast/motion and desktop geometry unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-p71-active-seat-retry-window",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared active-seat reconnection attempt window/banner across pause and terminal replay; server authority, queue timeout and all layouts unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-mobile-header-social-dock",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android collapsed chat/count header slot, score remaining width, bounded two-step surrender, touch-specific detail help; desktop geometry and expanded chat/policy preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-mobile-complete-auxiliary-tier-subtitle",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android auxiliary subtitle wraps complete Merchant T3 progress/charge state in its existing card; desktop geometry/art/motion unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-mobile-score-separate-readout-lines",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android score names/ratings and Stronghold labels use separate full-width lines within unchanged plate height; desktop geometry preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-p75-chat-capture-permits-own-controls",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared expanded-chat compose/close/mute/emoji pointer controls remain usable while gameplay is captured; actual dialogs/forms preserve their handlers and all geometry is unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-mobile-celebration-measured-free-space",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android celebration camera fits the measured space above Result without rebuilding dancers; compact paging and touch-only captions; shared cast/world slots/clips and desktop camera unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-p75-expanded-chat-retains-readable-history",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared expanded chat retains bounded recent messages for touch/guest readers without keyboard focus; compact docks and emoji timing unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-p71-terminal-replay-retention-and-confirmed-recovery",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared authoritative terminal-result recovery after long pause; original client deadline survives a Welcome without seat/result; all layouts, game values and windows unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-result-authoritative-forfeit-cause",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared Result uses existing server disconnect/moderation cause without inferring outcome or changing geometry; manual/local fallback retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-mobile-large-cast-result-sidebar",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android winning Result sidebar scroll/two-column actions, measured left-space64-entry formation and camera-facing cosmetic roots; all cast entries/clips, losing Result and desktop geometry preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-shared-emoji-library-icon-buttons",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared P75 standard emoji selection uses centered art without numeric debug labels;64px width contains32px art and existing padding; native48dp minimum retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-authenticated-terminal-replay-filter",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Same-family valid authenticated hello preserves existing unexpired terminal replay after a long pause; no extra grace, auth weakening or layout change",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-result-owned-report-and-readable-mobile-filters",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android Result owns eligible P75 toolbar in its scroll panel; full-width catalog filters, bounded Ranking cells and full short-header legend/status at font100/130; desktop geometry unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-bounded-mobile-social-body-copy",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android bounded P75 account/recovery/report/library and chat body readouts wrap unbroken input while preserving full limits and desktop presentation",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-native-email-and-room-keyboard-context",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Native P75 email/Room keyboard context; original500/five-scalar limits and shared submission/server validation retained; desktop/web editing preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
+    },
+    {
+      "id": "p69-final-emulator-consolidation-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Native Android full surface/safe controls, real menu/gameplay/IME/social/Result journeys and representative API36 profiles; shared Linux reference/web Hard runtime; current source identities and exact limitations in P69-emulator-20261103.json",
+      "linux": "scoped runtime observed; complete pixel/motion matrix pending",
+      "windows": "visual pending; CI tests/build/package passed",
+      "web": "scoped desktop runtime observed; portrait stays portrait with crowded existing layout",
+      "android": "scoped emulator runtime observed; physical ARM64/16KB pending"
+    }
+  ]
 }

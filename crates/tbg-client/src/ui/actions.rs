@@ -106,7 +106,7 @@ pub(super) fn apply(
             inspected.0 = None;
             tower_open.0 = false;
         }
-        #[cfg(tbg_desktop)]
+        #[cfg(tbg_native_ui)]
         let action = match action {
             UiAction::PracticeArena(arena) => {
                 config::save_arena(arena);
@@ -299,7 +299,7 @@ pub(super) fn apply(
                 }
             }
             // Linux presentation actions are consumed before this system.
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             UiAction::ShowArenaBanner
             | UiAction::CloseArenaBanner
             | UiAction::PickAugment(_)
@@ -377,6 +377,10 @@ pub(super) fn apply(
                     pending.0 = Some((u8::MAX, seq.0));
                 }
             }
+            #[cfg(target_os = "android")]
+            UiAction::ToggleAuxiliaries => {}
+            #[cfg(target_os = "android")]
+            UiAction::ToggleBattleDetails => {}
             UiAction::HireAuxiliary(slot) => {
                 if pending.0.is_some() {
                     continue;
@@ -455,7 +459,7 @@ pub(super) fn apply(
             }
             UiAction::CloseInspect => {
                 inspected.0 = None;
-                #[cfg(tbg_desktop)]
+                #[cfg(tbg_native_ui)]
                 {
                     selected.0 = None;
                 }

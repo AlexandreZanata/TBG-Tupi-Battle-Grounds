@@ -46,7 +46,18 @@ pub fn url_param(name: &str) -> Option<String> {
 /// 4. native: compile-time production override; localhost in development.
 pub fn server_url() -> String {
     if let Some(url) = url_param("server") {
+        #[cfg(target_os = "android")]
+        if !crate::platform::android::endpoint_allowed(&url) {
+            return "wss://invalid.invalid/ws".into();
+        }
         return url;
+    }
+    #[cfg(target_os = "android")]
+    if option_env!("TBG_DEFAULT_SERVER").is_none()
+        && cfg!(feature = "android-loopback")
+        && crate::platform::android::services::flag(jni::jni_str!("isInternalBuild"))
+    {
+        return "ws://127.0.0.1:18069/ws".into();
     }
     #[cfg(target_arch = "wasm32")]
     {
@@ -64,6 +75,14 @@ pub fn server_url() -> String {
     }
     #[cfg(not(target_arch = "wasm32"))]
     {
+        #[cfg(target_os = "android")]
+        if let Some(url) = option_env!("TBG_DEFAULT_SERVER") {
+            return if crate::platform::android::endpoint_allowed(url) {
+                url.into()
+            } else {
+                "wss://invalid.invalid/ws".into()
+            };
+        }
         option_env!("TBG_DEFAULT_SERVER")
             .unwrap_or(if cfg!(debug_assertions) {
                 "ws://127.0.0.1:8080/ws"

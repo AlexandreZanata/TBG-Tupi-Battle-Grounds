@@ -10,6 +10,9 @@ use tbg_core::protocol::{ChatPermission, ClientMsg, MatchSocial, ServerMsg};
 /// Normalized desktop rectangles shared with the precinct visibility contract.
 pub(crate) const COMPACT_BOUNDS: [f32; 4] = [0.79, 0.09, 0.20, 0.12];
 pub(crate) const EXPANDED_BOUNDS: [f32; 4] = [0.34, 0.15, 0.32, 0.55];
+#[cfg(target_os = "android")]
+mod mobile;
+
 static CONSUMED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub fn consumed() -> bool {
     CONSUMED.load(std::sync::atomic::Ordering::Relaxed)
@@ -21,6 +24,8 @@ pub struct Chat {
     pub policy: Option<MatchSocial>,
     pub lines: VecDeque<(f64, tbg_core::Seat, String)>,
     pub bubbles: [Option<(u8, f64)>; 2],
+    #[cfg(target_os = "android")]
+    pub compose_result: Option<[u8; 16]>,
     pub focused: bool,
     pub expanded: bool,
     pub edit: kit::edit::Edit,
@@ -32,6 +37,8 @@ pub struct Chat {
 #[derive(Component)]
 struct Root;
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "android")]
+    app.add_systems(Update, mobile::submit.before(keys));
     app.init_resource::<Inbox>()
         .insert_resource(Chat {
             mode: stored_mode(),
@@ -107,6 +114,7 @@ pub(crate) fn keys(
     state: Res<State<GameState>>,
     info: Res<MatchInfo>,
     mut link: NonSendMut<MatchLink>,
+    view: Res<crate::sync::LatestView>,
     time: Res<Time>,
     form: NonSend<super::textform::ActiveForm>,
 ) {
@@ -120,6 +128,7 @@ pub(crate) fn keys(
         || !matches!(&*link, MatchLink::Net(_))
         || super::textform::is_open(&form)
         || super::p75::modal()
+        || view.0.as_ref().is_some_and(|v| v.augment_round.is_some())
     {
         events.clear();
         chat.focused = false;
@@ -207,11 +216,13 @@ fn render(
     lang: Res<Lang>,
     time: Res<Time>,
     link: NonSend<MatchLink>,
+    view: Res<crate::sync::LatestView>,
     mut shown: Local<String>,
 ) {
     let active = chat.mode < 2
         && *state.get() == GameState::InMatch
         && !info.spectating
+        && !view.0.as_ref().is_some_and(|v| v.augment_round.is_some())
         && matches!(&*link, MatchLink::Net(_));
     let signature = format!(
         "{active}:{}:{}:{}:{}:{}:{}:{}",
@@ -234,6 +245,13 @@ fn render(
         return;
     }
     let now = time.elapsed_secs_f64();
+    #[cfg(target_os = "android")]
+    let bounds = if chat.expanded {
+        [0.12, 0.18, 0.76, 0.74]
+    } else {
+        [0.72, 0.18, 0.26, 0.23]
+    };
+    #[cfg(not(target_os = "android"))]
     let bounds = if chat.expanded {
         EXPANDED_BOUNDS
     } else {
@@ -243,38 +261,71 @@ fn render(
         .spawn((
             Root,
             super::hud::Hud::PrivateControls,
+            #[cfg(target_os = "android")]
+            UiAction::Disabled,
             GlobalZIndex(25),
             Node {
                 position_type: PositionType::Absolute,
-                left: percent(bounds[0] * 100.),
-                top: percent(bounds[1] * 100.),
-                width: percent(bounds[2] * 100.),
-                height: if chat.expanded {
+                left: if cfg!(target_os = "android") && !chat.expanded {
+                    px(6)
+                } else {
+                    percent(bounds[0] * 100.)
+                },
+                top: if cfg!(target_os = "android") && !chat.expanded {
+                    px(4)
+                } else {
+                    percent(bounds[1] * 100.)
+                },
+                width: if cfg!(target_os = "android") && !chat.expanded {
+                    px(48)
+                } else {
+                    percent(bounds[2] * 100.)
+                },
+                height: if cfg!(target_os = "android") && !chat.expanded {
+                    px(48)
+                } else if chat.expanded {
                     auto()
                 } else {
                     percent(bounds[3] * 100.)
                 },
-                max_height: percent(bounds[3] * 100.),
+                max_height: if cfg!(target_os = "android") && !chat.expanded {
+                    px(48)
+                } else {
+                    percent(bounds[3] * 100.)
+                },
                 overflow: if chat.expanded {
                     Overflow::scroll_y()
                 } else {
                     Overflow::clip()
                 },
-                padding: UiRect::all(px(if chat.expanded { 10 } else { 4 })),
+                padding: UiRect::all(px(if chat.expanded {
+                    10
+                } else if cfg!(target_os = "android") {
+                    0
+                } else {
+                    4
+                })),
                 flex_direction: FlexDirection::Column,
                 row_gap: px(if chat.expanded { 6 } else { 2 }),
                 ..default()
             },
             BackgroundColor(kit::PANEL.with_alpha(if chat.focused { 0.98 } else { 0.75 })),
+            #[cfg(target_os = "android")]
+            ScrollPosition::default(),
         ))
         .with_children(|p| {
             if !chat.expanded {
                 p.spawn(kit::button(
-                    format!("{} ({})", lang.key("p75.chat"), chat.lines.len()),
+                    if cfg!(target_os = "android") {
+                        format!("{}\n{}", lang.key("android.chat_short"), chat.lines.len())
+                    } else {
+                        format!("{} ({})", lang.key("p75.chat"), chat.lines.len())
+                    },
                     UiAction::P75(super::p75::Action::Chat),
                     0.,
                 ))
                 .insert(compact_button(percent(100.)));
+                #[cfg(not(target_os = "android"))]
                 emoji_controls(p, &chat, &info, now, true);
                 return;
             }
@@ -289,16 +340,12 @@ fn render(
             let lines: Vec<_> = chat
                 .lines
                 .iter()
-                .filter(|(at, from, _)| {
-                    chat.mode == 0
-                        && (chat.focused || now - at < 12.)
-                        && (!chat.muted || Some(*from) == info.you)
-                })
+                .filter(|(_, from, _)| chat.mode == 0 && (!chat.muted || Some(*from) == info.you))
                 .rev()
                 .take(8)
                 .collect();
             for (_, _, line) in lines.into_iter().rev() {
-                p.spawn(kit::muted(line, 14.));
+                p.spawn(kit::paragraph(line, 14.));
             }
             if chat.mode == 0 {
                 if chat
@@ -310,9 +357,22 @@ fn render(
                         if chat.focused {
                             chat.edit.display(false)
                         } else {
-                            lang.key("p75.chat_enter")
+                            lang.key(if cfg!(target_os = "android") {
+                                "android.chat_compose"
+                            } else {
+                                "p75.chat_enter"
+                            })
                         },
-                        UiAction::P75(super::p75::Action::Chat),
+                        UiAction::P75({
+                            #[cfg(target_os = "android")]
+                            {
+                                super::p75::Action::Compose
+                            }
+                            #[cfg(not(target_os = "android"))]
+                            {
+                                super::p75::Action::Chat
+                            }
+                        }),
                         230.,
                     ));
                 } else {
@@ -376,8 +436,8 @@ fn compact_button(width: Val) -> Node {
     Node {
         width,
         min_width: px(0),
-        height: px(32),
-        min_height: px(32),
+        height: px(if cfg!(target_os = "android") { 48 } else { 32 }),
+        min_height: px(if cfg!(target_os = "android") { 48 } else { 32 }),
         padding: UiRect::all(px(2)),
         align_items: AlignItems::Center,
         justify_content: JustifyContent::Center,

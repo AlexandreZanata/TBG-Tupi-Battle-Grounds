@@ -1,0 +1,82 @@
+{
+  "abi": "arm64-v8a",
+  "apk_sha256": "1fc7bdf83edb80dda55c888233420c5fd2b159b12f16d286353b99e337427267",
+  "assets_sha256": "fde37aef226a38ed6334d06846b8f3c420dfa383db9df0b103b45cfa5e1826e0",
+  "cargo_lock_sha256": "e8128970bb115b7affa87baaa83de2f23771f3ed72abcf890f9ad03cf79b70ac",
+  "content_sha256": "6df66afa9f6e7c92a9cbaab822e9e2644ad7acec4d061d4cdbfa693d79dc1b03",
+  "installed_apk_sha256": "1fc7bdf83edb80dda55c888233420c5fd2b159b12f16d286353b99e337427267",
+  "libraries": {
+    "libtbg_client.so": {
+      "abi": "arm64-v8a",
+      "imports": [
+        "libdl.so",
+        "liblog.so",
+        "libandroid.so",
+        "libaaudio.so",
+        "libm.so",
+        "libc.so"
+      ],
+      "load_alignment": [
+        16384,
+        16384,
+        16384,
+        16384
+      ],
+      "zip_data_offset": 6881280
+    }
+  },
+  "limits": [
+    "Internal prototype, not a public release.",
+    "Physical reference is one 4KB-page POCO; 16KB ARM64 runtime and other devices are unverified.",
+    "Adaptive layout and reported top blue space remain pending.",
+    "Cross-play/reconnect and final performance acceptance are incomplete.",
+    "Repeated native GLES texture-shape diagnostics remain unresolved."
+  ],
+  "package": "io.github.alexandrezanata.tbg.prototype",
+  "permissions": [
+    "android.permission.INTERNET",
+    "io.github.alexandrezanata.tbg.prototype.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+  ],
+  "protocol": 30,
+  "reviewed_linux_base": "6e569183b1f589faafab16bdc3f1c2b7a3d83316",
+  "ruleset": {
+    "source_hash": "3d56156049e626c5",
+    "version": 2
+  },
+  "signing_certificate_sha256": "5b0762f8270e29e73466305224b3315ffc69bea77cc8c828b7a5b1999696f168",
+  "source_sha": "ed1ce6f296340b36a13c3167d1b482d9fdefc091",
+  "status": "paused_by_owner",
+  "toolchain": {
+    "abi": "arm64-v8a",
+    "agp": "8.11.0",
+    "android_activity": "0.6.1",
+    "android_activity_jni": "0.22.4",
+    "appcompat": "1.7.1",
+    "bevy": "0.20.0",
+    "bevy_source": "b3bdd75becaffe9a16677cf5bae5bd6d198f052b",
+    "build_tools": "36.0.0",
+    "cargo_ndk": "4.1.2",
+    "compile_sdk": 36,
+    "emulator_abi": "x86_64",
+    "emulator_api": 35,
+    "emulator_page_size": 16384,
+    "emulator_rendering": "SwiftShader after host GPU emulator crash",
+    "game_activity": "4.4.0",
+    "game_activity_aar_sha256": "3a8b0887ac55a0a6ab56021ced7353a250539eac811278b74bccd8a5b678d9c9",
+    "gradle": "8.14.3",
+    "gradle_distribution_sha256": "bd71102213493060956ec229d946beee57158dbd89d0e62b91bca0fa2c5f3531",
+    "gradle_wrapper_sha256": "7d3a4ac4de1c32b59bc6a4eb8ecb8e612ccd0cf1ae1e99f66902da64df296172",
+    "jdk": "Temurin-21+35",
+    "kotlin": "2.1.20",
+    "min_sdk": 31,
+    "ndk": "28.2.13676358",
+    "reference_linux_commit": "6e56918",
+    "rust": "1.99.0",
+    "rust_target": "aarch64-linux-android",
+    "sdk_platform_revision": 2,
+    "target_sdk": 36,
+    "winit": "0.30.13"
+  },
+  "version_code": 9,
+  "version_name": "0.1.1-rc.1-android.9"
+}

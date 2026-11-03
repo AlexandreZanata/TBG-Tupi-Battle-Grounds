@@ -37,7 +37,7 @@ mod glyphs;
 pub(crate) mod history;
 mod hud;
 mod hud_portraits;
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 mod hud_top;
 mod hud_update;
 mod input;
@@ -48,16 +48,18 @@ mod keyboard;
 pub(crate) mod kit;
 pub(crate) mod match_chat;
 mod menu;
-#[cfg(tbg_desktop)]
+#[cfg(any(target_os = "android", test))]
+pub(crate) mod mobile;
+#[cfg(tbg_native_ui)]
 mod native_battle;
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub(crate) mod native_loading;
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 mod native_ranking;
 pub(crate) mod p75;
 mod queue;
 pub mod ranking;
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 mod ranking_ui;
 mod recovery;
 mod report;
@@ -69,6 +71,7 @@ mod start;
 mod stronghold_data_tests;
 pub(crate) mod surrender;
 pub mod textform;
+#[cfg(not(target_os = "android"))]
 mod textform_bevy;
 mod tips;
 mod toast;
@@ -88,7 +91,7 @@ pub enum UiAction {
     CelebrationMotion,
     Practice,
     PracticeSetup,
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     PracticeArena(tbg_core::Arena),
     Quick,
     CreateRoom,
@@ -112,8 +115,12 @@ pub enum UiAction {
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     LeaveWatch,
     Buy(u8),
-    #[cfg_attr(not(tbg_desktop), allow(dead_code))]
+    #[cfg_attr(not(tbg_native_ui), allow(dead_code))]
     HireAuxiliary(u8),
+    #[cfg(target_os = "android")]
+    ToggleAuxiliaries,
+    #[cfg(target_os = "android")]
+    ToggleBattleDetails,
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     Reserve {
         offer: u8,
@@ -174,9 +181,9 @@ pub enum UiAction {
     UpdateRestart,
     #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     UpdateNotesOk,
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     ShowArenaBanner,
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     CloseArenaBanner,
     // P41: lobby Settings language switch (DOM selector via data-action).
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))] // built from DOM strings on the web
@@ -187,9 +194,9 @@ pub enum UiAction {
     PreviewArena(tbg_core::Arena),
     // Owner revision 2026-10-29: War Council actions.
     ChooseAugment(u8),
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     PickAugment(u8),
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     ConfirmAugment,
     ForgoAugment,
     /// D-46: buy the next Fortification tier of your own tower on a branch.
@@ -211,11 +218,11 @@ pub fn plugin(app: &mut App) {
     p75::plugin(app);
     match_chat::plugin(app);
     crate::emoji::plugin(app);
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     native_battle::plugin(app);
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     native_ranking::plugin(app);
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     native_loading::plugin(app);
     app.init_resource::<PendingBuy>()
         .add_systems(
@@ -254,13 +261,31 @@ pub fn plugin(app: &mut App) {
             shell::plugin,
             social::plugin,
             kit::plugin,
-            attribution::plugin,
         ));
+    #[cfg(not(target_os = "android"))]
+    app.add_plugins(attribution::plugin);
 }
 
 /// Scale the whole UI with the smaller window side (phones ≈ 0.9, desktop 1.5).
-fn scale_ui(window: Single<&Window>, mut scale: ResMut<UiScale>) {
-    let s = if crate::config::bevy_ui() {
+fn scale_ui(
+    window: Single<&Window>,
+    mut scale: ResMut<UiScale>,
+    #[cfg(target_os = "android")] metrics: Res<mobile::layout::Metrics>,
+) {
+    let s = if cfg!(target_os = "android") {
+        #[cfg(target_os = "android")]
+        {
+            if metrics.density > 0. {
+                metrics.density / window.scale_factor()
+            } else {
+                1.
+            }
+        }
+        #[cfg(not(target_os = "android"))]
+        {
+            1.
+        }
+    } else if crate::config::bevy_ui() {
         kit::scale(window.width(), window.height())
     } else {
         (window.width().min(window.height()) / 420.0).clamp(0.75, 1.5)

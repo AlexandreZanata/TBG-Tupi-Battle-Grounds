@@ -41,8 +41,8 @@ pub(super) fn body() -> Node {
         min_width: px(0),
         flex_grow: 1.,
         flex_direction: FlexDirection::Column,
-        padding: UiRect::all(px(16)),
-        row_gap: px(10),
+        padding: UiRect::all(px(if cfg!(target_os = "android") { 10 } else { 16 })),
+        row_gap: px(if cfg!(target_os = "android") { 6 } else { 10 }),
         ..default()
     }
 }
@@ -67,7 +67,7 @@ pub(super) fn button_node() -> Node {
     Node {
         width: percent(100),
         min_width: px(0),
-        min_height: px(42),
+        min_height: px(if cfg!(target_os = "android") { 48 } else { 42 }),
         flex_shrink: 0.,
         align_items: AlignItems::Center,
         justify_content: JustifyContent::Center,

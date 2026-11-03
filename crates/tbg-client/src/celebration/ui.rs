@@ -15,6 +15,12 @@ struct Range;
 struct Toggle;
 #[derive(Component)]
 struct Motion;
+#[cfg(target_os = "android")]
+#[derive(Component)]
+pub(crate) struct ResultPanel;
+#[cfg(target_os = "android")]
+#[derive(Component)]
+pub(crate) struct ResultSurface;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, update.run_if(in_state(GameState::Result)));
@@ -32,34 +38,54 @@ pub(crate) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: L
             flex_wrap: FlexWrap::Wrap,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-            column_gap: px(8),
+            column_gap: px(if cfg!(target_os = "android") { 4 } else { 8 }),
             row_gap: px(5),
             ..default()
         })
         .with_children(|row| {
             row.spawn(button("<", UiAction::CelebrationPrev, 48.));
             row.spawn((
-                label("", 14.),
+                label(
+                    "",
+                    if cfg!(target_os = "android") {
+                        11.
+                    } else {
+                        14.
+                    },
+                ),
                 Node {
-                    width: px(190),
+                    width: px(if cfg!(target_os = "android") {
+                        140
+                    } else {
+                        190
+                    }),
                     ..default()
                 },
                 Range,
             ));
             row.spawn(button(">", UiAction::CelebrationNext, 48.));
             row.spawn(button(
-                lang.t(Msg::CelebrationHide),
+                &caption(lang, Msg::CelebrationHide),
                 UiAction::CelebrationHide,
-                145.,
+                if cfg!(target_os = "android") {
+                    100.
+                } else {
+                    145.
+                },
             ))
             .insert(Toggle);
             row.spawn(button(
-                lang.t(Msg::CelebrationMotion),
+                &caption(lang, Msg::CelebrationMotion),
                 UiAction::CelebrationMotion,
-                165.,
+                if cfg!(target_os = "android") {
+                    100.
+                } else {
+                    165.
+                },
             ))
             .insert(Motion);
         });
+    #[cfg(not(target_os = "android"))]
     parent.spawn(label(lang.t(Msg::CelebrationShortcuts), 11.));
 }
 
@@ -117,7 +143,7 @@ fn update(
             if let Some(children) = children {
                 for child in children {
                     if let Ok(mut text) = texts.get_mut(*child) {
-                        text.0 = lang.t(key).to_string();
+                        text.0 = caption(*lang, key);
                     }
                 }
             }
@@ -127,12 +153,26 @@ fn update(
     }
 }
 
+fn caption(lang: Lang, key: Msg) -> String {
+    #[cfg(target_os = "android")]
+    if let Some(key) = match key {
+        Msg::CelebrationHide => Some("android.celebration.hide"),
+        Msg::CelebrationShow => Some("android.celebration.show"),
+        Msg::CelebrationMotion => Some("android.celebration.reduce"),
+        Msg::CelebrationMotionOff => Some("android.celebration.full"),
+        _ => None,
+    } {
+        return lang.key(key);
+    }
+    lang.t(key).to_owned()
+}
+
 fn button(text: &str, action: UiAction, width: f32) -> impl Bundle + use<> {
     let text = text.to_owned();
     (
         Node {
             width: px(width),
-            min_height: px(30),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 30 }),
             padding: UiRect::axes(px(6), px(4)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
@@ -141,6 +181,23 @@ fn button(text: &str, action: UiAction, width: f32) -> impl Bundle + use<> {
         },
         BackgroundColor(crate::ui::BUTTON),
         action,
-        children![label(text, 13.)],
+        children![(
+            #[cfg(target_os = "android")]
+            Node {
+                width: percent(100),
+                min_width: px(0),
+                ..default()
+            },
+            label(
+                text,
+                if cfg!(target_os = "android") {
+                    11.
+                } else {
+                    13.
+                }
+            ),
+            #[cfg(target_os = "android")]
+            TextLayout::justify(Justify::Center),
+        )],
     )
 }

@@ -14,15 +14,24 @@ pub(super) fn render(
     roots: Query<Entity, With<Root>>,
     time: Res<Time>,
     mut shown: Local<String>,
+    #[cfg(target_os = "android")] result_panels: Query<
+        Entity,
+        With<crate::celebration::ui::ResultPanel>,
+    >,
 ) {
+    #[cfg(target_os = "android")]
+    let result_panel = result_panels.iter().next();
+    #[cfg(not(target_os = "android"))]
+    let result_panel: Option<Entity> = None;
     let signature = format!(
-        "{:?}:{}:{:?}:{}:{}:{}",
+        "{:?}:{}:{:?}:{}:{}:{}:{:?}",
         s.page,
         s.revision,
         game.get(),
         lang.code(),
         chat.mode,
-        textform::is_open(&form)
+        textform::is_open(&form),
+        result_panel
     );
     if *shown == signature {
         return;
@@ -31,7 +40,11 @@ pub(super) fn render(
     for e in &roots {
         commands.entity(e).despawn();
     }
-    if *game.get() == GameState::Menu && !textform::is_open(&form) && s.page == Page::None {
+    if !cfg!(target_os = "android")
+        && *game.get() == GameState::Menu
+        && !textform::is_open(&form)
+        && s.page == Page::None
+    {
         commands
             .spawn((
                 Root,
@@ -59,16 +72,27 @@ pub(super) fn render(
         && crate::auth::snapshot().access.is_some()
         && s.eligibility
             .is_some_and(|(id, eligible)| eligible && Some(id) == info.result_id)
+        && (!cfg!(target_os = "android") || result_panel.is_some())
     {
-        commands
+        let toolbar = commands
             .spawn((
                 Root,
                 GlobalZIndex(40),
-                Node {
-                    position_type: PositionType::Absolute,
-                    right: percent(2.),
-                    bottom: percent(15.),
-                    ..default()
+                if cfg!(target_os = "android") {
+                    Node {
+                        width: percent(100),
+                        flex_direction: FlexDirection::Column,
+                        flex_shrink: 0.,
+                        row_gap: px(6),
+                        ..default()
+                    }
+                } else {
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: percent(2.),
+                        bottom: percent(15.),
+                        ..default()
+                    }
                 },
             ))
             .with_children(|p| {
@@ -80,7 +104,11 @@ pub(super) fn render(
                         }
                     }
                 }
-            });
+            })
+            .id();
+        if let Some(panel) = result_panel {
+            commands.entity(panel).add_child(toolbar);
+        }
     }
     if s.page == Page::None {
         return;
@@ -89,6 +117,8 @@ pub(super) fn render(
         .spawn((
             Root,
             GlobalZIndex(90),
+            #[cfg(target_os = "android")]
+            UiAction::Disabled,
             Node {
                 position_type: PositionType::Absolute,
                 width: percent(100),
@@ -103,11 +133,19 @@ pub(super) fn render(
             root.spawn(kit::panel())
                 .insert((
                     DialogPanel,
+                    #[cfg(target_os = "android")]
+                    ScrollPosition::default(),
                     Node {
-                        width: px(840),
+                        width: if cfg!(target_os = "android") {
+                            percent(96)
+                        } else {
+                            px(840)
+                        },
+                        #[cfg(target_os = "android")]
+                        min_height: px(0),
                         max_height: percent(88),
                         overflow: Overflow::scroll_y(),
-                        padding: UiRect::all(px(24)),
+                        padding: UiRect::all(px(if cfg!(target_os = "android") { 8 } else { 24 })),
                         flex_direction: FlexDirection::Column,
                         row_gap: px(10),
                         ..default()
@@ -125,9 +163,10 @@ pub(super) fn render(
                         }),
                         28.,
                     ));
-                    p.spawn(kit::muted(lang.key("p75.keyboard"), 14.));
+                    #[cfg(not(target_os = "android"))]
+                    p.spawn(kit::paragraph(lang.key("p75.keyboard"), 14.));
                     if !s.notice.is_empty() {
-                        p.spawn(kit::muted(lang.key(s.notice), 16.));
+                        p.spawn(kit::paragraph(lang.key(s.notice), 16.));
                     }
                     match s.page {
                         Page::Account => {
@@ -139,11 +178,11 @@ pub(super) fn render(
                         Page::Emojis => emojis(p, &s, *lang, time.elapsed_secs_f64()),
                         Page::Suspended => {
                             if let Some((until, reason)) = s.suspension {
-                                p.spawn(kit::muted(
+                                p.spawn(kit::paragraph(
                                     lang.key(&format!("p75.reason.{}", reason.as_str())),
                                     20.,
                                 ));
-                                p.spawn(kit::muted(
+                                p.spawn(kit::paragraph(
                                     until
                                         .map(|v| {
                                             i64::try_from(v)
@@ -165,27 +204,27 @@ pub(super) fn render(
     let _ = &chat;
 }
 fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         s.data["email_masked"].as_str().unwrap_or(""),
         20.,
     ));
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         lang.key(&format!(
             "p75.email_state.{}",
             s.data["email_state"].as_str().unwrap_or("none")
         )),
         18.,
     ));
-    p.spawn(kit::row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.enter_code", Action::EmailVerify);
         button(r, lang, "p75.resend", Action::EmailResend);
     });
-    p.spawn(kit::muted(lang.key("p75.change_safeguard"), 15.));
-    p.spawn(kit::row()).with_children(|r| {
+    p.spawn(kit::paragraph(lang.key("p75.change_safeguard"), 15.));
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.key_proof", Action::KeyProof);
         button(r, lang, "p75.new_email", Action::NewEmail);
     });
-    p.spawn(kit::muted(&s.email.email, 16.));
+    p.spawn(kit::paragraph(&s.email.email, 16.));
     button(
         p,
         lang,
@@ -197,7 +236,7 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         Action::Hold,
     );
     button(p, lang, "p75.change_email", Action::EmailChange);
-    p.spawn(kit::row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.old_code", Action::OldCode);
         button(r, lang, "p75.new_code", Action::NewCode);
     });
@@ -207,7 +246,7 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         .as_i64()
         .filter(|until| *until > 0)
     {
-        p.spawn(kit::muted(
+        p.spawn(kit::paragraph(
             format!(
                 "{}: {}",
                 lang.key("p75.hold_until"),
@@ -218,22 +257,22 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
     }
 }
 fn recovery(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
-    p.spawn(kit::muted(lang.key("p75.recovery_guidance"), 18.));
-    p.spawn(kit::row()).with_children(|r| {
+    p.spawn(kit::paragraph(lang.key("p75.recovery_guidance"), 18.));
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.name_prompt", Action::RecoveryName);
         button(r, lang, "p75.email_prompt", Action::RecoveryEmail);
     });
-    p.spawn(kit::muted(&s.recovery.name, 18.));
+    p.spawn(kit::paragraph(&s.recovery.name, 18.));
     button(p, lang, "p75.send_code", Action::RecoveryRequest);
     if s.recovery.requested {
-        p.spawn(kit::muted(lang.key("p75.recovery_generic"), 17.));
+        p.spawn(kit::paragraph(lang.key("p75.recovery_generic"), 17.));
         button(p, lang, "p75.enter_code", Action::RecoveryCode);
     }
 }
 fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
-    p.spawn(kit::muted(lang.key("p75.report_privacy"), 16.));
+    p.spawn(kit::paragraph(lang.key("p75.report_privacy"), 16.));
     for row in 0..4 {
-        p.spawn(kit::row()).with_children(|r| {
+        p.spawn(control_row()).with_children(|r| {
             for col in 0..2 {
                 let index = row * 2 + col;
                 button(
@@ -245,7 +284,7 @@ fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
             }
         });
     }
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         lang.key(&format!(
             "p75.reason.{}",
             super::super::report::REASONS[usize::from(s.report.reason)]
@@ -253,11 +292,11 @@ fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         18.,
     ));
     button(p, lang, "p75.comment", Action::Comment);
-    p.spawn(kit::muted(&s.report.comment, 16.));
+    p.spawn(kit::paragraph(&s.report.comment, 16.));
     button(p, lang, "p75.send_report", Action::SendReport);
 }
 fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
-    p.spawn(kit::row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         for slot in 0..3 {
             button(
                 r,
@@ -267,16 +306,16 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
             );
         }
     });
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         format!("{} {}", lang.key("p75.selected_slot"), s.library.slot + 1),
         17.,
     ));
     for row in 0..4 {
-        p.spawn(kit::row()).with_children(|r| {
+        p.spawn(control_row()).with_children(|r| {
             for col in 0..4 {
                 let id = row * 4 + col;
                 r.spawn((
-                    kit::control(id.to_string(), true, 44.),
+                    kit::control("", true, 64.),
                     UiAction::P75(Action::Standard(id)),
                     DialogButton,
                 ))
@@ -292,17 +331,17 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
             }
         });
     }
-    p.spawn(kit::muted(lang.key("p75.upload_guidance"), 16.));
+    p.spawn(kit::paragraph(lang.key("p75.upload_guidance"), 16.));
     button(p, lang, "p75.choose_file", Action::Upload);
     button(p, lang, "p75.label", Action::UploadLabel);
-    p.spawn(kit::muted(&s.library.label, 16.));
+    p.spawn(kit::paragraph(&s.library.label, 16.));
     if let Some((_, name)) = &s.library.selected {
-        p.spawn(kit::muted(name, 16.));
+        p.spawn(kit::paragraph(name, 16.));
         button(p, lang, "p75.upload_send", Action::UploadSend);
     }
     if let Some(uploads) = s.data["uploads"].as_array() {
         for asset in uploads.iter().take(10) {
-            p.spawn(kit::muted(
+            p.spawn(kit::paragraph(
                 format!(
                     "{} · {}",
                     asset["label"].as_str().unwrap_or(""),
@@ -326,7 +365,7 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
                     crate::emoji::preview(p, id, reference, now);
                 }
                 if let Some(reason) = asset["reason"].as_str() {
-                    p.spawn(kit::muted(reason, 16.));
+                    p.spawn(kit::paragraph(reason, 16.));
                 }
                 if matches!(asset["status"].as_str(), Some("pending" | "approved")) {
                     button(p, lang, "p75.withdraw", Action::Withdraw(id));
@@ -351,4 +390,19 @@ fn parse_id(s: &str) -> Option<[u8; 16]> {
         b[i] = u8::from_str_radix(std::str::from_utf8(p).ok()?, 16).ok()?;
     }
     Some(b)
+}
+
+#[cfg(not(target_os = "android"))]
+fn control_row() -> impl Bundle {
+    kit::row()
+}
+#[cfg(target_os = "android")]
+fn control_row() -> impl Bundle {
+    Node {
+        width: percent(100),
+        column_gap: px(6),
+        row_gap: px(6),
+        flex_wrap: FlexWrap::Wrap,
+        ..default()
+    }
 }

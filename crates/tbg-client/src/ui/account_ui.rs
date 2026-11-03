@@ -62,8 +62,14 @@ pub fn apply_action(
         UiAction::DownloadKey => {
             if let AccountScreen::SaveKey { key, name, saved } = &mut account.screen {
                 if download_key(name, key) {
-                    *saved = true;
-                    toasts.say(Msg::AccountKeyDownloaded);
+                    // Android confirms only after the document picker actually writes the file.
+                    #[cfg(not(target_os = "android"))]
+                    {
+                        *saved = true;
+                        toasts.say(Msg::AccountKeyDownloaded);
+                    }
+                    #[cfg(target_os = "android")]
+                    let _ = saved;
                 } else {
                     toasts.say(Msg::AuthBackupFailed);
                 }
@@ -127,6 +133,50 @@ fn panel(
         return;
     };
     let (key, name) = (key.clone(), name.clone());
+    #[cfg(target_os = "android")]
+    {
+        let mut modal = commands.spawn((
+            screen(JustifyContent::Center),
+            DespawnOnExit(GameState::Menu),
+            SavePanel,
+        ));
+        modal.insert((
+            GlobalZIndex(100),
+            UiAction::Disabled,
+            BackgroundColor(Color::BLACK.with_alpha(0.7)),
+        ));
+        modal.with_children(|root| {
+            root.spawn((
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Center,
+                    padding: UiRect::all(px(16)),
+                    row_gap: px(6),
+                    max_height: percent(100),
+                    width: percent(100),
+                    max_width: px(600),
+                    overflow: Overflow::scroll_y(),
+                    border_radius: BorderRadius::all(px(16)),
+                    ..default()
+                },
+                ScrollPosition::default(),
+                BackgroundColor(super::PANEL),
+                children![
+                    label(lang.t(Msg::AccountSaveTitle), 26.),
+                    label(key, 18.),
+                    label(lang.t(Msg::AccountSaveLine1), 12.),
+                    label(lang.t(Msg::AccountSaveLine2), 12.),
+                    label(lang.t(Msg::AccountSaveLine3), 12.),
+                    button(lang.t(Msg::AccountCopy), UiAction::CopyKey, 260.),
+                    button(lang.t(Msg::AccountDownload), UiAction::DownloadKey, 260.),
+                    button(lang.t(Msg::AccountSavedIt), UiAction::KeySaved, 260.),
+                    button(lang.t(Msg::CommonClose), UiAction::ClosePanel, 260.),
+                    label(format!("{name}-tbg-key.txt"), 12.),
+                ],
+            ));
+        });
+    }
+    #[cfg(not(target_os = "android"))]
     commands
         .spawn((
             screen(JustifyContent::Center),

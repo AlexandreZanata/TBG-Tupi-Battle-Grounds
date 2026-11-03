@@ -11,9 +11,17 @@ use crate::{
 use bevy::prelude::*;
 use tbg_core::{content::TICK_HZ, Phase};
 
-const SCORE_TOP: f32 = 12.;
-const CLOCK_HEIGHT: f32 = 76.;
-const PLATE_HEIGHT: f32 = 55.;
+const SCORE_TOP: f32 = if cfg!(target_os = "android") { 4. } else { 12. };
+const CLOCK_HEIGHT: f32 = if cfg!(target_os = "android") {
+    48.
+} else {
+    76.
+};
+const PLATE_HEIGHT: f32 = if cfg!(target_os = "android") {
+    44.
+} else {
+    55.
+};
 pub(super) const PLATE_TOP: f32 = SCORE_TOP + (CLOCK_HEIGHT - PLATE_HEIGHT) / 2.;
 
 #[derive(Component)]
@@ -33,13 +41,27 @@ pub fn spawn(
     info: &MatchInfo,
     assets: &AssetServer,
     lang: Lang,
+    online: bool,
 ) {
     parent
         .spawn(Node {
             position_type: PositionType::Absolute,
             top: px(SCORE_TOP),
-            left: percent(22),
-            width: percent(56),
+            left: if cfg!(target_os = "android") {
+                px(if online { 64 } else { 8 })
+            } else {
+                percent(22)
+            },
+            right: if cfg!(target_os = "android") && online {
+                px(112)
+            } else {
+                Val::Auto
+            },
+            width: if cfg!(target_os = "android") && online {
+                Val::Auto
+            } else {
+                percent(if cfg!(target_os = "android") { 80 } else { 56 })
+            },
             height: px(CLOCK_HEIGHT),
             align_items: AlignItems::Center,
             ..default()
@@ -48,7 +70,7 @@ pub fn spawn(
             plate(row, info, assets, lang, 0);
             row.spawn((
                 Node {
-                    width: px(116),
+                    width: px(if cfg!(target_os = "android") { 72 } else { 116 }),
                     height: px(CLOCK_HEIGHT),
                     flex_shrink: 0.,
                     border: UiRect::all(px(3)),
@@ -62,7 +84,17 @@ pub fn spawn(
                 ZIndex(2),
             ))
             .with_children(|clock| {
-                clock.spawn((chrome::title("0:00", 29.), Readout::Clock));
+                clock.spawn((
+                    chrome::title(
+                        "0:00",
+                        if cfg!(target_os = "android") {
+                            20.
+                        } else {
+                            29.
+                        },
+                    ),
+                    Readout::Clock,
+                ));
                 clock.spawn((kit::muted("GET READY", 8.), Readout::Phase));
             });
             plate(row, info, assets, lang, 1);
@@ -86,7 +118,7 @@ fn plate(
                 flex_basis: px(0),
                 min_width: px(0),
                 height: px(PLATE_HEIGHT),
-                padding: UiRect::axes(px(8), px(4)),
+                padding: UiRect::axes(px(8), px(if cfg!(target_os = "android") { 2 } else { 4 })),
                 border: UiRect::all(px(2)),
                 border_radius: BorderRadius::all(px(7)),
                 column_gap: px(10),
@@ -104,8 +136,8 @@ fn plate(
             plate
                 .spawn((
                     Node {
-                        width: px(38),
-                        height: px(44),
+                        width: px(if cfg!(target_os = "android") { 24 } else { 38 }),
+                        height: px(if cfg!(target_os = "android") { 30 } else { 44 }),
                         flex_shrink: 0.,
                         align_items: AlignItems::Center,
                         justify_content: JustifyContent::Center,
@@ -133,15 +165,25 @@ fn plate(
                     flex_basis: px(0),
                     min_width: px(0),
                     flex_direction: FlexDirection::Column,
-                    row_gap: px(4),
+                    row_gap: px(if cfg!(target_os = "android") { 2 } else { 4 }),
                     ..default()
                 })
                 .with_children(|body| {
                     body.spawn(Node {
                         width: percent(100),
                         justify_content: JustifyContent::SpaceBetween,
-                        align_items: AlignItems::Center,
-                        flex_direction: if blue {
+                        align_items: if cfg!(target_os = "android") {
+                            if blue {
+                                AlignItems::Start
+                            } else {
+                                AlignItems::End
+                            }
+                        } else {
+                            AlignItems::Center
+                        },
+                        flex_direction: if cfg!(target_os = "android") {
+                            FlexDirection::Column
+                        } else if blue {
                             FlexDirection::Row
                         } else {
                             FlexDirection::RowReverse
@@ -156,22 +198,50 @@ fn plate(
                         };
                         let display_name = rating
                             .map_or_else(|| name.clone(), |rating| format!("{name} ({rating})"));
-                        let display_name =
-                            if own && !info.spectating && name.as_str() != lang.t(Msg::BattleYou) {
-                                format!("{display_name} · {}", lang.t(Msg::BattleYou))
-                            } else {
-                                display_name
-                            };
+                        let display_name = if !cfg!(target_os = "android")
+                            && own
+                            && !info.spectating
+                            && name.as_str() != lang.t(Msg::BattleYou)
+                        {
+                            format!("{display_name} · {}", lang.t(Msg::BattleYou))
+                        } else {
+                            display_name
+                        };
                         line.spawn((
                             Node {
-                                max_width: percent(68),
+                                max_width: percent(if cfg!(target_os = "android") {
+                                    100
+                                } else {
+                                    68
+                                }),
+                                #[cfg(target_os = "android")]
+                                min_width: px(0),
                                 overflow: Overflow::clip(),
                                 ..default()
                             },
-                            chrome::title(display_name, 14.),
+                            chrome::title(
+                                display_name,
+                                if cfg!(target_os = "android") {
+                                    10.
+                                } else {
+                                    14.
+                                },
+                            ),
                             TextLayout::no_wrap(),
                         ));
-                        line.spawn((kit::muted("", 9.), Readout::Tower(relative)));
+                        line.spawn((
+                            #[cfg(target_os = "android")]
+                            Node {
+                                max_width: percent(100),
+                                min_width: px(0),
+                                overflow: Overflow::clip(),
+                                ..default()
+                            },
+                            kit::muted("", if cfg!(target_os = "android") { 8. } else { 9. }),
+                            #[cfg(target_os = "android")]
+                            TextLayout::no_wrap(),
+                            Readout::Tower(relative),
+                        ));
                     });
                     vitality(body, relative);
                 });
@@ -189,7 +259,7 @@ fn vitality(parent: &mut ChildSpawnerCommands, relative: usize) {
         .spawn((
             Node {
                 width: percent(100),
-                height: px(20),
+                height: px(if cfg!(target_os = "android") { 16 } else { 20 }),
                 overflow: Overflow::clip(),
                 border_radius: BorderRadius::all(px(3)),
                 border: UiRect::all(px(1)),
@@ -236,13 +306,30 @@ fn vitality(parent: &mut ChildSpawnerCommands, relative: usize) {
         });
 }
 
-fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readout, &mut Text)>) {
+fn update(
+    view: Res<LatestView>,
+    info: Res<MatchInfo>,
+    lang: Res<Lang>,
+    mut texts: Query<(&Readout, &mut Text)>,
+) {
     let Some(v) = &view.0 else { return };
     for (kind, mut text) in &mut texts {
         let want = match kind {
             Readout::Clock => {
                 let s = v.elapsed / TICK_HZ;
                 format!("{}:{:02}", s / 60, s % 60)
+            }
+            Readout::Phase if cfg!(target_os = "android") => {
+                let key = if v.phase == Phase::Countdown {
+                    "battle.get_ready"
+                } else if v.augment_round.is_some() {
+                    "council.battle_paused"
+                } else if info.ranked {
+                    "hud.ranked_badge"
+                } else {
+                    "android.battle.phase"
+                };
+                lang.key(key).to_uppercase()
             }
             Readout::Phase => if v.phase == Phase::Countdown {
                 "GET READY"
@@ -264,7 +351,15 @@ fn update(view: Res<LatestView>, info: Res<MatchInfo>, mut texts: Query<(&Readou
             }
             Readout::Tower(relative) => {
                 let tower = v.strongholds[*relative];
-                format!("{:?} T{}", tower.kind, tower.tier)
+                if cfg!(target_os = "android") {
+                    format!(
+                        "{} T{}",
+                        crate::i18n::content::stronghold_name(*lang, tower.kind),
+                        tower.tier
+                    )
+                } else {
+                    format!("{:?} T{}", tower.kind, tower.tier)
+                }
             }
         };
         if text.0 != want {

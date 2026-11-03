@@ -63,7 +63,7 @@ pub struct Data {
     player: String,
 }
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 impl Data {
     pub fn live_pending(&self) -> bool {
         self.live.is_none() && !self.unavailable

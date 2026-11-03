@@ -13,8 +13,11 @@ use wasm_bindgen::JsCast;
 /// What the open form is collecting.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TextKind {
+    #[cfg(target_os = "android")]
+    MatchChat,
     Email,
     P75Text,
+    P75Email,
     P75Code,
     P75Secret,
     CatalogSearch,
@@ -23,6 +26,19 @@ pub enum TextKind {
     Key,
     BackupKey,
     Room,
+}
+
+/// Shared editor limits; Android and the Bevy form accept the same field lengths.
+pub fn limit(kind: Option<TextKind>) -> usize {
+    match kind {
+        Some(TextKind::Name | TextKind::PlayerSearch | TextKind::P75Code) => 16,
+        Some(TextKind::Email) => 254,
+        Some(TextKind::P75Text | TextKind::P75Email) => 500,
+        Some(TextKind::Room) => 5,
+        #[cfg(target_os = "android")]
+        Some(TextKind::MatchChat) => 120,
+        _ => 128,
+    }
 }
 
 /// A submitted value; the opener stays open until it calls `close` (so a
@@ -41,6 +57,8 @@ pub struct TextCancelled;
 #[derive(Default)]
 pub struct ActiveForm {
     pub(super) kind: Option<TextKind>,
+    #[cfg(target_os = "android")]
+    pub(super) generation: u64,
     pub(super) edit: super::kit::edit::Edit,
     pub(super) masked: bool,
     pub(super) focus: usize,
@@ -57,12 +75,17 @@ pub fn plugin(app: &mut App) {
         .add_message::<TextCancelled>()
         .insert_non_send(ActiveForm::default())
         .add_systems(Startup, wire_dom)
-        .add_systems(Update, poll)
-        .add_plugins(super::textform_bevy::plugin);
+        .add_systems(Update, poll);
+    #[cfg(not(target_os = "android"))]
+    app.add_plugins(super::textform_bevy::plugin);
 }
 
 /// Show the form for `kind` with `prompt` as its label.
 pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
+    #[cfg(target_os = "android")]
+    {
+        form.generation = form.generation.wrapping_add(1);
+    }
     form.kind = Some(kind);
     form.edit = Default::default();
     form.focus = 0;
@@ -87,7 +110,7 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
             TextKind::Room => "room",
             TextKind::Name => "name",
             TextKind::Key | TextKind::BackupKey | TextKind::P75Secret => "key",
-            TextKind::Email | TextKind::P75Text | TextKind::P75Code => "name",
+            TextKind::Email | TextKind::P75Text | TextKind::P75Email | TextKind::P75Code => "name",
         };
         let _ = dom.form.set_attribute("data-kind", marker);
         set_error_text(dom, None);

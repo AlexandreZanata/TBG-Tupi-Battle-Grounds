@@ -2,11 +2,9 @@
 
 use super::{arcanas, Action, Lang, Panel, Shell, UiAction};
 use crate::platform::storage::{self, Scope};
-use bevy::{
-    input::mouse::{MouseScrollUnit, MouseWheel},
-    prelude::*,
-    window::PresentMode,
-};
+#[cfg(not(target_os = "android"))]
+use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+use bevy::{prelude::*, window::PresentMode};
 
 #[allow(clippy::type_complexity)]
 type Buttons<'w, 's> = Query<
@@ -20,12 +18,19 @@ type Buttons<'w, 's> = Query<
         &'static UiGlobalTransform,
         &'static InheritedVisibility,
         Option<&'static bevy::ui::CalculatedClip>,
+        &'static bevy::ui::ComputedStackIndex,
     ),
 >;
 
 #[allow(clippy::too_many_arguments)]
 pub fn mouse_and_keys(
     mouse: Res<ButtonInput<MouseButton>>,
+    // Grouped so the Android touch inputs keep the system under Bevy's parameter limit.
+    #[cfg(target_os = "android")] (pointer, state, scale): (
+        Res<super::super::mobile::input::Pointer>,
+        Res<State<crate::GameState>>,
+        Res<UiScale>,
+    ),
     keys: Res<ButtonInput<KeyCode>>,
     mut window: Single<&mut Window>,
     buttons: Buttons,
@@ -39,10 +44,19 @@ pub fn mouse_and_keys(
     mut social_focus: Local<Option<super::super::social::Action>>,
     mut button_focus: ResMut<super::kit::buttons::Focus>,
     lang: Res<Lang>,
-    mut lights: Query<&mut DirectionalLight>,
-    mut volume: ResMut<bevy::audio::GlobalVolume>,
+    (mut lights, mut volume): (
+        Query<&mut DirectionalLight>,
+        ResMut<bevy::audio::GlobalVolume>,
+    ),
 ) {
     if crate::ui::p75::captured() {
+        return;
+    }
+    #[cfg(target_os = "android")]
+    if pointer.consumed
+        || super::super::auth_ui::blocks_menu(*state.get())
+        || window.height() > window.width()
+    {
         return;
     }
     if !crate::config::bevy_ui() || super::textform::is_open(&form) {
@@ -50,30 +64,68 @@ pub fn mouse_and_keys(
     }
     let mut ordered: Vec<_> = buttons
         .iter()
-        .filter(|(_, a, u, node, t, v, clip)| {
+        .filter(|(_, a, u, node, t, v, clip, _)| {
             v.get()
                 && (a.is_some() || **u != UiAction::Disabled)
-                && clip.is_none_or(|c| c.contains_point(t.translation))
+                && (cfg!(target_os = "android")
+                    || clip.is_none_or(|c| c.contains_point(t.translation)))
                 && node.size.x > 0.0
         })
         .collect();
-    ordered.sort_by_key(|(_, _, _, _, t, _, _)| {
+    ordered.sort_by_key(|(_, _, _, _, t, _, _, _)| {
         let p = t.translation;
         ((p.y * 10.) as i32, (p.x * 10.) as i32)
     });
     if let Some(anchor) = *social_focus {
-        if let Some(index)=ordered.iter().position(|(_,action,_,_,_,_,_)|matches!(action,Some(Action::Social(value)) if *value==anchor)) {
+        if let Some(index)=ordered.iter().position(|(_,action,_,_,_,_,_,_)|matches!(action,Some(Action::Social(value)) if *value==anchor)) {
             *focus=index;
             button_focus.0=Some(ordered[index].0);
         }
     }
-    let mut selected = None;
+    let mut selected = Vec::new();
+    #[cfg(target_os = "android")]
+    let mut releases: Vec<Vec2> = pointer.taps.iter().map(|tap| tap.1).collect();
+    #[cfg(not(target_os = "android"))]
+    let mut releases = Vec::new();
     if mouse.just_released(MouseButton::Left) {
-        if let Some(p) = window.cursor_position() {
-            selected = ordered.iter().position(|(_, _, _, node, t, _, clip)| {
-                node.contains_point(**t, p * window.scale_factor())
-                    && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
-            });
+        if let Some(point) = window.cursor_position() {
+            #[cfg(target_os = "android")]
+            let duplicate =
+                pointer.touch_frame && pointer.taps.iter().any(|tap| tap.1.distance(point) < 2.);
+            #[cfg(not(target_os = "android"))]
+            let duplicate = false;
+            if !duplicate {
+                releases.push(point);
+            }
+        }
+    }
+    for p in releases {
+        #[cfg(target_os = "android")]
+        let index = {
+            let physical = p * window.scale_factor();
+            // A disabled modal surface still shields the navigation beneath it.
+            buttons
+                .iter()
+                .filter(|(_, _, _, node, transform, visible, clip, _)| {
+                    visible.get()
+                        && super::super::mobile::input::hit(
+                            node,
+                            **transform,
+                            physical,
+                            window.scale_factor() * scale.0,
+                        )
+                        && clip.is_none_or(|c| c.contains_point(physical))
+                })
+                .max_by_key(|(_, _, _, _, _, _, _, stack)| stack.0)
+                .and_then(|(entity, ..)| ordered.iter().position(|row| row.0 == entity))
+        };
+        #[cfg(not(target_os = "android"))]
+        let index = ordered.iter().position(|(_, _, _, node, t, _, clip, _)| {
+            node.contains_point(**t, p * window.scale_factor())
+                && clip.is_none_or(|c| c.contains_point(p * window.scale_factor()))
+        });
+        if let Some(index) = index {
+            selected.push(index);
         }
     }
     if keys.just_pressed(KeyCode::Tab) && !ordered.is_empty() {
@@ -83,7 +135,7 @@ pub fn mouse_and_keys(
         && !keys.any_pressed([KeyCode::AltLeft, KeyCode::AltRight])
         && !ordered.is_empty()
     {
-        selected = Some(*focus % ordered.len());
+        selected.push(*focus % ordered.len());
     }
     if keys.just_pressed(KeyCode::Escape) {
         shell.panel = Panel::Lobby;
@@ -93,7 +145,7 @@ pub fn mouse_and_keys(
             .extend([UiAction::CloseRanking, UiAction::ClosePanel]);
     }
     let pointer = window.cursor_position().map(|p| p * window.scale_factor());
-    for (i, (entity, _, _, node, t, _, _)) in ordered.iter().enumerate() {
+    for (i, (entity, _, _, node, t, _, _, _)) in ordered.iter().enumerate() {
         if let Ok(mut border) = borders.get_mut(*entity) {
             let hovered = pointer.is_some_and(|p| node.contains_point(**t, p));
             *border = BorderColor::all(if hovered || (keys.pressed(KeyCode::Tab) && *focus == i) {
@@ -110,32 +162,32 @@ pub fn mouse_and_keys(
         *social_focus =
             ordered
                 .get(*focus % ordered.len().max(1))
-                .and_then(|(_, action, _, _, _, _, _)| match action {
+                .and_then(|(_, action, _, _, _, _, _, _)| match action {
                     Some(Action::Social(a)) => Some(*a),
                     _ => None,
                 });
     }
-    if let Some(index) = selected {
+    for index in selected {
         *focus = index;
         *social_focus = match ordered[index].1 {
             Some(Action::Social(a)) => Some(*a),
             _ => None,
         };
-        let (_, action, ui, _, _, _, _) = ordered[index];
+        let (_, action, ui, _, _, _, _, _) = ordered[index];
         if let Some(Action::Social(action)) = action {
             social.0.push(*action);
             return;
         }
         if let Some(Action::Catalog(action)) = action {
             training.0.push(*action);
-            return;
+            continue;
         }
         if let Some(Action::Download) = action {
             queue.0.push(UiAction::UpdateOpen);
             return;
         }
         if let Some(action) = action {
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             if matches!(action, Action::Open(_)) {
                 queue.0.push(UiAction::CloseRanking);
             }
@@ -226,7 +278,7 @@ fn video_audio(
 ) {
     match action {
         Action::Fullscreen => {
-            #[cfg(not(target_arch = "wasm32"))]
+            #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
             crate::platform::window::toggle_fullscreen(window);
             #[cfg(target_arch = "wasm32")]
             if let Some(doc) = web_sys::window().and_then(|w| w.document()) {
@@ -259,11 +311,21 @@ fn video_audio(
     }
 }
 
+#[cfg(not(target_os = "android"))]
 pub fn scroll(
     mut events: MessageReader<MouseWheel>,
+    #[cfg(target_os = "android")] pointer: Res<super::super::mobile::input::Pointer>,
     window: Single<&Window>,
     mut lists: Query<(&ComputedNode, &UiGlobalTransform, &mut ScrollPosition)>,
 ) {
+    #[cfg(target_os = "android")]
+    if let Some((p, delta)) = pointer.drag {
+        for (node, t, mut position) in &mut lists {
+            if node.contains_point(*t, p * window.scale_factor()) {
+                position.0.y = (position.0.y - delta.y).max(0.);
+            }
+        }
+    }
     let Some(p) = window.cursor_position().map(|p| p * window.scale_factor()) else {
         events.clear();
         return;
@@ -282,3 +344,7 @@ pub fn scroll(
         }
     }
 }
+
+/// Android touch scrolling owns one visible branch and chains only through its ancestors.
+#[cfg(target_os = "android")]
+pub use super::super::mobile::scroll::scroll;

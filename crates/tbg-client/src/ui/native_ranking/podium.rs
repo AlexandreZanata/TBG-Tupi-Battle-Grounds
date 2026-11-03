@@ -37,8 +37,16 @@ pub(super) fn spawn(
         .spawn((
             Node {
                 width: percent(100),
-                height: percent(43),
-                min_height: px(190),
+                height: if cfg!(target_os = "android") {
+                    px(126)
+                } else {
+                    percent(43)
+                },
+                min_height: px(if cfg!(target_os = "android") {
+                    126
+                } else {
+                    190
+                }),
                 flex_shrink: 0.,
                 overflow: Overflow::clip(),
                 border_radius: BorderRadius::all(px(5)),
@@ -106,7 +114,14 @@ pub(super) fn spawn(
                                     ..default()
                                 },
                                 frame(),
-                                children![kit::heading(rank.to_string(), 30.)],
+                                children![kit::heading(
+                                    rank.to_string(),
+                                    if cfg!(target_os = "android") {
+                                        18.
+                                    } else {
+                                        30.
+                                    }
+                                )],
                             ));
                             card.spawn((
                                 ImageNode {
@@ -126,30 +141,57 @@ pub(super) fn spawn(
                                     ..default()
                                 },
                             ));
-                            plate(card, 16., 68., 68., 13., |name| {
-                                name.spawn((
-                                    kit::heading(
-                                        leader.map_or_else(
-                                            || {
-                                                if ranking.page.is_none() {
-                                                    "—".into()
-                                                } else {
-                                                    words(lang, "Open place", "Lugar disponível")
-                                                }
+                            plate(
+                                card,
+                                if cfg!(target_os = "android") { 4. } else { 16. },
+                                68.,
+                                if cfg!(target_os = "android") {
+                                    92.
+                                } else {
+                                    68.
+                                },
+                                13.,
+                                |name| {
+                                    name.spawn((
+                                        kit::heading(
+                                            leader.map_or_else(
+                                                || {
+                                                    if ranking.page.is_none() {
+                                                        "—".into()
+                                                    } else {
+                                                        words(
+                                                            lang,
+                                                            "Open place",
+                                                            if cfg!(target_os = "android") {
+                                                                "Vaga livre"
+                                                            } else {
+                                                                "Lugar disponível"
+                                                            },
+                                                        )
+                                                    }
+                                                },
+                                                |p| p.name.clone(),
+                                            ),
+                                            if cfg!(target_os = "android") {
+                                                10.
+                                            } else {
+                                                15.
                                             },
-                                            |p| p.name.clone(),
                                         ),
-                                        15.,
-                                    ),
-                                    TextLayout::no_wrap().with_justify(Justify::Center),
-                                    kit::Pending(pending),
-                                    Node {
-                                        width: if pending { percent(100) } else { Val::Auto },
-                                        min_height: px(19),
-                                        ..default()
-                                    },
-                                ));
-                            });
+                                        TextLayout::no_wrap().with_justify(Justify::Center),
+                                        kit::Pending(pending),
+                                        Node {
+                                            width: if pending { percent(100) } else { Val::Auto },
+                                            min_height: px(if cfg!(target_os = "android") {
+                                                12
+                                            } else {
+                                                19
+                                            }),
+                                            ..default()
+                                        },
+                                    ));
+                                },
+                            );
                             plate(card, 12., 82., 76., 16., |stats| {
                                 for (value, label) in [
                                     (
@@ -175,7 +217,14 @@ pub(super) fn spawn(
                                         .with_children(|field| {
                                             field
                                                 .spawn((
-                                                    text(value, 12.),
+                                                    text(
+                                                        value,
+                                                        if cfg!(target_os = "android") {
+                                                            9.
+                                                        } else {
+                                                            12.
+                                                        },
+                                                    ),
                                                     kit::Pending(pending),
                                                     Node {
                                                         width: if pending {
@@ -183,7 +232,13 @@ pub(super) fn spawn(
                                                         } else {
                                                             Val::Auto
                                                         },
-                                                        min_height: px(15),
+                                                        min_height: px(
+                                                            if cfg!(target_os = "android") {
+                                                                10
+                                                            } else {
+                                                                15
+                                                            },
+                                                        ),
                                                         ..default()
                                                     },
                                                 ))

@@ -10,7 +10,7 @@ pub fn spawn(
     assets: &AssetServer,
     lang: Lang,
 ) {
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     let pending = account.auto_login || account.pending.is_some() || data.stats_pending();
     root.spawn(chrome::panel([2., 68., 27.5, 27.]))
         .with_children(|p| {
@@ -21,7 +21,7 @@ pub fn spawn(
                 },
                 chrome::region(0., 0., 100., 100.),
             ));
-            #[cfg(not(tbg_desktop))]
+            #[cfg(not(tbg_native_ui))]
             p.spawn((
                 ImageNode::new(assets.load("branding/tbg-emblem.webp")),
                 Node {
@@ -30,7 +30,7 @@ pub fn spawn(
                     ..chrome::region(2., 6., 27., 60.)
                 },
             ));
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             p.spawn(Node {
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
@@ -88,7 +88,7 @@ pub fn spawn(
                     );
                 let mut title = info.spawn(kit::heading(title, 20.));
                 title.insert(TextColor(Color::srgb_u8(245, 240, 224)));
-                #[cfg(tbg_desktop)]
+                #[cfg(tbg_native_ui)]
                 title.insert((
                     kit::Pending(pending),
                     Node {
@@ -97,7 +97,7 @@ pub fn spawn(
                         ..default()
                     },
                 ));
-                #[cfg_attr(not(tbg_desktop), allow(unused_mut))]
+                #[cfg_attr(not(tbg_native_ui), allow(unused_mut))]
                 let mut _rating = info.spawn(kit::heading(
                     account
                         .profile
@@ -105,7 +105,7 @@ pub fn spawn(
                         .map_or_else(|| "—".into(), |p| format!("{}", p.rating)),
                     18.,
                 ));
-                #[cfg(tbg_desktop)]
+                #[cfg(tbg_native_ui)]
                 _rating.insert((
                     kit::Pending(pending),
                     Node {
@@ -155,9 +155,9 @@ pub fn spawn(
                         })
                         .with_children(|stat| {
                             stat.spawn(kit::muted(lang.key(&format!("lobby.profile.{key}")), 12.));
-                            #[cfg_attr(not(tbg_desktop), allow(unused_mut))]
+                            #[cfg_attr(not(tbg_native_ui), allow(unused_mut))]
                             let mut _value = stat.spawn(kit::heading(value, 21.));
-                            #[cfg(tbg_desktop)]
+                            #[cfg(tbg_native_ui)]
                             _value.insert((
                                 kit::Pending(pending),
                                 TextLayout::justify(Justify::Center),

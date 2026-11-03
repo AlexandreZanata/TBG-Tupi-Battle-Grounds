@@ -3406,6 +3406,49 @@ sheets to content-addressed files or object storage if they exceed 256 MiB.
 **Reopen when** sharing/selling custom emojis, animated WebP/APNG or
 larger frames are requested.
 
+## D-98 · Independent Android landscape client reuses Linux gameplay — 2026-10-31 (Proposed, P69)
+
+**Owner decision.** Plan a native Android prototype played with the phone
+held horizontally. Keep the existing mobile browser portrait experience.
+P69 is explicitly a separate workstream from P68 Windows and authentication;
+neither implementation is a prerequisite or imported scope.
+
+**Decision.** Base the planning branch on reviewed Linux native.3 source
+`014b0e0c046b38c551ee24534ee00709cde0e493`, not an unfinished P68 checkout.
+Reuse one Rust/Bevy client/core/content and authoritative server contract;
+add an ARM64 GameActivity host and landscape touch presentation. Kotlin is
+small Android integration only, not a new game/UI framework. Existing key
+login may be temporary/in-memory; new refresh/access auth belongs elsewhere.
+
+**Exact gameplay.** Same ruleset/mode, stats, economy, intentions, ticks,
+seat ownership and outcomes as Linux. No mobile unit cap, automatic action,
+bot handicap, timer change, altered Shop preview activation or golden rewrite.
+Refactor platform/bootstrap carefully without treating every native target
+as desktop. Preserve desktop and portrait web behavior.
+
+**Evidence.** The owner's POCO X6 Pro was inspected read-only via ADB:
+Android 16/API 36, arm64-v8a, physical 1220×2712 panel, 480 dpi and 4096-byte
+pages. No identifier/private data, APK install or gameplay measurement was
+included. Validate the actual landscape viewport, touch/IME/lifecycle,
+existing Linux/ARM64 traces and packaged cross-play. Proposed configuration
+and test inputs live in GAME-DESIGN §23, not claimed performance numbers.
+
+**Why.** The existing Rust/game-art investment can be reused while mobile
+needs explicit touch layout, native services and lifecycle support. A
+landscape frontend follows the horizontal BattleLine/Shop composition while
+maintaining the same gameplay. A wrapper or boot-only demo does not establish
+a high-quality playable port.
+
+**Status.** Planning only; [P69](phases/P69-android-native-prototype.md) owns
+ordered steps, independent source/ownership, AN01–AN18 acceptance and handoff.
+D-96/D-97 and architecture §24/GAME-DESIGN §21 remain reserved for P68 on its
+separate branch; their absence here does not renumber or integrate them.
+
+**Reopen when** actual engine/driver/IME evidence rejects the chosen host
+path, the owner changes minimum Android support/orientation, broader device
+coverage or store/iOS delivery is requested, or a reviewed common backend
+contract changes after this prototype's frozen reference.
+
 
 ### D-110 / BR-AX12 integration — combined wire 40 (2026-11-02)
 

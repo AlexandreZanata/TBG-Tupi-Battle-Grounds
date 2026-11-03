@@ -21,9 +21,19 @@ const NEED_SHORT: f32 = 3.0;
 #[derive(Component)]
 pub struct ArenaCamera;
 
+#[cfg(target_os = "android")]
+pub(crate) mod mobile;
+
 pub fn plugin(app: &mut App) {
     app.add_systems(Startup, spawn_camera)
         .add_systems(Update, reframe_on_resize);
+    #[cfg(target_os = "android")]
+    app.add_systems(
+        Update,
+        mobile::frame
+            .after(reframe_on_resize)
+            .run_if(in_state(crate::GameState::InMatch)),
+    );
 }
 
 fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
@@ -42,6 +52,10 @@ fn spawn_camera(mut commands: Commands, window: Single<&Window>) {
     // `tonemapping_luts` feature, which we leave out to keep the WASM small.
     commands.spawn((
         Camera3d::default(),
+        #[cfg(target_os = "android")]
+        Msaa::Off,
+        #[cfg(target_os = "android")]
+        bevy::render::view::NoIndirectDrawing,
         Tonemapping::AcesFitted,
         // Soft haze on the far rim of the diorama; the lane stays crisp.
         DistanceFog {

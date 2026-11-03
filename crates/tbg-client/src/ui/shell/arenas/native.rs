@@ -28,23 +28,44 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
 fn details(body: &mut ChildSpawnerCommands, arena: tbg_core::Arena, lang: Lang) {
     let slug = arena.slug();
     body.spawn((
-        kit::heading(lang.key(&format!("arenas.{slug}.name")), 24.),
+        kit::heading(
+            lang.key(&format!("arenas.{slug}.name")),
+            if cfg!(target_os = "android") {
+                18.
+            } else {
+                24.
+            },
+        ),
         Node {
-            min_height: px(30),
+            min_height: px(if cfg!(target_os = "android") { 44 } else { 30 }),
+            #[cfg(target_os = "android")]
+            flex_shrink: 0.,
             ..default()
         },
     ));
     body.spawn((
         kit::muted(lang.key(&format!("arenas.{slug}.theme")), 14.),
         Node {
-            min_height: px(38),
+            min_height: if cfg!(target_os = "android") {
+                Val::Auto
+            } else {
+                px(38)
+            },
+            #[cfg(target_os = "android")]
+            flex_shrink: 0.,
             ..default()
         },
     ));
     body.spawn((
         crate::ui::label(effect(arena, lang), 15.),
         Node {
-            min_height: px(40),
+            min_height: if cfg!(target_os = "android") {
+                Val::Auto
+            } else {
+                px(40)
+            },
+            #[cfg(target_os = "android")]
+            flex_shrink: 0.,
             ..default()
         },
     ));

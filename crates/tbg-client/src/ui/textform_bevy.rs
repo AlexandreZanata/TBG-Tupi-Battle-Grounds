@@ -22,7 +22,10 @@ enum Control {
 }
 
 pub fn plugin(app: &mut App) {
+    #[cfg(not(target_os = "android"))]
     app.add_systems(Update, (keyboard, render).chain());
+    #[cfg(target_os = "android")]
+    let _ = app;
 }
 
 fn insert(form: &mut ActiveForm, value: &str) {
@@ -32,15 +35,7 @@ fn insert(form: &mut ActiveForm, value: &str) {
     } else {
         value.into()
     };
-    let limit = match form.kind {
-        Some(TextKind::Name) => 16,
-        Some(TextKind::Email) => 254,
-        Some(TextKind::P75Text) => 500,
-        Some(TextKind::P75Code) => 16,
-        Some(TextKind::Room) => 5,
-        Some(TextKind::PlayerSearch) => 16,
-        _ => 128,
-    };
+    let limit = textform::limit(form.kind);
     form.edit.insert(&value, limit, |c| {
         if room {
             c.is_ascii_alphanumeric()

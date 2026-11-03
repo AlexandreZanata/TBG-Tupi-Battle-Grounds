@@ -222,7 +222,10 @@ impl Lobby {
                 s.finished = None;
             }
             let gone = s.detached_at.is_some_and(|t| now - t > window);
-            let keep = !gone || matches!(s.state, SessionState::InMatch { .. });
+            // BR-M03/P63: a long connection pause can make detached_at old before
+            // the result is frozen. Its existing replay deadline still owns retention.
+            let keep =
+                !gone || matches!(s.state, SessionState::InMatch { .. }) || s.finished.is_some();
             if !keep {
                 released.extend(s.account.as_ref().map(|(id, _)| *id));
             }

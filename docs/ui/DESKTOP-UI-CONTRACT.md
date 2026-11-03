@@ -826,6 +826,204 @@ Those remain pending; no pixel parity or renderer tolerance is inferred.
 See [the production report](../phases/DELIVERY-consolidation-production-20261102.md)
 for actual sources, evidence and limitations.
 
+## 2026-11-02 — P69 main integration and mobile adaptation
+
+Owner explicitly requests landscape Android composition adapted to compact
+phone dimensions while retaining Linux art, information, rules and motion.
+Desktop Linux/Windows/web exact presentation requirements remain unchanged.
+Android uses the same presentation modules/assets with a mobile composition;
+its geometry is compared by information, accessibility and style, not desktop
+pixel dimensions. Lobby scenery fills the window with controls inside real
+lateral safe bounds; match scenery is edge-to-edge and controls stay safe.
+
+The shared bin-to-lib extraction carries all current main plugins and #57
+account/update fixes. Desktop and web retain their existing presentation.
+Affected cases: loading, lobby/navigation, account/error/forms, profile/ranking/
+history, news/notes, Troops/forms/abilities/previews, Arcanas/Strongholds/Arenas,
+Practice/Training, battle/HUD/Shop/auxiliaries/details, War Council, settings,
+confirmations/results/Victory/reconnect and return cleanup. All observations
+for this integrated source are pending; shared routing/builds never prove parity.
+See [P69 current execution](../phases/P69-mobile-20261102.md).
+
+P69 candidate 16 uses the engine's direct CPU mesh submission on Android
+following corrupted gfxstream geometry; no mesh, material, lighting rule or
+animation asset is replaced. The GLES point-shadow specialization no longer
+runs on Vulkan. Linux/Windows/web use their unchanged submission paths.
+Android visual comparison of the corrected path remains pending.
+
+P69's next direct-submission candidate also selects the public render-world
+`GpuPreprocessingMode::None`; phase batches must match the CPU builder.
+Candidate 16 failed this runtime requirement; its screenshot is not accepted.
+
+P69 manual CPU-builder overrides failed twice and are removed. The next
+Android capability profile derives the complete uniform-buffer rendering path
+from WebGL2 device limits on both native backends; sRGB Vulkan presentation
+is retained in the emulator. This does not waive art/motion correspondence.
+
+## 2026-11-02 — P69 compact navigation, laboratory and safe controls
+
+Android's adaptive composition retains the shared Linux heraldic icons,
+mode actions, collection art and kit typography. The owner-authorized mobile
+header is 56dp; the page fills its measured remainder. The same five modes
+(including Ranked account gating), collection pages, live directory and notes
+remain reachable. Laboratory controls move into a scrollable drawer while the
+model keeps its own viewport. Scroll/cancel handling follows BR-AN05 and
+48dp effective controls; it never changes purchases or simulation rules.
+Lobby insets distinguish visible bars/cutouts from mandatory gesture strips;
+battle scenery and loading backgrounds cover the complete surface. No Android
+creator strip is reintroduced. Shared desktop geometry/behavior is retained.
+
+Coverage: lobby, header, every menu page, laboratory catalog/forms/clips/editor/
+Practice, touch cancellation/scroll, native text input, loading/safe-area
+transitions. Android runtime checks and same-source Linux/Windows/web
+observations for this new composition remain pending.
+
+P69 candidate 19's separate full-bleed UI root failed to present content on the
+emulator. The next candidate restores the previously observed single UI-root
+hierarchy; loading-edge coverage remains pending while geometry/UI visibility
+are diagnosed. No desktop root or presentation path changes.
+
+## 2026-11-02 — P69 session-only manual backup and shared key masking
+
+Android consumes the shared form masking state for login and BackupKey entry,
+retaining native paste/reveal/Done/Back behavior. Its manual verified-key cache
+is process-only; the mobile prompt explains that lifetime. Linux/Windows/web
+retain #57's existing OS-vault/browser behavior and text. Native key masking,
+reveal/cancel, copy and account/logout states are affected. Emulator journeys
+and desktop correspondence remain pending for this source.
+
+## 2026-11-02 — P69 coalesced scrolling and compact battle controls
+
+Android preserves every touch move delivered between rendered frames and picks
+the foremost shell target, including disabled modal shields. A BR-AN05
+regression covers accumulated motion and cancellation. Its auxiliary cards move
+above the Shop; all five offers and Reroll retain independent touch regions.
+The resource strip uses compact mobile dimensions and localized labels.
+Android Settings retains language/audio/account controls and adds the existing
+shadow preference; app version and manual APK update information replace the
+inactive desktop updater entry. Desktop geometry and updater remain unchanged.
+
+Coverage: lobby modal ownership, clipped/scrolling Practice controls, battle
+Shop/reservation/Reroll/auxiliary controls and settings. Candidate 21 on API36
+shows intact geometry in inspected lobby/Practice/match frames but exposes
+auxiliary overlap and lost scroll distance. Corrected runtime and same-source
+Linux/Windows/web correspondence remain pending.
+
+## 2026-11-02 — P69 explicit Android document export
+
+Android Download recovery key uses the system document picker and acknowledges
+the backup only after a successful write. Back/cancel leaves the saved state
+unchanged, and stale account-epoch completions are ignored. Clipboard Copy
+remains a separate explicit action. Desktop/browser export and #57 updater
+behavior remain unchanged. Coverage: account backup/import/save confirmation,
+Android picker return/focus/immersive restoration and failure/cancel states.
+Compilation and observed journeys for this adapter remain pending.
+
+## 2026-11-02 — P69 landscape IME and mobile match labels
+
+Android text entry keeps the native dialog visible instead of using the IME's
+fullscreen extract editor. The dialog resizes with its keyboard; shared
+validation/masking/reveal and submission remain authoritative. Mobile match
+phase, Stronghold and paid Reroll labels use the active language; desktop
+text/geometry remain unchanged. An internal loopback-only gameplay intention
+trace records sequence/type without auth/room/resume data, enabling one-touch
+and inspection/scroll no-purchase observations. Emulator validation is pending.
+
+## 2026-11-02 — P69 menu density and protected form layout
+
+Android uses smaller panel spacing/type, three Arcana family columns instead
+of full-width banner stacks, and independent unshrunk Arena title/theme/effect
+regions. Settings actions wrap long localized labels and retain48dp minima.
+The saved-key panel owns a high-layer shield and a scrollable body; temporary
+session information moves to Settings instead of covering menu content.
+Toasts remain readable above the mobile modal. Native text forms have a short
+localized heading, a scrollable full prompt, and a reveal control beside the
+field so the software keyboard cannot hide it below the input.
+
+Shared native Arcana family/node and Stronghold name/summary/branch/advantage
+copy now uses the existing English/PT-BR catalogs, matching browser content
+instead of showing raw English catalog fields. This affects corresponding
+Linux, Windows and desktop web copy; their geometry stays unchanged.
+Coverage: Arcanas, Strongholds, Arenas, menu kit panels, Settings account
+actions, temporary account states, save-key modal, toast stacking and native
+IME/reveal/Done/Back. Corrected emulator journeys and updated same-source
+desktop observations remain pending.
+
+P69 internal loopback diagnostics now report allocated/text dimensions and
+positions for overflowing UI labels, without recording their contents. This
+measures Arena/Ranking layout defects before another geometry change. Guest
+Android Settings no longer claims an authenticated session lifetime; signed-in
+session information remains in Settings. Desktop presentation is unchanged.
+
+P69 measured Arena theme labels with57px allocated versus76px of glyphs,
+and an effect with60px versus109px. Android's theme/effect text now uses
+intrinsic height instead of the desktop minimum-height reservation. Desktop
+geometry is unchanged. BR-AP05 result waiting/closed feedback now remains
+visible for private/casual rematch offers on every target, matching their
+existing server eligibility; a focused regression covers the non-Challenge
+state. Neither change alters a rule, cost, deadline or outcome. Runtime
+remeasurement and same-source desktop observations remain pending.
+
+P69 continuation: Android War Council uses four horizontal choices with original
+frame/illustration proportions, local selection plus a scrollable full-effect
+readout and explicit 48dp confirmation. Ranking compacts its header/podium and
+keeps the public table/sidebar available through scroll. Desktop geometry is
+retained; Council copy now uses existing locale keys on native targets, and
+eligible non-Challenge rematches show shared waiting/closed feedback. Arena
+mobile body copy uses intrinsic height. Runtime coverage remains pending until
+recorded in `docs/phases/P69-mobile-20261102.md`; Windows/web parity is pending.
+
+P69 details consolidation: Android Training toolbar consumes intrinsic space
+before measurement panels; catalog stat labels wrap in their actual cells,
+Ranking sidebar names wrap, and Android unit details combine full ability/effect
+copy and Evolution choices in a scrollable safe panel. Loading scene decoration
+fills the surface separately. Native shared unit/Stronghold labels and form names
+use existing locales plus equivalent stat-label keys. Desktop geometry is retained;
+all affected runtime coverage is recorded separately in the P69 report.
+
+P69 small-height pass: Android header and catalog labels wrap within their own
+bounds, the catalog list keeps a reachable scroll viewport, and Ranking supports
+whole-page scrolling for short landscape surfaces. The Android system splash
+uses the existing dark background. Desktop geometry remains unchanged. Actual
+source/profile evidence and failed intermediate captures stay in the P69 report.
+
+P69 laboratory refinement: Android-only status/actions toolbar with equivalent
+short labels, wrapped participant navigation/headings and bounded generic
+button text. Desktop layout/copy remains unchanged; see P69 runtime evidence.
+
+P69 nested-scroll pass: Android scroll residuals propagate only to ancestor
+viewports, respecting visible action shields. Mobile catalog removes the duplicate
+heading and scrolls its hint with bounded thumbnail/name rows. Desktop unchanged;
+actual runtime coverage is recorded separately in the P69 report.
+
+P69 shared menu lifecycle: idle backup polling no longer marks Account changed;
+legitimate Ranking refreshes retain page/table/sidebar scroll. Presentation and
+backup semantics are unchanged across native targets. The App-level regression
+and actual Linux/Android scroll observations are recorded in the P69 report.
+
+P69 copy bounds: Android readouts retain intrinsic height and use word wrapping
+with a character fallback for individual long names/labels. Ranking sidebar
+stat labels are bounded; Browser button copy is shortened equivalently on Android.
+Desktop geometry/copy remains unchanged. See the P69 per-profile observations.
+
+P69 short battle viewport: Android Shop cells bound compact portraits/names/roles,
+Energy label/value share a column, and the48dp auxiliary drawer button flows in
+the resource bar beside Reroll. The dismissible drawer retains both choices and
+all server-derived prices/progress while shielding background actions. Scroll
+ownership permits a viewport's own buttons and blocks unrelated modal branches.
+Desktop geometry and all motion/gameplay remain unchanged. Runtime evidence and
+pending targets are recorded in the P69 continuation report.
+
+P69 native IME keeps essential actions together above short landscape keyboards;
+Android OS Back follows the existing Training editor return action. Native
+Fortification tier and Evolution headings use equivalent localized copy, with
+desktop geometry retained. Actual observations are in the P69 continuation report.
+
+P69 Android catalog camera uses the measured central preview rectangle to fit
+and center the unchanged model envelope below the tabs and above controls.
+Desktop camera, models and motion remain unchanged; zoom remains available.
+Per-model/form runtime coverage is recorded in the P69 continuation report.
+
 ## P75 shared identity and match-social presentation — 2026-11-02
 
 Registration gains a private email step. Shared Bevy overlays implement account email verification/change/hold, lost-key request/code/save-key, suspension, reports, three-slot emoji library/upload states, and chat mode. The battle HUD reserves its right column for text, input and emoji buttons, with seat bubbles lasting exactly 2.5 seconds and sprite-sheet animation driven by the same frame delays on every target. Mute and spectator exclusion share one implementation; private controls carry `Hud::PrivateControls`. Enter requires explicit Tab focus before activating a battle control and typing consumes game keys.
@@ -896,3 +1094,180 @@ the expanded log. Standard emoji handles stay resident and bind after Update
 command application, before layout/render extraction, so slow HUD rebuild
 frames never display an unbound placeholder. The first-frame regression is
 covered by a scheduled Bevy test; actual device correspondence remains pending.
+
+P69 current-main integration retains P75 and three-tier auxiliary content.
+Android adapts the shared tier cards into its explicit drawer, gives P75 dialogs
+owned touch/scroll/Back, puts account/library/recovery entries in Settings, and
+uses native IME/document services for chat and emoji selection. Desktop/web
+retain main's layout, keyboard and picker. All actual new-source target
+observations remain separate and are recorded in the P69 continuation report.
+
+P69 Android configuration handling preserves the native loop across font and
+related resource changes, refreshes insets, schedules IME after window focus,
+and gives the explicit key-save panel an owned scroll viewport. No desktop/web
+layout or motion changes. Profile failures and repeat evidence are tracked
+separately in the P69 continuation report.
+
+P69 native overlays: Android explicitly handles assetsPaths configuration
+changes through the shared host callback. Model preview rotation consumes an
+owned touch drag confined to its measured viewport and excludes its controls
+drawer; real mouse behavior and all desktop motion/assets remain unchanged.
+Actual cancellation/rotation/configuration observations are in the P69 report.
+
+
+P69 identity forms: Android verification uses the shared alphanumeric code
+contract and Unicode scalar field limits. Account/Library responses clear the
+loading notice only after actual data arrives on all targets. Native IME
+geometry and desktop field geometry are unchanged. Candidate40 lifecycle/drag
+and five actual Linux/Android canonical traces are recorded separately in the
+P69 continuation report; verification-form runtime repetition remains pending.
+
+
+P69 battle visibility: the Android scene remains edge-to-edge while its camera
+fits the actual horizontal safe width and centers bodies between measured HUD
+bounds. A framed Army control opens complete scrollable Synergy/Augment details;
+shared desktop readouts and camera are preserved. Android Council names occupy
+the full card width above the original art/price. On all targets, Council has
+global modal priority and chat closes throughout its authoritative pause.
+Actual runtime and correspondence observations are pending the next candidate.
+
+
+P69 Result: Android keeps confirmed outcome/reason/duration/purchase/Evolution
+summary and every action in a bounded scroll panel. Compact action and
+celebration rows retain48dp controls and leave scene space; keyboard hints stay
+on desktop. Cast, animation, page size and Linux/Windows/web geometry remain
+unchanged. The overflowing candidate40 Result is a recorded failure; new-source
+winner/loser/celebration observations remain pending.
+
+
+P69/P71 retry correspondence: all clients retain an active seat's retry path
+through the canonical connection pause, reconnect window and terminal replay
+retention. Queue/probe timeout and the existing banner layout remain unchanged;
+the numeric banner now reflects the longer active-seat retry limit. Only the
+server determines continuation/forfeit. Actual Android40 early-abandonment and
+Linux pause/result evidence, plus the focused regression and pending corrected
+runtime repetition, are recorded in the P69 continuation report.
+
+
+P69 social dock: Android places the collapsed chat/count in a48dp header slot,
+reserves the remaining score width, and bounds the two-step surrender label so
+it cannot grow across the HP plates. Expanded chat and policies are shared;
+desktop score/social/surrender geometry remains unchanged. Actual candidate41
+body visibility, drawer/Back and one-confirm Council evidence are recorded in
+the P69 continuation; the compact dock repetition is pending candidate42.
+
+
+P69 tier readouts: Android permits two wrapped lines in the existing auxiliary
+subtitle region, so Merchant T3 progress and remaining charges stay complete.
+Desktop subtitle geometry, every tier's art/motion and all authoritative values
+are preserved. The actual T1/T2/T3 candidate41 observations and clipped status
+failure are recorded in the P69 continuation; wrapped-runtime repetition remains
+pending the next package.
+
+
+P69 score readability: Android stacks the existing name/rating and Stronghold
+labels on separate full-width lines above HP, within the same plate height.
+The Arena side chip retains ownership identification; desktop name suffix,
+plate layout and every authoritative value remain unchanged. The overlapping
+candidate42 failure and actual41 Evolution/Fortification evidence are recorded
+in the continuation report. Corrected header observation remains pending.
+
+
+P69/P75 pointer capture: expanded chat captures gameplay while permitting its
+own compose/close/mute/emoji actions on all targets. Actual P75 dialogs retain
+their dedicated handler; native forms retain their existing guard. No geometry,
+chat permission or authority change. Candidate42's inert chat controls are a
+recorded failure; corrected delivery and background-gameplay exclusion remain
+pending actual runtime repetition.
+
+
+P69 celebration visibility: Android fits the unchanged formation envelope into
+the actual safe space above the measured Result panel by changing only the
+camera. Dancers are not rebuilt on panel-height changes; cast, world slots,
+page size, clips and desktop camera/motion are preserved. Mobile paging gets a
+wider range label and hide/show/motion captions omit desktop keyboard hints.
+The actual42 complete-summary pass and occluded-cast failure remain distinct;
+corrected full-cast/motion/cleanup observations are pending.
+
+
+P69/P75 retained chat: expanded logs show the existing bounded recent messages
+for native touch users and guest readers regardless of keyboard focus. Compact
+docks and emoji-bubble timing remain unchanged. Actual native45 IME/delivery to
+Linux passed; its empty older-message drawer is a recorded failure. Corrected
+later reading remains pending on the next package.
+
+
+P69 terminal recovery: shared server cleanup honors the existing unexpired
+terminal replay window after a long P71 pause. All clients require actual
+MatchStart/MatchEnd recovery before clearing the original retry deadline;
+Welcome alone cannot leave a frozen battle marked ready. No window, game value,
+seat authority or layout changes. The45s recovery passed; the120s terminal
+failure, targeted regressions and pending rebuilt-harness repetition are
+recorded separately in the P69 continuation.
+
+
+P69 Result cause correspondence: shared Result copy uses the existing
+server-provided disconnect/moderation cause when present, preserving manual
+surrender/local fallback copy. Geometry, outcomes and authority are unchanged.
+The34 focused client/two server passes and actual45 chat/pointer negatives are
+recorded in the continuation. Disconnect-label runtime repetition is pending
+the rebuilt local backend.
+
+
+P69 large-roster Result: after an actual82-purchase/83-entry Android result,
+winning Result uses a bounded scrollable right sidebar with two-column actions.
+The unchanged64-entry cast page fits the measured safe region to its left, and
+cosmetic roots face that fitted camera without restarting clips. The range
+label fits both real pages. Nonwinning Result and desktop geometry remain
+unchanged. Actual counts/paging and the too-small above-panel failure are
+recorded separately; corrected sidebar/cast/motion/cleanup observation is pending.
+
+
+P69 emoji selection: the shared standard library uses art-only controls with
+enough width for the existing32px icon and padding. Numeric IDs no longer
+overlap the emoji. Selection, slots, permissions and server authority are
+unchanged. Actual Android47 library/cancel evidence exposed this issue;
+corrected Android/Linux/web observations are queued.
+
+
+P69 authenticated recovery: valid same-family reconnect honors the existing
+terminal replay deadline after a long pause, through both session cleanup and
+authenticated hello. Cross-account, expired Access and controller protections
+are retained. Android48 terminal failure and its bounded Menu recovery remain
+recorded; corrected signed-in runtime repetition is pending.
+
+
+P69 Result/social ownership and accessibility: Android's eligible P75 result
+report toolbar belongs to the Result scroll panel, so it cannot cover Menu or
+history. The catalog stacks full-width filters. Ranking uses localized short
+headers with a full explanatory legend, wrapped bounded values and a secondary
+rank-status size. Desktop geometry, server eligibility and all data/actions are
+preserved. Actual48 clipping/overlay failures remain recorded; corrected
+font100/130, report and scroll observations are pending.
+
+
+P69 body readouts: Android P75 account/recovery/report/library text and retained
+chat lines have bounded width, nonshrinking height and word/character wrapping,
+including maximum-length unbroken input. Desktop typography/geometry and
+shared input/protocol limits remain unchanged. Actual48 report stored500 of
+501 attempted ASCII scalars and showed Report sent; overflow is recorded
+separately from the successful submission. Corrected rendering is pending.
+
+
+P69 contextual native input: P75 email fields select the existing Android email
+keyboard, and Room selects alphanumeric code input. Their original shared
+limits, values, submission and server rules remain intact. Desktop/web editing
+geometry/behavior is preserved. Actual52 recovery succeeded; the generic email
+keyboard is a recorded presentation issue. Corrected IME observations remain
+pending the next package.
+
+
+P69 final emulator consolidation (2026-11-03): APK54/Linux/web share executable
+sourcecd958bd0 and current main177da4a0/w40/R16. Actual scoped screen/input/
+profile/cross-play/terminal-recovery observations,612s active/paused reference
+measurements and safe original-frame hashes are indexed in
+[the consolidated evidence](../phases/P69-emulator-20261103.json). This records
+scoped Linux/web runtime, not complete pixel/motion equivalence. Windows visual
+coverage, physical ARM64/16KB and owner look/fun remain pending; Windows CI
+build/tests/package success does not change that status. Earlier candidate
+failures and their corrected repetitions remain distinct in the phase report.

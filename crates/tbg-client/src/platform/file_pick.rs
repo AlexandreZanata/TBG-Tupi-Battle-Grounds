@@ -2,6 +2,8 @@
 use std::sync::{Arc, Mutex};
 static OCCUPIED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub type Output = Arc<Mutex<Option<Result<(Vec<u8>, String), ()>>>>;
+#[cfg(target_os = "android")]
+pub(crate) mod android;
 pub fn choose() -> Output {
     let output = Output::default();
     if OCCUPIED.swap(true, std::sync::atomic::Ordering::AcqRel) {
@@ -11,7 +13,9 @@ pub fn choose() -> Output {
         return output;
     }
     let slot = output.clone();
-    #[cfg(not(target_arch = "wasm32"))]
+    #[cfg(target_os = "android")]
+    android::choose(slot);
+    #[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
     std::thread::spawn(move || {
         let value = (|| {
             let file = rfd::FileDialog::new()

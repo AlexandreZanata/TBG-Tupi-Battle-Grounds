@@ -1,5 +1,13 @@
 //! Platform services shared by the browser and native Bevy interface.
 
+#[cfg(target_os = "android")]
+pub mod android;
+#[cfg(all(test, not(target_os = "android")))]
+#[path = "android/credentials.rs"]
+mod android_credentials;
+#[cfg(all(test, not(target_os = "android")))]
+#[path = "android/endpoint.rs"]
+mod android_endpoint;
 pub mod http;
 
 /// P66 §7: what this client reports with an admission request: its
@@ -41,21 +49,22 @@ pub fn update_report() -> UpdateReport {
     }
 }
 #[cfg(not(target_arch = "wasm32"))]
+#[cfg_attr(target_os = "android", path = "android/credentials.rs")]
 pub mod credentials;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod resume;
 pub mod storage;
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 pub mod window;
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 fn clipboard() -> &'static std::sync::Mutex<Option<arboard::Clipboard>> {
     static CLIPBOARD: std::sync::OnceLock<std::sync::Mutex<Option<arboard::Clipboard>>> =
         std::sync::OnceLock::new();
     CLIPBOARD.get_or_init(|| std::sync::Mutex::new(arboard::Clipboard::new().ok()))
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 pub fn copy(text: &str) -> bool {
     clipboard()
         .lock()
@@ -64,7 +73,7 @@ pub fn copy(text: &str) -> bool {
         .is_some()
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 pub fn paste() -> Option<String> {
     clipboard().lock().ok()?.as_mut()?.get_text().ok()
 }
@@ -81,7 +90,7 @@ pub fn page_url(path: &str) -> Option<String> {
     ))
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 pub fn open_page(path: &str) {
     if let Some(url) = page_url(path) {
         if let Err(error) = open::that(url) {
@@ -91,7 +100,7 @@ pub fn open_page(path: &str) {
 }
 
 /// An explicit owner-requested backup export; never used for automatic session persistence.
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))]
 pub fn export_recovery_key(name: &str, key: &str) -> bool {
     use std::io::Write;
     let Some(dir) = directories::UserDirs::new()
@@ -127,6 +136,30 @@ pub fn export_recovery_key(name: &str, key: &str) -> bool {
         .open(path)
         .and_then(|mut file| file.write_all(key.as_bytes()).and_then(|_| file.sync_all()))
         .is_ok()
+}
+
+#[cfg(target_os = "android")]
+pub fn copy(text: &str) -> bool {
+    android::services::copy(text)
+}
+#[cfg(target_os = "android")]
+pub fn paste() -> Option<String> {
+    android::services::paste()
+}
+#[cfg(target_os = "android")]
+pub fn open_page(path: &str) {
+    if let Some(url) = page_url(path) {
+        android::services::open_page(&url);
+    }
+}
+#[cfg(target_os = "android")]
+pub fn export_recovery_key(name: &str, key: &str) -> bool {
+    if !tbg_core::account::parse_key(key).is_some_and(|(owner, _)| owner.eq_ignore_ascii_case(name))
+    {
+        return false;
+    }
+    let request = serde_json::json!({"epoch":crate::auth::epoch(), "name":name, "key":key});
+    android::services::send(jni::jni_str!("exportRecoveryKey"), &request.to_string())
 }
 
 pub mod file_pick;

@@ -37,6 +37,8 @@ pub(super) fn apply(action: Action, ctx: &mut Context<'_>) {
         | Action::EmailChange
         | Action::EmailConfirm
         | Action::EmailCancel => email_actions::apply(action, ctx),
+        #[cfg(target_os = "android")]
+        Action::Compose => social::apply(action, ctx),
         Action::Chat | Action::Mute | Action::Emoji(..) | Action::MarkReport | Action::Mode => {
             social::apply(action, ctx)
         }

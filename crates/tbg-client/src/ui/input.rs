@@ -35,7 +35,9 @@ const LONG_PRESS: f64 = 0.5;
 #[allow(clippy::too_many_arguments)] // one system reading every tap source
 pub(super) fn taps(
     form: NonSend<super::textform::ActiveForm>,
+    #[cfg(target_os = "android")] state: Res<State<crate::GameState>>,
     mouse: Res<ButtonInput<MouseButton>>,
+    #[cfg(target_os = "android")] pointer: Res<super::mobile::input::Pointer>,
     touches: Res<Touches>,
     window: Single<&Window>,
     scale: Res<UiScale>,
@@ -45,7 +47,14 @@ pub(super) fn taps(
     mut queue: ResMut<ActionQueue>,
     (time, mut pressed_at): (Res<Time>, Local<f64>),
 ) {
-    if crate::ui::p75::captured() {
+    if crate::ui::p75::modal() {
+        return;
+    }
+    #[cfg(target_os = "android")]
+    if pointer.consumed
+        || super::auth_ui::blocks_menu(*state.get())
+        || window.height() > window.width()
+    {
         return;
     }
     if super::textform::is_open(&form) {
@@ -55,19 +64,62 @@ pub(super) fn taps(
     if mouse.just_pressed(MouseButton::Left) || touches.iter_just_pressed().next().is_some() {
         *pressed_at = now;
     }
-    let long_press = now - *pressed_at >= LONG_PRESS;
-    let mut points: Vec<Vec2> = touches.iter_just_released().map(|t| t.position()).collect();
+    #[cfg(not(target_os = "android"))]
+    let mut gestures: Vec<(Vec2, Vec2, bool)> = touches
+        .iter_just_released()
+        .map(|t| (t.position(), t.position(), now - *pressed_at >= LONG_PRESS))
+        .collect();
+    #[cfg(target_os = "android")]
+    let mut gestures = pointer.taps.clone();
     if mouse.just_released(MouseButton::Left) {
-        points.extend(window.cursor_position());
+        if let Some(point) = window.cursor_position() {
+            #[cfg(target_os = "android")]
+            let duplicate =
+                pointer.touch_frame && pointer.taps.iter().any(|tap| tap.1.distance(point) < 2.);
+            #[cfg(not(target_os = "android"))]
+            let duplicate = false;
+            if !duplicate {
+                gestures.push((point, point, now - *pressed_at >= LONG_PRESS));
+            }
+        }
     }
-    for p in points {
+    for (_start, p, long_press) in gestures {
         let physical = p * window.scale_factor();
         let hit = buttons
             .iter()
             // Respect clipping and draw order when a modal covers a panel.
             .filter(|(_, node, t, vis, _, clip)| {
                 vis.get()
-                    && node.contains_point(**t, physical)
+                    && {
+                        #[cfg(target_os = "android")]
+                        {
+                            super::mobile::input::hit(
+                                node,
+                                **t,
+                                physical,
+                                window.scale_factor() * scale.0,
+                            )
+                        }
+                        #[cfg(not(target_os = "android"))]
+                        {
+                            node.contains_point(**t, physical)
+                        }
+                    }
+                    && {
+                        #[cfg(target_os = "android")]
+                        {
+                            super::mobile::input::hit(
+                                node,
+                                **t,
+                                _start * window.scale_factor(),
+                                window.scale_factor() * scale.0,
+                            )
+                        }
+                        #[cfg(not(target_os = "android"))]
+                        {
+                            true
+                        }
+                    }
                     && clip.is_none_or(|c| c.contains_point(physical))
             })
             .max_by_key(|(_, _, _, _, stack, _)| stack.0)
@@ -78,6 +130,12 @@ pub(super) fn taps(
             Some(a) => Some(a),
             None => nearest_unit(p, &units, &camera, scale.0),
         };
+        // Chat captures gameplay, but its own compose/close/mute/emoji controls must still work.
+        if crate::ui::p75::captured()
+            && !matches!(action, Some(UiAction::P75(_) | UiAction::Disabled))
+        {
+            continue;
+        }
         queue.0.push(action.unwrap_or(UiAction::Deselect));
     }
 }

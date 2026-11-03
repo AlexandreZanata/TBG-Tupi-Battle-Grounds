@@ -9,12 +9,31 @@ pub(super) fn apply(action: Action, ctx: &mut Context<'_>) {
         Action::Chat => {
             if !info.spectating && ctx.game == GameState::InMatch && chat.mode < 2 {
                 chat.expanded = !chat.expanded;
-                chat.focused = chat.expanded
+                chat.focused = !cfg!(target_os = "android")
+                    && chat.expanded
                     && chat.mode == 0
                     && chat
                         .policy
                         .as_ref()
                         .is_some_and(|p| p.chat == tbg_core::protocol::ChatPermission::Allowed);
+            }
+        }
+        #[cfg(target_os = "android")]
+        Action::Compose => {
+            if !info.spectating
+                && ctx.game == GameState::InMatch
+                && chat.mode == 0
+                && chat
+                    .policy
+                    .as_ref()
+                    .is_some_and(|p| p.chat == tbg_core::protocol::ChatPermission::Allowed)
+            {
+                chat.compose_result = info.result_id;
+                crate::ui::textform::open(
+                    ctx.form,
+                    TextKind::MatchChat,
+                    &ctx.lang.key("android.chat_compose"),
+                );
             }
         }
         Action::Mute => chat.muted = !chat.muted,

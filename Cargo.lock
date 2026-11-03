@@ -176,6 +176,7 @@ dependencies = [
  "ndk-context",
  "ndk-sys",
  "num_enum",
+ "simd_cesu8",
  "thiserror 2.0.21",
 ]
 
@@ -6187,16 +6188,18 @@ dependencies = [
 
 [[package]]
 name = "tbg-client"
-version = "0.1.4-colossus.5"
+version = "0.1.4-colossus.6"
 dependencies = [
  "arboard",
  "bevy",
+ "bevy_render",
  "dbus-secret-service-keyring-store",
  "directories",
  "ehttp",
  "ewebsock",
  "getrandom 0.3.4",
  "jiff",
+ "jni 0.22.4",
  "keyring-core",
  "open",
  "rfd",
@@ -7255,6 +7258,7 @@ dependencies = [
  "smallvec",
  "thiserror 2.0.21",
  "wgpu-core-deps-apple",
+ "wgpu-core-deps-emscripten",
  "wgpu-core-deps-wasm",
  "wgpu-core-deps-windows-linux-android",
  "wgpu-hal",
@@ -7267,6 +7271,15 @@ name = "wgpu-core-deps-apple"
 version = "30.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "061f3d319a40d39d00b1ecc2c33b89fe21d4e6fe01859df3500a3a8ecccd6b68"
+dependencies = [
+ "wgpu-hal",
+]
+
+[[package]]
+name = "wgpu-core-deps-emscripten"
+version = "30.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d98b86cf4abf524a902dd35f18ca6a3f08fc2ae9847c8f10b48e30491b1f0b86"
 dependencies = [
  "wgpu-hal",
 ]

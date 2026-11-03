@@ -2,6 +2,9 @@
 
 use super::*;
 
+#[derive(Component)]
+pub(super) struct Sidebar;
+
 pub(super) fn spawn(
     parent: &mut ChildSpawnerCommands,
     ranking: &Ranking,
@@ -9,17 +12,26 @@ pub(super) fn spawn(
     data: &LobbyData,
     assets: &AssetServer,
     lang: Lang,
+    scroll: ScrollPosition,
 ) {
     parent
-        .spawn(Node {
-            width: px(252),
-            min_height: px(0),
-            flex_shrink: 0.,
-            flex_direction: FlexDirection::Column,
-            row_gap: px(12),
-            overflow: Overflow::scroll_y(),
-            ..default()
-        })
+        .spawn((
+            Node {
+                width: if cfg!(target_os = "android") {
+                    percent(27)
+                } else {
+                    px(252)
+                },
+                min_height: px(0),
+                flex_shrink: 0.,
+                flex_direction: FlexDirection::Column,
+                row_gap: px(12),
+                overflow: Overflow::scroll_y(),
+                ..default()
+            },
+            scroll,
+            Sidebar,
+        ))
         .with_children(|sidebar| {
             summary(sidebar, ranking, account, data, assets, lang);
             recent(sidebar, account, data, lang);
@@ -52,7 +64,11 @@ fn summary(
             let pending = account.auto_login || account.pending.is_some() || data.stats_pending();
             card.spawn(kit::heading(
                 words(lang, "Your Rank", "Sua classificação"),
-                20.,
+                if cfg!(target_os = "android") {
+                    16.
+                } else {
+                    20.
+                },
             ));
             card.spawn(Node {
                 width: percent(100),
@@ -60,7 +76,20 @@ fn summary(
                 ..default()
             })
             .with_children(|crest| {
-                crest.spawn(kit::image(assets, "ranking/player-crest.webp", 108., 108.));
+                crest.spawn(kit::image(
+                    assets,
+                    "ranking/player-crest.webp",
+                    if cfg!(target_os = "android") {
+                        52.
+                    } else {
+                        108.
+                    },
+                    if cfg!(target_os = "android") {
+                        52.
+                    } else {
+                        108.
+                    },
+                ));
             });
             centered(
                 card,
@@ -82,7 +111,11 @@ fn summary(
                     || words(lang, "Unranked", "Sem classificação"),
                     |r| format!("#{r} Global"),
                 ),
-                24.,
+                if cfg!(target_os = "android") {
+                    12.
+                } else {
+                    24.
+                },
                 pending,
             );
             centered(
@@ -158,7 +191,17 @@ fn record(card: &mut ChildSpawnerCommands, data: &LobbyData, lang: Lang, pending
                     ..default()
                 })
                 .with_children(|stat| {
-                    stat.spawn(kit::muted(label, 9.));
+                    stat.spawn((
+                        #[cfg(target_os = "android")]
+                        Node {
+                            width: percent(100),
+                            min_width: px(0),
+                            ..default()
+                        },
+                        kit::muted(label, 9.),
+                        #[cfg(target_os = "android")]
+                        TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+                    ));
                     stat.spawn((
                         text(value, 14.),
                         kit::Pending(pending),
@@ -231,15 +274,27 @@ fn centered(parent: &mut ChildSpawnerCommands, value: String, size: f32, pending
             width: percent(100),
             justify_content: JustifyContent::Center,
             overflow: Overflow::clip(),
+            #[cfg(target_os = "android")]
+            flex_shrink: 0.,
             ..default()
         })
         .with_children(|row| {
             row.spawn((
                 kit::heading(value, size),
-                TextLayout::no_wrap().with_justify(Justify::Center),
+                if cfg!(target_os = "android") {
+                    TextLayout::new(Justify::Center, LineBreak::WordOrCharacter)
+                } else {
+                    TextLayout::no_wrap().with_justify(Justify::Center)
+                },
                 kit::Pending(pending),
                 Node {
-                    width: if pending { percent(100) } else { Val::Auto },
+                    width: if pending || cfg!(target_os = "android") {
+                        percent(100)
+                    } else {
+                        Val::Auto
+                    },
+                    #[cfg(target_os = "android")]
+                    flex_shrink: 0.,
                     min_height: px(size * 1.2),
                     ..default()
                 },

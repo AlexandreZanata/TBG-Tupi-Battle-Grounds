@@ -16,6 +16,9 @@ use tbg_core::{
     MatchView, Phase, Seat,
 };
 
+#[cfg(target_os = "android")]
+mod mobile;
+
 const CARD_W: f32 = 112.;
 const CARD_H: f32 = 152.;
 /// Gap between the last Shop card and the auxiliary panel.
@@ -36,6 +39,8 @@ struct AuxPip(usize, u8);
 #[derive(Component)]
 enum AuxReadout {
     Header,
+    #[cfg(target_os = "android")]
+    Toggle,
     Name(usize),
     Subtitle(usize),
     BadgePrefix(usize),
@@ -43,11 +48,26 @@ enum AuxReadout {
 }
 
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "android")]
+    mobile::plugin(app);
     app.add_systems(Update, update.run_if(in_state(GameState::InMatch)));
 }
 
 /// Spawned inside the scaled Shop column so it sits just right of the fifth card.
+#[cfg(target_os = "android")]
+pub(super) fn spawn_toggle(parent: &mut ChildSpawnerCommands) {
+    mobile::button(parent);
+}
+
 pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
+    #[cfg(target_os = "android")]
+    mobile::spawn(parent, assets);
+    #[cfg(not(target_os = "android"))]
+    spawn_desktop(parent, assets);
+}
+
+#[cfg(not(target_os = "android"))]
+fn spawn_desktop(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
     parent
         .spawn((
             Node {
@@ -168,14 +188,33 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, slot: usize) {
                         AuxReadout::Name(slot),
                     ));
                 });
-            card.spawn(absolute(8., 6., 105., 14.))
-                .with_children(|sub| {
-                    sub.spawn((
-                        kit::muted("", 9.),
-                        TextLayout::no_wrap(),
-                        AuxReadout::Subtitle(slot),
-                    ));
-                });
+            card.spawn(absolute(
+                8.,
+                6.,
+                105.,
+                if cfg!(target_os = "android") {
+                    22.
+                } else {
+                    14.
+                },
+            ))
+            .with_children(|sub| {
+                sub.spawn((
+                    kit::muted("", 9.),
+                    #[cfg(target_os = "android")]
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
+                    if cfg!(target_os = "android") {
+                        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter)
+                    } else {
+                        TextLayout::no_wrap()
+                    },
+                    AuxReadout::Subtitle(slot),
+                ));
+            });
             card.spawn(Node {
                 position_type: PositionType::Absolute,
                 left: px(6.),
@@ -397,6 +436,12 @@ fn update(
     for (readout, mut text) in &mut texts {
         let want = match readout {
             AuxReadout::Header => header_text(slots, *lang),
+            #[cfg(target_os = "android")]
+            AuxReadout::Toggle => format!(
+                "Aux.\n{}/{}",
+                slots.iter().filter(|slot| slot.tier > 0).count(),
+                AUXILIARY_SLOTS
+            ),
             AuxReadout::Name(i) => slot_strings(slots[*i], *lang).name.to_string(),
             AuxReadout::Subtitle(i) => slot_strings(slots[*i], *lang).sub,
             AuxReadout::BadgePrefix(i) => slot_strings(slots[*i], *lang).prefix.to_string(),

@@ -129,11 +129,14 @@ impl Lobby {
             }
         }
         // P71: the match holds a seat until it ends it (window, forfeit); an idle
-        // session past the window starts fresh instead of forcing a new sign-in.
+        // session past both reconnect and terminal replay windows starts fresh.
         let window = Duration::from_secs(self.config.reconnect_secs);
         let resume = resume.filter(|token| {
             self.sessions.get(token).is_none_or(|s| {
                 matches!(s.state, SessionState::InMatch { .. })
+                    || s.finished
+                        .as_ref()
+                        .is_some_and(|(until, _)| Instant::now() < *until)
                     || s.detached_at.is_none_or(|at| at.elapsed() <= window)
             })
         });

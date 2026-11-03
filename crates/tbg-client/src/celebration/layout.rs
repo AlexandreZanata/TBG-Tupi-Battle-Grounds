@@ -7,6 +7,33 @@ pub(super) struct Formation {
     pub positions: Vec<Vec3>,
     pub scale: f32,
     pub camera: Transform,
+    #[cfg(target_os = "android")]
+    pub viewport: ViewportFit,
+}
+
+#[cfg(target_os = "android")]
+pub(super) struct ViewportFit {
+    centre: Vec3,
+    dir: Vec3,
+    extents: Vec3,
+}
+
+#[cfg(target_os = "android")]
+impl ViewportFit {
+    pub fn frame(&self, aspect: f32, region: Rect) -> Transform {
+        let fraction = region.size().max(Vec2::splat(0.01));
+        let tan = (crate::camera::FOV_Y * 0.5).tan();
+        let distance = (self.extents.x / (tan * aspect * fraction.x * 0.88))
+            .max(self.extents.y / (tan * fraction.y * 0.88))
+            + self.extents.z;
+        let right = Vec3::Y.cross(self.dir).normalize();
+        let up = self.dir.cross(right).normalize();
+        let center = region.center();
+        let aim = self.centre
+            + right * ((1. - 2. * center.x) * distance * tan * aspect)
+            + up * ((2. * center.y - 1.) * distance * tan);
+        Transform::from_translation(aim + self.dir * distance).looking_at(aim, Vec3::Y)
+    }
 }
 
 pub(super) fn formation(n: usize, radius: f32, height: f32, aspect: f32, seat: Seat) -> Formation {
@@ -55,6 +82,12 @@ pub(super) fn formation(n: usize, radius: f32, height: f32, aspect: f32, seat: S
         positions,
         scale,
         camera,
+        #[cfg(target_os = "android")]
+        viewport: ViewportFit {
+            centre,
+            dir,
+            extents: Vec3::new(horizontal, vertical, depth),
+        },
     }
 }
 

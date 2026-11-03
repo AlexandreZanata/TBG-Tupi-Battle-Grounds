@@ -4,6 +4,10 @@ use super::types::Failure;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn origin(server: &str) -> Result<String, Failure> {
+    #[cfg(target_os = "android")]
+    if !crate::platform::android::endpoint_allowed(server) {
+        return Err(Failure::InvalidOrigin);
+    }
     let mut url = url::Url::parse(server).map_err(|_| Failure::InvalidOrigin)?;
     if !url.username().is_empty()
         || url.password().is_some()

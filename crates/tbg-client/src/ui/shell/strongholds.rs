@@ -5,9 +5,9 @@ use bevy::prelude::*;
 use serde_json::Value;
 use std::sync::OnceLock;
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 mod native;
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub use native::spawn;
 
 pub fn stronghold_data() -> &'static Value {
@@ -21,7 +21,7 @@ fn text(v: &Value, key: &str) -> String {
     v[key].as_str().unwrap_or_default().into()
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
     let data = stronghold_data();
     root.spawn(kit::panel()).with_children(|p| {
@@ -60,9 +60,23 @@ fn details(
     kind: tbg_core::StrongholdKind,
     lang: Lang,
 ) {
-    p.spawn(kit::heading(text(v, "name"), 26.));
-    p.spawn(kit::muted(text(v, "specialty"), 16.));
-    p.spawn((super::super::label(text(v, "summary"), 15.), detail_node()));
+    let slug = format!("{kind:?}").to_lowercase();
+    p.spawn(kit::heading(
+        crate::i18n::content::stronghold_name(lang, kind),
+        if cfg!(target_os = "android") {
+            20.
+        } else {
+            26.
+        },
+    ));
+    p.spawn(kit::muted(
+        lang.key(&format!("stronghold.{slug}.specialty")),
+        16.,
+    ));
+    p.spawn((
+        super::super::label(lang.key(&format!("stronghold.{slug}.summary")), 15.),
+        detail_node(),
+    ));
     let stats = &v["stats"];
     p.spawn(super::super::label(
         format!(
@@ -83,28 +97,49 @@ fn details(
         17.,
     ));
     p.spawn((kit::muted(passive(lang, kind, stats), 14.), detail_node()));
-    for (heading, field) in [("+", "advantages"), ("-", "disadvantages")] {
-        for line in v[field]
+    for (heading, field, key) in [
+        ("+", "advantages", "advantage"),
+        ("-", "disadvantages", "disadvantage"),
+    ] {
+        for (index, _line) in v[field]
             .as_array()
             .into_iter()
             .flatten()
             .filter_map(Value::as_str)
+            .enumerate()
         {
             p.spawn((
-                kit::muted(format!("{heading} {}", expand(line, stats)), 13.),
+                kit::muted(
+                    format!(
+                        "{heading} {}",
+                        expand(
+                            &lang.key(&format!("stronghold.{slug}.{key}.{index}")),
+                            stats
+                        )
+                    ),
+                    13.,
+                ),
                 detail_node(),
             ));
         }
     }
-    for branch in v["branches"].as_array().into_iter().flatten() {
-        p.spawn(kit::heading(text(branch, "name"), 17.));
+    for (branch_id, branch) in v["branches"].as_array().into_iter().flatten().enumerate() {
+        p.spawn(kit::heading(
+            crate::i18n::content::stronghold_branch(lang, kind, branch_id as u8),
+            17.,
+        ));
         for (i, step) in branch["steps"].as_array().into_iter().flatten().enumerate() {
             let s = &step["stats"];
             p.spawn((
                 kit::muted(
                     format!(
                         "{} · {} Energy · HP {} · {} {}",
-                        text(step, "name"),
+                        crate::i18n::content::stronghold_step(
+                            lang,
+                            kind,
+                            branch_id as u8,
+                            (i + 1) as u8
+                        ),
                         data["fortifyCost"][i.min(1)].as_u64().unwrap_or(0)
                             / data["energyScale"].as_u64().unwrap_or(600),
                         s["maxHp"],
@@ -115,10 +150,10 @@ fn details(
                 ),
                 detail_node(),
             ));
-            p.spawn((kit::muted(branch_effect(step), 13.), detail_node()));
+            p.spawn((kit::muted(branch_effect(step, lang), 13.), detail_node()));
         }
     }
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     p.spawn(Node {
         flex_grow: 1.,
         min_height: px(8),
@@ -134,20 +169,20 @@ fn details(
         Action::Stronghold(kind),
         290.,
     );
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     p.spawn(control).insert(super::catalog::button_node());
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     p.spawn(control);
 }
 
 fn detail_node() -> Node {
     Node {
-        width: if cfg!(tbg_desktop) {
+        width: if cfg!(tbg_native_ui) {
             percent(100)
         } else {
             Val::Auto
         },
-        max_width: if cfg!(tbg_desktop) {
+        max_width: if cfg!(tbg_native_ui) {
             percent(100)
         } else {
             px(310)
@@ -197,24 +232,32 @@ mod tests {
     }
 }
 
-pub(in crate::ui) fn branch_effect(step: &Value) -> String {
+pub(in crate::ui) fn branch_effect(step: &Value, lang: Lang) -> String {
     let stats = &step["stats"];
     let delta = &step["delta"];
     let mut parts = Vec::new();
     for (key, label, stat) in [
-        ("hpBp", "max HP", "maxHp"),
+        ("hpBp", "max_hp", "maxHp"),
         ("dmgBp", "damage", "damage"),
         ("rangeAdd", "range", "range"),
-        ("interval", "attack interval", "interval"),
-        ("spoilsAdd", "Spoils", "spoils"),
-        ("spoilsCapAdd", "Spoils cap", "spoilsCap"),
-        ("auraBpAdd", "War Banner", "auraBp"),
-        ("auraRangeAdd", "War Banner radius", "auraRange"),
+        ("interval", "every", "interval"),
+        ("spoilsAdd", "spoils", "spoils"),
+        ("spoilsCapAdd", "spoils_cap", "spoilsCap"),
+        ("auraBpAdd", "aura", "auraBp"),
+        ("auraRangeAdd", "aura_range", "auraRange"),
     ] {
         if delta[key].as_i64().is_some_and(|n| n != 0) {
             parts.push(format!(
-                "{label}: {}",
-                expand(&format!("{{{stat}}}"), stats)
+                "{}: {}",
+                lang.key(&format!("stronghold.stat.{label}")),
+                expand(&format!("{{{stat}}}"), stats).replace(
+                    " tiles",
+                    if lang == Lang::PtBr {
+                        " casas"
+                    } else {
+                        " tiles"
+                    }
+                )
             ));
         }
     }

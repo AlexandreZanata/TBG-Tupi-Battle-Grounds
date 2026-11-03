@@ -6,10 +6,16 @@ use tbg_core::content::TICK_HZ;
 use tbg_core::EndReason;
 
 use super::account::Account;
-use super::{button, label, screen, UiAction, PANEL};
+#[cfg(not(target_os = "android"))]
+use super::{button, label};
+use super::{screen, UiAction, PANEL};
+#[cfg(target_os = "android")]
+mod mobile;
 use crate::i18n::{Lang, Msg};
 use crate::sync::{MatchInfo, MatchStats, RematchInfo};
 use crate::GameState;
+#[cfg(target_os = "android")]
+use mobile::{button, label};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(GameState::Result), spawn)
@@ -72,6 +78,15 @@ fn spawn(
         }
         None => (lang.t(Msg::ResultOver), None),
     };
+    let reason = match info
+        .personal
+        .as_ref()
+        .map(|summary| summary.reason.as_str())
+    {
+        Some("disconnect") => Some(lang.key("p73.reason.disconnect")),
+        Some("moderation") => Some(lang.key("p73.reason.moderation")),
+        _ => reason.map(str::to_owned),
+    };
     let celebrating = crate::celebration::total(&info).is_some();
     let secs = info
         .personal
@@ -125,30 +140,89 @@ fn spawn(
             ..default()
         });
     }
+    #[cfg(target_os = "android")]
+    root.insert(Node {
+        width: percent(100),
+        height: percent(100),
+        position_type: PositionType::Absolute,
+        flex_direction: if celebrating {
+            FlexDirection::Row
+        } else {
+            FlexDirection::Column
+        },
+        justify_content: if celebrating {
+            JustifyContent::FlexEnd
+        } else {
+            JustifyContent::Center
+        },
+        align_items: AlignItems::Center,
+        padding: UiRect::all(px(6)),
+        ..default()
+    });
+    #[cfg(target_os = "android")]
+    root.insert(crate::celebration::ui::ResultSurface);
     root.with_children(|root| {
         root.spawn((
             Node {
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
-                width: if celebrating { percent(96) } else { Val::Auto },
+                width: if cfg!(target_os = "android") && celebrating {
+                    percent(48)
+                } else if celebrating || cfg!(target_os = "android") {
+                    percent(96)
+                } else {
+                    Val::Auto
+                },
                 max_width: if celebrating { px(900) } else { Val::Auto },
-                padding: UiRect::all(px(if celebrating { 8. } else { 24. })),
-                row_gap: px(if celebrating { 3. } else { 12. }),
+                padding: UiRect::all(px(if celebrating || cfg!(target_os = "android") {
+                    8.
+                } else {
+                    24.
+                })),
+                row_gap: px(if celebrating || cfg!(target_os = "android") {
+                    3.
+                } else {
+                    12.
+                }),
+                #[cfg(target_os = "android")]
+                max_height: percent(96),
+                #[cfg(target_os = "android")]
+                overflow: Overflow::scroll_y(),
                 border_radius: BorderRadius::all(px(16.0)),
                 ..default()
             },
             BackgroundColor(PANEL),
+            #[cfg(target_os = "android")]
+            ScrollPosition::default(),
+            #[cfg(target_os = "android")]
+            crate::celebration::ui::ResultPanel,
         ))
         .with_children(|panel| {
             #[cfg(feature = "ui-acceptance")]
             if crate::config::url_param("capture_panel").is_some_and(|v| v.starts_with("p73-")) {
                 panel.spawn(label(&lang.key("p73.fixture"), 14.));
             }
-            panel.spawn(label(title, if celebrating { 24. } else { 40. }));
+            panel.spawn(label(
+                title,
+                if cfg!(target_os = "android") {
+                    20.
+                } else if celebrating {
+                    24.
+                } else {
+                    40.
+                },
+            ));
             if let Some(reason) = reason {
-                panel.spawn(label(reason, if celebrating { 12. } else { 16. }));
-                panel.spawn(label(duration, if celebrating { 12. } else { 16. }));
-                panel.spawn(label(summary, if celebrating { 12. } else { 16. }));
+                let size = if cfg!(target_os = "android") {
+                    11.
+                } else if celebrating {
+                    12.
+                } else {
+                    16.
+                };
+                panel.spawn(label(reason, size));
+                panel.spawn(label(duration, size));
+                panel.spawn(label(summary, size));
             } else if !info.opponent.is_empty() {
                 panel.spawn(label(format!("vs {}", info.opponent), 16.0));
             }
@@ -168,17 +242,17 @@ fn spawn(
                 ));
                 return;
             }
-            panel.spawn((
-                label("", 18.0),
-                Node::default(),
-                RatingLabel,
-                HideForChallenge,
-            ));
-            panel.spawn((label("", 18.0), Node::default(), RematchLabel));
+            panel.spawn((label("", 18.0), RatingLabel, HideForChallenge));
+            panel.spawn((label("", 18.0), RematchLabel));
             panel.spawn((label("", 14.), HistoryStatusLabel));
             panel
                 .spawn(Node {
-                    flex_direction: if celebrating {
+                    width: if cfg!(target_os = "android") {
+                        percent(100)
+                    } else {
+                        Val::Auto
+                    },
+                    flex_direction: if celebrating || cfg!(target_os = "android") {
                         FlexDirection::Row
                     } else {
                         FlexDirection::Column
@@ -282,7 +356,7 @@ fn update_rematch(
         };
     for (mut text, mut node) in &mut set.p0() {
         text.0 = label.into();
-        node.display = if info.challenge && !label.is_empty() {
+        node.display = if !label.is_empty() {
             Display::Flex
         } else {
             Display::None
@@ -371,7 +445,20 @@ mod tests {
         let mut labels = app
             .world_mut()
             .query_filtered::<&Node, With<RematchLabel>>();
-        assert_eq!(labels.single(app.world()).unwrap().display, Display::None);
+        // BR-AP05: private/casual offers retain the same waiting/closed feedback.
+        assert_eq!(labels.single(app.world()).unwrap().display, Display::Flex);
+        {
+            let mut offer = app.world_mut().resource_mut::<RematchInfo>();
+            offer.open = true;
+            offer.closed = None;
+            offer.you_requested = true;
+            offer.opponent_requested = false;
+        }
+        app.update();
+        assert_eq!(labels.single(app.world()).unwrap().display, Display::Flex);
+        assert!(texts
+            .iter(app.world())
+            .any(|t| t.0 == Lang::En.t(Msg::ResultWaiting)));
     }
 }
 

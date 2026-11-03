@@ -63,7 +63,7 @@ pub fn spawn(
         });
     });
     root.spawn(Node {
-        flex_direction: if compact {
+        flex_direction: if compact && !cfg!(target_os = "android") {
             FlexDirection::Column
         } else {
             FlexDirection::Row
@@ -80,14 +80,14 @@ pub fn spawn(
                 .spawn(Node {
                     flex_grow: 1.,
                     flex_basis: px(0),
-                    min_width: px(300),
+                    min_width: px(if cfg!(target_os = "android") { 0 } else { 300 }),
                     flex_direction: FlexDirection::Column,
                     row_gap: px(12),
                     ..default()
                 })
                 .with_children(|col| {
                     col.spawn(kit::panel()).with_children(|p| {
-                        #[cfg(tbg_desktop)]
+                        #[cfg(tbg_native_ui)]
                         p.spawn(super::catalog::banner(
                             assets,
                             format!(
@@ -96,7 +96,7 @@ pub fn spawn(
                             ),
                             2.5,
                         ));
-                        #[cfg(not(tbg_desktop))]
+                        #[cfg(not(tbg_native_ui))]
                         p.spawn((
                             ImageNode::new(assets.load(format!(
                                 "arcana/{}",
@@ -109,11 +109,11 @@ pub fn spawn(
                             },
                         ));
                         p.spawn(kit::heading(
-                            family["name"].as_str().unwrap_or_default(),
+                            lang.key(&format!("arcana.family.{family_id}.name")),
                             28.,
                         ));
                         p.spawn(kit::muted(
-                            family["description"].as_str().unwrap_or_default(),
+                            lang.key(&format!("arcana.family.{family_id}.description")),
                             15.,
                         ));
                     });
@@ -141,13 +141,10 @@ pub fn spawn(
                                     58.,
                                     58.,
                                 ));
-                                r.spawn(kit::heading(
-                                    node["name"].as_str().unwrap_or_default(),
-                                    22.,
-                                ));
+                                r.spawn(kit::heading(node_copy(lang, node, "name"), 22.));
                             });
-                            for key in ["perRankText", "effect", "eligibility"] {
-                                p.spawn(kit::muted(node[key].as_str().unwrap_or_default(), 14.));
+                            for key in ["per_rank", "effect", "eligibility"] {
+                                p.spawn(kit::muted(node_copy(lang, node, key), 14.));
                             }
                             if !PREREQUISITES[i].is_empty() {
                                 let needs = PREREQUISITES[i]
@@ -155,7 +152,7 @@ pub fn spawn(
                                     .map(|(n, r)| {
                                         format!(
                                             "{} {r}",
-                                            data["nodes"][*n]["name"].as_str().unwrap_or_default()
+                                            node_copy(lang, &data["nodes"][*n], "name")
                                         )
                                     })
                                     .collect::<Vec<_>>()
@@ -165,7 +162,16 @@ pub fn spawn(
                                     13.,
                                 ));
                             }
-                            p.spawn(kit::row()).with_children(|r| {
+                            p.spawn(Node {
+                                flex_wrap: if cfg!(target_os = "android") {
+                                    FlexWrap::Wrap
+                                } else {
+                                    FlexWrap::NoWrap
+                                },
+                                row_gap: px(6),
+                                ..kit::row()
+                            })
+                            .with_children(|r| {
                                 r.spawn(button("-", Action::Arcana(i, -1), 42.));
                                 r.spawn(kit::heading(
                                     format!("{} / {}", shell.draft.ranks[i], MAX[i]),
@@ -183,6 +189,11 @@ pub fn spawn(
                 });
         }
     });
+}
+
+fn node_copy(lang: Lang, node: &Value, field: &str) -> String {
+    let id = node["id"].as_str().unwrap_or_default().replace('-', "_");
+    lang.key(&format!("arcana.node.{id}.{field}"))
 }
 
 #[cfg(test)]

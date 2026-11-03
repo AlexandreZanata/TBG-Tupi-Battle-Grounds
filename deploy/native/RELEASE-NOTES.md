@@ -1,3 +1,24 @@
+TBG 0.1.4-colossus.6 — Native Android landscape candidate
+
+Android inherits current main177da4a0, including account recovery/social flows
+and all three cumulative War Auxiliary tiers. Compact landscape navigation,
+catalogs, Shop, auxiliary drawer, Council and scrollable unit details retain
+the Linux artwork and shared rules. Scenery fills the surface while controls
+respect measured cutouts/system gestures. Native keyboard and explicit document
+export/import use Android services; account/session credentials stay in memory.
+Desktop layout and browser portrait retain their existing contracts.
+
+Chat controls remain usable while gameplay is captured, and recent messages
+stay readable without keyboard focus. Active-seat retries respect the existing
+P71 pause and terminal replay windows; server cleanup preserves unexpired
+results after a long disconnect. No server grace or outcome rule changes.
+
+This candidate uses main's wire40, schema12 and R16/f2e253b98ccb313a. P69 adds
+no simulation values, protocol changes, authority or outcomes. Actual runtime,
+artifact identities and separate pending targets are recorded in
+ docs/phases/P69-mobile-20261102.md. No store, backend deployment or update
+channel activation is included. Previous candidate notes follow.
+
 TBG 0.1.4-colossus.5 — Account recovery, match social and tiered War Auxiliaries candidate
 
 Verified email can recover a lost AccountKey on the same account, retaining

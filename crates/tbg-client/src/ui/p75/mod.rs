@@ -40,6 +40,8 @@ pub enum Action {
     OldCode,
     NewCode,
     Chat,
+    #[cfg(target_os = "android")]
+    Compose,
     Mute,
     Emoji(u8),
     MarkReport,
@@ -203,7 +205,7 @@ fn input(
     for e in entered.read().filter(|e| {
         matches!(
             e.kind,
-            TextKind::P75Text | TextKind::P75Code | TextKind::P75Secret
+            TextKind::P75Text | TextKind::P75Email | TextKind::P75Code | TextKind::P75Secret
         )
     }) {
         let Some(target) = s.awaiting.take() else {
@@ -345,6 +347,9 @@ fn poll(
             Purpose::Account | Purpose::Library => {
                 if reply.value.get("uploads").is_some() || matches!(purpose, Purpose::Account) {
                     s.data = reply.value;
+                    if s.notice == "p75.loading" {
+                        s.notice = "";
+                    }
                 } else {
                     send(&mut s, Purpose::Library, "/api/me/emoji", "GET", None);
                 }

@@ -57,7 +57,11 @@ pub(crate) fn request(account: &mut Account, action: ExportAction, toasts: &mut 
         let Some(profile) = account.profile.as_ref() else {
             return;
         };
-        toasts.say(if export(action, &profile.name, key) {
+        let exported = export(action, &profile.name, key);
+        if cfg!(target_os = "android") && matches!(action, ExportAction::Download) && exported {
+            return;
+        }
+        toasts.say(if exported {
             match action {
                 ExportAction::Copy => Msg::AccountKeyCopied,
                 ExportAction::Download => Msg::AccountKeyDownloaded,
@@ -80,6 +84,10 @@ fn finish(
     mut toasts: ResMut<Toasts>,
     lang: Res<Lang>,
 ) {
+    // Reading an empty slot must not mark Account changed and rebuild every menu frame.
+    if account.key_result.is_none() {
+        return;
+    }
     let Some(result) = account.key_result.take() else {
         return;
     };
@@ -95,7 +103,11 @@ fn finish(
         Ok(None) => textform::open(
             &mut form,
             TextKind::BackupKey,
-            &lang.key("account.backup.prompt"),
+            &lang.key(if cfg!(target_os = "android") {
+                "android.account.backup_prompt"
+            } else {
+                "account.backup.prompt"
+            }),
         ),
         Err(error) => {
             let key = if error == auth::Failure::InvalidKey {
@@ -120,6 +132,31 @@ fn finish(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn br_as05_idle_backup_preserves_menu_change_detection() {
+        #[derive(Resource, Default)]
+        struct Changes(usize);
+        fn observe(account: Res<Account>, mut changes: ResMut<Changes>) {
+            if account.is_changed() {
+                changes.0 += 1;
+            }
+        }
+        let mut app = App::new();
+        app.init_resource::<Account>()
+            .init_resource::<Toasts>()
+            .init_resource::<Changes>()
+            .insert_resource(Lang::En)
+            .insert_non_send(ActiveForm::default())
+            .add_systems(Update, (finish, observe).chain());
+        app.update();
+        app.update();
+        assert_eq!(
+            app.world().resource::<Changes>().0,
+            1,
+            "BR-AS05: idle backup processing must not invalidate the account or reset menu scroll"
+        );
+    }
+
     #[test]
     fn br_rc02_recovery_replaces_a_cached_export_and_discards_inflight_old_results() {
         let mut account = Account {
@@ -156,4 +193,43 @@ mod tests {
         assert!(!matches_account("OtherUser-0000-0000-0000-0000", &account));
         assert!(!matches_account("not-a-key", &account));
     }
+}
+
+/// The Android file picker cannot acknowledge a backup before the write completes.
+#[cfg(target_os = "android")]
+pub(crate) fn export_completed(
+    epoch: u64,
+    name: &str,
+    saved: bool,
+    cancelled: bool,
+    account: &mut Account,
+    toasts: &mut Toasts,
+) {
+    if epoch != auth::epoch() || cancelled {
+        return;
+    }
+    let same_account = account
+        .profile
+        .as_ref()
+        .is_some_and(|p| p.name.eq_ignore_ascii_case(name));
+    let mut same_panel = false;
+    if let super::account::AccountScreen::SaveKey {
+        name: owner,
+        saved: acknowledged,
+        ..
+    } = &mut account.screen
+    {
+        same_panel = owner.eq_ignore_ascii_case(name);
+        if same_panel && saved {
+            *acknowledged = true;
+        }
+    }
+    if !same_account && !same_panel {
+        return;
+    }
+    toasts.say(if saved {
+        Msg::AccountKeyDownloaded
+    } else {
+        Msg::AuthBackupFailed
+    });
 }

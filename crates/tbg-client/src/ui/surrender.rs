@@ -33,7 +33,7 @@ pub fn reset(state: &mut Surrender, ranked: bool) {
     };
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 pub(super) fn button() -> impl Bundle {
     (
         Node {
@@ -51,17 +51,23 @@ pub(super) fn button() -> impl Bundle {
     )
 }
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub(super) fn linux_button(assets: &AssetServer, lang: crate::i18n::Lang) -> impl Bundle {
     (
         Node {
             position_type: PositionType::Absolute,
-            top: px(18),
-            right: px(18),
-            min_width: px(120),
-            height: px(40),
-            padding: UiRect::axes(px(12), px(0)),
-            column_gap: px(7),
+            top: px(if cfg!(target_os = "android") { 4 } else { 18 }),
+            right: px(if cfg!(target_os = "android") { 6 } else { 18 }),
+            min_width: px(if cfg!(target_os = "android") {
+                100
+            } else {
+                120
+            }),
+            #[cfg(target_os = "android")]
+            width: px(100),
+            height: px(if cfg!(target_os = "android") { 48 } else { 40 }),
+            padding: UiRect::axes(px(if cfg!(target_os = "android") { 6 } else { 12 }), px(0)),
+            column_gap: px(if cfg!(target_os = "android") { 4 } else { 7 }),
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
             border: UiRect::all(px(2)),
@@ -74,7 +80,25 @@ pub(super) fn linux_button(assets: &AssetServer, lang: crate::i18n::Lang) -> imp
         SurrenderButton,
         children![
             super::kit::image(assets, "battle/native/flag.webp", 16., 18.),
-            label(lang.key("battle.surrender"), 12.)
+            (
+                #[cfg(target_os = "android")]
+                Node {
+                    flex_grow: 1.,
+                    flex_basis: px(0),
+                    min_width: px(0),
+                    ..default()
+                },
+                label(
+                    lang.key("battle.surrender"),
+                    if cfg!(target_os = "android") {
+                        10.
+                    } else {
+                        12.
+                    }
+                ),
+                #[cfg(target_os = "android")]
+                TextLayout::justify(Justify::Center),
+            )
         ],
     )
 }
@@ -104,7 +128,7 @@ fn refresh(
     });
     let bg = if state.sent {
         DISABLED
-    } else if cfg!(tbg_desktop) && state.armed_until.is_none() {
+    } else if cfg!(tbg_native_ui) && state.armed_until.is_none() {
         super::kit::INK
     } else {
         SURRENDER_BG

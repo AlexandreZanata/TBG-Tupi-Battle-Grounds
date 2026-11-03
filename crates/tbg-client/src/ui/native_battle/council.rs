@@ -44,6 +44,8 @@ enum Picture {
 enum Field {
     Time,
     Waiting,
+    #[cfg(target_os = "android")]
+    Selected,
     Name(usize),
     Description(usize),
     Cost(usize),
@@ -249,12 +251,26 @@ fn texts(
                 let seconds = r.ticks_left.div_ceil(TICK_HZ);
                 format!("{}:{:02}", seconds / 60, seconds % 60)
             }
-            Field::Waiting => if selection.forgone {
-                "Round forgone. Waiting for opponent…"
-            } else {
-                "Augment selected! Waiting for opponent…"
-            }
-            .into(),
+            Field::Waiting => format!(
+                "{} {}",
+                lang.key(if selection.forgone {
+                    "council.forgone"
+                } else {
+                    "council.selected"
+                }),
+                lang.key("council.waiting")
+            ),
+            #[cfg(target_os = "android")]
+            Field::Selected => selection.picked.map_or_else(
+                || lang.key("council.help"),
+                |i| {
+                    format!(
+                        "{} — {}",
+                        card_text(&Field::Name(i.into()), r, *lang),
+                        card_text(&Field::Description(i.into()), r, *lang)
+                    )
+                },
+            ),
             _ => card_text(field, r, *lang),
         };
         if text.0 != want {

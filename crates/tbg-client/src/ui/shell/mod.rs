@@ -2,20 +2,23 @@
 
 mod arcanas;
 mod arenas;
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 mod catalog;
 pub(crate) mod data;
+#[cfg(not(target_os = "android"))]
 mod header;
 mod input;
 mod live;
 mod lobby;
+#[cfg(target_os = "android")]
+pub(in crate::ui) use lobby::chrome as mobile_chrome;
 mod patch_notes;
 mod settings;
 mod strongholds;
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub(super) use data::Data as LobbyData;
 
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub(super) use strongholds::{branch_effect, passive, stronghold_data};
 
 use super::{
@@ -99,13 +102,32 @@ struct Root;
 struct Body;
 
 /// Every Linux menu page reserves the same clear region below the shared header.
-#[cfg(tbg_desktop)]
+#[cfg(tbg_native_ui)]
 pub(super) fn page_node() -> Node {
-    Node {
-        flex_direction: FlexDirection::Column,
-        row_gap: px(16),
-        overflow: Overflow::scroll_y(),
-        ..lobby::chrome::region(2., 17., 96., 79.)
+    #[cfg(target_os = "android")]
+    {
+        Node {
+            position_type: PositionType::Absolute,
+            left: px(8),
+            right: px(8),
+            top: px(64),
+            bottom: px(8),
+            min_width: px(0),
+            min_height: px(0),
+            flex_direction: FlexDirection::Column,
+            row_gap: px(8),
+            overflow: Overflow::scroll_y(),
+            ..default()
+        }
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        Node {
+            flex_direction: FlexDirection::Column,
+            row_gap: px(16),
+            overflow: Overflow::scroll_y(),
+            ..lobby::chrome::region(2., 17., 96., 79.)
+        }
     }
 }
 
@@ -179,7 +201,7 @@ fn render(
         Res<crate::sync::RematchInfo>,
         Res<Time>,
     ),
-    #[cfg(tbg_desktop)] volume: Res<bevy::audio::GlobalVolume>,
+    #[cfg(tbg_native_ui)] volume: Res<bevy::audio::GlobalVolume>,
     form: NonSend<ActiveForm>,
     roots: Query<Entity, With<Root>>,
     window: Single<&Window>,
@@ -194,11 +216,11 @@ fn render(
         return;
     }
     let modal = matches!(account.screen, AccountScreen::SaveKey { .. });
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     let modal = modal || ranking.open;
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     let volume_changed = shell.panel == Panel::Settings && volume.is_changed();
-    #[cfg(not(tbg_desktop))]
+    #[cfg(not(tbg_native_ui))]
     let volume_changed = false;
     if !shell.dirty
         && !volume_changed
@@ -233,7 +255,7 @@ fn render(
     }
     let compact = window.width() < 900.;
     let home = shell.panel == Panel::Lobby;
-    #[cfg(tbg_desktop)]
+    #[cfg(tbg_native_ui)]
     let home = home && !ranking.open;
     commands
         .spawn((
@@ -242,7 +264,7 @@ fn render(
                 width: percent(100),
                 height: percent(100),
                 flex_direction: FlexDirection::Column,
-                padding: UiRect::all(px(if cfg!(tbg_desktop) || home {
+                padding: UiRect::all(px(if cfg!(tbg_native_ui) || home {
                     0
                 } else if compact {
                     10
@@ -261,8 +283,9 @@ fn render(
             DespawnOnExit(GameState::Menu),
         ))
         .with_children(|root| {
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             {
+                #[cfg(not(target_os = "android"))]
                 header::spawn(
                     root,
                     &data,
@@ -272,12 +295,24 @@ fn render(
                     shell.panel,
                     ranking.open,
                 );
+                #[cfg(target_os = "android")]
+                super::mobile::shell::header(
+                    root,
+                    &assets,
+                    *lang,
+                    &account,
+                    shell.panel,
+                    ranking.open,
+                );
                 if ranking.open {
                     return;
                 }
             }
             if home {
+                #[cfg(not(target_os = "android"))]
                 lobby::spawn(root, &shell, &data, &account, &assets, *lang);
+                #[cfg(target_os = "android")]
+                super::mobile::shell::home(root, &assets, *lang, &account, &data);
                 if social.outgoing.is_some() || !social.incoming.is_empty() {
                     root.spawn((
                         Node {
@@ -298,9 +333,9 @@ fn render(
                 }
                 return;
             }
-            #[cfg(not(tbg_desktop))]
+            #[cfg(not(tbg_native_ui))]
             navigation(root, *lang, shell.panel, &data, compact, &assets);
-            #[cfg(not(tbg_desktop))]
+            #[cfg(not(tbg_native_ui))]
             if let Some(version) = &data.update {
                 root.spawn(button(
                     format!("{} · {version}", lang.key("native.update")),
@@ -308,7 +343,7 @@ fn render(
                     320.,
                 ));
             }
-            #[cfg(not(tbg_desktop))]
+            #[cfg(not(tbg_native_ui))]
             let body = Node {
                 flex_grow: 1.,
                 min_height: px(0),
@@ -318,7 +353,7 @@ fn render(
                 row_gap: px(16),
                 ..default()
             };
-            #[cfg(tbg_desktop)]
+            #[cfg(tbg_native_ui)]
             let body = {
                 let mut node = page_node();
                 if shell.panel == Panel::Troops {
@@ -332,7 +367,7 @@ fn render(
                 {
                     body.spawn(kit::muted(lang.key("p73.fixture"), 16.));
                 }
-                #[cfg(tbg_desktop)]
+                #[cfg(tbg_native_ui)]
                 if let Some(version) = &data.update {
                     body.spawn(button(
                         format!("{} · {version}", lang.key("native.update")),
@@ -343,9 +378,9 @@ fn render(
                 match shell.panel {
                     Panel::Lobby => {}
                     Panel::Friends => lobby::friends(body, *lang),
-                    #[cfg(not(tbg_desktop))]
+                    #[cfg(not(tbg_native_ui))]
                     Panel::Settings => settings::spawn(body, &account, &sounds, &window, *lang),
-                    #[cfg(tbg_desktop)]
+                    #[cfg(tbg_native_ui)]
                     Panel::Settings => settings::spawn(
                         body,
                         &account,
@@ -379,7 +414,7 @@ fn render(
                     Panel::Kit => settings::gallery(body, *lang),
                 }
             });
-            #[cfg(not(tbg_desktop))]
+            #[cfg(not(tbg_native_ui))]
             root.spawn(kit::muted(
                 format!(
                     "{} · v{} · {}",
@@ -393,7 +428,7 @@ fn render(
     let _ = form;
 }
 
-#[cfg(not(tbg_desktop))]
+#[cfg(not(tbg_native_ui))]
 fn navigation(
     root: &mut ChildSpawnerCommands,
     lang: Lang,
