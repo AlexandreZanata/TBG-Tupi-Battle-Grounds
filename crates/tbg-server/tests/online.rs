@@ -649,7 +649,7 @@ async fn br_m06_surrender_forfeits_once() {
 #[tokio::test]
 async fn br_u07_online_army_stays_in_sync() {
     // D-32 test 10: a real client buys the cheapest affordable offer all
-    // match long. Its army rebuilt from Spawn/Death events equals the
+    // match long. Its army rebuilt from Spawn/Death/DrillFused events equals the
     // server's view on every frame. Energy and the existing Augment pause
     // may refuse a raced purchase; a unit cap must never do so.
     let url = server(30).await;
@@ -670,6 +670,11 @@ async fn br_u07_online_army_stays_in_sync() {
                         }
                         tbg_core::Event::Death { unit } => {
                             own_deaths += u32::from(mine.remove(&unit));
+                        }
+                        tbg_core::Event::DrillFused { first, second, .. } => {
+                            // BR-R21: fusion consumes both inputs without combat deaths.
+                            mine.remove(&first);
+                            mine.remove(&second);
                         }
                         _ => {}
                     }
@@ -1510,7 +1515,11 @@ async fn celebration_finished_result_replays_to_either_seat_without_a_live_view(
 
 #[tokio::test]
 async fn p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative() {
-    use tbg_core::{auxiliary::AuxiliaryPhase, content::ENERGY_SCALE, Phase};
+    use tbg_core::{
+        auxiliary::{AuxiliaryKind, AuxiliaryPhase, AUXILIARY_RULE},
+        content::ENERGY_SCALE,
+        Phase,
+    };
     let url = server(30).await;
     let mut a = connect(&url).await;
     let mut b = connect(&url).await;
@@ -1526,7 +1535,11 @@ async fn p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative() 
     } else {
         (b, tb, a)
     };
-    wait_for_view(&mut buyer, |v| v.phase == Phase::Running).await;
+    let hire_cost = AUXILIARY_RULE.cost_of(AuxiliaryKind::Merchant, 1).unwrap();
+    wait_for_view(&mut buyer, |v| {
+        v.phase == Phase::Running && v.energy >= hire_cost
+    })
+    .await;
     send(
         &mut buyer,
         &ClientMsg::Intent {
@@ -1537,6 +1550,7 @@ async fn p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative() 
     .await;
     let hired = wait_for_view(&mut buyer, |v| v.last_seq == 1).await;
     assert_eq!(hired.you, Seat::B);
+    assert_eq!(hired.auxiliaries[1][1].tier, 1);
     assert!(matches!(
         hired.auxiliaries[1][1].phase,
         AuxiliaryPhase::Active { .. }

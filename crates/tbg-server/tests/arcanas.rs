@@ -53,7 +53,10 @@ async fn recv(ws: &mut Ws) -> Option<ServerMsg> {
         };
         match protocol::decode_server(&b).unwrap() {
             ServerMsg::Ping { id } => send(ws, &ClientMsg::Pong { id }).await,
-            ServerMsg::NetStats { .. } | ServerMsg::View(_) | ServerMsg::AuthState { .. } => {}
+            ServerMsg::NetStats { .. }
+            | ServerMsg::View(_)
+            | ServerMsg::AuthState { .. }
+            | ServerMsg::MatchSocial { .. } => {}
             other => return Some(other),
         }
     }

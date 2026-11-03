@@ -202,3 +202,34 @@ whether to authorize one further locked attempt. This local preview currently
 serves the prior successfully built bundle; the final source patch must pass
 GitHub test, native, Clippy and WASM lanes regardless. The visual/device
 acceptance and attended production activation remain separately pending.
+
+
+## Final CI follow-up (head ae65d887)
+
+Linux and Windows native packaging, WASM, Clippy, quality and desktop source
+checks passed. The test lane exposed legacy helpers consuming P75's new
+`MatchSocial` notification as a command reply, a synthetic v8 fixture retaining
+v12 foreign keys, a tier-1 Merchant purchase before its new canonical price was
+available, and an event reconstruction that omitted BR-R21 `DrillFused` inputs.
+The fixes retain the original assertions and never alter the simulation.
+The account-ownership fixture now establishes the asynchronous slot-A database
+claim and keeps A responsive before testing B's rejection, then explicitly
+closes A before testing ownership transfer. LoggedIn alone precedes that claim
+and was not a sufficient setup barrier.
+
+> blocked: `u13_u15_a_running_match_survives_promotion_and_rollback` failed
+> again in GitHub job 125658303316 after the earlier bounded-poll batch passed
+> locally. Exact error: `timed out waiting for both slots idle:
+> [("a", "active", 0, 2, 0, true), ("b", "draining", 0, 0, 0, false)]`.
+> Suspected cause: periodic follower/maintenance jobs align with the one-second
+> release snapshot and stay counted behind every observation. This step is
+> stopped under AGENTS.md's same-error-twice rule. A proposed half-period
+> follower offset preserves every load counter and retirement guard; the
+> owner was asked to authorize resuming this step. Independent failures continue.
+
+The six affected local regressions were queued with `cargo test -p tbg-server
+--test accounts --test arcanas --test auth_sessions --test online --test
+release_slots -- br_p04 br_ar05 br_as11 br_u07 p74_red u13_a
+--test-threads=1`, under the required host lock/two jobs. The lock returned
+exit 75 before compilation; this attempt is deferred, not a pass. There was
+no automatic lock retry. Formatting and `git diff --check` passed.

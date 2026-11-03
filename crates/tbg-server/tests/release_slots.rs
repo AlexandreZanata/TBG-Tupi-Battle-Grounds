@@ -132,9 +132,11 @@ async fn next(ws: &mut Ws, wait: Duration) -> Option<ServerMsg> {
 
 /// Real clients keep answering pings while the retirement gate is observed.
 fn responsive_clients(clients: [Ws; 4]) -> [tokio::task::JoinHandle<()>; 4] {
-    clients.map(|mut ws| {
-        tokio::spawn(async move { while next(&mut ws, Duration::from_secs(5)).await.is_some() {} })
-    })
+    clients.map(responsive_client)
+}
+
+fn responsive_client(mut ws: Ws) -> tokio::task::JoinHandle<()> {
+    tokio::spawn(async move { while next(&mut ws, Duration::from_secs(5)).await.is_some() {} })
 }
 
 fn load_components(slot: &Slot) -> (u64, u64, u64, u64) {
@@ -347,7 +349,7 @@ async fn attach_account(ws: &mut Ws, grant: &tbg_server::botclient::native_auth:
 /// holds its live session; once that idle session leaves, B may take it.
 /// D-97/D-99: accounts sign in over HTTP and attach to the socket, so the
 /// cross-slot claim follows the attach and a lost claim signs B out.
-async fn one_live_session(a_url: &str, b_url: &str, name: &str) -> Ws {
+async fn one_live_session(a_url: &str, b_url: &str, name: &str, db: Option<&PathBuf>) -> Ws {
     let (mut on_a, _) = join(a_url, None).await;
     let grant = auth::register(&on_a, name).await.expect("registered on A");
     attach_account(&mut on_a, &grant).await;
@@ -355,6 +357,23 @@ async fn one_live_session(a_url: &str, b_url: &str, name: &str) -> Ws {
         .account_key
         .clone()
         .expect("registration returns the key once");
+    // A must remain a live, responsive socket while B's claim is observed.
+    let on_a = responsive_client(on_a);
+    if let Some(db) = db {
+        // LoggedIn precedes the asynchronous cross-slot claim. Establish U13's
+        // premise before racing B against an account A does not yet hold.
+        let mut claimed = false;
+        for _ in 0..100 {
+            claimed = admin_conn(db)
+                .query_row("SELECT EXISTS(SELECT 1 FROM account_owner o JOIN accounts a ON a.id=o.account_id WHERE a.name_lower=?1 AND o.slot='a')", [name.to_lowercase()], |r| r.get(0))
+                .unwrap();
+            if claimed {
+                break;
+            }
+            tokio::time::sleep(Duration::from_millis(25)).await;
+        }
+        assert!(claimed, "A claimed the account before B attempts sign-in");
+    }
     let (mut on_b, _) = join(b_url, None).await;
     let on_b_grant = auth::login(&on_b, &key).await.expect("HTTP sign-in on B");
     attach_account(&mut on_b, &on_b_grant).await;
@@ -363,7 +382,12 @@ async fn one_live_session(a_url: &str, b_url: &str, name: &str) -> Ws {
         "B must not keep the account while A holds its live session"
     );
     // The release of A's hold is asynchronous: retry briefly on a new socket.
-    drop(on_a);
+    assert!(
+        !on_a.is_finished(),
+        "A stayed connected through the claim check"
+    );
+    on_a.abort();
+    let _ = on_a.await;
     for _ in 0..20 {
         tokio::time::sleep(Duration::from_millis(400)).await;
         let (mut retry, _) = join(b_url, None).await;
@@ -419,7 +443,7 @@ async fn a_promotion_refuses_stranded_waiters_and_moves_ranked_play_within_secon
 async fn u13_a_signed_in_account_holds_one_live_session_across_slots() {
     let (db, a, b) = two_ready_slots().await;
     // B's live session keeps holding the account while it is read.
-    let _on_b = one_live_session(&a.url("a"), &b.url("b"), "SlotUser").await;
+    let _on_b = one_live_session(&a.url("a"), &b.url("b"), "SlotUser", Some(&db)).await;
     let owner: String = admin_conn(&db)
         .query_row("SELECT slot FROM account_owner", [], |r| r.get(0))
         .unwrap();
@@ -440,7 +464,7 @@ async fn probe_one_live_session_on_deployed_slots() {
         panic!("set TBG_P66_PROBE_A and TBG_P66_PROBE_B");
     };
     let name = format!("Probe{}", std::process::id() % 100_000);
-    one_live_session(&a, &b, &name).await;
+    one_live_session(&a, &b, &name, None).await;
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
