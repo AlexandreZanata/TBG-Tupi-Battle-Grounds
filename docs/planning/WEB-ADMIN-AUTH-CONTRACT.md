@@ -11,6 +11,15 @@ Access/refresh, slot-routed auth), and the unmerged P65 planning branch
 `codex/p65-community-admin-foundation-plan` (`docs/planning/P65-SECURITY-CONTRACTS.md`,
 negative cases S01–S17), which this contract follows rather than repeats.
 
+> **Owner revision, 2026-11-02 (P75, Proposed):** the owner chose an email-claimed
+> Owner operator and account bans. D-107 supersedes the CLI-only bootstrap, decides
+> O-W1 (AdminKey plus an emailed login code) and O-W2 (public `admin.tupibg.com` with
+> `/admin-api/*` to a loopback listener per slot); D-109 supersedes the "no game bans"
+> exclusion below. Every other rule here (no client-side authorization, no secrets in
+> the console, separate cookie and listener, reasons and same-transaction audit,
+> no simulation or balance writes) stays binding. See
+> [P75](../phases/P75-admin-moderation-and-match-social.md).
+
 ## 1. What exists today (verified in source, base `8be248e`)
 
 | Area | Fact | Consequence for the console |

@@ -28,6 +28,12 @@ pub fn plugin(app: &mut App) {
 
 fn failure_key(error: Failure) -> &'static str {
     match error {
+        Failure::Suspended { .. } => "p75.suspended",
+        Failure::EmailInvalid => "p75.email_invalid",
+        Failure::EmailBlocked => "p75.email_blocked",
+        Failure::EmailLimit => "p75.email_limit",
+        Failure::RegistrationClosed => "p75.registration_closed",
+        Failure::CodeInvalid => "p75.code_invalid",
         Failure::Incompatible => "auth.incompatible",
         Failure::InvalidKey => "auth.invalid_key",
         Failure::NameTaken => "auth.name_taken",
@@ -103,6 +109,9 @@ fn render(
     }
     let view = auth::snapshot();
     if let Some(error) = view.error {
+        if let Failure::Suspended { until, reason } = error {
+            super::p75::suspend(until, reason);
+        }
         if super::textform::is_open(&form) {
             super::textform::set_error(&form, &lang.key(failure_key(error)));
         }

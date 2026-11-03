@@ -825,3 +825,74 @@ spectator/Blue-side browser coverage, or matched-frame GD-04/P74 motion rows.
 Those remain pending; no pixel parity or renderer tolerance is inferred.
 See [the production report](../phases/DELIVERY-consolidation-production-20261102.md)
 for actual sources, evidence and limitations.
+
+## P75 shared identity and match-social presentation — 2026-11-02
+
+Registration gains a private email step. Shared Bevy overlays implement account email verification/change/hold, lost-key request/code/save-key, suspension, reports, three-slot emoji library/upload states, and chat mode. The battle HUD reserves its right column for text, input and emoji buttons, with seat bubbles lasting exactly 2.5 seconds and sprite-sheet animation driven by the same frame delays on every target. Mute and spectator exclusion share one implementation; private controls carry `Hud::PrivateControls`. Enter requires explicit Tab focus before activating a battle control and typing consumes game keys.
+
+The `p75-*` cases in `desktop-ui-contract.json` cover the states listed by P75-CONTRACTS section 5. Linux is the reference; Windows and desktop web must match the same states, layout, imagery and motion. Native picker dialogs adapt to XDG/Win32/browser services behind the same visible button. Real Linux, Windows and web captures, keyboard journeys, upload errors and animation timing are **pending S14/owner device evidence**. Shared code or compilation does not establish parity.
+
+
+P75 S14 consolidation adds modal-only focus, PageUp/PageDown scrolling, private preview cache invalidation on identity changes, unavailable chat states, guest report guards, the existing localized history date formatter for hold/suspension deadlines, persistent All/Emojis/Off modes and immediate mute filtering through the same shared presentation. Native and WASM checks passed; every corresponding in-game capture and Windows comparison remains pending. The console-only EN/pt-BR captures in the P75 execution report are outside this game's parity evidence.
+
+## AX-T — Tiered War Auxiliaries: compact cards, real portraits, red side and per-Arena precincts (2026-11-02)
+
+Shared Linux/Windows/desktop web path, no platform branch
+(`crates/tbg-client/src/ui/native_battle/auxiliaries.rs`,
+`crates/tbg-client/src/arena/auxiliaries/`):
+
+- **HUD:** the two auxiliary cards are 112×152 (two thirds of a Shop card) in
+  a panel anchored inside the scaled Shop column, `10 px` right of the fifth
+  card, bottom-aligned, sharing the Shop scale. Each card shows three tier
+  pips, the status line, and `Custo`/`Cost`, `Evoluir`/`Evolve` with the next
+  price, or `Nível III`/`Tier III` when maxed.
+- **Portraits:** renders of the in-game low-poly `Mineiro`/`Mercador` figures
+  in the viewer's team colors (`aux_{miner,merchant}_{blue,red}.webp`),
+  captured with `--gallery=auxiliary --aux=… --side=… --portrait`.
+- **Red side:** Seat B precincts are mirrored with a negative X scale; their
+  material renders both faces so the outward faces keep correct lighting
+  instead of the grey interiors previously shown.
+- **Placement:** per-Arena offsets and Merchant sea lanes (`placement.rs`
+  `LAYOUTS`) keep every tier, platform, bridge and ship course clear of the
+  road, Stronghold footprints and existing scenery
+  (`br_ax15_every_tier_bridge_and_ship_course_clears_existing_arena_scenery`).
+  Offshore pads stand on stilts; a plank bridge is laid plank by plank from
+  the shore during construction.
+- **Tier motion:** tier 2 adds a winch with a bucket and an ore heap
+  (`Mineiro`), goods and pennants (`Mercador`); tier 3 adds a headframe with a
+  spinning sheave, a crystal crown, a banner and an apprentice (`Mineiro`), a
+  pavilion and a coin chest that opens on payouts (`Mercador`). Swing speed,
+  sparks and ship size grow per tier; a golden ring sweeps out on each
+  Evolution. Low motion keeps static poses and instant reveals.
+
+Affected cases: battle HUD shop row (both sides), every Arena × both sides ×
+tiers 1–3 precinct rendering and motion. Linux native captures are the
+reference; Windows and desktop web rows for these cases remain **pending**
+until captured on those targets.
+
+
+P75/AX-T consolidation (2026-11-02): the compact auxiliary cards remain children
+of the shared Shop scale. The P75 chat column stays above that row. Backup-key
+forms retain four keyboard stops; login-key forms include the fifth lost-key
+stop. Newly issued recovery keys replace cached exports and pending pre-rotation
+export results on every desktop target. All device observations remain
+explicit in the consolidation report; these shared paths alone prove no parity.
+
+BR-AX15 consolidation preserves all static land props even at a precinct anchor;
+only sea-surface floaters below the existing harbor threshold may yield. The
+unfiltered scenery collision contract remains mandatory for every Arena/side.
+
+P75/AX-T HUD integration: a compact two-row social dock at the upper right
+keeps both precinct flanks visible. Activating Chat opens the log in the central
+rectangle; guests can read it, while only the authoritative Allowed policy
+enables typing. Escape/close restores the dock and captures battle keys while
+open. Both rectangles are included in the eight-Arena precinct visibility test.
+Linux is the reference; actual Windows/web presentation and motion comparison
+remain pending until observed.
+
+The 1280×720 web observation exposed clipping from full-height kit controls in
+the compact dock. Its shared controls now use two 32 px rows; mute remains in
+the expanded log. Standard emoji handles stay resident and bind after Update
+command application, before layout/render extraction, so slow HUD rebuild
+frames never display an unbound placeholder. The first-frame regression is
+covered by a scheduled Bevy test; actual device correspondence remains pending.

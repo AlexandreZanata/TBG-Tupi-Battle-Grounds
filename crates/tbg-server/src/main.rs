@@ -17,6 +17,9 @@ fn main() -> std::process::ExitCode {
         println!("{}", tbg_server::build_info::get());
         return std::process::ExitCode::SUCCESS;
     }
+    if std::env::args().nth(1).as_deref() == Some("operator") {
+        return tbg_server::operator_cli::run(std::env::args().skip(2).collect());
+    }
     let mut config = Config::from_env();
     // P60: an invalid integrity setting is a start-up error, never a default.
     let settings = tbg_server::ranked::policy::RankedPolicy::from_env()

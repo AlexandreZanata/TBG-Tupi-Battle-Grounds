@@ -16,6 +16,11 @@ pub fn spawn(
 ) {
     controls::heading(root, assets, lang);
     root.spawn(kit::button(
+        lang.key("p75.mode"),
+        UiAction::P75(crate::ui::p75::Action::Mode),
+        260.,
+    ));
+    root.spawn(kit::button(
         lang.key("p73.my_history"),
         UiAction::OpenMyHistory,
         260.,

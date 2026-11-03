@@ -3,7 +3,7 @@
 
 [package]
 name = "tbg-client"
-version = "0.1.4-colossus.4"
+version = "0.1.4-colossus.5"
 edition.workspace = true
 rust-version.workspace = true
 license-file = "../../LICENSE"
@@ -45,6 +45,9 @@ serde_json = "1"
 ehttp = "0.7"
 # Compare release versions using SemVer, including native prerelease identifiers.
 semver = "1"
+
+# P75: one file-picker API with XDG portal/Win32/browser adapters; no GTK in native packages.
+rfd = { version = "=0.17.2", default-features = false, features = ["xdg-portal"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # P73: format persisted UTC timestamps in the native system time zone using the already locked library.

@@ -4,6 +4,12 @@ use std::path::PathBuf;
 
 #[derive(Clone, Debug)]
 pub struct Config {
+    pub admin: crate::admin::settings::Settings,
+    pub moderation: crate::moderation::cache::Cache,
+    pub mail: crate::mail::settings::Settings,
+    pub mail_capture: Option<crate::mail::transport::MailCapture>,
+    pub bootstrap_email: crate::mail::settings::Private<String>,
+    pub feed_ms: u64,
     /// Fixed loopback release-slot ports aggregated by the P73 presence snapshot.
     pub presence_ports: [u16; 2],
     /// P73 staged rollout: migrate explicitly, then collect, owner API, public opt-in.
@@ -67,6 +73,12 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Config {
+            admin: crate::admin::settings::Settings::default(),
+            moderation: crate::moderation::cache::Cache::default(),
+            mail: crate::mail::settings::Settings::default(),
+            mail_capture: None,
+            bootstrap_email: crate::mail::settings::Private::default(),
+            feed_ms: 1000,
             presence_ports: [8080, 8082],
             history_migrate: false,
             history_collect: false,
@@ -130,6 +142,14 @@ impl Config {
                 .unwrap_or(default)
         };
         Config {
+            admin: crate::admin::settings::Settings::from_env(),
+            moderation: crate::moderation::cache::Cache::default(),
+            mail: crate::mail::settings::Settings::from_env(),
+            mail_capture: None,
+            bootstrap_email: crate::mail::settings::Private(
+                std::env::var("TBG_ADMIN_BOOTSTRAP_EMAIL").unwrap_or_default(),
+            ),
+            feed_ms: num("TBG_FEED_MS", 1000).clamp(100, 10000),
             presence_ports: [
                 num("TBG_PRESENCE_PORT_A", 8080).clamp(1, 65535) as u16,
                 num("TBG_PRESENCE_PORT_B", 8082).clamp(1, 65535) as u16,

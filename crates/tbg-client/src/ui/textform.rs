@@ -13,6 +13,10 @@ use wasm_bindgen::JsCast;
 /// What the open form is collecting.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum TextKind {
+    Email,
+    P75Text,
+    P75Code,
+    P75Secret,
     CatalogSearch,
     PlayerSearch,
     Name,
@@ -62,7 +66,10 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
     form.kind = Some(kind);
     form.edit = Default::default();
     form.focus = 0;
-    form.masked = matches!(kind, TextKind::Key | TextKind::BackupKey);
+    form.masked = matches!(
+        kind,
+        TextKind::Key | TextKind::BackupKey | TextKind::P75Secret
+    );
     form.prompt = prompt.into();
     *form.error.lock().unwrap_or_else(|e| e.into_inner()) = String::new();
     *form.submitted.lock().unwrap_or_else(|e| e.into_inner()) = None;
@@ -79,7 +86,8 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
             TextKind::CatalogSearch | TextKind::PlayerSearch => "search",
             TextKind::Room => "room",
             TextKind::Name => "name",
-            TextKind::Key | TextKind::BackupKey => "key",
+            TextKind::Key | TextKind::BackupKey | TextKind::P75Secret => "key",
+            TextKind::Email | TextKind::P75Text | TextKind::P75Code => "name",
         };
         let _ = dom.form.set_attribute("data-kind", marker);
         set_error_text(dom, None);

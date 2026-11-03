@@ -85,6 +85,14 @@ async fn handle(app: &AppState, peer: SocketAddr, request: Request) -> Result<Va
                 .and_then(|s| s.split('/').next())
                 .filter(|n| tbg_core::account::valid_name_shape(n))
                 .ok_or((StatusCode::NOT_FOUND, "not_found"))?;
+            if app
+                .config
+                .auth_clock
+                .now()
+                .is_ok_and(|now| app.config.moderation.hidden(name, now))
+            {
+                return Err((StatusCode::NOT_FOUND, "not_found"));
+            }
             Subject::Public(name.into())
         }
     };

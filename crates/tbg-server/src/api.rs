@@ -79,6 +79,12 @@ pub async fn leaderboard(
     let rows: Vec<_> = snap
         .rows
         .iter()
+        .filter(|r| {
+            !app.config
+                .auth_clock
+                .now()
+                .is_ok_and(|now| app.config.moderation.hidden(&r.name, now))
+        })
         .skip(offset)
         .take(limit)
         .map(|r| {
@@ -113,7 +119,13 @@ pub async fn player(
         )
             .into_response();
     }
-    if !tbg_core::account::valid_name_shape(&name) {
+    if !tbg_core::account::valid_name_shape(&name)
+        || app
+            .config
+            .auth_clock
+            .now()
+            .is_ok_and(|now| app.config.moderation.hidden(&name, now))
+    {
         return (StatusCode::NOT_FOUND, Json(json!({"error": "not_found"}))).into_response();
     }
     let Some(store) = &app.store else {
@@ -184,7 +196,19 @@ pub async fn live(
             .into_response();
     }
     let snap = app.live.borrow().clone();
-    let matches: Vec<Value> = snap.matches.iter().map(live_match_json).collect();
+    let matches: Vec<Value> = snap
+        .matches
+        .iter()
+        .filter(|m| {
+            !m.players.iter().any(|p| {
+                app.config
+                    .auth_clock
+                    .now()
+                    .is_ok_and(|now| app.config.moderation.hidden(&p.name, now))
+            })
+        })
+        .map(live_match_json)
+        .collect();
     let body = json!({
         "revision": snap.revision, "updated_unix": snap.updated_unix,
         "complete": snap.complete, "stale": snap.stale,
@@ -224,7 +248,18 @@ pub async fn online(
             .into_response();
     };
     let (offset, limit) = (params.offset, params.limit);
-    let filtered: Vec<_> = snap.accounts.iter().filter(|r| params.matches(r)).collect();
+    let filtered: Vec<_> = snap
+        .accounts
+        .iter()
+        .filter(|r| {
+            params.matches(r)
+                && !app
+                    .config
+                    .auth_clock
+                    .now()
+                    .is_ok_and(|now| app.config.moderation.hidden(&r.name, now))
+        })
+        .collect();
     let rows: Vec<Value> = filtered
         .iter()
         .copied()

@@ -135,7 +135,7 @@ async fn a_failed_insert_rolls_back_both_accounts() {
 }
 
 #[tokio::test]
-async fn v6_database_migrates_to_v8_twice_without_touching_history() {
+async fn v6_database_migrates_to_current_twice_without_touching_history() {
     let dir = temp_dir("migrate");
     let path = dir.join("db.sqlite3");
     {
@@ -150,8 +150,8 @@ async fn v6_database_migrates_to_v8_twice_without_touching_history() {
     let version: i64 = conn
         .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
         .unwrap();
-    // v9/v10 add the P66 release directory and the D-97 auth families on top of v8.
-    assert_eq!(version, 10);
+    // Ordered additive migrations must preserve the v6 ranked baseline and history.
+    assert_eq!(version, tbg_server::store::DATABASE_SCHEMA_VERSION);
     let baseline: (i64, i64, i64) = conn
         .query_row(
             "SELECT rating, ranked_games, mature_games FROM ranked_baseline WHERE account_id = 1",

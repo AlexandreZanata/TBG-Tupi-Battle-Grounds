@@ -17,17 +17,23 @@ use crate::ranked::{JournalEntry, RankedReceipt};
 
 mod accounts;
 mod arcanas;
+pub mod audit;
 pub mod auth_sessions;
+pub mod emoji;
 mod history;
 pub mod integrity_admin;
 pub mod leaderboard;
 mod matches;
+pub mod moderation;
+pub mod operators;
 pub mod player_history;
 mod ranked;
 pub mod release;
 pub mod release_admin;
-// P67 is deliberately unavailable to server binaries until activation is reviewed.
-#[cfg(test)]
+pub mod reports;
+pub mod social;
+pub use recovery::outbox as mail_outbox;
+mod p75;
 pub(crate) mod recovery;
 mod rulesets;
 mod schema;
@@ -74,6 +80,12 @@ pub struct Store {
 }
 
 impl Store {
+    pub(crate) async fn refresh_leaderboard(&self, now: i64) {
+        if let Some(Ok(snapshot)) = self.release(move |db| leaderboard::build_at(db, now)).await {
+            self.snapshot_tx.send_replace(StdArc::new(snapshot));
+        }
+    }
+
     pub fn open(path: &Path) -> rusqlite::Result<Store> {
         Store::open_with(path, crate::ranked::policy::RankedPolicy::default())
     }

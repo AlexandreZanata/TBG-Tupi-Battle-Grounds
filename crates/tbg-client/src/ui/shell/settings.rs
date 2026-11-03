@@ -20,6 +20,11 @@ pub fn spawn(
 ) {
     root.spawn(kit::panel()).with_children(|p| {
         p.spawn(kit::heading(lang.key("lobby.settings.title"), 32.));
+        p.spawn(kit::button(
+            lang.key("p75.mode"),
+            UiAction::P75(crate::ui::p75::Action::Mode),
+            260.,
+        ));
         p.spawn(kit::heading(lang.key("lobby.settings.language"), 20.));
         p.spawn(kit::row()).with_children(|r| {
             r.spawn(kit::button(

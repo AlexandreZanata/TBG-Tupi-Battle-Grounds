@@ -1,8 +1,8 @@
-//! Narrow synthetic email normalization, pending the owner's O02 delivery policy.
+//! Narrow ASCII mailbox normalization under the selected O-P75-02 policy.
 
 use super::Error;
 
-pub(crate) fn normalize(email: &str) -> Result<String, Error> {
+pub fn normalize(email: &str) -> Result<String, Error> {
     let email = email.trim_matches(' ');
     if !email.is_ascii() || email.len() > 254 {
         return Err(Error::Denied);

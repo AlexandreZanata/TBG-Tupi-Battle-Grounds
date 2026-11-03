@@ -230,10 +230,18 @@ mod tests {
     use super::*;
     #[test]
     fn patch_history_is_newest_first_even_when_the_feed_appends_new_releases() {
-        let notes = newest_first(snapshot());
-        assert_eq!(notes.first().unwrap()["id"], "native-settings-auto-updates");
-        assert_eq!(notes.last().unwrap()["id"], "native-2-consolidation");
-        assert_eq!(notes.len(), snapshot()["notes"].as_array().unwrap().len());
+        let feed = serde_json::json!({"notes":[
+            {"id":"middle", "date":"9999-12-31", "ruleset_version":15,"version":"0.1.4"},
+            {"id":"oldest", "date":"0001-01-01", "ruleset_version":14,"version":"0.1.3"},
+            {"id":"newest", "date":"9999-12-31", "ruleset_version":16,"version":"0.1.5"}
+        ]});
+        let notes = newest_first(&feed);
+        assert_eq!(notes.first().unwrap()["id"], "newest");
+        assert_eq!(notes.last().unwrap()["id"], "oldest");
+        assert_eq!(
+            notes.len(),
+            snapshot()["notes"].as_array().unwrap().len() + 3
+        );
         assert!(notes
             .windows(2)
             .all(|pair| pair[0]["date"].as_str() >= pair[1]["date"].as_str()));

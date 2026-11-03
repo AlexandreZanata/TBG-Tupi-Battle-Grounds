@@ -3305,3 +3305,119 @@ free rerolls and quotes remain absent from PublicView. Values, the 46-unit
 online Shop and proposed 84-unit local preview are unchanged.
 
 Integrated source identity after formatting: `w38-r15-cc459351581b7763` (59 watched files).
+
+## D-107 · One Owner operator claimed by email; console separate from player accounts — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
+
+**Decision.** Administration uses `Operator` principals stored apart from
+`Account`s. Exactly one Owner exists, created idempotently at startup from
+the host-configured `TBG_ADMIN_BOOTSTRAP_EMAIL` (the owner's address, kept
+in host configuration and the operations runbook, never compiled in) in a
+`pending_claim` state with no key. When mail is configured the server emails
+a claim code; entering it in the console yields the single `AdminKey`
+(160 bits, hash-only), shown once. Losing it repeats the same email claim,
+which revokes the old key and sessions. Sign-in adds an emailed login code
+by default. The console API runs on a loopback listener per release slot
+(8090/8092), reached only through `admin.tupibg.com/admin-api/*`; a
+`tbg-server operator …` subcommand is the break-glass path over SSH.
+**Supersedes** the CLI-only bootstrap and the "credential method" decision
+O-W1 of `docs/planning/WEB-ADMIN-AUTH-CONTRACT.md` and resolves its O-W2
+exposure question in favor of the public admin host with app-level
+authentication, second factor and optional IP allow-list.
+**Why.** The owner wants to administer from a browser with a key that can
+always be recovered through their own mailbox, without SSH for routine work.
+Separate principals keep player compromise from becoming console access.
+**Accepted risk.** Whoever controls the Owner mailbox controls the console;
+mitigated by login codes, sign-in notices and SSH-only recovery of the
+Owner address. **Reopen when** a second Owner, hardware keys/TOTP or an
+identity provider is wanted, or the console must be private-network only.
+
+## D-108 · Required player email and in-game key recovery by code — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
+
+**Decision.** New accounts require an email (supersedes D-17's "no email,
+no recovery" for new accounts and D-94's optional enrollment). Verification,
+recovery, email change and operator claim use 10-character emailed codes
+typed in game or in the console, not links: the native client cannot
+receive a link, mail scanners cannot consume a code, and no bearer token
+ever appears in a URL. Recovery rotates `key_hash` on the same AccountId
+inside one transaction (the P67 fixture design, promoted to production),
+revokes every session on every slot and returns the new key once with a
+normal sign-in grant. The outbox stores intent only; the dispatcher creates
+each code when it sends. Up to 5 accounts may share an address; emails are
+not unique, so registration reveals nothing.
+**Why.** Losing a key must not lose an account, and recovery must never
+lose data: everything is keyed by the stable AccountId.
+**S14 contract amendment.** Legacy registration fixtures now send the required private email and locale; the BR-P01 name/refund/IP assertions stay intact. Recovery audit rollback, populated-history preservation, five-account retry behavior and every-account-FK snapshots are additive D-108 checks, not a relaxation of AccountKey format or account ownership.
+
+**Reopen when** paid ownership needs stronger proof (D-94), when a provider
+login is added, or when support must handle lost key plus lost mailbox.
+
+## D-109 · Account suspensions and moderation with immediate forfeit — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
+
+**Decision.** Operators may suspend accounts (1 h–365 d or permanent),
+restrict chat or emojis, revoke sessions and block addresses. Suspension
+applies on every slot within about 2 s through an append-only moderation
+feed (like the P71 W3 revocation feed): sessions end, waiting states are
+cancelled, and a seat in a running match forfeits immediately, settled like
+a surrender. This is the only outcome a moderation action may cause; the
+general D-97 rule that revocation never fabricates forfeits still holds for
+ordinary auth revocations. Suspended accounts are hidden from public lists;
+no rating, result or history is ever rewritten (D-89 stays the correction
+path). Reports are private, evidence is captured by the server, and nothing
+is automatic.
+**Supersedes** P65 BR-NC05's and WEB-ADMIN-AUTH-CONTRACT's "no game bans".
+**Why.** The owner asked for account bans; an opponent should not wait out
+a pause budget against a banned player. **Reopen when** appeals, automated
+signals or ranked-integrity enforcement (P60) need to join the workflow.
+
+## D-110 · Match chat and emojis at the presentation boundary (protocol 39) — 2026-11-02 (Proposed, P75 implementation; activation pending)
+
+**Decision.** Reopens chat and emotes (deferred in GAME-DESIGN §7 and the
+P39 decision). Text chat and emojis travel as appended WebSocket messages
+(one protocol bump), validated and relayed by the match task to the two
+seats only, never to spectators, views, replays or the simulation hash.
+Text is Latin-1 (the UI font), ≤ 120 characters, rate limited and masked;
+it needs an account with a verified email. Three emoji slots per account
+are frozen at pairing; sixteen standard emojis have permanent ids. A short
+transcript plus match facts is kept 7 days only to support reports. Chat is
+off by default and has a kill switch. In battle, Enter opens chat and only
+activates a control after explicit Tab focus, removing today's
+Enter-Enter surrender hazard. P67's opponent mute gets its first consumer.
+**Why.** The owner wants live chat and emojis; keeping them outside the
+simulation preserves determinism, replays and the authority model.
+**Reopen when** spectators, lobby/global chat, private messages or
+voice are requested, or report volume needs automated filtering.
+
+## D-111 · Moderated custom emojis normalized by the server — 2026-11-02 (Proposed, P75 implementation candidate; activation pending)
+
+**Decision.** Players with a verified email upload PNG, GIF or static WebP
+(≤ 1 MiB). The server checks declared dimensions before decoding, decodes
+with limits (`image` crate, pure Rust, new server dependency), and stores
+only a normalized PNG sprite sheet (≤ 24 frames of ≤ 128 px, ≤ 4 s,
+≤ 256 KiB) as a SQLite BLOB; originals are discarded. Uploads stay private
+until an Operator who sees every frame approves them; approval assigns a
+random public id served with immutable caching, revocation removes the
+emoji from every slot at once. Custom emojis are usable only by their owner.
+**Why.** Premoderation of every frame is the owner's requirement; serving
+only normalized, approved sheets keeps the game from hosting hostile files.
+**Ponytail.** BLOBs in the main database are fine at indie scale; move
+sheets to content-addressed files or object storage if they exceed 256 MiB.
+**Implementation freeze (S14).** Standard IDs 0–15 use Twemoji 14.0.2 in this exact order: `1f44b`, `1f44d`, `1f600`, `1f602`, `1f60e`, `1f914`, `1f622`, `1f621`, `1f525`, `2764`, `1f389`, `1f680`, `1f480`, `1f3c6`, `1f64f`, `1f4aa`. The IC-11 test expectation corrects its omitted Skull entry at ID 12; no previously shipped ID is renumbered.
+
+**Reopen when** sharing/selling custom emojis, animated WebP/APNG or
+larger frames are requested.
+
+
+### D-110 / BR-AX12 integration — combined wire 40 (2026-11-02)
+
+The owner authorized integrating tiered War Auxiliaries with P75. Each isolated
+branch had claimed wire 39 for an incompatible shape. Their combined release
+uses wire 40: the tier field from BR-AX12 and P75 appended client tags 27–28 /
+server tags 37–41. Existing message tags stay unchanged. R16 belongs solely to
+the owner-requested BR-AX12–BR-AX14 gameplay change; P75 adds no simulation
+behavior. R16 fingerprint `f2e253b98ccb313a` and measured lab traces remain
+unchanged by the merge. Wire 39 peers must be rejected.
+
+The combined candidate classifies `protocol/social.rs` with the other wire-only
+modules in `ruleset-sources.txt`. The frozen standard emoji asset table stays
+in `protocol.rs`; its hexadecimal identifiers are not simulation operations.
+No watched source, R16 fingerprint or simulation guard changes for this move.

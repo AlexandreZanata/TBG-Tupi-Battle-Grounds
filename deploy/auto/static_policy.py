@@ -8,10 +8,11 @@ from policy import MAX_ARCHIVE, MAX_CONTENT, SHA, digest, require
 from web_policy import MAX_FILES, safe_name
 
 WORKFLOW = 'AlexandreZanata/TBG-Tupi-Battle-Grounds/.github/workflows/static-release.yml'
+CONSOLE_CSP = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 SITES = {'landing': 'https://tupibg.com', 'admin': 'https://admin.tupibg.com'}
 
 
-def unpack(archive, destination, source):
+def unpack(archive, destination, source, *, admin_console_csp=None):
     require(bool(SHA.fullmatch(source)) and Path(archive).stat().st_size <= MAX_ARCHIVE, 'invalid static package')
     with tarfile.open(archive, 'r:gz') as tar:
         members, size = [], 0
@@ -40,7 +41,10 @@ def unpack(archive, destination, source):
         for site, files in meta['sites'].items():
             for name, expected_hash in files.items():
                 require(isinstance(expected_hash, str) and re.fullmatch(r'[0-9a-f]{64}', expected_hash), 'invalid static hash')
-                if site == 'admin':
+                console = site == 'admin' and meta.get('admin_mode') == 'app'
+                if console:
+                    require(admin_console_csp == CONSOLE_CSP, 'console requires attended CSP activation')
+                elif site == 'admin':
                     require(Path(name).suffix.lower() not in {'.js', '.mjs', '.json'}, 'admin preview/code is not publishable')
                 path = root/site/name
                 path.parent.mkdir(parents=True, exist_ok=True)
@@ -49,7 +53,7 @@ def unpack(archive, destination, source):
                     while chunk := stream.read(1024 * 1024):
                         out.write(chunk)
                 require(digest(path) == expected_hash, 'static hash mismatch')
-            if site == 'admin':
+            if site == 'admin' and meta.get('admin_mode') != 'app':
                 html = (root/site/'index.html').read_text().lower()
                 require(not any(tag in html for tag in ['<script', '<form', '<input', '<iframe']), 'active admin content refused')
         return meta

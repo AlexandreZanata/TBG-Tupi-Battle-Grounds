@@ -11,6 +11,7 @@ mod ability_gods;
 mod ability_legacy;
 pub mod account;
 pub(crate) mod account_backup;
+mod account_email;
 mod account_ui;
 mod actions;
 #[cfg(test)]
@@ -28,6 +29,7 @@ mod desktop;
 #[cfg(target_arch = "wasm32")]
 mod desktop_actions;
 pub(crate) mod effect_details;
+mod emoji_library;
 pub(crate) mod evolve;
 pub(crate) mod fortify;
 #[cfg(test)]
@@ -44,6 +46,7 @@ pub(crate) mod inspect;
 mod json_lite;
 mod keyboard;
 pub(crate) mod kit;
+pub(crate) mod match_chat;
 mod menu;
 #[cfg(tbg_desktop)]
 mod native_battle;
@@ -51,10 +54,13 @@ mod native_battle;
 pub(crate) mod native_loading;
 #[cfg(tbg_desktop)]
 mod native_ranking;
+pub(crate) mod p75;
 mod queue;
 pub mod ranking;
 #[cfg(not(tbg_desktop))]
 mod ranking_ui;
+mod recovery;
+mod report;
 mod result;
 pub(crate) mod shell;
 pub(crate) mod social;
@@ -73,6 +79,7 @@ pub use toast::{Banner, Toasts};
 
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum UiAction {
+    P75(p75::Action),
     /// Greyed-out button: clicks do nothing.
     Disabled,
     CelebrationPrev,
@@ -201,6 +208,9 @@ pub const TEXT: Color = Color::srgb(0.96, 0.95, 0.90);
 pub fn plugin(app: &mut App) {
     // P66: the native update overlay (no-op in the browser).
     update::plugin(app);
+    p75::plugin(app);
+    match_chat::plugin(app);
+    crate::emoji::plugin(app);
     #[cfg(tbg_desktop)]
     native_battle::plugin(app);
     #[cfg(tbg_desktop)]

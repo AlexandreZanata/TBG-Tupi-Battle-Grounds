@@ -27,6 +27,7 @@ CSP = {
     "admin-preview": "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; "
     "connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
 }
+CSP["admin-app"] = "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 PUBLIC_STATUS = ("/health", "/api/version")
 STATUS_LIMIT = 4096
 USER_AGENT = "tbg-web-preview/1 (local admin preview; public status only)"

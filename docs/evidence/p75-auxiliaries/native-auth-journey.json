@@ -1,0 +1,15 @@
+{
+  "confirmation_outage_recovered": true,
+  "legacy_preserved_in_temporary_mode": false,
+  "migration_completed": true,
+  "offline_pending_observed": true,
+  "ordinary_auth_metadata_contains_no_tokens": true,
+  "process_coordination": true,
+  "recovery_key_backup_roundtrip": true,
+  "remote_revocation": true,
+  "restored_same_family": true,
+  "secure_persistence": true,
+  "stale_vault_recovered": true,
+  "synthetic_loopback_only": true,
+  "vault_cleanup": true
+}

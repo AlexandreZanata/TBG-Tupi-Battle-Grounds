@@ -162,7 +162,7 @@ pub fn parse(value: &Value) -> Result<Grant, &'static str> {
 }
 
 pub async fn register(server: &str, name: &str) -> Result<Grant, &'static str> {
-    let body = json!({"name":name,"device_id":random_hex(16)?,"registration_retry_key":random_hex(32)?,"persistent":false});
+    let body = json!({"name":name,"email":format!("{name}@example.invalid"),"locale":"en","device_id":random_hex(16)?,"registration_retry_key":random_hex(32)?,"persistent":false});
     let (status, value) = post(server, "register", body, None).await?;
     if status == 409 && value.get("error").and_then(Value::as_str) == Some("name_taken") {
         return Err("name_taken");

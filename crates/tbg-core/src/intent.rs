@@ -75,7 +75,7 @@ pub enum Rejection {
     LaneFull,
     /// Auxiliary slot index outside `0..AUXILIARY_SLOTS` (BR-AX01).
     BadAuxiliarySlot,
-    /// The requested auxiliary was already hired this match (BR-AX03).
+    /// The requested auxiliary is already at its last tier (BR-AX03, BR-AX12).
     AuxiliaryAlreadyHired,
 }
 

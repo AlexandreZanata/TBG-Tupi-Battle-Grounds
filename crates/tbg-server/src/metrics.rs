@@ -5,9 +5,16 @@ use std::sync::atomic::{AtomicU64, Ordering::Relaxed};
 use std::sync::Mutex;
 use std::time::{Duration, Instant};
 
+pub mod p75;
+
 const RTT_WINDOW: Duration = Duration::from_secs(60);
 
 pub struct Metrics {
+    pub mail_sent: AtomicU64,
+    pub mail_failed: AtomicU64,
+    pub chat_sent: AtomicU64,
+    pub chat_refused: AtomicU64,
+    pub emoji_sent: AtomicU64,
     pub connections: AtomicU64,
     pub matches_running: AtomicU64,
     pub matches_finished: AtomicU64,
@@ -76,6 +83,11 @@ pub struct Metrics {
 impl Default for Metrics {
     fn default() -> Self {
         Metrics {
+            mail_sent: AtomicU64::new(0),
+            mail_failed: AtomicU64::new(0),
+            chat_sent: AtomicU64::new(0),
+            chat_refused: AtomicU64::new(0),
+            emoji_sent: AtomicU64::new(0),
             connections: AtomicU64::new(0),
             matches_running: AtomicU64::new(0),
             matches_finished: AtomicU64::new(0),
@@ -242,7 +254,11 @@ impl Metrics {
         ranked_waits.sort_unstable();
         let get = |c: &AtomicU64| c.load(Relaxed);
         let mut out = serde_json::json!({
+            "mail_sent":get(&self.mail_sent),"mail_failed":get(&self.mail_failed),
             "uptime_s": self.started.elapsed().as_secs(),
+            "chat_sent": get(&self.chat_sent),
+            "chat_refused": get(&self.chat_refused),
+            "emoji_sent": get(&self.emoji_sent),
             "connections": get(&self.connections),
             "matches_running": get(&self.matches_running),
             "matches_finished": get(&self.matches_finished),
@@ -297,6 +313,11 @@ impl Metrics {
             "update_outcomes": self.update_outcomes_json(),
         });
         if let (Some(out), serde_json::Value::Object(extra)) = (out.as_object_mut(), release) {
+            out.extend(extra);
+        }
+        if let (Some(out), serde_json::Value::Object(extra)) =
+            (out.as_object_mut(), p75::snapshot())
+        {
             out.extend(extra);
         }
         out

@@ -8,6 +8,14 @@ trusted email change and P65/P66 session integration remain blocked.
 > Design contract, no email sent or account changed. Recovery is a prerequisite
 > for paid cosmetics, reopening D-17 without replacing stable account identity.
 
+> **P75 revision (2026-11-02, Proposed, D-108):** the owner made an email required
+> for new accounts and asked for recovery inside the game. P75 promotes this
+> fixture to production with emailed **codes** typed in game instead of links
+> (native clients cannot open a link into the game; scanners cannot consume a code;
+> no token in any URL). Same-AccountId rotation, non-enumeration, epoch revocation,
+> no key by email and the email-change safeguards below are kept. See
+> [P75](../../../phases/P75-admin-moderation-and-match-social.md).
+
 ## Enrollment and account continuity
 
 Guests and existing non-paying accounts can continue playing. Registration/

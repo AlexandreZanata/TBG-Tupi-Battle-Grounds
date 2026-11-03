@@ -948,6 +948,71 @@
       "document": "docs/patches/2026-11-02-auxiliaries-gods.md"
     },
     {
+      "id": "p75-account-social",
+      "version": "0.1.4-colossus.3+p75",
+      "date": "2026-11-02",
+      "status": "candidate",
+      "kind": "maintenance",
+      "ruleset_version": 15,
+      "ruleset_hash": "cc459351581b7763",
+      "title": {
+        "en": "Account recovery and match social",
+        "pt-BR": "Recuperacao de conta e recursos sociais"
+      },
+      "summary": {
+        "en": "Candidate: verified email recovery preserves your account; private match chat, three emoji slots, reviewed uploads and reports. Chat/uploads await Owner activation.",
+        "pt-BR": "Candidato: recuperacao por email verificado preserva sua conta; chat privado da partida, tres espacos de emojis, envios revisados e denuncias. Chat e envios aguardam ativacao do Owner."
+      },
+      "changes": [
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Account and match social",
+            "pt-BR": "Conta e recursos sociais da partida"
+          },
+          "field": {
+            "en": "recovery and communication",
+            "pt-BR": "recuperacao e comunicacao"
+          },
+          "before": {
+            "en": "Manual keys without in-game recovery; no match social tools",
+            "pt-BR": "Chaves manuais sem recuperacao no jogo; sem ferramentas sociais na partida"
+          },
+          "after": {
+            "en": "Email-code recovery on the same account, chat/mute, three emoji slots and private reports",
+            "pt-BR": "Recuperacao por codigo na mesma conta, chat/silenciar, tres espacos de emojis e denuncias privadas"
+          },
+          "reason": {
+            "en": "Protect account continuity and support moderated match communication. Gameplay is unchanged.",
+            "pt-BR": "Proteger a continuidade da conta e oferecer comunicacao moderada. As regras do jogo permanecem iguais."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Activation pending",
+            "body": "Wire 39/schema 12 require the attended rollout, compatible clients, working backups, privacy approval and real desktop correspondence evidence."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Ativacao pendente",
+            "body": "Protocolo 39 e esquema 12 exigem publicacao assistida, clientes compativeis, backups funcionais, aprovacao de privacidade e evidencia real de correspondencia desktop."
+          }
+        ]
+      },
+      "evidence": {
+        "report": "docs/phases/P75-admin-moderation-and-match-social.md",
+        "accepted": false,
+        "seed_blocks": {
+          "discovery": "targeted contracts only; no gameplay change",
+          "confirmation": "pending"
+        }
+      },
+      "document": "docs/patches/2026-11-02-p75.md"
+    },
+    {
       "id": "native-settings-auto-updates",
       "version": "0.1.4-colossus.4",
       "date": "2026-11-02",
@@ -1047,6 +1112,110 @@
       "document": "docs/patches/2026-11-02-native-settings.md",
       "evidence": {
         "report": "docs/phases/NATIVE-SETTINGS-UPDATES.md",
+        "accepted": false
+      }
+    },
+    {
+      "id": "p75-tiered-auxiliaries",
+      "version": "0.1.4-colossus.5",
+      "date": "2026-11-02",
+      "status": "candidate",
+      "kind": "feature",
+      "ruleset_version": 16,
+      "ruleset_hash": "f2e253b98ccb313a",
+      "title": {
+        "en": "Three-tier War Auxiliaries and account recovery",
+        "pt-BR": "Auxiliares de três níveis e recuperação de conta"
+      },
+      "summary": {
+        "en": "Mineiro and Mercador gain cumulative tiers, compact cards and per-Arena precincts. Email recovery preserves the same account; match social remains subject to Owner activation. Values remain Proposed.",
+        "pt-BR": "Mineiro e Mercador ganham níveis cumulativos, cartas compactas e posições por Arena. A recuperação por email preserva a mesma conta; recursos sociais dependem da ativação do dono. Valores propostos."
+      },
+      "changes": [
+        {
+          "subject": {
+            "en": "Mineiro",
+            "pt-BR": "Mineiro"
+          },
+          "field": {
+            "en": "Cumulative Evolution",
+            "pt-BR": "Evolução cumulativa"
+          },
+          "before": {
+            "en": "One hire: 6 Energy, +0.05 Energy/s for 180 s",
+            "pt-BR": "Uma contratação: 6 Energy, +0,05 Energy/s por 180 s"
+          },
+          "after": {
+            "en": "Step costs 8/14/22 Energy; cumulative output +0.15/+0.30/+0.50 Energy/s, 180 s per window",
+            "pt-BR": "Custos 8/14/22 Energy; produção cumulativa +0,15/+0,30/+0,50 Energy/s, janela de 180 s"
+          },
+          "reason": {
+            "en": "Owner-requested stronger tiers; BR-AX12–14, Proposed pending competitive evidence",
+            "pt-BR": "Níveis mais fortes solicitados pelo dono; BR-AX12–14, propostos e pendentes de evidência competitiva"
+          }
+        },
+        {
+          "subject": {
+            "en": "Mercador",
+            "pt-BR": "Mercador"
+          },
+          "field": {
+            "en": "Cumulative Evolution",
+            "pt-BR": "Evolução cumulativa"
+          },
+          "before": {
+            "en": "One hire: 4 Energy, 3 purchases per activation, one free reroll, cap 3",
+            "pt-BR": "Uma contratação: 4 Energy, 3 compras por ativação, uma atualização grátis, limite 3"
+          },
+          "after": {
+            "en": "Step costs 6/10/16 Energy; purchases 3/2/2, rerolls 1/1/2, Energy 0/1/2, cumulative caps 4/8/12",
+            "pt-BR": "Custos 6/10/16 Energy; compras 3/2/2, atualizações 1/1/2, Energy 0/1/2, limites cumulativos 4/8/12"
+          },
+          "reason": {
+            "en": "Preserve earned progress while adding stronger tiers; BR-AX12–14, Proposed",
+            "pt-BR": "Preservar o progresso obtido e adicionar níveis mais fortes; BR-AX12–14, propostos"
+          }
+        },
+        {
+          "subject": {
+            "en": "Auxiliary presentation",
+            "pt-BR": "Apresentação dos auxiliares"
+          },
+          "field": {
+            "en": "Cards, precincts and motion",
+            "pt-BR": "Cartas, estruturas e movimento"
+          },
+          "before": {
+            "en": "Full-size auxiliary panel, fixed placements and grey mirrored surfaces",
+            "pt-BR": "Painel grande, posições fixas e superfícies espelhadas cinzas"
+          },
+          "after": {
+            "en": "Compact Shop-adjacent cards, figure portraits, tier structures and collision-tested Arena placements with bridges",
+            "pt-BR": "Cartas compactas ao lado da Shop, retratos das figuras, estruturas por nível e posições testadas com pontes"
+          },
+          "reason": {
+            "en": "Make each tier visible and preserve Arena scenery; BR-AX15",
+            "pt-BR": "Tornar cada nível visível e preservar o cenário da Arena; BR-AX15"
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Activation and evidence",
+            "body": "Wire 40/schema 12 require attended migration and compatible clients. P75 switches gate chat and custom uploads. Competitive balance acceptance and uncaptured desktop correspondence remain pending."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Ativação e evidência",
+            "body": "Protocolo 40/esquema 12 exigem migração assistida e clientes compatíveis. As chaves P75 controlam chat e envios personalizados. Aceitação competitiva e correspondência desktop sem capturas seguem pendentes."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-11-02-tiered-auxiliaries.md",
+      "evidence": {
+        "report": "docs/phases/P75-AUXILIARIES-CONSOLIDATION.md",
         "accepted": false
       }
     }

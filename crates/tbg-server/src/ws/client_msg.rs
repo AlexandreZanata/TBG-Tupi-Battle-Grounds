@@ -44,6 +44,8 @@ pub(super) fn on_client_bytes(
     }
     Ok(match msg {
         ClientMsg::Hello { .. } | ClientMsg::AuthenticatedHello { .. } => None,
+        ClientMsg::ChatSend { text } => social(c, MatchSocialInput::Chat(text)),
+        ClientMsg::EmojiSend { slot } => social(c, MatchSocialInput::Emoji(slot)),
         ClientMsg::Intent { seq, intent } => match &c.matched {
             Some((seat, m)) => {
                 let _ = m.try_send(MatchCmd::Intent {
@@ -115,7 +117,15 @@ fn authorize(c: &Conn, app: &AppState, msg: &ClientMsg) -> Option<ServerMsg> {
         return None;
     };
     // The already admitted seat may finish only this match after natural expiry.
-    if c.matched.is_some() && matches!(msg, ClientMsg::Intent { .. } | ClientMsg::Surrender) {
+    if c.matched.is_some()
+        && matches!(
+            msg,
+            ClientMsg::Intent { .. }
+                | ClientMsg::Surrender
+                | ClientMsg::ChatSend { .. }
+                | ClientMsg::EmojiSend { .. }
+        )
+    {
         return None;
     }
     (!app.auth.now().is_ok_and(|now| binding.valid(now)))
@@ -193,4 +203,33 @@ pub(super) async fn send(
         Metrics::add(&metrics.view_bytes, n);
     }
     socket.send(Message::Binary(bytes.into())).await.map(|_| n)
+}
+
+enum MatchSocialInput {
+    Chat(String),
+    Emoji(u8),
+}
+fn social(c: &Conn, input: MatchSocialInput) -> Option<ServerMsg> {
+    let Some((seat, tx)) = &c.matched else {
+        return Some(ServerMsg::SocialRefused {
+            reason: protocol::SocialRefusal::NotAvailable,
+        });
+    };
+    let command = match input {
+        MatchSocialInput::Chat(text) => MatchCmd::Chat {
+            seat: *seat,
+            conn_id: c.id,
+            text,
+        },
+        MatchSocialInput::Emoji(slot) => MatchCmd::Emoji {
+            seat: *seat,
+            conn_id: c.id,
+            slot,
+        },
+    };
+    tx.try_send(command)
+        .err()
+        .map(|_| ServerMsg::SocialRefused {
+            reason: protocol::SocialRefusal::RateLimited,
+        })
 }

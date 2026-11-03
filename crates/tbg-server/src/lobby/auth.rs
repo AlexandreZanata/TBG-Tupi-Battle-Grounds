@@ -23,6 +23,14 @@ impl Lobby {
         }
         match &session.auth_binding {
             Some(binding) => {
+                if self
+                    .config
+                    .auth_clock
+                    .now()
+                    .is_ok_and(|now| self.config.moderation.banned(binding.account, now))
+                {
+                    return false;
+                }
                 session
                     .account
                     .as_ref()
@@ -103,6 +111,9 @@ impl Lobby {
         lease: bool,
     ) -> Option<(Token, String)> {
         let now = self.config.auth_clock.now().ok()?;
+        if self.config.moderation.banned(binding.account, now) {
+            return None;
+        }
         if !binding.valid(now) && !(lease && self.lease_resumes(resume, &binding)) {
             return None;
         }
@@ -187,7 +198,14 @@ impl Lobby {
             .auth_binding
             .as_ref()
             .is_some_and(|old| old.account != binding.account || old.family != binding.family);
-        if !valid || wrong {
+        if !valid
+            || wrong
+            || self
+                .config
+                .auth_clock
+                .now()
+                .is_ok_and(|now| self.config.moderation.banned(binding.account, now))
+        {
             self.send_to(
                 token,
                 ServerMsg::AuthRequired {

@@ -32,6 +32,7 @@ impl Service {
                 name,
                 key_hash: tokens::hash(&secret),
                 register: false,
+                email: None,
                 device,
                 persistent,
                 channel,
@@ -42,9 +43,12 @@ impl Service {
         .await
     }
 
+    #[allow(clippy::too_many_arguments)] // Registration binds enrollment and retry proof to the same channel-specific grant.
     pub(super) async fn register(
         &self,
         name: String,
+        address: String,
+        locale: String,
         device: &str,
         persistent: bool,
         retry: &str,
@@ -52,12 +56,25 @@ impl Service {
         ip: IpAddr,
     ) -> Result<Grant, Error> {
         tbg_core::account::check_name(&name).map_err(|_| Error::NameInvalid)?;
+        if address.is_empty() {
+            return Err(Error::EmailRequired);
+        }
+        let email = crate::store::recovery::service::Enrollment {
+            email: crate::store::recovery::email::normalize(&address)
+                .map_err(|_| Error::EmailInvalid)?,
+            locale,
+        };
+        if !matches!(email.locale.as_str(), "en" | "pt-BR") {
+            return Err(Error::EmailInvalid);
+        }
         let device = tokens::decode::<16>(device)?;
         let retry = tokens::hash(&tokens::decode::<32>(retry)?);
         let fingerprint = tokens::hash(
             format!(
-                "{}:{}:{}:{}",
+                "{}:{}:{}:{}:{}:{}",
                 name,
+                email.email,
+                email.locale,
                 tokens::hex(&device),
                 persistent,
                 channel.as_str()
@@ -85,6 +102,13 @@ impl Service {
                 .await?;
             return Ok(cached.grant.clone());
         }
+        let address = email.email.clone();
+        let locale = email.locale.clone();
+        self.store()?
+            .release(move |db| crate::store::recovery::service::registration(db, &address, &locale))
+            .await
+            .ok_or(Error::Unavailable)?
+            .map_err(db::Error::from)?;
         self.cache_capacity(&state, None)?;
         if !state.login_limits.check_register(
             ip,
@@ -108,6 +132,7 @@ impl Service {
                     name,
                     key_hash: tokens::hash(&secret),
                     register: true,
+                    email: Some(email),
                     device,
                     persistent,
                     channel,
@@ -136,7 +161,7 @@ impl Service {
         }
     }
 
-    async fn issue(
+    pub(super) async fn issue(
         &self,
         state: &mut State,
         request: NewFamily,
@@ -149,7 +174,8 @@ impl Service {
             access: tokens::random::<32>()?,
             refresh: tokens::random::<32>()?,
         };
-        let request = db::Request::Issue(db::Issuance {
+        let email = request.email;
+        let issuance = db::Issuance {
             name: request.name,
             key_hash: request.key_hash,
             register: request.register,
@@ -159,7 +185,14 @@ impl Service {
             persistent: request.persistent,
             refresh_hash: tokens::hash(&secrets.refresh),
             now,
-        });
+        };
+        let request = match email {
+            Some(email) => db::Request::IssueEmail {
+                issue: issuance,
+                email,
+            },
+            None => db::Request::Issue(issuance),
+        };
         let reply = self.store()?.auth(request).await?;
         match self.publish(state, reply, secrets, now, key) {
             Ok(grant) => Ok(grant),

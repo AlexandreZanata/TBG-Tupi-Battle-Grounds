@@ -65,3 +65,9 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 # P11: SHA-256 of the account-key secret before storing it.
 sha2 = "0.10"
+
+# P75: asynchronous SMTP submission with Rust TLS and no OpenSSL dependency.
+lettre = { version = "=0.11.23", default-features = false, features = ["builder", "smtp-transport", "tokio1-rustls", "ring", "webpki-roots"] }
+
+# P75: bounded PNG/GIF/static-WebP normalization; never serve original uploads.
+image = { version = "=0.25.10", default-features = false, features = ["png", "gif", "webp"] }

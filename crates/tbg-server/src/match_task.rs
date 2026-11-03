@@ -24,6 +24,7 @@ mod live;
 mod personal;
 mod report;
 mod settle;
+mod social;
 mod spectators;
 pub(crate) mod summary;
 #[cfg(test)]
@@ -44,6 +45,7 @@ pub(crate) struct Player {
 }
 
 pub(super) struct Match {
+    social: social::Social,
     pub(super) result_id: tbg_core::protocol::ResultId,
     pub(super) state: MatchState,
     pub(super) players: [Player; 2],
@@ -138,6 +140,7 @@ pub(crate) fn spawn(
         end_detail: None,
         reached_running: false,
         summary: Default::default(),
+        social: Default::default(),
     };
     tokio::spawn(run(m, rx, lobby, config, seed, records));
     tx
@@ -151,6 +154,19 @@ async fn run(
     seed: u64,
     records: Records,
 ) {
+    m.social.config = Some(config.clone());
+    if let Some(store) = &records.store {
+        let accounts = m.players.each_ref().map(|p| p.account.map(|(id, _)| id));
+        if let Some(Ok(profiles)) = store
+            .release(move |db| crate::store::social::profiles(db, accounts))
+            .await
+        {
+            for (seat, (verified, slots)) in profiles.into_iter().enumerate() {
+                m.social.verified[seat] = verified;
+                m.social.loadouts[seat] = slots;
+            }
+        }
+    }
     m.metrics.matches_running.fetch_add(1, Relaxed);
     let started = Instant::now();
     let tick = Duration::from_millis(config.tick_ms);
@@ -158,6 +174,7 @@ async fn run(
     for seat in Seat::BOTH {
         let start = m.match_start(seat);
         m.send(seat, start);
+        m.send_social(seat);
     }
     let mut interval = tokio::time::interval(tick);
     interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
@@ -274,6 +291,13 @@ async fn run(
     if let (Some(mut replay), Some(tx)) = (m.replay.take(), &config.replays) {
         replay.final_hash = m.state.hash();
         let _ = tx.send(replay);
+    }
+    if let Some(store) = &records.store {
+        m.social_record(
+            store,
+            config.auth_clock.now().unwrap_or(0),
+            started.elapsed().as_secs(),
+        );
     }
     let ticks = u128::from(m.state.clock.max(1));
     m.metrics.matches_finished.fetch_add(1, Relaxed);

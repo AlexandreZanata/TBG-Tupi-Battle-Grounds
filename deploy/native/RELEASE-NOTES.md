@@ -1,4 +1,24 @@
-TBG 0.1.4-colossus.4 — Account backups and in-app update candidate
+TBG 0.1.4-colossus.5 — Account recovery, match social and tiered War Auxiliaries candidate
+
+Verified email can recover a lost AccountKey on the same account, retaining
+all account data and replacing an existing protected backup. Private two-seat
+chat, three emoji slots, reviewed custom uploads, reports and a separate
+operator console ship with conservative activation switches.
+
+Mineiro and Mercador now evolve through three cumulative tiers. Compact cards
+sit beside the five Shop cards and use real figure portraits. Tier structures,
+bridges and animation follow per-Arena placements on both sides; red-side
+surfaces retain their team colors. Costs and payouts remain Proposed.
+
+This candidate combines the auxiliary rules R16 / f2e253b98ccb313a with P75
+social messages on wire 40 and additive account schema 12. It is incompatible
+with wire 38/39. Automatic backend deployment must refuse the schema change;
+attended migration and a coordinated client/server switch remain required.
+Chat, custom display and uploads remain disabled until Owner activation.
+See docs/phases/P75-AUXILIARIES-CONSOLIDATION.md for current evidence and
+pending desktop correspondence and competitive balance acceptance.
+
+Preserved from 0.1.4-colossus.4:
 
 Update history now displays the newest note first and retains every historical entry.
 Native account settings can verify and protect an explicitly imported original
@@ -14,14 +34,14 @@ is approved. Final release and isolated update evidence are recorded in
 docs/phases/NATIVE-SETTINGS-UPDATES.md; Windows and real-browser observations
 for these settings changes remain pending.
 
-This immutable follow-up preserves colossus.2 gameplay, presentation and match compatibility.
+The account-settings and in-app updater behavior introduced in colossus.4 is retained.
 Miner and Merchant provide authoritative War Auxiliary choices during a match.
 The consolidated preview includes Volthar, Astreon and the refined Colossus,
 while preserving the original contact-based pushing and randomized match sides.
 The Linux preview installer reads the committed version and preserves existing data.
 
-Protocol 38, schema 10 (P73 history schema 11 remains opt-in), ruleset 15 /
-cc459351581b7763. This contract requires a coordinated release from protocol 31;
+Protocol 40, additive schema 12 (P73 history schema 11 remains opt-in), ruleset 16 /
+f2e253b98ccb313a. This contract requires a coordinated release from protocol 38;
 compatible-only delivery must not bypass its production contract gate.
 
 The local Practice/Training preview contains 84 champions across ten Factions,
@@ -56,16 +76,15 @@ Do not infer complete GPU/audio/DPI acceptance or exact pixel equality from shar
 code, a successful compile or a partial capture. The current release manifest keeps
 visual acceptance pending until the required full comparison is completed.
 
-Authentication uses the real OS vault when persistence is chosen. P67 email recovery
-and commerce remain offline foundations. Native TUF signing and two-slot rollout are
+Authentication uses the real OS vault when persistence is chosen. Commerce remains an offline foundation; P75 email recovery needs mail configuration. Native TUF signing and two-slot rollout are
 separate gated mechanisms. Preserve existing accounts, preferences and older packages.
 
 Source, individual asset checksums and the exact compatible contract are in
 `tbg-native-release.json`; `native-provenance.jsonl` binds the artifacts to GitHub CI.
 
-Ruleset 15 consolidates P74 and GD-04, including serialized auxiliary state and
-the owning seat's reroll quote. Miner and Merchant keep the proposed 6/4 Energy
-costs and single-hire lifecycle. Two new Gods remain in the local preview.
+Ruleset 16 adds three cumulative War Auxiliary tiers to the P74/GD-04 baseline.
+Mineiro step costs are 8/14/22 Energy; Mercador step costs are 6/10/16 Energy.
+Two new Gods remain in the local preview.
 No competitive acceptance is implied.
 
 D-104 retirement load is sampled inside its serialized writer turn, excluding

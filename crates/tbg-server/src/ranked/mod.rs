@@ -23,6 +23,7 @@ pub type MatchKey = [u8; 16];
 /// Surrender and Disconnect.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EndDetail {
+    Moderation,
     Stronghold,
     Surrender,
     Disconnect,
@@ -31,6 +32,7 @@ pub enum EndDetail {
 impl EndDetail {
     pub fn as_str(self) -> &'static str {
         match self {
+            EndDetail::Moderation => "moderation",
             EndDetail::Stronghold => "stronghold",
             EndDetail::Surrender => "surrender",
             EndDetail::Disconnect => "disconnect",
@@ -39,6 +41,7 @@ impl EndDetail {
 
     pub fn parse(s: &str) -> Option<EndDetail> {
         [
+            EndDetail::Moderation,
             EndDetail::Stronghold,
             EndDetail::Surrender,
             EndDetail::Disconnect,

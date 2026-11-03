@@ -12,6 +12,7 @@ pub(crate) mod api;
 mod native;
 #[cfg(not(target_arch = "wasm32"))]
 mod native_store;
+mod recovery;
 #[cfg(not(target_arch = "wasm32"))]
 mod recovery_key;
 mod transport;
@@ -120,6 +121,7 @@ fn should_renew(
 pub enum Command {
     Login(String),
     Register(String),
+    Recover(String),
     Migrate(String),
     Refresh,
     Backup,
@@ -147,6 +149,7 @@ pub fn request(command: Command) -> bool {
         command,
         Command::Login(_)
             | Command::Register(_)
+            | Command::Recover(_)
             | Command::Migrate(_)
             | Command::Logout
             | Command::Guest
@@ -212,6 +215,7 @@ enum Kind {
     Restore,
     Login,
     Register,
+    Recover,
     Refresh,
     Backup,
     RecoveryKey,
@@ -411,6 +415,10 @@ impl Session {
                 self.backup_after_login = false;
                 self.start(Kind::Login, Some(key));
             }
+            Command::Recover(input) => {
+                self.backup_after_login = false;
+                self.start(Kind::Recover, Some(input));
+            }
             Command::Register(name) => {
                 self.backup_after_login = false;
                 self.start(Kind::Register, Some(name));
@@ -434,7 +442,7 @@ impl Session {
             view.epoch = current;
             view.remember = self.remember;
             view.status = match kind {
-                Kind::Restore | Kind::Login | Kind::Register => Status::Restoring,
+                Kind::Restore | Kind::Login | Kind::Register | Kind::Recover => Status::Restoring,
                 Kind::Refresh => Status::Refreshing,
                 Kind::Logout => Status::LogoutPending,
                 Kind::Backup | Kind::RecoveryKey | Kind::Resume => view.status,
@@ -468,6 +476,7 @@ impl Session {
             Kind::Restore => native::Operation::Restore,
             Kind::Login => native::Operation::Login(input.unwrap_or_default()),
             Kind::Register => native::Operation::Register(input.unwrap_or_default()),
+            Kind::Recover => native::Operation::Recover(input.unwrap_or_default()),
             Kind::Refresh => native::Operation::Refresh,
             Kind::Backup => native::Operation::Backup,
             Kind::RecoveryKey => native::Operation::RecoveryKey(input),

@@ -1,0 +1,4 @@
+# Apply to both tbg-server.service.d and tbg-server@.service.d only during attended activation.
+[Service]
+EnvironmentFile=-/etc/tbg/p75.env
+LoadCredential=smtp_password:/etc/tbg/secrets/smtp_password

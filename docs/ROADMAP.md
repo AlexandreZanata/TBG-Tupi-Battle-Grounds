@@ -679,3 +679,27 @@ free-reroll indicator on the Reroll button. Procedural low-poly 3D `Mineiro`
 pier over water, and wave-bobbing wooden Merchant Caravel ship) with 3-stage
 construction animations, active work/delivery loops, and theme-harmonized
 palettes across all eight Arenas.
+
+## P75 — Administration, moderation, email key recovery and match social (implementation candidate, review pending)
+
+| Phase | Spec | Deliverable | Status | Owner gates |
+|---|---|---|---|---|
+| P75 | [P75-admin-moderation-and-match-social.md](phases/P75-admin-moderation-and-match-social.md) | Required player email, in-game key recovery by emailed code on the same account, single Owner operator claimed by email, console (bans, restrictions, reports, emoji review, blocked terms, kill switches, moderators, audit), Report account, match chat, emojis with 3 slots and moderated custom emojis/GIFs | **implementation candidate** on `phase/p75-admin-moderation-social`; S14 and combined R16/wire-40 evidence in the [consolidation report](phases/P75-AUXILIARIES-CONSOLIDATION.md); PR #59 final CI gate and owner-authorized merge tracked on GitHub; attended activation pending | O-P75-01…13, SMTP account and DNS, privacy/conduct text, working backups, attended schema+protocol switch, admin claim, feature switches, look/fun |
+
+Read the [requirements](planning/P75-REQUIREMENTS.md), the
+[immutability contracts and acceptance](planning/P75-CONTRACTS.md), the
+[interfaces](planning/P75-API.md), the [schema](planning/P75-SCHEMA.sql),
+the [operations runbook](planning/P75-OPERATIONS.md) and the
+[execution prompt](planning/P75-EXECUTION-PROMPT.md). Decisions D-107–D-111
+and GAME-DESIGN §22 are Proposed.
+
+Order: freeze base/allocations → schema 12 (fixing the v11 gate) → mail
+outbox and dispatcher → required email → in-place recovery → moderation
+core → operators and console sessions → console API → reports → protocol
+39 chat/emojis → custom emoji pipeline → client → web console → deploy
+templates → one targeted consolidation and Draft PR. Execution runs on
+`phase/p75-admin-moderation-social` from the current GitHub `main`.
+Schema and protocol both change, so delivery is attended; the automatic
+pipeline refuses it by design. The executor never touches the VPS, DNS,
+secrets or production data. P65 news/forum/tickets stay a separate phase
+that can reuse the P75 operator foundation.

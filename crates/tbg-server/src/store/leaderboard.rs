@@ -48,6 +48,10 @@ impl Snapshot {
 
 /// Rebuild from the table index; only accounts with ≥ 1 ranked game.
 pub(super) fn build(conn: &Connection) -> rusqlite::Result<Snapshot> {
+    build_at(conn, super::release::now_unix())
+}
+
+pub(super) fn build_at(conn: &Connection, now: i64) -> rusqlite::Result<Snapshot> {
     let updated_at: String = conn.query_row(
         "SELECT COALESCE(MAX(ended_at), strftime('%Y-%m-%dT%H:%M:%SZ', 'now')) FROM ranked_matches",
         [],
@@ -55,12 +59,12 @@ pub(super) fn build(conn: &Connection) -> rusqlite::Result<Snapshot> {
     )?;
     let mut stmt = conn.prepare(
         "SELECT name, name_lower, rating, ranked_games, wins, losses, draws FROM accounts
-         WHERE ranked_games >= 1 ORDER BY rating DESC, wins DESC, name_lower ASC",
+         WHERE ranked_games >= 1 AND NOT EXISTS (SELECT 1 FROM account_moderation m WHERE m.account_id=accounts.id AND m.ban_until_unix>?1) ORDER BY rating DESC, wins DESC, name_lower ASC",
     )?;
     let mut rows = Vec::new();
     let mut by_name = HashMap::new();
     let mut rank = 0u32;
-    let mapped = stmt.query_map([], |row| {
+    let mapped = stmt.query_map([now], |row| {
         Ok((
             row.get::<_, String>(0)?,
             row.get::<_, String>(1)?,
