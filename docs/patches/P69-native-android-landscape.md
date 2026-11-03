@@ -8,6 +8,9 @@ Touch scrolling preserves gesture ownership. Native text entry, explicit manual
 key backup and document export use Android services; secrets remain in memory.
 War Council keeps local selection separate from authoritative confirmation.
 
+Expanded chat keeps its own controls and recent messages accessible.
+Reconnection waits for actual seat/result recovery, and server cleanup retains
+terminal delivery through its existing replay deadline after a long pause.
 No game rules, numbers, online roster pools or competitive outcomes change.
 The source/evidence report is [P69](../phases/P69-mobile-20261102.md). It records
 actual emulator/Linux coverage and separate pending targets; this candidate

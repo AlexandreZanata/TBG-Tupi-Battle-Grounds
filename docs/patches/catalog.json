@@ -1281,6 +1281,29 @@
             "en": "Support touch composition and guest readers with the same server-owned chat.",
             "pt-BR": "Permitir composição por toque e leitura por visitantes no mesmo chat controlado pelo servidor."
           }
+        },
+        {
+          "category": "maintenance",
+          "subject": {
+            "en": "Match recovery",
+            "pt-BR": "Recuperação de partida"
+          },
+          "field": {
+            "en": "existing pause and terminal replay windows",
+            "pt-BR": "janelas existentes de pausa e reenvio do resultado"
+          },
+          "before": {
+            "en": "Clients could abandon a paused seat early or keep a frozen battle after a Welcome without recovery; cleanup could remove fresh results too soon",
+            "pt-BR": "O cliente podia abandonar cedo uma partida pausada ou manter a batalha congelada após uma conexão sem recuperação; a limpeza podia remover resultados recentes cedo demais"
+          },
+          "after": {
+            "en": "Retries await authoritative seat/result confirmation and cleanup preserves the existing terminal replay deadline",
+            "pt-BR": "As tentativas aguardam a confirmação autoritativa da partida ou resultado, e a limpeza preserva o prazo existente de reenvio do resultado"
+          },
+          "reason": {
+            "en": "Recover the same Linux/Android match without extending server grace or deciding outcomes locally.",
+            "pt-BR": "Recuperar a mesma partida Linux/Android sem ampliar a tolerância do servidor nem decidir resultados localmente."
+          }
         }
       ],
       "sections": {

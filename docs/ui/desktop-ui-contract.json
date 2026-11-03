@@ -523,6 +523,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-p71-terminal-replay-retention-and-confirmed-recovery",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared authoritative terminal-result recovery after long pause; original client deadline survives a Welcome without seat/result; all layouts, game values and windows unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

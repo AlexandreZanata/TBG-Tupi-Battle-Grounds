@@ -1195,3 +1195,12 @@ for native touch users and guest readers regardless of keyboard focus. Compact
 docks and emoji-bubble timing remain unchanged. Actual native45 IME/delivery to
 Linux passed; its empty older-message drawer is a recorded failure. Corrected
 later reading remains pending on the next package.
+
+
+P69 terminal recovery: shared server cleanup honors the existing unexpired
+terminal replay window after a long P71 pause. All clients require actual
+MatchStart/MatchEnd recovery before clearing the original retry deadline;
+Welcome alone cannot leave a frozen battle marked ready. No window, game value,
+seat authority or layout changes. The45s recovery passed; the120s terminal
+failure, targeted regressions and pending rebuilt-harness repetition are
+recorded separately in the P69 continuation.

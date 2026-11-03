@@ -691,3 +691,46 @@ fn celebration_terminal_replay_uses_the_existing_window_and_explicit_dismissal()
     lobby.cleanup();
     assert!(lobby.sessions[&token].finished.is_none());
 }
+
+#[test]
+fn p71_cleanup_preserves_the_terminal_replay_after_a_long_pause() {
+    // BR-M03/P63: cleanup must not erase the fresh result because the disconnect preceded a pause.
+    let (mut lobby, _rx) = lobby();
+    let token = [71; 16];
+    let _old = add_session(&mut lobby, token, SessionState::Idle);
+    let old_detach = Instant::now()
+        - Duration::from_secs(lobby.config.pause_secs + lobby.config.reconnect_secs + 1);
+    let result = completed_fixture(Seat::B);
+    let session = lobby.sessions.get_mut(&token).unwrap();
+    session.conn = None;
+    session.detached_at = Some(old_detach);
+    session.finished = Some((
+        Instant::now() + Duration::from_secs(lobby.config.reconnect_secs),
+        Box::new(result.clone()),
+    ));
+    lobby.cleanup();
+    assert!(
+        lobby.sessions.contains_key(&token),
+        "the existing replay window is still open"
+    );
+
+    let (tx, mut inbox) = mpsc::channel(8);
+    let resumed = lobby.hello(
+        Some(token),
+        ConnHandle::new(7171, tx),
+        [127, 0, 0, 1].into(),
+    );
+    assert_eq!(resumed.unwrap().0, token);
+    expect(&mut inbox, result.start);
+    expect(&mut inbox, result.end);
+
+    let session = lobby.sessions.get_mut(&token).unwrap();
+    session.conn = None;
+    session.detached_at = Some(old_detach);
+    session.finished.as_mut().unwrap().0 = Instant::now() - Duration::from_secs(1);
+    lobby.cleanup();
+    assert!(
+        !lobby.sessions.contains_key(&token),
+        "expiry does not grant a longer window"
+    );
+}

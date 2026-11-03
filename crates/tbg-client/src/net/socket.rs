@@ -125,12 +125,13 @@ impl NetLink {
 
     pub(super) fn reconnect(&mut self, now: f64) {
         let Some(lost) = self.lost_at else { return };
-        if self.socket.is_some() || matches!(self.status, NetStatus::Failed(_)) {
+        if matches!(self.status, NetStatus::Failed(_)) {
             return;
         }
         if now - lost > self.reconnect_window() {
+            self.socket = None;
             self.status = NetStatus::Failed(NetFailure::ConnectionLost);
-        } else if now >= self.next_try {
+        } else if self.socket.is_none() && now >= self.next_try {
             self.connect(now);
             self.tries += 1;
             self.next_try = now + delay(self.tries);
@@ -218,8 +219,11 @@ impl NetLink {
                 }
                 self.token = Some(token);
                 self.save_resume_family();
-                self.status = NetStatus::Ready;
-                self.lost_at = None;
+                // A live lobby socket alone does not restore an authoritative match.
+                if !self.in_match {
+                    self.status = NetStatus::Ready;
+                    self.lost_at = None;
+                }
                 if !self.in_match && !matches!(self.mode, super::Mode::Probe) {
                     if self.auth_access.is_some() {
                         self.held_request = true;
@@ -286,12 +290,16 @@ impl NetLink {
                         self.result_id = Some(result_id);
                         self.mode = super::Mode::Probe;
                         self.in_match = true;
+                        self.status = NetStatus::Ready;
+                        self.lost_at = None;
                         self.login_in_flight = false;
                         self.held_request = false;
                         self.login_deadline = None;
                     }
                     ServerMsg::MatchEnd { result_id, .. } if self.result_id == Some(result_id) => {
-                        self.in_match = false
+                        self.in_match = false;
+                        self.status = NetStatus::Ready;
+                        self.lost_at = None;
                     }
                     // P47: a watch starts a listen-only link; the end or a refusal
                     // leaves a probe that never asks for the watch again.
@@ -481,6 +489,53 @@ mod tests {
         queue.next_try = 1000.;
         queue.reconnect(31.);
         assert_eq!(queue.status, NetStatus::Failed(NetFailure::ConnectionLost));
+    }
+
+    #[test]
+    fn p71_welcome_requires_match_recovery_before_clearing_the_deadline() {
+        // BR-M03: a replacement lobby without the old seat cannot leave a frozen battle marked Ready.
+        let mut net = link(Mode::Probe);
+        net.in_match = true;
+        net.lost(0.);
+        net.next_try = 1000.;
+        net.handle(
+            ServerMsg::Welcome {
+                token: [1; 16],
+                name: "A".into(),
+            },
+            35.,
+        );
+        assert!(matches!(net.status, NetStatus::Reconnecting { since } if since == 0.));
+        assert_eq!(net.lost_at, Some(0.));
+        net.reconnect(181.);
+        assert_eq!(net.status, NetStatus::Failed(NetFailure::ConnectionLost));
+
+        let mut recovered = link(Mode::Probe);
+        recovered.in_match = true;
+        recovered.lost(0.);
+        recovered.handle(
+            ServerMsg::Welcome {
+                token: [1; 16],
+                name: "A".into(),
+            },
+            35.,
+        );
+        recovered.handle(
+            ServerMsg::MatchStart {
+                result_id: [71; 16],
+                you: tbg_core::Seat::A,
+                you_name: "A".into(),
+                you_rating: None,
+                opponent: "B".into(),
+                opponent_rating: None,
+                mode: protocol::MatchMode::Casual,
+                arcanas: [tbg_core::ArcanaPreset::DEFAULT; 2],
+                arena: tbg_core::Arena::Forest,
+            },
+            35.1,
+        );
+        assert_eq!(recovered.status, NetStatus::Ready);
+        assert!(recovered.lost_at.is_none());
     }
 
     #[test]
