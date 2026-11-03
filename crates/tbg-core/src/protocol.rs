@@ -32,6 +32,12 @@ use crate::view::{MatchView, PublicView};
 /// Older peers are refused by the handshake.
 pub const PROTOCOL_VERSION: u16 = 40;
 
+/// EM-01/IC-11: frozen Twemoji 14.0.2 source identities in standard-id order.
+pub const STANDARD_EMOJI_ASSETS: [&str; 16] = [
+    "1f44b", "1f44d", "1f600", "1f602", "1f60e", "1f914", "1f622", "1f621", "1f525", "2764",
+    "1f389", "1f680", "1f480", "1f3c6", "1f64f", "1f4aa",
+];
+
 /// Public result identity, independent of the combat seed and session token.
 pub type ResultId = [u8; 16];
 

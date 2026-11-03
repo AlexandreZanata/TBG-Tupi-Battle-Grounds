@@ -47,6 +47,17 @@ pub fn hex16(value: &str) -> Option<[u8; 16]> {
     }
     Some(bytes)
 }
+type EvidenceRow = (
+    Option<i64>,
+    Option<i64>,
+    String,
+    String,
+    String,
+    String,
+    String,
+    String,
+);
+
 pub fn file(db: &mut Connection, reporter: i64, input: Input, now: i64) -> Result<i64, Error> {
     let tx = db.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let enabled: bool = tx.query_row(
@@ -105,7 +116,7 @@ pub fn file(db: &mut Connection, reporter: i64, input: Input, now: i64) -> Resul
         .map(|s| hex16(&s).ok_or(Error::Invalid))
         .transpose()?;
     let (target, evidence, emoji_id) = if let Some(result) = result {
-        let row:Option<(Option<i64>,Option<i64>,String,String,String,String,String,String)>=tx.query_row("SELECT a_account,b_account,a_name,b_name,mode,outcome_json,loadouts_json,transcript_json FROM match_social_records WHERE result_id=?1 AND expires_unix>?2",params![result.as_slice(),now],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?,r.get(4)?,r.get(5)?,r.get(6)?,r.get(7)?))).optional()?;
+        let row:Option<EvidenceRow>=tx.query_row("SELECT a_account,b_account,a_name,b_name,mode,outcome_json,loadouts_json,transcript_json FROM match_social_records WHERE result_id=?1 AND expires_unix>?2",params![result.as_slice(),now],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get(3)?,r.get(4)?,r.get(5)?,r.get(6)?,r.get(7)?))).optional()?;
         let (a, b, an, bn, mode, outcome, loadouts, transcript) = row.ok_or(Error::NotEligible)?;
         let (target, other) = if a == Some(reporter) {
             (b, 1)

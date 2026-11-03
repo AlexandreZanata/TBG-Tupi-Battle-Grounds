@@ -7,22 +7,30 @@ pub(super) fn replace_backup(
     key: Option<&str>,
 ) -> bool {
     let (Some(store), Some(key)) = (store, key) else {
-        return true;
+        return false;
     };
     let Ok(namespace) = store.namespace(origin, account) else {
         return false;
     };
     let namespace = format!("{namespace}:recovery-key");
-    let present = crate::platform::credentials::read(&namespace).is_ok_and(|old| {
-        tbg_core::account::parse_key(&old)
-            .is_some_and(|(name, _)| name.eq_ignore_ascii_case(account))
-    }) || crate::config::load_account_key().is_some_and(|old| {
+    let protected = match crate::platform::credentials::read(&namespace) {
+        Ok(old) => {
+            if !tbg_core::account::parse_key(&old)
+                .is_some_and(|(name, _)| name.eq_ignore_ascii_case(account))
+            {
+                return false;
+            }
+            true
+        }
+        Err(crate::platform::credentials::Error::Missing) => false,
+        Err(_) => return false,
+    };
+    let legacy = super::native::legacy(origin).is_some_and(|old| {
         tbg_core::account::parse_key(&old)
             .is_some_and(|(name, _)| name.eq_ignore_ascii_case(account))
     });
-    if present {
-        // Never remove an existing backup; the recovered key also reaches the save-key screen.
-        // PR #57's writer provides the same namespace and remains owned by that front.
+    if protected || legacy {
+        // Replace only an existing same-account backup; never delete it or opt into persistence.
         return crate::platform::credentials::write(&namespace, key).is_ok();
     }
     true

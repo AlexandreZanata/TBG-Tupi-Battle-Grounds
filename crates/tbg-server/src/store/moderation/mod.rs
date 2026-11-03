@@ -90,7 +90,7 @@ fn write(db: &Connection, action: Action, now: i64) -> Result<State, Error> {
         _ => "settings",
     };
     event(
-        &tx,
+        tx,
         kind,
         Some(action.account),
         &json!({"version":next.version}),
@@ -99,7 +99,7 @@ fn write(db: &Connection, action: Action, now: i64) -> Result<State, Error> {
     if action.kind == "ban" || action.kind == "revoke_sessions" {
         tx.execute("UPDATE auth_sessions SET revoked_at=?2,revoke_reason=?3 WHERE account_id=?1 AND revoked_at IS NULL",params![action.account,now,if action.kind=="ban"{"banned"}else{"operator"}])?;
     }
-    audit::insert(&tx, now, &action.audit)?;
+    audit::insert(tx, now, &action.audit)?;
     Ok(next)
 }
 pub fn event(

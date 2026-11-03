@@ -189,27 +189,6 @@ pub(super) fn ship_point(heading: f32, distance: f32) -> Vec2 {
     BERTH + Vec2::new(heading.cos(), heading.sin()) * distance
 }
 
-/// True when world point `p` lies within `margin` of the precinct's pad or bridge.
-pub(super) fn covers(theme: Theme, seat: Seat, kind: AuxiliaryKind, p: Vec2, margin: f32) -> bool {
-    let place = placement(theme, seat, kind);
-    let local = place
-        .root
-        .compute_affine()
-        .inverse()
-        .transform_point3(Vec3::new(p.x, 0.0, p.y))
-        .xz();
-    let off = (local - pad_center(kind)).abs();
-    let half = pad_half(kind) + Vec2::splat(margin);
-    if off.x <= half.x && off.y <= half.y {
-        return true;
-    }
-    place.bridge.is_some_and(|(land, edge)| {
-        let (a, b) = (land.xz(), edge.xz());
-        let t = ((local - a).dot(b - a) / (b - a).length_squared().max(1e-6)).clamp(0.0, 1.0);
-        local.distance(a + (b - a) * t) <= 0.3 + margin
-    })
-}
-
 /// Sea-surface decoration (ice floes, lily pads, lava crust) sits below this height.
 pub(super) const FLOATER_Y: f32 = -1.0;
 /// Half-width of the Merchant's sea lane, wide enough for the tier-3 galleon.

@@ -117,6 +117,7 @@ async function run(request) {
     if(!secure&&warning==='storage_unavailable')write('logout_pending','1');
   }
   state.grant={...grant};delete state.grant.account_key;state.access=grant.access_token;
+  if(typeof grant.account_key==='string')state.recoveryKey=grant.account_key;
   notify();
   return {kind:'signed_in',grant,secure,...(warning?{warning}:{}),device:state.device};
 }

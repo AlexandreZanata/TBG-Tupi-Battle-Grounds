@@ -35,17 +35,28 @@ struct Empty {}
 fn parse<T: serde::de::DeserializeOwned>(b: &[u8]) -> Result<T, Error> {
     serde_json::from_slice(b).map_err(|_| Error::Invalid)
 }
+pub(crate) struct Context<'a> {
+    pub token: &'a str,
+    pub ip: &'a str,
+    pub request: &'a str,
+    pub attempt: &'a str,
+    pub now: i64,
+    pub second: bool,
+}
 pub(crate) fn execute(
     conn: &mut rusqlite::Connection,
     path: &str,
     bytes: &[u8],
-    token: &str,
-    ip: &str,
-    request: &str,
-    attempt: &str,
-    now: i64,
-    second: bool,
+    context: Context<'_>,
 ) -> Result<Response, Error> {
+    let Context {
+        token,
+        ip,
+        request,
+        attempt,
+        now,
+        second,
+    } = context;
     match path {
         "claim/request" => {
             let i: Email = parse(bytes)?;

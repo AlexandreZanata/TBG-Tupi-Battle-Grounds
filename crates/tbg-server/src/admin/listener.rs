@@ -117,7 +117,7 @@ async fn execute(
         let expected = anonymous.as_ref().ok_or(Error::Forbidden)?;
         if expected.len() != 64
             || !crate::identity::codes::equal(
-                &super::key::hash(&expected),
+                &super::key::hash(expected),
                 &super::key::hash(csrf.as_deref().ok_or(Error::Forbidden)?),
             )
         {
@@ -149,7 +149,15 @@ async fn execute(
         let _permit=permit;
         let principal=if route.capability!=policy::Capability::Public {
             match operators::sessions::authenticate(db,&token,mutation.then_some(csrf.as_deref().unwrap_or("")),now) {
-                Ok(p)=>{if !policy::allowed(&p.role,route.capability){return Err(Error::Forbidden);}if route.sensitive&&now-p.reauth>=300{return Err(Error::Reauth);}Some(p)},
+                Ok(p) => {
+                    if !policy::allowed(&p.role, route.capability) {
+                        return Err(Error::Forbidden);
+                    }
+                    if route.sensitive && now - p.reauth >= 300 {
+                        return Err(Error::Reauth);
+                    }
+                    Some(p)
+                },
                 Err(Error::Unauthorized) if path=="session"=>{
                     // Before a session exists, a host-only nonce protects claim/sign-in against login CSRF.
                     let nonce=super::key::random::<32>().map_err(|_|Error::Unavailable)?;
@@ -158,7 +166,7 @@ async fn execute(
                 },Err(e)=>return Err(e)
             }
         }else{None};
-        if path.starts_with("session")||path.starts_with("claim/"){session::execute(db,&path,&bytes,&token,&ip,&id,&attempt,now,second)}else{
+        if path.starts_with("session")||path.starts_with("claim/"){session::execute(db,&path,&bytes,session::Context {token:&token,ip:&ip,request:&id,attempt:&attempt,now,second})}else{
             let principal=principal.as_ref().ok_or(Error::Unauthorized)?;
             if path.starts_with("emoji/")&&path.ends_with("/sheet.png") {
                 let asset=path.split('/').nth(1).and_then(|v|v.parse::<i64>().ok()).ok_or(Error::Invalid)?;

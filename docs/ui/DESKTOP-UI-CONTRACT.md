@@ -869,3 +869,15 @@ Affected cases: battle HUD shop row (both sides), every Arena × both sides ×
 tiers 1–3 precinct rendering and motion. Linux native captures are the
 reference; Windows and desktop web rows for these cases remain **pending**
 until captured on those targets.
+
+
+P75/AX-T consolidation (2026-11-02): the compact auxiliary cards remain children
+of the shared Shop scale. The P75 chat column stays above that row. Backup-key
+forms retain four keyboard stops; login-key forms include the fifth lost-key
+stop. Newly issued recovery keys replace cached exports and pending pre-rotation
+export results on every desktop target. All device observations remain
+explicit in the consolidation report; these shared paths alone prove no parity.
+
+BR-AX15 consolidation preserves all static land props even at a precinct anchor;
+only sea-surface floaters below the existing harbor threshold may yield. The
+unfiltered scenery collision contract remains mandatory for every Arena/side.

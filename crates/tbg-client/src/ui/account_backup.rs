@@ -17,6 +17,13 @@ pub(crate) enum ExportAction {
     Download,
 }
 
+/// A server-issued recovery key supersedes any cached pre-rotation export.
+pub(crate) fn issued_key(account: &mut Account, key: &str) {
+    account.recovery_key = Some(key.to_owned());
+    account.key_action = None;
+    account.key_result = None;
+}
+
 pub(crate) fn matches_account(key: &str, account: &Account) -> bool {
     account.profile.as_ref().is_some_and(|profile| {
         tbg_core::account::parse_key(key)
@@ -113,6 +120,25 @@ fn finish(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn br_rc02_recovery_replaces_a_cached_export_and_discards_inflight_old_results() {
+        let mut account = Account {
+            recovery_key: Some("SameUser-0000-0000-0000-0000".into()),
+            key_action: Some(ExportAction::Download),
+            key_result: Some(Ok(Some("SameUser-0000-0000-0000-0000".into()))),
+            ..Default::default()
+        };
+        issued_key(&mut account, "SameUser-1111-1111-1111-1111");
+        assert_eq!(
+            account.recovery_key.as_deref(),
+            Some("SameUser-1111-1111-1111-1111")
+        );
+        assert!(
+            account.key_action.is_none() && account.key_result.is_none(),
+            "BR-RC02: an old pending export must never replace the newly recovered key"
+        );
+    }
+
     #[test]
     fn br_as05_backup_never_exports_another_accounts_cached_key() {
         let account = Account {

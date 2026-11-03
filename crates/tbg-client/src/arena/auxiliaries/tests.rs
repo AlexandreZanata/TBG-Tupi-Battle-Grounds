@@ -627,3 +627,23 @@ fn red_side_precincts_render_both_faces_under_their_mirror() {
         "mirrored winding must not cull outward faces"
     );
 }
+
+#[test]
+fn br_ax15_static_land_props_never_yield_even_at_a_precinct_anchor() {
+    for arena in tbg_core::Arena::ALL {
+        let theme = Theme::from(arena);
+        let kit = themes::build(theme);
+        for (shape, color, _) in kit.props.into_iter().chain(kit.glow) {
+            for seat in Seat::BOTH {
+                for kind in AuxiliaryKind::ALL {
+                    let (at, _) = placement::anchor(theme, seat, kind);
+                    let part = (shape, color, Transform::from_xyz(at.x, 0.0, at.y));
+                    assert!(
+                        !yields_to_precinct(theme, &part),
+                        "BR-AX15: preserve static land scenery instead of hiding a collision"
+                    );
+                }
+            }
+        }
+    }
+}

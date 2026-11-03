@@ -43,6 +43,7 @@ impl Service {
         .await
     }
 
+    #[allow(clippy::too_many_arguments)] // Registration binds enrollment and retry proof to the same channel-specific grant.
     pub(super) async fn register(
         &self,
         name: String,

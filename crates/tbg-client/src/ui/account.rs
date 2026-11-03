@@ -118,6 +118,7 @@ fn drain_inbox(
         }
         match msg {
             ServerMsg::Registered { key, profile } => {
+                super::account_backup::issued_key(&mut account, &key);
                 account.profile = Some(profile.clone());
                 account.screen = AccountScreen::SaveKey {
                     key,

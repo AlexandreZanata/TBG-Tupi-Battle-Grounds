@@ -28,6 +28,7 @@ impl Service {
             })
             .await;
     }
+    #[allow(clippy::too_many_arguments)] // Recovery binds the typed proof, device and retry to one revocable grant.
     pub(super) async fn recover(
         &self,
         name: String,

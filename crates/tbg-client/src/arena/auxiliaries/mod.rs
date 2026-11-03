@@ -23,25 +23,10 @@ use placement::{pad_center, pad_half, placement};
 use tbg_core::auxiliary::{AuxiliaryKind, AuxiliaryPhase, AUXILIARY_RULE};
 use tbg_core::Seat;
 
-/// True when a static arena prop at `pos` would clip into a `Mineiro` or
-/// `Mercador` pad or bridge (BR-AX15). Leaves `camp::BRAZIERS` untouched.
-pub(super) fn overlaps_precinct(theme: Theme, pos: Vec3) -> bool {
-    Seat::BOTH.into_iter().any(|seat| {
-        AuxiliaryKind::ALL
-            .into_iter()
-            .any(|kind| placement::covers(theme, seat, kind, pos.xz(), 0.35))
-    })
-}
-
-/// True when an arena prop must yield to a precinct (BR-AX15): any prop whose
-/// origin lies on a pad or bridge, and sea-surface floaters crossing a
-/// harbor's open water. Rocks, crags and landmarks are never removed; the
-/// layouts keep clear of them instead.
+/// Only sea-surface decoration may yield to a harbor's open water (BR-AX15).
+/// Static rocks, crags, landmarks and land props always retain their positions.
 pub(super) fn yields_to_precinct(theme: Theme, part: &crate::arena::Part) -> bool {
     let (shape, _, t) = part;
-    if overlaps_precinct(theme, t.translation) {
-        return true;
-    }
     if t.translation.y >= placement::FLOATER_Y {
         return false;
     }
