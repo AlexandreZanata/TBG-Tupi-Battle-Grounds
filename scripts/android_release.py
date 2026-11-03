@@ -34,7 +34,7 @@ def filename(value):
 def relevant(paths):
     files = {'Cargo.toml', 'Cargo.lock', 'rust-toolchain.toml',
              'scripts/package-android.py', 'scripts/android_binary.py', 'scripts/android_release.py',
-             'scripts/build-android-beta.py'}
+             'scripts/build-android-beta.py', 'scripts/setup-android-toolchain.py'}
     prefixes = ('crates/tbg-client/', 'crates/tbg-core/', 'platform/android/')
     return any(path in files or (path.startswith(prefixes) and not path.endswith('.md')
                and not any(part in path for part in ['/tests/', '/examples/', '/benches/'])) for path in paths)

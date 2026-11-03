@@ -27,6 +27,7 @@ def module(name):
 
 publisher = module('android-main-release')
 packager = module('android-release-manifest')
+toolchain = module('setup-android-toolchain')
 SOURCE = 'a'*40
 CONTRACT = 'w40-r16-f2e253b98ccb313a'
 LIVE = {'contract': CONTRACT}
@@ -49,6 +50,29 @@ def candidate():
 
 
 class AndroidPublication(unittest.TestCase):
+    def test_sdk_provisioning_uses_the_real_manager_path_and_refuses_changed_pins(self):
+        # A runner may ship sdkmanager without exposing it on PATH (run 41673897998).
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            manager = root/'cmdline-tools/latest/bin/sdkmanager'
+            manager.parent.mkdir(parents=True)
+            manager.write_text('fixture only')
+            pins = {'compile_sdk': 36, 'sdk_platform_revision': 2,
+                    'build_tools': '36.0.0', 'ndk': '28.2.13676358'}
+            for name, revision in [('platforms/android-36', '2'), ('build-tools/36.0.0', '36.0.0'),
+                                   ('ndk/28.2.13676358', '28.2.13676358')]:
+                folder = root/name
+                folder.mkdir(parents=True)
+                (folder/'source.properties').write_text('Pkg.Revision = '+revision+'\n')
+            with patch.object(toolchain.subprocess, 'run') as run, patch.dict('os.environ', {'PATH': ''}):
+                output = root/'environment'
+                toolchain.install(root, pins, output)
+                self.assertEqual(run.call_args.args[0][0], str(manager))
+                self.assertIn('ANDROID_NDK_HOME='+str(root/'ndk/28.2.13676358'), output.read_text())
+                (root/'platforms/android-36/source.properties').write_text('Pkg.Revision = 3\n')
+                with self.assertRaisesRegex(ValueError, 'reviewed pin'):
+                    toolchain.install(root, pins, output)
+
     def test_only_the_reviewed_release_signature_abi_revision_and_live_contract_enable_downloads(self):
         meta, release = candidate()
         result = android_policy.catalog(meta, release, LIVE)['android']
