@@ -613,6 +613,11 @@ consume the same authoritative positions across platforms.
 bot match. The new tests cover every Shop champion and a Farwatch
 firing at 36 units without stepping toward the target.
 
+Installed Linux build `0.1.0-2b7775169a4b` with the local installer
+(9.90 s). The installed client completed the 60-second Bot overview
+capture with exit 0 and only Xvfb display warnings. Evidence:
+`/tmp/tbg-p77-range/playtest.png` and `/tmp/tbg-p77-range/smoke.log`.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 champion Evolution forms and coverage beyond the automatic base kits ·
