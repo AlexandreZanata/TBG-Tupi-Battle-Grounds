@@ -734,3 +734,72 @@ fn p71_cleanup_preserves_the_terminal_replay_after_a_long_pause() {
         "expiry does not grant a longer window"
     );
 }
+
+#[test]
+fn p71_authenticated_terminal_replay_keeps_the_original_family_and_expiry() {
+    // BR-M03/P63/BR-AS07: valid same-family auth can replay, never extend the terminal deadline.
+    let (mut lobby, _rx) = lobby();
+    let token = [72; 16];
+    let _old = add_session(&mut lobby, token, SessionState::Idle);
+    let profile = profile("ReplayAccount", 1000);
+    let binding = crate::auth::Binding::fixture(72, profile.clone());
+    let old_detach = Instant::now()
+        - Duration::from_secs(lobby.config.pause_secs + lobby.config.reconnect_secs + 1);
+    let result = completed_fixture(Seat::B);
+    let session = lobby.sessions.get_mut(&token).unwrap();
+    session.conn = None;
+    session.detached_at = Some(old_detach);
+    session.auth_binding = Some(binding.clone());
+    session.account = Some((72, profile.clone()));
+    session.finished = Some((Instant::now() + Duration::from_secs(30), Box::new(result)));
+
+    let (tx, mut inbox) = mpsc::channel(16);
+    let wrong = crate::auth::Binding::fixture(73, profile);
+    assert!(lobby
+        .auth_hello(
+            Some(token),
+            ConnHandle::new(7200, tx.clone()),
+            [127, 0, 0, 1].into(),
+            wrong,
+            false
+        )
+        .is_none());
+    assert!(
+        inbox.try_recv().is_err(),
+        "another account cannot read the replay"
+    );
+    let resumed = lobby.auth_hello(
+        Some(token),
+        ConnHandle::new(7272, tx),
+        [127, 0, 0, 1].into(),
+        binding.clone(),
+        false,
+    );
+    assert_eq!(resumed.unwrap().0, token);
+    let messages: Vec<_> = std::iter::from_fn(|| inbox.try_recv().ok()).collect();
+    assert!(messages.iter().any(|m| matches!(m, ConnEvent::Send(ServerMsg::MatchStart { result_id, .. }) if *result_id == [63;16])));
+    assert!(messages.iter().any(|m| matches!(
+        m,
+        ConnEvent::Send(ServerMsg::MatchEnd { last_tick: 120, .. })
+    )));
+
+    let session = lobby.sessions.get_mut(&token).unwrap();
+    session.conn = None;
+    session.detached_at = Some(old_detach);
+    session.finished.as_mut().unwrap().0 = Instant::now() - Duration::from_secs(1);
+    let (tx, mut inbox) = mpsc::channel(16);
+    let fresh = lobby.auth_hello(
+        Some(token),
+        ConnHandle::new(7273, tx),
+        [127, 0, 0, 1].into(),
+        binding,
+        false,
+    );
+    assert_ne!(
+        fresh.unwrap().0,
+        token,
+        "expired terminal state starts a fresh session"
+    );
+    assert!(!std::iter::from_fn(|| inbox.try_recv().ok())
+        .any(|m| matches!(m, ConnEvent::Send(ServerMsg::MatchEnd { .. }))));
+}

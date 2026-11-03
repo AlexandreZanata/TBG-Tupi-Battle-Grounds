@@ -1228,3 +1228,10 @@ enough width for the existing32px icon and padding. Numeric IDs no longer
 overlap the emoji. Selection, slots, permissions and server authority are
 unchanged. Actual Android47 library/cancel evidence exposed this issue;
 corrected Android/Linux/web observations are queued.
+
+
+P69 authenticated recovery: valid same-family reconnect honors the existing
+terminal replay deadline after a long pause, through both session cleanup and
+authenticated hello. Cross-account, expired Access and controller protections
+are retained. Android48 terminal failure and its bounded Menu recovery remain
+recorded; corrected signed-in runtime repetition is pending.
