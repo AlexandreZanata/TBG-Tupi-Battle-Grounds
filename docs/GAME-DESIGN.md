@@ -2722,3 +2722,11 @@ BR-AX11) are unchanged. All values are **Proposed** and still need
   and never touch the BattleLine road or any existing static Arena scenery; a
   pad over the water is reached by a wooden plank bridge. This is presentation
   only and changes no rule.
+
+## 24. TBG Arena 5v5 — MOBA mode (P76, Proposed)
+
+A separate 5v5 mode (ten Commanders, three lanes, jungle, Troops sent to a
+Destination, bots on empty seats). Its canon, glossary and every number are
+**Proposed** and unbalanced in [GAME-DESIGN-MOBA.md](moba/GAME-DESIGN-MOBA.md);
+nothing in sections 1–23 changes and no 1v1 term or value is reused by it.
+Balance waits for an explicit owner request (D-112).

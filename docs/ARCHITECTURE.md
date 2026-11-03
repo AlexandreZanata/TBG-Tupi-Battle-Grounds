@@ -1061,3 +1061,12 @@ Source/toolchain/signing/artifact identity and real layout/performance/
 lifecycle evidence gate delivery. One phone does not certify all Android
 devices, 16 KB runtime or public-store readiness. P68 remains separately
 owned; any later common-contract integration is reviewed explicitly.
+
+## 30. TBG Arena 5v5 — separate MOBA workspace (P76, D-112)
+
+`moba/` is a second Cargo workspace (`tbg-moba-core`, `tbg-moba-server`,
+`tbg-moba-client`) with its own lock file, CI workflow and installer. It
+keeps the same boundaries as §3 (deterministic core, Bevy-free server,
+client never decides online outcomes) and has no dependency in either
+direction with `crates/*`. Details: [ARCHITECTURE-MOBA.md](moba/ARCHITECTURE-MOBA.md);
+immutable contracts: [CONTRACTS.md](moba/CONTRACTS.md).

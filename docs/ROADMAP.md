@@ -728,3 +728,14 @@ Read the [acceptance/runbook](planning/P69-ANDROID-ACCEPTANCE.md),
 The execution checkpoint separates actual build/device evidence from
 remaining acceptance. No all-Android compatibility or public-store approval
 is claimed.
+
+## P76 — TBG Arena 5v5 (MOBA) foundation (owner request, 2026-11-03)
+
+| Phase | Spec | Deliverable | Status | Owner gates |
+|---|---|---|---|---|
+| P76 | [P76-moba-5v5-foundation.md](phases/P76-moba-5v5-foundation.md) | Separate `moba/` workspace: deterministic 5v5 core, authoritative room server, Bevy client with the reference-image valley and HUD, offline practice vs 9 bots, online local room, Linux installer, contracts and CI | **implemented on `phase/p76-moba-core`**; MOBA workspace fmt/clippy/12 contract tests passed; Linux runtime and input observed and installed locally; Windows/web correspondence pending; unbalanced by design | look/fun sign-off; when to balance; integration into the 1v1 launcher; P77–P81 order |
+
+Read [docs/moba/README.md](moba/README.md). Next phases (each needs its own
+spec): P77 Commander kit and orders → P78 online rooms for real players →
+P79 presentation polish → P80 Windows and desktop web → P81 balance (only
+on explicit owner request). The 1v1 roadmap above is unaffected.

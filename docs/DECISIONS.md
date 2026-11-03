@@ -3464,3 +3464,30 @@ The combined candidate classifies `protocol/social.rs` with the other wire-only
 modules in `ruleset-sources.txt`. The frozen standard emoji asset table stays
 in `protocol.rs`; its hexadecimal identifiers are not simulation operations.
 No watched source, R16 fingerprint or simulation guard changes for this move.
+
+
+### D-112 — The 5v5 MOBA mode is a separate workspace (P76, 2026-11-03, Proposed)
+
+**Decision.** TBG Arena 5v5 lives in `moba/`, a Cargo workspace of its own
+(`tbg-moba-core`, `tbg-moba-server`, `tbg-moba-client`) with its own lock
+file, CI workflow (`moba.yml`), installer and binaries. It has no dependency
+on `crates/*` and the 1v1 crates have none on it. Its rules, glossary and
+numbers are Proposed and unbalanced in `docs/moba/GAME-DESIGN-MOBA.md`; its
+wire protocol v1 and authority rules are immutable contracts in
+`docs/moba/CONTRACTS.md`.
+
+**Why.** The owner asked for a mode that cannot interfere with the 1v1
+game. Root `Cargo.toml`/`Cargo.lock` are 1v1 desktop release inputs
+(`scripts/native_release_policy.py`): adding members there would force a 1v1
+version bump and publication on merge, and Cargo feature unification could
+change 1v1 builds. A separate workspace removes both risks; the lock file
+was copied from the root so dependency versions stay the audited set.
+
+**Design choice.** The mode keeps TBG's identity — players buy Troops and
+send them to a Destination — and adds one steerable Commander per player
+with a role, on a three-lane map with a jungle, as in the owner's reference
+image. Bots fill every empty seat through the same intentions as humans.
+
+**Reopen when** the owner wants the mode inside the 1v1 launcher or server,
+shared crates between modes become worth their coupling, or balance work
+(only on explicit request) needs a lab like D-33.

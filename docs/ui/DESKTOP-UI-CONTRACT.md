@@ -1280,3 +1280,17 @@ Desktop/390 x 844 PT/EN landing observations are in
 [the media report](../evidence/landing-android-beta-20261103.md). This adds no
 in-game parity evidence: Windows pixel/motion and physical ARM64/16 KB remain
 pending. Public download compatibility uses the actual running server.
+
+## P76 — TBG Arena 5v5 (MOBA) client (2026-11-03)
+
+New, separate client `tbg-moba` (`moba/client-moba`), not part of the 1v1
+capture matrix: menu, practice/online match HUD (scoreboard, role columns,
+player card, five Troop cards with rendered portraits, Destination,
+"Comprar e Enviar", minimap with zoom/auto/centre buttons, kill feed,
+toasts, connection and end overlays), the Tupi Valley scene and every unit
+figure, health bar, projectile, spark, death burst and move marker. Linux is
+the reference: offline start, mid-game overview, online join and real X
+input journeys were observed (see the [P76 report](../phases/P76-moba-5v5-foundation.md)).
+Presentation code has no OS-specific branches; the WASM client passes
+`cargo check` without warnings (locally and in the MOBA CI). Windows and desktop web packaging, runtime and pixel/motion
+correspondence are **pending** (P80) and block visual acceptance there.
