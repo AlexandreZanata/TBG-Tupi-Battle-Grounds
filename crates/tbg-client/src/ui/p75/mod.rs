@@ -205,7 +205,7 @@ fn input(
     for e in entered.read().filter(|e| {
         matches!(
             e.kind,
-            TextKind::P75Text | TextKind::P75Code | TextKind::P75Secret
+            TextKind::P75Text | TextKind::P75Email | TextKind::P75Code | TextKind::P75Secret
         )
     }) {
         let Some(target) = s.awaiting.take() else {

@@ -27,7 +27,7 @@ pub(super) fn apply(action: Action, ctx: &mut Context<'_>) {
             *lang,
             Await::NewEmail,
             "p75.email_prompt",
-            TextKind::P75Text,
+            TextKind::P75Email,
         ),
         Action::OldCode => prompt(
             s,

@@ -1252,3 +1252,11 @@ including maximum-length unbroken input. Desktop typography/geometry and
 shared input/protocol limits remain unchanged. Actual48 report stored500 of
 501 attempted ASCII scalars and showed Report sent; overflow is recorded
 separately from the successful submission. Corrected rendering is pending.
+
+
+P69 contextual native input: P75 email fields select the existing Android email
+keyboard, and Room selects alphanumeric code input. Their original shared
+limits, values, submission and server rules remain intact. Desktop/web editing
+geometry/behavior is preserved. Actual52 recovery succeeded; the generic email
+keyboard is a recorded presentation issue. Corrected IME observations remain
+pending the next package.

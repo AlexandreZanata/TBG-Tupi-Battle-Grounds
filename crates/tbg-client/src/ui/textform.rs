@@ -17,6 +17,7 @@ pub enum TextKind {
     MatchChat,
     Email,
     P75Text,
+    P75Email,
     P75Code,
     P75Secret,
     CatalogSearch,
@@ -32,7 +33,7 @@ pub fn limit(kind: Option<TextKind>) -> usize {
     match kind {
         Some(TextKind::Name | TextKind::PlayerSearch | TextKind::P75Code) => 16,
         Some(TextKind::Email) => 254,
-        Some(TextKind::P75Text) => 500,
+        Some(TextKind::P75Text | TextKind::P75Email) => 500,
         Some(TextKind::Room) => 5,
         #[cfg(target_os = "android")]
         Some(TextKind::MatchChat) => 120,
@@ -109,7 +110,7 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
             TextKind::Room => "room",
             TextKind::Name => "name",
             TextKind::Key | TextKind::BackupKey | TextKind::P75Secret => "key",
-            TextKind::Email | TextKind::P75Text | TextKind::P75Code => "name",
+            TextKind::Email | TextKind::P75Text | TextKind::P75Email | TextKind::P75Code => "name",
         };
         let _ = dom.form.set_attribute("data-kind", marker);
         set_error_text(dom, None);

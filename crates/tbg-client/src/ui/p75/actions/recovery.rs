@@ -19,7 +19,7 @@ pub(super) fn apply(action: Action, ctx: &mut Context<'_>) {
             *lang,
             Await::Email,
             "p75.email_prompt",
-            TextKind::P75Text,
+            TextKind::P75Email,
         ),
         Action::RecoveryRequest => {
             if s.pending.is_none() {
