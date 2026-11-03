@@ -1121,3 +1121,12 @@ loading notice only after actual data arrives on all targets. Native IME
 geometry and desktop field geometry are unchanged. Candidate40 lifecycle/drag
 and five actual Linux/Android canonical traces are recorded separately in the
 P69 continuation report; verification-form runtime repetition remains pending.
+
+
+P69 battle visibility: the Android scene remains edge-to-edge while its camera
+fits the actual horizontal safe width and centers bodies between measured HUD
+bounds. A framed Army control opens complete scrollable Synergy/Augment details;
+shared desktop readouts and camera are preserved. Android Council names occupy
+the full card width above the original art/price. On all targets, Council has
+global modal priority and chat closes throughout its authoritative pause.
+Actual runtime and correspondence observations are pending the next candidate.

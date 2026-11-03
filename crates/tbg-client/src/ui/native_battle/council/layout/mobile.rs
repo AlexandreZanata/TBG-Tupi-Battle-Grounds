@@ -34,10 +34,10 @@ pub(super) fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: u
             // Preserve the original frame/illustration proportions rather than stretching art.
             card.spawn(Node {
                 position_type: PositionType::Absolute,
-                left: px(4),
-                top: px(14),
-                width: px(56),
-                height: px(56. * 1180. / 820.),
+                left: px(5),
+                top: px(48),
+                width: px(42),
+                height: px(42. * 1180. / 820.),
                 ..default()
             })
             .with_children(|art| {
@@ -74,20 +74,20 @@ pub(super) fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: u
             card.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    left: px(66),
+                    left: px(4),
                     right: px(4),
-                    top: px(10),
+                    top: px(6),
                     min_width: px(0),
                     ..default()
                 },
-                chrome::title("", 12.),
+                chrome::title("", 11.),
                 TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
                 Field::Name(i),
             ));
             card.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    left: px(66),
+                    left: px(54),
                     right: px(4),
                     bottom: px(8),
                     height: px(24),

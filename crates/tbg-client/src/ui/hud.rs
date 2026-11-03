@@ -306,8 +306,11 @@ fn spawn(
                 Hud::PrivateControls,
             ))
             .with_children(|shop| {
-                shop.spawn((label("", 11.), Hud::Augments));
-                shop.spawn((label("", 11.), Hud::Info));
+                #[cfg(not(target_os = "android"))]
+                {
+                    shop.spawn((label("", 11.), Hud::Augments));
+                    shop.spawn((label("", 11.), Hud::Info));
+                }
                 shop.spawn((
                     Node {
                         width: if cfg!(target_os = "android") {
@@ -338,6 +341,8 @@ fn spawn(
             });
             #[cfg(target_os = "android")]
             super::native_battle::auxiliaries(root, &assets);
+            #[cfg(target_os = "android")]
+            super::native_battle::details(root, *lang);
             root.spawn((
                 Node {
                     position_type: PositionType::Absolute,

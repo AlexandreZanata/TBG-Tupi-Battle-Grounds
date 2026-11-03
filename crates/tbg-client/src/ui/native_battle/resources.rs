@@ -47,6 +47,8 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 visual_box: bevy::ui::VisualBox::BorderBox,
                 ..ImageNode::new(assets.load("battle/native/resources.webp"))
             },
+            #[cfg(target_os = "android")]
+            crate::camera::mobile::BelowBattle,
         ))
         .with_children(|bar| {
             #[cfg(target_os = "android")]
@@ -146,8 +148,16 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                     flex_basis: px(0),
                     min_width: px(0),
                     max_height: percent(100),
+                    height: px(48),
+                    padding: UiRect::all(px(4)),
+                    border: UiRect::all(px(1)),
+                    border_radius: BorderRadius::all(px(4)),
                     ..default()
                 },
+                #[cfg(target_os = "android")]
+                BorderColor::all(chrome::GOLD),
+                #[cfg(target_os = "android")]
+                UiAction::ToggleBattleDetails,
                 #[cfg(target_os = "android")]
                 TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
                 chrome::title(

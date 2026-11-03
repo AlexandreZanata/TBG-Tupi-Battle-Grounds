@@ -114,6 +114,7 @@ pub(crate) fn keys(
     state: Res<State<GameState>>,
     info: Res<MatchInfo>,
     mut link: NonSendMut<MatchLink>,
+    view: Res<crate::sync::LatestView>,
     time: Res<Time>,
     form: NonSend<super::textform::ActiveForm>,
 ) {
@@ -127,6 +128,7 @@ pub(crate) fn keys(
         || !matches!(&*link, MatchLink::Net(_))
         || super::textform::is_open(&form)
         || super::p75::modal()
+        || view.0.as_ref().is_some_and(|v| v.augment_round.is_some())
     {
         events.clear();
         chat.focused = false;
@@ -214,11 +216,13 @@ fn render(
     lang: Res<Lang>,
     time: Res<Time>,
     link: NonSend<MatchLink>,
+    view: Res<crate::sync::LatestView>,
     mut shown: Local<String>,
 ) {
     let active = chat.mode < 2
         && *state.get() == GameState::InMatch
         && !info.spectating
+        && !view.0.as_ref().is_some_and(|v| v.augment_round.is_some())
         && matches!(&*link, MatchLink::Net(_));
     let signature = format!(
         "{active}:{}:{}:{}:{}:{}:{}:{}",

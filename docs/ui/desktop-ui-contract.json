@@ -433,6 +433,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-battle-visible-band-details-council",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android measured mobile battle camera, Army details drawer, Council card names; shared exclusive Council/chat layering with Linux desktop geometry preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

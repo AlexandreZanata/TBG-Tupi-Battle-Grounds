@@ -2021,5 +2021,6 @@
   "mobile.training.reset": "Reset",
   "mobile.training.back": "Catalog",
   "battle.evolution": "Evolution",
-  "android.chat_compose": "Write a message"
+  "android.chat_compose": "Write a message",
+  "android.battle.details": "Battle details"
 }

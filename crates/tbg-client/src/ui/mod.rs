@@ -119,6 +119,8 @@ pub enum UiAction {
     HireAuxiliary(u8),
     #[cfg(target_os = "android")]
     ToggleAuxiliaries,
+    #[cfg(target_os = "android")]
+    ToggleBattleDetails,
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     Reserve {
         offer: u8,

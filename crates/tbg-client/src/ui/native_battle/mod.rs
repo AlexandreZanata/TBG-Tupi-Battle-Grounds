@@ -5,6 +5,8 @@ mod auxiliaries;
 mod cards;
 pub(super) mod chrome;
 mod council;
+#[cfg(target_os = "android")]
+mod details;
 mod fortify;
 mod reserve;
 mod resources;
@@ -32,7 +34,12 @@ pub(super) fn plugin(app: &mut App) {
     unit_panel::plugin(app);
     reserve::plugin(app);
     council::plugin(app);
+    #[cfg(target_os = "android")]
+    details::plugin(app);
 }
+
+#[cfg(target_os = "android")]
+pub(super) use details::spawn as details;
 
 pub(super) use council::CouncilControl;
 

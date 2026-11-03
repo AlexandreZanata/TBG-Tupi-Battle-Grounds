@@ -379,6 +379,8 @@ pub(super) fn apply(
             }
             #[cfg(target_os = "android")]
             UiAction::ToggleAuxiliaries => {}
+            #[cfg(target_os = "android")]
+            UiAction::ToggleBattleDetails => {}
             UiAction::HireAuxiliary(slot) => {
                 if pending.0.is_some() {
                     continue;

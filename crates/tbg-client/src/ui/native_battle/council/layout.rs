@@ -26,7 +26,7 @@ pub(super) fn spawn(
             Root,
             Visibility::Hidden,
             UiAction::Disabled,
-            ZIndex(30),
+            GlobalZIndex(30),
             DespawnOnExit(GameState::InMatch),
         ))
         .with_children(|backdrop| {

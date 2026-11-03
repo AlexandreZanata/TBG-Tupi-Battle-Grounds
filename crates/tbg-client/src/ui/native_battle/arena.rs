@@ -65,6 +65,8 @@ fn spawn(
             },
             DespawnOnExit(GameState::InMatch),
             ZIndex(3),
+            #[cfg(target_os = "android")]
+            crate::camera::mobile::AboveBattle,
         ))
         .with_children(|root| {
             root.spawn((
