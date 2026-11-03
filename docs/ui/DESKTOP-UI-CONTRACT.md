@@ -1327,3 +1327,15 @@ fog plane. Two visibility levels; a cosmetic inner feather. Minimap timers
 use only received visible Camp records. Fog removals skip death cues;
 projectiles into unseen areas are culled. Linux runtime/shader and all
 Windows/web pixel/motion checks pending (P81 for the latter).
+
+## P77 D — valley map refinement (2026-11-03)
+
+Shared MOBA scene: read-only 1v1 pine canopies, bushes, flowers, grass and
+seeded boulders; darker forest floor and dirt jungle paths; sand banks,
+rock/moss rim strata, individual worn cobbles/kerbs, fences/pennants,
+stone bridges, thick plaza island/stairs, raised base courts, braziers,
+river-exit waterfalls, vertex-wave water, flame flicker and cached structure
+damage bands. Warm key/cool ambient, three shadow cascades and distance haze.
+All pixel/motion observations remain pending, including Linux. No platform
+waiver or parity claim; queue overview/lane/camp/base/river checks on all
+three desktop targets at consolidation (Windows/web runtime in P81).

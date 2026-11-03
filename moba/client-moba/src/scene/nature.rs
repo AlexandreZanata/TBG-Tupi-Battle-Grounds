@@ -4,7 +4,7 @@ use bevy::prelude::*;
 use tbg_moba_core::map::{self, PLAZA, RIVER_HALF_WIDTH, SIZE};
 use tbg_moba_core::Team;
 
-use super::mesh::{hash, merge, mix, noise, Part, Shape};
+use super::mesh::{hash, merge, noise, Part, Shape};
 use super::terrain::{height, lane_distance, river_distance, v};
 use super::to_world;
 
@@ -23,7 +23,8 @@ fn clear(p: Vec2) -> bool {
         let s = map::stronghold(t);
         p.distance(Vec2::new(s.x as f32, s.y as f32) / 1000.0) < 24.0
     });
-    lane_distance(p) < 7.0
+    super::terrain::jungle_path_distance(p) < 2.4
+        || lane_distance(p) < 7.0
         || river_distance(p) < RIVER_HALF_WIDTH as f32 + 3.5
         || p.distance(v(PLAZA)) < 15.0
         || tower_near
@@ -31,71 +32,24 @@ fn clear(p: Vec2) -> bool {
         || base_near
 }
 
-fn pine(parts: &mut Vec<Part>, at: Vec3, s: f32, tint: f32, yaw: f32) {
-    let rot = Quat::from_rotation_y(yaw);
-    parts.push((
-        Shape::Cyl(0.22 * s, 1.2 * s),
-        Color::srgb(0.36, 0.24, 0.14),
-        Transform::from_translation(at + Vec3::Y * 0.6 * s),
-    ));
-    let greens = [
-        mix(
-            Color::srgb(0.13, 0.33, 0.16),
-            Color::srgb(0.20, 0.42, 0.15),
-            tint,
-        ),
-        mix(
-            Color::srgb(0.17, 0.40, 0.18),
-            Color::srgb(0.27, 0.50, 0.17),
-            tint,
-        ),
-        mix(
-            Color::srgb(0.24, 0.48, 0.20),
-            Color::srgb(0.36, 0.58, 0.20),
-            tint,
-        ),
-    ];
-    for (k, (r, h, y)) in [(1.55, 2.1, 1.9), (1.2, 1.8, 2.9), (0.8, 1.5, 3.8)]
-        .into_iter()
-        .enumerate()
-    {
-        parts.push((
-            Shape::Cone(r * s, h * s),
-            greens[k],
-            Transform::from_translation(at + Vec3::Y * y * s).with_rotation(rot),
-        ));
-    }
+fn pine(parts: &mut Vec<Part>, at: Vec3, s: f32, _tint: f32, _yaw: f32) {
+    let mut shared = Vec::new();
+    super::kit::pine(&mut shared, at, s * 2.1);
+    append(parts, shared);
 }
-
 fn bush(parts: &mut Vec<Part>, at: Vec3, s: f32) {
-    for (off, r) in [
-        (Vec3::new(-0.35, 0.3, 0.0), 0.6),
-        (Vec3::new(0.35, 0.35, 0.1), 0.7),
-        (Vec3::new(0.0, 0.25, -0.4), 0.5),
-    ] {
-        parts.push((
-            Shape::Ball(r * s),
-            Color::srgb(0.24, 0.48, 0.17),
-            Transform::from_translation(at + off * s).with_scale(Vec3::new(1.1, 0.8, 1.0)),
-        ));
-    }
+    let mut shared = Vec::new();
+    super::kit::bush(&mut shared, at, s * 1.6);
+    append(parts, shared);
 }
-
 pub fn rock(parts: &mut Vec<Part>, at: Vec3, s: f32, seed: f32) {
-    let grey = mix(
-        Color::srgb(0.42, 0.41, 0.39),
-        Color::srgb(0.60, 0.58, 0.54),
-        seed,
-    );
-    parts.push((
-        Shape::Ball(s),
-        grey,
-        Transform::from_translation(at + Vec3::Y * s * 0.25)
-            .with_rotation(Quat::from_rotation_y(seed * 6.0))
-            .with_scale(Vec3::new(1.3, 0.75, 1.0)),
-    ));
+    let mut shared = Vec::new();
+    super::kit::boulder(&mut shared, at, s * 1.7, seed * 6.);
+    append(parts, shared);
 }
-
+fn append(parts: &mut Vec<Part>, shared: Vec<super::kit::Part>) {
+    parts.extend(shared.into_iter().map(|(s, c, t)| (Shape::Shared(s), c, t)));
+}
 /// The scattered vegetation, one merged mesh per map chunk.
 pub fn forest() -> Vec<Mesh> {
     let chunks = ((SIZE as f32 + 40.0) / CHUNK).ceil() as i32;
@@ -158,4 +112,24 @@ fn clear_of_structures(p: Vec2) -> bool {
     river_distance(p) < RIVER_HALF_WIDTH as f32 + 3.0
         || map::towers()
             .any(|(_, _, _, t)| p.distance(Vec2::new(t.x as f32, t.y as f32) / 1000.0) < 4.0)
+}
+
+/// Tiny verge plants have their own batch so they never cast a shadow.
+pub fn details() -> Mesh {
+    let mut parts = Vec::new();
+    for i in 0..1500 {
+        let p = Vec2::new(hash(i, 0, 113), hash(i, 1, 113)) * SIZE as f32;
+        let lane = lane_distance(p);
+        let river = river_distance(p);
+        if clear_of_structures(p) || !(4.8..8.).contains(&lane) && !(8.5..11.).contains(&river) {
+            continue;
+        }
+        let at = to_world(p.x, p.y, height(p));
+        if i % 7 == 0 {
+            super::kit::flowers(&mut parts, at);
+        } else {
+            super::kit::grass(&mut parts, at, hash(i, 2, 113) * 6.);
+        }
+    }
+    super::kit::merge(parts)
 }

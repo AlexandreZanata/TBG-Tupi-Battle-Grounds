@@ -69,7 +69,7 @@ fn minion(p: &mut Vec<Part>, kind: MinionKind, team: Team) {
     }
 }
 
-fn tower(p: &mut Vec<Part>, tier: TowerTier, team: Team) {
+fn tower(p: &mut Vec<Part>, tier: TowerTier, team: Team, damage: u8) {
     let s = if tier == TowerTier::Nexus { 1.15 } else { 1.0 };
     let trim = palette::team(team);
     p.push((
@@ -85,6 +85,9 @@ fn tower(p: &mut Vec<Part>, tier: TowerTier, team: Team) {
         at(0.0, 5.9 * s, 0.0),
     ));
     for k in 0..6 {
+        if damage > 0 && k % 3 == 0 || damage > 1 && k % 2 == 0 {
+            continue;
+        }
         let a = k as f32 / 6.0 * std::f32::consts::TAU;
         p.push((
             Shape::Box(0.55, 0.6, 0.55),
@@ -111,6 +114,13 @@ fn stronghold(p: &mut Vec<Part>, team: Team) {
         palette::team_dark(team),
         at(0.0, 2.3, 0.0),
     ));
+    for radius in [3.3, 4.5, 5.7] {
+        p.push((
+            Shape::Shared(crate::art::mesh::Shape::Ring(0.10, radius, 360.)),
+            palette::GOLD_DARK,
+            at(0., 1.25, 0.),
+        ));
+    }
     for k in 0..6 {
         let a = k as f32 / 6.0 * std::f32::consts::TAU + 0.5;
         let (x, z) = (a.cos() * 4.7, a.sin() * 4.7);
@@ -140,28 +150,49 @@ pub fn crystal() -> Mesh {
 /// Every unit figure, keyed by kind and side.
 #[derive(Resource, Default)]
 pub struct Models {
-    meshes: HashMap<(UnitKind, Side), Handle<Mesh>>,
+    meshes: HashMap<(UnitKind, Side, u8), Handle<Mesh>>,
 }
 
 impl Models {
-    pub fn get(&mut self, kind: UnitKind, side: Side, meshes: &mut Assets<Mesh>) -> Handle<Mesh> {
+    pub fn get(
+        &mut self,
+        kind: UnitKind,
+        side: Side,
+        damage: u8,
+        meshes: &mut Assets<Mesh>,
+    ) -> Handle<Mesh> {
         self.meshes
-            .entry((kind, side))
-            .or_insert_with(|| meshes.add(figure(kind, side)))
+            .entry((kind, side, damage))
+            .or_insert_with(|| meshes.add(figure(kind, side, damage)))
             .clone()
     }
 }
 
-pub fn figure(kind: UnitKind, side: Side) -> Mesh {
+pub fn figure(kind: UnitKind, side: Side, damage: u8) -> Mesh {
     let team = side.team().unwrap_or(Team::Blue);
     let mut p = Vec::new();
     match kind {
         UnitKind::Minion(m) => minion(&mut p, m, team),
         UnitKind::Neutral(n) => return super::monsters::figure(n),
-        UnitKind::Tower(tier, _) => tower(&mut p, tier, team),
+        UnitKind::Tower(tier, _) => tower(&mut p, tier, team, damage),
         UnitKind::Stronghold => stronghold(&mut p, team),
         // Commanders and Troops are 1v1 champion rigs (champions.rs).
         UnitKind::Commander(_) | UnitKind::Troop(_) => {}
+    }
+    if damage > 0 && kind.structure() {
+        for k in 0..damage * 3 {
+            let angle = k as f32 * 2.4;
+            p.push((
+                Shape::Shared(crate::art::mesh::Shape::Rock(0.45, k as u32)),
+                Color::srgb(0.32, 0.30, 0.27),
+                at(angle.cos() * 2.1, 0.2, angle.sin() * 2.1),
+            ));
+        }
+        p.push((
+            Shape::Box(0.16, 3.2, 0.08),
+            Color::srgb(0.18, 0.18, 0.17),
+            at(0.2, 2.5, -1.28).with_rotation(Quat::from_rotation_z(0.24)),
+        ));
     }
     merge(&p)
 }

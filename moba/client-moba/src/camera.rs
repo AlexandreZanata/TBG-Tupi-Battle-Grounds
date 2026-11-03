@@ -98,6 +98,14 @@ fn spawn(mut commands: Commands) {
         Transform::default(),
         IsDefaultUiCamera,
         MainCamera,
+        DistanceFog {
+            color: crate::palette::SKY,
+            falloff: FogFalloff::Linear {
+                start: 260.,
+                end: 700.,
+            },
+            ..default()
+        },
     ));
     commands.spawn((
         Camera3d::default(),

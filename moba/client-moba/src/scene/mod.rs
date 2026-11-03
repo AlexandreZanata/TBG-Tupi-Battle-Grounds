@@ -4,7 +4,10 @@ use bevy::light::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
 use bevy::prelude::*;
 
 pub mod fog;
+mod kit;
 mod landmarks;
+mod motion;
+mod props;
 use fog::{FogMask, FogMaterial, FogTexture};
 pub mod mesh;
 mod nature;
@@ -26,6 +29,7 @@ pub struct Painted(pub Handle<FogMaterial>);
 
 pub fn plugin(app: &mut App) {
     fog::plugin(app);
+    motion::plugin(app);
     app.insert_resource(DirectionalLightShadowMap { size: 4096 })
         .add_systems(Startup, (setup_material, build).chain());
 }
@@ -56,12 +60,18 @@ fn build(
     painted: Res<Painted>,
 ) {
     let paint = painted.0.clone();
+    let mut batches = 0usize;
+    let mut triangles = 0usize;
     let mut put = |mesh: Mesh| {
-        commands.spawn((
-            Mesh3d(meshes.add(mesh)),
-            MeshMaterial3d(paint.clone()),
-            Transform::default(),
-        ));
+        batches += 1;
+        triangles += crate::art::mesh::triangles(&mesh);
+        commands
+            .spawn((
+                Mesh3d(meshes.add(mesh)),
+                MeshMaterial3d(paint.clone()),
+                Transform::default(),
+            ))
+            .id()
     };
     put(terrain::ground());
     put(terrain::lanes());
@@ -72,6 +82,20 @@ fn build(
     put(landmarks::plaza());
     put(landmarks::camps());
     put(landmarks::bridges());
+    put(props::streets());
+    put(props::rim());
+    let waterfall = put(props::waterfalls());
+    commands.entity(waterfall).insert(motion::WaterfallSurface);
+    let details = nature::details();
+    triangles += crate::art::mesh::triangles(&details);
+    batches += 1;
+    commands.spawn((
+        Mesh3d(meshes.add(details)),
+        MeshMaterial3d(paint.clone()),
+        Transform::default(),
+        bevy::light::NotShadowCaster,
+    ));
+    info!(batches,triangles,"P77 static mesh batches before culling; excludes water/crystal/flames, dynamic units and shadow passes");
     let water = materials.add(FogMaterial {
         base: StandardMaterial {
             base_color: Color::srgba(0.20, 0.62, 0.78, 0.86),
@@ -86,6 +110,8 @@ fn build(
     });
     commands.spawn((
         Mesh3d(meshes.add(terrain::water())),
+        motion::WaterSurface,
+        bevy::light::NotShadowCaster,
         MeshMaterial3d(water),
         Transform::default(),
     ));
@@ -120,23 +146,23 @@ fn lights(commands: &mut Commands) {
     commands.spawn((
         DirectionalLight {
             color: Color::srgb(1.0, 0.95, 0.86),
-            illuminance: 12_500.0,
+            illuminance: 14_000.0,
             shadow_maps_enabled: true,
             ..default()
         },
         // Low sun from the south-west: long readable shadows towards the north-east.
         Transform::from_xyz(-60.0, 90.0, 70.0).looking_at(Vec3::ZERO, Vec3::Y),
         CascadeShadowConfigBuilder {
-            num_cascades: 2,
+            num_cascades: 3,
             first_cascade_far_bound: 70.0,
-            maximum_distance: 260.0,
+            maximum_distance: 320.0,
             ..default()
         }
         .build(),
     ));
     commands.insert_resource(GlobalAmbientLight {
         color: Color::srgb(0.72, 0.80, 1.0),
-        brightness: 950.0,
+        brightness: 850.0,
         ..default()
     });
 }

@@ -6,6 +6,8 @@ use bevy::prelude::*;
 
 #[derive(Clone, Copy, Debug)]
 pub enum Shape {
+    /// Read-only 1v1 scenery primitive.
+    Shared(crate::art::mesh::Shape),
     Box(f32, f32, f32),
     Ball(f32),
     Cyl(f32, f32),
@@ -21,6 +23,7 @@ pub type Part = (Shape, Color, Transform);
 
 fn build(shape: Shape) -> Mesh {
     match shape {
+        Shape::Shared(shape) => crate::art::mesh::build(shape),
         Shape::Box(x, y, z) => Cuboid::new(x, y, z).into(),
         Shape::Ball(r) => Sphere::new(r)
             .mesh()

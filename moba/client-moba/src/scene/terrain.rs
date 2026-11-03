@@ -53,10 +53,30 @@ pub fn height(p: Vec2) -> f32 {
     if plaza < 0.0 {
         return 0.25;
     }
+    let base = tbg_moba_core::Team::ALL
+        .into_iter()
+        .map(|team| {
+            let q = map::stronghold(team);
+            p.distance(Vec2::new(q.x as f32, q.y as f32) / 1000.)
+        })
+        .fold(f32::MAX, f32::min);
+    if base < 22. {
+        return 0.8;
+    }
+    if base < 27. {
+        let t = (27. - base) / 5.;
+        return 0.8 * t * t * (3. - 2. * t);
+    }
     let river = river_distance(p) - RIVER_HALF_WIDTH as f32;
     if river < 3.0 {
         let k = ((3.0 - river) / 3.0).clamp(0.0, 1.0);
         return -1.7 * k * k * (3.0 - 2.0 * k);
+    }
+    if (0..map::CAMP_COUNT).any(|c| {
+        let q = map::camp(c).0;
+        p.distance(Vec2::new(q.x as f32, q.y as f32) / 1000.) < map::CAMP_RADIUS as f32 + 0.5
+    }) {
+        return 0.;
     }
     let edge = border_distance(p);
     if edge < 9.0 {
@@ -91,7 +111,26 @@ fn ground_color(p: Vec2, h: f32) -> Color {
             rock
         };
     }
+    let bank = river_distance(p) - RIVER_HALF_WIDTH as f32;
+    if bank < 4.5 {
+        return mix(
+            Color::srgb(0.64, 0.58, 0.37),
+            grass_light,
+            (bank / 4.5).clamp(0., 1.),
+        );
+    }
+    let path = jungle_path_distance(p);
+    if path < 2.2 {
+        return mix(
+            Color::srgb(0.32, 0.27, 0.17),
+            Color::srgb(0.48, 0.41, 0.25),
+            n,
+        );
+    }
     let mut c = mix(grass_dark, grass_light, n);
+    if lane_distance(p) > 9. && path > 4. {
+        c = mix(c, Color::srgb(0.17, 0.28, 0.12), 0.4);
+    }
     if noise(p.x, p.y, 31.0, 11) > 0.68 {
         c = mix(c, Color::srgb(0.58, 0.60, 0.26), 0.35);
     }
@@ -264,4 +303,25 @@ fn out_quad(out: &mut Vec<(Vec3, Color)>, [a, b, c, d]: [Vec3; 4], color: Color)
         (d, color),
         (c, color),
     ]);
+}
+
+/// Readable walking corridors through both jungles, without a gameplay obstacle.
+pub fn jungle_path_distance(p: Vec2) -> f32 {
+    let mut distance = f32::MAX;
+    for team in tbg_moba_core::Team::ALL {
+        let base = map::stronghold(team);
+        let base = Vec2::new(base.x as f32, base.y as f32) / 1000.;
+        let offset = team.index() * 4;
+        for pair in [[0, 1], [2, 3]] {
+            let point = |i: usize| {
+                let q = map::camp(offset + i).0;
+                Vec2::new(q.x as f32, q.y as f32) / 1000.
+            };
+            let (a, b) = (point(pair[0]), point(pair[1]));
+            for (start, end) in [(base, a), (a, b), (b, v(PLAZA))] {
+                distance = distance.min(segment_distance(p, start, end));
+            }
+        }
+    }
+    distance
 }

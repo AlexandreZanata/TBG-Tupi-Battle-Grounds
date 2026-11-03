@@ -76,7 +76,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(Startup, setup.after(crate::scene::fog::setup))
         .add_systems(
             Update,
-            (sync, animate, bars)
+            (sync, structures, animate, bars)
                 .chain()
                 .run_if(in_state(Screen::Match)),
         )
@@ -376,7 +376,7 @@ fn spawn_unit(
         Some(kind) => champions::spawn_figure(commands, lib, id, kind, u.id),
         None => {
             commands.entity(id).insert((
-                Mesh3d(models.get(u.kind, u.side, meshes)),
+                Mesh3d(models.get(u.kind, u.side, 0, meshes)),
                 MeshMaterial3d(painted.0.clone()),
             ));
         }
@@ -557,4 +557,27 @@ fn clear(
         despawn_unit(&mut commands, entity, &units);
     }
     spawned.generation = 0;
+}
+
+/// Damage bands use the Team's last-observed HP, so hidden damage never changes a silhouette.
+fn structures(
+    mut models: ResMut<models::Models>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut q: Query<(&UnitVisual, &mut Mesh3d)>,
+) {
+    for (v, mut mesh) in &mut q {
+        if v.kind.structure() {
+            let damage = if v.hp < 0.33 {
+                2
+            } else if v.hp < 0.66 {
+                1
+            } else {
+                0
+            };
+            let handle = models.get(v.kind, v.side, damage, &mut meshes);
+            if mesh.0 != handle {
+                mesh.0 = handle;
+            }
+        }
+    }
 }

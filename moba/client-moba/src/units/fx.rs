@@ -232,12 +232,7 @@ fn fade(
 ) {
     for (entity, mut f, mut transform) in &mut fades {
         f.t += time.delta_secs() / f.duration;
-        if f.t >= 1.0
-            || !feed
-                .curr
-                .as_ref()
-                .is_some_and(|w| w.units.iter().any(|u| u.id == f.target))
-        {
+        if f.t >= 1.0 {
             commands.entity(entity).despawn();
             continue;
         }

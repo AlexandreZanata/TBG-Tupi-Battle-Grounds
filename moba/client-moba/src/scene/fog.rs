@@ -65,7 +65,7 @@ fn update(
     mask: Res<FogTexture>,
     mut images: ResMut<Assets<Image>>,
 ) {
-    let Some(image) = images.get_mut(&mask.0) else {
+    let Some(mut image) = images.get_mut(&mask.0) else {
         return;
     };
     let Some(data) = image.data.as_mut() else {

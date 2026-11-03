@@ -41,10 +41,10 @@ pub fn bases() -> Mesh {
     let mut parts = Vec::new();
     for team in Team::ALL {
         let c = units(map::stronghold(team));
-        flat(&mut parts, c, 19.0, 0.06, STONE_DARK);
-        flat(&mut parts, c, 17.5, 0.1, STONE);
-        flat(&mut parts, c, 9.5, 0.14, palette::team_dark(team));
-        flat(&mut parts, c, 8.6, 0.16, STONE);
+        flat(&mut parts, c, 19.0, 0.86, STONE_DARK);
+        flat(&mut parts, c, 17.5, 0.9, STONE);
+        flat(&mut parts, c, 9.5, 0.94, palette::team_dark(team));
+        flat(&mut parts, c, 8.6, 0.96, STONE);
         let roads = road_angles(team);
         for k in 0..36 {
             let a = k as f32 / 36.0 * std::f32::consts::TAU;
@@ -58,7 +58,7 @@ pub fn bases() -> Mesh {
             let p = c + Vec2::new(a.cos(), a.sin()) * 19.5;
             // Wall blocks run along the circle (tangent), so turn a quarter past the radius.
             let rot = Quat::from_rotation_y(a + std::f32::consts::FRAC_PI_2);
-            let at = to_world(p.x, p.y, 0.0);
+            let at = to_world(p.x, p.y, height(p));
             parts.push((
                 Shape::Box(3.6, 2.2, 1.4),
                 STONE,
@@ -105,6 +105,11 @@ fn banner(parts: &mut Vec<Part>, at: Vec3, team: Team, angle: f32) {
 pub fn plaza() -> Mesh {
     let mut parts = Vec::new();
     let c = v(PLAZA);
+    parts.push((
+        Shape::Cyl(10.2, 1.7),
+        STONE_DARK,
+        Transform::from_translation(to_world(c.x, c.y, -0.6)),
+    ));
     flat(
         &mut parts,
         c,
@@ -133,6 +138,17 @@ pub fn plaza() -> Mesh {
             Color::srgb(0.5, 0.85, 1.0),
             Transform::from_translation(to_world(p.x, p.y, 2.8)),
         ));
+    }
+    for side in [-1., 1.] {
+        for step in 0..5 {
+            let q = c + Vec2::ONE.normalize() * (10.4 + step as f32 * 0.8) * side;
+            parts.push((
+                Shape::Box(6.5, 0.2, 0.9),
+                STONE,
+                Transform::from_translation(to_world(q.x, q.y, 0.2 - step as f32 * 0.06))
+                    .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_4)),
+            ));
+        }
     }
     merge(&parts)
 }
@@ -189,7 +205,7 @@ pub fn camps() -> Mesh {
     merge(&parts)
 }
 
-/// Wooden decks where the top and bot roads cross the river.
+/// Stone decks where the top and bot roads cross the river.
 pub fn bridges() -> Mesh {
     let mut parts = Vec::new();
     for lane in [Lane::Top, Lane::Bot] {
@@ -204,22 +220,22 @@ pub fn bridges() -> Mesh {
             let at = to_world(cross.x, cross.y, 0.25);
             parts.push((
                 Shape::Box(length, 0.35, LANE_HALF_WIDTH * 2.0),
-                WOOD,
+                STONE,
                 Transform::from_translation(at).with_rotation(yaw),
             ));
             for side in [-1.0, 1.0] {
                 let offset = yaw * Vec3::new(0.0, 0.8, side * LANE_HALF_WIDTH);
                 parts.push((
-                    Shape::Box(length, 0.18, 0.18),
-                    WOOD,
+                    Shape::Box(length, 0.38, 0.6),
+                    STONE,
                     Transform::from_translation(at + offset).with_rotation(yaw),
                 ));
                 for k in 0..5 {
                     let along = yaw
                         * Vec3::new((k as f32 - 2.0) * length / 4.5, 0.4, side * LANE_HALF_WIDTH);
                     parts.push((
-                        Shape::Box(0.25, 0.9, 0.25),
-                        WOOD,
+                        Shape::Box(0.8, 1.4, 0.8),
+                        STONE,
                         Transform::from_translation(at + along),
                     ));
                 }
