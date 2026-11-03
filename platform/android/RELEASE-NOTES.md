@@ -5,13 +5,13 @@ scenery, measured safe touch controls, compact menus and battle HUD, native
 forms, Practice and Training, current champions, Evolution, Fortification,
 War Auxiliaries, War Council and complete match results.
 
-Install the ARM64 APK on Android 12/API31 or newer. It uses the same package
+Install the ARM64 APK on Android 12/API 31 or newer. It uses the same package
 and signing certificate as the reviewed prototype, so a normal in-place
 upgrade keeps its nonsecret preferences. Keep your explicit account-key backup.
 The app does not store account credentials between process restarts.
 
 This is an early beta. Emulator runtime is verified; installing the earlier
-prototype on an ARM64 phone did not constitute physical gameplay or16KB runtime
+prototype on an ARM64 phone did not constitute physical gameplay or 16 KB runtime
 acceptance. Physical audio, thermal behavior and the full device matrix remain
 pending. No universal Android or store-readiness claim is made.
 

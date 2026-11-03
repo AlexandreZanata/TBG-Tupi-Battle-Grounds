@@ -86,5 +86,40 @@ from this successful package inspection.
 
 Automatic approval review rejected uploading the existing private signing key,
 password and alias to persistent GitHub Secrets without explicit payload/destination
-authorization. No key material was sent. Automatic signing configuration remains
-pending that permission; unaffected local validation and PR work continue.
+authorization. No key material was sent by that rejected action. The owner then
+explicitly authorized the exact payload/destination. Setup completed with an
+exact `main` branch policy and the three named environment Secrets; only names
+and policy were printed. An HTTP2 policy-creation transport refusal was resolved
+by reading state first, then completing the HTTPS request using HTTP1. No secret
+values entered arguments, logs or tracked files.
+
+## Public-mode emulator smoke
+
+The x86_64 release APK above upgraded in place successfully on task emulator
+`emulator-5582`, API 36. The host renderer exited with signal 139 before boot;
+official SwiftShader booted the same retained AVD without wiping data. The app
+opened Guest lobby, accepted navigation/Back, opened Practice setup, scrolled
+both configuration sections and started a real Tundra match. One ordinary Shop
+purchase changed Army 0 to Army 1, spawned the red Archer and renewed all five
+offers. Live battles showed unavailable, consistent with the protocol-38 service.
+No internal loopback or private backend was used. Software rendering was visibly
+slow: this validates navigation/local gameplay, not phone performance or ARM64.
+
+The retained emulator started at forced density 320/font 1.3. The reference smoke
+used 240 dpi/font 1.0, matching P69's 1.5 density reference. Early immediate input
+captures showed a prior frame; settled frames confirmed settings/scroll actions.
+Those early frames are not claimed as input failures. The initial density/font
+settings are restored when the task closes.
+
+The signed APK/inspection and safe original PNGs remain in ignored local delivery
+storage. Public ARM64 bytes and hosted-builder attestations must still pass the
+actual main pipeline. Final CI/publication state is recorded in
+[PR 63](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/63).
+
+- public55-reference-lobby.png: 7986739d34d598116b6c8e4f99d0534df6f393bf1162b067bb0d58057bb818d3
+
+- public55-practice-start-options.png: c62ad52d18ae08aa81448bc69fc142127333ba21cb75eafffc9b8bf9f5e21633
+
+- public55-match.png: 574b7f8c0926223cc44f175fcce3aa3566549e0f4f758d27b7878a6a6deb5258
+
+- public55-after-purchase.png: ed906e4c13d9cba13c91604fc8a948ea71353b2ce09010048776685e1a155344
