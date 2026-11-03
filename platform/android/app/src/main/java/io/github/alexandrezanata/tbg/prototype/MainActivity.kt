@@ -55,7 +55,7 @@ class MainActivity : GameActivity() {
             androidx.core.view.ViewCompat.requestApplyInsets(window.decorView)
             androidx.core.view.ViewCompat.getRootWindowInsets(window.decorView)?.let { captureViewport(it) }
         }
-        if (BuildConfig.DEBUG) android.util.Log.i("TBGHost", "configuration fontScale=${newConfig.fontScale} densityDpi=${newConfig.densityDpi} orientation=${newConfig.orientation}")
+        if (isInternalBuild()) android.util.Log.i("TBGHost", "configuration fontScale=${newConfig.fontScale} densityDpi=${newConfig.densityDpi} orientation=${newConfig.orientation}")
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
