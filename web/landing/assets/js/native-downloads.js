@@ -4,16 +4,16 @@ import { t } from './i18n.js';
 import { available, detectedOS } from './download-rules.js';
 
 const PLATFORMS = ['windows', 'linux', 'android'];
-// Each platform lists its options in recommended-first order; Android has no package yet.
-const ORDER = { windows: ['installer', 'zip'], linux: ['appimage', 'tarball'], android: [] };
-const FORMATS = { installer: '.exe', zip: '.zip', appimage: '.AppImage', tarball: '.tar.gz' };
-const labels = { installer: 'downloads.install', zip: 'downloads.portable', appimage: 'downloads.appimage', tarball: 'downloads.tarball' };
-const descriptions = { installer: 'downloads.windows.install', zip: 'downloads.windows.portable', appimage: 'downloads.linux.appimage', tarball: 'downloads.linux.tarball' };
+// Every format comes from the same source-bound catalog, in recommended-first order.
+const ORDER = { windows: ['installer', 'zip'], linux: ['appimage', 'tarball'], android: ['apk'] };
+const FORMATS = { installer: '.exe', zip: '.zip', appimage: '.AppImage', tarball: '.tar.gz', apk: '.apk' };
+const labels = { installer: 'downloads.install', zip: 'downloads.portable', appimage: 'downloads.appimage', tarball: 'downloads.tarball', apk: 'downloads.apk' };
+const descriptions = { installer: 'downloads.windows.install', zip: 'downloads.windows.portable', appimage: 'downloads.linux.appimage', tarball: 'downloads.linux.tarball', apk: 'downloads.android.apk' };
 // Text shown while a platform has no verified package.
 const PENDING = {
   windows: { status: 'state.preparing', short: 'downloads.pending', long: 'downloads.pending' },
   linux: { status: 'state.preparing', short: 'downloads.pending', long: 'downloads.pending' },
-  android: { status: 'state.soon', short: 'android.pending.short', long: 'android.pending' },
+  android: { status: 'state.preparing', short: 'android.pending.short', long: 'android.pending' },
 };
 
 let current = null;
@@ -42,8 +42,10 @@ function option(asset, recommended) {
 function notes(release) {
   const items = [];
   if (opened === 'windows') items.push(el('p', { class: 'native-callout native-callout-warn', text: t('downloads.unsigned') }));
-  if (release.visual_acceptance !== 'passed') items.push(el('p', { class: 'native-callout', text: t('downloads.pixels.pending') }));
-  items.push(el('a', { class: 'native-notes-link', href: `https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v${release.version}`, rel: 'noopener noreferrer', text: t('downloads.notes') }));
+  if (opened === 'android') items.push(el('p', { class: 'native-callout', text: t('downloads.android.beta') }));
+  else if (release.visual_acceptance !== 'passed') items.push(el('p', { class: 'native-callout', text: t('downloads.pixels.pending') }));
+  const tag = opened === 'android' ? release.tag : 'v' + release.version;
+  items.push(el('a', { class: 'native-notes-link', href: `https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/${tag}`, rel: 'noopener noreferrer', text: t('downloads.notes') }));
   return el('div', { class: 'native-notes' }, items);
 }
 

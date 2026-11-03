@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
 import tempfile
 from urllib.error import HTTPError
 from urllib.parse import quote
@@ -25,7 +26,18 @@ def publish(value):
     require(not ROOT.is_symlink(), 'native catalog root requires explicit adoption')
     ROOT.mkdir(mode=0o755, parents=True, exist_ok=True)
     ROOT.chmod(0o755)
-    encoded = (json.dumps(value, sort_keys=True) + '\n').encode()
+    # Independent release families share this writer and lock; refreshing one
+    # must preserve verified entries for the other under the same live contract.
+    merged = {'schema': 1, 'server': value['server'],
+              **{platform: {'state': 'pending'} for platform in ['linux', 'windows', 'android']}}
+    current = ROOT/'current.json'
+    if current.exists():
+        previous = json.loads(current.read_text())
+        if previous.get('server') == value['server']:
+            for platform in ['linux', 'windows', 'android']:
+                merged[platform] = previous.get(platform, {'state': 'pending'})
+    merged.update(value)
+    encoded = (json.dumps(merged, sort_keys=True) + '\n').encode()
     require(len(encoded) <= 16384, 'public native catalog exceeds its budget')
     temporary = ROOT/'current.next'
     with temporary.open('wb') as stream:
@@ -37,10 +49,10 @@ def publish(value):
     sync_directory(ROOT)
 
 
-def pending(live):
+def pending(live, platforms=('linux', 'windows', 'android')):
     protocol = int(re.match(r'w([0-9]+)-', live['contract'])[1])
     publish({'schema': 1, 'server': {'protocol': protocol, 'contract': live['contract']},
-             'linux': {'state': 'pending'}, 'windows': {'state': 'pending'}})
+             **{os: {'state': 'pending'} for os in platforms}})
 
 
 def synchronize(live):
@@ -66,17 +78,17 @@ def published(tag):
     return release if native(release) else None
 
 
-def run(config):
+def run(config, listing=None):
     live = status()
     synchronize(live)
     require(api('')['id'] == REPOSITORY_ID, 'repository identity changed')
-    candidates = [r for r in api(f'/releases?per_page={PAGE}') if native(r)]
+    candidates = [r for r in (api(f'/releases?per_page={PAGE}') if listing is None else listing) if native(r)]
     old = json.loads(RECEIPT.read_text()) if RECEIPT.exists() else None
     if old and not any(r['tag_name'] == old['tag'] for r in candidates):
         active = published(old['tag'])
         if active is None:
             # Revoked or deleted: never leave its links enabled.
-            pending(live)
+            pending(live, ('linux', 'windows'))
             raise ValueError(f"active native release {old['tag']} is no longer published")
         candidates.append(active)
     if not candidates:
@@ -88,7 +100,7 @@ def run(config):
             publish(catalog(old, release, live))
         except ValueError:
             # Revoked/changed assets must not leave a previously enabled broken link.
-            pending(live)
+            pending(live, ('linux', 'windows'))
             raise
         print('Verified native catalog remains current.')
         return
@@ -122,7 +134,18 @@ def main():
 
     def body():
         with deployment_lock():
-            run(json.loads(args.config.read_text()))
+            from android_pull import run as android_run
+            config = json.loads(args.config.read_text())
+            listing = api(f'/releases?per_page={PAGE}')
+            # One incompatible release family must not block a compatible one.
+            errors = []
+            for operation in (lambda: run(config, listing), lambda: android_run(config, status(), publish, listing)):
+                try:
+                    operation()
+                except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:
+                    errors.append(str(error))
+            if errors:
+                raise ValueError('; '.join(errors))
     run_controller(body)
 
 

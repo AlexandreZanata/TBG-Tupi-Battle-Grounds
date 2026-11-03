@@ -9,5 +9,8 @@
   },
   "windows": {
     "state": "pending"
+  },
+  "android": {
+    "state": "pending"
   }
 }

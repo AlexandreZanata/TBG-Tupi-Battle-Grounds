@@ -84,6 +84,9 @@ def prepare(args):
     if len(libraries) != 1 + len(args.dependency):
         raise ValueError("Duplicate native library inputs")
     binary = args.library.read_bytes()
+    if args.channel == "beta":
+        if b"TBG_ANDROID_MEASURE" in binary or b"wss://api.tupibg.com/ws" not in binary:
+            raise ValueError("Public beta requires the official WSS endpoint and no internal loopback feature")
     # The shared Rust Android entry must retain this exact source marker in the cdylib.
     if f"TBG_ANDROID_SOURCE={source}".encode() not in binary:
         raise ValueError("Library source marker is absent/mismatched; refusing stale .so")
@@ -107,6 +110,7 @@ def prepare(args):
     info = {
         "source_sha": source, "reviewed_linux_base": BASE, "linux_version": version,
         "android_revision": args.version_code, "package": PACKAGE, "abi": args.abi,
+        "channel": args.channel,
         "protocol": protocol, "ruleset": rules_identity(),
         "content_sha256": digest((ROOT / "crates/tbg-core/src/content.rs").read_bytes()),
         "cargo_lock_sha256": digest((ROOT / "Cargo.lock").read_bytes()),
@@ -197,6 +201,14 @@ def inspect_apk(args):
     badging = subprocess.check_output([str(tools / "aapt2"), "dump", "badging", str(args.apk)], text=True)
     if f"package: name='{PACKAGE}'" not in badging:
         raise ValueError("Wrong APK application ID")
+    debuggable = "application-debuggable" in badging
+    if info.get("channel") == "beta":
+        from android_release import configuration
+        public = configuration()
+        if debuggable or certificates[0].lower() != public["certificate_sha256"]:
+            raise ValueError("Public beta must be non-debuggable and use its stable reviewed certificate")
+        if info["android_revision"] != public["version_code"]:
+            raise ValueError("Public beta versionCode differs from its release identity")
     permissions = re.findall(r"uses-permission[^:]*: name='([^']+)'", badging)
     # AndroidX protects its own internal receiver with this signature permission.
     expected_permissions = {"android.permission.INTERNET", PACKAGE + ".DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"}
@@ -208,6 +220,7 @@ def inspect_apk(args):
         "apk_sha256": digest(args.apk.read_bytes()), "signing_certificate_sha256": certificates[0],
         "build_info": info, "libraries": libraries, "permissions": permissions,
         "package_badging": badging.splitlines()[0],
+        "debuggable": debuggable,
         "limits": "ELF/ZIP inspection does not establish 16 KB runtime, gameplay or store readiness",
     }
     write_json(args.report, report)
@@ -224,6 +237,7 @@ def main():
     stage.add_argument("--abi", choices=["arm64-v8a","x86_64"], default="arm64-v8a")
     # Must equal Gradle's -PprototypeVersionCode; upgrades only ever increase it.
     stage.add_argument("--version-code", type=int, required=True)
+    stage.add_argument("--channel", choices=["internal", "beta"], default="internal")
     verify = commands.add_parser("verify-stage")
     verify.add_argument("--abi", choices=["arm64-v8a","x86_64"])
     apk = commands.add_parser("inspect-apk")

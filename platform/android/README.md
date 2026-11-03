@@ -1,4 +1,4 @@
-# Native Android landscape prototype
+# Native Android landscape beta
 
 The Rust client is one library shared with desktop/browser. GameActivity is
 only the Android host: rendering, core/content, actions and authority are
@@ -81,8 +81,8 @@ must never be presented as a POCO ARM64 artifact or ARM64 runtime proof.
 
 ## Services and safety
 
-`MainActivity` owns surface margins for cutouts/system gestures/IME and
-reports the actual surface/density after layout. Rust compares this with
+`MainActivity` fills the native surface and reports cutouts/system gestures/IME
+separately from the actual surface/density. Rust insets controls once and compares this with
 Bevy coordinates for effective 48 dp controls. It preserves GameActivity's
 callbacks and one event loop. Unexpected portrait blocks inputs with a rotate
 message; it does not reset state or pause online authority.
@@ -96,7 +96,7 @@ focus and system music volume.
 Only allowlisted nonsecret settings reach app-private files. AccountKey,
 Access/Refresh and resume credentials stay in memory through the reviewed
 common auth coordinator; no Android vault or new auth protocol is introduced.
-Manual backup is deliberate clipboard export. Public links use checked HTTPS
+Manual backup uses explicit clipboard or system document export. Public links use checked HTTPS
 intents. Desktop updater/window/vault controls do not execute on Android.
 Backup/device-transfer are excluded by manifest policy.
 
@@ -106,3 +106,27 @@ same-key in-place install. Signing/version conflicts are errors; no uninstall,
 downgrade, data wipe, global logcat clearing or global ADB mapping removal.
 Capture only the game foreground/viewport and filtered game logs. Keep the
 installed desktop game and personal phone data intact.
+
+## Automatic public beta publication
+
+`android-release.yml` follows the native desktop pattern: successful exact-source
+main CI, a signed production-endpoint build, immutable version tag, promotion of
+the original bytes, hosted-runner attestation and a complete GitHub prerelease.
+`release.json` supplies the monotonic versionCode and stable public certificate.
+Changing shipped Android inputs under an existing revision is refused.
+
+The `android-beta` GitHub environment is restricted to main and contains only
+the stable keystore/password/alias secrets. PR jobs never receive that key.
+The key is materialized only in private runner storage and removed afterward;
+it is never part of an artifact. `build-android-beta.py` compiles without
+`android-loopback`, packages the non-debuggable release variant and inspects its
+source, WSS endpoint, certificate, permissions and16KB ELF/ZIP alignment.
+
+The VPS's existing native catalog timer verifies Android provenance, immutable
+asset digests, increasing source/revision and the live MatchContract. It merges
+Android without erasing Linux/Windows. A changed server contract or revoked APK
+fails closed. Website availability is independent of a GitHub beta existing:
+an incompatible server never enables an online-compatible download claim.
+
+The2026-11-03 publishing continuation is documented in
+[P69 beta delivery](../../docs/phases/P69-beta-publication-20261103.md).

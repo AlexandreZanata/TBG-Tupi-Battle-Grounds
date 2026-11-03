@@ -22,5 +22,8 @@
     "protocol": null,
     "contract": null,
     "assets": []
+  },
+  "android": {
+    "state": "pending"
   }
 }

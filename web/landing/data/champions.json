@@ -119,7 +119,7 @@
       },
       "faction": "humans",
       "archetype": "tank",
-      "portrait": "media/portraits/shieldbearer.webp",
+      "portrait": "media/portraits/shieldbearer.webp?v=732a1f3b6c581f93",
       "availability": "active"
     },
     {
@@ -130,7 +130,7 @@
       },
       "faction": "humans",
       "archetype": "ranged",
-      "portrait": "media/portraits/archer.webp",
+      "portrait": "media/portraits/archer.webp?v=b4dd551bed24d916",
       "availability": "active"
     },
     {
@@ -141,7 +141,7 @@
       },
       "faction": "undead",
       "archetype": "tank",
-      "portrait": "media/portraits/bonebrute.webp",
+      "portrait": "media/portraits/bonebrute.webp?v=58f655cb4f5b3b27",
       "availability": "active"
     },
     {
@@ -152,7 +152,7 @@
       },
       "faction": "undead",
       "archetype": "control",
-      "portrait": "media/portraits/hexer.webp",
+      "portrait": "media/portraits/hexer.webp?v=8db6d579995f5505",
       "availability": "active"
     },
     {
@@ -163,7 +163,7 @@
       },
       "faction": "machines",
       "archetype": "dps",
-      "portrait": "media/portraits/sawbot.webp",
+      "portrait": "media/portraits/sawbot.webp?v=2c561b92b7f116ff",
       "availability": "active"
     },
     {
@@ -174,7 +174,7 @@
       },
       "faction": "ogres",
       "archetype": "ranged",
-      "portrait": "media/portraits/siegewalker.webp",
+      "portrait": "media/portraits/siegewalker.webp?v=a15a79973e584dc8",
       "availability": "active"
     },
     {
@@ -185,7 +185,7 @@
       },
       "faction": "plants",
       "archetype": "support",
-      "portrait": "media/portraits/bloomkeeper.webp",
+      "portrait": "media/portraits/bloomkeeper.webp?v=c488c63899a2668b",
       "availability": "active"
     },
     {
@@ -196,7 +196,7 @@
       },
       "faction": "plants",
       "archetype": "control",
-      "portrait": "media/portraits/rootcaller.webp",
+      "portrait": "media/portraits/rootcaller.webp?v=a06c200e48297482",
       "availability": "active"
     },
     {
@@ -207,7 +207,7 @@
       },
       "faction": "plants",
       "archetype": "support",
-      "portrait": "media/portraits/nester.webp",
+      "portrait": "media/portraits/nester.webp?v=33ccd62a73cc57b7",
       "availability": "active"
     },
     {
@@ -218,7 +218,7 @@
       },
       "faction": "machines",
       "archetype": "tank",
-      "portrait": "media/portraits/rampart.webp",
+      "portrait": "media/portraits/rampart.webp?v=2a065234c513d29f",
       "availability": "active"
     },
     {
@@ -229,7 +229,7 @@
       },
       "faction": "humans",
       "archetype": "dps",
-      "portrait": "media/portraits/longaxe.webp",
+      "portrait": "media/portraits/longaxe.webp?v=9a2510d252292df2",
       "availability": "active"
     },
     {
@@ -240,7 +240,7 @@
       },
       "faction": "humans",
       "archetype": "ranged",
-      "portrait": "media/portraits/farwatch.webp",
+      "portrait": "media/portraits/farwatch.webp?v=10e97143b9bd16f8",
       "availability": "active"
     },
     {
@@ -251,7 +251,7 @@
       },
       "faction": "machines",
       "archetype": "ranged",
-      "portrait": "media/portraits/bombard.webp",
+      "portrait": "media/portraits/bombard.webp?v=14293cac796d70ff",
       "availability": "active"
     },
     {
@@ -262,7 +262,7 @@
       },
       "faction": "plants",
       "archetype": "ranged",
-      "portrait": "media/portraits/rotcap.webp",
+      "portrait": "media/portraits/rotcap.webp?v=3f5721d34be80746",
       "availability": "active"
     },
     {
@@ -273,7 +273,7 @@
       },
       "faction": "humans",
       "archetype": "control",
-      "portrait": "media/portraits/oldfinn.webp",
+      "portrait": "media/portraits/oldfinn.webp?v=d21a352cf3b79c29",
       "availability": "active"
     },
     {
@@ -284,7 +284,7 @@
       },
       "faction": "plants",
       "archetype": "support",
-      "portrait": "media/portraits/antidotebrewer.webp",
+      "portrait": "media/portraits/antidotebrewer.webp?v=d37bfaceb8efeb01",
       "availability": "active"
     },
     {
@@ -295,7 +295,7 @@
       },
       "faction": "plants",
       "archetype": "tank",
-      "portrait": "media/portraits/shatterback.webp",
+      "portrait": "media/portraits/shatterback.webp?v=8c2da2cd653444d2",
       "availability": "active"
     },
     {
@@ -306,7 +306,7 @@
       },
       "faction": "undead",
       "archetype": "dps",
-      "portrait": "media/portraits/bloodfurnace.webp",
+      "portrait": "media/portraits/bloodfurnace.webp?v=b277281a50ea4f0b",
       "availability": "active"
     },
     {
@@ -317,7 +317,7 @@
       },
       "faction": "undead",
       "archetype": "support",
-      "portrait": "media/portraits/bloodweaver.webp",
+      "portrait": "media/portraits/bloodweaver.webp?v=d08eeb3655de5b7a",
       "availability": "active"
     },
     {
@@ -328,7 +328,7 @@
       },
       "faction": "machines",
       "archetype": "tank",
-      "portrait": "media/portraits/oilpress.webp",
+      "portrait": "media/portraits/oilpress.webp?v=926757fea30aaa84",
       "availability": "active"
     },
     {
@@ -339,7 +339,7 @@
       },
       "faction": "humans",
       "archetype": "support",
-      "portrait": "media/portraits/drumguard.webp",
+      "portrait": "media/portraits/drumguard.webp?v=e3b04d66569fbc25",
       "availability": "active"
     },
     {
@@ -350,7 +350,7 @@
       },
       "faction": "plants",
       "archetype": "dps",
-      "portrait": "media/portraits/leechroot.webp",
+      "portrait": "media/portraits/leechroot.webp?v=b7f98a370f1bade4",
       "availability": "active"
     },
     {
@@ -361,7 +361,7 @@
       },
       "faction": "machines",
       "archetype": "tank",
-      "portrait": "media/portraits/cargocrab.webp",
+      "portrait": "media/portraits/cargocrab.webp?v=71b54f28a837274f",
       "availability": "active"
     },
     {
@@ -372,7 +372,7 @@
       },
       "faction": "undead",
       "archetype": "control",
-      "portrait": "media/portraits/puppetmaster.webp",
+      "portrait": "media/portraits/puppetmaster.webp?v=d19c37412a6c60a8",
       "availability": "active"
     },
     {
@@ -383,7 +383,7 @@
       },
       "faction": "humans",
       "archetype": "support",
-      "portrait": "media/portraits/smuggler.webp",
+      "portrait": "media/portraits/smuggler.webp?v=65cf6c7a310f7851",
       "availability": "active"
     },
     {
@@ -394,7 +394,7 @@
       },
       "faction": "monsters",
       "archetype": "tank",
-      "portrait": "media/portraits/bonehorn.webp",
+      "portrait": "media/portraits/bonehorn.webp?v=f06c621b30433ed9",
       "availability": "active"
     },
     {
@@ -405,7 +405,7 @@
       },
       "faction": "monsters",
       "archetype": "dps",
-      "portrait": "media/portraits/ravager.webp",
+      "portrait": "media/portraits/ravager.webp?v=575da713122e0fa1",
       "availability": "active"
     },
     {
@@ -416,7 +416,7 @@
       },
       "faction": "monsters",
       "archetype": "ranged",
-      "portrait": "media/portraits/acidmaw.webp",
+      "portrait": "media/portraits/acidmaw.webp?v=933d7a9ce7ae50d8",
       "availability": "active"
     },
     {
@@ -427,7 +427,7 @@
       },
       "faction": "monsters",
       "archetype": "control",
-      "portrait": "media/portraits/whisperer.webp",
+      "portrait": "media/portraits/whisperer.webp?v=c34905f3f2e17116",
       "availability": "active"
     },
     {
@@ -438,7 +438,7 @@
       },
       "faction": "machines",
       "archetype": "tank",
-      "portrait": "media/portraits/bulwark.webp",
+      "portrait": "media/portraits/bulwark.webp?v=56ad63affcd63413",
       "availability": "active"
     },
     {
@@ -449,7 +449,7 @@
       },
       "faction": "machines",
       "archetype": "tank",
-      "portrait": "media/portraits/demolisher.webp",
+      "portrait": "media/portraits/demolisher.webp?v=f371b299c5732ebf",
       "availability": "active"
     },
     {
@@ -460,7 +460,7 @@
       },
       "faction": "undead",
       "archetype": "ranged",
-      "portrait": "media/portraits/crowcaller.webp",
+      "portrait": "media/portraits/crowcaller.webp?v=9061e0034c460fba",
       "availability": "active"
     },
     {
@@ -471,7 +471,7 @@
       },
       "faction": "humans",
       "archetype": "ranged",
-      "portrait": "media/portraits/trigger.webp",
+      "portrait": "media/portraits/trigger.webp?v=573f0900f46ca39b",
       "availability": "active"
     },
     {
@@ -482,7 +482,7 @@
       },
       "faction": "humans",
       "archetype": "tank",
-      "portrait": "media/portraits/rattletick.webp",
+      "portrait": "media/portraits/rattletick.webp?v=990c1b60d71f63f8",
       "availability": "active"
     },
     {
@@ -493,7 +493,7 @@
       },
       "faction": "plants",
       "archetype": "tank",
-      "portrait": "media/portraits/capybara.webp",
+      "portrait": "media/portraits/capybara.webp?v=19da09b78f5d81b6",
       "availability": "active"
     },
     {
@@ -504,7 +504,7 @@
       },
       "faction": "abyssals",
       "archetype": "tank",
-      "portrait": "media/portraits/trident.webp",
+      "portrait": "media/portraits/trident.webp?v=623d9ad7fb0fca04",
       "availability": "active"
     },
     {
@@ -515,7 +515,7 @@
       },
       "faction": "celestials",
       "archetype": "tank",
-      "portrait": "media/portraits/solarsentinel.webp",
+      "portrait": "media/portraits/solarsentinel.webp?v=1039bd155077ec53",
       "availability": "active"
     },
     {
@@ -526,7 +526,7 @@
       },
       "faction": "celestials",
       "archetype": "control",
-      "portrait": "media/portraits/luminousoracle.webp",
+      "portrait": "media/portraits/luminousoracle.webp?v=7455913beca7110c",
       "availability": "active"
     },
     {
@@ -537,7 +537,7 @@
       },
       "faction": "celestials",
       "archetype": "ranged",
-      "portrait": "media/portraits/celestialarcher.webp",
+      "portrait": "media/portraits/celestialarcher.webp?v=d3e457dff0577b4e",
       "availability": "active"
     },
     {
@@ -548,7 +548,7 @@
       },
       "faction": "celestials",
       "archetype": "control",
-      "portrait": "media/portraits/justiciar.webp",
+      "portrait": "media/portraits/justiciar.webp?v=d68cf08f3c8f8b8b",
       "availability": "active"
     },
     {
@@ -559,7 +559,7 @@
       },
       "faction": "insects",
       "archetype": "tank",
-      "portrait": "media/portraits/jawguard.webp",
+      "portrait": "media/portraits/jawguard.webp?v=fff9aced85dc8b9e",
       "availability": "active"
     },
     {
@@ -570,7 +570,7 @@
       },
       "faction": "insects",
       "archetype": "dps",
-      "portrait": "media/portraits/mantis.webp",
+      "portrait": "media/portraits/mantis.webp?v=307f7f3bbeb7e721",
       "availability": "active"
     },
     {
@@ -581,7 +581,7 @@
       },
       "faction": "insects",
       "archetype": "ranged",
-      "portrait": "media/portraits/hornet.webp",
+      "portrait": "media/portraits/hornet.webp?v=9a22e5bbe44b56bf",
       "availability": "active"
     },
     {
@@ -592,7 +592,7 @@
       },
       "faction": "insects",
       "archetype": "control",
-      "portrait": "media/portraits/weaver.webp",
+      "portrait": "media/portraits/weaver.webp?v=937a1de164de23bc",
       "availability": "active"
     },
     {
@@ -603,7 +603,7 @@
       },
       "faction": "undead",
       "archetype": "tank",
-      "portrait": "media/portraits/pyrewarden.webp",
+      "portrait": "media/portraits/pyrewarden.webp?v=8bc6c52c0a66111f",
       "availability": "active"
     },
     {
@@ -614,7 +614,7 @@
       },
       "faction": "machines",
       "archetype": "ranged",
-      "portrait": "media/portraits/drillnest.webp",
+      "portrait": "media/portraits/drillnest.webp?v=1772fbbbad27abe9",
       "availability": "active"
     },
     {
@@ -625,7 +625,7 @@
       },
       "faction": "undead",
       "archetype": "dps",
-      "portrait": "media/portraits/gravecutter.webp",
+      "portrait": "media/portraits/gravecutter.webp?v=fdfe65ee0c206212",
       "availability": "preview"
     },
     {
@@ -636,7 +636,7 @@
       },
       "faction": "undead",
       "archetype": "support",
-      "portrait": "media/portraits/lastlightcantor.webp",
+      "portrait": "media/portraits/lastlightcantor.webp?v=fcde0a00d95502ba",
       "availability": "preview"
     },
     {
@@ -647,7 +647,7 @@
       },
       "faction": "monsters",
       "archetype": "dps",
-      "portrait": "media/portraits/cragclaw.webp",
+      "portrait": "media/portraits/cragclaw.webp?v=cbb90c3f6b33e8fe",
       "availability": "preview"
     },
     {
@@ -658,7 +658,7 @@
       },
       "faction": "monsters",
       "archetype": "dps",
-      "portrait": "media/portraits/hushfang.webp",
+      "portrait": "media/portraits/hushfang.webp?v=63ce113a3e5c885f",
       "availability": "preview"
     },
     {
@@ -669,7 +669,7 @@
       },
       "faction": "monsters",
       "archetype": "ranged",
-      "portrait": "media/portraits/spinehurler.webp",
+      "portrait": "media/portraits/spinehurler.webp?v=634516a7444fd7cb",
       "availability": "preview"
     },
     {
@@ -680,7 +680,7 @@
       },
       "faction": "monsters",
       "archetype": "support",
-      "portrait": "media/portraits/miretender.webp",
+      "portrait": "media/portraits/miretender.webp?v=d63133ad3663200c",
       "availability": "preview"
     },
     {
@@ -691,7 +691,7 @@
       },
       "faction": "monsters",
       "archetype": "control",
-      "portrait": "media/portraits/gorgehowl.webp",
+      "portrait": "media/portraits/gorgehowl.webp?v=4ff8715140f7d82e",
       "availability": "preview"
     },
     {
@@ -702,7 +702,7 @@
       },
       "faction": "celestials",
       "archetype": "dps",
-      "portrait": "media/portraits/sunlancer.webp",
+      "portrait": "media/portraits/sunlancer.webp?v=04dcb0f0ba676ca7",
       "availability": "preview"
     },
     {
@@ -713,7 +713,7 @@
       },
       "faction": "celestials",
       "archetype": "dps",
-      "portrait": "media/portraits/eclipsedancer.webp",
+      "portrait": "media/portraits/eclipsedancer.webp?v=0c2cc363a46b32e9",
       "availability": "preview"
     },
     {
@@ -724,7 +724,7 @@
       },
       "faction": "celestials",
       "archetype": "dps",
-      "portrait": "media/portraits/starbreaker.webp",
+      "portrait": "media/portraits/starbreaker.webp?v=f67e864dabbdf108",
       "availability": "preview"
     },
     {
@@ -735,7 +735,7 @@
       },
       "faction": "celestials",
       "archetype": "support",
-      "portrait": "media/portraits/dawnmender.webp",
+      "portrait": "media/portraits/dawnmender.webp?v=bc5ef04bd2f1e2f0",
       "availability": "preview"
     },
     {
@@ -746,7 +746,7 @@
       },
       "faction": "celestials",
       "archetype": "ranged",
-      "portrait": "media/portraits/prismancer.webp",
+      "portrait": "media/portraits/prismancer.webp?v=ce5dfb32cdf4f607",
       "availability": "preview"
     },
     {
@@ -757,7 +757,7 @@
       },
       "faction": "insects",
       "archetype": "dps",
-      "portrait": "media/portraits/leafcutter.webp",
+      "portrait": "media/portraits/leafcutter.webp?v=47f390e3e10cb81a",
       "availability": "preview"
     },
     {
@@ -768,7 +768,7 @@
       },
       "faction": "insects",
       "archetype": "dps",
-      "portrait": "media/portraits/blastbeetle.webp",
+      "portrait": "media/portraits/blastbeetle.webp?v=6c397a4aaff0c1dc",
       "availability": "preview"
     },
     {
@@ -779,7 +779,7 @@
       },
       "faction": "insects",
       "archetype": "ranged",
-      "portrait": "media/portraits/needlewing.webp",
+      "portrait": "media/portraits/needlewing.webp?v=03bae65e78c73fe6",
       "availability": "preview"
     },
     {
@@ -790,7 +790,7 @@
       },
       "faction": "insects",
       "archetype": "support",
-      "portrait": "media/portraits/nectarnurse.webp",
+      "portrait": "media/portraits/nectarnurse.webp?v=251aa1f5b7360345",
       "availability": "preview"
     },
     {
@@ -801,7 +801,7 @@
       },
       "faction": "insects",
       "archetype": "control",
-      "portrait": "media/portraits/stridulator.webp",
+      "portrait": "media/portraits/stridulator.webp?v=69c54cbfc8247188",
       "availability": "preview"
     },
     {
@@ -812,7 +812,7 @@
       },
       "faction": "ogres",
       "archetype": "tank",
-      "portrait": "media/portraits/basaltbulwark.webp",
+      "portrait": "media/portraits/basaltbulwark.webp?v=496713ebde511544",
       "availability": "preview"
     },
     {
@@ -823,7 +823,7 @@
       },
       "faction": "ogres",
       "archetype": "dps",
-      "portrait": "media/portraits/cindermaul.webp",
+      "portrait": "media/portraits/cindermaul.webp?v=bcb0accb3f5484f0",
       "availability": "preview"
     },
     {
@@ -834,7 +834,7 @@
       },
       "faction": "ogres",
       "archetype": "dps",
-      "portrait": "media/portraits/hookbrawler.webp",
+      "portrait": "media/portraits/hookbrawler.webp?v=5760adc94dd8f3b4",
       "availability": "preview"
     },
     {
@@ -845,7 +845,7 @@
       },
       "faction": "ogres",
       "archetype": "dps",
-      "portrait": "media/portraits/flintrunner.webp",
+      "portrait": "media/portraits/flintrunner.webp?v=011b64522d6bc9ae",
       "availability": "preview"
     },
     {
@@ -856,7 +856,7 @@
       },
       "faction": "ogres",
       "archetype": "control",
-      "portrait": "media/portraits/claybinder.webp",
+      "portrait": "media/portraits/claybinder.webp?v=f326f2ddffe9761f",
       "availability": "preview"
     },
     {
@@ -867,7 +867,7 @@
       },
       "faction": "ogres",
       "archetype": "support",
-      "portrait": "media/portraits/gustdrummer.webp",
+      "portrait": "media/portraits/gustdrummer.webp?v=12d69311b01f1510",
       "availability": "preview"
     },
     {
@@ -878,7 +878,7 @@
       },
       "faction": "ogres",
       "archetype": "support",
-      "portrait": "media/portraits/hidemender.webp",
+      "portrait": "media/portraits/hidemender.webp?v=c9239563aa5635e7",
       "availability": "preview"
     },
     {
@@ -889,7 +889,7 @@
       },
       "faction": "ogres",
       "archetype": "ranged",
-      "portrait": "media/portraits/pebbleslinger.webp",
+      "portrait": "media/portraits/pebbleslinger.webp?v=dd87c2fb866b53c0",
       "availability": "preview"
     },
     {
@@ -900,7 +900,7 @@
       },
       "faction": "machines",
       "archetype": "ranged",
-      "portrait": "media/portraits/rivetballista.webp",
+      "portrait": "media/portraits/rivetballista.webp?v=64c40c60e24e7bda",
       "availability": "preview"
     },
     {
@@ -911,7 +911,7 @@
       },
       "faction": "abyssals",
       "archetype": "dps",
-      "portrait": "media/portraits/nacreduelist.webp",
+      "portrait": "media/portraits/nacreduelist.webp?v=724b5348033fb468",
       "availability": "preview"
     },
     {
@@ -922,7 +922,7 @@
       },
       "faction": "abyssals",
       "archetype": "dps",
-      "portrait": "media/portraits/reeflancer.webp",
+      "portrait": "media/portraits/reeflancer.webp?v=68a02e4f8a601cf6",
       "availability": "preview"
     },
     {
@@ -933,7 +933,7 @@
       },
       "faction": "abyssals",
       "archetype": "dps",
-      "portrait": "media/portraits/trenchfist.webp",
+      "portrait": "media/portraits/trenchfist.webp?v=e536eb9da18a21d2",
       "availability": "preview"
     },
     {
@@ -944,7 +944,7 @@
       },
       "faction": "abyssals",
       "archetype": "ranged",
-      "portrait": "media/portraits/pearlslinger.webp",
+      "portrait": "media/portraits/pearlslinger.webp?v=34e78c00894deabf",
       "availability": "preview"
     },
     {
@@ -955,7 +955,7 @@
       },
       "faction": "abyssals",
       "archetype": "ranged",
-      "portrait": "media/portraits/abyssharpooner.webp",
+      "portrait": "media/portraits/abyssharpooner.webp?v=5d1358b3f17165eb",
       "availability": "preview"
     },
     {
@@ -966,7 +966,7 @@
       },
       "faction": "abyssals",
       "archetype": "control",
-      "portrait": "media/portraits/undertowherald.webp",
+      "portrait": "media/portraits/undertowherald.webp?v=b50548177d5cbf8b",
       "availability": "preview"
     },
     {
@@ -977,7 +977,7 @@
       },
       "faction": "abyssals",
       "archetype": "control",
-      "portrait": "media/portraits/trenchlamplighter.webp",
+      "portrait": "media/portraits/trenchlamplighter.webp?v=8e41d0d2bd89026f",
       "availability": "preview"
     },
     {
@@ -988,7 +988,7 @@
       },
       "faction": "abyssals",
       "archetype": "support",
-      "portrait": "media/portraits/foamweaver.webp",
+      "portrait": "media/portraits/foamweaver.webp?v=214e5dfeb899389c",
       "availability": "preview"
     },
     {
@@ -999,7 +999,7 @@
       },
       "faction": "plants",
       "archetype": "ranged",
-      "portrait": "media/portraits/podsnapper.webp",
+      "portrait": "media/portraits/podsnapper.webp?v=b1ab375e58f2b9c6",
       "availability": "preview"
     },
     {
@@ -1010,7 +1010,7 @@
       },
       "faction": "gods",
       "archetype": "tank",
-      "portrait": "media/portraits/colossus.webp",
+      "portrait": "media/portraits/colossus.webp?v=c3a101ce07415674",
       "availability": "preview"
     },
     {
@@ -1021,7 +1021,7 @@
       },
       "faction": "gods",
       "archetype": "ranged",
-      "portrait": "media/portraits/volthar.webp",
+      "portrait": "media/portraits/volthar.webp?v=33b2890d5b964da8",
       "availability": "preview"
     },
     {
@@ -1032,7 +1032,7 @@
       },
       "faction": "gods",
       "archetype": "dps",
-      "portrait": "media/portraits/astreon.webp",
+      "portrait": "media/portraits/astreon.webp?v=2a906c62263ce979",
       "availability": "preview"
     }
   ]

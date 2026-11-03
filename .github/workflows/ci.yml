@@ -52,6 +52,8 @@ jobs:
           python3 scripts/test-static-deploy.py
           python3 scripts/test-static-assets.py
           python3 scripts/test-native-catalog.py
+          python3 scripts/test-android-package.py
+          python3 scripts/test-android-release.py
           python3 scripts/test-native-artifacts.py
           python3 scripts/test-native-package.py
           python3 scripts/test-native-inputs.py
