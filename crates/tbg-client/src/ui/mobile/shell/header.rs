@@ -101,8 +101,13 @@ pub fn spawn(
                     if active { kit::GOLD } else { kit::MUTED },
                 ));
                 t.spawn((
-                    kit::muted(lang.key(&format!("lobby.tabs.{key}")), 12.),
-                    TextLayout::justify(Justify::Center),
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
+                    kit::muted(lang.key(&format!("lobby.tabs.{key}")), 11.),
+                    TextLayout::new(Justify::Center, LineBreak::AnyCharacter),
                 ));
             });
         }

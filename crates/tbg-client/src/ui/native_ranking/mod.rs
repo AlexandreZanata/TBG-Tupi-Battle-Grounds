@@ -78,7 +78,11 @@ fn render(
                 padding: UiRect::all(px(if cfg!(target_os = "android") { 8 } else { 16 })),
                 border: UiRect::all(px(2)),
                 border_radius: BorderRadius::all(px(9)),
-                overflow: Overflow::clip(),
+                overflow: if cfg!(target_os = "android") {
+                    Overflow::scroll_y()
+                } else {
+                    Overflow::clip()
+                },
                 row_gap: px(if cfg!(target_os = "android") { 6 } else { 12 }),
                 ..super::shell::page_node()
             },
@@ -92,7 +96,9 @@ fn render(
             root.spawn(Node {
                 width: percent(100),
                 flex_grow: 1.,
-                min_height: px(0),
+                #[cfg(target_os = "android")]
+                flex_shrink: 0.,
+                min_height: px(if cfg!(target_os = "android") { 340 } else { 0 }),
                 column_gap: px(if cfg!(target_os = "android") { 8 } else { 16 }),
                 ..default()
             })

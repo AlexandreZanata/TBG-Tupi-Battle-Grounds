@@ -115,7 +115,14 @@ pub fn spawn(
         });
 }
 fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: Lang, scroll: Vec2) {
-    p.spawn(kit::heading(lang.key("training.catalog"), 25.));
+    p.spawn(kit::heading(
+        lang.key("training.catalog"),
+        if cfg!(target_os = "android") {
+            18.
+        } else {
+            25.
+        },
+    ));
     p.spawn(skin::control(
         if c.search.is_empty() {
             lang.key("training.search")
@@ -151,9 +158,17 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         ] {
             row.spawn(skin::control(label, action, 0., active))
                 .insert(Node {
-                    width: percent(50),
+                    width: if cfg!(target_os = "android") {
+                        Val::Auto
+                    } else {
+                        percent(50)
+                    },
+                    #[cfg(target_os = "android")]
+                    flex_grow: 1.,
+                    #[cfg(target_os = "android")]
+                    flex_basis: px(0),
                     min_width: px(0),
-                    min_height: px(40),
+                    min_height: px(if cfg!(target_os = "android") { 48 } else { 40 }),
                     padding: UiRect::all(px(6)),
                     border: UiRect::all(px(1)),
                     border_radius: BorderRadius::all(px(4)),
@@ -169,7 +184,7 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         Node {
             width: percent(100),
             flex_grow: 1.,
-            min_height: px(0),
+            min_height: px(if cfg!(target_os = "android") { 140 } else { 0 }),
             flex_direction: FlexDirection::Column,
             overflow: Overflow::scroll_y(),
             row_gap: px(7),

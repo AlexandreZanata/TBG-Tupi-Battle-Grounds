@@ -3,6 +3,9 @@
     <style name="TbgPrototypeTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:windowBackground">#070F16</item>
+        <item name="android:windowSplashScreenBackground">#070F16</item>
+        <item name="android:statusBarColor">#070F16</item>
+        <item name="android:navigationBarColor">#070F16</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>

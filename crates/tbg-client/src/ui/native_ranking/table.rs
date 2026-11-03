@@ -37,7 +37,7 @@ pub(super) fn spawn(
         },
         children![kit::muted(status, 12.)],
     ));
-    parent.spawn((Node{width:percent(100),flex_grow:1.,min_height:px(0),flex_direction:FlexDirection::Column,overflow:Overflow::scroll_y(),row_gap:px(3),..default()}, scroll, List)).with_children(|list| {
+    parent.spawn((Node{width:percent(100),flex_grow:1.,min_height:px(if cfg!(target_os = "android") { 48 } else { 0 }),flex_direction:FlexDirection::Column,overflow:Overflow::scroll_y(),row_gap:px(3),..default()}, scroll, List)).with_children(|list| {
         let headings=["#".into(),words(lang,"Player","Jogador"),words(lang,"Rating","Pontuação"),words(lang,"Wins","Vitórias"),words(lang,"Losses","Derrotas"),words(lang,"Draws","Empates"),words(lang,"Win rate","Taxa de vitória")];
         row(list,headings,Color::srgb_u8(17,43,49),true);
         if page.is_none() && ranking.want.is_some() {

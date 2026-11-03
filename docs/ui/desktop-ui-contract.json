@@ -265,6 +265,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-small-landscape-scroll-bounds",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android header/catalog text, minimum catalog list viewport, whole-page Ranking scroll, system splash background; desktop geometry unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

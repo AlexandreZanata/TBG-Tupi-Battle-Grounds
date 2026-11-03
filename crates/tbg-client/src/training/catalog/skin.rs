@@ -48,7 +48,24 @@ pub(super) fn control(
         colors(selected),
         crate::ui::UiAction::Disabled,
         shell::Action::Catalog(action),
-        children![crate::ui::label(text, 14.)],
+        children![(
+            #[cfg(target_os = "android")]
+            Node {
+                width: percent(100),
+                min_width: px(0),
+                ..default()
+            },
+            crate::ui::label(
+                text,
+                if cfg!(target_os = "android") {
+                    12.
+                } else {
+                    14.
+                }
+            ),
+            #[cfg(target_os = "android")]
+            TextLayout::new(Justify::Center, LineBreak::AnyCharacter),
+        )],
     )
 }
 pub(super) fn primary() -> impl Bundle {
@@ -69,11 +86,11 @@ pub(super) fn panel(width: f32) -> impl Bundle {
             width: percent(width),
             min_width: px(0),
             min_height: px(0),
-            padding: UiRect::all(px(15)),
+            padding: UiRect::all(px(if cfg!(target_os = "android") { 8 } else { 15 })),
             border: UiRect::all(px(2)),
             border_radius: BorderRadius::all(px(6)),
             flex_direction: FlexDirection::Column,
-            row_gap: px(10),
+            row_gap: px(if cfg!(target_os = "android") { 6 } else { 10 }),
             overflow: Overflow::scroll_y(),
             ..default()
         },
