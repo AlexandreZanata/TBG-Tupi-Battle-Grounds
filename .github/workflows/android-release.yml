@@ -31,6 +31,8 @@ concurrency:
 
 env:
   RUST_TOOLCHAIN: 1.99.0
+  # Temurin names the reviewed JDK 21+35 build with the provider's LTS suffix.
+  ANDROID_JAVA_VERSION: '21.0.0+35.0.LTS'
 
 jobs:
   package-contracts:
@@ -41,6 +43,12 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.ANDROID_JAVA_VERSION }}
+      - name: Verify the public package's Java pin before main publication
+        run: java -version
       - run: |
           python3 scripts/test-android-package.py
           python3 scripts/test-android-release.py
@@ -85,6 +93,8 @@ jobs:
           ref: ${{ needs.scope.outputs.source }}
           # The APK inspector proves ancestry from the retained Linux reference.
           fetch-depth: 0
+          # Keep commit ancestry without downloading historical art blobs.
+          filter: blob:none
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; compiler pinned by input
         with:
@@ -93,7 +103,7 @@ jobs:
       - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
         with:
           distribution: temurin
-          java-version: '21.0.0+35'
+          java-version: ${{ env.ANDROID_JAVA_VERSION }}
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: android-arm64-ndk28-release
