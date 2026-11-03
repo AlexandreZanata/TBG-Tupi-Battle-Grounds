@@ -347,6 +347,9 @@ fn poll(
             Purpose::Account | Purpose::Library => {
                 if reply.value.get("uploads").is_some() || matches!(purpose, Purpose::Account) {
                     s.data = reply.value;
+                    if s.notice == "p75.loading" {
+                        s.notice = "";
+                    }
                 } else {
                     send(&mut s, Purpose::Library, "/api/me/emoji", "GET", None);
                 }

@@ -27,6 +27,19 @@ pub enum TextKind {
     Room,
 }
 
+/// Shared editor limits; Android and the Bevy form accept the same field lengths.
+pub fn limit(kind: Option<TextKind>) -> usize {
+    match kind {
+        Some(TextKind::Name | TextKind::PlayerSearch | TextKind::P75Code) => 16,
+        Some(TextKind::Email) => 254,
+        Some(TextKind::P75Text) => 500,
+        Some(TextKind::Room) => 5,
+        #[cfg(target_os = "android")]
+        Some(TextKind::MatchChat) => 120,
+        _ => 128,
+    }
+}
+
 /// A submitted value; the opener stays open until it calls `close` (so a
 /// server error can be shown in the form via `set_error`).
 #[derive(Message)]

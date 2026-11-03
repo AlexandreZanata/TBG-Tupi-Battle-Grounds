@@ -1113,3 +1113,11 @@ changes through the shared host callback. Model preview rotation consumes an
 owned touch drag confined to its measured viewport and excludes its controls
 drawer; real mouse behavior and all desktop motion/assets remain unchanged.
 Actual cancellation/rotation/configuration observations are in the P69 report.
+
+
+P69 identity forms: Android verification uses the shared alphanumeric code
+contract and Unicode scalar field limits. Account/Library responses clear the
+loading notice only after actual data arrives on all targets. Native IME
+geometry and desktop field geometry are unchanged. Candidate40 lifecycle/drag
+and five actual Linux/Android canonical traces are recorded separately in the
+P69 continuation report; verification-form runtime repetition remains pending.

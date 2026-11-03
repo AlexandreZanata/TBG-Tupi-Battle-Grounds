@@ -42,13 +42,25 @@ internal class NativeTextInput(private val activity: MainActivity) {
                 InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
             } else when (request.optString("keyboard")) {
                 "email" -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
-                "number" -> InputType.TYPE_CLASS_NUMBER
+                "code" -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS or
+                    InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
                 else -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             }
             imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING or
                 EditorInfo.IME_FLAG_NO_EXTRACT_UI or EditorInfo.IME_FLAG_NO_FULLSCREEN
-            filters = arrayOf(InputFilter.LengthFilter(limit))
-            setText(request.optString("value").take(limit))
+            // Rust and the desktop editor count Unicode scalars, rather than UTF-16 units.
+            filters = arrayOf(InputFilter { source, start, end, dest, dstart, dend ->
+                val remaining = limit - Character.codePointCount(dest, 0, dstart) -
+                    Character.codePointCount(dest, dend, dest.length)
+                when {
+                    remaining <= 0 -> ""
+                    Character.codePointCount(source, start, end) <= remaining -> null
+                    else -> source.subSequence(start, Character.offsetByCodePoints(source, start, remaining))
+                }
+            })
+            val value = request.optString("value")
+            val count = minOf(limit, Character.codePointCount(value, 0, value.length))
+            setText(value.substring(0, Character.offsetByCodePoints(value, 0, count)))
             setSelection(text.length)
         }
         val density = activity.resources.displayMetrics.density

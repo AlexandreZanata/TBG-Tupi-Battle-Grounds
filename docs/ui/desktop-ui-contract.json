@@ -423,6 +423,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-native-verification-code-shared-limits",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android alphanumeric verification/recovery code keyboard and Unicode scalar limits, shared Account/Library loading completion; existing desktop geometry preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }
