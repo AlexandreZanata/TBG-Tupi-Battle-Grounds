@@ -6187,7 +6187,7 @@ dependencies = [
 
 [[package]]
 name = "tbg-client"
-version = "0.1.4-colossus.4"
+version = "0.1.4-colossus.5"
 dependencies = [
  "arboard",
  "bevy",
