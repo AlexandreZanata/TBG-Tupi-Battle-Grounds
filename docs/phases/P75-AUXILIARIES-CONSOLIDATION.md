@@ -283,3 +283,12 @@ complete online three-tier/reconnect/privacy/result scenario 1 passed (1.95 s).
 The last command freshly validates both the corrected online tier journey and
 the changed follower implementation; it is not a lock-wait retry on unchanged
 code. No full local suite ran. Final GitHub lanes still gate merge.
+
+## Post-merge authentication follow-up
+
+PR #59 merged with all required PR/native checks green. The next main run
+exposed a real deferred SQLite read-to-write race during cross-slot account
+issuance. [The isolated authentication follow-up](P75-AUTH-WRITER-FOLLOWUP.md)
+records the forced-contention reproductions, minimal writer-reservation fix,
+32 passing focused tests and unchanged simulation/retirement/deployment guards.
+Its GitHub CI and normal merge precede the final immutable preview refresh.

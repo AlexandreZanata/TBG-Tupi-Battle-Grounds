@@ -1,6 +1,6 @@
 //! Transactional, hash-only device families and refresh history (D-97/BR-AS02–03).
 
-use rusqlite::{params, Connection, OptionalExtension};
+use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use tbg_core::protocol::{AccountError, Profile};
 
 use super::{accounts, ranked, AccountId};
@@ -274,7 +274,9 @@ fn issue_family(
     issue: Issuance,
     email: Option<super::recovery::service::Enrollment>,
 ) -> Result<Reply, Error> {
-    let tx = conn.transaction()?;
+    // Two slots share the file: reserve the writer before policy/account reads,
+    // so SQLite can busy-wait instead of rejecting a deferred lock upgrade.
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     if let Some(input) = &email {
         super::recovery::service::registration(&tx, &input.email, &input.locale)
             .map_err(Error::from)?;
@@ -393,7 +395,8 @@ fn rotate(
     channel: Channel,
     now: i64,
 ) -> Result<Reply, Error> {
-    let tx = conn.transaction()?;
+    // The refresh lookup and consumption must share a writable snapshot.
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let row = lookup(&tx, old_hash, channel, now)?;
     if let Some(at) = row.consumed {
         return consumed(&tx, row, at, Some(operation_hash));
@@ -467,3 +470,6 @@ fn guard_ban(db: &Connection, account: i64, now: i64) -> Result<(), Error> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests;
