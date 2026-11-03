@@ -21,7 +21,10 @@ pub(crate) async fn start(
     let weak_auth = Arc::downgrade(&auth);
     tokio::spawn(async move {
         drop((store, auth));
-        let mut tick = tokio::time::interval(std::time::Duration::from_millis(config.feed_ms));
+        let period = std::time::Duration::from_millis(config.feed_ms);
+        // Offset the follower from the one-second release/auth heartbeats so
+        // bounded maintenance cannot be queued behind every idle observation.
+        let mut tick = tokio::time::interval_at(tokio::time::Instant::now() + period / 2, period);
         let mut cursor = 0;
         let mut previous_now = 0;
         loop {

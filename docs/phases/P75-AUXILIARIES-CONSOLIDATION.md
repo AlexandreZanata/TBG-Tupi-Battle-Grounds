@@ -217,7 +217,7 @@ claim and keeps A responsive before testing B's rejection, then explicitly
 closes A before testing ownership transfer. LoggedIn alone precedes that claim
 and was not a sufficient setup barrier.
 
-> blocked: `u13_u15_a_running_match_survives_promotion_and_rollback` failed
+> blocked (resumed under the owner follow-up; scoped checks passed): `u13_u15_a_running_match_survives_promotion_and_rollback` failed
 > again in GitHub job 125658303316 after the earlier bounded-poll batch passed
 > locally. Exact error: `timed out waiting for both slots idle:
 > [("a", "active", 0, 2, 0, true), ("b", "draining", 0, 0, 0, false)]`.
@@ -254,3 +254,32 @@ p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative --
 --test-threads=1`, with the same lock/two-job prefix and existing P75 cache.
 It returned exit 75 before compilation and is deferred to the next GitHub
 run. No lock retry or full local suite ran. Formatting/diff checks passed.
+
+
+### Resumed retirement follow-up
+
+The owner's later explicit instruction to resolve all failures and finish the
+combined PR authorizes this routine, reversible follow-up. The additional
+permission question was unnecessary; the step had been stopped and recorded
+before independent work continued. The prepared follower offset is now applied:
+its first poll starts half an existing feed period after startup, preserving
+the configured period, immediate startup snapshot, every pending-job count,
+retirement predicate, reconnect receipt and rollback guard. This prevents the
+new periodic poll from always entering the same heartbeat observation window.
+The preceding two heads' successful slot runs remain evidence, not proof that
+the earlier intermittent alignment could never recur.
+
+With the offset applied, the following fresh scopes completed under the global
+nonblocking lock, `CARGO_BUILD_JOBS=2`, existing `/data/tbg-p75-target` cache:
+
+```text
+cargo test -p tbg-server --lib --test release_slots --test contract_p75_moderation -- heartbeat_ u13_ u15_ br_md02_cross_slot s13_global --test-threads=1
+cargo test -p tbg-server --test online p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative -- --test-threads=1
+```
+
+Results: heartbeat regressions 2 passed (0.05 s), cross-slot moderation 1 passed
+(0.55 s), ownership/promotion/rollback/ranked settlement 3 passed (14.70 s),
+complete online three-tier/reconnect/privacy/result scenario 1 passed (1.95 s).
+The last command freshly validates both the corrected online tier journey and
+the changed follower implementation; it is not a lock-wait retry on unchanged
+code. No full local suite ran. Final GitHub lanes still gate merge.
