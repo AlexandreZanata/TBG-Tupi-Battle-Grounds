@@ -99,6 +99,11 @@ def prepare(args):
     version = tomllib.loads((ROOT / "crates/tbg-client/Cargo.toml").read_text())["package"]["version"]
     protocol = int(re.search(r"PROTOCOL_VERSION: u16 = (\d+)",
                             (ROOT / "crates/tbg-core/src/protocol.rs").read_text())[1])
+    toolchain = json.loads((ROOT / "platform/android/toolchain.json").read_text())
+    # Runtime AVD observations belong to the execution report, not build identity.
+    toolchain = {key: value for key, value in toolchain.items() if not key.startswith("emulator_")}
+    toolchain["abi"] = args.abi
+    toolchain["rust_target"] = {"arm64-v8a": "aarch64-linux-android", "x86_64": "x86_64-linux-android"}[args.abi]
     info = {
         "source_sha": source, "reviewed_linux_base": BASE, "linux_version": version,
         "android_revision": args.version_code, "package": PACKAGE, "abi": args.abi,
@@ -107,7 +112,7 @@ def prepare(args):
         "cargo_lock_sha256": digest((ROOT / "Cargo.lock").read_bytes()),
         "assets_sha256": digest(json.dumps(assets, sort_keys=True).encode()),
         "native_libraries": {name: digest(path.read_bytes()) for name, path in libraries.items()},
-        "toolchain": json.loads((ROOT / "platform/android/toolchain.json").read_text()),
+        "toolchain": toolchain,
     }
     STAGE.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="native-input-", dir=STAGE.parent) as scratch:
