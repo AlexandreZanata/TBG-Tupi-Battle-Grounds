@@ -46,11 +46,12 @@ The browser repeats the same validation, so a malformed file stays in the safe p
   previews are the client's own renders.
 - Patch notes: `docs/patches/catalog.json` copied at staging; the page shows title, summary,
   date, version and status only (technical sections stay in the game and repository).
-- Captures: real Practice matches from the native Linux client built from the base commit
-  (`0.1.1-rc.1-tupibg-8be248e` install), English UI, captured on a private Xvfb display with
-  `web/scripts/capture_native.sh` and cropped by `media_from_capture.sh` to drop the client's
-  debug performance line. Crop and resize only. The pt-BR native HUD still shows some English
-  labels, which is why English captures are used.
+- Captures: the current gallery and root README share real native Linux
+  release-profile `0.1.4-colossus.5` Practice screenshots. Forest and Tundra
+  matches include War Auxiliaries, Augments, inspection panels and the result
+  of a complete match. See [capture provenance](../../docs/evidence/readme-linux-release.md)
+  for the exact CI package, hashes, method and acceptance limits. Derivatives
+  are 1280 × 720 with 800 × 450 thumbnails; no content was painted over.
 - Hero art: `crates/tbg-client/assets/ranking/podium-grove.webp`; wordmark:
   `lobby/wordmark.webp` (owner-selected wordmark for the lobby brand); emblem: branding.
 

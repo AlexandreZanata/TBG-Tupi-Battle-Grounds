@@ -1,29 +1,103 @@
-# TBG — Tupi Battle Grounds
+<p align="center">
+  <a href="https://tupibg.com/">
+    <img src="web/landing/media/wordmark-760.webp" width="420" height="168" alt="Tupi Battle Grounds — official logo">
+  </a>
+</p>
 
-An open-source, browser-first, real-time 1v1 strategy game. Buy units from
-a rotating five-offer Shop, watch them fight automatically on a single
-lane, evolve them along branching paths, and stack faction synergies until
-one `Stronghold` falls.
+# Tupi Battle Grounds
 
-> **Status: beta integration, not balance-approved.** The shared Bevy desktop UI
-> runs on Linux and in the browser. The integrated roster has 46 conventional
-> champions and eight Arenas. Official origins and release/validation limits are
-> documented in [RELEASES](docs/RELEASES.md); email recovery, mobile, native signed
-> updater activation and real Windows visual acceptance remain separate work.
+**[▶ PLAY IN YOUR BROWSER — app.tupibg.com](https://app.tupibg.com/)**
 
-## The game
+**[Official website — tupibg.com](https://tupibg.com/)** ·
+[How to play](https://tupibg.com/#how-to-play) ·
+[Linux and Windows download options](https://tupibg.com/#play)
 
-| | |
-|-|-|
-| Mode | Live 1v1, both players act at the same time, 3–4 minute matches |
-| Board | One `BattleLine`; units walk and fight on their own |
-| Economy | Regenerating `Energy` spent on units and evolutions |
-| Shop | Five offers, refilled on purchase, rotating on a shared timer |
-| Depth | Branching `Evolution`, faction `Synergy`, `Tank`/`DPS`/`Support`/`Ranged`/`Control` roles |
-| Factions | Humans, Undead, Machines, Plants |
-| Fairness | Server-authoritative; free-to-play with cosmetics only, never pay-to-win |
+An open-source, real-time 1v1 strategy game for desktop browsers, Linux and
+Windows. Build an army from a rotating five-offer `Shop`, combine `Faction`
+`Synergy`, choose branching `Evolution`, and destroy the enemy `Stronghold`.
+Combat runs automatically on one `BattleLine`; your purchases and timing decide
+what reaches it. Online matches use an authoritative Rust server.
 
-Full rules: [docs/GAME-DESIGN.md](docs/GAME-DESIGN.md).
+![Real Linux gameplay in the Verdant Forest, with Mineiro and Mercador at tier III](web/landing/media/captures/release-war-auxiliaries-1280.webp)
+
+*Verdant Forest, the base Arena: a real Practice match with both War Auxiliaries
+at tier III. All screenshots below come from the native Linux release build.*
+
+## How to play
+
+1. **Enter the game.** Open [app.tupibg.com](https://app.tupibg.com/) on a desktop
+   browser, or visit [tupibg.com](https://tupibg.com/#play) for native download
+   availability. Start with **Practice against the Bot**; choose an Arena and
+   difficulty. Casual, friend challenges and private rooms are also available.
+2. **Buy and send champions.** Click an affordable `Shop` offer. The champion
+   enters the `BattleLine` and fights automatically. Manage `Energy` between
+   purchases, `Evolution`, rerolls and saving for Interest.
+3. **Inspect and evolve.** Click one of your champions to see its statistics
+   and `Evolution` choices. Combine champions from a `Faction` to activate
+   `Synergy`. Click your `Stronghold` to inspect its `Fortification` branches.
+4. **Choose an Augment.** At each **War Council**, combat pauses and both players
+   receive the same four `Augment` offers. Select one and confirm, or **Forgo**.
+5. **Build your economy.** Hire **Mineiro** and **Mercador** in the auxiliary
+   cards beside the `Shop`. Each has three tiers: Mineiro generates `Energy`;
+   Mercador rewards champion purchases. Their construction and remaining
+   benefits are visible during the match.
+6. **Break the enemy Stronghold.** There is no match time limit. Destroying the
+   opposing `Stronghold` ends the match; the result screen offers **Play again**.
+
+Guests can learn and play Casual; an account is required for Ranked and saved
+account progress. Keep your manual recovery key safe. Account recovery and
+optional verified email are documented in the
+[P75 account and social contracts](docs/planning/P75-CONTRACTS.md).
+
+Full rules and the current balance proposals: [GAME-DESIGN](docs/GAME-DESIGN.md).
+
+## Real gameplay gallery
+
+These are actual frames from **0.1.4-colossus.5**, compiled with the **release**
+profile for Linux. They show ordinary Practice gameplay, including a complete
+Forest match through the result screen. No armies, `Energy` or auxiliary tiers
+were injected. [Capture provenance and image details](docs/evidence/readme-linux-release.md).
+
+### Frozen Tundra
+
+![Champions fighting on the snow-covered Frozen Tundra BattleLine](web/landing/media/captures/release-tundra-battle-1280.webp)
+
+### War Council and Augments
+
+![Four Augment cards offered during a real War Council in the Verdant Forest](web/landing/media/captures/release-augments-1280.webp)
+
+### Click a champion: statistics and Evolution
+
+![Celestial Archer selected in the Frozen Tundra, showing statistics and branching Evolution](web/landing/media/captures/release-champion-panel-1280.webp)
+
+### Click the Stronghold: tower upgrades
+
+![Bastion Stronghold inspection and Fortification choices during the Forest match](web/landing/media/captures/release-stronghold-panel-1280.webp)
+
+### A complete match reaches its result
+
+![Result of the completed Forest Practice match after a Stronghold was destroyed](web/landing/media/captures/release-forest-result-1280.webp)
+
+### Choose an Arena
+
+![Native Arena catalog showing Forest, Tundra, Volcanic Forge and Ancient Ruins previews](web/landing/media/captures/release-arena-catalog-1280.webp)
+
+*The Arena catalog shows additional fields; the gameplay photos above are from
+actual Forest and Tundra matches.*
+
+### The lobby
+
+![The native Linux lobby with Practice, Casual, friend challenges, private rooms and collections](web/landing/media/captures/release-lobby-1280.webp)
+
+Explore more Arenas, champions and instructions on the
+[official landing page](https://tupibg.com/#screenshots), or
+**[play the web game](https://app.tupibg.com/)**.
+
+**Development status: beta.** Competitive balance approval and remaining device
+and visual acceptance are tracked separately. These Linux captures do not
+certify Windows or browser pixel and motion parity. See
+[RELEASES](docs/RELEASES.md), [ROADMAP](docs/ROADMAP.md) and the
+[desktop UI contract](docs/ui/DESKTOP-UI-CONTRACT.md) for current limits.
 
 ## Technology
 
@@ -36,7 +110,7 @@ as stylized toy figurines — no rigging pipeline. Details:
 
 ```
 crates/tbg-core    rules, content, bot, protocol (shared, deterministic)
-crates/tbg-client  Bevy browser client
+crates/tbg-client  Bevy Linux/Windows and browser client
 crates/tbg-server  authoritative game server
 docs/              GAME-DESIGN, ARCHITECTURE, ROADMAP, DECISIONS, phases/
 archive/           legacy Unity/Nakama/Python project (read-only)
@@ -44,7 +118,7 @@ archive/           legacy Unity/Nakama/Python project (read-only)
 
 ## Build and check
 
-Requires `rustup`; `rust-toolchain.toml` selects stable and installs the
+Requires `rustup`; `rust-toolchain.toml` pins the compiler version and installs the
 `wasm32-unknown-unknown` target.
 
 Use [DEVELOPMENT](docs/DEVELOPMENT.md) and [VALIDATION](docs/VALIDATION.md) to choose
@@ -60,61 +134,22 @@ flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
 
 ## Run it locally
 
+Follow [DEVELOPMENT](docs/DEVELOPMENT.md) for the native client and browser setup.
+For a local browser build with Trunk already installed:
+
 ```bash
-# Once, if Trunk is not installed:
-flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
-  env CARGO_BUILD_JOBS=2 cargo install --locked trunk --version 0.22.1
-# Build under the shared lock; exit 75 means defer, never retry automatically.
+# Exit 75 means defer: another worktree owns the shared compilation slot.
 flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
   env CARGO_BUILD_JOBS=2 bash -euc '(cd crates/tbg-client && trunk build); cargo build --locked -p tbg-server'
 TBG_AUTH_ORIGINS=http://localhost:8080,http://127.0.0.1:8080 \
   TBG_DB=/tmp/tbg-development.sqlite3 TBG_STATIC_DIR=crates/tbg-client/dist target/debug/tbg-server
 ```
 
-Open `http://localhost:8080/` in a desktop browser.
-URL options: `?autoplay=practice|quick` (a bot plays for you), `?lag=300`
-(simulated latency), `?gallery` / `?gallery=N` (art review), `?stress=30`,
-`?shadows=0`, `?room=CODE`. Bot load test:
-`cargo run --release -p tbg-server --bin tbg-bots -- --matches 50`.
-Accounts: guests play everything except ranked; "Create account" in the
-menu gives you a name plus a manual recovery key (save it; the
-server stores only its hash). Log in with the key on any device. Load
-tests with `--accounts` need `TBG_REGISTER_PER_IP_HOUR` raised on the test
-server only.
-Global ranking and player stats: the **Ranking** button in the menu, or
-the public page at `http://localhost:8080/ranking/` (JSON API:
-`/api/leaderboard`, `/api/players/{name}`).
-Field news opens the shared **Patch notes** page in Linux and the browser
-(`?ui=bevy&panel=patch-notes`). The read-only public feed is
-`/api/patch-notes`, with details at `/api/patch-notes/{id}`. Every gameplay
-revision needs [documented patch notes and evidence](docs/patches/README.md);
-CI rejects missing revision notes. Linux also includes an offline snapshot.
-
-## Consolidated Linux prerelease candidate
-
-[Download the Linux candidate](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases/tag/v0.1.1-rc.1)
-(AppImage or tar.gz, x86_64, **glibc 2.39+**, unsigned prerelease).
-
-`0.1.1-rc.1` is built from the consolidation of the open pull requests
-#18-#33: complete roster, five arenas with training, laboratory, victory
-celebration, English/pt-BR, ranked records, competitive audit and patch notes,
-protected sign-in (P68) and the recoverable Linux updater foundation (P66).
-It uses protocol 30 and server schema 10; gameplay numbers are unchanged.
-**The existing protocol-29 production server is incompatible.** Offline
-Practice/training remains available; online play needs a compatible server
-built from the same consolidation, which this release does not deploy.
-
-Access stays in memory; optional Linux refresh persistence and the short
-match-resume record use Secret Service through one coordinator. Browser
-refresh uses a protected host cookie with exact configured origins.
-Vault/cookie failure produces a visible temporary mode. Existing manual keys
-remain valid. Official signing/automatic updates (O02) and Windows support are
-not active; the official host runs the two release slots (D-104) and promotes
-compatible server releases through them. See [native instructions](deploy/native/README.txt),
-the [consolidation report](docs/phases/CONSOLIDATION-20261101.md) and the
-[desktop UI contract](docs/ui/DESKTOP-UI-CONTRACT.md).
-
-Deploying to a VPS: [deploy/README.md](deploy/README.md).
+Open `http://localhost:8080/` in a desktop browser. Keep client and server on the
+same match contract. Practice is local; online accounts and matches use the
+configured server. Public ranking and patch notes are served at `/ranking/`
+and `/api/patch-notes`. See [deploy/README.md](deploy/README.md) for deployment
+operations and [RELEASES](docs/RELEASES.md) for publication and compatibility gates.
 
 ## Contributing
 
