@@ -82,6 +82,8 @@ fn keyboard(
             Key::Tab => {
                 let count = if form.kind == Some(TextKind::Key) {
                     5
+                } else if form.kind == Some(TextKind::BackupKey) {
+                    4
                 } else {
                     3
                 };
@@ -284,11 +286,17 @@ fn render(
                                 kit::LINE
                             }));
                     }
-                    if form.kind == Some(TextKind::Key) {
-                        row.spawn((
-                            kit::control(lang.key("p75.lost_key"), true, 180.),
-                            Control::Recover,
-                        ));
+                    if matches!(form.kind, Some(TextKind::Key | TextKind::BackupKey)) {
+                        if form.kind == Some(TextKind::Key) {
+                            row.spawn((
+                                kit::control(lang.key("p75.lost_key"), true, 180.),
+                                Control::Recover,
+                            ))
+                            .insert(kit::buttons::Chrome {
+                                enabled: true,
+                                focused: form.focus == 4,
+                            });
+                        }
                         row.spawn((
                             kit::control(lang.key("native.reveal"), true, 140.),
                             Control::Reveal,

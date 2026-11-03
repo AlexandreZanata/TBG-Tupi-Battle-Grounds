@@ -1,0 +1,39 @@
+{
+  "installed": "/home/iiii/.local/opt/tupi-battle-grounds/0.1.4-colossus.3-94a0aa4c37a1",
+  "source_commit": "94a0aa4c37a1911512fb06b5e59ade72fa9b6af1",
+  "version": "0.1.4-colossus.3",
+  "profile": "release",
+  "contract": "w38-r15-cc459351581b7763",
+  "binary_sha256": "def47731e25b1e4d6593e70b8560df9217896a74b3cae9e0b3b13f9aeab4e811",
+  "manifest_files_verified": 395,
+  "launchers": {
+    "tbg": "/home/iiii/.local/opt/tupi-battle-grounds/0.1.4-colossus.3-94a0aa4c37a1/tbg-client",
+    "tupi-battle-grounds": "/home/iiii/.local/opt/tupi-battle-grounds/0.1.4-colossus.3-94a0aa4c37a1/tbg-client"
+  },
+  "installed_native_acceptance": {
+    "confirmation_outage_recovered": true,
+    "legacy_preserved_in_temporary_mode": false,
+    "migration_completed": true,
+    "offline_pending_observed": true,
+    "ordinary_auth_metadata_contains_no_tokens": true,
+    "process_coordination": true,
+    "remote_revocation": true,
+    "restored_same_family": true,
+    "secure_persistence": true,
+    "stale_vault_recovered": true,
+    "synthetic_loopback_only": true,
+    "vault_cleanup": true
+  },
+  "linux_ui_smoke": {
+    "source_commit": "94a0aa4c37a1911512fb06b5e59ade72fa9b6af1",
+    "pending_warning_observed_in_native_capture": true,
+    "restart_restores_same_account_and_confirms_persistence": true,
+    "owner_data_used": false
+  },
+  "existing_session_recovery": {
+    "existing_credential_confirmed": true,
+    "nonsecret_recovery_markers_repaired_under_origin_lock": true,
+    "credential_changed": false,
+    "logout_requested": false
+  }
+}

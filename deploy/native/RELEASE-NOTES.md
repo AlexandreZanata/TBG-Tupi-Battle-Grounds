@@ -1,4 +1,18 @@
-TBG 0.1.4-colossus.3 — Compatible delivery verification beta
+TBG 0.1.4-colossus.4 — Account backups and in-app update candidate
+
+Update history now displays the newest note first and retains every historical entry.
+Native account settings can verify and protect an explicitly imported original
+recovery key, then copy or download it without replacing the active login.
+Session warnings distinguish storage failures from interrupted confirmation.
+
+Downloads and updates opens inside the shared game UI. Managed Linux installs
+can verify, download and restart signed updates at the existing safe idle
+boundary; Ranked requests take priority over automatic restarts. Initial
+signing-key custody and channel publication remain pending owner approval O02.
+The previous Linux installation remains available until the managed adoption
+is approved. Final release and isolated update evidence are recorded in
+docs/phases/NATIVE-SETTINGS-UPDATES.md; Windows and real-browser observations
+for these settings changes remain pending.
 
 This immutable follow-up preserves colossus.2 gameplay, presentation and match compatibility.
 Miner and Merchant provide authoritative War Auxiliary choices during a match.

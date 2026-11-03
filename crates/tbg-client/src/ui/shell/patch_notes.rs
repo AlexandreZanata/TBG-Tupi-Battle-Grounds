@@ -84,6 +84,39 @@ fn local(value: &Value, lang: Lang) -> &str {
     })
 }
 
+fn newest_first(catalog: &Value) -> Vec<&Value> {
+    let mut ids = std::collections::BTreeSet::new();
+    let mut notes: Vec<_> = catalog["notes"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .chain(snapshot()["notes"].as_array().into_iter().flatten())
+        .filter(|note| ids.insert(note["id"].as_str().unwrap_or_default()))
+        .collect();
+    notes.sort_by(|a, b| {
+        b["date"]
+            .as_str()
+            .cmp(&a["date"].as_str())
+            .then_with(|| {
+                b["ruleset_version"]
+                    .as_u64()
+                    .cmp(&a["ruleset_version"].as_u64())
+            })
+            .then_with(|| {
+                let version = |note: &Value| {
+                    note["version"]
+                        .as_str()
+                        .and_then(|s| semver::Version::parse(s).ok())
+                };
+                match (version(a), version(b)) {
+                    (Some(a), Some(b)) => b.cmp_precedence(&a),
+                    _ => std::cmp::Ordering::Equal,
+                }
+            })
+    });
+    notes
+}
+
 pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, assets: &AssetServer, lang: Lang) {
     root.spawn(kit::panel()).with_children(|panel| {
         panel
@@ -127,7 +160,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, assets: &AssetServer,
     } else {
         &data.patch_notes
     };
-    for note in catalog["notes"].as_array().into_iter().flatten() {
+    for note in newest_first(catalog) {
         root.spawn(kit::panel()).with_children(|panel| {
             panel.spawn(kit::muted(
                 format!(
@@ -195,6 +228,16 @@ pub fn spawn(root: &mut ChildSpawnerCommands, data: &Data, assets: &AssetServer,
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn patch_history_is_newest_first_even_when_the_feed_appends_new_releases() {
+        let notes = newest_first(snapshot());
+        assert_eq!(notes.first().unwrap()["id"], "native-settings-auto-updates");
+        assert_eq!(notes.last().unwrap()["id"], "native-2-consolidation");
+        assert_eq!(notes.len(), snapshot()["notes"].as_array().unwrap().len());
+        assert!(notes
+            .windows(2)
+            .all(|pair| pair[0]["date"].as_str() >= pair[1]["date"].as_str()));
+    }
     #[test]
     fn compiled_notes_are_valid_and_malformed_feeds_are_rejected() {
         assert!(parse(snapshot().clone()).is_some());

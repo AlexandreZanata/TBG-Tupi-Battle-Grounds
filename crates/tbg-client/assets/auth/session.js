@@ -26,14 +26,14 @@ async function post(operation,body,access,credentials) {
     if(response.status!==200){const error=new Error(typeof value.error==='string'?value.error:'incompatible');error.payload=value;throw error;}
     return value;
   } catch(error) {
-    const known=['incompatible','auth_required','name_taken','name_invalid','rate_limited','conflict','recovery_required','in_match','capacity','family_limit','unavailable','email_required','email_invalid','email_blocked','email_limit','registration_closed','code_invalid','account_suspended'];
+    const known=['incompatible','auth_required','name_taken','name_invalid','rate_limited','conflict','recovery_required','in_match','capacity','family_limit','unavailable','storage_unavailable','email_required','email_invalid','email_blocked','email_limit','registration_closed','code_invalid','account_suspended'];
     if(known.includes(error.message))throw error;failure('unavailable');
   } finally {clearTimeout(timer);}
 }
 
 async function retry(operation,body,access,credentials) {
   try{return await post(operation,body,access,credentials);}catch(error){
-    if(error.message==='unavailable'&&['refresh','register','recover'].includes(operation))return post(operation,body,access,credentials);
+    if(error.message==='unavailable'&&['refresh','register','recover','confirm'].includes(operation))return post(operation,body,access,credentials);
     throw error;
   }
 }
@@ -45,10 +45,10 @@ async function logout(credentials,access) {
   try {
     await post('logout',{},access,credentials);
     if(durable&&!write('logout_pending',null))failure('unavailable');
-    state.grant=null;state.access=null;notify();return {kind:'logged_out'};
+    state.grant=null;state.access=null;state.recoveryKey=null;notify();return {kind:'logged_out'};
   }catch(error){
     // An unrecognized cookie cannot restore an account; a lost successful reply is safe to retry.
-    if(error.message==='auth_required'&&marked){if(durable)write('logout_pending',null);state.grant=null;state.access=null;return {kind:'logged_out'};}
+    if(error.message==='auth_required'&&marked){if(durable)write('logout_pending',null);state.grant=null;state.access=null;state.recoveryKey=null;return {kind:'logged_out'};}
     return {kind:'logout_pending',error:error.message};
   }
 }
@@ -58,6 +58,15 @@ async function run(request) {
   const current=()=>state.epoch===request.epoch;
   const operation=request.kind;
   if(request.origin!==location.origin)failure('invalid_origin');
+  if(operation==='recovery-key') {
+    const name=state.grant?.profile?.name;
+    if(!name||!state.access)failure('auth_required');
+    if(request.input) {
+      if(!request.input.toLowerCase().startsWith(name.toLowerCase()+'-'))failure('auth_required');
+      state.recoveryKey=request.input;
+    }
+    return {kind:'recovery_key',key:state.recoveryKey||null};
+  }
   if(read('logout_pending')==='1'&&operation!=='logout') {
     const result=await logout('same-origin',state.access);
     if(result.kind!=='logged_out')return result;
@@ -101,14 +110,15 @@ async function run(request) {
     if(out.kind!=='logged_out'){write('logout_pending','1');failure('revocation_pending');}
     failure('cancelled');
   }
-  let secure=false;
+  let secure=false,warning=durable?null:'storage_unavailable';
   if(durable) {
-    try{const proof=await post('confirm',{},null,credentials);secure=proof.session_id===grant.session_id;}catch{/* Cookies blocked: keep Access only and display temporary mode. */}
-    if(!secure)write('logout_pending','1');
+    try{const proof=await retry('confirm',{},null,credentials);secure=proof.session_id===grant.session_id;if(!secure)warning='conflict';}catch(error){warning=error.message==='auth_required'?'storage_unavailable':error.message;}
+    // A transport outage does not prove cookies are blocked or require logout.
+    if(!secure&&warning==='storage_unavailable')write('logout_pending','1');
   }
   state.grant={...grant};delete state.grant.account_key;state.access=grant.access_token;
   notify();
-  return {kind:'signed_in',grant,secure,device:state.device};
+  return {kind:'signed_in',grant,secure,...(warning?{warning}:{}),device:state.device};
 }
 
 export function startAuth(raw,callback) {

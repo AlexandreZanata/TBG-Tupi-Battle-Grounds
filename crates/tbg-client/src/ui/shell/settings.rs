@@ -98,7 +98,11 @@ pub fn spawn(
                 320.,
             ));
         }
-        p.spawn(button(lang.key("native.downloads"), Action::Download, 320.));
+        p.spawn(kit::button(
+            lang.key("native.downloads"),
+            UiAction::UpdateOpen,
+            320.,
+        ));
         p.spawn(button(
             lang.key("native.kit"),
             Action::Open(Panel::Kit),

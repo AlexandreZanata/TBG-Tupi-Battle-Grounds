@@ -32,6 +32,9 @@ pub(crate) enum AccountScreen {
 #[derive(Resource, Default)]
 pub struct Account {
     pub registration_name: Option<String>,
+    pub(crate) recovery_key: Option<String>,
+    pub(crate) key_action: Option<super::account_backup::ExportAction>,
+    pub(crate) key_result: Option<Result<Option<String>, crate::auth::Failure>>,
     pub profile: Option<Profile>,
     pub(crate) screen: AccountScreen,
     pub(crate) pending: Option<TextKind>,
@@ -47,6 +50,7 @@ pub struct Account {
 pub fn plugin(app: &mut App) {
     app.init_resource::<Account>()
         .init_resource::<AccountInbox>()
+        .add_plugins(super::account_backup::plugin)
         .add_systems(Update, (watch_text, text_cancelled, drain_inbox));
 }
 
@@ -80,6 +84,7 @@ fn watch_text(
                 crate::auth::Command::Register(serde_json::json!({"name":name,"email":ev.value,"locale":if *lang==Lang::PtBr{"pt-BR"}else{"en"}}).to_string())
             }
             TextKind::Key => crate::auth::Command::Login(ev.value.clone()),
+            TextKind::BackupKey => crate::auth::Command::RecoveryKey(Some(ev.value.clone())),
             _ => continue,
         };
         if crate::auth::request(command) {
@@ -90,6 +95,7 @@ fn watch_text(
 
 fn text_cancelled(mut events: MessageReader<TextCancelled>, mut account: ResMut<Account>) {
     for _ in events.read() {
+        account.key_action = None;
         if matches!(account.pending, Some(TextKind::Name | TextKind::Key)) {
             crate::auth::request(crate::auth::Command::Guest);
         }
@@ -122,6 +128,15 @@ fn drain_inbox(
                 textform::close(&mut form);
             }
             ServerMsg::LoggedIn { profile } => {
+                if account
+                    .profile
+                    .as_ref()
+                    .is_some_and(|old| old.name != profile.name)
+                {
+                    account.recovery_key = None;
+                    account.key_action = None;
+                    account.key_result = None;
+                }
                 let was_auto = account.auto_login;
                 account.profile = Some(profile.clone());
                 account.pending = None;
@@ -132,6 +147,9 @@ fn drain_inbox(
                 }
             }
             ServerMsg::LoggedOut => {
+                account.recovery_key = None;
+                account.key_action = None;
+                account.key_result = None;
                 account.profile = None;
                 account.screen = AccountScreen::None;
                 account.logout_armed = false;

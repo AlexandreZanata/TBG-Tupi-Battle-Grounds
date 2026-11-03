@@ -94,7 +94,9 @@ pub fn open_page(path: &str) {
 #[cfg(not(target_arch = "wasm32"))]
 pub fn export_recovery_key(name: &str, key: &str) -> bool {
     use std::io::Write;
-    let Some(dir) = storage::data_dir() else {
+    let Some(dir) = directories::UserDirs::new()
+        .and_then(|dirs| dirs.download_dir().map(std::path::Path::to_path_buf))
+    else {
         return false;
     };
     let safe: String = name
@@ -105,14 +107,24 @@ pub fn export_recovery_key(name: &str, key: &str) -> bool {
         return false;
     }
     let mut options = std::fs::OpenOptions::new();
-    options.create(true).truncate(true).write(true);
+    options.create_new(true).write(true);
     #[cfg(unix)]
     {
         use std::os::unix::fs::OpenOptionsExt;
         options.mode(0o600);
     }
+    let mut path = dir.join(format!("{safe}-tbg-key.txt"));
+    if path.exists() {
+        if std::fs::read_to_string(&path).is_ok_and(|old| old == key) {
+            return true;
+        }
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |time| time.as_secs());
+        path = dir.join(format!("{safe}-tbg-key-{stamp}.txt"));
+    }
     options
-        .open(dir.join(format!("{safe}-tbg-key.txt")))
+        .open(path)
         .and_then(|mut file| file.write_all(key.as_bytes()).and_then(|_| file.sync_all()))
         .is_ok()
 }

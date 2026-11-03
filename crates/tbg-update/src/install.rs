@@ -39,6 +39,13 @@ pub fn install(layout: &Layout, opts: &Options) -> Result<String, String> {
     let from = layout.current_build().unwrap_or_default();
     activate::switch(layout, &from, &build).map_err(|e| e.to_string())?;
     journal::store(layout, None).map_err(|e| e.to_string())?;
+    let icon = layout
+        .release(&build)
+        .join("assets/branding/tbg-icon-512.png");
+    if icon.is_file() {
+        std::fs::copy(icon, layout.launcher_dir().join("tbg-icon-512.png"))
+            .map_err(|error| error.to_string())?;
+    }
     if opts.desktop {
         desktop_entry(&launcher)?;
         command_link(&launcher)?;
@@ -143,7 +150,7 @@ fn desktop_entry(launcher: &Path) -> Result<(), String> {
         .map(|p| format!("Icon={}\n", p.display()))
         .unwrap_or_default();
     let entry = format!(
-        "[Desktop Entry]\nType=Application\nName=TBG\nComment=Tupi Battle Grounds\nExec=\"{exec}\"\n{icon}Terminal=false\nCategories=Game;StrategyGame;\nStartupWMClass=tbg-client\n"
+        "[Desktop Entry]\nType=Application\nName=TBG\nComment=Tupi Battle Grounds\nExec=\"{exec}\"\n{icon}Terminal=false\nCategories=Game;StrategyGame;\nStartupWMClass=tupi-battle-grounds\n"
     );
     fsx::write_atomic(&path, entry.as_bytes()).map_err(|e| e.to_string())
 }
@@ -156,19 +163,26 @@ fn command_link(launcher: &Path) -> Result<(), String> {
     {
         let bin = home()?.join(".local/bin");
         std::fs::create_dir_all(&bin).map_err(|e| e.to_string())?;
-        let link = bin.join("tbg");
-        match std::fs::symlink_metadata(&link) {
-            Ok(m) if !m.file_type().is_symlink() => {
-                eprintln!(
-                    "tbg-launcher: {} is not a link; left unchanged",
-                    link.display()
-                );
-                return Ok(());
+        for name in ["tbg", "tupi-battle-grounds"] {
+            let link = bin.join(name);
+            match std::fs::symlink_metadata(&link) {
+                Ok(m) if !m.file_type().is_symlink() => {
+                    eprintln!(
+                        "tbg-launcher: {} is not a link; left unchanged",
+                        link.display()
+                    );
+                    continue;
+                }
+                Ok(_) => {}
+                Err(_) => {}
             }
-            Ok(_) => std::fs::remove_file(&link).map_err(|e| e.to_string())?,
-            Err(_) => {}
+            let temporary = link.with_extension("managed-new");
+            if temporary.is_symlink() {
+                std::fs::remove_file(&temporary).map_err(|error| error.to_string())?;
+            }
+            std::os::unix::fs::symlink(launcher, &temporary).map_err(|e| e.to_string())?;
+            std::fs::rename(temporary, &link).map_err(|error| error.to_string())?;
         }
-        std::os::unix::fs::symlink(launcher, &link).map_err(|e| e.to_string())?;
     }
     #[cfg(not(unix))]
     let _ = launcher;

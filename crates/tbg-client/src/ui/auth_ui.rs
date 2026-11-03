@@ -50,6 +50,23 @@ fn failure_key(error: Failure) -> &'static str {
     }
 }
 
+fn status_key(view: &auth::Snapshot) -> Option<&'static str> {
+    match view.status {
+        Status::Restoring => Some("auth.restoring"),
+        Status::Refreshing => Some("auth.refreshing"),
+        Status::PersistenceUnavailable => Some(match view.error {
+            Some(Failure::StorageUnavailable) | None => "auth.temporary",
+            _ => "auth.connection_pending",
+        }),
+        Status::Conflict => Some("auth.conflict"),
+        Status::ReauthRequired => Some("auth.reauth"),
+        Status::LogoutPending => Some("auth.logout_pending"),
+        Status::Guest if view.legacy_available => Some("auth.legacy"),
+        Status::Authenticated if !view.remember => Some("auth.session_only"),
+        _ => None,
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn render(
     mut commands: Commands,
@@ -102,17 +119,7 @@ fn render(
     if !crate::config::bevy_ui() {
         return;
     }
-    let key = match view.status {
-        Status::Restoring => Some("auth.restoring"),
-        Status::Refreshing => Some("auth.refreshing"),
-        Status::PersistenceUnavailable => Some("auth.temporary"),
-        Status::Conflict => Some("auth.conflict"),
-        Status::ReauthRequired => Some("auth.reauth"),
-        Status::LogoutPending => Some("auth.logout_pending"),
-        Status::Guest if view.legacy_available => Some("auth.legacy"),
-        Status::Authenticated if !view.remember => Some("auth.session_only"),
-        _ => None,
-    };
+    let key = status_key(&view);
     let signature = format!(
         "{:?}|{:?}|{}|{}|{}",
         view.status,
@@ -121,7 +128,9 @@ fn render(
         lang.code(),
         account.pending.is_some()
     );
-    if *shown == signature {
+    // Leaving Menu despawns the notice. Returning must recreate a warning
+    // that is still unresolved, even when its public state did not change.
+    if *shown == signature && (!roots.is_empty() || key.is_none()) {
         return;
     }
     *shown = signature;
@@ -157,7 +166,9 @@ fn render(
                             (Action::Login, "lobby.account.key"),
                             (Action::Guest, "auth.guest"),
                         ],
-                        Status::LogoutPending => &[(Action::Retry, "auth.retry")],
+                        Status::LogoutPending | Status::PersistenceUnavailable => {
+                            &[(Action::Retry, "auth.retry")]
+                        }
                         _ => &[],
                     };
                     for (action, key) in choices {
@@ -166,4 +177,28 @@ fn render(
                 });
             });
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn br_as11_only_vault_failures_claim_secure_storage_is_unavailable() {
+        let mut view = auth::Snapshot {
+            status: Status::PersistenceUnavailable,
+            remember: true,
+            error: Some(Failure::Unavailable),
+            ..default()
+        };
+        assert_eq!(status_key(&view), Some("auth.connection_pending"));
+        view.error = Some(Failure::StorageUnavailable);
+        assert_eq!(status_key(&view), Some("auth.temporary"));
+        view.status = Status::Authenticated;
+        view.secure = true;
+        view.error = None;
+        assert_eq!(status_key(&view), None);
+        view.remember = false;
+        assert_eq!(status_key(&view), Some("auth.session_only"));
+    }
 }

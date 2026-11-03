@@ -21,6 +21,7 @@ pub enum TextKind {
     PlayerSearch,
     Name,
     Key,
+    BackupKey,
     Room,
 }
 
@@ -65,7 +66,10 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
     form.kind = Some(kind);
     form.edit = Default::default();
     form.focus = 0;
-    form.masked = matches!(kind, TextKind::Key | TextKind::P75Secret);
+    form.masked = matches!(
+        kind,
+        TextKind::Key | TextKind::BackupKey | TextKind::P75Secret
+    );
     form.prompt = prompt.into();
     *form.error.lock().unwrap_or_else(|e| e.into_inner()) = String::new();
     *form.submitted.lock().unwrap_or_else(|e| e.into_inner()) = None;
@@ -82,7 +86,7 @@ pub fn open(form: &mut ActiveForm, kind: TextKind, prompt: &str) {
             TextKind::CatalogSearch | TextKind::PlayerSearch => "search",
             TextKind::Room => "room",
             TextKind::Name => "name",
-            TextKind::Key | TextKind::P75Secret => "key",
+            TextKind::Key | TextKind::BackupKey | TextKind::P75Secret => "key",
             TextKind::Email | TextKind::P75Text | TextKind::P75Code => "name",
         };
         let _ = dom.form.set_attribute("data-kind", marker);
@@ -100,6 +104,11 @@ pub fn is_open(form: &ActiveForm) -> bool {
 /// Hide the form and forget what it was collecting.
 pub fn close(form: &mut ActiveForm) {
     form.kind = None;
+    form.edit = Default::default();
+    *form
+        .submitted
+        .lock()
+        .unwrap_or_else(|error| error.into_inner()) = None;
     #[cfg(target_arch = "wasm32")]
     if let Some(dom) = &form.dom {
         dom.form.set_hidden(true);

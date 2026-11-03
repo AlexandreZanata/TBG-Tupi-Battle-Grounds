@@ -751,6 +751,58 @@ Packaged integrated Linux capture and Windows/browser rendered observations
 remain pending; no parity is inferred from these tests or shared code.
 
 
+### 2026-11-02 — Accurate session warnings and persistence recovery
+
+Linux reference: a confirmed signed-in account shows no temporary-storage
+warning. Actual vault failures retain the existing temporary-session notice.
+A failed HTTP renewal/confirmation instead says the account is connected and
+session renewal/recovery could not be confirmed, with the existing localized
+Retry control. Queue/socket admission cannot clear a persistence failure;
+successful coordinator recovery clears it. Both Bevy and legacy HTML controls
+use one Rust status-to-message selector. No champion motion is affected.
+
+Matrix additions: account-confirmation-pending, account-confirmation-retry,
+account-renewal-network-outage and account-queue-return-persistence, alongside
+the existing account-restoring/temporary/conflict cases. Shared state, messages
+and controls propagate to Linux, Windows and desktop web. Runtime evidence and
+remaining target observations are recorded in
+[the focused report](../phases/AUTH-SESSION-PERSISTENCE-FIX.md). Native-only tests
+or synthetic JavaScript regressions do not prove cross-platform visual parity.
+
+
+Evidence for the session correction: 21 focused native auth/socket/UI tests and
+five synthetic JavaScript regressions passed. The installed Linux release was
+observed with an injected confirmation failure (account still logged in, correct
+warning and Retry visible) and on restart after recovery (same account,
+confirmed persistence, no warning). Both 1280x720 Linux captures were inspected.
+Real interactive queue-return observation and actual Windows/desktop-browser
+captures remain pending; synthetic JS and Linux observations do not prove parity.
+
+### 2026-11-02 — Native settings, ordered notes and in-app update controls
+
+Linux reference: patch history merges installed and online notes by identity
+and displays descending date, ruleset and semantic version, preserving every
+entry. Latest installed notes remain visible when the backend has an older
+catalog. The account panel offers masked one-time import of the existing
+manual recovery key; copying/downloading that protected backup does not change
+the active account. Downloads export explicitly to the user's Downloads folder.
+
+Downloads and updates opens the shared in-game modal, including checking,
+current, download, staged/restart, recoverable errors and the automatic toggle.
+Automatic native updates download and restart only at the existing safe idle
+boundary. A Ranked request cancels/defers the download and retains priority;
+no updater request changes the game backend endpoint or match contract.
+The stable launcher and signed repository supply platform services. Browser
+uses its reload adapter; OS vaults and explicit export/clipboard remain platform
+services. Typography, colors, spacing, forms and modal rendering stay shared.
+
+Matrix additions: patch-notes-newest-first; settings-key-backup-import/export;
+settings-update-check/current/download/idle-restart. No champion motion changes.
+Focused evidence and pending Windows/real-browser observations are in
+[the settings delivery report](../phases/NATIVE-SETTINGS-UPDATES.md). Shared code
+and Linux checks cannot certify cross-platform visual or behavioral parity.
+
+
 ### Final integrated desktop observations (2026-11-02)
 
 The released shared P74/GD-04 presentation is wire 38/R15. Actual integrated

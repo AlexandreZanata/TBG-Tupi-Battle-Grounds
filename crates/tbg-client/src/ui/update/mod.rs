@@ -8,18 +8,17 @@
 
 use bevy::prelude::*;
 
-#[cfg(not(target_arch = "wasm32"))]
 use super::{ActionQueue, UiAction};
 
 #[cfg(not(target_arch = "wasm32"))]
 mod helper;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
-#[cfg(not(target_arch = "wasm32"))]
 mod view;
+#[cfg(target_arch = "wasm32")]
+mod web;
 
 /// What the update overlay currently says.
-#[cfg(not(target_arch = "wasm32"))]
 #[derive(Clone, Debug, PartialEq, Default)]
 pub enum UpdState {
     /// Not managed by the launcher, or nothing to say.
@@ -47,20 +46,42 @@ pub enum UpdState {
 }
 
 /// The update UI state shared by its systems.
-#[cfg(not(target_arch = "wasm32"))]
-#[derive(Resource, Default)]
+#[derive(Resource)]
 pub struct Updater {
     pub state: UpdState,
     /// `Later` hides the modal for this build until the next launch.
     pub snoozed: Option<String>,
     /// The pending notes receipt to present, as the helper reported it.
     pub notes: Option<serde_json::Value>,
+    #[cfg(not(target_arch = "wasm32"))]
     inner: native::Inner,
-    pub(super) idle: bool,
+    #[cfg(target_arch = "wasm32")]
+    inner: web::Inner,
+    pub(super) opened: bool,
+    pub(super) automatic: bool,
+    pub(crate) idle: bool,
     pending_play: Option<UiAction>,
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+impl Default for Updater {
+    fn default() -> Self {
+        Self {
+            state: UpdState::Off,
+            snoozed: None,
+            notes: None,
+            inner: Default::default(),
+            idle: false,
+            pending_play: None,
+            opened: false,
+            automatic: crate::platform::storage::get(
+                crate::platform::storage::Scope::Local,
+                "update.automatic",
+            )
+            .as_deref()
+                != Some("0"),
+        }
+    }
+}
 impl Updater {
     /// An update is being applied: no new play may start (U09).
     pub fn applying(&self) -> bool {
@@ -69,11 +90,11 @@ impl Updater {
 }
 
 /// Is `action` one of the update overlay's own buttons?
-#[cfg(not(target_arch = "wasm32"))]
 fn ours(action: &UiAction) -> bool {
     matches!(
         action,
-        UiAction::UpdateNow
+        UiAction::UpdateAutomatic
+            | UiAction::UpdateNow
             | UiAction::UpdateCheck
             | UiAction::UpdateOpen
             | UiAction::UpdateLater
@@ -83,45 +104,67 @@ fn ours(action: &UiAction) -> bool {
     )
 }
 
+fn starts_online(action: &UiAction) -> bool {
+    matches!(
+        action,
+        UiAction::Quick
+            | UiAction::Ranked
+            | UiAction::CreateRoom
+            | UiAction::JoinRoom(_)
+            | UiAction::CreateChallenge
+            | UiAction::JoinChallenge(_)
+            | UiAction::Watch(_)
+    )
+}
+
 /// Runs before `actions::apply`: handles the update buttons and, while an
 /// update is applying, drops every other action (the Update/Play race).
-#[cfg(not(target_arch = "wasm32"))]
 pub(super) fn take_actions(
     mut queue: ResMut<ActionQueue>,
     mut updater: ResMut<Updater>,
     state: Res<State<crate::GameState>>,
     mut exit: MessageWriter<AppExit>,
 ) {
+    // A click to play wins over an automatic update in the same frame,
+    // including a fully staged restart. An already-active Apply stays exclusive.
+    if updater.automatic && !updater.applying() && queue.0.iter().any(starts_online) {
+        queue
+            .0
+            .retain(|action| !matches!(action, UiAction::UpdateNow | UiAction::UpdateRestart));
+    }
     let mine: Vec<UiAction> = queue.0.iter().copied().filter(ours).collect();
     queue.0.retain(|a| !ours(a));
     for action in mine {
+        if action == UiAction::UpdateAutomatic {
+            updater.automatic = !updater.automatic;
+            crate::platform::storage::set(
+                crate::platform::storage::Scope::Local,
+                "update.automatic",
+                if updater.automatic { "1" } else { "0" },
+            );
+            continue;
+        }
+        #[cfg(not(target_arch = "wasm32"))]
         native::apply(&mut updater, action, *state.get(), &mut exit);
+        #[cfg(target_arch = "wasm32")]
+        web::apply(&mut updater, action);
     }
-    let online = |a: &UiAction| {
-        matches!(
-            a,
-            UiAction::Quick
-                | UiAction::Ranked
-                | UiAction::CreateRoom
-                | UiAction::JoinRoom(_)
-                | UiAction::CreateChallenge
-                | UiAction::JoinChallenge(_)
-                | UiAction::Watch(_)
-        )
-    };
-    if native::stage_busy(&updater) && queue.0.iter().any(online) {
-        updater.pending_play = queue.0.iter().find(|a| online(a)).copied();
-        queue.0.retain(|a| !online(a));
-        native::apply(
-            &mut updater,
-            UiAction::UpdateCancel,
-            *state.get(),
-            &mut exit,
-        );
-    }
-    if !native::stage_busy(&updater) && !updater.applying() {
-        if let Some(action) = updater.pending_play.take() {
-            queue.0.push(action);
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        if native::stage_busy(&updater) && queue.0.iter().any(starts_online) {
+            updater.pending_play = queue.0.iter().find(|a| starts_online(a)).copied();
+            queue.0.retain(|a| !starts_online(a));
+            native::apply(
+                &mut updater,
+                UiAction::UpdateCancel,
+                *state.get(),
+                &mut exit,
+            );
+        }
+        if !native::stage_busy(&updater) && !updater.applying() {
+            if let Some(action) = updater.pending_play.take() {
+                queue.0.push(action);
+            }
         }
     }
     if updater.applying() {
@@ -129,16 +172,12 @@ pub(super) fn take_actions(
     }
 }
 
-/// The browser has no installer to drive (new builds arrive on reload).
-#[cfg(target_arch = "wasm32")]
-pub(super) fn take_actions() {}
-
 pub fn plugin(app: &mut App) {
+    app.init_resource::<Updater>();
     #[cfg(not(target_arch = "wasm32"))]
     {
-        app.init_resource::<Updater>();
         native::plugin(app);
     }
     #[cfg(target_arch = "wasm32")]
-    let _ = app;
+    web::plugin(app);
 }

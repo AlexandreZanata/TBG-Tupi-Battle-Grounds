@@ -130,6 +130,10 @@ pub fn mouse_and_keys(
             training.0.push(*action);
             return;
         }
+        if let Some(Action::Download) = action {
+            queue.0.push(UiAction::UpdateOpen);
+            return;
+        }
         if let Some(action) = action {
             #[cfg(tbg_desktop)]
             if matches!(action, Action::Open(_)) {
@@ -188,9 +192,7 @@ fn apply(
         Action::CopyWatch(id) => crate::config::copy_text(
             &crate::platform::page_url(&format!("/?watch={id:016x}")).unwrap_or_default(),
         ),
-        Action::Download => crate::config::open_url(
-            "https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/releases",
-        ),
+        Action::Download => {}
         Action::Arcana(_, _) | Action::ResetArcanas | Action::DefaultArcanas => {
             edit_arcanas(action, shell, lang)
         }
