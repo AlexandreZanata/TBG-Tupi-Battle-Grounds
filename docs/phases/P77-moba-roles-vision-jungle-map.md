@@ -261,7 +261,189 @@ in sections A–D are historical input, superseded by this steering.
 
 ## 9. Report
 
-Pending final work-front evidence below.
+**Level: work front, 2026-11-03.** Implementation is committed locally on
+`phase/p77-moba-roles-vision-map`, worktree
+`/data/tbg-p77-moba-roles-vision-map`. Base: `abc65648fcef` from
+`origin/phase/p76-moba-core`; GitHub PR #67 was open/unmerged when checked.
+The original checkout and other worktrees were preserved. No push, merge,
+installation, release, deployment or balance run occurred.
+
+Implementation commits:
+
+- `2b35bb1a`: A — three role-locked Shop slots (M-19/M-20).
+- `06463374`: B — four mirrored camp kinds, monster figures/motion and
+  per-kind Proposed stats, rewards and respawns (M-60–M-64).
+- `be736548`: C — per-Team snapshots, hidden data/event filtering,
+  last-observed structure HP, fog material/mask and visible camp timers.
+- `bb3a7f9d`: D — read-only shared vegetation/rocks, ground/path dressing,
+  cobbles/kerbs/fittings, stone bridges/plaza/base refinements, waterfalls,
+  animated water/flames, structure damage bands and lighting/haze.
+- `0787ad65`: E — the owner's follow-up: no personal champion/avatar or
+  movement control; per-purchase Lane/Jungle Destination; automatic
+  movement/combat; left-drag map camera; strategic Seat/K/D UI; protocol v2.
+
+All `crates/*`, root `Cargo.toml` and root `Cargo.lock` are identical to
+both the P76 base and `origin/main`. No dependency was added. The only
+shared 1v1 code is read-only. All five visual fronts have records in the
+Markdown and JSON desktop correspondence contracts, with observations
+explicitly pending.
+
+### Checks actually run
+
+Formatting and whitespace on the final code:
+
+```bash
+cargo fmt --manifest-path moba/Cargo.toml -p tbg-moba-core -p tbg-moba-client -p tbg-moba-server -- --check
+git diff --check
+python -m json.tool docs/ui/desktop-ui-contract.json > /dev/null
+git diff --name-only origin/main -- crates Cargo.toml Cargo.lock
+```
+
+All exited 0; the last command printed no paths. A final server-test
+fixture formatting pass also exited 0. Source checks below covered the
+final game implementation; the subsequent change only bounded a test
+fixture's wait and labelled historical screenshots.
+
+Scoped compilation, from `moba/`, reusing the existing cache and the shared
+host lock, always at two Cargo jobs:
+
+```bash
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock \
+  env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target \
+  PKG_CONFIG_PATH=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/native-deps/root/usr/lib/x86_64-linux-gnu/pkgconfig \
+  bash -c 'cargo check --locked -p tbg-moba-core -p tbg-moba-server --lib && cargo check --locked -p tbg-moba-client --bin tbg-moba'
+```
+
+Final real output, exit 0, no warnings:
+
+```text
+Checking tbg-moba-core v0.1.0
+Checking tbg-moba-server v0.1.0
+Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.63s
+Checking tbg-moba-core v0.1.0
+Checking tbg-moba-client v0.1.0
+Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.54s
+```
+
+Earlier compilation caught four client errors: an overbroad edit had
+copied projectile filtering into the generic Fade system, and Bevy 0.20
+asset guards required mutable bindings. Those were fixed in D. A later
+pass passed with two unused-binding/import warnings after avatar removal;
+they were removed before the final clean compilation above. One HUD roster
+parse error was corrected before formatting passed. No failure repeated
+twice; there is no unresolved compiler failure.
+
+Read-only 1v1 policy guards:
+
+```bash
+python scripts/check-native-version.py --base origin/main
+python scripts/check-patch-notes.py --base origin/main
+python scripts/check-native-inputs.py
+python scripts/ci-test-lanes.py
+```
+
+Real results:
+
+```text
+Native version policy satisfied for 0.1.4-colossus.6.
+Patch notes OK: 12 entries; current ruleset 16 / f2e253b98ccb313a
+Native inputs use canonical UTF-8/LF bytes; binary assets are untouched.
+Test lanes cover the workspace with unified features: {'test': '--workspace --exclude tbg-balance --features tbg-core/lab', 'balance': '-p tbg-balance --features tbg-core/training'}
+```
+
+The first version-policy attempt failed because the restricted shell could
+not resolve github.com; its approved network-enabled retry passed. The
+other guards passed immediately. Their evidence remains applicable:
+subsequent changes were limited to `moba/` and documentation, with the
+unchanged 1v1 paths inspected again on the final tree.
+
+### Regression coverage written, not executed
+
+There are now 22 core contract scenarios and 4 room scenarios. New coverage
+includes role-slot membership/uniqueness/locks, camp composition/passivity/
+leash/respawn, exact sight boundary and hidden data, remembered structure
+HP, deterministic Team frames, socket Team isolation, no avatars,
+rejected manual commands, per-purchase lane choice/automatic walking and
+Troop bounty/score bookkeeping. Existing scenarios remain; affected
+assertions/API calls follow their revised rules and D-112 amendment.
+
+No `cargo test`, workspace Clippy, WASM compilation, build/package,
+benchmark or gameplay campaign ran. These checks are pending, not passes.
+
+### Decisions and deviations
+
+- The resource strip keeps its original centred 862 px width. Three
+  166×225 cards with 8 px gaps stay centred below it; category captions
+  are below the Archetype line. Hotkeys are 1–3.
+- Slot rules derive per slot from Role, one content table; there is no new
+  category-changing intention. Any Role may send each purchase anywhere.
+- The P77 draft reused M-20, which P76 used for avatar progression.
+  The owner's E revision retires the avatar clause and leaves M-20 as
+  the slot rule, without retaining unused XP/level systems.
+- Protocol v1 could still change because P76 was unmerged. E deliberately
+  moves to v2 to make the removal of avatar fields and manual controls
+  explicit and reject old clients. Existing enum discriminants remain
+  reserved; manual-order variants return ManualControlDisabled.
+- Troop K/D/team score replace the retired avatar kill score. Card-price
+  bounties stay unchanged, neutral kills do not score for a Team, and no
+  new kill bonus is introduced. No balancing or river objective was added.
+- Fog has two levels with a cosmetic inner feather, no exploration
+  memory. Public Troop kill counts, Towers, team Gold and outcomes remain
+  visible; hidden purchases/camp events/target ids do not. Structure HP
+  remains last-observed outside sight. The client never decides visibility
+  online; shared sight is used only for presentation of received state.
+- D1's assumption that every listed 1v1 scenery file depends only on Part
+  was inaccurate: cliffs/water depend on 1v1 geometry/theme/materials;
+  props/life also depend on authored 1v1 sites. The adapter therefore
+  includes trees.rs and rocks.rs directly and builds MOBA-specific stone,
+  river and fitting geometry. No copies of the 1v1 world layout and no 1v1
+  edits were introduced. Flames follow the 1v1 nested-cone language.
+- Runtime instrumentation logs static mesh batches/triangle counts before
+  culling, explicitly excluding water/crystal/flames, units and shadow
+  passes. It is not a measured GPU draw-call count. Section 7 names a
+  performance probe but provides no actual probe command/source; no new
+  benchmark framework was added.
+
+### Deferred consolidation and owner acceptance
+
+Reuse `/data/tbg-moba-target`, the PKG_CONFIG_PATH above, the nonblocking
+host lock and `CARGO_BUILD_JOBS=2`. One reviewer should deduplicate and run:
+
+```bash
+# Focused contracts; the full-match scenario stays outside this work-front scope.
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target \
+  cargo test --locked -p tbg-moba-core --test contract_moba -- --skip m30_a_ten_bot_match_always_ends --test-threads=1
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target \
+  cargo test --locked -p tbg-moba-server --test room -- --test-threads=1
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target \
+  cargo clippy --locked -p tbg-moba-core -p tbg-moba-server --lib -- -D warnings
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target \
+  cargo clippy --locked -p tbg-moba-client --bin tbg-moba -- -D warnings
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target \
+  cargo check --locked -p tbg-moba-core -p tbg-moba-client --target wasm32-unknown-unknown
+```
+
+Reasons: work-front policy defers test execution, Clippy and extra targets;
+compilation does not compile these integration tests or validate shaders.
+No local full suite was requested. Full workspace suites, the ten-bot
+full-match probe, 60 fps measurement and packaging/install remain deferred
+until the relevant explicit owner scope.
+
+A scoped native build and Linux runtime are still needed to validate the
+embedded fog shader/pipeline, gesture handling and appearance. Capture
+`docs/moba/media/p77-{overview,lane,camp-wolves,camp-golems,camp-jaguar,camp-frogs,base,river}.webp`
+with the P77 binary and compare to the historical P76 captures and owner
+reference. Verify left dragging on map; starting on cards/locks/resources/
+roster/modal; dragging across UI; release/focus loss; minimap drag; zoom;
+Space/base centre. Buy champions into different lanes without any movement
+input; verify no avatar/Auto/right-click movement; see an enemy enter/leave
+allied sight, loss of projectile targets, monster spawn/hit/death motion,
+and timers disappearing outside vision.
+
+No new capture was generated and no P77 runtime, frame time, triangle or
+GPU draw-call measurement is claimed. Windows/desktop-web pixel and motion
+checks remain pending (P81); Linux-only compilation proves no visual
+correspondence. Owner look/fun sign-off, balance and release remain open.
 
 ## 10. After P77 (renumbered backlog)
 
