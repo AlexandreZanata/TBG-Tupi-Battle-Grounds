@@ -5,10 +5,19 @@ name: moba
 # `ci` workflow and its required `check` are unaffected.
 on:
   pull_request:
-    paths: ['moba/**', '.github/workflows/moba.yml', 'rust-toolchain.toml']
+    paths: &moba-paths
+      - 'moba/**'
+      - '.github/workflows/moba.yml'
+      - 'rust-toolchain.toml'
+      # Shared 1v1 sources the MOBA builds on (D-112).
+      - 'crates/tbg-core/**'
+      - 'crates/tbg-client/src/art/**'
+      - 'crates/tbg-client/src/vfx/**'
+      - 'crates/tbg-client/src/crowd.rs'
+      - 'crates/tbg-client/assets/battle/**'
   push:
     branches: [main]
-    paths: ['moba/**', '.github/workflows/moba.yml', 'rust-toolchain.toml']
+    paths: *moba-paths
   workflow_dispatch:
 
 permissions:
