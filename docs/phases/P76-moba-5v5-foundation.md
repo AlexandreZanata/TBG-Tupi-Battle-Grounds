@@ -150,22 +150,12 @@ world frame ~2.7 KB.
 - Menu shows the valley without units (no match running behind it).
 - Portraits are rendered once per frame by small cameras (cheap, but always on).
 
-## Backlog — next phases (each its own spec before work starts)
+## Backlog — next phases
 
-1. **P77 — Champion abilities and Evolutions in 5v5, Commander kit and orders.**
-   Run each champion's 1v1 abilities and Evolution forms in the MOBA core;
-   one active ability per Commander role (Q),
-   attack-move, stop, health/cooldown HUD, ability VFX; bots use them.
-   Contracts: append `MobaIntention` variants (protocol v2 only if needed).
-2. **P78 — Online rooms for real players.** Several rooms per process,
-   lobby/matchmaking endpoint, reconnect tokens to the same seat, latency
-   ping display, metrics, load test with 10 socket clients, TLS via Caddy.
-   VPS work only on explicit owner request.
-3. **P79 — Presentation polish.** Rigged walk/attack animations, sounds,
-   music, kill-feed portraits, Tab scoreboard, settings (volume, edge pan),
-   fog of war rendering after the rule exists.
-4. **P80 — Windows and desktop web.** Packaging, WASM build/hosting,
-   correspondence matrix and captures per the visual contract.
-5. **P81 — Balance (only when the owner asks).** Offline lab for the MOBA
-   core in the spirit of D-33; numbers change only with evidence.
-6. **Integration** of the mode into the 1v1 launcher/lobby — owner decision.
+The next phase is specified in
+[P77 — role Shop slots, team vision, jungle monsters and map refinement](P77-moba-roles-vision-jungle-map.md)
+(owner request, 2026-11-03), which also carries the handoff prompt and the
+renumbered backlog: P78 1v1 abilities and Evolutions in 5v5 + Commander kit,
+P79 online rooms, P80 presentation polish, P81 Windows and desktop web, P82
+balance (only on explicit owner request). Integrating the mode into the 1v1
+launcher remains an owner decision.

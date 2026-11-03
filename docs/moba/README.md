@@ -13,7 +13,9 @@ against 9 bots and online on a local room server; unbalanced.**
 | [GAME-DESIGN-MOBA.md](GAME-DESIGN-MOBA.md) | Rules `M-xx`, glossary, Proposed numbers |
 | [ARCHITECTURE-MOBA.md](ARCHITECTURE-MOBA.md) | Crates, simulation, network, client, running |
 | [CONTRACTS.md](CONTRACTS.md) | What must never change silently |
-| [P76 phase spec and report](../phases/P76-moba-5v5-foundation.md) | What was built, validation, backlog for the next agent |
+| [P76 phase spec and report](../phases/P76-moba-5v5-foundation.md) | What was built and validated |
+| [P77 spec and handoff](../phases/P77-moba-roles-vision-jungle-map.md) | Next: role Shop slots, team vision, jungle monsters, map refinement |
+| [Reference map](media/reference-map.webp) · [1v1 battle HUD](media/reference-1v1-battle-hud.webp) | Owner visual targets |
 
 ## Play on Linux
 

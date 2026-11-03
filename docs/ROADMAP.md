@@ -735,7 +735,9 @@ is claimed.
 |---|---|---|---|---|
 | P76 | [P76-moba-5v5-foundation.md](phases/P76-moba-5v5-foundation.md) | Separate `moba/` workspace: deterministic 5v5 core, authoritative room server, Bevy client with the reference-image valley, the 1v1 champions (shared roster, rigs, Shop rules and portraits) and the 1v1 battle HUD layout, Minion waves, offline practice vs 9 bots, online local room, Linux installer, contracts and CI | **implemented on `phase/p76-moba-core`**; MOBA workspace fmt/clippy/13 contract tests and WASM check passed; Linux runtime and input observed and installed locally; Windows/web correspondence pending; unbalanced by design | look/fun sign-off; when to balance; integration into the 1v1 launcher; P77–P81 order |
 
-Read [docs/moba/README.md](moba/README.md). Next phases (each needs its own
-spec): P77 Commander kit and orders → P78 online rooms for real players →
-P79 presentation polish → P80 Windows and desktop web → P81 balance (only
-on explicit owner request). The 1v1 roadmap above is unaffected.
+Read [docs/moba/README.md](moba/README.md). Next:
+[P77 — role Shop slots, team vision, jungle monsters and map refinement](phases/P77-moba-roles-vision-jungle-map.md)
+(spec + handoff, owner request 2026-11-03) → P78 1v1 abilities/Evolutions in
+5v5 and Commander kit → P79 online rooms → P80 presentation polish → P81
+Windows and desktop web → P82 balance (only on explicit owner request). The
+1v1 roadmap above is unaffected.
