@@ -107,7 +107,7 @@ pub fn spawn(
                         ..default()
                     },
                     kit::muted(lang.key(&format!("lobby.tabs.{key}")), 11.),
-                    TextLayout::new(Justify::Center, LineBreak::AnyCharacter),
+                    TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
                 ));
             });
         }

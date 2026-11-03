@@ -81,7 +81,7 @@ pub(super) fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: u
                     ..default()
                 },
                 chrome::title("", 12.),
-                TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
+                TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
                 Field::Name(i),
             ));
             card.spawn((

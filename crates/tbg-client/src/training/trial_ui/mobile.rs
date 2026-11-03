@@ -94,6 +94,6 @@ pub(super) fn heading(parent: &mut ChildSpawnerCommands, text: String) {
             ..default()
         },
         kit::heading(text, 16.),
-        TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
+        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
     ));
 }

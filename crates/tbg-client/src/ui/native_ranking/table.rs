@@ -97,7 +97,11 @@ pub(super) fn spawn(
                         (words(lang, "Next", "Próxima"), next),
                         (words(lang, "Refresh", "Atualizar"), UiAction::OpenRanking),
                         (
-                            words(lang, "Open in browser", "Ver no navegador"),
+                            if cfg!(target_os = "android") {
+                                words(lang, "Browser", "Navegador")
+                            } else {
+                                words(lang, "Open in browser", "Ver no navegador")
+                            },
                             UiAction::OpenFullRanking,
                         ),
                     ] {

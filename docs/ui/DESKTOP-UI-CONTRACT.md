@@ -1000,3 +1000,8 @@ P69 shared menu lifecycle: idle backup polling no longer marks Account changed;
 legitimate Ranking refreshes retain page/table/sidebar scroll. Presentation and
 backup semantics are unchanged across native targets. The App-level regression
 and actual Linux/Android scroll observations are recorded in the P69 report.
+
+P69 copy bounds: Android readouts retain intrinsic height and use word wrapping
+with a character fallback for individual long names/labels. Ranking sidebar
+stat labels are bounded; Browser button copy is shortened equivalently on Android.
+Desktop geometry/copy remains unchanged. See the P69 per-profile observations.

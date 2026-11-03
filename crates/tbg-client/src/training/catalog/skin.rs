@@ -64,7 +64,7 @@ pub(super) fn control(
                 }
             ),
             #[cfg(target_os = "android")]
-            TextLayout::new(Justify::Center, LineBreak::AnyCharacter),
+            TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
         )],
     )
 }

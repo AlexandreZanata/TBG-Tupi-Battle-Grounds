@@ -272,7 +272,7 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
                             },
                         ),
                         #[cfg(target_os = "android")]
-                        TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
+                        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
                     ));
                     copy.spawn(kit::muted(
                         format!(

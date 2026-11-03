@@ -136,7 +136,7 @@ pub fn control(text: impl Into<String>, enabled: bool, width: f32) -> impl Bundl
             },
             super::label(text, 16.),
             #[cfg(target_os = "android")]
-            TextLayout::new(Justify::Center, LineBreak::AnyCharacter),
+            TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
         )],
     )
 }
