@@ -1130,3 +1130,11 @@ shared desktop readouts and camera are preserved. Android Council names occupy
 the full card width above the original art/price. On all targets, Council has
 global modal priority and chat closes throughout its authoritative pause.
 Actual runtime and correspondence observations are pending the next candidate.
+
+
+P69 Result: Android keeps confirmed outcome/reason/duration/purchase/Evolution
+summary and every action in a bounded scroll panel. Compact action and
+celebration rows retain48dp controls and leave scene space; keyboard hints stay
+on desktop. Cast, animation, page size and Linux/Windows/web geometry remain
+unchanged. The overflowing candidate40 Result is a recorded failure; new-source
+winner/loser/celebration observations remain pending.

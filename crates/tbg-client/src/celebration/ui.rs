@@ -32,16 +32,27 @@ pub(crate) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: L
             flex_wrap: FlexWrap::Wrap,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-            column_gap: px(8),
+            column_gap: px(if cfg!(target_os = "android") { 4 } else { 8 }),
             row_gap: px(5),
             ..default()
         })
         .with_children(|row| {
             row.spawn(button("<", UiAction::CelebrationPrev, 48.));
             row.spawn((
-                label("", 14.),
+                label(
+                    "",
+                    if cfg!(target_os = "android") {
+                        11.
+                    } else {
+                        14.
+                    },
+                ),
                 Node {
-                    width: px(190),
+                    width: px(if cfg!(target_os = "android") {
+                        100
+                    } else {
+                        190
+                    }),
                     ..default()
                 },
                 Range,
@@ -50,16 +61,25 @@ pub(crate) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: L
             row.spawn(button(
                 lang.t(Msg::CelebrationHide),
                 UiAction::CelebrationHide,
-                145.,
+                if cfg!(target_os = "android") {
+                    108.
+                } else {
+                    145.
+                },
             ))
             .insert(Toggle);
             row.spawn(button(
                 lang.t(Msg::CelebrationMotion),
                 UiAction::CelebrationMotion,
-                165.,
+                if cfg!(target_os = "android") {
+                    108.
+                } else {
+                    165.
+                },
             ))
             .insert(Motion);
         });
+    #[cfg(not(target_os = "android"))]
     parent.spawn(label(lang.t(Msg::CelebrationShortcuts), 11.));
 }
 
@@ -132,7 +152,7 @@ fn button(text: &str, action: UiAction, width: f32) -> impl Bundle + use<> {
     (
         Node {
             width: px(width),
-            min_height: px(30),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 30 }),
             padding: UiRect::axes(px(6), px(4)),
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
@@ -141,6 +161,23 @@ fn button(text: &str, action: UiAction, width: f32) -> impl Bundle + use<> {
         },
         BackgroundColor(crate::ui::BUTTON),
         action,
-        children![label(text, 13.)],
+        children![(
+            #[cfg(target_os = "android")]
+            Node {
+                width: percent(100),
+                min_width: px(0),
+                ..default()
+            },
+            label(
+                text,
+                if cfg!(target_os = "android") {
+                    11.
+                } else {
+                    13.
+                }
+            ),
+            #[cfg(target_os = "android")]
+            TextLayout::justify(Justify::Center),
+        )],
     )
 }
