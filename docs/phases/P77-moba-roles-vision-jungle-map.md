@@ -769,7 +769,7 @@ CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target cargo check --locked
 wasm32-unknown-unknown`; run at cross-platform consolidation, not as evidence
 of visual correspondence. No full-suite or release-readiness claim is made.
 
-### M-76 decision-engine follow-up (2026-11-03, in progress)
+### M-76 decision-engine follow-up (2026-11-03, scoped delivery complete)
 
 Owner report: deployed Troops still stall and repeatedly switch targets.
 The focused moving-contact regression reproduced loss of a reachable living
@@ -835,3 +835,89 @@ The regression first asserts an `Unreachable` release, then moves the patient
 back and out again, requiring uninterrupted retention. Sixteen decision,
 seven navigation, aggro and champion-combat tests passed; the tightened
 single patient fixture also passed. The union is 45 distinct focused tests.
+
+
+#### Installed M-76 delivery — `0.1.0-81b018a389d3`
+
+The final code is `81b018a389d30f2db2c4cb59318bb075127000fa` on
+`phase/p77-moba-roles-vision-map`, installed through
+`moba/scripts/install-linux-moba.sh` (dev build, 8.94 seconds). The menu entry
+and `~/.local/bin/tbg-moba` / `tbg-moba-server` point to that version.
+Evidence is outside Git at `/data/tbg-moba-logs/p77-decisions-81b018a389d3`; its manifest records both binary
+hashes and the unchanged MOBA Cargo.lock hash. No push, merge or deployment.
+The final documentation commit does not change the installed code.
+
+**Validation level: focused consolidation.** 45 distinct tests passed across
+the consolidated batch and the scoped reruns after observed fixes. The final
+commitment rerun covers 16 decision, 7 navigation, 1 aggro and 4 champion-combat
+tests; the strengthened patient-reachability fixture passed separately.
+Unchanged range, deployment, rewards, camp/mission and wire evidence is reused.
+The decision scenarios include all 46 Shop champions leaving their initial
+Nexus positions and a ten-seat per-tick hash/Team-frame replay. Navigation
+includes 40 melee/Camp combinations with the existing strength fixture.
+These are mechanics assertions, not complete roster animation certification.
+
+All compiling commands used the same wrapper (existing target cache):
+
+```bash
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target \
+  cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core \
+  --test decisions --test navigation --test contract_aggro \
+  --test contract_champion_combat --test contract_champion_range \
+  --test contract_deployment --test rewards -- --test-threads=1
+# In the same lock wrapper, separate named filters:
+cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core --test contract_moba m6 -- --test-threads=1
+cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core --test contract_moba m08 -- --test-threads=1
+cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core --test contract_moba m40 -- --test-threads=1
+# Final scoped rerun after reachability-hint correction:
+cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core --test decisions --test navigation --test contract_aggro --test contract_champion_combat -- --test-threads=1
+cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core --test decisions patient_returning -- --test-threads=1
+```
+
+Native build/install used the existing native pkg-config directory
+`/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/native-deps/root/usr/lib/x86_64-linux-gnu/pkgconfig`;
+the installer itself acquires the shared lock and sets two Cargo jobs.
+Affected-package formatting, JSON parsing and `git diff --check` passed.
+No root workspace/1v1/archive file was changed. No full suite, release build,
+balance run, WASM or Windows compilation was run.
+
+**Installed Linux motion.** An isolated native X11/Xvfb session at 1600×900
+recorded `installed-motion.mp4`, with per-frame model/camera telemetry and
+per-tick authoritative decisions. Seed 11 was warped to 90 seconds, then ran
+with the Jungle Seat human and nine bots. The sampled run contains
+1118 ticks (1801–2918), 241 distinct units,
+and a peak of 176 live units. Footage and sequential frame inspection
+cover Top bridge/front advancement, plaza fighting, the passive camp view
+and adjacent route movement. The attempted initial card purchase was rejected
+for insufficient Gold, so it is not purchase/spawn evidence; the 46-champion
+purchase test supplies that mechanics coverage.
+
+- Core tick duration: 0.711 ms median,
+  1.286 ms p95, 34.881 ms maximum.
+  This instruments host/core and bot decisions, excluding rendering, snapshot
+  encoding and file writing; it is not a device or online performance guarantee.
+- Target-cycle detector: 0 flagged sequences of three
+  acquisitions returning to the same nonzero target within 40 ticks. Exact
+  sequences and all release reasons are retained in `analysis.json`/CSV.
+- 0 Troop replanning runs exceeded 40 ticks in this sample.
+  This is bounded observation, not proof against every possible match state.
+- 67909 sampled unit frames; 23345 authoritative
+  Attack frames; 0 of those used the Walk clip.
+  Maximum logged yaw slew was 12.567950 rad/s, consistent with the
+  shared 4π slew after decimal timestamp/yaw rounding. Full-rig jitter and all
+  champion/ability combinations are not certified by this metric.
+- All camera frames within the four stationary observation intervals had
+  exactly one pose, including the pointer held at the window edge.
+- Native logs contain no panic/error; only Xvfb display/XSETTINGS warnings.
+  The runner terminated only its own client and Xvfb after capture.
+
+**Deferred.** Windows and desktop-web motion/pixel correspondence, full Linux
+roster/ability/carry/fusion motion, physical-device performance, and a two-client
+online combat/reconnect observation remain pending. The explicit browser
+consolidation command is the same lock wrapper with
+`cargo check --locked --manifest-path moba/Cargo.toml -p tbg-moba-client --target wasm32-unknown-unknown`,
+followed by the M-76 matrix's moving scenarios on desktop web and Windows.
+Shared sources and native compilation do not prove those targets. Owner look
+and fun sign-off remains separate. No claim of exhaustive coverage of every
+possible battle configuration is made.

@@ -1485,3 +1485,7 @@ the Ravager/Leechroot stalls observed in the intermediate Linux recording.
 Patient-following coverage includes a formerly unreachable patient returning
 into range, then moving away: successful reacquisition must clear the old
 blocked-route hint and preserve aim/following through recovery.
+
+Installed Linux `81b018a389d3`: scoped Top/plaza/camp-view motion and decision
+traces recorded, 45 distinct focused tests passed. See the P77 installed M-76
+delivery for commands, moving evidence, metrics and deferred platforms.

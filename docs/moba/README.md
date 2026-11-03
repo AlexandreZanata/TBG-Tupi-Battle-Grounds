@@ -4,13 +4,13 @@ A separate 5v5 game mode of Tupi Battle Grounds: ten strategic Seats with no pla
 lanes, a jungle, automatic Minion waves, the **same champions as the 1v1
 game** bought in the same Shop and sent to a Destination, and bots on every
 empty seat. Status: **P77 implemented locally, including the owner's strategy-only
-revision and M-73–M-76 corrections. 42 focused tests passed; M-76 installed
-Linux movement observation is being consolidated in the P77 report. Complete roster, performance
+revision and M-73–M-76 corrections. 45 focused tests passed; M-76 installed
+Linux movement and decision traces are recorded in the P77 report. Complete roster, performance
 and cross-platform acceptance pending; unbalanced.**
 
 ![1v1 champions fighting on a lane, 1v1-style HUD](media/p76-champions-lane.webp)
 
-Historical P76 image; P77 no-avatar HUD/map captures are pending.
+Historical P76 image; current P77 native motion evidence is linked from the phase report.
 
 | Read | For |
 |---|---|
