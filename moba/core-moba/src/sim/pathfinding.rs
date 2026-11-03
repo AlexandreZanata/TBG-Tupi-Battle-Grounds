@@ -20,7 +20,11 @@ pub(super) fn route(
     let units = if target.is_none() && matches!(a.brain, crate::state::Brain::Lane { .. }) {
         permanent = units
             .iter()
-            .filter(|u| u.kind.structure())
+            .filter(|u| {
+                u.kind.structure()
+                    || u.side == crate::types::Side::Neutral
+                    || u.side == a.side && !u.mobile()
+            })
             .cloned()
             .collect::<Vec<_>>();
         &permanent[..]

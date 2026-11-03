@@ -1477,3 +1477,7 @@ M-76 follow-up: include an occupied distant Lane front. Units must visibly
 approach before acquiring a nearby opponent, retain collision clearance,
 and continue after the front clears; they must not wait at the previous
 waypoint for the entire future route to become empty.
+
+Also cover a Lane detouring past passive Golems/Frogs: it must keep its Lane
+mission, move around the camp and leave neutral HP unchanged. This covers
+the Ravager/Leechroot stalls observed in the intermediate Linux recording.

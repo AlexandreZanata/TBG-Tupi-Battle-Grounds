@@ -574,3 +574,64 @@ fn mission_approaches_a_distant_occupied_front_instead_of_waiting_for_it_to_clea
         .iter()
         .any(|id| g.unit(*id).is_some_and(|u| u.hp < 100_000)));
 }
+
+#[test]
+fn lane_detours_around_passive_camps_that_it_must_not_attack() {
+    use tbg_moba_core::content;
+    for (kind, team, lane, camp, from) in [
+        (
+            Champion::Ravager,
+            Team::Red,
+            Lane::Top,
+            5,
+            Pos {
+                x: 84_801,
+                y: 133_424,
+            },
+        ),
+        (
+            Champion::Leechroot,
+            Team::Blue,
+            Lane::Bot,
+            3,
+            Pos {
+                x: 113_906,
+                y: 67_447,
+            },
+        ),
+    ] {
+        let mut g = MobaMatch::new(11);
+        g.units.clear();
+        g.tick = content::secs(20) - 1;
+        g.step();
+        g.units.retain(|u| u.brain == Brain::Neutral { camp });
+        let a = g.spawn(
+            UnitKind::Troop(kind),
+            Side::Team(team),
+            None,
+            from,
+            Brain::Lane { lane, waypoint: 4 },
+        );
+        for _ in 0..500 {
+            g.step();
+            g.units
+                .retain(|u| u.id == a || u.brain == Brain::Neutral { camp });
+            g.events.clear();
+            assert_eq!(
+                g.unit(a).unwrap().target,
+                0,
+                "a Lane mission must not attack the passive camp"
+            );
+        }
+        let u = g.unit(a).unwrap();
+        assert!(
+            u.pos.dist(from) > 10_000,
+            "passive camp pinned {kind:?}: {u:?}"
+        );
+        assert!(g
+            .units
+            .iter()
+            .filter(|u| u.brain == Brain::Neutral { camp })
+            .all(|u| u.hp == u.max_hp));
+    }
+}

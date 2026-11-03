@@ -815,3 +815,13 @@ The focused rerun passed all 14 decision and 7 navigation tests. Deployment
 also passed with the same Lane planning change. Together with the unaffected
 consolidated contracts, 43 distinct focused tests passed. Logs preserve the
 intermediate failure and the successful final scoped rerun.
+
+Native follow-up on `54f755cfb109` recorded 1,114 authoritative ticks:
+0.820 ms median, 2.278 ms p95, 21.404 ms maximum core tick time in this
+instrumented dev/Xvfb sample. No target reacquisition cycle within 40 ticks
+was recorded. Two mission stalls remained at passive Camps (Ravager and
+Leechroot): Lane units cannot attack those neutrals, so they must remain
+route obstacles. The final filter keeps neutral bodies and immobile allies,
+while still allowing approach to a distant hostile front. A regression uses
+both observed positions and asserts departure with neutral HP unchanged.
+All 15 decision plus 7 navigation tests passed after this correction.

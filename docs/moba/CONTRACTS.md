@@ -146,7 +146,8 @@ repeated target changes. `tests/decisions.rs` covers moving attack endpoints,
 windup/recovery under pressure, death/carried-target release, root cancellation,
 patient retention/following, idle support front holds, transient obstruction,
 all 46 Shop champions' initial missions, narrow bridge centres, larger cargo
-contents, bank/rim pursuits and deterministic ten-seat decisions/Team frames.
+contents, bank/rim pursuits, occupied future fronts, passive-camp detours and
+deterministic ten-seat decisions/Team frames.
 M-07 acquisition, M-08 protection, M-61/M-62 retaliation/leash, M-18 range
 and M-75 receipts remain guarded by their existing focused tests.
 The wire schema remains v4; internal decision diagnostics are never a new
