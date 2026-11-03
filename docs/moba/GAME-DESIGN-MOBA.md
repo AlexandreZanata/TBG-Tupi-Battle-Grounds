@@ -22,7 +22,7 @@
    figures, animations, shots and impacts. What is new in 5v5 are the lane
    Minions, Towers, the jungle and the Commanders' roles.
 4. **No delay for anyone.** The server ticks at 20 Hz, sends one shared
-   world frame per tick and never lets a slow player delay the other nine.
+   world frame per Team per tick and never lets a slow player delay the other nine.
 5. **Bots everywhere.** Every empty seat is a bot using the same intentions
    as a human, so a match always has ten sides and a human can drop in or out.
 
@@ -163,7 +163,7 @@ way (structures in the M-08 order); they never enter the jungle.
 
 ## 10. Out of scope until later phases
 
-1v1 champion abilities and Evolutions in 5v5, Commander abilities and items, fog of war, pings/chat, ranked/MMR,
+1v1 champion abilities and Evolutions in 5v5, Commander abilities and items, pings/chat, ranked/MMR,
 matchmaking across rooms, spectators, reconnect-to-same-seat tokens,
 mobile layout, sounds/music, balance.
 
@@ -196,3 +196,26 @@ mobile layout, sounds/music, balance.
 
 P76 Small/Big protocol discriminants remain reserved for compatibility;
 new camps never spawn them. Their legacy stats are unchanged.
+
+## 12. Team vision (P77, Proposed M-50–M-55)
+
+- **M-50** Each Team sees its own living units and enemy/neutral centres
+  within at least one living allied unit's sight radius (inclusive).
+  Vision does not change combat decisions. No walls or exploration memory.
+- **M-51** Structure locations are always map knowledge. Outside sight,
+  their HP stays at its last observed value (initially full), with no
+  attack or target updates. Structure destruction is public map knowledge.
+- **M-52** The server encodes one World per Team per tick; sockets receive
+  only their Team's World. Offline practice uses the human's Team.
+- **M-53** Visibility uses integer squared distances and an id-ordered
+  spatial grid. Same state and Team give identical frames.
+- **M-54** Hidden units, target ids, enemy Commander HP/id, CampCleared,
+  enemy purchases/upgrades and unseen LevelUp events are omitted/redacted.
+  Commander kills, levels, K/D, respawn timers, destroyed Towers, team
+  Gold, scores and outcome remain public. Camp timers are sent only while
+  cleared and the Camp centre is visible. First-spawn countdown follows
+  the same visibility rule. Hidden figures disappear without a Death clip.
+- **M-55** Sight: Troops/Minions 8 units, Commanders/Towers 9, Strongholds
+  10. The client and minimap use this shared table with two fog levels,
+  visible and unseen, and a 256×256 mask with a soft inner edge. The
+  smoothed edge is cosmetic; the server uses the exact sight radius.

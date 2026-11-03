@@ -56,9 +56,9 @@ owner-approved phase (see the P76 backlog).
 
 - One WebSocket per player at `/moba/ws`; binary postcard frames.
 - Handshake: client `Hello{protocol}` within 5 s → server `Welcome{seat}`.
-- Per tick the room encodes **one** `World` frame (≈3 KB at peak, all units,
-  quantised to centi-units and HP per mille) and shares the same bytes with
-  every socket, plus a small `Private` frame (gold, essence, tier) per seat.
+- Per tick the room encodes **two** filtered `World` frames (one per Team,
+  quantised to centi-units and HP per mille) and shares each only with that
+  Team, plus a small `Private` frame (gold, essence, tier) per seat.
 - Each socket has a bounded outbox (64 frames). `try_send` drops a frame for
   a slow socket only; the tick loop never awaits a client. `TCP_NODELAY` is on.
 - Inbound frames are capped at 256 bytes and 30 per second; malformed frames,

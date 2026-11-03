@@ -29,7 +29,7 @@ ClientMsg = Hello { protocol: u16, name: String (≤ 24 chars, no control chars)
           | Intention(MobaIntention)
           | Ping(u32)
 ServerMsg = Welcome { protocol, seat, seed, tick_hz }
-          | World(WorldView)       // identical bytes for every socket each tick
+          | World(WorldView)       // one filtered frame per Team each tick (M-52)
           | Private(PrivateView)   // only to its seat
           | Rejected(Reject)
           | Pong(u32)
@@ -75,6 +75,10 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 | `m61_monsters_stay_passive_until_hit` | M-61 |
 | `m62_leashed_monsters_heal_home` | M-62 |
 | `m63_cleared_camp_respawns_after_its_timer` | M-63 |
+| `m50_enemies_outside_allied_sight_are_absent_from_that_team_frame` | M-50/M-54 |
+| `m51_structures_are_always_in_every_frame` | M-51 |
+| `m52_each_socket_receives_its_team_frame` (server) | M-52 |
+| `m53_vision_is_deterministic` | M-53 |
 | `m30_a_ten_bot_match_always_ends` | M-30 |
 | `m40_frames_round_trip_and_hostile_frames_are_refused` | M-40 |
 | `m41_seats_come_from_connections_and_purchases_are_authoritative` (server) | M-05, M-41 |

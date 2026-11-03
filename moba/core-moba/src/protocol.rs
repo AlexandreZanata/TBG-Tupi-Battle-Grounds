@@ -1,8 +1,7 @@
 //! MOBA wire protocol v1 (immutable once merged; `docs/moba/CONTRACTS.md` §3).
 //!
-//! Binary postcard frames over WebSocket. The world snapshot is identical
-//! for every player and encoded once per tick; private economy goes to its
-//! owner only.
+//! Binary postcard frames over WebSocket. One filtered world per team per tick;
+//! private economy goes to its owner only (M-50–M-55).
 
 use serde::{Deserialize, Serialize};
 
@@ -46,7 +45,7 @@ pub struct Welcome {
     pub tick_hz: u8,
 }
 
-/// Public state of one tick, the same bytes for every connection.
+/// Team-visible state of one tick, shared only by that team (M-50).
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct WorldView {
     pub tick: u32,
@@ -55,6 +54,7 @@ pub struct WorldView {
     pub team_gold: [u32; 2],
     pub seats: Vec<SeatView>,
     pub units: Vec<UnitView>,
+    pub camps: Vec<CampView>,
     pub events: Vec<Event>,
     pub outcome: Option<Outcome>,
 }
@@ -132,4 +132,11 @@ pub fn decode_server(bytes: &[u8]) -> Result<ServerMsg, WireError> {
         return Err(WireError::TooLarge);
     }
     postcard::from_bytes(bytes).map_err(|_| WireError::Malformed)
+}
+
+/// A cleared camp timer, sent only while its centre is in team sight (M-54).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CampView {
+    pub camp: u8,
+    pub respawn_ticks: u16,
 }

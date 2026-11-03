@@ -13,6 +13,7 @@ use crate::art::anim::{Animator, Clip};
 use crate::art::FigureLibrary;
 use crate::link::Feed;
 use crate::palette;
+use crate::scene::fog::{FogMask, FogMaterial, FogTexture};
 use crate::scene::terrain::{height, lane_distance, LANE_HALF_WIDTH};
 use crate::scene::{to_world, Painted};
 
@@ -64,15 +65,15 @@ struct Shared {
     icon: Handle<Mesh>,
     icon_material: [Handle<StandardMaterial>; 4],
     crystal: Handle<Mesh>,
-    crystal_material: [Handle<StandardMaterial>; 2],
+    crystal_material: [Handle<FogMaterial>; 2],
     ring: Handle<Mesh>,
-    flash: Handle<StandardMaterial>,
+    flash: Handle<FogMaterial>,
 }
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Spawned>()
         .init_resource::<models::Models>()
-        .add_systems(Startup, setup)
+        .add_systems(Startup, setup.after(crate::scene::fog::setup))
         .add_systems(
             Update,
             (sync, animate, bars)
@@ -97,12 +98,19 @@ fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut fog_materials: ResMut<Assets<FogMaterial>>,
+    fog: Res<FogTexture>,
 ) {
-    let glow = |m: &mut Assets<StandardMaterial>, c: Color, e: LinearRgba| {
-        m.add(StandardMaterial {
-            base_color: c,
-            emissive: e,
-            ..default()
+    let glow = |m: &mut Assets<FogMaterial>, c: Color, e: LinearRgba| {
+        m.add(FogMaterial {
+            base: StandardMaterial {
+                base_color: c,
+                emissive: e,
+                ..default()
+            },
+            extension: FogMask {
+                texture: fog.0.clone(),
+            },
         })
     };
     let shared = Shared {
@@ -132,17 +140,21 @@ fn setup(
         crystal: meshes.add(models::crystal()),
         crystal_material: [
             glow(
-                &mut materials,
+                &mut fog_materials,
                 palette::BLUE_GLOW,
                 LinearRgba::rgb(0.6, 2.4, 6.0),
             ),
             glow(
-                &mut materials,
+                &mut fog_materials,
                 palette::RED_GLOW,
                 LinearRgba::rgb(6.0, 1.2, 0.6),
             ),
         ],
-        flash: unlit(&mut materials, Color::srgb(1.8, 1.5, 1.1)),
+        flash: glow(
+            &mut fog_materials,
+            Color::WHITE,
+            LinearRgba::rgb(1.2, 0.8, 0.4),
+        ),
         ring: meshes.add(
             Annulus::new(1.0, 1.25)
                 .mesh()
@@ -247,6 +259,7 @@ fn sync(
         if u.attacked && champions::champion_of(u.kind).is_none() {
             if let Some(&to) = positions.get(&u.target) {
                 shots.write(fx::Shot {
+                    target: u.target,
                     from: pos,
                     to,
                     kind: u.kind,
@@ -266,6 +279,10 @@ fn sync(
             continue;
         };
         if let Ok((v, animator)) = visuals.get_mut(entity) {
+            if !crate::scene::fog::point_visible(&feed, v.curr) {
+                despawn_unit(&mut commands, entity, &visuals);
+                continue;
+            }
             if let Some(mut a) = animator {
                 // Champions play their 1v1 Death clip before leaving the field.
                 commands.entity(v.bar).despawn();
@@ -408,7 +425,7 @@ fn animate(
             &mut UnitVisual,
             &mut Transform,
             Option<&mut Animator>,
-            Option<&mut MeshMaterial3d<StandardMaterial>>,
+            Option<&mut MeshMaterial3d<FogMaterial>>,
         ),
         Without<Crystal>,
     >,

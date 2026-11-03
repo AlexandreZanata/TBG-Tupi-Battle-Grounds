@@ -11,6 +11,7 @@ use crate::scene::to_world;
 /// An attack or heal left `from` towards `to` (map units).
 #[derive(Message, Clone, Copy)]
 pub struct Shot {
+    pub target: u32,
     pub from: Vec2,
     pub to: Vec2,
     pub kind: UnitKind,
@@ -33,6 +34,7 @@ pub struct Marker {
 
 #[derive(Component)]
 struct Flight {
+    target: u32,
     from: Vec3,
     to: Vec3,
     t: f32,
@@ -144,6 +146,7 @@ fn shots(mut commands: Commands, mut reader: MessageReader<Shot>, assets: Res<Fx
             MeshMaterial3d(assets.glow[material].clone()),
             Transform::from_translation(from).with_scale(Vec3::splat(size)),
             Flight {
+                target: shot.target,
                 from,
                 to,
                 t: 0.0,
@@ -205,10 +208,16 @@ fn fly(
     mut commands: Commands,
     time: Res<Time>,
     mut flights: Query<(Entity, &mut Flight, &mut Transform)>,
+    feed: Res<crate::link::Feed>,
 ) {
     for (entity, mut f, mut transform) in &mut flights {
         f.t += time.delta_secs() / f.duration;
-        if f.t >= 1.0 {
+        if f.t >= 1.0
+            || !feed
+                .curr
+                .as_ref()
+                .is_some_and(|w| w.units.iter().any(|u| u.id == f.target))
+        {
             commands.entity(entity).despawn();
             continue;
         }
@@ -223,7 +232,12 @@ fn fade(
 ) {
     for (entity, mut f, mut transform) in &mut fades {
         f.t += time.delta_secs() / f.duration;
-        if f.t >= 1.0 {
+        if f.t >= 1.0
+            || !feed
+                .curr
+                .as_ref()
+                .is_some_and(|w| w.units.iter().any(|u| u.id == f.target))
+        {
             commands.entity(entity).despawn();
             continue;
         }

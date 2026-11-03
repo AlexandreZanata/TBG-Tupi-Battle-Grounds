@@ -24,7 +24,7 @@ pub mod shots;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(PreStartup, init)
-        .add_systems(Update, (animate, shots::fly));
+        .add_systems(Update, (animate, shots::fly, cull_fog.after(shots::fly)));
 }
 
 /// Stand-ins for the 1v1 cargo barrels (only the Cargo Crab drops them).
@@ -319,6 +319,22 @@ fn pose(v: &Vfx, k: f32) -> Transform {
             let swing = 1.0 - (1.0 - k).powi(3);
             at.with_rotation(Quat::from_rotation_y(turn * swing) * v.rotation)
                 .with_scale(Vec3::new(size, size * (0.3 + fade), size))
+        }
+    }
+}
+
+/// Shared kit projectiles have no MOBA ids; never keep them outside current team sight.
+fn cull_fog(
+    mut commands: Commands,
+    feed: Res<crate::link::Feed>,
+    shots: Query<(Entity, &Transform), With<shots::Shot>>,
+) {
+    if feed.curr.is_none() {
+        return;
+    }
+    for (entity, transform) in &shots {
+        if !crate::scene::fog::point_visible(&feed, crate::scene::to_map(transform.translation)) {
+            commands.entity(entity).despawn();
         }
     }
 }

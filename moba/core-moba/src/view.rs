@@ -2,7 +2,7 @@
 
 use crate::content::MATCH_TICKS;
 use crate::protocol::{PrivateView, SeatView, UnitView, WorldView};
-use crate::state::{CommandMode, Controller, MobaMatch};
+use crate::state::{CommandMode, Controller, Event, MobaMatch};
 use crate::types::{Seat, Team};
 
 fn centi(mm: i32) -> u16 {
@@ -13,15 +13,22 @@ fn permille(hp: i32, max: i32) -> u16 {
     (hp.max(0) as i64 * 1000 / max.max(1) as i64) as u16
 }
 
-pub fn world(m: &MobaMatch) -> WorldView {
+pub fn world(m: &MobaMatch, team: Team) -> WorldView {
+    let vision = crate::vision::Vision::new(m, team);
     let seats = Seat::all()
         .map(|seat| {
             let p = m.player(seat);
             let unit = m.unit(p.commander);
+            let seen =
+                seat.team() == team || m.slot(p.commander).is_some_and(|i| vision.visible[i]);
             SeatView {
                 human: p.controller == Controller::Human,
                 level: p.level,
-                hp_permille: unit.map_or(0, |u| permille(u.hp, u.max_hp)),
+                hp_permille: if seen {
+                    unit.map_or(0, |u| permille(u.hp, u.max_hp))
+                } else {
+                    0
+                },
                 respawn_ticks: if unit.is_some() {
                     0
                 } else {
@@ -29,23 +36,42 @@ pub fn world(m: &MobaMatch) -> WorldView {
                 },
                 kills: p.kills,
                 deaths: p.deaths,
-                commander: p.commander,
+                commander: if seen { p.commander } else { 0 },
             }
         })
         .collect();
     let units = m
         .units
         .iter()
-        .map(|u| UnitView {
+        .enumerate()
+        .filter(|(i, u)| vision.visible[*i] || u.kind.structure())
+        .map(|(i, u)| UnitView {
             id: u.id,
             kind: u.kind,
             side: u.side,
             owner: u.owner,
             x: centi(u.pos.x),
             y: centi(u.pos.y),
-            hp_permille: permille(u.hp, u.max_hp),
-            target: u.target,
-            attacked: m.tick > 0 && u.last_attack == m.tick,
+            hp_permille: permille(
+                if u.kind.structure() && !vision.visible[i] {
+                    m.structure_hp[team.index()]
+                        .iter()
+                        .find(|(id, _)| *id == u.id)
+                        .map_or(u.max_hp, |(_, hp)| *hp)
+                } else {
+                    u.hp
+                },
+                u.max_hp,
+            ),
+            target: if vision.visible[i] && vision.unit(u.target) {
+                u.target
+            } else {
+                0
+            },
+            attacked: vision.visible[i]
+                && vision.unit(u.target)
+                && m.tick > 0
+                && u.last_attack == m.tick,
         })
         .collect();
     WorldView {
@@ -55,7 +81,26 @@ pub fn world(m: &MobaMatch) -> WorldView {
         team_gold: [m.team_gold(Team::Blue), m.team_gold(Team::Red)],
         seats,
         units,
-        events: m.events.clone(),
+        camps: m
+            .camps
+            .iter()
+            .enumerate()
+            .filter_map(|(i, c)| {
+                let at = c.respawn_at?;
+                (at > m.tick && vision.point(crate::map::camp(i).0)).then_some(
+                    crate::protocol::CampView {
+                        camp: i as u8,
+                        respawn_ticks: at.saturating_sub(m.tick).min(u16::MAX as u32) as u16,
+                    },
+                )
+            })
+            .collect(),
+        events: m
+            .events
+            .iter()
+            .copied()
+            .filter(|event| event_visible(m, &vision, team, event))
+            .collect(),
         outcome: m.outcome,
     }
 }
@@ -79,4 +124,19 @@ pub fn private(m: &MobaMatch, seat: Seat) -> PrivateView {
 /// Seconds left on the match clock.
 pub fn seconds_left(tick: u32) -> u32 {
     MATCH_TICKS.saturating_sub(tick) / crate::content::TICK_HZ
+}
+
+fn event_visible(
+    m: &MobaMatch,
+    vision: &crate::vision::Vision<'_>,
+    team: Team,
+    event: &Event,
+) -> bool {
+    match *event {
+        // Kills, destroyed structures and outcome are public scoreboard information.
+        Event::CommanderKilled { .. } | Event::TowerDestroyed { .. } | Event::Ended(_) => true,
+        Event::CampCleared { camp, .. } => vision.point(crate::map::camp(camp as usize).0),
+        Event::TroopSent { seat, .. } | Event::Upgraded { seat, .. } => seat.team() == team,
+        Event::LevelUp { seat, .. } => seat.team() == team || vision.unit(m.player(seat).commander),
+    }
 }

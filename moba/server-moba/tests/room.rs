@@ -104,3 +104,32 @@ async fn m42_hostile_frames_close_the_socket() {
             .unwrap_or(false)
     );
 }
+
+#[tokio::test]
+async fn m52_each_socket_receives_its_team_frame() {
+    // M-52: both teams see their own Commanders at spawn, never the other team's.
+    let url = start().await;
+    let (mut blue, wb) = join(&url).await;
+    let (mut red, wr) = join(&url).await;
+    assert_ne!(wb.seat.team(), wr.seat.team());
+    for (socket, seat) in [(&mut blue, wb.seat), (&mut red, wr.seat)] {
+        let mut checked = false;
+        for _ in 0..20 {
+            if let Some(ServerMsg::World(w)) = next(socket).await {
+                assert!(w.tick < 100, "fixture must stay near initial spawns");
+                let commanders: Vec<_> = w
+                    .units
+                    .iter()
+                    .filter(|u| matches!(u.kind, tbg_moba_core::UnitKind::Commander(_)))
+                    .collect();
+                assert_eq!(commanders.len(), 5);
+                assert!(commanders
+                    .iter()
+                    .all(|u| u.side.team() == Some(seat.team())));
+                checked = true;
+                break;
+            }
+        }
+        assert!(checked, "socket did not receive a team world");
+    }
+}

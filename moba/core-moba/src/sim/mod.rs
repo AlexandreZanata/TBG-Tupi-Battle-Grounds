@@ -29,5 +29,6 @@ impl MobaMatch {
         upkeep::fountain(self);
         rewards::resolve_deaths(self);
         outcome::check(self);
+        crate::vision::remember_structures(self);
     }
 }

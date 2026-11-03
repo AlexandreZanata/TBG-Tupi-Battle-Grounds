@@ -13,10 +13,13 @@ use crate::palette;
 /// The square the minimap camera draws into.
 #[derive(Component)]
 struct Slot;
+#[derive(Component)]
+struct CampTimer(u8);
 
 pub const SIZE: f32 = 262.0;
 
 pub fn plugin(app: &mut App) {
+    app.add_systems(Update, timers.run_if(in_state(Screen::Match)));
     app.add_systems(
         PostUpdate,
         track
@@ -79,14 +82,32 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
             palette::GOLD,
         ))
         .with_children(|frame| {
-            frame.spawn((
-                Node {
-                    width: px(SIZE),
-                    height: px(SIZE),
-                    ..default()
-                },
-                Slot,
-            ));
+            frame
+                .spawn((
+                    Node {
+                        width: px(SIZE),
+                        height: px(SIZE),
+                        ..default()
+                    },
+                    Slot,
+                ))
+                .with_children(|map| {
+                    for camp in 0..tbg_moba_core::map::CAMP_COUNT {
+                        let p = tbg_moba_core::map::camp(camp).0;
+                        let x = (p.x as f32 / 1000. + 2.) / 204. * SIZE;
+                        let y = (202. - p.y as f32 / 1000.) / 204. * SIZE;
+                        map.spawn((
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: px(x - 10.),
+                                top: px(y - 6.),
+                                ..default()
+                            },
+                            text("", 10., palette::GOLD),
+                            CampTimer(camp as u8),
+                        ));
+                    }
+                });
         });
     });
 }
@@ -107,5 +128,22 @@ fn track(
     };
     if (new.min, new.size) != (rect.min, rect.size) {
         *rect = new;
+    }
+}
+
+fn timers(feed: Res<crate::link::Feed>, mut q: Query<(&CampTimer, &mut Text)>) {
+    for (CampTimer(camp), mut text) in &mut q {
+        let seconds = feed
+            .curr
+            .as_ref()
+            .and_then(|w| w.camps.iter().find(|c| c.camp == *camp))
+            .map(|c| {
+                c.respawn_ticks
+                    .div_ceil(tbg_moba_core::content::TICK_HZ as u16)
+            });
+        let value = seconds.map_or_else(String::new, |s| s.to_string());
+        if text.0 != value {
+            text.0 = value;
+        }
     }
 }

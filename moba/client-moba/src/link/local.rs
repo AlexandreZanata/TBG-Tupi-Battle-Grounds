@@ -34,7 +34,7 @@ pub fn start(world: &mut World, launch: &Launch) {
     feed.seat = Some(seat);
     feed.status = Status::Live;
     feed.me = Some(view::private(&game, seat));
-    feed.push(view::world(&game), now);
+    feed.push(view::world(&game, seat.team()), now);
     world.insert_resource(LocalHost {
         game,
         seat,
@@ -69,6 +69,9 @@ pub fn run(
         let rejects = host::tick(&mut host.game, &mut host.inputs);
         feed.rejects.extend(rejects.into_iter().map(|(_, r)| r));
         feed.me = Some(view::private(&host.game, seat));
-        feed.push(view::world(&host.game), time.elapsed_secs_f64());
+        feed.push(
+            view::world(&host.game, seat.team()),
+            time.elapsed_secs_f64(),
+        );
     }
 }

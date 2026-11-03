@@ -3,7 +3,9 @@
 use bevy::light::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
 use bevy::prelude::*;
 
+pub mod fog;
 mod landmarks;
+use fog::{FogMask, FogMaterial, FogTexture};
 pub mod mesh;
 mod nature;
 pub mod terrain;
@@ -20,26 +22,37 @@ pub fn to_map(p: Vec3) -> Vec2 {
 
 /// The one material every vertex-coloured mesh shares.
 #[derive(Resource, Clone)]
-pub struct Painted(pub Handle<StandardMaterial>);
+pub struct Painted(pub Handle<FogMaterial>);
 
 pub fn plugin(app: &mut App) {
+    fog::plugin(app);
     app.insert_resource(DirectionalLightShadowMap { size: 4096 })
         .add_systems(Startup, (setup_material, build).chain());
 }
 
-pub fn setup_material(mut commands: Commands, mut materials: ResMut<Assets<StandardMaterial>>) {
-    commands.insert_resource(Painted(materials.add(StandardMaterial {
-        base_color: Color::WHITE,
-        perceptual_roughness: 0.92,
-        reflectance: 0.18,
-        ..default()
+pub fn setup_material(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<FogMaterial>>,
+    fog: Res<FogTexture>,
+) {
+    commands.insert_resource(Painted(materials.add(FogMaterial {
+        base: StandardMaterial {
+            base_color: Color::WHITE,
+            perceptual_roughness: 0.92,
+            reflectance: 0.18,
+            ..default()
+        },
+        extension: FogMask {
+            texture: fog.0.clone(),
+        },
     })));
 }
 
 fn build(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut materials: ResMut<Assets<FogMaterial>>,
+    fog: Res<FogTexture>,
     painted: Res<Painted>,
 ) {
     let paint = painted.0.clone();
@@ -59,22 +72,32 @@ fn build(
     put(landmarks::plaza());
     put(landmarks::camps());
     put(landmarks::bridges());
-    let water = materials.add(StandardMaterial {
-        base_color: Color::srgba(0.20, 0.62, 0.78, 0.86),
-        perceptual_roughness: 0.12,
-        reflectance: 0.55,
-        alpha_mode: AlphaMode::Blend,
-        ..default()
+    let water = materials.add(FogMaterial {
+        base: StandardMaterial {
+            base_color: Color::srgba(0.20, 0.62, 0.78, 0.86),
+            perceptual_roughness: 0.12,
+            reflectance: 0.55,
+            alpha_mode: AlphaMode::Blend,
+            ..default()
+        },
+        extension: FogMask {
+            texture: fog.0.clone(),
+        },
     });
     commands.spawn((
         Mesh3d(meshes.add(terrain::water())),
         MeshMaterial3d(water),
         Transform::default(),
     ));
-    let crystal = materials.add(StandardMaterial {
-        base_color: Color::srgb(0.55, 0.9, 1.0),
-        emissive: LinearRgba::rgb(0.6, 2.2, 3.2),
-        ..default()
+    let crystal = materials.add(FogMaterial {
+        base: StandardMaterial {
+            base_color: Color::srgb(0.55, 0.9, 1.0),
+            emissive: LinearRgba::rgb(0.6, 2.2, 3.2),
+            ..default()
+        },
+        extension: FogMask {
+            texture: fog.0.clone(),
+        },
     });
     commands.spawn((
         Mesh3d(meshes.add(landmarks::plaza_crystal())),

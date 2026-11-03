@@ -281,3 +281,8 @@ pub fn camp_content(kind: crate::types::CampKind) -> (&'static [NeutralKind], u3
         CampKind::Frogs => (&[Frog, SmallFrog, SmallFrog], secs(60)),
     }
 }
+
+/// Shared authoritative sight radius in millimetres (M-50/M-55).
+pub fn sight(kind: UnitKind) -> i32 {
+    base_stats(kind).sight
+}

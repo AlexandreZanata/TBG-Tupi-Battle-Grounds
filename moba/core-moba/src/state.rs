@@ -178,6 +178,8 @@ pub struct MobaMatch {
     pub outcome: Option<Outcome>,
     pub events: Vec<Event>,
     pub(crate) grid: Grid,
+    /// Last observed HP for surviving structures; destruction is public map knowledge.
+    pub(crate) structure_hp: [Vec<(u32, i32)>; 2],
 }
 
 impl MobaMatch {
@@ -215,6 +217,7 @@ impl MobaMatch {
             outcome: None,
             events: Vec::new(),
             grid: Grid::default(),
+            structure_hp: [Vec::new(), Vec::new()],
         };
         for (team, tier, lane, pos) in map::towers() {
             m.spawn(
@@ -242,6 +245,7 @@ impl MobaMatch {
             p.offers = crate::shop::opening(&mut p.shop_rng, &content::slot_rules(seat.role()));
             crate::sim::spawn::commander(&mut m, seat);
         }
+        crate::vision::remember_structures(&mut m);
         m
     }
 

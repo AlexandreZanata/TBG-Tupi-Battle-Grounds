@@ -157,12 +157,18 @@ impl Room {
         if self.game.outcome.is_some() && self.ended_at.is_none() {
             self.ended_at = Some(self.wall);
         }
-        let world = Bytes::from(protocol::encode(&ServerMsg::World(view::world(&self.game))));
+        let worlds = Team::ALL.map(|team| {
+            Bytes::from(protocol::encode(&ServerMsg::World(view::world(
+                &self.game, team,
+            ))))
+        });
         for client in &self.clients {
             let private =
                 protocol::encode(&ServerMsg::Private(view::private(&self.game, client.seat)));
             // try_send: a full outbox drops this tick for that socket only.
-            let _ = client.outbox.try_send(world.clone());
+            let _ = client
+                .outbox
+                .try_send(worlds[client.seat.team().index()].clone());
             let _ = client.outbox.try_send(Bytes::from(private));
         }
     }

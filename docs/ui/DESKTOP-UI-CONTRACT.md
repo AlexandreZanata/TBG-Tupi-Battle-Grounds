@@ -1317,3 +1317,13 @@ rock golems with moss/crystals, spotted jaguar, squat cururu frogs. Coverage:
 idle breathing, attack bite/lunge/spit, hit flash, death collapse, ground
 emergence on spawn; bones/crystals/moss/lily-pad camp dressing. All desktop
 runtime/motion correspondence remains pending until observed.
+
+## P77 C — team vision (2026-11-03)
+
+Both MOBA cameras use one 256×256 R8 mask. A shared material extension
+samples map-space coordinates per fragment on terrain, scenery, water,
+crystals and structure/monster figures, preserving relief without a floating
+fog plane. Two visibility levels; a cosmetic inner feather. Minimap timers
+use only received visible Camp records. Fog removals skip death cues;
+projectiles into unseen areas are culled. Linux runtime/shader and all
+Windows/web pixel/motion checks pending (P81 for the latter).

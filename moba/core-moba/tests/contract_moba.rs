@@ -241,7 +241,7 @@ fn m30_a_ten_bot_match_always_ends() {
 fn m40_frames_round_trip_and_hostile_frames_are_refused() {
     let mut m = MobaMatch::new(9);
     run(&mut m, 300);
-    let world = ServerMsg::World(view::world(&m));
+    let world = ServerMsg::World(view::world(&m, Team::Blue));
     assert_eq!(
         protocol::decode_server(&protocol::encode(&world)),
         Ok(world)
@@ -453,5 +453,129 @@ fn m63_cleared_camp_respawns_after_its_timer() {
                 .count(),
             ids.len()
         );
+    }
+}
+
+#[test]
+fn m50_enemies_outside_allied_sight_are_absent_from_that_team_frame() {
+    // M-50/M-54: inclusive exact sight; hidden ids, HP, targets, events and timers are absent.
+    use tbg_moba_core::{state::Event, types::MinionKind};
+    let mut m = MobaMatch::new(50);
+    m.units.clear();
+    let p = Pos {
+        x: 100_000,
+        y: 100_000,
+    };
+    let ally = m.spawn(
+        UnitKind::Minion(MinionKind::Melee),
+        Side::Team(Team::Blue),
+        None,
+        p,
+        Brain::Static,
+    );
+    let near = m.spawn(
+        UnitKind::Troop(Champion::Longaxe),
+        Side::Team(Team::Red),
+        Some(Seat(5)),
+        Pos {
+            x: p.x + 8000,
+            y: p.y,
+        },
+        Brain::Static,
+    );
+    let hidden = m.spawn(
+        UnitKind::Troop(Champion::Longaxe),
+        Side::Team(Team::Red),
+        Some(Seat(5)),
+        Pos {
+            x: p.x + 8001,
+            y: p.y,
+        },
+        Brain::Static,
+    );
+    m.units[0].target = hidden;
+    m.player_mut(Seat(5)).commander = hidden;
+    m.events.push(Event::TroopSent {
+        seat: Seat(5),
+        troop: Champion::Longaxe,
+        to: Destination::Jungle,
+    });
+    let w = view::world(&m, Team::Blue);
+    assert!(w.units.iter().any(|u| u.id == ally));
+    assert!(w.units.iter().any(|u| u.id == near));
+    assert!(!w.units.iter().any(|u| u.id == hidden));
+    assert_eq!(w.units.iter().find(|u| u.id == ally).unwrap().target, 0);
+    assert_eq!(w.seats[5].commander, 0);
+    assert_eq!(w.seats[5].hp_permille, 0);
+    assert!(w.events.is_empty());
+    assert!(w.camps.is_empty());
+    assert_eq!(
+        protocol::decode_server(&protocol::encode(&ServerMsg::World(w.clone()))),
+        Ok(ServerMsg::World(w))
+    );
+}
+
+#[test]
+fn m51_structures_are_always_in_every_frame() {
+    // M-51: map knowledge is public, unseen HP and attacks are not.
+    let mut m = MobaMatch::new(51);
+    let i = m
+        .units
+        .iter()
+        .position(|u| u.team() == Some(Team::Red) && u.kind.structure())
+        .unwrap();
+    let id = m.units[i].id;
+    m.units[i].hp = 1;
+    m.units[i].last_attack = m.tick;
+    for team in Team::ALL {
+        let w = view::world(&m, team);
+        assert_eq!(w.units.iter().filter(|u| u.kind.structure()).count(), 24);
+    }
+    let blue = view::world(&m, Team::Blue);
+    let u = blue.units.iter().find(|u| u.id == id).unwrap();
+    assert_eq!(u.hp_permille, 1000);
+    assert!(!u.attacked);
+    // Enter sight, remember damage; leave sight and subsequent damage stays hidden.
+    let observer = m.player(Seat(0)).commander;
+    let a = m.slot(observer).unwrap();
+    m.units[a].pos = m.units[i].pos;
+    m.units[i].stats.damage = 0;
+    m.units[a].stats.damage = 0;
+    m.step();
+    let observed = view::world(&m, Team::Blue)
+        .units
+        .iter()
+        .find(|u| u.id == id)
+        .unwrap()
+        .hp_permille;
+    let a = m.slot(observer).unwrap();
+    m.units[a].pos = Pos { x: 0, y: 0 };
+    let i = m.slot(id).unwrap();
+    m.units[i].hp = m.units[i].max_hp;
+    m.step();
+    assert_eq!(
+        view::world(&m, Team::Blue)
+            .units
+            .iter()
+            .find(|u| u.id == id)
+            .unwrap()
+            .hp_permille,
+        observed
+    );
+}
+
+#[test]
+fn m53_vision_is_deterministic() {
+    // M-53: both team frames are byte-identical across a deterministic replay.
+    let (mut a, mut b) = (MobaMatch::new(53), MobaMatch::new(53));
+    for _ in 0..600 {
+        run(&mut a, 1);
+        run(&mut b, 1);
+        for team in Team::ALL {
+            assert_eq!(
+                protocol::encode(&view::world(&a, team)),
+                protocol::encode(&view::world(&b, team))
+            );
+        }
     }
 }
