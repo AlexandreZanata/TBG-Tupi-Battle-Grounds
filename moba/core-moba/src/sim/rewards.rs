@@ -3,7 +3,7 @@
 use crate::content::{self, SHARE_RANGE};
 use crate::geom::Pos;
 use crate::state::{Brain, Credit, EndReason, Event, MobaMatch, Outcome};
-use crate::types::{NeutralKind, Seat, Side, Team, UnitKind};
+use crate::types::{Seat, Side, Team, UnitKind};
 
 struct Death {
     kind: UnitKind,
@@ -64,13 +64,10 @@ fn reward(m: &mut MobaMatch, d: &Death) {
     match d.kind {
         UnitKind::Minion(_) => grant(m, killer, content::MINION_BOUNTY, 0),
         UnitKind::Troop(kind) => grant(m, killer, content::troop_cost(kind) / 3, 0),
-        UnitKind::Neutral(NeutralKind::Small) => grant(m, killer, content::NEUTRAL_BOUNTY[0], 0),
-        UnitKind::Neutral(NeutralKind::Big) => grant(
-            m,
-            killer,
-            content::NEUTRAL_BOUNTY[1],
-            content::BIG_NEUTRAL_ESSENCE,
-        ),
+        UnitKind::Neutral(kind) => {
+            let (gold, essence, _) = content::neutral_rewards(kind);
+            grant(m, killer, gold, essence);
+        }
         UnitKind::Commander(_) => commander_death(m, d, team, killer),
         UnitKind::Tower(tier, lane) => {
             for seat in Seat::all().filter(|s| s.team() == team) {
@@ -183,7 +180,7 @@ fn close_camp(m: &mut MobaMatch, camp: u8, credit: Option<Credit>) {
     if up || state.respawn_at.is_some() {
         return;
     }
-    state.respawn_at = Some(m.tick + content::CAMP_RESPAWN_TICKS);
+    state.respawn_at = Some(m.tick + content::camp_content(crate::map::camp_kind(camp as usize)).1);
     m.events.push(Event::CampCleared {
         camp,
         by: credit.and_then(|c| c.seat),

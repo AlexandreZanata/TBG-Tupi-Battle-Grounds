@@ -4,7 +4,7 @@ use crate::content::{self, COMMANDER_LEVEL_DAMAGE, COMMANDER_LEVEL_HP};
 use crate::geom::{Pos, MM};
 use crate::map;
 use crate::state::{Brain, CommandMode, MobaMatch};
-use crate::types::{Champion, Destination, Lane, NeutralKind, Seat, Side, Team, UnitKind};
+use crate::types::{Champion, Destination, Lane, Seat, Side, Team, UnitKind};
 
 /// Small fixed fan of offsets so units do not spawn stacked.
 fn fan(k: u32) -> Pos {
@@ -112,26 +112,16 @@ pub(super) fn camps(m: &mut MobaMatch) {
         m.camps[c].respawn_at = None;
         let (center, _) = map::camp(c);
         let brain = Brain::Neutral { camp: c as u8 };
-        m.spawn(
-            UnitKind::Neutral(NeutralKind::Big),
-            Side::Neutral,
-            None,
-            center,
-            brain,
-        );
-        for dx in [-3, 3] {
-            let at = offset(
-                center,
-                Pos {
-                    x: dx * MM,
-                    y: -3 * MM,
-                },
-            );
+        for (i, &kind) in content::camp_content(map::camp_kind(c))
+            .0
+            .iter()
+            .enumerate()
+        {
             m.spawn(
-                UnitKind::Neutral(NeutralKind::Small),
+                UnitKind::Neutral(kind),
                 Side::Neutral,
                 None,
-                at,
+                offset(center, fan(i as u32)),
                 brain,
             );
         }

@@ -1309,3 +1309,11 @@ MOBA only: three centred 166×225 cards, 8 px gaps, unchanged 862 px centred
 resource strip, slot category captions, locks/reroll/purchase, hotkeys 1–3
 for every Role. Shared HUD code on all desktop targets. Linux runtime and
 Windows/web pixel correspondence pending; champion motion unchanged.
+
+## P77 B — jungle monsters (2026-11-03)
+
+Shared MOBA figures use the 1v1 vertex-colour primitives: maned wolves,
+rock golems with moss/crystals, spotted jaguar, squat cururu frogs. Coverage:
+idle breathing, attack bite/lunge/spit, hit flash, death collapse, ground
+emergence on spawn; bones/crystals/moss/lily-pad camp dressing. All desktop
+runtime/motion correspondence remains pending until observed.

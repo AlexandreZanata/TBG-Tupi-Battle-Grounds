@@ -69,42 +69,6 @@ fn minion(p: &mut Vec<Part>, kind: MinionKind, team: Team) {
     }
 }
 
-fn neutral(p: &mut Vec<Part>, kind: NeutralKind) {
-    match kind {
-        NeutralKind::Small => {
-            let fur = Color::srgb(0.38, 0.27, 0.2);
-            p.push((Shape::Box(0.6, 0.55, 1.1), fur, at(0.0, 0.6, 0.0)));
-            p.push((Shape::Box(0.45, 0.42, 0.45), fur, at(0.0, 0.75, -0.65)));
-            for (x, z) in [(-0.22, -0.4), (0.22, -0.4), (-0.22, 0.4), (0.22, 0.4)] {
-                p.push((Shape::Box(0.14, 0.4, 0.14), DARK, at(x, 0.2, z)));
-            }
-            for x in [-0.15, 0.15] {
-                p.push((Shape::Cone(0.05, 0.25), Color::WHITE, at(x, 0.62, -0.9)));
-            }
-        }
-        NeutralKind::Big => {
-            let rock = Color::srgb(0.36, 0.30, 0.27);
-            p.push((Shape::Ball(0.95), rock, at(0.0, 1.3, 0.0)));
-            for x in [-1.0, 1.0] {
-                p.push((Shape::Ball(0.45), rock, at(x, 1.1, -0.1)));
-                p.push((Shape::Box(0.4, 0.9, 0.4), rock, at(x * 0.45, 0.45, 0.0)));
-            }
-            for (x, z, s) in [(0.0, 0.55, 1.0), (-0.45, 0.4, 0.7), (0.45, 0.4, 0.75)] {
-                p.push((
-                    Shape::Crystal(0.25 * s, 1.0 * s),
-                    palette::NEUTRAL,
-                    at(x, 2.0, z),
-                ));
-            }
-            p.push((
-                Shape::Box(0.5, 0.1, 0.05),
-                Color::srgb(1.0, 0.6, 0.2),
-                at(0.0, 1.5, -0.92),
-            ));
-        }
-    }
-}
-
 fn tower(p: &mut Vec<Part>, tier: TowerTier, team: Team) {
     let s = if tier == TowerTier::Nexus { 1.15 } else { 1.0 };
     let trim = palette::team(team);
@@ -193,7 +157,7 @@ pub fn figure(kind: UnitKind, side: Side) -> Mesh {
     let mut p = Vec::new();
     match kind {
         UnitKind::Minion(m) => minion(&mut p, m, team),
-        UnitKind::Neutral(n) => neutral(&mut p, n),
+        UnitKind::Neutral(n) => return super::monsters::figure(n),
         UnitKind::Tower(tier, _) => tower(&mut p, tier, team),
         UnitKind::Stronghold => stronghold(&mut p, team),
         // Commanders and Troops are 1v1 champion rigs (champions.rs).
@@ -207,8 +171,14 @@ pub fn figure(kind: UnitKind, side: Side) -> Mesh {
 pub fn scale(kind: UnitKind) -> f32 {
     match kind {
         UnitKind::Minion(_) => 0.95,
-        UnitKind::Neutral(NeutralKind::Big) => 1.25,
-        UnitKind::Neutral(NeutralKind::Small) => 1.1,
+        UnitKind::Neutral(
+            NeutralKind::Big
+            | NeutralKind::Golem
+            | NeutralKind::Jaguar
+            | NeutralKind::WolfAlpha
+            | NeutralKind::Frog,
+        ) => 1.25,
+        UnitKind::Neutral(_) => 1.1,
         _ => 1.0,
     }
 }
@@ -216,7 +186,13 @@ pub fn scale(kind: UnitKind) -> f32 {
 /// Height of the health bar above the feet.
 pub fn bar_height(kind: UnitKind) -> f32 {
     match kind {
-        UnitKind::Neutral(NeutralKind::Big) => 3.6,
+        UnitKind::Neutral(
+            NeutralKind::Big
+            | NeutralKind::Golem
+            | NeutralKind::Jaguar
+            | NeutralKind::WolfAlpha
+            | NeutralKind::Frog,
+        ) => 3.6,
         UnitKind::Tower(..) => 10.6,
         UnitKind::Stronghold => 11.5,
         _ => 2.2,
@@ -228,7 +204,13 @@ pub fn bar_width(kind: UnitKind) -> f32 {
         UnitKind::Commander(_) => 2.4,
         UnitKind::Tower(..) => 3.4,
         UnitKind::Stronghold => 6.0,
-        UnitKind::Neutral(NeutralKind::Big) => 1.8,
+        UnitKind::Neutral(
+            NeutralKind::Big
+            | NeutralKind::Golem
+            | NeutralKind::Jaguar
+            | NeutralKind::WolfAlpha
+            | NeutralKind::Frog,
+        ) => 1.8,
         _ => 1.2,
     }
 }

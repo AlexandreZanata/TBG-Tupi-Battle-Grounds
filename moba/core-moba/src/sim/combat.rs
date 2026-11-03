@@ -197,7 +197,13 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
             mode: CommandMode::Hold(p),
             ..
         } => (Some(p), content::HOLD_LEASH),
-        Brain::Neutral { camp } => (Some(map::camp(camp as usize).0), content::CAMP_LEASH),
+        Brain::Neutral { camp } => {
+            let home = map::camp(camp as usize).0;
+            if !a.pos.within(home, content::CAMP_LEASH) {
+                return None;
+            }
+            (Some(home), content::CAMP_LEASH)
+        }
         _ => (None, 0),
     };
     let keep = if a.mobile() {
@@ -209,7 +215,7 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
         let b = &m.units[j];
         attackable(vul, a, b)
             && a.pos.within(b.pos, keep + b.stats.radius)
-            && anchor.is_none_or(|p| b.pos.within(p, leash + a.stats.range))
+            && anchor.is_none_or(|p| b.pos.within(p, leash))
     });
     // Neutral monsters never pick fights; others re-scan every 10 ticks.
     let rescan = !matches!(a.brain, Brain::Neutral { .. }) && (m.tick + a.id).is_multiple_of(10);

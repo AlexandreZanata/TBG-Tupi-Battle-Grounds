@@ -152,3 +152,14 @@ pub fn spawn_point(team: Team) -> Pos {
     };
     Pos::units(x, y)
 }
+
+/// Each side has the same four camp kinds in the same order (M-60).
+pub fn camp_kind(id: usize) -> crate::types::CampKind {
+    use crate::types::CampKind;
+    [
+        CampKind::Wolves,
+        CampKind::Golems,
+        CampKind::Jaguar,
+        CampKind::Frogs,
+    ][id % 4]
+}

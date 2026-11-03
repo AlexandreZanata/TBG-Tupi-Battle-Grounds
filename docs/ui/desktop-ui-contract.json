@@ -633,6 +633,16 @@
       "windows": "pending (P81)",
       "web": "pending (P81)",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-b-jungle-monsters-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Wolves/Golems/Jaguar/Frogs figures, camp dressing; shared idle, lunge/spit, hit flash, death collapse and spawn emergence",
+      "linux": "pending runtime/motion",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
     }
   ]
 }

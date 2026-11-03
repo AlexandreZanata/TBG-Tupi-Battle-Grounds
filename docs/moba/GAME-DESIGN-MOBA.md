@@ -40,7 +40,7 @@
 | `Shop` | Three role-locked offers per player drawn from the 1v1 online pool, with locks and a paid reroll, as in the 1v1 game. |
 | `Minion` | Free lane unit spawned in `Wave`s by each Stronghold. |
 | `Wave` | Three melee + two ranged Minions per lane, per team, every 30 s. |
-| `Camp` | A jungle pit of neutral monsters (one big, two small). |
+| `Camp` | A jungle pit of Wolves, Golems, Jaguar or Frogs (M-60). |
 | `Tower` | Defensive structure: Outer, Inner, Base per lane, plus two Nexus towers. |
 | `Stronghold` | Each team's crystal; destroying the enemy's wins. |
 | `Gold` | Currency for Troops (coins on the HUD). |
@@ -98,7 +98,7 @@
 - **M-11** At most 8 live Troops per player.
 - **M-12** Passive income: +1 Gold per second, +1 Essence every 10 s.
 - **M-13** Bounties go to the owner of the unit that landed the last hit:
-  Minion 4, Troop cost/3, small monster 6, big monster 15 (+2 Essence).
+  Minion 4, Troop cost/3, monsters by M-64.
 - **M-14** Commander kill: killer +40 Gold +3 Essence; every allied Commander
   within 12 units +15 Gold (assist); the killing Team scores 1.
 - **M-15** Tower destroyed: every player of the destroying Team +25 Gold
@@ -112,8 +112,7 @@
   slot order, excluding locked champions and earlier draws. The wire sends
   a bitmask per slot (Tank=1, Dps=2, Support=4, Ranged=8, Control=16).
   Category selection is reserved for a future intention. Commanders level 1–12 from experience shared by every allied
-  Commander within 12 units of an enemy death (Minion 20, Troop 25, small
-  monster 30, big 60, Commander 120). Level = +80 HP, +4 damage.
+  Commander within 12 units of an enemy death (Minion 20, Troop 25, monsters by M-64, Commander 120). Level = +80 HP, +4 damage.
 - **M-21** A dead Commander respawns at its base after `5 s + 1.5 s × level`.
 - **M-22** Commanders within 14 units of their own Stronghold heal ~5 %/s.
 
@@ -130,8 +129,7 @@
 | Tower Outer / Inner / Base / Nexus | 2500 / 2800 / 3000 / 3500 | 120 | 9.0 | 1.0 | — | 0 | M-08 |
 | Stronghold | 6000 | 150 | 10.0 | 1.0 | — | 0 | win condition |
 
-Waves: first at 0:10, then every 30 s. Camps: first at 0:20, respawn 60 s
-after cleared. Start Gold 60.
+Waves: first at 0:10, then every 30 s. Camps: first at 0:20, per-kind respawn after cleared (M-63). Start Gold 60.
 
 ## 7. Commanders
 
@@ -168,3 +166,33 @@ way (structures in the M-08 order); they never enter the jungle.
 1v1 champion abilities and Evolutions in 5v5, Commander abilities and items, fog of war, pings/chat, ranked/MMR,
 matchmaking across rooms, spectators, reconnect-to-same-seat tokens,
 mobile layout, sounds/music, balance.
+
+## 11. Jungle camps (P77, Proposed M-60–M-64)
+
+- **M-60** Camp ids 0–3 (Blue) and 4–7 (Red) repeat Wolves, Golems,
+  Jaguar, Frogs. Wolves: one alpha and three pups; Golems: one big and two
+  small; Jaguar: one elite; Frogs: one big and two small with ranged spit.
+- **M-61** Monsters are passive until struck, then retaliate against that
+  attacker; no lane unit or structure hunts neutral monsters.
+- **M-62** Beyond the 9-unit home leash, or when the attacker leaves it,
+  monsters drop the target, return home and heal fully within 4 units.
+- **M-63** First spawn at 0:20. After the last monster dies, Wolves respawn
+  after 45 s, Golems 75 s, Jaguar 90 s, Frogs 60 s. Partial clears do not
+  start a timer. The timer is exposed only while the camp is in team vision.
+- **M-64** The following are initial Proposed content values, not tuning.
+  Bounties are last-hit Gold/Essence and nearby Commander XP. All monsters
+  have 8-unit sight. Radius: alpha/big frog 1, pup 0.5, golem/jaguar 1.2,
+  small golem 0.7, small frog 0.6. No river objective is added.
+
+| Monster | HP | Damage | Range | Interval (s) | Speed (u/s) | Armor | Gold/Essence/XP |
+|---|---|---|---|---|---|---|---|
+| Wolf alpha | 600 | 30 | 1.8 | 0.8 | 4.2 | 0 | 18/1/60 |
+| Wolf pup | 180 | 12 | 1.4 | 0.8 | 4.5 | 0 | 5/0/20 |
+| Golem | 1200 | 32 | 2 | 1.5 | 2 | 25% | 20/2/70 |
+| Small golem | 450 | 14 | 1.6 | 1.5 | 2.2 | 20% | 6/0/30 |
+| Jaguar | 1000 | 70 | 2 | 1 | 4 | 5% | 32/3/120 |
+| Big frog | 750 | 28 | 6 | 1.2 | 2.8 | 0 | 18/2/60 |
+| Small frog | 240 | 12 | 5 | 1.2 | 3 | 0 | 6/0/25 |
+
+P76 Small/Big protocol discriminants remain reserved for compatibility;
+new camps never spawn them. Their legacy stats are unchanged.

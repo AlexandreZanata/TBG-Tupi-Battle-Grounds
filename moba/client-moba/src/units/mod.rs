@@ -20,6 +20,7 @@ pub mod champions;
 mod fx;
 pub use fx::Marker;
 pub mod models;
+mod monsters;
 
 /// Render layer seen only by the minimap camera.
 pub const MINIMAP_LAYER: usize = 2;
@@ -35,6 +36,8 @@ pub struct UnitVisual {
     target: u32,
     pub yaw: f32,
     lunge: f32,
+    age: f32,
+    flash: f32,
     /// Height of the health bar above the feet.
     bar_height: f32,
     bar: Entity,
@@ -63,6 +66,7 @@ struct Shared {
     crystal: Handle<Mesh>,
     crystal_material: [Handle<StandardMaterial>; 2],
     ring: Handle<Mesh>,
+    flash: Handle<StandardMaterial>,
 }
 
 pub fn plugin(app: &mut App) {
@@ -78,6 +82,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnExit(Screen::Match), clear);
     fx::plugin(app);
     champions::plugin(app);
+    monsters::plugin(app);
 }
 
 fn unlit(materials: &mut Assets<StandardMaterial>, color: Color) -> Handle<StandardMaterial> {
@@ -137,6 +142,7 @@ fn setup(
                 LinearRgba::rgb(6.0, 1.2, 0.6),
             ),
         ],
+        flash: unlit(&mut materials, Color::srgb(1.8, 1.5, 1.1)),
         ring: meshes.add(
             Annulus::new(1.0, 1.25)
                 .mesh()
@@ -214,6 +220,9 @@ fn sync(
                 }
                 v.prev = v.curr;
                 v.curr = pos;
+                if hp < v.hp {
+                    v.flash = 0.16;
+                }
                 v.hp = hp;
                 v.target = u.target;
                 if u.attacked {
@@ -263,6 +272,16 @@ fn sync(
                 commands.entity(v.fill).despawn();
                 commands.entity(entity).remove::<UnitVisual>();
                 champions::die(&mut commands, entity, &mut a);
+                continue;
+            }
+            if matches!(v.kind, UnitKind::Neutral(_)) {
+                commands.entity(v.bar).despawn();
+                commands.entity(v.fill).despawn();
+                commands
+                    .entity(entity)
+                    .remove::<UnitVisual>()
+                    .despawn_related::<Children>();
+                monsters::die(&mut commands, entity);
                 continue;
             }
             bursts.write(fx::Burst {
@@ -328,6 +347,8 @@ fn spawn_unit(
                 target: u.target,
                 yaw,
                 lunge: 0.0,
+                age: 0.0,
+                flash: 0.0,
                 bar_height,
                 bar,
                 fill,
@@ -380,14 +401,24 @@ fn spawn_unit(
 fn animate(
     feed: Res<Feed>,
     time: Res<Time>,
-    mut units: Query<(&mut UnitVisual, &mut Transform, Option<&mut Animator>), Without<Crystal>>,
+    shared: Res<Shared>,
+    painted: Res<Painted>,
+    mut units: Query<
+        (
+            &mut UnitVisual,
+            &mut Transform,
+            Option<&mut Animator>,
+            Option<&mut MeshMaterial3d<StandardMaterial>>,
+        ),
+        Without<Crystal>,
+    >,
     mut crystals: Query<(&Crystal, &mut Transform), Without<UnitVisual>>,
 ) {
     let alpha = feed.alpha(time.elapsed_secs_f64());
     let dt = time.delta_secs();
     let t = time.elapsed_secs();
     let targets: HashMap<u32, Vec2> = units.iter().map(|(v, ..)| (v.id, v.curr)).collect();
-    for (mut v, mut transform, animator) in &mut units {
+    for (mut v, mut transform, animator, material) in &mut units {
         if v.kind.structure() {
             continue;
         }
@@ -427,6 +458,18 @@ fn animate(
         }
         transform.translation = to_world(pos.x, pos.y, ground_y(pos) + bob) + forward;
         transform.rotation = Quat::from_rotation_y(v.yaw);
+        if let UnitKind::Neutral(kind) = v.kind {
+            v.age += dt;
+            v.flash = (v.flash - dt).max(0.0);
+            monsters::pose(kind, v.id, v.age, t, v.lunge, &mut transform);
+            if let Some(mut material) = material {
+                material.0 = if v.flash > 0.0 {
+                    shared.flash.clone()
+                } else {
+                    painted.0.clone()
+                };
+            }
+        }
     }
     for (c, mut transform) in &mut crystals {
         transform.translation.y = c.base + (t * 1.6).sin() * 0.25;

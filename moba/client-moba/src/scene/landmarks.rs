@@ -150,7 +150,7 @@ pub fn plaza_crystal() -> Mesh {
 pub fn camps() -> Mesh {
     let mut parts = Vec::new();
     for camp in 0..map::CAMP_COUNT {
-        let (pos, team) = map::camp(camp);
+        let (pos, _team) = map::camp(camp);
         let c = units(pos);
         let r = map::CAMP_RADIUS as f32;
         flat(&mut parts, c, r + 0.8, 0.05, Color::srgb(0.30, 0.25, 0.19));
@@ -165,14 +165,24 @@ pub fn camps() -> Mesh {
                 hash(camp as i32, k, 10),
             );
         }
-        for k in 0..3 {
-            let a = k as f32 * 2.1 + camp as f32;
-            let p = c + Vec2::new(a.cos(), a.sin()) * (r + 1.6);
+        use tbg_moba_core::types::CampKind;
+        for k in 0..6 {
+            let angle = k as f32 * 1.047 + camp as f32;
+            let p = c + Vec2::new(angle.cos(), angle.sin()) * (r - 1.0);
+            let (shape, color, h) = match map::camp_kind(camp) {
+                CampKind::Wolves => (
+                    Shape::Box(0.22, 0.18, 1.1),
+                    Color::srgb(0.79, 0.73, 0.58),
+                    0.22,
+                ),
+                CampKind::Golems => (Shape::Crystal(0.4, 1.6), Color::srgb(0.28, 0.78, 0.72), 0.8),
+                CampKind::Jaguar => (Shape::Ball(0.55), Color::srgb(0.23, 0.39, 0.15), 0.25),
+                CampKind::Frogs => (Shape::Disc(0.75), Color::srgb(0.29, 0.53, 0.18), 0.12),
+            };
             parts.push((
-                Shape::Crystal(0.45, 1.8),
-                palette::glow(team),
-                Transform::from_translation(to_world(p.x, p.y, 0.9))
-                    .with_rotation(Quat::from_rotation_z(0.25)),
+                shape,
+                color,
+                Transform::from_translation(to_world(p.x, p.y, h)),
             ));
         }
     }

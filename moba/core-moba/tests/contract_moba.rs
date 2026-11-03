@@ -314,3 +314,144 @@ fn m20_role_slots_only_offer_the_role_archetypes() {
         );
     }
 }
+
+fn jungle_fixture() -> MobaMatch {
+    let mut m = MobaMatch::new(60);
+    m.units.clear();
+    m.tick = content::secs(20) - 1;
+    m.step();
+    m
+}
+
+#[test]
+fn m60_each_camp_spawns_its_kind() {
+    // M-60: identical camp composition on both sides, no generic placeholders.
+    let m = jungle_fixture();
+    for camp in 0..tbg_moba_core::map::CAMP_COUNT {
+        let expected = content::camp_content(tbg_moba_core::map::camp_kind(camp)).0;
+        let actual: Vec<_> = m
+            .units
+            .iter()
+            .filter(|u| u.brain == Brain::Neutral { camp: camp as u8 })
+            .map(|u| u.kind)
+            .collect();
+        assert_eq!(
+            actual,
+            expected
+                .iter()
+                .copied()
+                .map(UnitKind::Neutral)
+                .collect::<Vec<_>>()
+        );
+    }
+}
+
+#[test]
+fn m61_monsters_stay_passive_until_hit() {
+    // M-61: a nearby opponent alone never starts a neutral attack.
+    let mut m = jungle_fixture();
+    let home = tbg_moba_core::map::camp(0).0;
+    let id = m.spawn(
+        UnitKind::Troop(Champion::Shieldbearer),
+        Side::Team(Team::Blue),
+        Some(Seat(1)),
+        home,
+        Brain::Static,
+    );
+    let i = m.slot(id).unwrap();
+    m.units[i].stats.damage = 0;
+    for _ in 0..30 {
+        m.step();
+    }
+    let hp = m.unit(id).unwrap().hp;
+    assert_eq!(hp, m.unit(id).unwrap().max_hp);
+    assert!(m
+        .units
+        .iter()
+        .filter(|u| u.side == Side::Neutral)
+        .all(|u| u.target == 0));
+    // A jungle attacker actually lands a hit; the victim retaliates.
+    let i = m.slot(id).unwrap();
+    m.units[i].brain = Brain::Jungle { camp: Some(0) };
+    m.units[i].stats.damage = 1;
+    m.units[i].stats.range = 6000;
+    for _ in 0..100 {
+        m.step();
+    }
+    assert!(m.unit(id).is_none_or(|u| u.hp < hp));
+}
+
+#[test]
+fn m62_leashed_monsters_heal_home() {
+    // M-62: an attacker outside the leash cannot drag a wounded monster away.
+    let mut m = jungle_fixture();
+    let home = tbg_moba_core::map::camp(0).0;
+    let attacker = m.spawn(
+        UnitKind::Troop(Champion::Shieldbearer),
+        Side::Team(Team::Blue),
+        None,
+        Pos {
+            x: home.x + 20_000,
+            y: home.y,
+        },
+        Brain::Static,
+    );
+    m.units.last_mut().unwrap().stats.damage = 0;
+    let i = m
+        .units
+        .iter()
+        .position(|u| u.brain == Brain::Neutral { camp: 0 })
+        .unwrap();
+    let monster = m.units[i].id;
+    m.units[i].pos.x += 10_000;
+    m.units[i].hp = 10;
+    m.units[i].target = attacker;
+    for _ in 0..100 {
+        m.step();
+    }
+    let u = m.unit(monster).unwrap();
+    assert_eq!(u.target, 0);
+    assert_eq!(u.hp, u.max_hp);
+    assert!(u.pos.within(home, 4000));
+}
+
+#[test]
+fn m63_cleared_camp_respawns_after_its_timer() {
+    // M-63: partial kills do not start a timer; a full clear does, for each kind.
+    for camp in 0..4 {
+        let mut m = jungle_fixture();
+        let ids: Vec<_> = m
+            .units
+            .iter()
+            .filter(|u| u.brain == Brain::Neutral { camp })
+            .map(|u| u.id)
+            .collect();
+        for &id in &ids[..ids.len() - 1] {
+            let i = m.slot(id).unwrap();
+            m.units[i].hp = 0;
+        }
+        m.step();
+        assert!(m.camps[camp as usize].respawn_at.is_none());
+        let i = m.slot(*ids.last().unwrap()).unwrap();
+        m.units[i].hp = 0;
+        m.step();
+        let at = m.camps[camp as usize].respawn_at.unwrap();
+        assert_eq!(
+            at - m.tick,
+            content::camp_content(tbg_moba_core::map::camp_kind(camp as usize)).1
+        );
+        while m.tick + 1 < at {
+            m.step();
+        }
+        assert!(!m.units.iter().any(|u| u.brain == Brain::Neutral { camp }));
+        m.step();
+        assert!(m.camps[camp as usize].respawn_at.is_none());
+        assert_eq!(
+            m.units
+                .iter()
+                .filter(|u| u.brain == Brain::Neutral { camp })
+                .count(),
+            ids.len()
+        );
+    }
+}

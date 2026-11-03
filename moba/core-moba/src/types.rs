@@ -150,8 +150,16 @@ pub enum MinionKind {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum NeutralKind {
+    // Retained wire discriminants from the unmerged P76 skeleton; camps use the kinds below.
     Small,
     Big,
+    WolfAlpha,
+    WolfPup,
+    Golem,
+    SmallGolem,
+    Jaguar,
+    Frog,
+    SmallFrog,
 }
 
 /// Tower position in its lane, from the river towards the base, plus the
@@ -179,4 +187,13 @@ impl UnitKind {
     pub fn structure(self) -> bool {
         matches!(self, UnitKind::Tower(..) | UnitKind::Stronghold)
     }
+}
+
+/// Mirrored jungle camp identities (M-60).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CampKind {
+    Wolves,
+    Golems,
+    Jaguar,
+    Frogs,
 }

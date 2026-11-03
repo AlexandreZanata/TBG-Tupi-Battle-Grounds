@@ -79,11 +79,7 @@ pub fn base_stats(kind: UnitKind) -> Stats {
         UnitKind::Minion(MinionKind::Melee) => stats(300, 14, 16, 20, 32),
         UnitKind::Minion(MinionKind::Ranged) => stats(200, 18, 60, 24, 32),
         UnitKind::Troop(kind) => troop_stats(kind),
-        UnitKind::Neutral(NeutralKind::Small) => stats(350, 16, 16, 20, 30),
-        UnitKind::Neutral(NeutralKind::Big) => Stats {
-            radius: u(12),
-            ..stats(900, 35, 20, 24, 28)
-        },
+        UnitKind::Neutral(kind) => neutral_stats(kind),
         UnitKind::Tower(tier, _) => Stats {
             hp: match tier {
                 TowerTier::Outer => 2500,
@@ -180,13 +176,11 @@ pub const START_GOLD: u32 = 60;
 pub const GOLD_PER_SECOND: u32 = 1;
 pub const ESSENCE_EVERY_TICKS: u32 = secs(10);
 pub const MINION_BOUNTY: u32 = 4;
-pub const NEUTRAL_BOUNTY: [u32; 2] = [6, 15];
 pub const COMMANDER_BOUNTY: u32 = 40;
 pub const ASSIST_BOUNTY: u32 = 15;
 pub const TOWER_TEAM_BOUNTY: u32 = 25;
 pub const TOWER_TEAM_ESSENCE: u32 = 2;
 pub const COMMANDER_KILL_ESSENCE: u32 = 3;
-pub const BIG_NEUTRAL_ESSENCE: u32 = 2;
 pub const SHARE_RANGE: i32 = 12 * MM;
 
 /// Troop upgrade tiers bought with Essence (M-17).
@@ -210,8 +204,7 @@ pub fn xp_reward(kind: UnitKind) -> u32 {
     match kind {
         UnitKind::Minion(_) => 20,
         UnitKind::Troop(_) => 25,
-        UnitKind::Neutral(NeutralKind::Small) => 30,
-        UnitKind::Neutral(NeutralKind::Big) => 60,
+        UnitKind::Neutral(kind) => neutral_rewards(kind).2,
         UnitKind::Commander(_) => 120,
         UnitKind::Tower(..) | UnitKind::Stronghold => 0,
     }
@@ -234,9 +227,57 @@ pub const WAVE: [MinionKind; 5] = [
     MinionKind::Ranged,
     MinionKind::Ranged,
 ];
-pub const CAMP_RESPAWN_TICKS: u32 = secs(60);
 pub const CAMP_LEASH: i32 = 9 * MM;
 /// Manual Hold leash around the hold point.
 pub const HOLD_LEASH: i32 = 7 * MM;
 /// Lane units advance to the next waypoint inside this radius.
 pub const WAYPOINT_RADIUS: i32 = 2 * MM;
+
+/// Monster tables are Proposed placeholders, not a balance pass (M-60/M-64).
+fn neutral_stats(kind: NeutralKind) -> Stats {
+    use NeutralKind::*;
+    let (hp, damage, range, interval, pace, armor, radius) = match kind {
+        Small => (350, 16, 16, 20, 30, 0, 6),
+        Big => (900, 35, 20, 24, 28, 0, 12),
+        WolfAlpha => (600, 30, 18, 16, 42, 0, 10),
+        WolfPup => (180, 12, 14, 16, 45, 0, 5),
+        Golem => (1200, 32, 20, 30, 20, 25, 12),
+        SmallGolem => (450, 14, 16, 30, 22, 20, 7),
+        Jaguar => (1000, 70, 20, 20, 40, 5, 12),
+        Frog => (750, 28, 60, 24, 28, 0, 10),
+        SmallFrog => (240, 12, 50, 24, 30, 0, 6),
+    };
+    Stats {
+        armor,
+        radius: u(radius),
+        ..stats(hp, damage, range, interval, pace)
+    }
+}
+
+/// Last-hit Gold, Essence and nearby Commander XP (M-64).
+pub fn neutral_rewards(kind: NeutralKind) -> (u32, u32, u32) {
+    use NeutralKind::*;
+    match kind {
+        Small => (6, 0, 30),
+        Big => (15, 2, 60),
+        WolfAlpha => (18, 1, 60),
+        WolfPup => (5, 0, 20),
+        Golem => (20, 2, 70),
+        SmallGolem => (6, 0, 30),
+        Jaguar => (32, 3, 120),
+        Frog => (18, 2, 60),
+        SmallFrog => (6, 0, 25),
+    }
+}
+
+/// Composition and seconds after a full clear (M-60/M-63).
+pub fn camp_content(kind: crate::types::CampKind) -> (&'static [NeutralKind], u32) {
+    use crate::types::CampKind;
+    use NeutralKind::*;
+    match kind {
+        CampKind::Wolves => (&[WolfAlpha, WolfPup, WolfPup, WolfPup], secs(45)),
+        CampKind::Golems => (&[Golem, SmallGolem, SmallGolem], secs(75)),
+        CampKind::Jaguar => (&[Jaguar], secs(90)),
+        CampKind::Frogs => (&[Frog, SmallFrog, SmallFrog], secs(60)),
+    }
+}
