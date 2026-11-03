@@ -1,10 +1,10 @@
 # P69 — Independent native Android landscape prototype
 
-**Status:** paused by the owner, 2026-11-01. Internal ARM64 versionCode 9
-was built and installed on the POCO; the same-source Linux build and WASM
-check passed. Device acceptance is partial. The reported top blue space and
-phone-independent adaptive layout remain pending. Resume only on owner
-request; see the [execution checkpoint](P69-device-20261101.md#owner-requested-pause-and-github-checkpoint).
+**Status:** resumed by the owner on2026-11-02; native landscape implementation
+and emulator consolidation in progress on`codex/p69-mobile-playable`. See the
+[current continuation](P69-mobile-20261102.md). The2026-11-01 physical-phone
+checkpoint below remains historical, partial device evidence; no current
+physical-phone validation is claimed.
 **Planning branch:** `codex/p69-android-landscape-plan`.
 **Execution branch:** `codex/p69-android-native-prototype`.
 **Reviewed Linux base:** `014b0e0c046b38c551ee24534ee00709cde0e493`
@@ -20,11 +20,13 @@ GitHub PR with verified CI. This instruction supersedes the historical pause,
 source-ownership/P68 exclusion and physical-phone requirement for this round.
 It does not certify ARM64 runtime, physical performance or store readiness.
 
-Selected main: `b964875e2219bafe129b19960f7f1369307870d5`.
+Original selected main: `b964875e2219bafe129b19960f7f1369307870d5`.
+Current integrated main: `177da4a042260bf044cf7f9e323a66fcb89ecfbc`,
+including PR59/60 runtime/auth and PR61 documentation.
 Inherited heads: #57 `43d25a8c4845922f43bd74727f6ae6975351d740`,
 #58 `b61764dbed4d59e0654a8ced9c865ec68be8ab5c`.
 Android checkpoint: `d2a3c6b9d1032133487911f9d88669936bc83bc4`.
-The current shared contract is `w38-r15-cc459351581b7763`.
+The current shared contract is `w40-r16-f2e253b98ccb313a`.
 Architecture §29 / GAME-DESIGN §23 hold P69 after resolving the P75 section
 number collision; P75 planning and proposed rules remain unchanged.
 See [current execution](P69-mobile-20261102.md) for actual evidence.
