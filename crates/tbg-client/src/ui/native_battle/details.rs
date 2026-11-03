@@ -52,7 +52,7 @@ fn toggle(
     }
 }
 
-pub(super) fn spawn(parent: &mut ChildSpawnerCommands, lang: Lang) {
+pub fn spawn(parent: &mut ChildSpawnerCommands, lang: Lang) {
     parent
         .spawn((
             Node {
