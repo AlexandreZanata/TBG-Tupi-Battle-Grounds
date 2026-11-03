@@ -739,7 +739,7 @@
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
       "affected_cases": "Shared MOBA desktop camera capture/edges/focus, personal and Team reward receipts with hidden origins, eight Camps, target commitment, route resumption, crowded Nexus, water/rim pursuit, shared 1v1 gait/attack transitions and 12-unit plaza",
-      "linux": "26 focused core tests and native compile passed; runtime evidence pending",
+      "linux": "28 focused tests; installed 0a7b3f241141 native motion/input recorded at 1600x900, personal/Team receipts observed; complete roster/device comparison pending",
       "windows": "pending",
       "web": "pending",
       "android": "out of scope"

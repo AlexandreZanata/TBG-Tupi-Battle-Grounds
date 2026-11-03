@@ -649,3 +649,122 @@ P78 champion Evolution forms and coverage beyond the automatic base kits ·
 P79 online rooms for real players · P80 presentation polish (sound,
 scoreboard, settings) · P81 Windows and desktop web · P82 balance (only on
 explicit owner request).
+
+
+### M-73–M-75 correction delivery and installed Linux motion (2026-11-03)
+
+**Level:** owner-requested focused consolidation and local Linux installation.
+Worktree `/data/tbg-p77-moba-roles-vision-map`, branch
+`phase/p77-moba-roles-vision-map`. Implementation commits `22827552dd93`
+and `0a7b3f241141`. No push, merge, deployment, full workspace suite,
+balance gate, release build or Windows/WASM build was run.
+
+Implemented camera edge removal with captured left dragging; persistent
+Lane/Jungle missions and cargo mission inheritance; deterministic body-safe
+routes with continuous melee approach, fixed detours, progress/rejection
+rules and soft allied pressure; shared water/crossing/plaza geometry;
+per-death Gold/Essence receipts, personal versus Team HUD notices and
+vision-safe origins; authoritative activity driving shared 1v1 gait/attack
+posture. The plaza radius is Proposed 12 instead of 10 so existing widest
+bodies have a valid crossing. Champion reach remains 3×; economy values,
+neutral retaliation/leash, immediate Nexus spawning and the 1v1 sources
+remain unchanged. Wire v4 carries receipt/activity additions.
+
+**Reproduction and fixes.** The initial 40-case Jungle scenario exposed
+incomplete clears, leash resets and a body contact position missed by a
+coarse route lattice. The final scenario uses Shieldbearer, BoneBrute,
+CargoCrab, Bonehorn and Colossus against all eight Camps, with 20× HP and
+4× basic damage in the fixture only so the assertion concerns navigation
+and attack completion rather than balance. All 40 combinations cause damage
+and clear their Camp within the bound. The first Linux motion run additionally
+exposed pressure pinning small bodies at a route's first seed cell, and
+cargo contents inheriting Static. Removed redundant route corners by swept
+visibility and kept the parent's mission on the immobile crate. Added a
+mixed eight-champion Nexus/cargo regression; the final installed run no
+longer showed that initial cohort accumulated at the Nexus.
+
+**Checks actually run.** All compiling commands used the nonblocking shared
+lock, two Cargo jobs and `/data/tbg-moba-target`; tests used one test thread.
+The final source passed 28 distinct focused tests across these selections
+(repeated affected selections only after relevant fixes):
+
+```bash
+# From this worktree; reuse for every Cargo command below.
+export CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target
+export PKG_CONFIG_PATH=/home/iiii/PESSOAL-PROJETOS-ALEXANDRE/TBG-Tupi-Battle-Grounds/.local/native-deps/root/usr/lib/x86_64-linux-gnu/pkgconfig
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock   cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core   --test navigation --test contract_deployment --test contract_aggro   --test contract_champion_combat -- --test-threads=1
+# The newly added mixed_crowd scenario was rerun alone after its fixture
+# excluded unrelated enemy-wave deaths; it passed. Production code unchanged.
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock   cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core   --test navigation mixed_crowd -- --test-threads=1
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock   cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core   --test contract_champion_range --test rewards -- --test-threads=1
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock   cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core   --test contract_moba m6 -- --test-threads=1
+flock -n -E 75 /tmp/tbg-validation-$(id -u).lock   cargo test --locked --manifest-path moba/Cargo.toml -p tbg-moba-core   --test contract_moba m40 -- --test-threads=1
+```
+
+Final evidence totals: navigation 7 passed; deployment 2; aggro 1;
+champion combat 4; champion range 2; rewards 5; M-60–M-65 selection 6;
+M-40 wire round-trip/hostile frames 1. Reward scenarios include real splash,
+stored lethal poison after source removal, owned summon credit, simultaneous
+source death, all monster Gold/Essence values, ownerless individual kills,
+Tower payment to all five allied Seats, once-only grants and hidden-origin
+redaction. Replay scenarios compare every state hash and encoded Team World
+under competing targets beside water and the rim. Large and small lane
+walkers cross valid geometry and retain their original Lane.
+
+Native client `cargo check --locked --manifest-path moba/Cargo.toml
+-p tbg-moba-client --bin tbg-moba` passed (1.88 s at the first consolidated
+revision). The final installer compiled both client and server with the same
+lock and two jobs: `Finished dev profile ... in 30.44s`, then
+`Installed TBG Arena 5v5 0.1.0-0a7b3f241141 (dev profile)`.
+Package formatting, `git diff --check` and contract JSON parsing passed.
+
+**Installed artifacts.** Menu entry `TBG Arena 5v5`, and both local binary
+links point into `/home/iiii/.local/opt/tbg-moba/0.1.0-0a7b3f241141/`.
+Client SHA-256: `368c53be52ac2898c0d8b820789ce1df0c0ed21c7a5d0f5484c1357d8d82b681`.
+Server SHA-256: `4bbcb46d20d82c85b9b102d1a467c42f73c65fd0b1c104462318b0bed3ffc182`.
+No 1v1 source, root Cargo manifest/lock or archive file was changed by this work.
+
+**Linux motion/input evidence.** Ran the installed binary in an isolated
+native X11/Xvfb session, 1600×900, seed 11, 90-second offline warp, Jungle
+Seat; actual XTest mouse/keyboard input, 20 fps video plus per-frame rig and
+unit telemetry. This is a scoped native Linux observation, not owner device
+sign-off or a complete roster/performance certification. Saved evidence
+outside Git at `/data/tbg-moba-logs/p77-missions-0a7b3f241141/`:
+
+- `linux-motion.mp4` (53.4 s), `input-results.json`, `motion.csv` and
+  `analysis.json`: left/right/top/bottom and two corner holds, release,
+  focus loss/return, drag across the HUD, HUD-origin gesture, minimap,
+  wheel and Space-to-base. Each stationary interval had exactly one
+  camera pose across all its recorded frames (18–26 frames per short
+  hold; 513 in the 30-second fixed-camera observation). Drag capture
+  cleared on release/focus loss; no new press meant no resumed dragging.
+- `jungle-melee.mp4` (18 s), `golems.png`, `golems-{3,9,15}.png`: melee
+  contact/strikes, retargeting between Golems, damage, monster removal and
+  subsequent route resumption. Sawbot and Rootcaller later continued toward
+  the next Camp. Native sequence shows the `+6 Ouro · Pessoal · Selva` notice.
+- `team-notice.png`, extracted at 21.5 s of the first video, shows both
+  `+5 Ouro · Pessoal · Selva` and `+25 Ouro +2 Essência · Equipe · Torre`.
+  Correct recipients and once-only grants are established by core tests;
+  the screenshot demonstrates their distinct HUD presentation.
+- The sampled motion analysis contains 74,388 champion-frame records,
+  including 8,807 Attack records with displacement and **zero Attack/Walk
+  records**. Facing stayed within the existing shared 4π rad/s turn limit
+  (log rounding gives a measured maximum 12.569 rad/s). This supports the
+  pressure/stance fix in the observed scenes; it does not certify absence
+  of every possible roster animation issue. The evidence contains changing
+  frames and telemetry, not just a static screenshot.
+- `manifest.json`, `final-tests.log`, `client.log` and input scripts record
+  identity and reproduction. Runtime emitted only the Xvfb XSETTINGS/display
+  size warnings, with no panic. Test windows/processes created here were closed.
+
+**Deferred, not passes.** Windows and desktop web matching pixel/motion
+captures for the P77 L cases; full Linux roster motion and owner look/fun
+sign-off; online two-client receipt/camera/vision journey. The exact queued
+scenarios are stationary edge/capture/focus, visible and hidden-origin
+personal/team receipts, eight Camps with both body sizes, mixed Nexus
+crowding, water/rim pursuits and post-combat mission continuation. A scoped
+WASM compile remains `flock -n -E 75 /tmp/tbg-validation-$(id -u).lock env
+CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target cargo check --locked
+--manifest-path moba/Cargo.toml -p tbg-moba-client --bin tbg-moba --target
+wasm32-unknown-unknown`; run at cross-platform consolidation, not as evidence
+of visual correspondence. No full-suite or release-readiness claim is made.

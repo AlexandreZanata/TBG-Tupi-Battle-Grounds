@@ -1448,6 +1448,7 @@ bridge cannot fit them. Include moving sequences for all eight Camps,
 competing targets, post-kill mission resumption, Nexus crowds, bank/rim
 pursuit, personal/team receipts and every camera capture transition.
 
-Core focused validation passed; Linux runtime evidence is recorded in the
-P77 report after installation. Windows and desktop web motion/pixel
+28 focused tests passed. Installed Linux revision `0a7b3f241141` has
+recorded moving camera/capture, melee Golem combat, personal/Team receipts
+and crowd/stance evidence at 1600×900; see the P77 report. Windows and desktop web motion/pixel
 comparison remain pending. Shared code and compilation do not prove parity.
