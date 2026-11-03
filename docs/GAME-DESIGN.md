@@ -134,8 +134,8 @@ GLOSSARY · S5 legacy unit schema (all under `archive/docs/` or
 | BR-C02 | Persistent cosmetics are bound to an account `Inventory` | Confirmed | S1 |
 | BR-C03 | Store purchases are granted only after server-side receipt validation | Adapted | S1, S2 |
 | BR-C04 | `StrongholdStyle`s are free cosmetics; every style has identical gameplay (styles stay cosmetic; mechanical `StrongholdKind`s are separate, BR-SK01–SK09, D-46) | Proposed | — |
-| BR-P01 | An `Account` is a unique `PlayerName` plus an `AccountKey`; names are 3–16 letters, digits or `_`, start with a letter, are unique ignoring case, and never change | Proposed | — |
-| BR-P02 | The `AccountKey` is the long-lived manual credential: shown once at creation, never shown to other players, not recoverable on this base. P68-A delegates runtime authentication to expiring tokens (§21) without changing existing keys | Proposed (P11/P68-A) | — |
+| BR-P01 | An `Account` is a unique `PlayerName` plus an `AccountKey`; P75 requires a private email for new accounts, while existing accounts keep playing; names are 3–16 letters, digits or `_`, start with a letter, are unique ignoring case, and never change | Proposed | — |
+| BR-P02 | The `AccountKey` is the long-lived manual credential: shown once at creation or in-place recovery, never shown to other players; P75 recovery requires the verified RecoveryEmail (§22). P68-A delegates runtime authentication to expiring tokens (§21) without changing existing keys | Proposed (P11/P68-A) | — |
 | BR-P03 | One active account controller; explicit login/takeover can replace the old controller, including its match. P68-A allows separate persistent device families, but passive refresh/startup never takes over automatically (§21) | Proposed (P11/P68-A) | — |
 | BR-P04 | Guests may play practice, casual matches, and private rooms; ranked play needs an account | Proposed | — |
 | BR-P05 | A public profile shows name, rating, rank, record, win rate and faction mix. P73 makes the last 10 ranked results and detailed history subject to the account's Public/Only me choice (BR-AP11); private history exposes no recent rows. P68-A additionally stores minimal private session-security metadata (§21), never exposing tokens/device identifiers on public profiles | Proposed (P11/P68-A/P73) | — |
@@ -2680,3 +2680,45 @@ Proposed prototype configuration and validation inputs, not combat values:
 No competitive balance number, Rating rule, seed, simulation fixture or
 headless trace is changed by this phase. Differences between Linux Practice
 preview and online CANON are preserved rather than unified for Android.
+
+## AX-T — Proposed cumulative War Auxiliary tiers (owner request, 2026-11-02)
+
+The owner asked for much stronger, more expensive War Auxiliaries with three
+cumulative tiers, the third being the most expensive and most rewarding. These
+rules supersede the single-hire costs and payouts of BR-AX03–BR-AX05,
+BR-AX07, BR-AX08 and BR-AX10; slots, authority, Interest isolation, free-reroll
+streak preservation and public visibility (BR-AX01, BR-AX02, BR-AX06, BR-AX09,
+BR-AX11) are unchanged. All values are **Proposed** and still need
+`tbg-balance` evidence (D-33) before competitive acceptance.
+
+- **BR-AX12 (Tiers, Proposed):** Each slot has a tier `0..=3` (`0` = not
+  hired), carried in `AuxiliarySlotView.tier` (wire 40, R16). The same
+  `PlayerIntention::HireAuxiliary { slot }` hires at tier 1 and then evolves one
+  tier per accepted intention; a fourth attempt returns
+  `Rejection::AuxiliaryAlreadyHired`. Each step pays only its own price:
+
+  | Auxiliary | Tier 1 (hire) | Tier 2 | Tier 3 | Total |
+  |-----------|---------------|--------|--------|-------|
+  | `Mineiro` | 8 `Energy` | 14 `Energy` | 22 `Energy` | 44 `Energy` |
+  | `Mercador` | 6 `Energy` | 10 `Energy` | 16 `Energy` | 32 `Energy` |
+
+- **BR-AX13 (Evolution timing, Proposed):** Evolving a `Mineiro` that is still
+  `Preparing` keeps the build countdown; otherwise it restarts a full `180 s`
+  `Active` window at the new rate (also from `Completed`). Evolving a
+  `Mercador` keeps its purchase progress and activation history; a `Completed`
+  `Mercador` reopens with the activations it already used.
+- **BR-AX14 (Cumulative bonuses, Proposed):** Each tier keeps everything below
+  it and adds more:
+
+  | Tier | `Mineiro` `Energy`/s (180 s window) | `Mercador` purchases per activation | Free rerolls per activation | `Energy` per activation | Activation cap per match |
+  |------|------|---|---|---|----|
+  | 1 | +0.15 (27 gross) | 3 | 1 | 0 | 4 |
+  | 2 | +0.30 (54 gross) | 2 | 1 | +1 | 8 |
+  | 3 | +0.50 (90 gross) | 2 | 2 | +2 | 12 |
+
+  `Mineiro` output stays exact integer sub-energy (`90`/`180`/`300` per second)
+  and is never multiplied by Interest (BR-AX06).
+- **BR-AX15 (Presentation, Proposed):** Precincts grow visibly with every tier
+  and never touch the BattleLine road or any existing static Arena scenery; a
+  pad over the water is reached by a wooden plank bridge. This is presentation
+  only and changes no rule.

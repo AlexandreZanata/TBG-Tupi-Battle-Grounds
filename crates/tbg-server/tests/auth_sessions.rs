@@ -1,5 +1,8 @@
 //! D-97/BR-AS02–03/10: hash-only atomic refresh history preserves ranked accounts.
 
+#[path = "common/schema.rs"]
+mod schema_fixture;
+
 use std::sync::atomic::{AtomicU64, Ordering};
 use tbg_server::store::{auth_sessions::*, Store};
 
@@ -171,17 +174,18 @@ async fn br_as11_v8_upgrade_and_repeat_preserve_existing_accounts_and_ranked_bas
     let p = path();
     let store = Store::open(&p).unwrap();
     store.register("Existing".into(), [9; 32]).await.unwrap();
-    let db = rusqlite::Connection::open(&p).unwrap();
-    db.execute_batch("PRAGMA foreign_keys=ON; DROP TABLE auth_refresh_tokens; DROP TABLE auth_sessions; DELETE FROM schema_version WHERE version IN (9,10);").unwrap();
-    drop(db);
     drop(store);
+    let db = rusqlite::Connection::open(&p).unwrap();
+    schema_fixture::remove_p75(&db);
+    db.execute_batch("PRAGMA foreign_keys=ON; DROP TABLE auth_refresh_tokens; DROP TABLE auth_sessions; DROP TABLE account_owner; DROP TABLE release_audit; DROP TABLE release_slots; DELETE FROM schema_version WHERE version IN (9,10);").unwrap();
+    drop(db);
     let upgraded = Store::open(&p).unwrap();
     assert!(upgraded.login("existing".into(), [9; 32]).await.is_ok());
     let db = rusqlite::Connection::open(&p).unwrap();
     let version: i64 = db
         .query_row("SELECT MAX(version) FROM schema_version", [], |r| r.get(0))
         .unwrap();
-    assert_eq!(version, 10);
+    assert_eq!(version, tbg_server::store::DATABASE_SCHEMA_VERSION);
     let baseline: i64 = db
         .query_row("SELECT COUNT(*) FROM ranked_baseline", [], |r| r.get(0))
         .unwrap();

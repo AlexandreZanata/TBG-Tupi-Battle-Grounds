@@ -49,6 +49,9 @@ pub fn mouse_and_keys(
         ResMut<bevy::audio::GlobalVolume>,
     ),
 ) {
+    if crate::ui::p75::captured() {
+        return;
+    }
     #[cfg(target_os = "android")]
     if pointer.consumed
         || super::super::auth_ui::blocks_menu(*state.get())

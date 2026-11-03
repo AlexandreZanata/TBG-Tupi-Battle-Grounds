@@ -1,0 +1,14 @@
+[Unit]
+Description=TBG attended backup prerequisite
+
+[Service]
+Type=oneshot
+User=tbg
+Group=tbg
+UMask=0077
+EnvironmentFile=-/etc/default/tbg-backup
+ExecStart=/opt/tbg/deploy/backup.sh
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/backups/tbg /var/lib/tbg

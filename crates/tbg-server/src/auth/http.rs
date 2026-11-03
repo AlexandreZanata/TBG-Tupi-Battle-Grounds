@@ -23,6 +23,9 @@ struct Login {
 #[serde(deny_unknown_fields)]
 struct Register {
     name: String,
+    #[serde(default)]
+    email: String,
+    locale: String,
     device_id: String,
     persistent: bool,
     registration_retry_key: String,
@@ -52,8 +55,27 @@ struct Recovery {
     account_key: String,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RecoveryRequest {
+    name: String,
+    email: String,
+    locale: String,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Recover {
+    name: String,
+    code: String,
+    device_id: String,
+    persistent: bool,
+    registration_retry_key: String,
+}
+
 enum Output {
+    Accepted,
     Grant(Grant),
+    Recovered(Grant),
     Confirmed(FamilyId),
     LoggedOut { clear_cookie: bool },
 }
@@ -182,6 +204,26 @@ async fn execute(
     ip: IpAddr,
 ) -> Result<Output, Error> {
     match operation {
+        "recovery-request" => {
+            let i: RecoveryRequest = parse(body)?;
+            auth.recovery_request(i.name, i.email, i.locale, ip).await;
+            Ok(Output::Accepted)
+        }
+        "recover" => {
+            let i: Recover = parse(body)?;
+            Ok(Output::Recovered(
+                auth.recover(
+                    i.name,
+                    i.code,
+                    &i.device_id,
+                    i.persistent,
+                    &i.registration_retry_key,
+                    channel,
+                    ip,
+                )
+                .await?,
+            ))
+        }
         "login" => {
             let input: Login = parse(body)?;
             Ok(Output::Grant(
@@ -200,6 +242,8 @@ async fn execute(
             Ok(Output::Grant(
                 auth.register(
                     input.name,
+                    input.email,
+                    input.locale,
                     &input.device_id,
                     input.persistent,
                     &input.registration_retry_key,
@@ -267,14 +311,18 @@ fn credential(
 }
 
 fn render(output: Output, channel: Channel, now: i64) -> Result<Response, Error> {
+    let recovered = matches!(&output, Output::Recovered(_));
     match output {
-        Output::Grant(grant) => {
+        Output::Accepted => Ok((StatusCode::ACCEPTED, Json(json!({"ok":true}))).into_response()),
+        Output::Grant(grant) | Output::Recovered(grant) => {
             if now >= grant.expires_at || now >= grant.family.expires_at {
                 return Err(Error::Unauthorized);
             }
             let mut value = json!({"access_token":grant.access,"access_expires_at":grant.expires_at,"session_expires_at":grant.family.expires_at,"session_id":tokens::hex(&grant.family.id),"server_time":now,"profile":grant.profile,"persistent":grant.persistent});
             if let Some(key) = grant.account_key {
                 value["account_key"] = Value::String(key);
+                value["email_state"] =
+                    Value::String(if recovered { "verified" } else { "unverified" }.into());
             }
             if channel == Channel::Native {
                 value["refresh_token"] = Value::String(grant.refresh.clone());
@@ -320,7 +368,21 @@ fn set_cookie(response: &mut Response, cookie: String) -> Result<(), Error> {
 }
 
 fn failure(error: Error) -> Response {
+    if let Error::Suspended { until, reason } = error {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(json!({"error":"account_suspended","until":until,"reason":reason.as_str()})),
+        )
+            .into_response();
+    }
     let (status, code) = match error {
+        Error::Suspended { .. } => (StatusCode::FORBIDDEN, "account_suspended"),
+        Error::CodeInvalid => (StatusCode::UNAUTHORIZED, "code_invalid"),
+        Error::RegistrationClosed => (StatusCode::SERVICE_UNAVAILABLE, "registration_closed"),
+        Error::EmailLimit => (StatusCode::CONFLICT, "email_limit"),
+        Error::EmailBlocked => (StatusCode::FORBIDDEN, "email_blocked"),
+        Error::EmailInvalid => (StatusCode::BAD_REQUEST, "email_invalid"),
+        Error::EmailRequired => (StatusCode::BAD_REQUEST, "email_required"),
         Error::Unauthorized => (StatusCode::UNAUTHORIZED, "auth_required"),
         Error::Forbidden => (StatusCode::FORBIDDEN, "forbidden"),
         Error::BadRequest => (StatusCode::BAD_REQUEST, "bad_request"),
@@ -374,4 +436,21 @@ pub(crate) fn history_binding(
     slot_matches(headers, app.release.slot())?;
     let raw = bearer(headers)?.ok_or(Error::Unauthorized)?;
     app.auth.authenticate(tokens::decode::<32>(&raw)?)
+}
+
+/// CE-01 changes only the permitted media type; the exact Origin, custom header, cookie and slot fences stay identical.
+pub(crate) fn image_binding(app: &AppState, headers: &HeaderMap) -> Result<super::Binding, Error> {
+    if headers.get_all("content-type").iter().count() != 1
+        || !headers
+            .get("content-type")
+            .is_some_and(|v| matches!(v.to_str(), Ok("image/png" | "image/gif" | "image/webp")))
+    {
+        return Err(Error::BadRequest);
+    }
+    let mut envelope = headers.clone();
+    envelope.insert(
+        "content-type",
+        axum::http::HeaderValue::from_static("application/json"),
+    );
+    history_binding(app, &envelope)
 }

@@ -158,7 +158,13 @@ async fn actual_two_slot_loopback_snapshots_share_counts_and_protect_the_interna
         ("b", "FixtureSlotB", ports[1]),
     ] {
         let base = format!("ws://127.0.0.1:{port}");
-        let (_,v)=native_auth::post(&base,"register",serde_json::json!({"name":name,"device_id":native_auth::random_hex(16).unwrap(),"persistent":false,"registration_retry_key":native_auth::random_hex(32).unwrap()}),None).await.unwrap();
+        let (status,v)=native_auth::post(&base,"register",serde_json::json!({"name":name,"email":format!("{name}@example.invalid"),"locale":"en","device_id":native_auth::random_hex(16).unwrap(),"persistent":false,"registration_retry_key":native_auth::random_hex(32).unwrap()}),None).await.unwrap();
+        assert_eq!(
+            status,
+            200,
+            "synthetic registration failed: {:?}",
+            v.get("error")
+        );
         let grant = native_auth::parse(&v).unwrap();
         let mut ws = tokio_tungstenite::connect_async(format!("{base}/ws/slot-{slot}"))
             .await

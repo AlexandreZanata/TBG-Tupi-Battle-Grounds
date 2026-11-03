@@ -4,17 +4,22 @@ export async function historyRequest(raw, callback) {
   const timeout = setTimeout(() => controller.abort(), 2000);
   try {
     const q = JSON.parse(raw), url = new URL(q.url);
-    if (url.origin !== location.origin || !/^\/api\/(me|players)\//.test(url.pathname)) throw Error();
-    const headers = {'Content-Type':'application/json','X-TBG-Auth':'1','Cache-Control':'no-store'};
+    const path=url.pathname, method=q.method;
+    const read=method==='GET' && (/^\/api\/(me|players|emoji)\//.test(path));
+    const post=method==='POST' && ['/api/me/email','/api/me/email/verify','/api/me/email/resend','/api/me/email/change/confirm','/api/me/email/change/cancel','/api/me/reports','/api/me/emoji','/api/auth/browser/recovery-request'].includes(path);
+    const change=(method==='PATCH'&&path==='/api/me/preferences/history')||(method==='PUT'&&path==='/api/me/emoji/slots')||(method==='DELETE'&&/^\/api\/me\/emoji\/\d+$/.test(path));
+    if (url.origin !== location.origin || !(read||post||change)) throw Error();
+    if(q.bytes && (!Array.isArray(q.bytes)||q.bytes.length>1048576||q.bytes.some(v=>!Number.isInteger(v)||v<0||v>255)))throw Error();
+    const headers = {'Content-Type':q.mime||'application/json','X-TBG-Auth':'1','Cache-Control':'no-store'};
     if (q.access) headers.Authorization = `Bearer ${q.access}`;
     if (q.slot) headers['X-TBG-Slot'] = q.slot;
     if (q.revision !== null) headers['If-Match'] = `"${q.revision}"`;
-    const response = await fetch(url, {method:q.method, headers, body:q.body === null ? undefined : JSON.stringify(q.body), credentials:'omit', cache:'no-store', redirect:'error', signal:controller.signal});
+    const response = await fetch(url, {method:q.method, headers, body:q.bytes ? new Uint8Array(q.bytes) : q.body === null ? undefined : JSON.stringify(q.body), credentials:'omit', cache:'no-store', redirect:'error', signal:controller.signal});
     const reader = response.body.getReader(), parts = []; let size = 0;
     while (true) { const {done,value} = await reader.read(); if (done) break; size += value.byteLength; if (size > 262144) { await reader.cancel(); throw Error(); } parts.push(value); }
     const data = new Uint8Array(size); let at = 0;
     for (const part of parts) { data.set(part,at); at += part.byteLength; }
-    callback(JSON.stringify({status:response.status,value:JSON.parse(new TextDecoder().decode(data))}));
+    callback(JSON.stringify({status:response.status,value:q.sheet?null:JSON.parse(new TextDecoder().decode(data)),bytes:q.sheet?[...data]:null}));
   } catch { callback('{}'); }
   finally { clearTimeout(timeout); }
 }

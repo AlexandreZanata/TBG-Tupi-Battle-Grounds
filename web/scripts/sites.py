@@ -26,6 +26,7 @@ class Site:
 SITES = {
     "landing": Site("landing", REPO / "web/landing"),
     "admin-public": Site("admin-public", REPO / "web/admin/public"),
+    "admin-app": Site("admin-app", REPO / "web/admin/app"),
     "admin-preview": Site("admin-preview", REPO / "web/admin/app", local_only=True),
 }
 

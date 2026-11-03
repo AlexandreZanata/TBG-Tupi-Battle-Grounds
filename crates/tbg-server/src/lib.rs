@@ -15,23 +15,31 @@ use axum::{Json, Router};
 use tokio::net::TcpListener;
 use tokio::sync::{mpsc, watch};
 
+pub mod admin;
 mod api;
 pub mod auth;
 pub mod botclient;
 pub mod build_info;
 mod chan;
 pub mod config;
+pub mod emoji;
+pub mod identity;
 mod limits;
 pub mod live;
 mod lobby;
+pub mod mail;
 mod match_task;
 pub mod metrics;
+pub mod moderation;
 mod names;
+pub mod operator_cli;
 mod patch_notes;
 pub mod player_history;
 pub mod presence;
 pub mod ranked;
 pub mod release;
+mod reports;
+pub mod social;
 pub mod stats;
 pub mod store;
 mod version;
@@ -43,6 +51,9 @@ use metrics::Metrics;
 /// Shared by every request handler.
 #[derive(Clone)]
 pub(crate) struct AppState {
+    pub emoji_work: Arc<tokio::sync::Semaphore>,
+    pub emoji_cache: Arc<emoji::cache::Cache>,
+    pub mail_configured: bool,
     pub auth: Arc<auth::Service>,
     pub history_reads: Arc<tokio::sync::Semaphore>,
     pub lobby: mpsc::Sender<chan::LobbyCmd>,
@@ -63,6 +74,7 @@ pub(crate) struct AppState {
 /// Handles the binary keeps to drive graceful shutdown.
 #[derive(Clone, Default)]
 pub struct Shared {
+    pub admin_address: Arc<OnceLock<SocketAddr>>,
     pub metrics: Arc<Metrics>,
     /// P66: set by `run_with`; the shutdown drain reads its gate and load.
     pub release: Arc<OnceLock<Arc<release::Runtime>>>,
@@ -97,6 +109,35 @@ pub async fn run_with(
     // deploy check never passes a server that runs without its records.
     let store_failed = config.db.is_some() && store.is_none();
     let config = Arc::new(config);
+    let mut mail_configured = false;
+    if let Some(store) = &store {
+        let transport = config
+            .mail_capture
+            .clone()
+            .map(mail::transport::Transport::Capture)
+            .or_else(|| {
+                config
+                    .mail
+                    .load()
+                    .and_then(|c| mail::transport::Transport::smtp(&config.mail, c))
+            });
+        if let Some(transport) = transport {
+            mail_configured = true;
+            mail::dispatch::start(
+                store.clone(),
+                Arc::new(transport),
+                config.mail.clone(),
+                format!(
+                    "{}:{}",
+                    config.slot.as_deref().unwrap_or("single"),
+                    std::process::id()
+                ),
+                config.auth_clock.clone(),
+                metrics.clone(),
+            );
+        }
+    }
+
     let release = shared
         .release
         .get_or_init(|| release::Runtime::new(&config))
@@ -124,7 +165,36 @@ pub async fn run_with(
         config.auth_clock.clone(),
         config.clone(),
     ));
+    if let Some(store) = &store {
+        if config.admin.enabled {
+            let now = auth.now().map_err(|_| std::io::Error::other("clock"))?;
+            store
+                .release(move |db| store::operators::sessions::restart(db, now))
+                .await
+                .ok_or_else(|| std::io::Error::other("operator store unavailable"))?
+                .map_err(|_| std::io::Error::other("operator restart refused"))?;
+        }
+        if !config.bootstrap_email.0.is_empty() {
+            let address = config.bootstrap_email.0.clone();
+            let now = auth.now().map_err(|_| std::io::Error::other("clock"))?;
+            store
+                .release(move |db| store::operators::bootstrap(db, &address, now))
+                .await
+                .ok_or_else(|| std::io::Error::other("operator store unavailable"))?
+                .map_err(|_| std::io::Error::other("operator bootstrap refused"))?;
+        }
+    }
     auth::Service::start(&auth);
+    if let Some(store) = &store {
+        moderation::feed::start(
+            store.clone(),
+            config.clone(),
+            lobby_tx.clone(),
+            auth.clone(),
+        )
+        .await
+        .map_err(std::io::Error::other)?;
+    }
     // P47: the lobby publishes the live snapshot; the API only reads it.
     let (live_tx, live_rx) = watch::channel(Arc::default());
     tokio::spawn(lobby::run(
@@ -137,6 +207,9 @@ pub async fn run_with(
         live_tx,
     ));
     let state = AppState {
+        emoji_work: Arc::new(tokio::sync::Semaphore::new(2)),
+        emoji_cache: Arc::default(),
+        mail_configured,
         history_reads: Arc::new(tokio::sync::Semaphore::new(4)),
         auth,
         lobby: lobby_tx,
@@ -150,7 +223,34 @@ pub async fn run_with(
         local_live: live_rx,
         release,
     };
+    let _admin = admin::listener::start(state.clone(), &shared.admin_address).await?;
     let mut app = Router::new()
+        .route(
+            "/api/me/emoji",
+            get(emoji::upload::handler)
+                .post(emoji::upload::handler)
+                .layer(DefaultBodyLimit::max(1048576)),
+        )
+        .route(
+            "/api/me/emoji/slots",
+            axum::routing::put(emoji::upload::handler),
+        )
+        .route(
+            "/api/me/emoji/{id}",
+            axum::routing::delete(emoji::upload::handler),
+        )
+        .route("/api/me/emoji/{id}/sheet.png", get(emoji::upload::handler))
+        .route("/api/emoji/{asset}", get(emoji::serve::handler))
+        .route("/api/me/reports", post(reports::handler))
+        .route("/api/me/account", get(identity::http::handler))
+        .route("/api/me/email", post(identity::http::handler))
+        .route("/api/me/email/verify", post(identity::http::handler))
+        .route("/api/me/email/resend", post(identity::http::handler))
+        .route(
+            "/api/me/email/change/confirm",
+            post(identity::http::handler),
+        )
+        .route("/api/me/email/change/cancel", post(identity::http::handler))
         .route(
             "/api/auth/{channel}/{operation}",
             post(auth::http::handler).layer(DefaultBodyLimit::max(4096)),

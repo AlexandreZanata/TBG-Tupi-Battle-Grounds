@@ -242,6 +242,8 @@ pub struct PlayerState {
     /// P74 (BR-AX01–BR-AX10): War Auxiliaries state and accumulated Merchant free rerolls.
     pub auxiliaries: [crate::auxiliary::AuxiliaryPhase; crate::auxiliary::AUXILIARY_SLOTS],
     pub free_rerolls: u8,
+    /// BR-AX12: War Auxiliary tier per slot (`0` = not hired).
+    pub auxiliary_tiers: [u8; crate::auxiliary::AUXILIARY_SLOTS],
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

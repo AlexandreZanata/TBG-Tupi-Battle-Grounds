@@ -35,7 +35,14 @@ pub(super) fn run() -> Result<serde_json::Value, Failure> {
     let current = Arc::new(AtomicU64::new(1));
     let mut work = Work {
         origin: origin.clone(),
-        operation: Operation::Register(format!("P68{}", native_store::nonce(6)?)),
+        operation: Operation::Register(
+            json!({
+                "name": format!("P68{}", native_store::nonce(6)?),
+                "email": "synthetic-native@example.invalid",
+                "locale": "en"
+            })
+            .to_string(),
+        ),
         remember: true,
         refresh: None,
         family: None,

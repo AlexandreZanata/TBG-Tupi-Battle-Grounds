@@ -13,7 +13,7 @@ pub(super) fn issue(
     ttl: i64,
 ) -> Result<String, Error> {
     tx.execute(
-        "DELETE FROM recovery_challenges WHERE expires<=?1 OR consumed=1",
+        "DELETE FROM recovery_challenges WHERE expires_unix<=?1 OR consumed=1",
         [now],
     )?;
     // SQLite COUNT is an i64; rusqlite 0.41 has no usize decoding.
@@ -24,8 +24,8 @@ pub(super) fn issue(
     let token = random_hex()?;
     let expires = now.checked_add(ttl).ok_or(Error::Unavailable)?;
     tx.execute(
-        "INSERT INTO recovery_challenges(digest,account_id,purpose,email,epoch,expires)
-         SELECT ?1,account_id,?3,?4,epoch,?5 FROM recovery_identity WHERE account_id=?2",
+        "INSERT INTO recovery_challenges(digest,account_id,purpose,email,epoch,expires_unix)
+         SELECT ?1,account_id,?3,?4,epoch,?5 FROM recovery_identity WHERE account_id=?2 ON CONFLICT(account_id,purpose) DO UPDATE SET digest=?1,email=?4,epoch=excluded.epoch,expires_unix=?5,consumed=0,attempts=0",
         params![
             digest(token.as_bytes()).as_slice(),
             account,
@@ -49,7 +49,7 @@ pub(super) fn challenge(
     tx.query_row(
         "SELECT c.account_id,c.email,c.epoch FROM recovery_challenges c
          JOIN recovery_identity i ON c.account_id=i.account_id
-         WHERE c.digest=?1 AND c.purpose=?2 AND c.consumed=0 AND c.expires>?3
+         WHERE c.digest=?1 AND c.purpose=?2 AND c.consumed=0 AND c.expires_unix>?3
          AND c.epoch=i.epoch AND i.compromised=0
          AND (c.purpose='verify' OR c.email=i.verified_email)",
         params![digest(token.as_bytes()).as_slice(), purpose, now],

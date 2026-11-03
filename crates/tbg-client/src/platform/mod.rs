@@ -161,3 +161,5 @@ pub fn export_recovery_key(name: &str, key: &str) -> bool {
     let request = serde_json::json!({"epoch":crate::auth::epoch(), "name":name, "key":key});
     android::services::send(jni::jni_str!("exportRecoveryKey"), &request.to_string())
 }
+
+pub mod file_pick;

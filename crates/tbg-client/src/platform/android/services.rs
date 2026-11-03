@@ -36,6 +36,25 @@ pub fn flag(name: &JNIStr) -> bool {
     })
     .unwrap_or(false)
 }
+pub fn bytes(name: &JNIStr, limit: usize) -> Option<Vec<u8>> {
+    with_activity(|env, activity| {
+        let object = env
+            .call_method(activity, name, jni::jni_sig!("()[B"), &[])?
+            .l()?;
+        if object.is_null() {
+            return Ok(None);
+        }
+        let array: jni::objects::JByteArray = env.cast_local(object)?;
+        let len = array.len(env)?;
+        if len > limit {
+            return Ok(None);
+        }
+        let mut bytes = vec![0i8; len];
+        array.get_region(env, 0, &mut bytes)?;
+        Ok(Some(bytes.into_iter().map(|b| b as u8).collect()))
+    })
+    .flatten()
+}
 pub fn send(name: &JNIStr, value: &str) -> bool {
     with_activity(|env, activity| {
         let text = env.new_string(value)?;

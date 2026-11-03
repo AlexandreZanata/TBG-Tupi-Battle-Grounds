@@ -165,9 +165,12 @@ pub fn play(m: &Matchup, seed: u64, swapped: bool) -> MatchResult {
                         side.spent += u64::from(m.rules.fortify_cost[tier]);
                     }
                     PlayerIntention::HireAuxiliary { slot } => {
-                        if let Some(kind) = tbg_core::AuxiliaryKind::from_slot(slot) {
-                            side.spent += u64::from(m.rules.auxiliary.cost_of(kind));
-                        }
+                        let tier = view.auxiliaries[seat.index()]
+                            .get(usize::from(slot))
+                            .map_or(0, |v| v.tier);
+                        let cost = tbg_core::AuxiliaryKind::from_slot(slot)
+                            .and_then(|kind| m.rules.auxiliary.cost_of(kind, tier + 1));
+                        side.spent += u64::from(cost.unwrap_or(0));
                     }
                     PlayerIntention::Reserve { .. }
                     | PlayerIntention::Release { .. }

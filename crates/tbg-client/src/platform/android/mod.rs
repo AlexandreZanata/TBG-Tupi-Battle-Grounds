@@ -53,6 +53,8 @@ pub fn persistent_preference(key: &str) -> bool {
             | "tbg_reduced_motion"
             | "video.low"
             | "practice.difficulty"
+            | "p75_chat_off"
+            | "p75_chat_emoji"
     )
 }
 

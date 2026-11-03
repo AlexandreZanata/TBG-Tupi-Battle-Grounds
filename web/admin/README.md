@@ -1,53 +1,9 @@
-# Admin foundation
+# P75 operator console
 
-There is no server-side administrative authorization yet
-([contract](../../docs/planning/WEB-ADMIN-AUTH-CONTRACT.md)). This folder therefore holds two
-separate things:
+`app/` is the real operator console. `public/` remains the no-script fallback. The `admin-app` site may be staged for the attended P75 rollout; the automatic static package continues to include `admin-public` only. Staging does not activate the console.
 
-| Folder | Status | Where it may run |
-|--------|--------|------------------|
-| `public/` | **Implemented.** Static bilingual "in preparation" page; no script, form, data or API. | `admin.tupibg.com` (via `web/deploy`) |
-| `app/` | **Demonstration.** Console shell for review: navigation, pages, components, states. | `127.0.0.1` only; `stage.py` refuses it |
+The app uses `/admin-api/v1/*` on the same origin, HttpOnly host-only sessions, a CSRF header for every mutation, reasoned actions and text-only DOM construction. Pages cover claim/recovery, sign-in with emailed code, accounts, reports, every emoji frame, terms, switches, email blocks, operators, audit and system. The server enforces the capability matrix even for direct API calls. There are no rating, history or player-key editing tools.
 
-`check.py` fails if `public/` ever ships a script, JSON, form, input or fetch.
+Run `python3 web/scripts/check.py` for static references, i18n parity, JS syntax, text-only rendering and the CSRF source gate. A local static preview can use `python3 web/scripts/serve.py admin-app --port 8603`; authenticated QA additionally requires a local same-origin proxy to the synthetic capture-backed admin listener. Never point a preview at a live operator API. See [operations](../../docs/planning/P75-OPERATIONS.md) for the attended activation and exact CSP.
 
-## Preview
-
-```bash
-python3 web/scripts/serve.py admin-preview --port 8603 --public-status https://api.tupibg.com
-```
-
-Without `--public-status` the overview shows the public-status card as disabled.
-
-## Structure of `app/`
-
-| Path | Responsibility |
-|------|----------------|
-| `assets/js/main.js`, `shell.js`, `router.js` | Frame (sidebar, top bar, preview banner), hash routes, loading/error/not-found |
-| `assets/js/pages/*.js` | Overview, Champions, Arenas, Matches and players, Updates, Settings |
-| `assets/js/ui/*.js` | Reusable pieces: states, cards/panels with data-source badges, table, filter bar, gated actions, form fields, confirmation dialog |
-| `assets/js/api/http.js` | Same-origin GET with timeout and size limit; never sends credentials |
-| `assets/js/api/public-status.js` | Read-only `/health` and `/api/version` (public routes, not admin access) |
-| `assets/js/api/admin.js` | Boundary for future admin endpoints: `ADMIN_AVAILABLE = false`, every request throws |
-| `assets/js/data/content.js` | Repository snapshots (champions, Arenas, patch catalog), read-only |
-| `assets/js/data/fixtures.js` | **Fictional** matches/players/activity (`Demo…`, `DEMO-…`) for layout only |
-| `assets/js/strings.js`, `i18n.js` | pt-BR/English interface strings |
-
-Every panel names its data source (repository, demonstration, public status). Action
-buttons stay focusable but explain why they are unavailable; the confirmation dialog can
-never enable its confirm button while `ADMIN_AVAILABLE` is false. No login, password, token
-or secret exists anywhere in this code, and nothing reaches production except the two public
-status reads through the local preview proxy.
-
-## Planned extensions (documented, not implemented)
-
-| Area | Intended scope | Depends on |
-|------|----------------|-----------|
-| Content | News/notice drafts, preview, publish/withdraw with review | `content.*` capabilities, audit |
-| Balance | Read balance-lab reports and proposals; values change only via D-33 evidence and a reviewed PR | `balance.view`; never a write path |
-| Moderation | Reports and reversible community restrictions with reasons | `moderation.*`, audit; ranked corrections stay the D-89 CLI |
-| Permissions | Named operators and grants | Host maintenance CLI only |
-| Audit | Read-only trail of operator actions | `audit.read` |
-
-Turning any area on means implementing its server routes under the contract, then replacing
-the matching fixture or gated action behind `api/admin.js`.
+Real capture-backed browser sign-in and the owner's subjective sign-off are recorded separately in the phase report; source checks are not runtime evidence.

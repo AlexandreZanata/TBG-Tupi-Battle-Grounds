@@ -88,6 +88,7 @@ impl MatchState {
                 auxiliaries: [crate::auxiliary::AuxiliaryPhase::Available;
                     crate::auxiliary::AUXILIARY_SLOTS],
                 free_rerolls: 0,
+                auxiliary_tiers: [0; crate::auxiliary::AUXILIARY_SLOTS],
             }
         };
         let first_round = if rules.augment.round_ticks == 0 {

@@ -18,6 +18,7 @@ class MainActivity : GameActivity() {
     private val services by lazy { PlatformServices(this) }
     private val textInput by lazy { NativeTextInput(this) }
     private val recoveryExport by lazy { RecoveryExport(this) }
+    private val imagePicker by lazy { ImagePicker(this) }
     @Volatile private var viewport = "{}"
     @Volatile private var battleViewport = false
     @Volatile private var resumed = false
@@ -75,12 +76,14 @@ class MainActivity : GameActivity() {
     override fun onDestroy() {
         textInput.dismiss()
         recoveryExport.clear()
+        imagePicker.clear()
         super.onDestroy()
     }
 
     @Deprecated("Android result callback retained for the explicit document picker")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
-        if (!recoveryExport.result(requestCode, resultCode, data)) {
+        if (!recoveryExport.result(requestCode, resultCode, data) &&
+            !imagePicker.result(requestCode, resultCode, data)) {
             super.onActivityResult(requestCode, resultCode, data)
         }
     }
@@ -166,6 +169,8 @@ class MainActivity : GameActivity() {
     fun showTextForm(request: String): Boolean = textInput.show(request)
     fun dismissTextForm() = textInput.dismiss()
     fun exportRecoveryKey(request: String): Boolean = recoveryExport.start(request)
+    fun chooseImage(request: String): Boolean = imagePicker.start(request)
+    fun takePickedImage(): ByteArray? = imagePicker.take()
     fun copyText(text: String) = services.copy(text)
     fun requestPaste() = services.paste()
     fun pasteText(): String? = services.pasteText()

@@ -16,6 +16,28 @@ pub fn spawn(
     assets: &AssetServer,
 ) {
     controls::heading(root, assets, lang);
+    #[cfg(target_os = "android")]
+    root.spawn(Node {
+        width: percent(100),
+        column_gap: px(8),
+        row_gap: px(8),
+        flex_wrap: FlexWrap::Wrap,
+        ..default()
+    })
+    .with_children(|row| {
+        use crate::ui::p75::{self, Action};
+        p75::toolbar_button(row, lang, "p75.lost_key", Action::LostKey);
+        if crate::auth::snapshot().access.is_some() {
+            p75::toolbar_button(row, lang, "p75.account", Action::Account);
+            p75::toolbar_button(row, lang, "p75.emojis", Action::Emojis);
+        }
+    });
+
+    root.spawn(kit::button(
+        lang.key("p75.mode"),
+        UiAction::P75(crate::ui::p75::Action::Mode),
+        260.,
+    ));
     root.spawn(kit::button(
         lang.key("p73.my_history"),
         UiAction::OpenMyHistory,

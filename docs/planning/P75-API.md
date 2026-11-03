@@ -257,3 +257,9 @@ in a separate struct without `Debug`):
 Mail is "configured" only when host, username, password credential and
 sender are all present; otherwise the dispatcher idles and rows wait.
 `--build-info` must keep working with no environment at all.
+
+### P75 implementation clarifications
+
+The unauthenticated `GET /admin-api/v1/session` returns `401` with a CSRF nonce and a Secure, HttpOnly, SameSite=Strict `__Host-tbg_admin_pre` cookie. Pre-session mutations echo that nonce; authenticated mutations use the session-bound nonce. A sign-in attempt is derived from the pre-session nonce, so `session/start` remains byte-identical within the same pre-session context regardless of credentials, mail failure or throttling. A new `GET /session` creates a new context.
+
+Authenticated history adds `report_result` only for the participating owner when the opponent is an account. Public history never receives it. Reporting still derives eligibility and the target from the frozen server record. `/system` reports measured projection lag in moderation events (`feed_lag_unit: "events"`). Identical normalized uploads are refused as `422 image_invalid`; the unique content identity and every approved public ID remain unchanged.

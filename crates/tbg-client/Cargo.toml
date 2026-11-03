@@ -3,7 +3,7 @@
 
 [package]
 name = "tbg-client"
-version = "0.1.4-colossus.5"
+version = "0.1.4-colossus.6"
 edition.workspace = true
 rust-version.workspace = true
 license-file = "../../LICENSE"
@@ -50,6 +50,10 @@ serde_json = "1"
 ehttp = "0.7"
 # Compare release versions using SemVer, including native prerelease identifiers.
 semver = "1"
+
+[target.'cfg(not(target_os = "android"))'.dependencies]
+# P75: use the existing XDG/Win32/browser picker; Android uses its native document adapter.
+rfd = { version = "=0.17.2", default-features = false, features = ["xdg-portal"] }
 
 [target.'cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))'.dependencies]
 # OS-standard user data directory for native preferences and account credentials.

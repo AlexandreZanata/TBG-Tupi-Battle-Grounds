@@ -331,8 +331,12 @@ fn spawn(
                 .with_children(|bottom| {
                     super::native_battle::resources(bottom, &assets);
                     super::native_battle::cards(bottom, &assets);
+                    // Desktop auxiliaries share the Shop scale; the mobile drawer covers the safe frame.
+                    #[cfg(not(target_os = "android"))]
+                    super::native_battle::auxiliaries(bottom, &assets);
                 });
             });
+            #[cfg(target_os = "android")]
             super::native_battle::auxiliaries(root, &assets);
             root.spawn((
                 Node {

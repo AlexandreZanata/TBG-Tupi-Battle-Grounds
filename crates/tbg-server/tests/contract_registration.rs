@@ -87,7 +87,7 @@ async fn connect(url: &str) -> Ws {
 
 /// `Ok(account name)` or `Err(code)`.
 async fn register(ws: &mut Ws, name: &str) -> Result<String, AccountError> {
-    // D-97: preserve the name/refund contract through the isolated HTTP route.
+    // BR-P01 (P75): required email joins the existing name/refund HTTP contract.
     auth::register(ws, name)
         .await
         .map(|grant| grant.profile.name)

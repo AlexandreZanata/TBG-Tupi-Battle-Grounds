@@ -31,6 +31,7 @@ pub(crate) enum AccountScreen {
 
 #[derive(Resource, Default)]
 pub struct Account {
+    pub registration_name: Option<String>,
     pub(crate) recovery_key: Option<String>,
     pub(crate) key_action: Option<super::account_backup::ExportAction>,
     pub(crate) key_result: Option<Result<Option<String>, crate::auth::Failure>>,
@@ -63,10 +64,25 @@ fn error_msg(code: AccountError) -> Msg {
     }
 }
 
-fn watch_text(mut events: MessageReader<TextEntered>, mut account: ResMut<Account>) {
+fn watch_text(
+    mut events: MessageReader<TextEntered>,
+    mut account: ResMut<Account>,
+    mut form: NonSendMut<ActiveForm>,
+    lang: Res<Lang>,
+) {
     for ev in events.read() {
         let command = match ev.kind {
-            TextKind::Name => crate::auth::Command::Register(ev.value.clone()),
+            TextKind::Name => {
+                account.registration_name = Some(ev.value.clone());
+                textform::open(&mut form, TextKind::Email, &lang.key("p75.email_prompt"));
+                continue;
+            }
+            TextKind::Email => {
+                let Some(name) = account.registration_name.clone() else {
+                    continue;
+                };
+                crate::auth::Command::Register(serde_json::json!({"name":name,"email":ev.value,"locale":if *lang==Lang::PtBr{"pt-BR"}else{"en"}}).to_string())
+            }
             TextKind::Key => crate::auth::Command::Login(ev.value.clone()),
             TextKind::BackupKey => crate::auth::Command::RecoveryKey(Some(ev.value.clone())),
             _ => continue,
@@ -102,6 +118,7 @@ fn drain_inbox(
         }
         match msg {
             ServerMsg::Registered { key, profile } => {
+                super::account_backup::issued_key(&mut account, &key);
                 account.profile = Some(profile.clone());
                 account.screen = AccountScreen::SaveKey {
                     key,

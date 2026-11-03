@@ -1000,7 +1000,7 @@ recovery are not implicitly activated by these pipelines.
 
 ## 28. Administration, moderation and match social (P75, Proposed)
 
-[P75](phases/P75-admin-moderation-and-match-social.md) (planning only)
+[P75](phases/P75-admin-moderation-and-match-social.md) (implementation candidate, validation/review pending)
 adds, without touching `tbg-core` simulation:
 
 - **Identity:** the P67 `store/recovery` fixture becomes production code:

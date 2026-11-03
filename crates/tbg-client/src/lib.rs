@@ -16,6 +16,7 @@ mod capture;
 mod celebration;
 mod config;
 mod crowd;
+mod emoji;
 mod gallery;
 mod i18n;
 mod link;

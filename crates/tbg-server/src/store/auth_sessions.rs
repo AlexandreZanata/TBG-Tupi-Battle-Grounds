@@ -1,6 +1,6 @@
 //! Transactional, hash-only device families and refresh history (D-97/BR-AS02–03).
 
-use rusqlite::{params, Connection, OptionalExtension};
+use rusqlite::{params, Connection, OptionalExtension, TransactionBehavior};
 use tbg_core::protocol::{AccountError, Profile};
 
 use super::{accounts, ranked, AccountId};
@@ -79,6 +79,10 @@ pub struct Issuance {
 
 pub enum Request {
     Issue(Issuance),
+    IssueEmail {
+        issue: Issuance,
+        email: super::recovery::service::Enrollment,
+    },
     Rotate {
         old_hash: CredentialHash,
         new_hash: CredentialHash,
@@ -143,6 +147,14 @@ pub enum Reply {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Error {
+    Suspended {
+        until: Option<u64>,
+        reason: tbg_core::protocol::SuspensionReason,
+    },
+    RegistrationClosed,
+    EmailLimit,
+    EmailBlocked,
+    EmailInvalid,
     Unauthorized,
     Unavailable,
     NameTaken,
@@ -181,7 +193,8 @@ impl From<AccountError> for Error {
 
 pub(super) fn apply(conn: &mut Connection, request: Request) -> Result<Reply, Error> {
     match request {
-        Request::Issue(issue) => issue_family(conn, issue),
+        Request::Issue(issue) => issue_family(conn, issue, None),
+        Request::IssueEmail { issue, email } => issue_family(conn, issue, Some(email)),
         Request::Rotate {
             old_hash,
             new_hash,
@@ -256,14 +269,28 @@ pub(super) fn apply(conn: &mut Connection, request: Request) -> Result<Reply, Er
     }
 }
 
-fn issue_family(conn: &mut Connection, issue: Issuance) -> Result<Reply, Error> {
-    let tx = conn.transaction()?;
+fn issue_family(
+    conn: &mut Connection,
+    issue: Issuance,
+    email: Option<super::recovery::service::Enrollment>,
+) -> Result<Reply, Error> {
+    // Two slots share the file: reserve the writer before policy/account reads,
+    // so SQLite can busy-wait instead of rejecting a deferred lock upgrade.
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    if let Some(input) = &email {
+        super::recovery::service::registration(&tx, &input.email, &input.locale)
+            .map_err(Error::from)?;
+    }
     let lower = issue.name.to_ascii_lowercase();
     let (account, profile) = if issue.register {
         accounts::register_in_transaction(&tx, &issue.name, &lower, &issue.key_hash)?
     } else {
         accounts::login(&tx, &lower, &issue.key_hash)?
     };
+    if let Some(input) = email {
+        super::recovery::service::enroll(&tx, account, &input, issue.now).map_err(Error::from)?;
+    }
+    guard_ban(&tx, account, issue.now)?;
     let count:u32=tx.query_row("SELECT COUNT(*) FROM auth_sessions WHERE account_id=?1 AND revoked_at IS NULL AND expires_at>?2",params![account,issue.now],|r|r.get(0))?;
     if count >= 10 {
         return Err(Error::FamilyLimit);
@@ -307,6 +334,7 @@ fn lookup(
     let row=conn.query_row("SELECT s.id,s.account_id,s.device_id,s.created_at,s.expires_at,t.generation,t.consumed_at,t.operation_hash,s.keep_signed_in FROM auth_refresh_tokens t JOIN auth_sessions s ON s.id=t.session_id WHERE t.token_hash=?1 AND s.client_kind=?2 AND s.revoked_at IS NULL AND s.expires_at>?3",params![hash.as_slice(),channel.as_str(),now],|r| {
         Ok((r.get::<_,Vec<u8>>(0)?,r.get(1)?,r.get::<_,Vec<u8>>(2)?,r.get(3)?,r.get(4)?,r.get(5)?,r.get(6)?,r.get::<_,Option<Vec<u8>>>(7)?,r.get::<_,bool>(8)?))
     }).optional()?.ok_or(Error::Unauthorized)?;
+    guard_ban(conn, row.1, now)?;
     Ok(Row {
         family: Family {
             id: row.0.try_into().map_err(|_| Error::Unavailable)?,
@@ -367,7 +395,8 @@ fn rotate(
     channel: Channel,
     now: i64,
 ) -> Result<Reply, Error> {
-    let tx = conn.transaction()?;
+    // The refresh lookup and consumption must share a writable snapshot.
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
     let row = lookup(&tx, old_hash, channel, now)?;
     if let Some(at) = row.consumed {
         return consumed(&tx, row, at, Some(operation_hash));
@@ -412,3 +441,35 @@ fn logout_family(
         persistent: row.5,
     }))
 }
+
+impl From<super::recovery::Error> for Error {
+    fn from(value: super::recovery::Error) -> Self {
+        use super::recovery::Error as E;
+        match value {
+            E::EmailInvalid => Self::EmailInvalid,
+            E::EmailBlocked => Self::EmailBlocked,
+            E::EmailLimit => Self::EmailLimit,
+            E::RegistrationClosed => Self::RegistrationClosed,
+            _ => Self::Unavailable,
+        }
+    }
+}
+
+fn guard_ban(db: &Connection, account: i64, now: i64) -> Result<(), Error> {
+    let state = super::moderation::state(db, account).map_err(|_| Error::Unavailable)?;
+    if state.banned(now) {
+        return Err(Error::Suspended {
+            until: state
+                .ban_until
+                .filter(|v| *v != super::moderation::PERMANENT)
+                .map(|v| v as u64),
+            reason: state
+                .reason
+                .unwrap_or(tbg_core::protocol::SuspensionReason::Other),
+        });
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests;

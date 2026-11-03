@@ -47,6 +47,9 @@ pub(super) fn taps(
     mut queue: ResMut<ActionQueue>,
     (time, mut pressed_at): (Res<Time>, Local<f64>),
 ) {
+    if crate::ui::p75::captured() {
+        return;
+    }
     #[cfg(target_os = "android")]
     if pointer.consumed
         || super::auth_ui::blocks_menu(*state.get())

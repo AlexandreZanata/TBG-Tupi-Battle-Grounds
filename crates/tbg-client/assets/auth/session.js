@@ -23,17 +23,17 @@ async function post(operation,body,access,credentials) {
     while(true){const {done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>4096){await reader.cancel();failure('incompatible');}chunks.push(value);}
     const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}
     let value;try{value=JSON.parse(new TextDecoder().decode(bytes));}catch{failure('incompatible');}
-    if(response.status!==200)failure(typeof value.error==='string'?value.error:'incompatible');
+    if(response.status!==200){const error=new Error(typeof value.error==='string'?value.error:'incompatible');error.payload=value;throw error;}
     return value;
   } catch(error) {
-    const known=['incompatible','auth_required','name_taken','name_invalid','rate_limited','conflict','recovery_required','in_match','capacity','family_limit','unavailable','storage_unavailable'];
-    failure(known.includes(error.message)?error.message:'unavailable');
+    const known=['incompatible','auth_required','name_taken','name_invalid','rate_limited','conflict','recovery_required','in_match','capacity','family_limit','unavailable','storage_unavailable','email_required','email_invalid','email_blocked','email_limit','registration_closed','code_invalid','account_suspended'];
+    if(known.includes(error.message))throw error;failure('unavailable');
   } finally {clearTimeout(timer);}
 }
 
 async function retry(operation,body,access,credentials) {
   try{return await post(operation,body,access,credentials);}catch(error){
-    if(error.message==='unavailable'&&['refresh','register','confirm'].includes(operation))return post(operation,body,access,credentials);
+    if(error.message==='unavailable'&&['refresh','register','recover','confirm'].includes(operation))return post(operation,body,access,credentials);
     throw error;
   }
 }
@@ -85,7 +85,7 @@ async function run(request) {
     return {kind:'backup',migrated:true};
   }
   if(operation==='restore'&&!durable)return {kind:'guest',legacy:legacy()};
-  if(['login','register'].includes(operation)) {
+  if(['login','register','recover'].includes(operation)) {
     // Explicit account switches finish revocation before a new cookie is installed.
     if(durable||state.access){const out=await logout(credentials,state.access);if(out.kind!=='logged_out')return out;}
   }
@@ -101,7 +101,7 @@ async function run(request) {
   }else{
     const body={device_id:state.device,persistent:!!request.remember};
     if(operation==='login')body.account_key=request.input;
-    else if(operation==='register'){body.name=request.input;body.registration_retry_key=hex(32);}
+    else if(operation==='register'||operation==='recover'){Object.assign(body,JSON.parse(request.input));body.registration_retry_key=hex(32);}
     else failure('incompatible');
     grant=await retry(operation,body,null,credentials);
   }
@@ -117,6 +117,7 @@ async function run(request) {
     if(!secure&&warning==='storage_unavailable')write('logout_pending','1');
   }
   state.grant={...grant};delete state.grant.account_key;state.access=grant.access_token;
+  if(typeof grant.account_key==='string')state.recoveryKey=grant.account_key;
   notify();
   return {kind:'signed_in',grant,secure,...(warning?{warning}:{}),device:state.device};
 }
@@ -126,8 +127,8 @@ export function startAuth(raw,callback) {
   state.epoch=Math.max(state.epoch,request.epoch);
   state.slot=typeof request.slot==='string'&&/^[a-z]$/.test(request.slot)?request.slot:null;
   const execute=()=>run(request).catch(async error=>{
-    if(['login','register'].includes(request.kind)&&error.message==='unavailable') {write('logout_pending','1');return {kind:'logout_pending',error:'unavailable'};}
-    if(request.epoch!==state.epoch&&['login','register','refresh'].includes(request.kind)) {
+    if(['login','register','recover'].includes(request.kind)&&error.message==='unavailable') {write('logout_pending','1');return {kind:'logout_pending',error:'unavailable'};}
+    if(request.epoch!==state.epoch&&['login','register','recover','refresh'].includes(request.kind)) {
       const out=await logout(supported()?'same-origin':'omit',state.access);
       if(out.kind!=='logged_out')failure('revocation_pending');
       failure('cancelled');
@@ -135,7 +136,7 @@ export function startAuth(raw,callback) {
     throw error;
   });
   const work=supported()?navigator.locks.request('org.tupi.TBG.auth.origin.v1',{mode:'exclusive'},execute):execute();
-  Promise.resolve(work).then(value=>callback(JSON.stringify(value)),error=>callback(JSON.stringify({error:error.message||'unavailable'})));
+  Promise.resolve(work).then(value=>callback(JSON.stringify(value)),error=>callback(JSON.stringify({...(error.payload||{}),error:error.message||'unavailable'})));
 }
 
 

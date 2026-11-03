@@ -1,0 +1,10 @@
+[Unit]
+Description=TBG nightly backup schedule (owner installs before P75 activation)
+
+[Timer]
+OnCalendar=*-*-* 03:15:00 UTC
+Persistent=true
+Unit=tbg-backup.service
+
+[Install]
+WantedBy=timers.target

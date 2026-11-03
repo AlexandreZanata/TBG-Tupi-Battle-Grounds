@@ -21,6 +21,7 @@ use crate::{
 mod access;
 pub(crate) mod http;
 mod origin;
+mod recovery;
 mod rotation;
 mod tokens;
 pub(crate) use origin::websocket as websocket_origin;
@@ -38,6 +39,16 @@ const RETRY_SECONDS: i64 = 300;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Error {
+    Suspended {
+        until: Option<u64>,
+        reason: tbg_core::protocol::SuspensionReason,
+    },
+    CodeInvalid,
+    RegistrationClosed,
+    EmailLimit,
+    EmailBlocked,
+    EmailInvalid,
+    EmailRequired,
     Unauthorized,
     Forbidden,
     BadRequest,
@@ -55,6 +66,11 @@ pub(crate) enum Error {
 impl From<db::Error> for Error {
     fn from(value: db::Error) -> Self {
         match value {
+            db::Error::Suspended { until, reason } => Self::Suspended { until, reason },
+            db::Error::RegistrationClosed => Self::RegistrationClosed,
+            db::Error::EmailLimit => Self::EmailLimit,
+            db::Error::EmailBlocked => Self::EmailBlocked,
+            db::Error::EmailInvalid => Self::EmailInvalid,
             db::Error::Unauthorized => Self::Unauthorized,
             db::Error::Unavailable => Self::Unavailable,
             db::Error::NameTaken => Self::NameTaken,
@@ -115,6 +131,7 @@ struct NewFamily {
     name: String,
     key_hash: CredentialHash,
     register: bool,
+    email: Option<crate::store::recovery::service::Enrollment>,
     device: FamilyId,
     persistent: bool,
     channel: Channel,

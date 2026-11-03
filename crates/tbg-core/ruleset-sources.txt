@@ -71,6 +71,7 @@ exclude practice_bot.rs local tools and observational hooks, no normal-match out
 exclude profiling.rs benchmark counters only
 exclude protocol.rs wire format, versioned separately
 exclude protocol/history.rs P73 personal summary wire shapes (D-103), versioned with the protocol
+exclude protocol/social.rs P75 presentation-only social metadata (D-110), outside simulation and replay
 exclude ranked_integrity.rs settlement eligibility, policy-versioned
 exclude rating.rs Elo, versioned by GAME-DESIGN §5 and contracts
 exclude replay.rs offline replay tooling
@@ -92,3 +93,4 @@ exclude barrel/tests.rs OG-02 regression scenarios, not simulation rules
 
 exclude occupancy/tests.rs PK-01 regression tests, not gameplay
 exclude stronghold_power/tests.rs TW-01 regression tests, not gameplay
+exclude auxiliary/tests.rs BR-AX12-BR-AX15 regression scenarios, not simulation rules

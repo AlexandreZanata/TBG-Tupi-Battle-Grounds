@@ -9,7 +9,7 @@ use crate::chan::MatchCmd;
 use super::Match;
 
 impl Match {
-    fn owns_connection(&self, seat: Seat, id: u64) -> bool {
+    pub(super) fn owns_connection(&self, seat: Seat, id: u64) -> bool {
         self.players[seat.index()]
             .conn
             .as_ref()
@@ -50,6 +50,24 @@ impl Match {
 
     pub(super) fn command(&mut self, cmd: MatchCmd) {
         match cmd {
+            MatchCmd::Chat {
+                seat,
+                conn_id,
+                text,
+            } => self.social_chat(seat, conn_id, text),
+            MatchCmd::Emoji {
+                seat,
+                conn_id,
+                slot,
+            } => self.social_emoji(seat, conn_id, slot),
+            MatchCmd::SocialPolicy => self.social_policy(),
+            MatchCmd::ModerationForfeit { seat } => {
+                if self.state.outcome.is_none() {
+                    self.record(seat, None);
+                    self.state.forfeit(seat);
+                    self.end_detail = Some(crate::ranked::EndDetail::Moderation);
+                }
+            }
             MatchCmd::Intent {
                 conn_id,
                 seat,
@@ -132,6 +150,7 @@ impl Match {
                 self.applied[seat.index()] = false;
                 let start = self.match_start(seat);
                 self.send(seat, start);
+                self.send_social(seat);
                 // Catch up on events buffered while detached.
                 self.send_view(seat, false);
             }

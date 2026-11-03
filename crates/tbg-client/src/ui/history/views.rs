@@ -87,6 +87,9 @@ pub fn players(
                     lang.key(&format!("live.status.{}", row.status)),
                     17.,
                 ));
+                if !mine {
+                    super::super::p75::report_button(r, name, lang);
+                }
                 if !mine && available {
                     control(r, "p73.challenge", Action::Challenge(name), lang, 150.);
                 } else if !mine {
@@ -164,6 +167,9 @@ pub fn rematch_card(p: &mut ChildSpawnerCommands, rematch: &crate::sync::Rematch
 }
 
 pub fn profile(p: &mut ChildSpawnerCommands, history: &History, lang: Lang) {
+    if let Some(name) = Name::new(&history.subject) {
+        super::super::p75::report_button(p, name, lang);
+    }
     if !history.current() {
         return;
     }
@@ -311,6 +317,15 @@ pub fn spawn(p: &mut ChildSpawnerCommands, history: &History, lang: Lang) {
 }
 
 fn item(p: &mut ChildSpawnerCommands, v: &Value, lang: Lang) {
+    if crate::auth::snapshot().access.is_some() {
+        if let Some(id) = v["report_result"].as_str().and_then(entry) {
+            p.spawn(kit::button(
+                lang.key("p75.report"),
+                super::super::UiAction::P75(super::super::p75::Action::ReportHistory(id)),
+                180.,
+            ));
+        }
+    }
     let opponent = v["opponent"]
         .as_str()
         .map(str::to_owned)
@@ -482,7 +497,7 @@ fn duration(seconds: Option<u64>, lang: Lang) -> String {
         |s| format!("{}:{:02}", s / 60, s % 60),
     )
 }
-fn date(seconds: i64, lang: Lang) -> String {
+pub(in crate::ui) fn date(seconds: i64, lang: Lang) -> String {
     #[cfg(not(target_arch = "wasm32"))]
     {
         jiff::Timestamp::from_second(seconds)

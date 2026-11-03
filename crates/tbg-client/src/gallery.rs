@@ -105,6 +105,20 @@ fn spawn(
         // Built by `arena::strongholds`, which owns the tower parts.
         "strongholds" => {}
         "aim" => aim::spawn(&mut commands, &lib, &options, mats, &window),
+        "auxiliary" => {
+            let kind = match crate::config::url_param("aux").as_deref() {
+                Some("merchant") => tbg_core::auxiliary::AuxiliaryKind::Merchant,
+                _ => tbg_core::auxiliary::AuxiliaryKind::Miner,
+            };
+            let blue = crate::config::url_param("side").as_deref() != Some("red");
+            crate::arena::spawn_auxiliary_portrait(
+                &mut commands,
+                &mut meshes,
+                &lib.material,
+                kind,
+                blue,
+            );
+        }
         _ if options.polish => polish::spawn(&mut commands, &lib, &options),
         _ if options.range => {
             let unit = options.unit.unwrap_or(tbg_core::UnitKind::SiegeWalker);

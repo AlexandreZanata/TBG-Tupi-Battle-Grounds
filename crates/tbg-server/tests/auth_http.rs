@@ -125,7 +125,7 @@ async fn raw_post(
     .unwrap()
 }
 fn registration(name: &str) -> Value {
-    json!({"name":name,"device_id":"01".repeat(16),"persistent":true,"registration_retry_key":"02".repeat(32)})
+    json!({"name":name,"email":format!("{name}@example.invalid"),"locale":"en","device_id":"01".repeat(16),"persistent":true,"registration_retry_key":"02".repeat(32)})
 }
 fn refresh(token: &Value, op: u8) -> Value {
     json!({"refresh_token":token,"operation_id":format!("{op:02x}").repeat(16)})

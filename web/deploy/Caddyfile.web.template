@@ -2,7 +2,7 @@
 # Rendered by web/deploy/publish.sh into /etc/caddy/tbg-web/sites.caddy, which the main
 # Caddyfile pulls in with `import tbg-web/*.caddy`. The API/app blocks, Cloudflare client-IP
 # trust and private-route blocks stay in deploy/Caddyfile.domains.template, untouched.
-# No block here proxies to the game server: these hosts serve files only.
+# P75: only the admin host proxies /admin-api/* to dedicated loopback operator listeners.
 
 (tbg_web_headers) {
 	header {
@@ -53,16 +53,23 @@ www.__TBG_SITE_DOMAIN__ {
 	redir https://__TBG_SITE_DOMAIN__{uri} permanent
 }
 
-# Placeholder only until server-side operator authorization exists
-# (docs/planning/WEB-ADMIN-AUTH-CONTRACT.md): no scripts, data, sign-in or API routes.
+# P75 attended console activation. Keep admin-public staged until the owner activates admin-app.
 __TBG_ADMIN_DOMAIN__ {
 	encode zstd gzip
 	import tbg_web_headers
 	header {
-		Content-Security-Policy "default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+		Content-Security-Policy "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' blob:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
 		X-Robots-Tag "noindex, nofollow"
 		Cache-Control "no-cache, no-transform"
 	}
+    handle /admin-api/* {
+        reverse_proxy 127.0.0.1:8090 127.0.0.1:8092 {
+            header_up X-Forwarded-For {client_ip}
+            lb_policy first
+            lb_try_duration 2s
+            fail_duration 10s
+        }
+    }
 	root * /srv/tbg/admin/current
 	file_server {
 		hide .*

@@ -1,12 +1,9 @@
-// Admin preview entry point: build the frame, route, and rebuild both when the language changes.
-import { onLangChange } from './i18n.js';
-import { renderShell } from './shell.js';
-import { setFrame, showRoute, startRouter } from './router.js';
-
-const root = document.getElementById('app');
-startRouter(renderShell(root));
-onLangChange(() => {
-  setFrame(renderShell(root));
-  showRoute({ focus: false });
-});
-showRoute({ focus: false });
+// Operator console lifecycle; route visibility never replaces server-side capabilities.
+import {el} from '../shared/dom.js';import {t,setLang,lang,onLangChange} from './i18n.js';import {request,ApiError} from './api/admin.js';import {button} from './ui/forms.js';import {auth,reauth} from './pages/auth.js';import {accounts} from './pages/accounts.js';import {reports} from './pages/reports.js';import {emoji} from './pages/emoji.js';import {controls,operators,audit,read} from './pages/controls.js';
+const root=document.getElementById('app');let session=null,section='overview',page,notice;
+async function run(action){try{notice.textContent=t('loading');await action();notice.textContent='';}catch(error){if(error.status===401){session=null;try{await request('session');}catch{}render();}else if(error.status===403&&error.code==='reauth_required'){reauth(root,run,()=>run(action));}else{notice.textContent=t(`error.${error.code||'unavailable'}`);}}}
+function render(){const header=el('header',{class:'topbar'},el('h1',{text:t('title')}),el('div',{class:'topbar-meta'},button(lang()==='en'?'language_pt':'language_en',()=>setLang(lang()==='en'?'pt-BR':'en'))));page=el('main',{class:'page',tabindex:'-1'});notice=el('p',{class:'notice',role:'status','aria-live':'polite'});root.replaceChildren(header,notice,page);
+ if(!session){auth(page,run,value=>{session=value;render();run(show);});return;}
+ const items=['overview','accounts','reports','emoji','terms','settings','system'];if(session.operator.role==='owner')items.push('email-blocks','operators','audit');const nav=el('nav',{'aria-label':t('navigation')});for(const id of items){const b=button(`nav.${id}`,()=>{section=id;run(show);});b.setAttribute('aria-current',section===id?'page':'false');nav.append(b);}nav.append(button('logout',()=>run(async()=>{await request('session/logout',{method:'POST',body:{}});session=null;try{await request('session');}catch{}render();}))); root.insertBefore(nav,page);header.append(el('span',{text:`${session.operator.email_masked} · ${session.operator.role}`}));}
+async function show(){page.replaceChildren(el('h2',{text:t(`nav.${section}`)}));const ctx={session,run};switch(section){case'accounts':await accounts(page,ctx);break;case'reports':await reports(page,ctx);break;case'emoji':await emoji(page,ctx);break;case'terms':case'settings':case'email-blocks':await controls(page,ctx,section);break;case'operators':await operators(page,ctx);break;case'audit':await audit(page,ctx);break;default:await read(page,ctx,section);}page.focus();}
+onLangChange(()=>{render();if(session)run(show);});render();run(async()=>{try{session=await request('session');render();await show();}catch(error){if(error.status!==401)throw error;}});

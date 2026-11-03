@@ -38,10 +38,12 @@ internal class NativeTextInput(private val activity: MainActivity) {
             textSize = 16f
             isSaveEnabled = false
             importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
-            inputType = InputType.TYPE_CLASS_TEXT or if (secret) {
-                InputType.TYPE_TEXT_VARIATION_PASSWORD
-            } else {
-                InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
+            inputType = if (secret) {
+                InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+            } else when (request.optString("keyboard")) {
+                "email" -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                "number" -> InputType.TYPE_CLASS_NUMBER
+                else -> InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_SENTENCES
             }
             imeOptions = EditorInfo.IME_ACTION_DONE or EditorInfo.IME_FLAG_NO_PERSONALIZED_LEARNING or
                 EditorInfo.IME_FLAG_NO_EXTRACT_UI or EditorInfo.IME_FLAG_NO_FULLSCREEN

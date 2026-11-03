@@ -1,7 +1,6 @@
 # P75 — Administration, moderation, email key recovery and match social
 
-**Status:** planning only, 2026-11-02. No runtime code, migration, VPS
-change or secret is part of this delivery.
+**Status:** implementation candidate, 2026-11-02; targeted S14 consolidation complete, Draft PR/review and owner activation gates recorded in the [execution report](../planning/P75-EXECUTION-REPORT.md). No production migration, VPS change or real secret is part of this delivery.
 **Planning branch:** `docs/p75-admin-moderation-plan`.
 **Execution branch:** `phase/p75-admin-moderation-social`, created from the
 freshly fetched GitHub `origin/main` (owner rule 2026-11-02: always base on
@@ -548,33 +547,64 @@ compatibility; visual parity needs real captures.
 
 - [ ] Every IC-01…IC-20 test exists, cites its rule and passes at S14.
 - [ ] No admin route on the public router; listener loopback-only.
-- [ ] No secret/email in `Config` Debug, logs, metrics, DB plaintext.
-- [ ] Wire diff is append-only; one protocol bump; golden tests appended.
-- [ ] Schema additive; v11 still installs after v12.
-- [ ] Simulation untouched (`contract_determinism`, IC-06).
-- [ ] Recovery FK snapshot covers every account-referencing table.
-- [ ] Ban forfeit settles like a surrender; nothing else edits outcomes.
-- [ ] Spectators receive no social messages; HUD hides social controls.
-- [ ] Every new surface has a DESKTOP-UI-CONTRACT entry; pending targets listed.
-- [ ] EN/pt-BR complete; Latin-1 only; no literals in UI code.
-- [ ] Dependencies (lettre, image, file picker) have reason comments.
-- [ ] Draft PR lists deferred checks and owner gates honestly.
+- [x] No secret/email in Config Debug, logs or metrics; no plaintext credentials in DB/WAL (private email columns remain as specified).
+- [x] Wire diff is append-only; one protocol bump; golden tests appended.
+- [x] Schema additive; v11 still installs after v12.
+- [x] Simulation untouched (`contract_determinism`, IC-06).
+- [x] Recovery FK snapshot covers every account-referencing table.
+- [x] Ban forfeit settles like a surrender; nothing else edits outcomes.
+- [x] Spectators receive no social messages; HUD hides social controls.
+- [x] Every new surface has a DESKTOP-UI-CONTRACT entry; pending targets listed.
+- [x] EN/pt-BR complete; Latin-1 only; no literals in UI code.
+- [x] Dependencies (lettre, image, file picker) have reason comments.
+- [x] Draft PR lists deferred checks and owner gates honestly.
 
 ## Phase report (executor fills in)
 
 ### S0 freeze
-- Base SHA / allocations / owner decisions / coordination / dependency choices:
+- GitHub base: `b964875e2219bafe129b19960f7f1369307870d5` fetched on 2026-11-02; planning prerequisite fast-forwarded from `origin/docs/p75-admin-moderation-plan` (`b61764d`). Isolated worktree: `/data/tbg-p75-admin-moderation-social`.
+- Allocations confirmed: protocol 39, new ClientMsg tags 27–28, ServerMsg tags 37–41; schema 12 with independently installed history 11; D-107–D-111; GAME-DESIGN section 22.
+- Owner explicitly selected all O-P75-01–13 defaults in this execution request. Digits 1/2/3 remain the emoji shortcuts.
+- Coordination: GitHub open PR inventory contains planning #58 and native settings #57 (`23e8cb0`); P65 remains planning-only (`b2a12c6`). Neither front is modified, merged or reset. Client integration must preserve the native key-backup seam; conflict resolution with #57 remains a reviewer gate. No other agent edits this worktree.
+- Dependencies selected against primary documentation: lettre 0.11.23 (`default-features=false`, `builder,smtp-transport,tokio1-rustls,ring,webpki-roots`), image 0.25.10 (`default-features=false`, `png,gif,webp`); rfd 0.17.2 (`default-features=false`, `xdg-portal`, no GTK). Sources: https://docs.rs/crate/lettre/0.11.23/features, https://docs.rs/image/0.25.10/image/struct.ImageReader.html, https://docs.rs/crate/rfd/0.17.2/features.
+- Source audit: `protocol.rs:31` is wire 38; `store/schema.rs:19` is schema 10; `schema.rs:410` uses the unsafe MAX(version) history gate. `ui/keyboard.rs` activates Enter using implicit local focus without a preceding Tab. Runtime Enter-Enter reproduction pending: no P75 client build or running isolated game was available at S0; source inspection is not runtime evidence.
+- Validation: `git diff --check` passed. Cargo checks deferred until final scoped consolidation (new worktree has no build cache). Tests will run only at S14.
 
 ### Steps
 | Step | Commits | Work-front check (command → result) | Tests written | Deferred |
 |---|---|---|---|---|
+| S14 | Delivery commit | Targeted consolidation; full evidence below | 112 distinct behavioral tests passed; Linux and WASM checks passed | Device/game visual acceptance and explicit gates in execution report |
+| S13 | `b166ce18` | Static web/patch-note checks; `git diff --check`; templates inspected (Caddy absent locally) | Deployment templates only; automatic console activation remains refused | Owner rollout, SMTP/DNS, privacy publication, backup install/restore and coordinated contract switch pending. |
+| S12 | `852d893f` | Initial `python3 web/scripts/check.py` found JS delimiters (corrected) and pre-P75 landing contract metadata (S13). Node syntax checks passed on corrected modules. | Static no-HTML/CSRF checks integrated; all console areas connected | Full static check after S13 metadata; real capture-backed browser sign-in pending S14. No site was published. |
+| S11 | `a249583f` | Initial `cargo fmt` failed on a delimiter in `ui/p75/views.rs`; corrected before S14 and formatting rerun. `git diff --check`, PNG/i18n/visual JSON inspection passed | Actual keyboard system Enter/Enter regression, charset, transport allowlist, PNG predecode dimensions, frame timing | Native/WASM checks, real flows, private preview/library polish and Linux/Windows/web captures queued S14. PR #57 vault integration requires consolidated verification. |
+| S10 | `34a82125` | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | `contract_p75_emoji`: hostile dimensions/truncation/polyglots/frame count, standard IDs, private upload → approval → equip → revoke, content hash and cache reauthorization | Tests queued S14; 2 s timing and real animated-client presentation pending. |
+| S9 | `4073a00d` | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | Appended wire goldens; real two-seat chat/guest boundary and replay hash test; sanitizer and limit contracts | Tests queued S14; actual spectator attachment/reconnect/mid-match checks pending extension. |
+| S8 | `02c70cd1` | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_reports`: participant eligibility, duplicate race, frozen transcript, forged target rejection, privacy and daily bound | S9 populates live transcript/loadouts; tests and real-client filing queued S14. |
+| S7 | `72e5b966` | `cargo fmt -p tbg-server`; `git diff --check` passed | Every area route inventoried with success/unauthenticated denial; moderator ceiling, current disabled state, masked-email projection | Runtime tests queued S14; console walkthrough pending S12. |
+| S6 | `f17feeb9` | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_admin`: bootstrap, claim, session cookie, separation, CSRF/Origin, idle expiry, atomic audit failure, append-only guards; trusted proxy unit case | API area inventory completes S7; tests queued S14; no real email or host CLI action. |
+| S5 | `d6c12b91` | `cargo fmt -p tbg-core -p tbg-server`; `git diff --check` passed | Moderation reversibility, two-slot issuance/expiry, optimistic race, exact forfeit state and no voluntary surrender signal | S9 adds suspension wire delivery; S7 extends API and switch tests; full targeted run S14. |
+| S4 | `693cb15b` | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_recovery`: discovered FK snapshot, key format, two-slot revocation, generic replies, code budgets and secret-at-rest canaries | Test run queued S14; real socket closure and full UI recovery remain pending. |
+| S3 | `4f3e17f0` | `cargo fmt -p tbg-server`; `git diff --check` passed | `contract_p75_identity` and preserved P67 offline scenarios; BR-P01/02 helper amended with canon | Compilations/tests queued S14; live verification and desktop captures pending. |
+| S2 | `ad8a970c` | `cargo fmt -p tbg-server`; `git diff --check` passed | Mail capture, two-writer lease, retry exhaustion, queue bound, code-at-rest and Debug canaries | Cold compilation and tests queued for S14; SMTP never contacted. |
+| S1 | `75ce8977` | `cargo fmt -p tbg-server`; `git diff --check` passed | Appended IC-13 history-after-v12 and damaged-shape tests | Compilation cold; tests queued for S14. Legacy recovery fixture API conversion follows in S3. |
 
 ### Consolidation (S14)
-- Commands and real output:
-- Acceptance A01–A12 (observed / pending + reason):
-- Visual correspondence (Linux / Windows / web):
+- Level: targeted consolidation. **112 distinct tests passed, zero unresolved test failures**; native test-module and desktop-WASM compilation passed. No full suite or release build ran.
+- Exact scopes, real output, corrections, IC-01–20/S01–17 mapping, screenshots and A01–A12 status: [P75 execution report](../planning/P75-EXECUTION-REPORT.md).
+- Linux/Windows/web in-game visual and motion acceptance, native unit execution (cold Bevy linking), the lock-deferred legacy auth smoke, PR #57 consolidation and attended activation gates remain pending. A compilation or shared source is not a parity claim.
 
 ### Deviations, blocked items, residual risks
+> blocked: S11 initially stopped after two missing-script errors. Auto-review had rejected the unapplied draft because it removed an existing key backup without persisting its replacement. The owner explicitly authorized resuming S11 on 2026-11-02. The replacement implementation never removes backups and uses PR #57's protected vault namespace. No unsafe draft was applied or run.
+
+- S9 freezes social profiles in one store read during pairing setup before the first MatchStart, outside all simulation ticks. The match owns frozen rights/loadouts; live restrictions and switches use the shared cache. No SQL runs during social relay.
+- D-110's explicit protocol bump updates only the existing current-version assertion in `contract_protocol`; pre-P75 encoding goldens remain untouched and P75 encodings are appended.
+
+- S6 pre-session mutations use a Secure host-only nonce cookie from unauthenticated `GET /session`, echoed in the CSRF header, plus exact Origin and JSON. Once signed in, CSRF is session-bound and reconstructed from the opaque session token. This defines the necessary pre-authentication CSRF bootstrap absent from the planning API.
+
+- S4 reuses the exact `revoke_account` barrier through `revoke_scope` while holding the existing D-97 coordinator lock; calling `revoke_account` recursively would deadlock. SQL revocation is also committed with key rotation.
+- The recovery FK snapshot treats `account_owner` as auth/session ownership (revoked on recovery), alongside `auth_sessions`; all other non-recovery account FK tables are discovered rather than enumerated.
+- The P67 offline link fixture remains test-only for its historical contracts; production uses only typed codes and the live P75 tables. No fixture-only schema installer remains.
+
 
 ### PR
-- URL, branch, final commit, pending owner gates:
+- Draft PR: the execution PR for `phase/p75-admin-moderation-social`; the final URL/SHA are returned in the handoff. This report is committed in S14. The [execution report](../planning/P75-EXECUTION-REPORT.md) lists every deferred check and owner gate. Normal push only; no merge/deploy/activation.

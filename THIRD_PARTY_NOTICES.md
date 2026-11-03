@@ -63,3 +63,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## Twemoji standard emoji set (P75)
+
+The sixteen PNG graphics in `crates/tbg-client/assets/emoji/standard/` are by Twitter, Inc. and other contributors, from Twemoji v14.0.2. Graphics are licensed under CC-BY 4.0: https://creativecommons.org/licenses/by/4.0/. Source and attribution: https://github.com/twitter/twemoji/tree/v14.0.2. Files are renamed to permanent game ids; source codepoints are frozen in `tbg_core::protocol::STANDARD_EMOJI_ASSETS`. No endorsement is implied.

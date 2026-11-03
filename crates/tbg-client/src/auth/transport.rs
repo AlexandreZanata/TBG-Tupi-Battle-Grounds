@@ -58,6 +58,8 @@ pub(super) fn post(
     if ![
         "login",
         "register",
+        "recover",
+        "recovery-request",
         "refresh",
         "confirm",
         "logout",
@@ -108,7 +110,7 @@ pub(super) fn post(
         .read_to_vec()
         .map_err(|_| Failure::Unavailable)?;
     let value = serde_json::from_slice(&bytes).map_err(|_| Failure::Incompatible)?;
-    if status != 200 {
+    if status != 200 && !(status == 202 && operation == "recovery-request") {
         return Err(super::types::public_error(&value));
     }
     Ok(value)

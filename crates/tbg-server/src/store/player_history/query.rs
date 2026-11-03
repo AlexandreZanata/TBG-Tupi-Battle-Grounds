@@ -119,6 +119,10 @@ fn project(row: &rusqlite::Row<'_>, public: bool, details: bool) -> rusqlite::Re
         "opponent":opponent,"quality":summary.quality,"summary_version":summary.version,
         "rating_status": if !ranked { "unranked" } else if stored { "committed" } else { "pending" },
         "rating_delta": if ranked && stored { row.get::<_,Option<i64>>(4)? } else { None }});
+    // P75: only the authenticated participant receives a report locator; public history keeps no correlation key.
+    if !public && other.account.is_some() {
+        value["report_result"] = json!(e.result_id.map(|id| crate::ranked::hex(&id)));
+    }
     if details {
         // The DTO contains only this side. Internal keys and the other side are never serialized.
         let mut personal =

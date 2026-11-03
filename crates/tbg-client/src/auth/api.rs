@@ -9,6 +9,7 @@ use tbg_core::protocol::AccessToken;
 pub struct Reply {
     pub status: u16,
     pub value: Value,
+    pub bytes: Option<Vec<u8>>,
 }
 type Slot = Arc<Mutex<Option<Result<Reply, ()>>>>;
 pub struct Request {
@@ -16,6 +17,9 @@ pub struct Request {
     method: &'static str,
     body: Option<Value>,
     revision: Option<i64>,
+    raw: Option<Vec<u8>>,
+    mime: Option<String>,
+    sheet: bool,
     private: bool,
     epoch: u64,
     access: Option<AccessToken>,
@@ -31,39 +35,93 @@ impl Request {
         revision: Option<i64>,
         private: bool,
     ) -> Self {
+        let mut request = Self::prepare(path, method, body, revision, private);
+        request.dispatch();
+        request
+    }
+    fn prepare(
+        path: String,
+        method: &'static str,
+        body: Option<Value>,
+        revision: Option<i64>,
+        private: bool,
+    ) -> Self {
         let view = snapshot();
-        let mut request = Self {
+        Self {
             path,
             method,
             body,
             revision,
             private,
+            raw: None,
+            mime: None,
+            sheet: false,
             epoch: epoch(),
             access: view.access,
             slot: Arc::default(),
             retried: false,
             wait_until: None,
+        }
+    }
+    pub fn recovery(name: &str, email: &str, locale: &str) -> Self {
+        let channel = if cfg!(target_arch = "wasm32") {
+            "browser"
+        } else {
+            "native"
         };
-        request.dispatch();
-        request
+        Self::new(
+            format!("/api/auth/{channel}/recovery-request"),
+            "POST",
+            Some(serde_json::json!({"name":name,"email":email,"locale":locale})),
+            None,
+            false,
+        )
+    }
+    pub fn upload(label: &str, bytes: Vec<u8>, mime: &str) -> Self {
+        let label: String = label
+            .bytes()
+            .map(|b| {
+                if b.is_ascii_alphanumeric() {
+                    (b as char).to_string()
+                } else {
+                    format!("%{b:02X}")
+                }
+            })
+            .collect();
+        let mut r = Self::prepare(
+            format!("/api/me/emoji?label={label}"),
+            "POST",
+            None,
+            None,
+            true,
+        );
+        r.raw = Some(bytes);
+        r.mime = Some(mime.into());
+        r.dispatch();
+        r
+    }
+    pub fn sheet(path: String, private: bool) -> Self {
+        let mut r = Self::prepare(path, "GET", None, None, private);
+        r.sheet = true;
+        r.dispatch();
+        r
     }
     fn dispatch(&mut self) {
         self.slot = Arc::default();
-        let allowed = self.path.len() <= 2048
-            && (self.path.starts_with("/api/me/") || self.path.starts_with("/api/players/"))
-            && matches!(self.method, "GET" | "PATCH");
+        let allowed = self.path.len() <= 2048 && allowed(&self.path, self.method);
         let origin = super::transport::origin(&crate::config::server_url()).ok();
         if !allowed || origin.is_none() || self.private && self.access.is_none() {
             if let Ok(mut slot) = self.slot.lock() {
                 *slot = Some(Ok(Reply {
                     status: 401,
                     value: Value::Null,
+                    bytes: None,
                 }));
             }
             return;
         }
         let body = serde_json::json!({"url":format!("{}{}",origin.unwrap_or_default(),self.path),"method":self.method,
-            "body":self.body,"revision":self.revision,"slot":super::slot().map(String::from),
+            "body":self.body,"bytes":self.raw,"mime":self.mime,"sheet":self.sheet,"revision":self.revision,"slot":super::slot().map(String::from),
             "access":if self.private {self.access.map(|a|a.0.iter().map(|b|format!("{b:02x}")).collect::<String>())}else{None}});
         start(body, self.slot.clone());
     }
@@ -86,6 +144,7 @@ impl Request {
                 return Some(Ok(Reply {
                     status: 401,
                     value: Value::Null,
+                    bytes: None,
                 }));
             } else {
                 return None;
@@ -117,7 +176,10 @@ fn start(value: Value, slot: Slot) {
             let mut builder = ureq::http::Request::builder()
                 .method(value["method"].as_str().ok_or(())?)
                 .uri(value["url"].as_str().ok_or(())?)
-                .header("Content-Type", "application/json")
+                .header(
+                    "Content-Type",
+                    value["mime"].as_str().unwrap_or("application/json"),
+                )
                 .header("X-TBG-Client", "native")
                 .header("Cache-Control", "no-store");
             if let Some(slot) = value["slot"].as_str() {
@@ -132,7 +194,14 @@ fn start(value: Value, slot: Slot) {
                 header.set_sensitive(true);
                 builder = builder.header("Authorization", header);
             }
-            let bytes = if value["body"].is_null() {
+            let bytes = if let Some(raw) = value["bytes"].as_array() {
+                if raw.len() > 1048576 {
+                    return Err(());
+                }
+                raw.iter()
+                    .map(|n| n.as_u64().filter(|v| *v <= 255).map(|v| v as u8).ok_or(()))
+                    .collect::<Result<Vec<_>, _>>()?
+            } else if value["body"].is_null() {
                 Vec::new()
             } else {
                 serde_json::to_vec(&value["body"]).map_err(|_| ())?
@@ -152,7 +221,12 @@ fn start(value: Value, slot: Slot) {
                 .map_err(|_| ())?;
             Ok(Reply {
                 status,
-                value: serde_json::from_slice(&bytes).map_err(|_| ())?,
+                value: if value["sheet"] == true {
+                    Value::Null
+                } else {
+                    serde_json::from_slice(&bytes).map_err(|_| ())?
+                },
+                bytes: (value["sheet"] == true).then_some(bytes),
             })
         })();
         if let Ok(mut output) = slot.lock() {
@@ -176,6 +250,11 @@ fn start(value: Value, slot: Slot) {
                 Some(Reply {
                     status: u16::try_from(v["status"].as_u64()?).ok()?,
                     value: v["value"].clone(),
+                    bytes: v["bytes"].as_array().and_then(|a| {
+                        a.iter()
+                            .map(|v| v.as_u64().filter(|v| *v <= 255).map(|v| v as u8))
+                            .collect()
+                    }),
                 })
             })
             .ok_or(());
@@ -186,6 +265,54 @@ fn start(value: Value, slot: Slot) {
     if request(&value.to_string(), &callback).is_err() {
         if let Ok(mut output) = slot.lock() {
             *output = Some(Err(()));
+        }
+    }
+}
+
+/// Exact mutation surface; widening player-history reads never authorizes an arbitrary write.
+pub fn allowed(path: &str, method: &str) -> bool {
+    let path = path.split('?').next().unwrap_or("");
+    match method {
+        "GET" => {
+            path.starts_with("/api/me/")
+                || path.starts_with("/api/players/")
+                || path.starts_with("/api/emoji/")
+        }
+        "PATCH" => path == "/api/me/preferences/history",
+        "POST" => matches!(
+            path,
+            "/api/me/email"
+                | "/api/me/email/verify"
+                | "/api/me/email/resend"
+                | "/api/me/email/change/confirm"
+                | "/api/me/email/change/cancel"
+                | "/api/me/reports"
+                | "/api/me/emoji"
+                | "/api/auth/native/recovery-request"
+                | "/api/auth/browser/recovery-request"
+        ),
+        "PUT" => path == "/api/me/emoji/slots",
+        "DELETE" => path
+            .strip_prefix("/api/me/emoji/")
+            .is_some_and(|id| !id.is_empty() && id.bytes().all(|b| b.is_ascii_digit())),
+        _ => false,
+    }
+}
+
+#[cfg(test)]
+mod p75_tests {
+    use super::*;
+    #[test]
+    fn p75_mutations_remain_on_the_exact_allowlist() {
+        assert!(allowed("/api/me/emoji/slots", "PUT"));
+        assert!(allowed("/api/auth/native/recovery-request", "POST"));
+        for (path, method) in [
+            ("/api/players/Victim", "POST"),
+            ("/admin-api/v1/settings/chat_enabled", "PUT"),
+            ("/api/me/matches/1", "DELETE"),
+            ("/api/me/emoji/1/sheet.png", "DELETE"),
+        ] {
+            assert!(!allowed(path, method));
         }
     }
 }

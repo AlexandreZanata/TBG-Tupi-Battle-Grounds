@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 38,
-        "INT-06: combined P74 auxiliary views and GD-04 events require wire 38"
+        PROTOCOL_VERSION, 40,
+        "D-110 / BR-AX12: combined social messages and tiered views require wire 40"
     );
 }
 
@@ -490,4 +490,79 @@ fn gd01_wire36_appends_gods_and_retains_legacy_tags() {
     );
     state.phase = tbg_core::Phase::Running;
     assert!(encode(&tbg_core::Rejection::LaneFull).len() <= 2);
+}
+
+// D-110 / IC-05: existing variants retain their tags; all P75 additions are appended once.
+#[test]
+fn p75_social_tags_and_encodings_are_frozen() {
+    use tbg_core::protocol::*;
+    use tbg_core::Seat;
+    assert_eq!(
+        encode(&ClientMsg::ChatSend { text: "A".into() }),
+        [27, 1, 65]
+    );
+    assert_eq!(encode(&ClientMsg::EmojiSend { slot: 2 }), [28, 2]);
+    assert_eq!(
+        encode(&ServerMsg::Chat {
+            from: Seat::A,
+            text: "A".into()
+        }),
+        [38, 0, 1, 65]
+    );
+    assert_eq!(
+        encode(&ServerMsg::Emoji {
+            from: Seat::B,
+            slot: 2
+        }),
+        [39, 1, 2]
+    );
+    assert_eq!(
+        encode(&ServerMsg::SocialRefused {
+            reason: SocialRefusal::Disabled
+        }),
+        [40, 4]
+    );
+    assert_eq!(
+        encode(&ServerMsg::AccountSuspended {
+            until_unix: None,
+            reason: SuspensionReason::Other
+        }),
+        [41, 0, 7]
+    );
+    let social = MatchSocial {
+        chat: ChatPermission::Disabled,
+        emojis: true,
+        custom_emojis: false,
+        loadouts: std::array::from_fn(|_| {
+            std::array::from_fn(|slot| EmojiRef::Standard { id: slot as u8 })
+        }),
+    };
+    assert_eq!(
+        encode(&ServerMsg::MatchSocial(Box::new(social))),
+        [37, 1, 1, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 1, 0, 2]
+    );
+}
+#[test]
+fn p75_decoders_refuse_invalid_custom_layouts_before_client_decode() {
+    use tbg_core::protocol::*;
+    let bad = EmojiRef::Custom {
+        id: [1; 16],
+        frame_px: 128,
+        frames: 24,
+        columns: 6,
+        delays_ms: vec![1000; 24],
+    };
+    assert!(!bad.valid());
+    assert!(decode_server(&encode(&ServerMsg::Chat {
+        from: tbg_core::Seat::A,
+        text: "a".repeat(121)
+    }))
+    .is_err());
+    let social = MatchSocial {
+        chat: ChatPermission::Allowed,
+        emojis: true,
+        custom_emojis: true,
+        loadouts: std::array::from_fn(|_| std::array::from_fn(|_| bad.clone())),
+    };
+    assert!(decode_server(&encode(&ServerMsg::MatchSocial(Box::new(social)))).is_err());
 }

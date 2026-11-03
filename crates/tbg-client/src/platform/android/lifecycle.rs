@@ -20,6 +20,7 @@ pub fn poll(
     mut account: ResMut<ui::account::Account>,
     mut toasts: ResMut<ui::Toasts>,
     mut training: ResMut<crate::training::Requests>,
+    mut chat: ResMut<ui::match_chat::Chat>,
     state: Res<State<GameState>>,
     lang: Res<crate::i18n::Lang>,
     sinks: Query<&AudioSink>,
@@ -57,6 +58,11 @@ pub fn poll(
             if event["type"] == "back" {
                 if ui::textform::is_open(&form) {
                     ui::textform::close(&mut form);
+                } else if ui::p75::modal() {
+                    ui::p75::request(ui::p75::Action::Close);
+                } else if chat.expanded {
+                    chat.expanded = false;
+                    chat.focused = false;
                 } else if *state.get() == GameState::Menu {
                     shell.panel = Panel::Lobby;
                     shell.dirty = true;
@@ -71,6 +77,14 @@ pub fn poll(
                     queue.0.push(ui::UiAction::ToMenu);
                 } else {
                     queue.0.push(ui::UiAction::Deselect);
+                }
+            } else if event["type"] == "image-picked" {
+                if let (Some(id), Some(name), Some(success)) = (
+                    event["id"].as_u64(),
+                    event["name"].as_str(),
+                    event["success"].as_bool(),
+                ) {
+                    crate::platform::file_pick::android::finish(id, name, success);
                 }
             } else if event["type"] == "link-unavailable" {
                 toasts.push_for(lang.key("mobile.link_unavailable"), 4.);
