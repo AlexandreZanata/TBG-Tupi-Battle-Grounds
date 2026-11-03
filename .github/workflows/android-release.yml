@@ -83,6 +83,8 @@ jobs:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ needs.scope.outputs.source }}
+          # The APK inspector proves ancestry from the retained Linux reference.
+          fetch-depth: 0
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; compiler pinned by input
         with:

@@ -116,6 +116,11 @@ storage. Public ARM64 bytes and hosted-builder attestations must still pass the
 actual main pipeline. Final CI/publication state is recorded in
 [PR 63](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/63).
 
+Before main publication, workflow inspection found that checkout's default shallow
+history would omit the pinned Linux ancestor required by the existing APK
+inspector. Android main builds now fetch full history for that ancestry proof;
+no source-ancestry guard was removed. Actionlint/workflow policy were rechecked.
+
 - public55-reference-lobby.png: 7986739d34d598116b6c8e4f99d0534df6f393bf1162b067bb0d58057bb818d3
 
 - public55-practice-start-options.png: c62ad52d18ae08aa81448bc69fc142127333ba21cb75eafffc9b8bf9f5e21633
