@@ -1932,5 +1932,6 @@
   "mobile.training.play_pause": "Play / pause",
   "mobile.training.step": "One tick",
   "mobile.training.reset": "Reset",
-  "mobile.training.back": "Catalog"
+  "mobile.training.back": "Catalog",
+  "battle.evolution": "Evolution"
 }

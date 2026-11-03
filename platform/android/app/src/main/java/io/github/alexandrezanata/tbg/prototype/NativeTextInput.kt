@@ -9,7 +9,6 @@ import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import org.json.JSONObject
@@ -50,41 +49,55 @@ internal class NativeTextInput(private val activity: MainActivity) {
             setText(request.optString("value").take(limit))
             setSelection(text.length)
         }
+        val density = activity.resources.displayMetrics.density
+        val prompt = TextView(activity).apply {
+            text = request.getString("title")
+            textSize = 14f
+            maxLines = 2
+            movementMethod = android.text.method.ScrollingMovementMethod.getInstance()
+            isVerticalScrollBarEnabled = true
+        }
+        val cancel = android.widget.Button(activity).apply {
+            text = request.getString("cancel")
+            minWidth = (48 * density).toInt()
+            textSize = 14f
+        }
+        val done = android.widget.Button(activity).apply {
+            text = request.getString("done")
+            minWidth = (48 * density).toInt()
+            textSize = 14f
+        }
+        field.hint = request.getString("heading")
+        field.contentDescription = request.getString("title")
+        // A short landscape IME can leave only ~110dp. Keep the field and all
+        // essential actions on one 48dp row; the full prompt scrolls above it.
         val content = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
-            val density = resources.displayMetrics.density
-            val padding = (12 * density).toInt()
-            setPadding(padding, padding, padding, padding)
-            if (request.getString("heading") != request.getString("title")) {
-                addView(TextView(activity).apply {
-                    text = request.getString("title")
-                    textSize = 14f
-                    setPadding(0, 0, 0, (4 * density).toInt())
-                })
-            }
+            setPadding((4 * density).toInt(), (4 * density).toInt(),
+                (4 * density).toInt(), (4 * density).toInt())
+            addView(prompt)
             addView(LinearLayout(activity).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = android.view.Gravity.CENTER_VERTICAL
-                addView(field, LinearLayout.LayoutParams(0, (48 * density).toInt(), 1f))
+                val rowHeight = (48 * density).toInt()
+                addView(field, LinearLayout.LayoutParams(0, rowHeight, 1f))
                 if (secret) addView(CheckBox(activity).apply {
                     text = request.getString("reveal_short")
                     contentDescription = request.getString("reveal")
-                    minHeight = (48 * density).toInt()
+                    minHeight = rowHeight
                     minWidth = (48 * density).toInt()
                     setOnCheckedChangeListener { _, checked ->
                         field.transformationMethod = if (checked) null else PasswordTransformationMethod.getInstance()
                         field.setSelection(field.text.length)
                     }
-                })
+                }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, rowHeight))
+                addView(cancel, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, rowHeight))
+                addView(done, LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, rowHeight))
             })
         }
-        val scroll = ScrollView(activity).apply { addView(content) }
         var submitted = false
         val modal = AlertDialog.Builder(activity)
-            .setTitle(request.getString("heading"))
-            .setView(scroll)
-            .setPositiveButton(request.getString("done"), null)
-            .setNegativeButton(request.getString("cancel")) { _, _ -> }
+            .setView(content)
             .create()
         fun submit() {
             if (submitted) return
@@ -100,8 +113,9 @@ internal class NativeTextInput(private val activity: MainActivity) {
             field.text.clear()
             if (dialog === modal) dialog = null
         }
+        cancel.setOnClickListener { modal.cancel() }
+        done.setOnClickListener { submit() }
         modal.setOnShowListener {
-            modal.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener { submit() }
             field.setOnEditorActionListener { _, action, _ ->
                 if (action == EditorInfo.IME_ACTION_DONE) { submit(); true } else false
             }
@@ -115,6 +129,7 @@ internal class NativeTextInput(private val activity: MainActivity) {
         }
         dialog = modal
         modal.show()
+        modal.window?.setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.WRAP_CONTENT)
     }
 
     fun dismiss() { activity.runOnUiThread { dialog?.cancel() } }

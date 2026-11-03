@@ -19,6 +19,7 @@ pub fn poll(
     mut form: NonSendMut<ui::textform::ActiveForm>,
     mut account: ResMut<ui::account::Account>,
     mut toasts: ResMut<ui::Toasts>,
+    mut training: ResMut<crate::training::Requests>,
     state: Res<State<GameState>>,
     lang: Res<crate::i18n::Lang>,
     sinks: Query<&AudioSink>,
@@ -64,6 +65,8 @@ pub fn poll(
                         .extend([ui::UiAction::ClosePanel, ui::UiAction::CloseRanking]);
                 } else if *state.get() == GameState::Queue {
                     queue.0.push(ui::UiAction::Cancel);
+                } else if *state.get() == GameState::Training {
+                    training.0.push(crate::training::Action::Back);
                 } else if *state.get() == GameState::Result {
                     queue.0.push(ui::UiAction::ToMenu);
                 } else {

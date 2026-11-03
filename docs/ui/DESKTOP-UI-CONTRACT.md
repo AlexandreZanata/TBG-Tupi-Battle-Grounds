@@ -1013,3 +1013,8 @@ all server-derived prices/progress while shielding background actions. Scroll
 ownership permits a viewport's own buttons and blocks unrelated modal branches.
 Desktop geometry and all motion/gameplay remain unchanged. Runtime evidence and
 pending targets are recorded in the P69 continuation report.
+
+P69 native IME keeps essential actions together above short landscape keyboards;
+Android OS Back follows the existing Training editor return action. Native
+Fortification tier and Evolution headings use equivalent localized copy, with
+desktop geometry retained. Actual observations are in the P69 continuation report.

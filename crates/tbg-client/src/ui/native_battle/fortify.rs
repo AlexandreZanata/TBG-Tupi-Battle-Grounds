@@ -308,8 +308,9 @@ fn field_text(
     match field {
         Field::Name => crate::i18n::content::stronghold_name(lang, tower.kind).into(),
         Field::Tier => format!(
-            "Tier {} / 2{}",
-            tower.tier,
+            "{}{}",
+            lang.key("fortify.tier")
+                .replace("{tier}", &tower.tier.to_string()),
             if tower.tier == 0 {
                 String::new()
             } else {

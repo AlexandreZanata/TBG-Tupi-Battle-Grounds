@@ -412,9 +412,9 @@ fn field_text(
             "{} · {}",
             r.name,
             if view.is_some_and(|v| v.units.iter().any(|u| Some(u.id) == id && u.tier >= 2)) {
-                lang.t(crate::i18n::Msg::EvolveFully)
+                lang.t(crate::i18n::Msg::EvolveFully).to_owned()
             } else {
-                "Evolution"
+                lang.key("battle.evolution")
             }
         ),
         Field::Evolution(branch) => evolution_text(view, id, *branch, lang),
