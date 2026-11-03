@@ -618,6 +618,24 @@ Installed Linux build `0.1.0-2b7775169a4b` with the local installer
 capture with exit 0 and only Xvfb display warnings. Evidence:
 `/tmp/tbg-p77-range/playtest.png` and `/tmp/tbg-p77-range/smoke.log`.
 
+### Committed aggro and Nexus exits (M-07, M-72)
+
+Target selection preserves an eligible focus when other enemies move
+closer. It chooses a new target only after invalidation or leaving the
+pursuit radius. Heals and control casts retain valid recipients. Shared
+rendering faces the interpolated target during pursuit and lets stale aim
+expire after the attack clip. Purchases and waves originate at the
+Nexus plinth. Both Nexus Towers and the Mid Base Tower were moved off
+the Mid road's clearance envelope so large champions can leave it.
+
+34 focused contracts passed across aggro, deployment, champion range
+and combat, territory vision and existing MOBA rules (full bot match
+excluded). The deployment test verifies the forward position and
+distance of all eight immediate spawns from each Nexus, then checks
+their advance. The aggro test changes the nearest enemy during pursuit
+and verifies retargeting after the locked target leaves. Full desktop
+motion comparison remains pending.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 champion Evolution forms and coverage beyond the automatic base kits ·

@@ -7,19 +7,26 @@ pub fn target(g: &MobaMatch, u: &Unit) -> Option<Option<u32>> {
     for a in abilities(u) {
         match a {
             Ability::Brew { .. } => {
-                return Some(
-                    nearby(g, u, u.pos, u.stats.range, u8::MAX, None, true)
-                        .into_iter()
-                        .filter(|id| g.unit(*id).is_some_and(|v| afflicted(v, g.tick)))
-                        .next(),
-                )
+                let targets = nearby(g, u, u.pos, u.stats.range, u8::MAX, None, true)
+                    .into_iter()
+                    .filter(|id| g.unit(*id).is_some_and(|v| afflicted(v, g.tick)));
+                return Some(preferred(targets, u.target));
             }
-            Ability::Puppet { .. } => return Some(puppets(g, u).first().copied()),
+            Ability::Puppet { .. } => return Some(preferred(puppets(g, u).into_iter(), u.target)),
             _ => {}
         }
     }
     None
 }
+fn preferred(mut targets: impl Iterator<Item = u32>, current: u32) -> Option<u32> {
+    let first = targets.next()?;
+    if first == current || targets.any(|id| id == current) {
+        Some(current)
+    } else {
+        Some(first)
+    }
+}
+
 fn afflicted(u: &Unit, now: u32) -> bool {
     let f = &u.fx;
     f.root_until > now

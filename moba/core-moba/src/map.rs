@@ -44,12 +44,13 @@ const BLUE_TOWERS: [(TowerTier, Option<Lane>, (i32, i32)); 11] = [
     (TowerTier::Base, Some(Lane::Top), (26, 50)),
     (TowerTier::Outer, Some(Lane::Mid), (73, 79)),
     (TowerTier::Inner, Some(Lane::Mid), (56, 62)),
-    (TowerTier::Base, Some(Lane::Mid), (40, 46)),
+    (TowerTier::Base, Some(Lane::Mid), (36, 50)),
     (TowerTier::Outer, Some(Lane::Bot), (112, 25)),
     (TowerTier::Inner, Some(Lane::Bot), (78, 25)),
     (TowerTier::Base, Some(Lane::Bot), (50, 26)),
-    (TowerTier::Nexus, None, (31, 38)),
-    (TowerTier::Nexus, None, (38, 31)),
+    // The mid exit must fit the widest champion between the fixed towers.
+    (TowerTier::Nexus, None, (31, 44)),
+    (TowerTier::Nexus, None, (44, 31)),
 ];
 
 /// Blue-side camps (between Blue's lanes, south of the river); Red's are mirrored.
@@ -72,6 +73,8 @@ pub const PLAZA: (i32, i32) = (100, 100);
 pub const PLAZA_RADIUS: i32 = 10;
 /// Radius of each base plateau around a Stronghold.
 pub const BASE_RADIUS: i32 = 26;
+/// Radius of the Nexus plinth and the origin of its deployment exits, in millimetres.
+pub const NEXUS_PLINTH_RADIUS: i32 = 5_500;
 pub const CAMP_RADIUS: i32 = 7;
 
 /// Reflection across the anti-diagonal: Blue layout → Red layout.

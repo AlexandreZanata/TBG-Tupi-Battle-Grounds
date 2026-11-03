@@ -103,7 +103,11 @@ fn tower(p: &mut Vec<Part>, tier: TowerTier, team: Team, damage: u8) {
 }
 
 fn stronghold(p: &mut Vec<Part>, team: Team) {
-    p.push((Shape::Cyl(5.5, 1.2), STONE, at(0.0, 0.6, 0.0)));
+    p.push((
+        Shape::Cyl(tbg_moba_core::map::NEXUS_PLINTH_RADIUS as f32 / 1000.0, 1.2),
+        STONE,
+        at(0.0, 0.6, 0.0),
+    ));
     p.push((
         Shape::Cyl(4.3, 1.0),
         Color::srgb(0.5, 0.49, 0.47),

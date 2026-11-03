@@ -190,17 +190,22 @@ fn land(m: &mut MobaMatch, i: usize, j: usize) {
 
 fn most_injured_ally(m: &MobaMatch, i: usize) -> Option<usize> {
     let a = &m.units[i];
-    let mut best: Option<(i64, usize)> = None;
     let reach = a.stats.range;
+    let eligible = |u: &Unit| {
+        u.side == a.side
+            && (u.id != a.id || a.kind != UnitKind::Troop(crate::Champion::GustDrummer))
+            && u.alive()
+            && u.mobile()
+            && u.hp < u.max_hp
+            && u.pos.within(a.pos, reach)
+    };
+    if let Some(current) = m.slot(a.target).filter(|&j| eligible(&m.units[j])) {
+        return Some(current);
+    }
+    let mut best: Option<(i64, usize)> = None;
     m.grid.near(a.pos, reach, |k| {
         let u = &m.units[k];
-        if u.side != a.side
-            || (u.id == a.id && a.kind == UnitKind::Troop(crate::Champion::GustDrummer))
-            || !u.alive()
-            || !u.mobile()
-            || u.hp >= u.max_hp
-            || !u.pos.within(a.pos, reach)
-        {
+        if !eligible(u) {
             return;
         }
         let ratio = u.hp as i64 * 1000 / u.max_hp.max(1) as i64;
@@ -242,19 +247,24 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
         _ => (None, 0),
     };
     let keep = if a.mobile() {
-        (a.stats.sight * 3 / 2).max(a.stats.range)
+        a.stats.sight.max(a.stats.range) + a.stats.sight / 2
     } else {
         a.stats.range
     };
     let current = m.slot(a.target).filter(|&j| {
         let b = &m.units[j];
+        let limit = if a.mobile() {
+            keep + b.stats.radius
+        } else {
+            champions::reach(a, b)
+        };
         attackable(vul, a, b)
-            && a.pos.within(b.pos, keep + b.stats.radius)
+            && a.pos.within(b.pos, limit)
             && anchor.is_none_or(|p| b.pos.within(p, leash))
     });
-    // Neutral monsters never pick fights; others re-scan every 10 ticks.
-    let rescan = !matches!(a.brain, Brain::Neutral { .. }) && (m.tick + a.id).is_multiple_of(10);
-    if current.is_some() && !rescan || matches!(a.brain, Brain::Neutral { .. }) {
+    // Preserve commitment through movement and cooldown. Neutral monsters
+    // may only acquire through the retaliation hook.
+    if current.is_some() || matches!(a.brain, Brain::Neutral { .. }) {
         return current;
     }
     // Weapon acquisition must reach the end of the weapon range. The
@@ -264,7 +274,7 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
     } else {
         a.stats.range
     };
-    let mut best: Option<(bool, i64, usize)> = None;
+    let mut best: Option<(bool, bool, i64, usize)> = None;
     m.grid.near(a.pos, sight + 7 * crate::geom::MM, |k| {
         let b = &m.units[k];
         if !attackable(vul, a, b) || !a.pos.within(b.pos, sight + b.stats.radius) {
@@ -275,9 +285,14 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
         }
         let d = a.pos.dist2(b.pos);
         let not_guard = !champions::abilities(b).contains(&tbg_core::content::Ability::Guard);
-        if best.is_none_or(|old| (not_guard, d, k) < old) {
-            best = Some((not_guard, d, k));
+        let out_of_range = !a.pos.within(b.pos, champions::reach(a, b));
+        if out_of_range && !a.mobile() {
+            return;
+        }
+        let priority = (not_guard, out_of_range, d, k);
+        if best.is_none_or(|old| priority < old) {
+            best = Some(priority);
         }
     });
-    best.map(|(_, _, k)| k).or(current)
+    best.map(|(_, _, _, k)| k)
 }

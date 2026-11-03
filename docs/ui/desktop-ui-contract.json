@@ -723,6 +723,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-k-aggro-and-nexus-exits",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Committed facing while chasing and attacking, aim release, Nexus spawn heading and widened Mid corridor on both teams",
+      "linux": "focused simulation contracts passed; full motion pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
     }
   ]
 }

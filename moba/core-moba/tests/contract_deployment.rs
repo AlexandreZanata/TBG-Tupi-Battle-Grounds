@@ -31,6 +31,24 @@ fn crowded_base_drains_purchased_troops_through_their_own_gate() {
             8,
             "every purchase must deploy immediately"
         );
+        let nexus = map::stronghold(team);
+        for unit in game.units.iter().filter(|u| u.owner == Some(seat)) {
+            let Brain::Lane { lane, waypoint: 1 } = unit.brain else {
+                panic!("a new troop must start on the first leg of its lane");
+            };
+            let exit = map::waypoint(lane, team, 1);
+            let dx = i64::from(exit.x - nexus.x);
+            let dy = i64::from(exit.y - nexus.y);
+            let px = i64::from(unit.pos.x - nexus.x);
+            let py = i64::from(unit.pos.y - nexus.y);
+            let length = (dx * dx + dy * dy).isqrt();
+            assert!(px * dx + py * dy > 0, "must spawn ahead of the Nexus");
+            assert!((px * dy - py * dx).abs() <= i64::from(map::LANE_HALF_WIDTH) * length);
+            assert!(nexus.within(
+                unit.pos,
+                map::NEXUS_PLINTH_RADIUS + unit.stats.radius + map::LANE_HALF_WIDTH
+            ));
+        }
         let starts: Vec<_> = game
             .units
             .iter()

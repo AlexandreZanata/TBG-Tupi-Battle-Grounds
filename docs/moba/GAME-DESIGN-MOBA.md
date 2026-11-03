@@ -71,8 +71,16 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
 - **M-06** Every unit has HP, damage, range, attack interval, speed, armor
   (% damage ignored), sight and a body radius (table in §6).
 - **M-07** Decisions use the start-of-tick state and all damage lands at
-  once (simultaneous resolution). Targets: keep a valid one, re-scan every
-  10 ticks for the nearest attackable enemy in sight.
+  once (simultaneous resolution). **Proposed owner revision:** commit to
+  a valid target through pursuit, windup and cooldown. After the windup,
+  release dead, protected, carried or otherwise invalid enemies and
+  enemies beyond pursuit range. Mobile pursuit keeps the larger of
+  weapon range and sight plus half the unit's sight, with the existing
+  target-body allowance. Fixed attackers keep enemies within actual
+  attack range. When acquiring, prioritize Guard, then candidates already
+  in reach, then nearest distance and lowest id. A healer keeps an
+  eligible wounded patient, and basic control casts keep eligible
+  recipients. Neutral camp retaliation and leash still apply.
 - **M-08** Tower order: an Inner Tower is invulnerable while its lane's
   Outer stands; a Base while its Inner stands; Nexus Towers while all three
   Base Towers stand; the Stronghold while either Nexus Tower stands.
@@ -284,8 +292,11 @@ new camps never spawn them. Their legacy stats are unchanged.
 
 
 - **M-72** Proposed owner revision: purchases and Minion waves deploy
-  immediately on the chosen route's exit. Lane deployments use the first
-  road segment and prefer a free cell clear of static structures. If the
+  immediately from the Nexus. Lane deployments use the first road
+  segment, from the Nexus plinth (5.5 units) to its edge plus the unit
+  radius and PK-01 gap. They prefer a free cell clear of static structures.
+  The Mid exit passes between the Nexus Towers at Blue (31,44)/(44,31)
+  and beside the Mid Base Tower at (36,50), mirrored for Red. If the
   exit is crowded, they choose the least-overlapped position and resolve
   allied crowding as they advance. Mobile allies exert bounded pressure
   and never hard-block each other. The lateral component follows the

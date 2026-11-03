@@ -68,10 +68,8 @@ fn deploy_at_exit(m: &mut MobaMatch, order: Deployment) {
     let length = a.dist(b).max(1) as i32;
     let dx = b.x - a.x;
     let dy = b.y - a.y;
-    // PK-01: start at the deployment line, find an open lateral cell, then
-    // try ranks behind it. Each 5v5 route has its own deployment strip.
-    let gate = (crate::map::BASE_RADIUS * MM + radius * 2).min(length - content::WAYPOINT_RADIUS);
-    let rear = content::base_stats(UnitKind::Stronghold).radius + radius + GAP;
+    // Start beside the Nexus, facing the first leg of the chosen route.
+    let gate = map::NEXUS_PLINTH_RADIUS + radius + GAP;
     let side = (crate::map::LANE_HALF_WIDTH - radius).max(0) / CELL;
     let blockers: Vec<_> = m
         .units
@@ -94,7 +92,10 @@ fn deploy_at_exit(m: &mut MobaMatch, order: Deployment) {
                 .div_euclid(i64::from(length)) as i32,
     };
     let mut best = None;
-    'ranks: for progress in (rear..=gate).rev().step_by((radius / 2).max(CELL) as usize) {
+    'ranks: for progress in (map::NEXUS_PLINTH_RADIUS..=gate)
+        .rev()
+        .step_by(CELL as usize)
+    {
         for cell in 0..=side * 2 {
             let lateral = ((cell + 1) / 2) * if cell % 2 == 0 { -CELL } else { CELL };
             let pos = point(progress, lateral);

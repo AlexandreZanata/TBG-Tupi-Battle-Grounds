@@ -1421,3 +1421,14 @@ attack at the new distance. Check close melee contact, ranged release
 and projectile travel, support casts, and shots crossing Team vision.
 Focused Linux core checks cover reach and acquisition. Desktop motion
 comparison on Linux, Windows and web remains pending.
+
+
+## P77 K — committed facing and Nexus exits
+
+The shared 5v5 desktop client faces the authoritative target while
+pursuing it, using interpolated endpoints and the existing turn limit.
+A cached aim survives only for an attack clip. New units near their
+Nexus face out of its plinth. The three mirrored route exits and widened
+Mid base corridor use the shared map geometry. Check motion while
+pursuing competing targets, target loss, crowd pressure, and spawn
+heading on every route. Full desktop motion comparisons remain pending.

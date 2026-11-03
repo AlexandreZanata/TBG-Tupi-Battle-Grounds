@@ -409,16 +409,27 @@ fn spawn_unit(
             Visibility::Visible,
         ))
         .id();
-    let yaw = match u.side {
-        Side::Team(tbg_moba_core::Team::Red) => -std::f32::consts::PI * 0.25,
-        _ => std::f32::consts::PI * 0.75,
-    };
+    let stats = tbg_moba_core::content::base_stats(u.kind);
+    let yaw = u.side.team().map_or(0.0, |team| {
+        let nexus = tbg_moba_core::map::stronghold(team);
+        let offset = pos - Vec2::new(nexus.x as f32, nexus.y as f32) / 1000.0;
+        let exit_radius = (tbg_moba_core::map::NEXUS_PLINTH_RADIUS
+            + stats.radius
+            + tbg_moba_core::map::LANE_HALF_WIDTH) as f32
+            / 1000.0;
+        if offset.length_squared() <= exit_radius.powi(2) && offset != Vec2::ZERO {
+            offset.x.atan2(-offset.y)
+        } else if team == tbg_moba_core::Team::Blue {
+            std::f32::consts::PI * 0.75
+        } else {
+            -std::f32::consts::PI * 0.25
+        }
+    });
     let champion = champions::champion_of(u.kind);
     let scale = champion.map_or(models::scale(u.kind), |_| champions::scale(u.kind));
     let bar_height = champion.map_or(models::bar_height(u.kind), |k| {
         lib.get(k, 0, 0).overhead * scale + 0.5
     });
-    let stats = tbg_moba_core::content::base_stats(u.kind);
     let hold = champion
         .and_then(|k| tbg_core::content::def(k).on_hit)
         .map_or(0.0, |hit| match hit {
@@ -524,14 +535,13 @@ fn animate(
         }
         let pos = v.prev.lerp(v.curr, alpha);
         let step = v.curr - v.prev;
-        let facing = if step.length_squared() > 1e-4 {
-            Some(step)
-        } else {
-            targets
-                .get(&v.target)
-                .map(|(t, _)| *t - v.curr)
-                .filter(|d| d.length_squared() > 1e-4)
-        };
+        // A committed target sets facing even when collision adds a sideways
+        // step. Interpolate both endpoints on the same clock.
+        let facing = targets
+            .get(&v.target)
+            .map(|(at, _)| *at - pos)
+            .filter(|delta| delta.length_squared() > 1e-4)
+            .or_else(|| (step.length_squared() > 1e-4).then_some(step));
         if let Some(d) = facing {
             // The shared rigs face +Z; the map's north is -Z.
             let goal = d.x.atan2(-d.y);
@@ -555,7 +565,14 @@ fn animate(
             let aim = targets.get(&v.target);
             a.aim_at = aim
                 .map(|(p, _)| to_world(p.x, p.y, ground_y(*p) + chest))
-                .or_else(|| v.aim.map(|(_, p)| p));
+                .or_else(|| {
+                    matches!(
+                        a.clip_time().0,
+                        Clip::AttackMelee | Clip::AttackRanged | Clip::Cast
+                    )
+                    .then(|| v.aim.map(|(_, p)| p))
+                    .flatten()
+                });
             a.aim_is_ally = aim.is_some_and(|(_, side)| *side == v.side);
             let mut at = to_world(pos.x, pos.y, ground_y(pos));
             if let Some((mount, _)) = targets.get(&v.effect.carrier) {
