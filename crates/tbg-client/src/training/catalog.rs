@@ -46,14 +46,14 @@ pub fn spawn(
                 ("practice", Tab::Practice),
             ] {
                 #[cfg_attr(not(target_os = "android"), allow(unused_mut))]
-                let mut control = row.spawn(skin::control(
+                let mut _control = row.spawn(skin::control(
                     lang.key(&format!("training.{key}")),
                     Action::Tab(tab),
                     220.,
                     c.tab == tab,
                 ));
                 #[cfg(target_os = "android")]
-                control.insert(Node {
+                _control.insert(Node {
                     flex_grow: 1.,
                     flex_basis: px(0),
                     min_width: px(48),

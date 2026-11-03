@@ -23,7 +23,9 @@ pub fn spawn(
     ));
     // The native resume record (P66) lives in the OS vault; the browser has none.
     #[cfg(not(target_arch = "wasm32"))]
-    if !crate::platform::resume::available() {
+    if !crate::platform::resume::available()
+        && (!cfg!(target_os = "android") || account.profile.is_some())
+    {
         root.spawn(kit::muted(
             lang.key(if cfg!(target_os = "android") {
                 "auth.session_only"

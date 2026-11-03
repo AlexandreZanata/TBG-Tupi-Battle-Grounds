@@ -948,3 +948,9 @@ Coverage: Arcanas, Strongholds, Arenas, menu kit panels, Settings account
 actions, temporary account states, save-key modal, toast stacking and native
 IME/reveal/Done/Back. Corrected emulator journeys and updated same-source
 desktop observations remain pending.
+
+P69 internal loopback diagnostics now report allocated/text dimensions and
+positions for overflowing UI labels, without recording their contents. This
+measures Arena/Ranking layout defects before another geometry change. Guest
+Android Settings no longer claims an authenticated session lifetime; signed-in
+session information remains in Settings. Desktop presentation is unchanged.

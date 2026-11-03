@@ -57,6 +57,13 @@ pub fn census(
     windows: Query<(Entity, &Window, Has<bevy::window::PrimaryWindow>)>,
     cameras: Query<(Entity, &Camera, &bevy::camera::RenderTarget, Has<Camera3d>)>,
     nodes: Query<&ComputedNode>,
+    text_bounds: Query<(
+        Entity,
+        &ComputedNode,
+        &UiGlobalTransform,
+        &InheritedVisibility,
+        &bevy::text::TextLayoutInfo,
+    )>,
     visible_nodes: Query<&InheritedVisibility, With<Node>>,
     meshes: Query<(&InheritedVisibility, &ViewVisibility), With<Mesh3d>>,
     roots: Query<&ComputedNode, (With<Node>, Without<ChildOf>)>,
@@ -83,6 +90,18 @@ pub fn census(
             camera.viewport.as_ref().map(|v| (v.physical_position, v.physical_size)),
             camera.physical_viewport_size()
         );
+    }
+    for (entity, node, transform, visible, text) in &text_bounds {
+        if visible.get()
+            && node.size.min_element() > 0.
+            && text.size.cmpgt(node.size + Vec2::splat(1.)).any()
+        {
+            // Dimensions only: even the explicit save-key screen must never log text.
+            info!(
+                "TBG_ANDROID_TEXT_BOUNDS entity={entity} center={:?} allocated={:?} glyphs={:?}",
+                transform.translation, node.size, text.size
+            );
+        }
     }
     let sizes: Vec<_> = roots.iter().map(|n| n.size).take(4).collect();
     info!(
