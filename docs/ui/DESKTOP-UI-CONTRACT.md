@@ -1351,3 +1351,10 @@ end on release/focus loss. HUD/minimap starts never initiate map dragging;
 minimap navigates the camera, Space/H returns to the Team base. Shared
 input, UI and automatic champion motion on Linux/Windows/web; all gesture,
 pixel and motion observations pending, with no parity claim.
+
+P77 installed Linux observation (2026-11-03, `e0cbfe6c3645`): one
+1600×900 overview from the installed binary loaded the scene, three cards,
+no-avatar Seat HUD and map/minimap fog without game/shader errors. This is
+scoped startup/overview evidence; gesture interactions, full detail/pixel/
+motion coverage, performance and Windows/web remain pending. See the P77
+installation follow-up for the exact command and local screenshot/log.

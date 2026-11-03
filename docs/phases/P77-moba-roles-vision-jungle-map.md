@@ -445,6 +445,39 @@ GPU draw-call measurement is claimed. Windows/desktop-web pixel and motion
 checks remain pending (P81); Linux-only compilation proves no visual
 correspondence. Owner look/fun sign-off, balance and release remain open.
 
+### Linux installation follow-up (owner request, 2026-11-03)
+
+The owner explicitly requested updating the existing separate 5v5 Linux
+playtest. Ran the existing installer with `CARGO_TARGET_DIR=/data/tbg-moba-target`
+and the PKG_CONFIG_PATH recorded above. The installer holds the shared
+nonblocking validation lock and uses two Cargo jobs. Cargo briefly waited
+for its package cache, then continued compiling; the existing process
+finished during a chat interruption. No second build was started.
+
+The existing `TBG Arena 5v5` menu entry and both `~/.local/bin/tbg-moba*`
+links now target `~/.local/opt/tbg-moba/0.1.0-e0cbfe6c3645/`.
+Installed `tbg-moba --version`: `TBG Arena 5v5 0.1.0 · MOBA protocol 2`.
+Installed client and cached build have identical SHA-256:
+`bc34e28453de785f406078489090b711b67653e470bcbf7b1457d35ece4be076`.
+
+Scoped installed-binary smoke command:
+
+```bash
+timeout --signal=TERM --kill-after=5s 45s xvfb-run -a -s '-screen 0 1920x1080x24' \
+  env WAYLAND_DISPLAY= RUST_LOG=warn /home/iiii/.local/bin/tbg-moba \
+  --capture /tmp/tbg-p77-linux-update/installed-overview.png \
+  --seed 11 --warp 60 --role mid --overview
+```
+
+Exit 0. Visually inspected the resulting 1600×900 image: three Shop cards,
+strategic Seat HUD, map/minimap fog and refined scene loaded. No game or
+shader errors; the log contains only Xvfb XSETTINGS/display-size warnings.
+Local evidence: `/tmp/tbg-p77-linux-update/smoke.log` and the PNG above.
+This supersedes the installation/initial shader-startup deferrals only.
+Full visual/motion/gesture checks, tests, performance, Windows/web and
+owner look/fun approval remain pending. No 1v1 package or installation
+was changed.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 1v1 champion abilities and Evolutions in 5v5 (automatic, no Commander kit/orders) ·
