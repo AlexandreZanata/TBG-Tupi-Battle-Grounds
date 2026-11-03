@@ -110,7 +110,7 @@ as stylized toy figurines — no rigging pipeline. Details:
 
 ```
 crates/tbg-core    rules, content, bot, protocol (shared, deterministic)
-crates/tbg-client  Bevy browser client
+crates/tbg-client  Bevy Linux/Windows and browser client
 crates/tbg-server  authoritative game server
 docs/              GAME-DESIGN, ARCHITECTURE, ROADMAP, DECISIONS, phases/
 archive/           legacy Unity/Nakama/Python project (read-only)
@@ -118,7 +118,7 @@ archive/           legacy Unity/Nakama/Python project (read-only)
 
 ## Build and check
 
-Requires `rustup`; `rust-toolchain.toml` selects stable and installs the
+Requires `rustup`; `rust-toolchain.toml` pins the compiler version and installs the
 `wasm32-unknown-unknown` target.
 
 Use [DEVELOPMENT](docs/DEVELOPMENT.md) and [VALIDATION](docs/VALIDATION.md) to choose
