@@ -513,6 +513,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-p75-expanded-chat-retains-readable-history",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared expanded chat retains bounded recent messages for touch/guest readers without keyboard focus; compact docks and emoji timing unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

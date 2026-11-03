@@ -1258,6 +1258,29 @@
             "en": "Keep existing game actions readable and reachable on landscape phones.",
             "pt-BR": "Manter as ações existentes do jogo legíveis e acessíveis no celular deitado."
           }
+        },
+        {
+          "category": "interface",
+          "subject": {
+            "en": "Match chat",
+            "pt-BR": "Chat da batalha"
+          },
+          "field": {
+            "en": "expanded controls and message history",
+            "pt-BR": "controles e histórico expandidos"
+          },
+          "before": {
+            "en": "Expanded chat blocked its own pointer controls and hid older messages without keyboard focus",
+            "pt-BR": "O chat expandido bloqueava os próprios controles e ocultava mensagens antigas sem foco no teclado"
+          },
+          "after": {
+            "en": "Chat controls remain usable while gameplay is captured, and the bounded recent log stays readable",
+            "pt-BR": "Os controles de chat continuam utilizáveis com a batalha bloqueada, e o histórico recente limitado permanece legível"
+          },
+          "reason": {
+            "en": "Support touch composition and guest readers with the same server-owned chat.",
+            "pt-BR": "Permitir composição por toque e leitura por visitantes no mesmo chat controlado pelo servidor."
+          }
         }
       ],
       "sections": {

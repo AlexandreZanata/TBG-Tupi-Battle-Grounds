@@ -340,11 +340,7 @@ fn render(
             let lines: Vec<_> = chat
                 .lines
                 .iter()
-                .filter(|(at, from, _)| {
-                    chat.mode == 0
-                        && (chat.focused || now - at < 12.)
-                        && (!chat.muted || Some(*from) == info.you)
-                })
+                .filter(|(_, from, _)| chat.mode == 0 && (!chat.muted || Some(*from) == info.you))
                 .rev()
                 .take(8)
                 .collect();

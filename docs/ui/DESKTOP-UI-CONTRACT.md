@@ -1188,3 +1188,10 @@ page size, clips and desktop camera/motion are preserved. Mobile paging gets a
 wider range label and hide/show/motion captions omit desktop keyboard hints.
 The actual42 complete-summary pass and occluded-cast failure remain distinct;
 corrected full-cast/motion/cleanup observations are pending.
+
+
+P69/P75 retained chat: expanded logs show the existing bounded recent messages
+for native touch users and guest readers regardless of keyboard focus. Compact
+docks and emoji-bubble timing remain unchanged. Actual native45 IME/delivery to
+Linux passed; its empty older-message drawer is a recorded failure. Corrected
+later reading remains pending on the next package.
