@@ -156,3 +156,26 @@ filter: commit ancestry stays available for the inspector, while historical
 art blobs are fetched only if needed. This addresses the observed multi-minute
 cold checkout without reducing source checks. No Android tag or public APK
 was created by the failed build; revision 55 remains the first public candidate.
+
+## SDK runner-path correction
+
+PR 64 and its JDK/provider smoke passed, and merged as
+`d061db6e40cecdd41ad07419d666abcc93989a57`. Its main CI run 41672338033 passed
+all seven lanes. Android run 41673897998 resolved/downloaded the reviewed JDK,
+but stopped before compilation with `sdkmanager: command not found` (exit 127).
+The runner ships the SDK at ANDROID_HOME with the manager under
+`cmdline-tools/latest/bin`; that directory is not on PATH. This is documented
+in actions/runner-images' installer and issue 13674.
+
+The common setup helper now calls that exact SDK manager path, installs the
+packages declared in toolchain.json, verifies platform/build-tools/NDK revision
+files, and exports all NDK aliases consistently. PR preflight performs the same
+SDK installation and resolves the real pinned Android Gradle plugins without
+receiving a signing secret. A focused regression covers absent PATH and rejects
+an unexpected installed platform revision. No Android tag/APK was published by
+either failed preparation run.
+
+A local ARM64 preflight attempt was deferred once because the nonblocking common
+validation lock returned 75. No Cargo process started; no other validation was
+stopped and no polling or cache bypass was used. Hosted ARM64 packaging remains
+the required shipping proof, separate from the completed x86_64 emulator smoke.

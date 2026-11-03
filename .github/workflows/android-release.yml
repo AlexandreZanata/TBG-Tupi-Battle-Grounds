@@ -38,7 +38,7 @@ jobs:
   package-contracts:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -49,6 +49,10 @@ jobs:
           java-version: ${{ env.ANDROID_JAVA_VERSION }}
       - name: Verify the public package's Java pin before main publication
         run: java -version
+      - name: Provision the same pinned SDK and resolve the Android Gradle plugins
+        run: |
+          python3 scripts/setup-android-toolchain.py
+          ./platform/android/gradlew -p platform/android help --no-parallel --max-workers=2 --console=plain
       - run: |
           python3 scripts/test-android-package.py
           python3 scripts/test-android-release.py
@@ -110,8 +114,7 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Install the pinned Android tools
         run: |
-          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
-          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> "$GITHUB_ENV"
+          python3 scripts/setup-android-toolchain.py
           cargo install cargo-ndk --version 4.1.2 --locked
       - name: Materialize the stable signing key only in private runner storage
         env:
