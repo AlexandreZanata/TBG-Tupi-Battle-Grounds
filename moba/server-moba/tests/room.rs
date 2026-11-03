@@ -3,7 +3,7 @@
 
 use futures_util::{SinkExt, StreamExt};
 use tbg_moba_core::protocol::{self, ClientMsg, ServerMsg, MOBA_PROTOCOL_VERSION};
-use tbg_moba_core::{Destination, Lane, MobaIntention, TroopKind};
+use tbg_moba_core::{Destination, Lane, MobaIntention};
 use tokio_tungstenite::tungstenite::Message;
 
 type Socket =
@@ -68,7 +68,7 @@ async fn m41_seats_come_from_connections_and_purchases_are_authoritative() {
     }
     assert!(last_tick > 0 && gold.is_some());
     let buy = ClientMsg::Intention(MobaIntention::BuyTroop {
-        troop: TroopKind::Healer,
+        slot: 0,
         to: Destination::Lane(Lane::Mid),
     });
     a.send(Message::Binary(protocol::encode(&buy).into()))

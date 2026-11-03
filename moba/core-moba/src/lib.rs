@@ -13,6 +13,7 @@ pub mod intent;
 pub mod map;
 pub mod protocol;
 pub mod rng;
+pub mod shop;
 pub mod sim;
 pub mod state;
 pub mod types;
@@ -20,4 +21,4 @@ pub mod view;
 
 pub use intent::{MobaIntention, Reject};
 pub use state::MobaMatch;
-pub use types::{Destination, Lane, Role, Seat, Team, TroopKind, UnitKind};
+pub use types::{Champion, Destination, Lane, Role, Seat, Team, UnitKind};

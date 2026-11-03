@@ -1,7 +1,7 @@
 //! Walking: lane waypoints, jungle camps, Commander modes, chasing and spacing.
 
 use super::spawn::{camp_alive, nearest_camp};
-use crate::content::{self, SLOW_PERCENT, WAYPOINT_RADIUS};
+use crate::content::{self, WAYPOINT_RADIUS};
 use crate::geom::{Pos, MM};
 use crate::map;
 use crate::state::{Brain, CommandMode, MobaMatch};
@@ -57,12 +57,8 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
                 None => continue,
             },
         };
-        let tick = m.tick;
         let u = &mut m.units[i];
-        let mut step = u.stats.speed;
-        if u.slowed_until > tick {
-            step = step * (100 - SLOW_PERCENT) / 100;
-        }
+        let step = u.stats.speed;
         u.pos.step_toward(goal, step);
         u.pos = u.pos.clamp_to_map();
     }

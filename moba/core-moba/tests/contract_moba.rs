@@ -8,7 +8,7 @@ use tbg_moba_core::protocol::{self, ClientMsg, ServerMsg, WireError, MAX_CLIENT_
 use tbg_moba_core::state::{Brain, Controller, EndReason};
 use tbg_moba_core::types::{Side, TowerTier, UnitKind};
 use tbg_moba_core::{
-    view, Destination, Lane, MobaIntention, MobaMatch, Reject, Role, Seat, Team, TroopKind,
+    view, Champion, Destination, Lane, MobaIntention, MobaMatch, Reject, Role, Seat, Team,
 };
 
 fn run(m: &mut MobaMatch, ticks: u32) {
@@ -44,7 +44,7 @@ fn m03_same_seed_and_inputs_replay_identically() {
             inputs.push((
                 Seat(4),
                 MobaIntention::BuyTroop {
-                    troop: TroopKind::Healer,
+                    slot: 0,
                     to: Destination::Lane(Lane::Bot),
                 },
             ));
@@ -91,7 +91,7 @@ fn m08_inner_tower_is_invulnerable_until_the_outer_falls() {
         y: inner.1.y,
     };
     m.spawn(
-        UnitKind::Troop(TroopKind::Colossus),
+        UnitKind::Troop(Champion::BoneBrute),
         Side::Team(Team::Red),
         None,
         near,
@@ -121,35 +121,29 @@ fn m08_inner_tower_is_invulnerable_until_the_outer_falls() {
 }
 
 #[test]
-fn m10_buying_spends_the_exact_card_price() {
+fn m10_buying_spends_the_exact_card_price_of_a_1v1_champion() {
     let mut m = MobaMatch::new(1);
     let seat = Seat(3);
-    let before = m.player(seat).gold;
-    m.apply(
-        seat,
-        MobaIntention::BuyTroop {
-            troop: TroopKind::Guardian,
-            to: Destination::Lane(Lane::Bot),
-        },
-    )
-    .unwrap();
+    m.player_mut(seat).gold = 1_000;
+    let champion = m.player(seat).offers[2];
+    assert!(tbg_moba_core::types::POOL.contains(&champion));
+    let to = Destination::Lane(Lane::Bot);
+    m.apply(seat, MobaIntention::BuyTroop { slot: 2, to })
+        .unwrap();
+    assert_eq!(m.player(seat).gold, 1_000 - content::troop_cost(champion));
+    assert!(m
+        .units
+        .iter()
+        .any(|u| u.owner == Some(seat) && u.kind == UnitKind::Troop(champion)));
+    m.player_mut(seat).gold = 0;
     assert_eq!(
-        m.player(seat).gold,
-        before - content::troop_cost(TroopKind::Guardian)
-    );
-    assert_eq!(m.troops_alive(seat), 1);
-    m.player_mut(seat).gold = 5;
-    assert_eq!(
-        m.apply(
-            seat,
-            MobaIntention::BuyTroop {
-                troop: TroopKind::Healer,
-                to: Destination::Jungle
-            }
-        ),
+        m.apply(seat, MobaIntention::BuyTroop { slot: 0, to }),
         Err(Reject::NotEnoughGold)
     );
-    assert_eq!(m.player(seat).gold, 5);
+    assert_eq!(
+        m.apply(seat, MobaIntention::BuyTroop { slot: 5, to }),
+        Err(Reject::InvalidSlot)
+    );
 }
 
 #[test]
@@ -158,13 +152,51 @@ fn m11_troop_cap_limits_alive_troops_per_player() {
     let seat = Seat(0);
     m.player_mut(seat).gold = 10_000;
     let buy = MobaIntention::BuyTroop {
-        troop: TroopKind::Healer,
+        slot: 0,
         to: Destination::Lane(Lane::Top),
     };
     for _ in 0..TROOP_CAP {
         m.apply(seat, buy).unwrap();
     }
     assert_eq!(m.apply(seat, buy), Err(Reject::TroopCap));
+}
+
+#[test]
+fn m19_shop_offers_follow_the_1v1_rules_with_locks_and_reroll() {
+    let mut m = MobaMatch::new(5);
+    let seat = Seat(7);
+    let distinct = |o: &[Champion; 5]| (0..5).all(|i| (0..i).all(|j| o[i] != o[j]));
+    assert!(distinct(&m.player(seat).offers));
+    assert_ne!(
+        m.player(Seat(0)).offers,
+        m.player(Seat(1)).offers,
+        "each seat draws its own stream"
+    );
+    m.player_mut(seat).gold = 1_000;
+    m.apply(seat, MobaIntention::ToggleLock { slot: 1 })
+        .unwrap();
+    let kept = m.player(seat).offers[1];
+    m.apply(seat, MobaIntention::Reroll).unwrap();
+    assert_eq!(m.player(seat).gold, 1_000 - content::REROLL_COST);
+    assert_eq!(
+        m.player(seat).offers[1],
+        kept,
+        "a locked slot survives a reroll"
+    );
+    assert!(distinct(&m.player(seat).offers));
+    let to = Destination::Jungle;
+    m.apply(seat, MobaIntention::BuyTroop { slot: 1, to })
+        .unwrap();
+    assert_eq!(
+        m.player(seat).locked & 0b10,
+        0,
+        "buying a locked slot frees it"
+    );
+    m.player_mut(seat).gold = 0;
+    assert_eq!(
+        m.apply(seat, MobaIntention::Reroll),
+        Err(Reject::NotEnoughGold)
+    );
 }
 
 #[test]

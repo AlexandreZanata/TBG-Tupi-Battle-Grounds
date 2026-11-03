@@ -9,17 +9,21 @@
 > contract tests in `moba/core-moba/tests/contract_moba.rs` and
 > `moba/server-moba/tests/room.rs`.
 
-![Overview at 07:27, ten bots](media/p76-overview-0727.webp)
+![Overview at 7:03, ten bots](media/p76-overview.webp)
 
 ## 1. Pillars
 
 1. **Ten commanders, one valley.** Two teams of five, one role each, on a
    three-lane map with a jungle and a river — readable at a glance.
 2. **Strategy over twitch.** A player steers one Commander with a right
-   click and wins by *what* Troops they buy and *where* they send them.
-3. **No delay for anyone.** The server ticks at 20 Hz, sends one shared
+   click and wins by *what* champions they buy and *where* they send them.
+3. **One roster, two modes.** Troops *are* the 1v1 champions: same names,
+   archetypes, base stats, prices (in Gold), Shop rules, portraits, 3D
+   figures, animations, shots and impacts. What is new in 5v5 are the lane
+   Minions, Towers, the jungle and the Commanders' roles.
+4. **No delay for anyone.** The server ticks at 20 Hz, sends one shared
    world frame per tick and never lets a slow player delay the other nine.
-4. **Bots everywhere.** Every empty seat is a bot using the same intentions
+5. **Bots everywhere.** Every empty seat is a bot using the same intentions
    as a human, so a match always has ten sides and a human can drop in or out.
 
 ## 2. Glossary (use these words exactly)
@@ -31,8 +35,9 @@
 | `Role` | `Top`, `Jungle`, `Mid`, `Bot`, `Support` — seat index modulo 5. |
 | `Lane` | `Top`, `Mid`, `Bot` road between the two Strongholds. |
 | `Destination` | Where a purchased Troop goes: a `Lane` or the `Jungle` ("Destino da Tropa"). |
-| `Commander` | The player's own unit on the map. Auto by default; Move/Hold on command. |
-| `Troop` | A unit bought in the `Shop` and sent to a `Destination`. |
+| `Commander` | The player's own unit on the map, drawn as its role's 1v1 champion. Auto by default; Move/Hold on command. |
+| `Troop` | A 1v1 champion (`tbg_core::UnitKind`) bought in the `Shop` and sent to a `Destination`. |
+| `Shop` | Five offers per player drawn from the 1v1 online pool, with locks and a paid reroll, as in the 1v1 game. |
 | `Minion` | Free lane unit spawned in `Wave`s by each Stronghold. |
 | `Wave` | Three melee + two ranged Minions per lane, per team, every 30 s. |
 | `Camp` | A jungle pit of neutral monsters (one big, two small). |
@@ -41,7 +46,7 @@
 | `Gold` | Currency for Troops (coins on the HUD). |
 | `Essence` | Second currency (purple gem) spent on Troop `Upgrade`s. |
 | `Upgrade` | Raises the player's Troop tier (+HP and damage for new Troops). |
-| `MobaIntention` | The only way a player or bot acts: `BuyTroop`, `Upgrade`, `MoveCommander`, `CommanderAuto`. |
+| `MobaIntention` | The only way a player or bot acts: `BuyTroop`, `Reroll`, `ToggleLock`, `Upgrade`, `MoveCommander`, `CommanderAuto`. |
 
 ## 3. Match structure
 
@@ -75,8 +80,21 @@
 
 ## 5. Economy, shop and progression
 
-- **M-10** "Comprar e Enviar" buys the selected Troop for its card price and
-  sends it to the chosen Destination; insufficient Gold is rejected.
+- **M-10** Clicking a Shop card (or pressing 1–5) buys that champion for its
+  card price and sends it to the chosen Destination; insufficient Gold is
+  rejected. Price = the champion's 1v1 Energy cost × 6 Gold.
+- **M-18** A champion keeps its 1v1 HP, damage, attack interval and range
+  (both modes tick at 20 Hz in millimetres); it walks 4× its 1v1 speed
+  because MOBA lanes are ~12× longer than the BattleLine. Tank archetypes
+  ignore 20 % of damage. Champions with a 1v1 `heal` mend the most injured
+  ally in range instead of attacking; champions with a 1v1 `splash` also hit
+  enemies around their target for 50 %. 1v1 abilities and Evolutions are
+  not active in 5v5 yet (P77).
+- **M-19** Shop: five distinct offers from the 1v1 online pool, drawn from
+  each seat's own seeded stream (1v1 BR-S01/S05); every purchase redraws all
+  unlocked offers (BR-S04); locking a slot is free and keeps it through
+  redraws (buying it unlocks it); a reroll redraws the unlocked offers for 6
+  Gold (one 1v1 Energy).
 - **M-11** At most 8 live Troops per player.
 - **M-12** Passive income: +1 Gold per second, +1 Essence every 10 s.
 - **M-13** Bounties go to the owner of the unit that landed the last hit:
@@ -98,15 +116,10 @@
 
 | Unit | HP | Dmg | Range | Attack (s) | Speed (u/s) | Armor | Rule |
 |---|---|---|---|---|---|---|---|
-| Commander (Top/Jungle) | 900 | 40 | 1.8 | 0.9 | 4.2 | 10 % | melee |
-| Commander (Mid/Bot/Support) | 900 | 40 | 6.5 | 0.9 | 4.2 | 10 % | ranged |
+| Commander | 900 | 40 | its champion's range (≥ 1.8) | its champion's interval | 4.2 | 10 % | Top Longaxe, Jungle Mantis, Mid Hexer, Bot Celestial Archer, Support Luminous Oracle |
 | Minion melee | 300 | 14 | 1.6 | 1.0 | 3.2 | 0 | — |
 | Minion ranged | 200 | 18 | 6.0 | 1.2 | 3.2 | 0 | — |
-| Guardião (Guardian, Tank) — 18 Gold | 700 | 20 | 1.6 | 1.0 | 3.0 | 30 % | front line |
-| Curandeiro (Healer, Suporte) — 12 Gold | 320 | 8 | 5.0 | 1.2 | 3.2 | 0 | heals the most injured ally within 6 for 30 every 1.5 s |
-| Bardo (Bard, Suporte) — 14 Gold | 340 | 14 | 5.0 | 1.1 | 3.2 | 0 | allies within 6 deal +25 % damage |
-| Colosso (Colossus, Tank) — 20 Gold | 1300 | 34 | 2.0 | 1.4 | 2.4 | 20 % | double damage to structures |
-| Invocador (Summoner, Controle) — 16 Gold | 360 | 26 | 7.0 | 1.3 | 3.0 | 0 | hits slow by 40 % for 1.5 s |
+| Any 1v1 champion — 1v1 Energy × 6 Gold | 1v1 HP | 1v1 | 1v1 | 1v1 | 1v1 × 4 | Tank 20 % | M-18 |
 | Small monster | 350 | 16 | 1.6 | 1.0 | 3.0 | 0 | passive |
 | Big monster | 900 | 35 | 2.0 | 1.2 | 2.8 | 0 | passive |
 | Tower Outer / Inner / Base / Nexus | 2500 / 2800 / 3000 / 3500 | 120 | 9.0 | 1.0 | — | 0 | M-08 |
@@ -133,15 +146,22 @@ after cleared. Start Gold 60.
 
 ## 9. Bots (M-26)
 
-Bots think twice per second. They upgrade when they can, otherwise buy the
-next Troop of their role's rotation (Top: Guardian/Colossus/Summoner; Jungle:
-Guardian/Summoner/Healer; Mid: Summoner/Bard/Guardian; Bot: Guardian/
-Summoner/Bard; Support: Healer/Bard/Guardian) when affordable, sending it to
-their role's lane (Jungle: own camps while any is up, else Mid). Both teams
-use identical habits by role; the match seed shifts each team's rotation.
+Bots think twice per second. They upgrade when they can; otherwise they buy
+the first affordable offer of their role's favourite archetype (Top Tank,
+Jungle Dps, Mid Control, Bot Ranged, Support Support), any affordable offer
+once Gold piles up (≥ 72), or reroll when nothing fits and Gold ≥ 48. They
+send Troops to their role's lane (Jungle: own camps while any is up, else
+Mid). Both teams use the same habits; offers differ per seat stream.
+
+## 9a. Minions (new in 5v5)
+
+Every 30 s (first at 0:10) each Stronghold sends a Wave of three melee and
+two ranged Minions down each lane. They walk towards the enemy Towers and
+Stronghold and attack any enemy Troop, Minion, Commander or structure on the
+way (structures in the M-08 order); they never enter the jungle.
 
 ## 10. Out of scope until later phases
 
-Commander abilities and items, fog of war, pings/chat, ranked/MMR,
+1v1 champion abilities and Evolutions in 5v5, Commander abilities and items, fog of war, pings/chat, ranked/MMR,
 matchmaking across rooms, spectators, reconnect-to-same-seat tokens,
 mobile layout, sounds/music, balance.

@@ -2,7 +2,8 @@
 //! (`docs/moba/GAME-DESIGN-MOBA.md` §6); balance waits for an explicit owner request.
 
 use crate::geom::MM;
-use crate::types::{MinionKind, NeutralKind, TowerTier, TroopKind, UnitKind};
+use crate::types::{Champion, MinionKind, NeutralKind, Role, TowerTier, UnitKind};
+use tbg_core::types::Archetype;
 
 /// Simulation ticks per second (M-01).
 pub const TICK_HZ: u32 = 20;
@@ -27,6 +28,10 @@ pub struct Stats {
     /// Distance at which the unit notices enemies.
     pub sight: i32,
     pub radius: i32,
+    /// HP mended per attack on the most injured ally in range (healers).
+    pub heal: i32,
+    /// Radius around the target that also takes splash damage.
+    pub splash: i32,
 }
 
 const fn u(units_x10: i32) -> i32 {
@@ -48,6 +53,8 @@ const fn stats(hp: i32, damage: i32, range_x10: i32, attack_ticks: u16, speed_x1
         armor: 0,
         sight: u(80),
         radius: u(6),
+        heal: 0,
+        splash: 0,
     }
 }
 
@@ -57,12 +64,18 @@ pub const MAX_LEVEL: u8 = 12;
 
 pub fn base_stats(kind: UnitKind) -> Stats {
     match kind {
-        UnitKind::Commander(role) => Stats {
-            armor: 10,
-            radius: u(8),
-            sight: u(90),
-            ..stats(900, 40, if role.ranged() { 65 } else { 18 }, 18, 42)
-        },
+        UnitKind::Commander(role) => {
+            // Reach and rhythm of the role's champion; bulk of a Commander.
+            let champion = tbg_core::content::def(commander_champion(role));
+            Stats {
+                armor: 10,
+                radius: u(8),
+                sight: u(90),
+                range: champion.range.max(u(18)),
+                attack_ticks: champion.interval.max(1),
+                ..stats(900, 40, 0, 0, 42)
+            }
+        }
         UnitKind::Minion(MinionKind::Melee) => stats(300, 14, 16, 20, 32),
         UnitKind::Minion(MinionKind::Ranged) => stats(200, 18, 60, 24, 32),
         UnitKind::Troop(kind) => troop_stats(kind),
@@ -90,44 +103,57 @@ pub fn base_stats(kind: UnitKind) -> Stats {
     }
 }
 
-fn troop_stats(kind: TroopKind) -> Stats {
-    match kind {
-        TroopKind::Guardian => Stats {
-            armor: 30,
-            radius: u(8),
-            ..stats(700, 20, 16, 20, 30)
+/// A 1v1 champion on the MOBA map: its own HP, damage, attack interval and
+/// range (both modes tick at 20 Hz and measure in millimetres), walking
+/// faster because lanes here are ~12x longer than the 1v1 BattleLine (M-18).
+fn troop_stats(kind: Champion) -> Stats {
+    let def = tbg_core::content::def(kind);
+    let melee = def.range < 1_500;
+    Stats {
+        hp: def.hp,
+        damage: def.damage,
+        range: def.range.max(u(10)),
+        attack_ticks: def.interval.max(1),
+        speed: def.speed * CHAMPION_SPEED_FACTOR,
+        armor: if def.archetype == Archetype::Tank {
+            20
+        } else {
+            0
         },
-        TroopKind::Healer => stats(320, 8, 50, 24, 32),
-        TroopKind::Bard => stats(340, 14, 50, 22, 32),
-        TroopKind::Colossus => Stats {
-            armor: 20,
-            radius: u(11),
-            ..stats(1300, 34, 20, 28, 24)
-        },
-        TroopKind::Summoner => stats(360, 26, 70, 26, 30),
+        sight: u(80),
+        radius: if melee { u(7) } else { u(6) },
+        heal: def.heal,
+        splash: def.splash,
     }
 }
 
-/// Gold price shown on the Shop card (M-10).
-pub fn troop_cost(kind: TroopKind) -> u32 {
-    match kind {
-        TroopKind::Guardian => 18,
-        TroopKind::Healer => 12,
-        TroopKind::Bard => 14,
-        TroopKind::Colossus => 20,
-        TroopKind::Summoner => 16,
-    }
+/// Champion walking speed multiplier over its 1v1 value (Proposed).
+pub const CHAMPION_SPEED_FACTOR: i32 = 4;
+/// Gold per 1v1 Energy point of a champion's price (Proposed).
+pub const GOLD_PER_ENERGY: u32 = 6;
+
+/// Gold price on the Shop card: the 1v1 Energy cost in Gold (M-10).
+pub fn troop_cost(kind: Champion) -> u32 {
+    tbg_core::content::def(kind).cost / tbg_core::content::ENERGY_SCALE * GOLD_PER_ENERGY
 }
 
-/// Distinct visible rule of each archetype (§6.3).
-pub const HEAL_AMOUNT: i32 = 30;
-pub const HEAL_TICKS: u16 = 30;
-pub const HEAL_RANGE: i32 = 6 * MM;
-pub const BARD_AURA_RANGE: i32 = 6 * MM;
-pub const BARD_AURA_PERCENT: i32 = 25;
-pub const SLOW_TICKS: u32 = 30;
-pub const SLOW_PERCENT: i32 = 40;
-pub const COLOSSUS_STRUCTURE_MULTIPLIER: i32 = 2;
+/// Redrawing the unlocked offers costs one 1v1 Energy in Gold (M-19).
+pub const REROLL_COST: u32 = GOLD_PER_ENERGY;
+/// Splash victims around a champion's target take this percent of the hit (M-07).
+pub const SPLASH_PERCENT: i32 = 50;
+/// Offers on the Shop, as in the 1v1 game.
+pub const OFFERS: usize = tbg_core::content::OFFERS;
+
+/// The champion each role's Commander is drawn as and fights like (Proposed).
+pub fn commander_champion(role: Role) -> Champion {
+    match role {
+        Role::Top => Champion::Longaxe,
+        Role::Jungle => Champion::Mantis,
+        Role::Mid => Champion::Hexer,
+        Role::Bot => Champion::CelestialArcher,
+        Role::Support => Champion::LuminousOracle,
+    }
+}
 
 /// Alive Troops one player may own at once (M-11).
 pub const TROOP_CAP: u8 = 8;

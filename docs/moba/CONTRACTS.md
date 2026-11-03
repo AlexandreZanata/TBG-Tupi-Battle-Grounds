@@ -34,7 +34,10 @@ ServerMsg = Welcome { protocol, seat, seed, tick_hz }
           | Rejected(Reject)
           | Pong(u32)
           | Full
-MobaIntention = BuyTroop { troop, to } | Upgrade | MoveCommander { to: Pos(mm) } | CommanderAuto
+MobaIntention = BuyTroop { slot: u8, to } | Upgrade | MoveCommander { to: Pos(mm) } | CommanderAuto
+              | Reroll | ToggleLock { slot: u8 }
+PrivateView   = { seat, gold, essence, tier, troops, destination, commander_auto,
+                  offers: [UnitKind; 5] (1v1 champions), locked: u8 }
 ```
 
 - Variant order is part of the wire: **append new variants only**, never
@@ -42,6 +45,8 @@ MobaIntention = BuyTroop { troop, to } | Upgrade | MoveCommander { to: Pos(mm) }
 - Limits: client frame ≤ 256 bytes, ≤ 30 frames/s, Hello within 5 s, idle
   timeout 30 s; server frame ≤ 256 KiB. Violations close the socket; the
   server never panics on client input.
+- Troops are bought **by Shop slot**, never by naming a champion, so a
+  client cannot buy outside its own offers (M-19).
 - `UnitView` positions are centi-units (`x / 100` = map units), HP is per
   mille, `attacked` marks an attack or heal on that tick.
 
@@ -61,9 +66,10 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 | `m04_bots_never_act_for_human_seats` | M-04 |
 | `m05_seat_outside_the_match_is_rejected` | M-05 |
 | `m08_inner_tower_is_invulnerable_until_the_outer_falls` | M-08 |
-| `m10_buying_spends_the_exact_card_price` | M-10 |
+| `m10_buying_spends_the_exact_card_price_of_a_1v1_champion` | M-10, M-18 |
 | `m11_troop_cap_limits_alive_troops_per_player` | M-11 |
 | `m17_upgrade_spends_essence_and_caps_at_max_tier` | M-17 |
+| `m19_shop_offers_follow_the_1v1_rules_with_locks_and_reroll` | M-19 |
 | `m30_a_ten_bot_match_always_ends` | M-30 |
 | `m40_frames_round_trip_and_hostile_frames_are_refused` | M-40 |
 | `m41_seats_come_from_connections_and_purchases_are_authoritative` (server) | M-05, M-41 |
@@ -71,7 +77,15 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 
 Run them with `cd moba && cargo test --locked --workspace`.
 
-## 6. Isolation (D-112)
+## 6. Isolation and the shared champions (D-112, amended 2026-11-03)
 
-`moba/` never depends on `crates/*` and vice versa; the root workspace,
-lock file and 1v1 release inputs are not modified by MOBA work.
+- The 1v1 crates never depend on `moba/`, and MOBA work never modifies the
+  root workspace, its lock file or any 1v1 release input.
+- The MOBA shares the 1v1 champions **read-only**: `tbg-moba-core` and
+  `tbg-moba-client` depend on `crates/tbg-core` (roster, stats, costs,
+  pool), and the client compiles the 1v1 figure sources in place
+  (`crates/tbg-client/src/art`, `vfx/impacts.rs`, `vfx/shots.rs`) and loads
+  the 1v1 assets (`battle/`, `lobby/native-icons/`). A 1v1 change to those
+  files therefore changes the MOBA too; the MOBA workflow runs on them.
+- `UnitKind::Troop` carries a `tbg_core::UnitKind`; a champion's
+  `Debug` name lowercased is its portrait file, as in the 1v1 Shop.

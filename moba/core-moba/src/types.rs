@@ -135,25 +135,12 @@ impl Destination {
     ];
 }
 
-/// The five purchasable Troop archetypes of the MOBA Shop.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
-pub enum TroopKind {
-    Guardian,
-    Healer,
-    Bard,
-    Colossus,
-    Summoner,
-}
+/// A purchasable Troop is one of the 1v1 champions (`tbg_core::UnitKind`):
+/// both modes share the same roster, stats, names and figures.
+pub type Champion = tbg_core::UnitKind;
 
-impl TroopKind {
-    pub const ALL: [TroopKind; 5] = [
-        TroopKind::Guardian,
-        TroopKind::Healer,
-        TroopKind::Bard,
-        TroopKind::Colossus,
-        TroopKind::Summoner,
-    ];
-}
+/// The 1v1 online champion pool the MOBA Shop draws from.
+pub const POOL: &[Champion] = &tbg_core::types::FULL_POOL;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum MinionKind {
@@ -181,7 +168,7 @@ pub enum TowerTier {
 pub enum UnitKind {
     Commander(Role),
     Minion(MinionKind),
-    Troop(TroopKind),
+    Troop(Champion),
     Neutral(NeutralKind),
     /// `None` lane for the Nexus towers.
     Tower(TowerTier, Option<Lane>),

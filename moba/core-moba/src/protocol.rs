@@ -6,9 +6,10 @@
 
 use serde::{Deserialize, Serialize};
 
+use crate::content::OFFERS;
 use crate::intent::{MobaIntention, Reject};
 use crate::state::{Event, Outcome};
-use crate::types::{Destination, Seat, Side, UnitKind};
+use crate::types::{Champion, Destination, Seat, Side, UnitKind};
 
 pub const MOBA_PROTOCOL_VERSION: u16 = 1;
 /// Largest client frame accepted; anything bigger closes the socket (M-40).
@@ -94,6 +95,9 @@ pub struct PrivateView {
     pub troops: u8,
     pub destination: Destination,
     pub commander_auto: bool,
+    /// The seat's five Shop offers and locked-slot bits.
+    pub offers: [Champion; OFFERS],
+    pub locked: u8,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

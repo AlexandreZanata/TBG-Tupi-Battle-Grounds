@@ -70,6 +70,8 @@ pub fn private(m: &MobaMatch, seat: Seat) -> PrivateView {
         troops: m.troops_alive(seat),
         destination: p.destination,
         commander_auto: p.mode == CommandMode::Auto,
+        offers: p.offers,
+        locked: p.locked,
     }
 }
 

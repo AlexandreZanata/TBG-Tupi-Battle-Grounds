@@ -4,17 +4,17 @@ use crate::content::{self, MAX_TIER, TROOP_CAP};
 use crate::intent::MobaIntention;
 use crate::sim::spawn::nearest_camp;
 use crate::state::MobaMatch;
-use crate::types::{Destination, Lane, Role, Seat, TroopKind};
+use crate::types::{Champion, Destination, Lane, Role, Seat};
+use tbg_core::types::Archetype;
 
-/// Troops each role prefers, tried in rotation.
-fn preferences(role: Role) -> &'static [TroopKind] {
-    use TroopKind::*;
+/// The archetype each role buys first; anything affordable comes next.
+fn favourite(role: Role) -> Archetype {
     match role {
-        Role::Top => &[Guardian, Colossus, Summoner],
-        Role::Jungle => &[Guardian, Summoner, Healer],
-        Role::Mid => &[Summoner, Bard, Guardian],
-        Role::Bot => &[Guardian, Summoner, Bard],
-        Role::Support => &[Healer, Bard, Guardian],
+        Role::Top => Archetype::Tank,
+        Role::Jungle => Archetype::Dps,
+        Role::Mid => Archetype::Control,
+        Role::Bot => Archetype::Ranged,
+        Role::Support => Archetype::Support,
     }
 }
 
@@ -44,13 +44,24 @@ pub fn decide(m: &MobaMatch, seat: Seat) -> Option<MobaIntention> {
     if m.troops_alive(seat) >= TROOP_CAP {
         return None;
     }
-    let prefs = preferences(seat.role());
-    // Same role, same habits on both teams; the seed varies them per match.
-    let flavour = (m.seed >> (seat.team().index() * 8)) as u32 % 3;
-    let start = (m.tick / 10 + seat.role() as u32 + flavour) as usize;
-    let troop = prefs[start % prefs.len()];
-    (p.gold >= content::troop_cost(troop)).then(|| MobaIntention::BuyTroop {
-        troop,
-        to: destination(m, seat),
-    })
+    let affordable = |k: &&Champion| p.gold >= content::troop_cost(**k);
+    let wanted = favourite(seat.role());
+    let pick = p
+        .offers
+        .iter()
+        .position(|k| affordable(&k) && tbg_core::content::def(*k).archetype == wanted)
+        .or_else(|| {
+            // Saving up for a favourite is pointless when gold piles up.
+            (p.gold >= 3 * content::REROLL_COST * 4)
+                .then(|| p.offers.iter().position(|k| affordable(&k)))?
+        });
+    match pick {
+        Some(slot) => Some(MobaIntention::BuyTroop {
+            slot: slot as u8,
+            to: destination(m, seat),
+        }),
+        // Nothing worth buying and plenty of gold: reroll like a 1v1 player.
+        None if p.gold >= 8 * content::REROLL_COST => Some(MobaIntention::Reroll),
+        None => None,
+    }
 }

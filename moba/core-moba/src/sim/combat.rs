@@ -1,9 +1,9 @@
 //! Target selection, attacks, heals and their simultaneous resolution (M-06..M-09).
 
-use crate::content::{self, BARD_AURA_PERCENT, BARD_AURA_RANGE, HEAL_RANGE};
+use crate::content;
 use crate::map;
 use crate::state::{Brain, CommandMode, Credit, MobaMatch, Unit};
-use crate::types::{Lane, Side, Team, TowerTier, TroopKind, UnitKind};
+use crate::types::{Lane, Side, Team, TowerTier, UnitKind};
 
 /// Which structures may be damaged this tick (M-08).
 struct Vulnerability {
@@ -59,18 +59,20 @@ pub(super) fn fight(m: &mut MobaMatch) -> Vec<bool> {
     for i in 0..n {
         let u = &mut m.units[i];
         u.cooldown = u.cooldown.saturating_sub(1);
-        u.heal_cooldown = u.heal_cooldown.saturating_sub(1);
         if !u.alive() || u.stats.damage == 0 {
             continue;
         }
-        if u.kind == UnitKind::Troop(TroopKind::Healer) {
+        // Healing champions (1v1 `heal` > 0) mend the most injured ally first.
+        if u.stats.heal > 0 {
             if let Some(j) = most_injured_ally(m, i) {
                 engaged[i] = true;
-                if m.units[i].heal_cooldown == 0 {
-                    heals.push((j, content::HEAL_AMOUNT));
-                    m.units[i].heal_cooldown = content::HEAL_TICKS;
-                    m.units[i].last_attack = m.tick;
-                    m.units[i].target = m.units[j].id;
+                if m.units[i].cooldown == 0 {
+                    heals.push((j, m.units[i].stats.heal));
+                    let target = m.units[j].id;
+                    let u = &mut m.units[i];
+                    u.cooldown = u.stats.attack_ticks;
+                    u.last_attack = m.tick;
+                    u.target = target;
                 }
                 continue;
             }
@@ -82,7 +84,8 @@ pub(super) fn fight(m: &mut MobaMatch) -> Vec<bool> {
         if a.pos.within(b.pos, a.stats.range + b.stats.radius) {
             engaged[i] = true;
             if a.cooldown == 0 {
-                hits.push((i, j, damage(m, i, j)));
+                let a = &m.units[i];
+                hits.push((i, j, a.stats.damage * (100 + a.power) / 100));
                 let a = &mut m.units[i];
                 a.cooldown = a.stats.attack_ticks;
                 a.last_attack = m.tick;
@@ -100,65 +103,59 @@ pub(super) fn fight(m: &mut MobaMatch) -> Vec<bool> {
 }
 
 fn land(m: &mut MobaMatch, i: usize, j: usize, dmg: i32) {
+    let (splash, center) = (m.units[i].stats.splash, m.units[j].pos);
+    strike(m, i, j, dmg);
+    if splash <= 0 {
+        return;
+    }
+    // Splash champions also hurt other mobile enemies around the target.
+    let mut around = Vec::new();
+    m.grid.near(center, splash, |k| {
+        let (a, b) = (&m.units[i], &m.units[k]);
+        if k != j
+            && b.alive()
+            && b.mobile()
+            && a.side.hostile(b.side)
+            && b.pos.within(center, splash)
+        {
+            around.push(k);
+        }
+    });
+    around.sort_unstable();
+    for k in around {
+        strike(m, i, k, dmg * content::SPLASH_PERCENT / 100);
+    }
+}
+
+fn strike(m: &mut MobaMatch, i: usize, j: usize, dmg: i32) {
     let credit = Credit {
         side: m.units[i].side,
         seat: m.units[i].owner,
     };
-    let (attacker_id, slows) = (
-        m.units[i].id,
-        m.units[i].kind == UnitKind::Troop(TroopKind::Summoner),
-    );
-    let tick = m.tick;
+    let attacker_id = m.units[i].id;
     let t = &mut m.units[j];
     if !t.alive() {
         return;
     }
     t.hp -= (dmg * (100 - t.stats.armor) / 100).max(1);
     t.last_hit = Some(credit);
-    if slows {
-        t.slowed_until = tick + content::SLOW_TICKS;
-    }
     // Neutral monsters are passive until hit, then answer the attacker.
     if matches!(t.brain, Brain::Neutral { .. }) && t.target == 0 {
         t.target = attacker_id;
     }
 }
 
-fn damage(m: &MobaMatch, i: usize, j: usize) -> i32 {
-    let a = &m.units[i];
-    let mut dmg = a.stats.damage * (100 + a.power) / 100;
-    if a.mobile()
-        && ally_near(m, a, BARD_AURA_RANGE, |u| {
-            u.kind == UnitKind::Troop(TroopKind::Bard)
-        })
-    {
-        dmg = dmg * (100 + BARD_AURA_PERCENT) / 100;
-    }
-    if a.kind == UnitKind::Troop(TroopKind::Colossus) && m.units[j].kind.structure() {
-        dmg *= content::COLOSSUS_STRUCTURE_MULTIPLIER;
-    }
-    dmg
-}
-
-fn ally_near(m: &MobaMatch, a: &Unit, range: i32, pred: impl Fn(&Unit) -> bool) -> bool {
-    let mut found = false;
-    m.grid.near(a.pos, range, |k| {
-        let u = &m.units[k];
-        found |= u.side == a.side && u.alive() && pred(u) && u.pos.within(a.pos, range);
-    });
-    found
-}
-
 fn most_injured_ally(m: &MobaMatch, i: usize) -> Option<usize> {
     let a = &m.units[i];
     let mut best: Option<(i64, usize)> = None;
-    m.grid.near(a.pos, HEAL_RANGE, |k| {
+    let reach = a.stats.range;
+    m.grid.near(a.pos, reach, |k| {
         let u = &m.units[k];
         if u.side != a.side
             || !u.alive()
             || !u.mobile()
             || u.hp >= u.max_hp
-            || !u.pos.within(a.pos, HEAL_RANGE)
+            || !u.pos.within(a.pos, reach)
         {
             return;
         }

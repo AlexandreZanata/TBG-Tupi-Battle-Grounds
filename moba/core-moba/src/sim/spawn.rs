@@ -4,7 +4,7 @@ use crate::content::{self, COMMANDER_LEVEL_DAMAGE, COMMANDER_LEVEL_HP};
 use crate::geom::{Pos, MM};
 use crate::map;
 use crate::state::{Brain, CommandMode, MobaMatch};
-use crate::types::{Destination, Lane, NeutralKind, Seat, Side, Team, TroopKind, UnitKind};
+use crate::types::{Champion, Destination, Lane, NeutralKind, Seat, Side, Team, UnitKind};
 
 /// Small fixed fan of offsets so units do not spawn stacked.
 fn fan(k: u32) -> Pos {
@@ -53,7 +53,7 @@ pub(crate) fn commander(m: &mut MobaMatch, seat: Seat) {
     m.player_mut(seat).commander = id;
 }
 
-pub(crate) fn troop(m: &mut MobaMatch, seat: Seat, kind: TroopKind, to: Destination) {
+pub(crate) fn troop(m: &mut MobaMatch, seat: Seat, kind: Champion, to: Destination) {
     let team = seat.team();
     let pos = offset(map::spawn_point(team), fan(m.next_id));
     let brain = match to {

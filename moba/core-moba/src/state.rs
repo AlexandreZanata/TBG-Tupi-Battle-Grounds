@@ -62,8 +62,6 @@ pub struct Unit {
     pub brain: Brain,
     pub target: u32,
     pub cooldown: u16,
-    pub heal_cooldown: u16,
-    pub slowed_until: u32,
     /// Tick of the last attack fired, so views can animate it.
     pub last_attack: u32,
     pub last_hit: Option<Credit>,
@@ -108,6 +106,10 @@ pub struct Player {
     pub mode: CommandMode,
     /// Last Destination chosen, echoed to the HUD.
     pub destination: Destination,
+    /// The five Shop offers, locked-slot bits and the seat's own Shop stream.
+    pub offers: [crate::types::Champion; content::OFFERS],
+    pub locked: u8,
+    pub shop_rng: Rng,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -148,7 +150,7 @@ pub enum Event {
     },
     TroopSent {
         seat: Seat,
-        troop: crate::types::TroopKind,
+        troop: crate::types::Champion,
         to: Destination,
     },
     LevelUp {
@@ -195,6 +197,9 @@ impl MobaMatch {
             respawn_at: 0,
             mode: CommandMode::Auto,
             destination: Destination::Lane(Lane::Mid),
+            offers: [crate::types::POOL[0]; content::OFFERS],
+            locked: 0,
+            shop_rng: Rng::new(0),
         };
         let mut m = Self {
             seed,
@@ -230,6 +235,11 @@ impl MobaMatch {
             );
         }
         for seat in Seat::all() {
+            // Each seat draws from its own stream, as in the 1v1 Shop (BR-S05).
+            let p = m.player_mut(seat);
+            p.shop_rng =
+                Rng::new(seed ^ (u64::from(seat.0) + 1).wrapping_mul(0xA24B_AED4_963E_E407));
+            p.offers = crate::shop::opening(&mut p.shop_rng);
             crate::sim::spawn::commander(&mut m, seat);
         }
         m
@@ -277,8 +287,6 @@ impl MobaMatch {
             brain,
             target: 0,
             cooldown: 0,
-            heal_cooldown: 0,
-            slowed_until: 0,
             last_attack: 0,
             last_hit: None,
         });
@@ -342,7 +350,14 @@ impl MobaMatch {
             }
         }
         for p in &self.players {
-            for v in [p.gold as i64, p.essence as i64, p.xp as i64, p.tier as i64] {
+            for v in [
+                p.gold as i64,
+                p.essence as i64,
+                p.xp as i64,
+                p.tier as i64,
+                p.locked as i64,
+                p.shop_rng.state() as i64,
+            ] {
                 mix(v);
             }
         }
