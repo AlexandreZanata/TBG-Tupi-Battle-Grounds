@@ -1101,3 +1101,9 @@ owned touch/scroll/Back, puts account/library/recovery entries in Settings, and
 uses native IME/document services for chat and emoji selection. Desktop/web
 retain main's layout, keyboard and picker. All actual new-source target
 observations remain separate and are recorded in the P69 continuation report.
+
+P69 Android configuration handling preserves the native loop across font and
+related resource changes, refreshes insets, schedules IME after window focus,
+and gives the explicit key-save panel an owned scroll viewport. No desktop/web
+layout or motion changes. Profile failures and repeat evidence are tracked
+separately in the P69 continuation report.

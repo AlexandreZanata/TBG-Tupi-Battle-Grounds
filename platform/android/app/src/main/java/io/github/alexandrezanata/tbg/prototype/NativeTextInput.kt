@@ -123,8 +123,10 @@ internal class NativeTextInput(private val activity: MainActivity) {
             }
             field.requestFocus()
             field.post {
-                activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
-                    .showSoftInput(field, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+                modal.window?.let { inputWindow ->
+                    androidx.core.view.WindowCompat.getInsetsController(inputWindow, field)
+                        .show(androidx.core.view.WindowInsetsCompat.Type.ime())
+                }
             }
             modal.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)

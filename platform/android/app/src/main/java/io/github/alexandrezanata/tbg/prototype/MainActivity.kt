@@ -47,6 +47,17 @@ class MainActivity : GameActivity() {
         immersive()
     }
 
+    override fun onConfigurationChanged(newConfig: android.content.res.Configuration) {
+        // Keep the single GameActivity/native loop alive for supported configuration changes.
+        super.onConfigurationChanged(newConfig)
+        window.decorView.post {
+            immersive()
+            androidx.core.view.ViewCompat.requestApplyInsets(window.decorView)
+            androidx.core.view.ViewCompat.getRootWindowInsets(window.decorView)?.let { captureViewport(it) }
+        }
+        if (BuildConfig.DEBUG) android.util.Log.i("TBGHost", "configuration fontScale=${newConfig.fontScale} densityDpi=${newConfig.densityDpi} orientation=${newConfig.orientation}")
+    }
+
     override fun onWindowFocusChanged(hasFocus: Boolean) {
         super.onWindowFocusChanged(hasFocus)
         // Dialogs and the IME can restore the bars; hide them again when the game regains focus.

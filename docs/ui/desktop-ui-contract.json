@@ -403,6 +403,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-native-configuration-ime-handoff-backup-scroll",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android font/resource configuration lifecycle, reliable consecutive native IME forms, explicit key-save panel scroll; desktop/web presentation unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

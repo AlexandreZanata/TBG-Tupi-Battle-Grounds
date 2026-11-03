@@ -159,6 +159,7 @@ fn panel(
                     border_radius: BorderRadius::all(px(16)),
                     ..default()
                 },
+                ScrollPosition::default(),
                 BackgroundColor(super::PANEL),
                 children![
                     label(lang.t(Msg::AccountSaveTitle), 26.),
