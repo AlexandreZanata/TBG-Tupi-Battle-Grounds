@@ -45,7 +45,11 @@ fn render(
     assets: Res<AssetServer>,
     lang: Res<Lang>,
     roots: Query<Entity, With<Root>>,
-    positions: Query<&ScrollPosition, With<table::List>>,
+    (positions, page_positions, profile_positions): (
+        Query<&ScrollPosition, With<table::List>>,
+        Query<&ScrollPosition, With<Root>>,
+        Query<&ScrollPosition, With<profile::Sidebar>>,
+    ),
     mut page_at: Local<u16>,
 ) {
     if !crate::config::bevy_ui() {
@@ -71,6 +75,8 @@ fn render(
     } else {
         ScrollPosition::default()
     };
+    let page_scroll = page_positions.iter().next().cloned().unwrap_or_default();
+    let profile_scroll = profile_positions.iter().next().cloned().unwrap_or_default();
     *page_at = offset;
     commands
         .spawn((
@@ -88,6 +94,7 @@ fn render(
             },
             frame(),
             Root,
+            page_scroll,
             GlobalZIndex(10),
             DespawnOnExit(GameState::Menu),
         ))
@@ -116,7 +123,15 @@ fn render(
                     podium::spawn(board, &ranking, &assets, *lang);
                     table::spawn(board, &ranking, &account, *lang, scroll);
                 });
-                profile::spawn(body, &ranking, &account, &data, &assets, *lang);
+                profile::spawn(
+                    body,
+                    &ranking,
+                    &account,
+                    &data,
+                    &assets,
+                    *lang,
+                    profile_scroll,
+                );
             });
         });
 }

@@ -77,6 +77,10 @@ fn finish(
     mut toasts: ResMut<Toasts>,
     lang: Res<Lang>,
 ) {
+    // Reading an empty slot must not mark Account changed and rebuild every menu frame.
+    if account.key_result.is_none() {
+        return;
+    }
     let Some(result) = account.key_result.take() else {
         return;
     };
@@ -121,6 +125,31 @@ fn finish(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn br_as05_idle_backup_preserves_menu_change_detection() {
+        #[derive(Resource, Default)]
+        struct Changes(usize);
+        fn observe(account: Res<Account>, mut changes: ResMut<Changes>) {
+            if account.is_changed() {
+                changes.0 += 1;
+            }
+        }
+        let mut app = App::new();
+        app.init_resource::<Account>()
+            .init_resource::<Toasts>()
+            .init_resource::<Changes>()
+            .insert_resource(Lang::En)
+            .insert_non_send_resource(ActiveForm::default())
+            .add_systems(Update, (finish, observe).chain());
+        app.update();
+        app.update();
+        assert_eq!(
+            app.world().resource::<Changes>().0,
+            1,
+            "BR-AS05: idle backup processing must not invalidate the account or reset menu scroll"
+        );
+    }
+
     #[test]
     fn br_as05_backup_never_exports_another_accounts_cached_key() {
         let account = Account {

@@ -2,6 +2,9 @@
 
 use super::*;
 
+#[derive(Component)]
+pub(super) struct Sidebar;
+
 pub(super) fn spawn(
     parent: &mut ChildSpawnerCommands,
     ranking: &Ranking,
@@ -9,21 +12,26 @@ pub(super) fn spawn(
     data: &LobbyData,
     assets: &AssetServer,
     lang: Lang,
+    scroll: ScrollPosition,
 ) {
     parent
-        .spawn(Node {
-            width: if cfg!(target_os = "android") {
-                percent(27)
-            } else {
-                px(252)
+        .spawn((
+            Node {
+                width: if cfg!(target_os = "android") {
+                    percent(27)
+                } else {
+                    px(252)
+                },
+                min_height: px(0),
+                flex_shrink: 0.,
+                flex_direction: FlexDirection::Column,
+                row_gap: px(12),
+                overflow: Overflow::scroll_y(),
+                ..default()
             },
-            min_height: px(0),
-            flex_shrink: 0.,
-            flex_direction: FlexDirection::Column,
-            row_gap: px(12),
-            overflow: Overflow::scroll_y(),
-            ..default()
-        })
+            scroll,
+            Sidebar,
+        ))
         .with_children(|sidebar| {
             summary(sidebar, ranking, account, data, assets, lang);
             recent(sidebar, account, data, lang);

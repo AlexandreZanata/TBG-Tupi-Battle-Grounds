@@ -995,3 +995,8 @@ P69 nested-scroll pass: Android scroll residuals propagate only to ancestor
 viewports, respecting visible action shields. Mobile catalog removes the duplicate
 heading and scrolls its hint with bounded thumbnail/name rows. Desktop unchanged;
 actual runtime coverage is recorded separately in the P69 report.
+
+P69 shared menu lifecycle: idle backup polling no longer marks Account changed;
+legitimate Ranking refreshes retain page/table/sidebar scroll. Presentation and
+backup semantics are unchanged across native targets. The App-level regression
+and actual Linux/Android scroll observations are recorded in the P69 report.
