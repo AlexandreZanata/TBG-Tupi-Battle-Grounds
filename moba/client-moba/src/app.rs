@@ -3,7 +3,7 @@
 use bevy::asset::AssetMetaCheck;
 use bevy::prelude::*;
 
-use crate::{camera, capture, config, hud, i18n, input, link, menu, palette, scene, units};
+use crate::{camera, config, hud, i18n, input, link, menu, palette, scene, units};
 
 #[derive(States, Default, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Screen {
@@ -59,7 +59,14 @@ pub fn run() {
             hud::plugin,
             input::plugin,
             menu::plugin,
-            capture::plugin,
         ))
+        .add_plugins(native_plugins)
         .run();
+}
+
+fn native_plugins(app: &mut App) {
+    #[cfg(not(target_arch = "wasm32"))]
+    crate::capture::plugin(app);
+    #[cfg(target_arch = "wasm32")]
+    let _ = app;
 }

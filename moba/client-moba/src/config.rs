@@ -21,7 +21,8 @@ pub struct Launch {
     /// Pre-simulate this many seconds of an offline match (review captures).
     pub warp_secs: u32,
     pub seed: u64,
-    /// Save one screenshot to this path a few seconds in, then exit.
+    /// Save one screenshot to this path a few seconds in, then exit (desktop only).
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
     pub capture: Option<String>,
     /// Start zoomed out over the whole valley (review captures).
     pub overview: bool,

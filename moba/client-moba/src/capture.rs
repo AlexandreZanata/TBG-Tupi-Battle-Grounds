@@ -21,36 +21,24 @@ fn shoot(
     mut state: Local<u8>,
     mut exit: MessageWriter<AppExit>,
 ) {
-    #[cfg(not(target_arch = "wasm32"))]
-    {
-        use bevy::render::view::screenshot::{save_to_disk, Screenshot};
-        let Some(path) = launch.capture.clone() else {
-            return;
-        };
-        let now = time.elapsed_secs();
-        let start = *started.get_or_insert(now);
-        match *state {
-            0 if now - start >= DELAY => {
-                commands
-                    .spawn(Screenshot::primary_window())
-                    .observe(save_to_disk(path));
-                *state = 1;
-            }
-            // Give the asynchronous readback a moment to reach the disk.
-            1 if now - start >= DELAY + 1.5 => {
-                exit.write(AppExit::Success);
-                *state = 2;
-            }
-            _ => {}
+    use bevy::render::view::screenshot::{save_to_disk, Screenshot};
+    let Some(path) = launch.capture.clone() else {
+        return;
+    };
+    let now = time.elapsed_secs();
+    let start = *started.get_or_insert(now);
+    match *state {
+        0 if now - start >= DELAY => {
+            commands
+                .spawn(Screenshot::primary_window())
+                .observe(save_to_disk(path));
+            *state = 1;
         }
+        // Give the asynchronous readback a moment to reach the disk.
+        1 if now - start >= DELAY + 1.5 => {
+            exit.write(AppExit::Success);
+            *state = 2;
+        }
+        _ => {}
     }
-    #[cfg(target_arch = "wasm32")]
-    let _ = (
-        &mut commands,
-        &launch,
-        &time,
-        &mut started,
-        &mut state,
-        &mut exit,
-    );
 }

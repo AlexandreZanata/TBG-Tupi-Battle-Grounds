@@ -3,6 +3,8 @@
 
 mod app;
 mod camera;
+// Review screenshots write files, so they exist only in desktop builds.
+#[cfg(not(target_arch = "wasm32"))]
 mod capture;
 mod config;
 mod hud;
