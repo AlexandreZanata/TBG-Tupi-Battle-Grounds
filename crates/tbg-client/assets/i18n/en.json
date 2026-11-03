@@ -2022,5 +2022,7 @@
   "mobile.training.back": "Catalog",
   "battle.evolution": "Evolution",
   "android.chat_compose": "Write a message",
-  "android.battle.details": "Battle details"
+  "android.battle.details": "Battle details",
+  "android.battle.shop_help": "Tap to recruit · Hold for details",
+  "android.chat_short": "Chat"
 }

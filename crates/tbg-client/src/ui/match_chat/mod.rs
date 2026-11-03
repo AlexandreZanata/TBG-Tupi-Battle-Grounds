@@ -266,21 +266,45 @@ fn render(
             GlobalZIndex(25),
             Node {
                 position_type: PositionType::Absolute,
-                left: percent(bounds[0] * 100.),
-                top: percent(bounds[1] * 100.),
-                width: percent(bounds[2] * 100.),
-                height: if chat.expanded {
+                left: if cfg!(target_os = "android") && !chat.expanded {
+                    px(6)
+                } else {
+                    percent(bounds[0] * 100.)
+                },
+                top: if cfg!(target_os = "android") && !chat.expanded {
+                    px(4)
+                } else {
+                    percent(bounds[1] * 100.)
+                },
+                width: if cfg!(target_os = "android") && !chat.expanded {
+                    px(48)
+                } else {
+                    percent(bounds[2] * 100.)
+                },
+                height: if cfg!(target_os = "android") && !chat.expanded {
+                    px(48)
+                } else if chat.expanded {
                     auto()
                 } else {
                     percent(bounds[3] * 100.)
                 },
-                max_height: percent(bounds[3] * 100.),
+                max_height: if cfg!(target_os = "android") && !chat.expanded {
+                    px(48)
+                } else {
+                    percent(bounds[3] * 100.)
+                },
                 overflow: if chat.expanded {
                     Overflow::scroll_y()
                 } else {
                     Overflow::clip()
                 },
-                padding: UiRect::all(px(if chat.expanded { 10 } else { 4 })),
+                padding: UiRect::all(px(if chat.expanded {
+                    10
+                } else if cfg!(target_os = "android") {
+                    0
+                } else {
+                    4
+                })),
                 flex_direction: FlexDirection::Column,
                 row_gap: px(if chat.expanded { 6 } else { 2 }),
                 ..default()
@@ -292,7 +316,11 @@ fn render(
         .with_children(|p| {
             if !chat.expanded {
                 p.spawn(kit::button(
-                    format!("{} ({})", lang.key("p75.chat"), chat.lines.len()),
+                    if cfg!(target_os = "android") {
+                        format!("{}\n{}", lang.key("android.chat_short"), chat.lines.len())
+                    } else {
+                        format!("{} ({})", lang.key("p75.chat"), chat.lines.len())
+                    },
                     UiAction::P75(super::p75::Action::Chat),
                     0.,
                 ))

@@ -272,6 +272,7 @@ fn spawn(
     info: Res<MatchInfo>,
     assets: Res<AssetServer>,
     lang: Res<crate::i18n::Lang>,
+    link: NonSend<crate::link::MatchLink>,
 ) {
     commands
         .spawn((
@@ -280,7 +281,13 @@ fn spawn(
             DespawnOnExit(GameState::InMatch),
         ))
         .with_children(|root| {
-            super::native_battle::score(root, &info, &assets, *lang);
+            super::native_battle::score(
+                root,
+                &info,
+                &assets,
+                *lang,
+                matches!(&*link, crate::link::MatchLink::Net(_)) && !info.spectating,
+            );
             if !info.spectating {
                 root.spawn(super::surrender::linux_button(&assets, *lang));
             }

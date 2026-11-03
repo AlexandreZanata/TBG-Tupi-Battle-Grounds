@@ -41,17 +41,27 @@ pub fn spawn(
     info: &MatchInfo,
     assets: &AssetServer,
     lang: Lang,
+    online: bool,
 ) {
     parent
         .spawn(Node {
             position_type: PositionType::Absolute,
             top: px(SCORE_TOP),
             left: if cfg!(target_os = "android") {
-                px(8)
+                px(if online { 64 } else { 8 })
             } else {
                 percent(22)
             },
-            width: percent(if cfg!(target_os = "android") { 80 } else { 56 }),
+            right: if cfg!(target_os = "android") && online {
+                px(112)
+            } else {
+                Val::Auto
+            },
+            width: if cfg!(target_os = "android") && online {
+                Val::Auto
+            } else {
+                percent(if cfg!(target_os = "android") { 80 } else { 56 })
+            },
             height: px(CLOCK_HEIGHT),
             align_items: AlignItems::Center,
             ..default()
@@ -195,7 +205,7 @@ fn plate(
                             chrome::title(
                                 display_name,
                                 if cfg!(target_os = "android") {
-                                    11.
+                                    10.
                                 } else {
                                     14.
                                 },

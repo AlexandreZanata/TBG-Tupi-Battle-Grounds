@@ -463,6 +463,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-mobile-header-social-dock",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android collapsed chat/count header slot, score remaining width, bounded two-step surrender, touch-specific detail help; desktop geometry and expanded chat/policy preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

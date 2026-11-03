@@ -130,7 +130,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, lang: Lang) {
                                         hud,
                                     ));
                                 }
-                                body.spawn(kit::muted(lang.key("battle.shop_help"), 11.));
+                                body.spawn(kit::muted(lang.key("android.battle.shop_help"), 11.));
                             });
                     });
             });

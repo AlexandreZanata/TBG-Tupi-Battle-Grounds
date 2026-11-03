@@ -1147,3 +1147,11 @@ the numeric banner now reflects the longer active-seat retry limit. Only the
 server determines continuation/forfeit. Actual Android40 early-abandonment and
 Linux pause/result evidence, plus the focused regression and pending corrected
 runtime repetition, are recorded in the P69 continuation report.
+
+
+P69 social dock: Android places the collapsed chat/count in a48dp header slot,
+reserves the remaining score width, and bounds the two-step surrender label so
+it cannot grow across the HP plates. Expanded chat and policies are shared;
+desktop score/social/surrender geometry remains unchanged. Actual candidate41
+body visibility, drawer/Back and one-confirm Council evidence are recorded in
+the P69 continuation; the compact dock repetition is pending candidate42.
