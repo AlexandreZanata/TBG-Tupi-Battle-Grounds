@@ -8,7 +8,7 @@ pub(super) fn button(text: &str, action: UiAction, _desktop_width: f32) -> impl 
         Node {
             flex_grow: 1.,
             flex_basis: px(0),
-            min_width: px(48),
+            min_width: px(96),
             min_height: px(48),
             padding: UiRect::all(px(4)),
             align_items: AlignItems::Center,

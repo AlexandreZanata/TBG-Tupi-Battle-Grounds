@@ -221,6 +221,10 @@ fn aim(
         (&ComputedNode, &UiGlobalTransform),
         With<super::ui::ResultSurface>,
     >,
+    #[cfg(target_os = "android")] mut dancers: Query<
+        &mut Transform,
+        (With<Dancer>, Without<ArenaCamera>),
+    >,
 ) {
     if let Some(view) = scene.view {
         if let Ok(mut transform) = camera.single_mut() {
@@ -236,12 +240,15 @@ fn aim(
                 let padding = Vec2::splat(6. * window.scale_factor());
                 let min = surface_t.translation - surface.size * 0.5 + padding;
                 let max = Vec2::new(
-                    surface_t.translation.x + surface.size.x * 0.5,
-                    panel_t.translation.y - panel.size.y * 0.5,
+                    panel_t.translation.x - panel.size.x * 0.5,
+                    surface_t.translation.y + surface.size.y * 0.5,
                 ) - padding;
                 if size.min_element() > 0. && (max - min).min_element() > 0. {
                     *transform =
                         fit.frame(size.x / size.y, Rect::from_corners(min / size, max / size));
+                    for mut dancer in &mut dancers {
+                        dancer.rotation = layout::facing(dancer.translation, transform.translation);
+                    }
                 }
             }
         }

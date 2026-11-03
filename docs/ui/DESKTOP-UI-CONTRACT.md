@@ -1212,3 +1212,12 @@ surrender/local fallback copy. Geometry, outcomes and authority are unchanged.
 The34 focused client/two server passes and actual45 chat/pointer negatives are
 recorded in the continuation. Disconnect-label runtime repetition is pending
 the rebuilt local backend.
+
+
+P69 large-roster Result: after an actual82-purchase/83-entry Android result,
+winning Result uses a bounded scrollable right sidebar with two-column actions.
+The unchanged64-entry cast page fits the measured safe region to its left, and
+cosmetic roots face that fitted camera without restarting clips. The range
+label fits both real pages. Nonwinning Result and desktop geometry remain
+unchanged. Actual counts/paging and the too-small above-panel failure are
+recorded separately; corrected sidebar/cast/motion/cleanup observation is pending.

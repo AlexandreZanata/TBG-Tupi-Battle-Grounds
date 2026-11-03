@@ -145,7 +145,11 @@ fn spawn(
         width: percent(100),
         height: percent(100),
         position_type: PositionType::Absolute,
-        flex_direction: FlexDirection::Column,
+        flex_direction: if celebrating {
+            FlexDirection::Row
+        } else {
+            FlexDirection::Column
+        },
         justify_content: if celebrating {
             JustifyContent::FlexEnd
         } else {
@@ -162,7 +166,9 @@ fn spawn(
             Node {
                 flex_direction: FlexDirection::Column,
                 align_items: AlignItems::Center,
-                width: if celebrating || cfg!(target_os = "android") {
+                width: if cfg!(target_os = "android") && celebrating {
+                    percent(48)
+                } else if celebrating || cfg!(target_os = "android") {
                     percent(96)
                 } else {
                     Val::Auto

@@ -55,7 +55,7 @@ pub(crate) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: L
                 ),
                 Node {
                     width: px(if cfg!(target_os = "android") {
-                        120
+                        140
                     } else {
                         190
                     }),

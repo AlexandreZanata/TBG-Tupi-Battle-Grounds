@@ -543,6 +543,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-mobile-large-cast-result-sidebar",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android winning Result sidebar scroll/two-column actions, measured left-space64-entry formation and camera-facing cosmetic roots; all cast entries/clips, losing Result and desktop geometry preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }
