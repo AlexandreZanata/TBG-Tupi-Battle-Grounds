@@ -11,6 +11,7 @@ use crate::types::{Lane, Team};
 #[allow(clippy::needless_range_loop)]
 pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
     let snapshot = m.units.clone();
+    let mut route_budget = 4;
     for i in 0..engaged.len() {
         let u = &m.units[i];
         if !u.alive() || !u.mobile() || engaged[i] {
@@ -29,19 +30,25 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
         };
         let step = crate::champions::speed(&m.units[i], m.tick);
         if step == 0 {
+            super::decision::phase(&mut m.units[i], super::decision::Phase::Wait);
             continue;
         }
         let from = m.units[i].pos;
         let mut to = from;
         to.step_toward(goal, step);
         if formation_holds(m, i, to) {
+            super::decision::phase(&mut m.units[i], super::decision::Phase::Formation);
+            m.units[i].decision.reason = super::decision::Reason::Formation;
             continue;
         }
-        let next = super::navigation::step(m, &snapshot, i, goal, step);
+        let next = super::navigation::step(m, &snapshot, i, goal, step, &mut route_budget);
         // Decisions use the snapshot; settled bodies reserve their swept step
         // in id order so opposing movers cannot walk into each other.
         if super::navigation::clear(&m.units, &m.units[i], from, next) {
             m.units[i].pos = next;
+        } else {
+            super::decision::phase(&mut m.units[i], super::decision::Phase::Repath);
+            m.units[i].decision.reason = super::decision::Reason::Obstructed;
         }
         if m.units[i].pos != from {
             crate::champions::walked(&mut m.units[i]);

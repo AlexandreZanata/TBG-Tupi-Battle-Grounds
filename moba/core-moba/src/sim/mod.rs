@@ -1,12 +1,15 @@
 //! One fixed simulation tick, split by responsibility.
 
 mod combat;
-mod decision;
+pub mod decision;
 mod movement;
 pub(crate) mod navigation;
 mod outcome;
+mod pathfinding;
+pub(crate) mod placement;
 mod rewards;
 pub(crate) mod spawn;
+mod targeting;
 mod upkeep;
 
 use crate::state::MobaMatch;

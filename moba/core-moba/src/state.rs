@@ -17,7 +17,7 @@ pub enum Brain {
     Static,
     /// Walk the lane's waypoints towards the enemy Stronghold.
     Lane { lane: Lane, waypoint: u8 },
-    /// Clear camps one by one, then join the mid lane.
+    /// Clear camps one by one, waiting for respawns when none are alive.
     Jungle { camp: Option<u8> },
     /// Passive until hit; leashed to its camp.
     Neutral { camp: u8 },
@@ -58,6 +58,7 @@ pub struct Unit {
     pub cooldown: u16,
     pub(crate) navigation: crate::sim::navigation::Navigation,
     pub activity: Activity,
+    pub decision: crate::sim::decision::Decision,
     /// Tick of the last attack fired, so views can animate it.
     pub last_attack: u32,
     pub last_hit: Option<Credit>,
@@ -319,6 +320,7 @@ impl MobaMatch {
             target: 0,
             cooldown: 0,
             navigation: Default::default(),
+            decision: Default::default(),
             activity: Activity::Advance,
             last_attack: 0,
             last_hit: None,
@@ -390,6 +392,9 @@ impl MobaMatch {
         }
         for u in &self.units {
             for byte in crate::protocol::encode(&u.navigation) {
+                mix(i64::from(byte));
+            }
+            for byte in crate::protocol::encode(&u.decision) {
                 mix(i64::from(byte));
             }
             mix(u.activity as i64);

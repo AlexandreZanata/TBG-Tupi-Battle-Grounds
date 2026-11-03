@@ -163,9 +163,10 @@ it never decides online visibility or combat outcomes.
 
 ## 9. P77 automatic mission and navigation correction
 
-`sim/combat` owns action priority and target commitment; `sim/decision`
-shares attack-position eligibility with navigation, including the Camp
-leash. `Brain` retains the mission. `sim/navigation` stores the deterministic
+`sim/decision` owns action priority, commitment and explicit transitions;
+`sim/targeting` owns eligibility and stable selection; `sim/combat` executes
+locked windups and hits. Shared action-position eligibility includes the
+Camp leash and each support's legal reach. `Brain` retains the mission. `sim/navigation` stores the deterministic
 route, next-point progress and short rejected-target list per Unit; all
 of that state participates in replay hashing. Movement plans against one
 frozen position set; allied pressure does not become a hard obstacle.
@@ -177,3 +178,16 @@ unseen origins before transport. No client decides rewards or movement.
 Native `--motion-log PATH` optionally records per-frame camera input/focus,
 rig coordinates and champion position/yaw/activity/clip. It adds no gameplay
 UI or online authority and is disabled unless explicitly requested on launch.
+
+
+M-76 adds continuous bridge portals to the existing lattice and safe ground
+placement for larger summoned bodies (`sim/placement`). A full route query
+is finite over the map; no incomplete search result is treated as unreachable.
+The per-tick query count is limited separately from direct/cached movement.
+`Decision` and route state participate in replay hashing.
+
+Native offline `--decision-log PATH` records each authoritative tick's duration,
+Unit mission/phase/target and reason, alongside `--motion-log PATH` for rendered
+motion. These options are off by default and never affect online frames.
+`cargo run --manifest-path moba/Cargo.toml -p tbg-moba-core --example decision_probe`
+inspects the bounded seed-11 opening; run it under the shared validation lock.

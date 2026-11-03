@@ -125,3 +125,6 @@ fn stop(world: &mut World) {
     world.remove_resource::<local::LocalHost>();
     world.remove_non_send::<online::Socket>();
 }
+
+#[cfg(not(target_arch = "wasm32"))]
+mod decision_probe;

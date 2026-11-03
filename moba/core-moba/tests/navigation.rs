@@ -279,7 +279,7 @@ fn unreachable_target_is_released_and_the_lane_mission_continues() {
         released |= game.unit(a).unwrap().target == 0;
         game.events.clear();
     }
-    assert!(released);
+    assert!(released, "unreachable engagement: {:?}", game.unit(a));
     let u = game.unit(a).unwrap();
     assert!(u.pos.y > 55_000, "route must resume: {:?}", u.pos);
     assert!(matches!(

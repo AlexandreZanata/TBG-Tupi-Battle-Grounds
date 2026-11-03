@@ -3564,3 +3564,16 @@ Protocol v4 adds activity and receipt fields; no manual intentions return.
 Reuse the 1v1 rigs/clips read-only. Validate focused cases and Linux motion,
 install locally, and do not push, merge or deploy. Windows/web verification
 remains required before any claim of desktop visual correspondence.
+
+
+### D-112 seventh amendment — M-76 decision coherence (2026-11-03)
+
+The owner reported remaining 5v5 stalls and target oscillation and requested
+stable automatic missions and fluid 1v1-style combat at 5v5 scale. Implement
+separate mission/engagement/navigation responsibilities, explicit decision
+phases and reasons, patient retention, continuous narrow-crossing graph
+connections and body-safe cargo release. Keep authoritative deterministic
+rules, shared read-only 1v1 rigs/clips, existing balance values and protocol
+v4. Record safeguards as Proposed M-76. Validate focused scenarios under the
+host lock and observe native Linux movement; Windows/web parity remains
+pending until observed. No push, merge or deployment is authorized.

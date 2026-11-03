@@ -119,6 +119,7 @@ fn fuse(g: &mut MobaMatch) {
             v.fx.slow_until = a.fx.slow_until.max(b.fx.slow_until);
             v.fx.root_until = a.fx.root_until.max(b.fx.root_until);
         }
+        crate::sim::placement::restore(g, out);
         used.extend([a.id, b.id]);
         if let Some(u) = g.unit(out).cloned() {
             cue(g, &u, 0, u.pos, 0, false);
@@ -133,6 +134,7 @@ fn spawn(g: &mut MobaMatch, u: &Unit, kind: Champion, life: u32) -> u32 {
         g.units[i].fx.summon = if u.fx.summon == 0 { u.id } else { u.fx.summon };
         g.units[i].fx.expires = if life > 0 { g.tick + life } else { 0 };
     }
+    crate::sim::placement::restore(g, id);
     id
 }
 fn open(g: &mut MobaMatch, u: &Unit) {
@@ -191,6 +193,7 @@ pub fn died(g: &mut MobaMatch, u: &Unit) {
             g.units[i].fx.carrier = 0;
             g.units[i].pos = u.pos;
         }
+        crate::sim::placement::restore(g, u.fx.passenger);
     }
 }
 

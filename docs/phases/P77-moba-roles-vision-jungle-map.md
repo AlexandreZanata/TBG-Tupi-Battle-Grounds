@@ -768,3 +768,38 @@ CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=/data/tbg-moba-target cargo check --locked
 --manifest-path moba/Cargo.toml -p tbg-moba-client --bin tbg-moba --target
 wasm32-unknown-unknown`; run at cross-platform consolidation, not as evidence
 of visual correspondence. No full-suite or release-readiness claim is made.
+
+### M-76 decision-engine follow-up (2026-11-03, in progress)
+
+Owner report: deployed Troops still stall and repeatedly switch targets.
+The focused moving-contact regression reproduced loss of a reachable living
+Shieldbearer target at tick 40. An incremental A* experiment restored long
+crossings but failed the Colossus camp-clear scenario twice.
+
+> blocked: incremental planner integration; tried bounded partial paths,
+> then persistent search frontiers. Exact remaining failure:
+> `melee_reaches_damages_and_clears_every_camp`: Colossus Camps 1, 3, 5, 7
+> deal damage but do not clear within the existing 120-second fixture.
+> Suspected cause: interaction between refreshed contact positions, crowd
+> movement and leash. This planner attempt is withdrawn; do not ship it or
+> claim its validation. Continue the independent decision/aim changes and
+> use the previous proven route solver for the contact correction.
+
+
+The final implementation restores the previous complete route search and
+adds continuous bridge-centre graph edges. The narrow-lattice issue was
+reproduced from native seed 11: Bulwark/Sawbot radius 3 cannot fit any grid
+centre inside the bridge's remaining centre corridor. A separate Leechroot
+was born from cargo on invalid terrain. Continuous bridge connections and
+same-bank placement resolve those cases without changing map width.
+A moving patient now remains committed while followed into legal action range.
+
+Consolidation: 42 focused tests passed on the integrated M-76 working tree,
+including 13 decision scenarios, 7 navigation scenarios (40 melee/Camp
+combinations), aggro 1, champion combat 4, range 2, deployment 2, rewards 5,
+M-6x 6, M-08 1 and M-40 1. The initial 46-champion exit matrix is a bounded
+mechanics check, not full roster visual acceptance. Native client/server dev
+build passed in 18.09 seconds. All compilation/tests held the shared
+nonblocking lock with two Cargo jobs and one test thread. No full suite.
+The exact command batch and logs are retained for the final evidence record.
+Native final motion/installation results follow after observation.

@@ -1452,3 +1452,23 @@ pursuit, personal/team receipts and every camera capture transition.
 recorded moving camera/capture, melee Golem combat, personal/Team receipts
 and crowd/stance evidence at 1600×900; see the P77 report. Windows and desktop web motion/pixel
 comparison remain pending. Shared code and compilation do not prove parity.
+
+## P77 M — stable decision and action transitions (M-76)
+
+The shared 5v5 presentation uses explicit authoritative phases. Preserve the
+locked basic/channel target; independent special aim uses its existing cue.
+Walk faces effective route displacement, including a committed bridge/bank
+detour; planted recovery faces the engagement through soft allied pressure.
+Support follows an eligible patient back into range and holds at an enemy
+front without an eligible action. Mission resumes after target death or a
+proved/sustained blocked pursuit. Cargo with larger bodies appears on valid
+ground beside the same bank, then follows its inherited mission.
+
+Required motion cases: moving target plus competing enemies; patients
+crossing action range; root/channel/recovery; target death/carried invalidity;
+Top/Mid/Bot/Jungle resumption; narrow bridge centres with Bulwark/Sawbot,
+large-body plaza detours and crate opening on a bridge; Nexus crowd pressure.
+Rigs, clips, slew, blending and map geometry remain shared across Linux,
+Windows and desktop web. Focused core assertions do not prove visual parity.
+Linux follow-up observation is recorded in the P77 delivery report;
+Windows/web comparison and complete roster motion remain pending.

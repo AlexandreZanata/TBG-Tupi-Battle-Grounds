@@ -1,14 +1,13 @@
 //! Persistent deterministic body-safe routes; mobile allies remain soft obstacles.
+use super::pathfinding::route;
 use crate::{
     geom::{Pos, MM},
     map,
     state::{MobaMatch, Unit},
 };
 use serde::{Deserialize, Serialize};
-use std::{cmp::Reverse, collections::BinaryHeap};
 
-const CELL: i32 = 2 * MM;
-const WIDTH: usize = 101;
+pub(super) const CELL: i32 = 2 * MM;
 const STALL: u16 = 40;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
@@ -20,6 +19,17 @@ pub struct Navigation {
     pub rejected: Vec<(u32, u32)>,
     pub retry_at: u32,
     pub progress: Option<(Pos, i64)>,
+    pub failed_since: Option<u32>,
+}
+
+impl Navigation {
+    pub fn reset_route(&mut self) {
+        self.path.clear();
+        self.progress = None;
+        self.stalled = 0;
+        self.retry_at = 0;
+        self.failed_since = None;
+    }
 }
 
 pub fn rejected(u: &Unit, id: u32, tick: u32) -> bool {
@@ -70,7 +80,7 @@ pub fn clear(units: &[Unit], a: &Unit, from: Pos, to: Pos) -> bool {
             .all(|b| !intersects(from, to, b.pos, gap(a, b)))
 }
 
-fn acceptable(a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> bool {
+pub(super) fn acceptable(a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> bool {
     match target {
         Some(b) => super::decision::in_position_at(a, b, at),
         None => at.within(
@@ -86,121 +96,17 @@ fn acceptable(a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> bool {
     }
 }
 
-fn heuristic(a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> i64 {
-    let reach = target.map_or(0, |b| crate::champions::reach(a, b));
+pub(super) fn heuristic(a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> i64 {
+    let reach = target.map_or(0, |b| super::decision::reach(a, b));
     (at.dist(goal) - i64::from(reach)).max(0)
 }
 
-/// Search the fixed 2-unit lattice only after a direct approach fails. Stable
-/// (cost, node id) ties and ordered neighbours make routes replayable.
-fn route(units: &[Unit], a: &Unit, target: Option<&Unit>, goal: Pos) -> Option<Vec<Pos>> {
-    let node = |id: usize| Pos {
-        x: (id % WIDTH) as i32 * CELL,
-        y: (id / WIDTH) as i32 * CELL,
-    };
-    let mut cost = vec![i64::MAX; WIDTH * WIDTH];
-    let mut parent = vec![usize::MAX; WIDTH * WIDTH];
-    let mut open = BinaryHeap::new();
-    let sx = a.pos.x / CELL;
-    let sy = a.pos.y / CELL;
-    for y in sy - 1..=sy + 1 {
-        for x in sx - 1..=sx + 1 {
-            if !(0..WIDTH as i32).contains(&x) || !(0..WIDTH as i32).contains(&y) {
-                continue;
-            }
-            let id = y as usize * WIDTH + x as usize;
-            let p = node(id);
-            if clear(units, a, a.pos, p) {
-                cost[id] = a.pos.dist(p);
-                open.push(Reverse((
-                    cost[id] + heuristic(a, target, p, goal),
-                    cost[id],
-                    id,
-                )));
-            }
-        }
-    }
-    while let Some(Reverse((_, distance, id))) = open.pop() {
-        if distance != cost[id] {
-            continue;
-        }
-        let at = node(id);
-        let finish = if acceptable(a, target, at, goal) {
-            Some(at)
-        } else if target.is_some() && heuristic(a, target, at, goal) <= i64::from(2 * CELL) {
-            let mut probe = a.clone();
-            probe.pos = at;
-            let end = approach(&probe, target, goal);
-            (acceptable(a, target, end, goal) && clear(units, a, at, end)).then_some(end)
-        } else {
-            None
-        };
-        if let Some(end) = finish {
-            let mut path = if end == at { vec![at] } else { vec![end, at] };
-            let mut n = id;
-            while parent[n] != usize::MAX {
-                n = parent[n];
-                path.push(node(n));
-            }
-            path.reverse();
-            return Some(simplify(units, a, path));
-        }
-        for (dx, dy) in [
-            (0, -1),
-            (-1, 0),
-            (1, 0),
-            (0, 1),
-            (-1, -1),
-            (1, -1),
-            (-1, 1),
-            (1, 1),
-        ] {
-            let x = id as i32 % WIDTH as i32 + dx;
-            let y = id as i32 / WIDTH as i32 + dy;
-            if !(0..WIDTH as i32).contains(&x) || !(0..WIDTH as i32).contains(&y) {
-                continue;
-            }
-            let next = y as usize * WIDTH + x as usize;
-            let p = node(next);
-            let distance = distance + at.dist(p);
-            if distance < cost[next] && clear(units, a, at, p) {
-                cost[next] = distance;
-                parent[next] = id;
-                open.push(Reverse((
-                    distance + heuristic(a, target, p, goal),
-                    distance,
-                    next,
-                )));
-            }
-        }
-    }
-    None
-}
-
-/// Remove lattice corners visible from the previous corner. Besides smoother
-/// routes, this avoids trying to stand exactly on a seed cell under ally pressure.
-fn simplify(units: &[Unit], a: &Unit, path: Vec<Pos>) -> Vec<Pos> {
-    let mut result = Vec::new();
-    let mut from = a.pos;
-    let mut first = 0;
-    while first < path.len() {
-        let next = (first..path.len())
-            .rev()
-            .find(|&j| clear(units, a, from, path[j]))
-            .unwrap_or(first);
-        result.push(path[next]);
-        from = path[next];
-        first = next + 1;
-    }
-    result
-}
-
-fn approach(a: &Unit, target: Option<&Unit>, goal: Pos) -> Pos {
+pub(super) fn approach(a: &Unit, target: Option<&Unit>, goal: Pos) -> Pos {
     let Some(b) = target else {
         return map::surface::clamp_body(goal, a.stats.radius);
     };
     let mut p = goal;
-    let radius = crate::champions::reach(a, b)
+    let radius = super::decision::reach(a, b)
         .saturating_sub(50)
         .max(a.stats.radius + b.stats.radius);
     p.step_toward(a.pos, radius);
@@ -214,7 +120,14 @@ fn approach(a: &Unit, target: Option<&Unit>, goal: Pos) -> Pos {
     p
 }
 
-pub fn step(m: &mut MobaMatch, snapshot: &[Unit], i: usize, goal: Pos, speed: i32) -> Pos {
+pub fn step(
+    m: &mut MobaMatch,
+    snapshot: &[Unit],
+    i: usize,
+    goal: Pos,
+    speed: i32,
+    budget: &mut u8,
+) -> Pos {
     let a = &m.units[i];
     let target = snapshot.iter().find(|u| u.id == a.target && u.alive());
     let direct = approach(a, target, goal);
@@ -228,16 +141,31 @@ pub fn step(m: &mut MobaMatch, snapshot: &[Unit], i: usize, goal: Pos, speed: i3
         nav.target = a.target;
         nav.goal = goal;
     }
+    // Reaching the old contact point requests the next leg toward the
+    // current target. It never rejects an otherwise valid engagement.
+    while nav.path.first().is_some_and(|p| a.pos.within(*p, 50)) {
+        nav.path.remove(0);
+    }
     // Retain a chosen detour until it finishes, rather than switching sides each tick.
     if nav.path.is_empty()
         && clear(snapshot, a, a.pos, direct)
         && acceptable(a, target, direct, goal)
     {
         nav.path.push(direct);
+        nav.failed_since = None;
     }
-    if nav.path.is_empty() && m.tick >= nav.retry_at {
-        nav.path = route(snapshot, a, target, goal).unwrap_or_default();
-        nav.retry_at = m.tick + u32::from(STALL);
+    if nav.path.is_empty() && m.tick >= nav.retry_at && *budget > 0 {
+        *budget -= 1;
+        match route(snapshot, a, target, goal) {
+            Some(path) => {
+                nav.path = path;
+                nav.failed_since = None;
+            }
+            None => {
+                nav.failed_since.get_or_insert(m.tick);
+            }
+        }
+        nav.retry_at = m.tick + 10;
     }
     while nav.path.first().is_some_and(|p| a.pos.within(*p, 50)) {
         nav.path.remove(0);
@@ -277,15 +205,27 @@ pub fn step(m: &mut MobaMatch, snapshot: &[Unit], i: usize, goal: Pos, speed: i3
         };
         nav.progress = Some((next, distance));
     }
-    let failed = nav.stalled >= STALL || nav.path.is_empty() && !acceptable(a, target, a.pos, goal);
+    let failed = nav.stalled >= STALL
+        || nav
+            .failed_since
+            .is_some_and(|since| m.tick.saturating_sub(since) >= u32::from(STALL));
     if failed {
         nav.path.clear();
         if a.target != 0 {
             nav.rejected.push((a.target, m.tick + u32::from(STALL)));
-            m.units[i].target = 0;
         }
         nav.stalled = 0;
+        nav.failed_since = None;
     }
+    let stationary = to == a.pos;
+    let blocked = stationary && !acceptable(a, target, a.pos, goal);
     m.units[i].navigation = nav;
+    if blocked {
+        super::decision::phase(&mut m.units[i], super::decision::Phase::Repath);
+        m.units[i].decision.reason = super::decision::Reason::Obstructed;
+    } else if stationary {
+        super::decision::phase(&mut m.units[i], super::decision::Phase::Wait);
+        m.units[i].decision.reason = super::decision::Reason::Arrived;
+    }
     to
 }

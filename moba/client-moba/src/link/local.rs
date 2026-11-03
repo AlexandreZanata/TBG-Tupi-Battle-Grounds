@@ -18,6 +18,8 @@ pub struct LocalHost {
     seat: Seat,
     inputs: Vec<(Seat, MobaIntention)>,
     pending: f32,
+    #[cfg(not(target_arch = "wasm32"))]
+    probe: Option<super::decision_probe::Probe>,
 }
 
 pub fn start(world: &mut World, launch: &Launch) {
@@ -39,6 +41,8 @@ pub fn start(world: &mut World, launch: &Launch) {
         seat,
         inputs: Vec::new(),
         pending: 0.0,
+        #[cfg(not(target_arch = "wasm32"))]
+        probe: super::decision_probe::Probe::open(),
     });
 }
 
@@ -65,7 +69,13 @@ pub fn run(
     host.pending = (host.pending + time.delta_secs()).min(DT * MAX_CATCH_UP as f32);
     while host.pending >= DT {
         host.pending -= DT;
+        #[cfg(not(target_arch = "wasm32"))]
+        let started = host.probe.as_ref().map(|_| std::time::Instant::now());
         let rejects = host::tick(&mut host.game, &mut host.inputs);
+        #[cfg(not(target_arch = "wasm32"))]
+        if let (Some(probe), Some(started)) = (&mut host.probe, started) {
+            probe.record(&host.game, started.elapsed().as_micros());
+        }
         feed.rejects.extend(rejects.into_iter().map(|(_, r)| r));
         feed.me = Some(view::private(&host.game, seat));
         if feed

@@ -27,7 +27,7 @@ fn preferred(mut targets: impl Iterator<Item = u32>, current: u32) -> Option<u32
     }
 }
 
-fn afflicted(u: &Unit, now: u32) -> bool {
+pub(crate) fn afflicted(u: &Unit, now: u32) -> bool {
     let f = &u.fx;
     f.root_until > now
         || f.slow_until > now

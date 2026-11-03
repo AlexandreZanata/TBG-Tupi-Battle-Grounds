@@ -339,7 +339,8 @@ new camps never spawn them. Their legacy stats are unchanged.
   or the target changes. Project blocked steps along a free axis. Forty
   ticks without at least 5 mm of progress toward the next path point clear
   the route; an unreachable enemy is released and excluded for 40 ticks,
-  then may be retried. An exhaustive failed route also releases that enemy.
+  then may be retried. M-76 refines exhaustive-search failure with a transient
+  obstruction grace period and a per-tick query budget.
   These limits are navigation safeguards, not combat stat tuning.
 - Shared map geometry: water half-width 8.2 units (the existing visible
   ribbon), bridge length 18 and half-width 3.6, playable rim 6 plus body
@@ -367,3 +368,49 @@ new camps never spawn them. Their legacy stats are unchanged.
   receipts for 2.5 seconds and labels Personal versus Team. A duplicate
   World tick cannot replay a HUD receipt. Protocol v4 carries receipts and
   activity without adding a client intention.
+
+## 14. Coherent decision engine (owner follow-up, 2026-11-03)
+
+- **M-76 Proposed.** Mission (`Brain`), engagement and navigation are
+  separate responsibilities. `sim/decision` alone commits normal actions;
+  `sim/targeting` supplies eligible candidates; `sim/combat` executes
+  windups and simultaneous basic completions. Retaliation still establishes
+  a neutral's initial engagement. Each Unit records its phase, target,
+  commitment tick/position and transition reason in deterministic state.
+- Priority is disabled/channel → finish locked windup → retain a valid
+  engagement → acquire a useful action → pursue its legal action position
+  → strike or recover → resume the saved Lane/Jungle mission. Phases also
+  distinguish temporary replanning, neutral return, formation and arrival.
+  Death, invalid eligibility, M-07 pursuit limits and sustained navigation
+  failure are explicit release reasons. A closer candidate never replaces
+  a valid enemy. Guard and distance/id acquisition ties remain M-07.
+- Healing and cleansing keep their patient while useful, within the
+  existing action range plus half sight and the patient's body allowance.
+  Move back into legal action range before acting; this retention distance
+  never extends healing/cast range. Cooldown keeps the recovery recipient,
+  even when already healed. A support without a useful action holds at an
+  enemy front as in 1v1. Roots cancel basics; channels and betrayal keep
+  their own locked presentation target. Timed specials prefer the current
+  eligible engagement and keep their separate aim cues.
+- A planted recovery tolerates the existing 100 mm PK-01 gap outside legal
+  range until cooldown ends, avoiding stance flicker from lateral pressure.
+  New attacks still require legal range. Walking faces actual route motion;
+  a planted action faces its locked target, using shared 1v1 slew/blends.
+- Reaching a previous moving-target endpoint requests the next leg; it
+  does not prove inaccessibility. Keep the passing side until that leg ends.
+  At most **4** full A* searches start per tick in stable Unit order; cached
+  paths and direct steps do not consume this budget. Retry a failed search
+  after **10 ticks**, retaining the target through transient blockage.
+  Failure persisting **40 ticks**, or the existing 40-tick no-progress
+  rule, rejects that target for the existing 40 ticks. Budget exhaustion
+  never rejects a target. These are Proposed scheduling safeguards, not
+  damage, speed, reward or attack-range changes.
+- Add continuous swept bridge-centre connections to the 2-unit graph.
+  Their dry endpoints use the existing water width, body radius and one
+  grid cell. This represents a valid narrow centre corridor even when no
+  grid centre fits it; no bridge geometry is enlarged. Too-wide bodies
+  still use the plaza. Summons, fusion results and released passengers
+  whose larger bodies overlap water move to the nearest valid sampled
+  ground on the same bank: stable eight-direction **500 mm** rings up to
+  **20 units**, preserving owner and mission. Ordinary valid spawns stay
+  immediate and mobile allies remain soft obstacles.

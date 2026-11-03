@@ -138,3 +138,16 @@ source death, one grant per death and hidden-origin redaction. Existing
 aggro, deployment, range and champion-combat contracts remain unchanged.
 Camera and motion evidence belongs to the desktop correspondence matrix;
 core assertions alone do not establish visual parity.
+
+## 8. Decision commitments (M-76)
+
+The owner requested a stable 5v5 decision engine after observing stalls and
+repeated target changes. `tests/decisions.rs` covers moving attack endpoints,
+windup/recovery under pressure, death/carried-target release, root cancellation,
+patient retention/following, idle support front holds, transient obstruction,
+all 46 Shop champions' initial missions, narrow bridge centres, larger cargo
+contents, bank/rim pursuits and deterministic ten-seat decisions/Team frames.
+M-07 acquisition, M-08 protection, M-61/M-62 retaliation/leash, M-18 range
+and M-75 receipts remain guarded by their existing focused tests.
+The wire schema remains v4; internal decision diagnostics are never a new
+client instruction. Linux movement observation is required separately.

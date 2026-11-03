@@ -48,8 +48,10 @@ pub fn world(m: &MobaMatch, team: Team) -> WorldView {
                 },
                 u.max_hp,
             ),
-            target: if vision.visible[i] && vision.unit(u.target) {
-                u.target
+            target: if vision.visible[i]
+                && vision.unit(crate::sim::decision::presentation_target(u))
+            {
+                crate::sim::decision::presentation_target(u)
             } else {
                 0
             },
@@ -80,7 +82,7 @@ pub fn world(m: &MobaMatch, team: Team) -> WorldView {
                 crate::state::Activity::Hold
             },
             attacked: vision.visible[i]
-                && vision.unit(u.target)
+                && vision.unit(crate::sim::decision::presentation_target(u))
                 && m.tick > 0
                 && u.last_attack == m.tick,
         })

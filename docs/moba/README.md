@@ -4,8 +4,8 @@ A separate 5v5 game mode of Tupi Battle Grounds: ten strategic Seats with no pla
 lanes, a jungle, automatic Minion waves, the **same champions as the 1v1
 game** bought in the same Shop and sent to a Destination, and bots on every
 empty seat. Status: **P77 implemented locally, including the owner's strategy-only
-revision and M-73–M-75 corrections. 28 focused tests passed; installed Linux
-camera/combat motion and reward HUD observed. Complete roster, performance
+revision and M-73–M-76 corrections. 42 focused tests passed; M-76 installed
+Linux movement observation is being consolidated in the P77 report. Complete roster, performance
 and cross-platform acceptance pending; unbalanced.**
 
 ![1v1 champions fighting on a lane, 1v1-style HUD](media/p76-champions-lane.webp)
@@ -42,6 +42,8 @@ the minimap navigates it. Wheel zooms, arrows/middle-drag pan,
 **Space** or **H** on the minimap centres the Team base, **Esc** returns
 to the menu. Right click does not issue orders. A stationary pointer never pans at the window edge.
 Troops keep their Lane/Jungle mission through combat and resume it afterward.
+Engagements have explicit pursuit, windup, recovery and replanning phases;
+support follows an eligible patient back into range.
 Gold receipts distinguish personal bounties from Team Tower rewards.
 
 Vision: the entire allied half is visible. Across the river, allied

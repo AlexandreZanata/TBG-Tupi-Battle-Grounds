@@ -542,13 +542,20 @@ fn animate(
         }
         let pos = v.prev.lerp(v.curr, alpha);
         let step = v.curr - v.prev;
-        // A committed target sets facing even when collision adds a sideways
-        // step. Interpolate both endpoints on the same clock.
-        let facing = targets
-            .get(&v.target)
-            .map(|(at, _)| *at - pos)
-            .filter(|delta| delta.length_squared() > 1e-4)
-            .or_else(|| (step.length_squared() > 1e-4).then_some(step));
+        // Route motion owns walking facing; the committed target owns a
+        // planted action. This prevents sideways walking around a detour.
+        let moving = matches!(
+            v.activity,
+            tbg_moba_core::state::Activity::Advance | tbg_moba_core::state::Activity::Pursue
+        ) && step.length_squared() > 1e-4;
+        let facing = if moving {
+            Some(step)
+        } else {
+            targets
+                .get(&v.target)
+                .map(|(at, _)| *at - pos)
+                .filter(|d| d.length_squared() > 1e-4)
+        };
         if let Some(d) = facing {
             // The shared rigs face +Z; the map's north is -Z.
             let goal = d.x.atan2(-d.y);

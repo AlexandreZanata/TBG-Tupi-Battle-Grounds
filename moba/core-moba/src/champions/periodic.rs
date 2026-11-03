@@ -35,7 +35,16 @@ fn primary(g: &MobaMatch, u: &Unit, a: Ability) -> Option<u32> {
         _ => super::reach(u, u),
     };
     let allied = matches!(a, Ability::SolarBarrier { .. });
-    let ids = nearby(g, u, u.pos, reach, u8::MAX, None, allied);
+    let mut ids = nearby(g, u, u.pos, reach, u8::MAX, None, allied);
+    // Independent abilities prefer the current engagement when eligible.
+    // They retain their own windup target after starting.
+    ids.sort_by_key(|id| {
+        (
+            *id != u.target,
+            g.unit(*id).map_or(i64::MAX, |v| u.pos.dist2(v.pos)),
+            *id,
+        )
+    });
     ids.into_iter().find(|id| {
         let Some(v) = g.unit(*id) else { return false };
         match a {
