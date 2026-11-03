@@ -37,8 +37,28 @@ pub(super) fn spawn(
         },
         children![kit::muted(status, 12.)],
     ));
+    #[cfg(target_os = "android")]
+    parent.spawn((
+        Node {
+            width: percent(100),
+            flex_shrink: 0.,
+            ..default()
+        },
+        children![kit::muted(
+            words(
+                lang,
+                "W: Wins · L: Losses · D: Draws · %: Win rate",
+                "V: Vitórias · D: Derrotas · E: Empates · %: Taxa de vitória"
+            ),
+            10.
+        )],
+    ));
     parent.spawn((Node{width:percent(100),flex_grow:1.,min_height:px(if cfg!(target_os = "android") { 48 } else { 0 }),flex_direction:FlexDirection::Column,overflow:Overflow::scroll_y(),row_gap:px(3),..default()}, scroll, List)).with_children(|list| {
-        let headings=["#".into(),words(lang,"Player","Jogador"),words(lang,"Rating","Pontuação"),words(lang,"Wins","Vitórias"),words(lang,"Losses","Derrotas"),words(lang,"Draws","Empates"),words(lang,"Win rate","Taxa de vitória")];
+        let headings = if cfg!(target_os = "android") {
+            ["#".into(), words(lang,"Player","Jogador"), words(lang,"Rating","Pontos"), words(lang,"W","V"), words(lang,"L","D"), words(lang,"D","E"), "%".into()]
+        } else {
+            ["#".into(),words(lang,"Player","Jogador"),words(lang,"Rating","Pontuação"),words(lang,"Wins","Vitórias"),words(lang,"Losses","Derrotas"),words(lang,"Draws","Empates"),words(lang,"Win rate","Taxa de vitória")]
+        };
         row(list,headings,Color::srgb_u8(17,43,49),true);
         if page.is_none() && ranking.want.is_some() {
             super::super::native_loading::rows(list, 6);
@@ -152,8 +172,18 @@ fn row(parent: &mut ChildSpawnerCommands, values: [String; 7], color: Color, hea
                             _ => Color::srgb_u8(241, 223, 174),
                         }
                     };
-                    cell.spawn(text(value, if heading { 10. } else { 12. }))
-                        .insert(TextColor(ink));
+                    let mut copy = cell.spawn(text(value, if heading { 10. } else { 12. }));
+                    copy.insert(TextColor(ink));
+                    #[cfg(target_os = "android")]
+                    copy.insert((
+                        Node {
+                            width: percent(100),
+                            min_width: px(0),
+                            flex_shrink: 0.,
+                            ..default()
+                        },
+                        TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+                    ));
                 });
             }
         });

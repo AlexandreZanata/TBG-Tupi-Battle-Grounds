@@ -573,6 +573,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-result-owned-report-and-readable-mobile-filters",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android Result owns eligible P75 toolbar in its scroll panel; full-width catalog filters, bounded Ranking cells and full short-header legend/status at font100/130; desktop geometry unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

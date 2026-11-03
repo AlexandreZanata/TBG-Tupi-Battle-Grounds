@@ -14,15 +14,24 @@ pub(super) fn render(
     roots: Query<Entity, With<Root>>,
     time: Res<Time>,
     mut shown: Local<String>,
+    #[cfg(target_os = "android")] result_panels: Query<
+        Entity,
+        With<crate::celebration::ui::ResultPanel>,
+    >,
 ) {
+    #[cfg(target_os = "android")]
+    let result_panel = result_panels.iter().next();
+    #[cfg(not(target_os = "android"))]
+    let result_panel: Option<Entity> = None;
     let signature = format!(
-        "{:?}:{}:{:?}:{}:{}:{}",
+        "{:?}:{}:{:?}:{}:{}:{}:{:?}",
         s.page,
         s.revision,
         game.get(),
         lang.code(),
         chat.mode,
-        textform::is_open(&form)
+        textform::is_open(&form),
+        result_panel
     );
     if *shown == signature {
         return;
@@ -63,16 +72,27 @@ pub(super) fn render(
         && crate::auth::snapshot().access.is_some()
         && s.eligibility
             .is_some_and(|(id, eligible)| eligible && Some(id) == info.result_id)
+        && (!cfg!(target_os = "android") || result_panel.is_some())
     {
-        commands
+        let toolbar = commands
             .spawn((
                 Root,
                 GlobalZIndex(40),
-                Node {
-                    position_type: PositionType::Absolute,
-                    right: percent(2.),
-                    bottom: percent(15.),
-                    ..default()
+                if cfg!(target_os = "android") {
+                    Node {
+                        width: percent(100),
+                        flex_direction: FlexDirection::Column,
+                        flex_shrink: 0.,
+                        row_gap: px(6),
+                        ..default()
+                    }
+                } else {
+                    Node {
+                        position_type: PositionType::Absolute,
+                        right: percent(2.),
+                        bottom: percent(15.),
+                        ..default()
+                    }
                 },
             ))
             .with_children(|p| {
@@ -84,7 +104,11 @@ pub(super) fn render(
                         }
                     }
                 }
-            });
+            })
+            .id();
+        if let Some(panel) = result_panel {
+            commands.entity(panel).add_child(toolbar);
+        }
     }
     if s.page == Page::None {
         return;

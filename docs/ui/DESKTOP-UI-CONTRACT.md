@@ -1235,3 +1235,12 @@ terminal replay deadline after a long pause, through both session cleanup and
 authenticated hello. Cross-account, expired Access and controller protections
 are retained. Android48 terminal failure and its bounded Menu recovery remain
 recorded; corrected signed-in runtime repetition is pending.
+
+
+P69 Result/social ownership and accessibility: Android's eligible P75 result
+report toolbar belongs to the Result scroll panel, so it cannot cover Menu or
+history. The catalog stacks full-width filters. Ranking uses localized short
+headers with a full explanatory legend, wrapped bounded values and a secondary
+rank-status size. Desktop geometry, server eligibility and all data/actions are
+preserved. Actual48 clipping/overlay failures remain recorded; corrected
+font100/130, report and scroll observations are pending.

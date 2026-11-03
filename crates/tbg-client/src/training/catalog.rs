@@ -135,7 +135,15 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
         !c.search.is_empty(),
     ));
     p.spawn(Node {
+        width: percent(100),
+        flex_direction: if cfg!(target_os = "android") {
+            FlexDirection::Column
+        } else {
+            FlexDirection::Row
+        },
         column_gap: px(6),
+        row_gap: px(6),
+        flex_shrink: 0.,
         ..default()
     })
     .with_children(|row| {
@@ -160,14 +168,11 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
             row.spawn(skin::control(label, action, 0., active))
                 .insert(Node {
                     width: if cfg!(target_os = "android") {
-                        Val::Auto
+                        percent(100)
                     } else {
                         percent(50)
                     },
-                    #[cfg(target_os = "android")]
-                    flex_grow: 1.,
-                    #[cfg(target_os = "android")]
-                    flex_basis: px(0),
+                    flex_shrink: 0.,
                     min_width: px(0),
                     min_height: px(if cfg!(target_os = "android") { 48 } else { 40 }),
                     padding: UiRect::all(px(if cfg!(target_os = "android") { 4 } else { 6 })),

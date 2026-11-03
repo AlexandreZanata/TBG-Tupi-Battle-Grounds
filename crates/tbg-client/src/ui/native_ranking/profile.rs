@@ -112,7 +112,7 @@ fn summary(
                     |r| format!("#{r} Global"),
                 ),
                 if cfg!(target_os = "android") {
-                    18.
+                    12.
                 } else {
                     24.
                 },
