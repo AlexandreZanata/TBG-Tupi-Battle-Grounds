@@ -566,6 +566,30 @@ XSETTINGS/display-size warnings. This screenshot does not prove full
 motion, gestures, per-champion correspondence, performance, or parity
 with Windows and desktop web; those checks remain pending.
 
+### Walk continuity and crowded exits (M-72)
+
+The 5v5 arrival-time interpolation could repeatedly slow, stop or jump.
+Local playback now uses the simulation accumulator and the actual prior
+snapshot. Online playback buffers two ticks and slews a monotonic server
+clock. The shared Animator now accounts for the threefold parent scale
+when advancing the gait. Terrain grounding samples the existing road
+height and the bounds of the physical bridge decks.
+
+Each purchase or wave spawns immediately at the chosen exit. Same-team
+mobile units spread with bounded pressure using PK-01 body sizes, with
+lateral bias on the road. This is a planar adaptation of the BattleLine
+spacing and persistent bypass rules. The 1v1 longitudinal slot solver
+does not run in the 5v5 map. Opponents and fixed structures still use
+swept body contact. The earlier waiting-queue approach was superseded
+by the owner's immediate deployment requirement.
+
+Focused core results: 22 MOBA contracts, 4 champion combat contracts and
+2 deployment contracts passed. The deployment fixture buys eight Colossi
+at once on each side, including four for one exit. It checks immediate
+appearance and forward progress from each spawn position. It also checks
+a static obstacle bypass. The 25-minute bot match was excluded. Full
+motion comparison and Windows/web verification remain pending.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 champion Evolution forms and coverage beyond the automatic base kits ·

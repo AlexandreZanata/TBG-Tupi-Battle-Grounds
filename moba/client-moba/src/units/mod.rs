@@ -106,6 +106,7 @@ pub fn plugin(app: &mut App) {
                 bars,
             )
                 .chain()
+                .after(crate::link::Receive)
                 .before(crate::art::anim::animate)
                 .run_if(in_state(Screen::Match)),
         )
@@ -192,8 +193,10 @@ fn setup(
 /// Ground height where a unit stands: bridges and the plaza carry it over water.
 pub fn ground_y(p: Vec2) -> f32 {
     let h = height(p);
-    if h < 0.0 && lane_distance(p) < LANE_HALF_WIDTH + 0.5 {
-        0.45
+    if let Some(deck) = crate::scene::landmarks::bridge_surface(p) {
+        h.max(deck)
+    } else if lane_distance(p) < LANE_HALF_WIDTH {
+        crate::scene::terrain::road_height(p)
     } else {
         h.max(-0.6)
     }
@@ -240,6 +243,12 @@ fn sync(
     spawned.generation = feed.generation;
     let Some(world) = &feed.curr else { return };
     let positions: HashMap<u32, Vec2> = world.units.iter().map(|u| (u.id, map_pos(u))).collect();
+    let previous: HashMap<u32, Vec2> = feed
+        .prev
+        .iter()
+        .flat_map(|w| &w.units)
+        .map(|u| (u.id, map_pos(u)))
+        .collect();
     for u in &world.units {
         let pos = map_pos(u);
         if let Some(&entity) = spawned.by_id.get(&u.id) {
@@ -286,7 +295,7 @@ fn sync(
                     }
                 }
                 v.effect = u.champion;
-                v.prev = v.curr;
+                v.prev = previous.get(&u.id).copied().unwrap_or(pos);
                 v.curr = pos;
                 if hp != v.hp {
                     v.flash = if hp < v.hp { 0.08 } else { -0.15 };
@@ -502,7 +511,7 @@ fn animate(
     >,
     mut crystals: Query<(&Crystal, &mut Transform), Without<UnitVisual>>,
 ) {
-    let alpha = feed.alpha(time.elapsed_secs_f64());
+    let alpha = feed.alpha;
     let dt = time.delta_secs();
     let t = time.elapsed_secs();
     let targets: HashMap<u32, (Vec2, Side)> = units
@@ -559,7 +568,8 @@ fn animate(
                     mount.x,
                     mount.y,
                     ground_y(*mount)
-                        + (crate::art::kits::saddle_height(0) - hip) * champions::scale(v.kind),
+                        + crate::art::kits::saddle_height(0) * champions::scale(v.kind)
+                        - hip,
                 );
             }
             v.still = if transform.translation.xz().distance_squared(at.xz()) > 0.0004_f32.powi(2) {

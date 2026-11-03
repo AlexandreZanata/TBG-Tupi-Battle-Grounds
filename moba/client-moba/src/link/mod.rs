@@ -3,7 +3,6 @@
 //! consume the same intention outbox, so the rest of the client is mode-blind.
 
 use bevy::prelude::*;
-use tbg_moba_core::content::TICK_HZ;
 use tbg_moba_core::protocol::{PrivateView, WorldView};
 use tbg_moba_core::state::Event;
 use tbg_moba_core::{MobaIntention, Reject, Seat};
@@ -39,10 +38,8 @@ pub enum FailReason {
 pub struct Feed {
     pub prev: Option<WorldView>,
     pub curr: Option<WorldView>,
-    /// `Time::elapsed_secs_f64` when `curr` arrived.
-    pub received: f64,
-    /// Smoothed seconds between worlds.
-    pub interval: f32,
+    /// Fraction of the authoritative interval drawn this frame.
+    pub alpha: f32,
     /// Bumped on every new world so systems react once.
     pub generation: u64,
     pub me: Option<PrivateView>,
@@ -59,8 +56,7 @@ impl Default for Feed {
         Self {
             prev: None,
             curr: None,
-            received: 0.0,
-            interval: 1.0 / TICK_HZ as f32,
+            alpha: 1.0,
             generation: 0,
             me: None,
             seat: None,
@@ -73,11 +69,7 @@ impl Default for Feed {
 }
 
 impl Feed {
-    pub fn push(&mut self, world: WorldView, now: f64) {
-        if self.curr.is_some() {
-            let gap = (now - self.received) as f32;
-            self.interval = (self.interval * 0.9 + gap.clamp(0.02, 0.25) * 0.1).max(0.02);
-        }
+    pub fn push(&mut self, world: WorldView) {
         self.events.extend(world.events.iter().copied());
         self.motion_events.extend(
             world
@@ -95,15 +87,12 @@ impl Feed {
                 .copied(),
         );
         self.prev = self.curr.replace(world);
-        self.received = now;
         self.generation += 1;
     }
-
-    /// Interpolation factor between `prev` and `curr` for this frame.
-    pub fn alpha(&self, now: f64) -> f32 {
-        ((now - self.received) as f32 / self.interval).clamp(0.0, 1.0)
-    }
 }
+
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Receive;
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Outbox>()
@@ -112,7 +101,9 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnExit(Screen::Match), stop)
         .add_systems(
             Update,
-            (local::run, online::run).run_if(in_state(Screen::Match)),
+            (local::run, online::run)
+                .in_set(Receive)
+                .run_if(in_state(Screen::Match)),
         );
 }
 

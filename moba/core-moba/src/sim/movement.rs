@@ -34,7 +34,7 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
         if formation_holds(m, i, to) {
             continue;
         }
-        m.units[i].pos = blocked_step(m, i, from, to);
+        m.units[i].pos = blocked_step(m, i, from, to, goal, step);
         if m.units[i].pos != from {
             crate::champions::walked(&mut m.units[i]);
         }
@@ -137,128 +137,196 @@ fn formation_holds(m: &MobaMatch, i: usize, to: Pos) -> bool {
     hold
 }
 
-/// Check the full segment so even a shallow crossing cannot tunnel through a body.
-fn clear_step(m: &MobaMatch, i: usize, from: Pos, to: Pos) -> bool {
-    let a = &m.units[i];
+/// Swept body contact in the map plane, with the shared PK-01 gap.
+fn intersects(from: Pos, to: Pos, center: Pos, gap: i32) -> bool {
     let dx = i64::from(to.x - from.x);
     let dy = i64::from(to.y - from.y);
     let len = dx * dx + dy * dy;
-    let mut clear = true;
+    let projection = i64::from(center.x - from.x) * dx + i64::from(center.y - from.y) * dy;
+    let along = projection.clamp(0, len);
+    let nearest = Pos {
+        x: from.x + (dx * along / len.max(1)) as i32,
+        y: from.y + (dy * along / len.max(1)) as i32,
+    };
+    let initial = from.dist2(center);
+    let limit = i64::from(gap).pow(2);
+    if initial < limit {
+        projection > 0
+    } else {
+        nearest.dist2(center) < limit
+    }
+}
+
+fn gap(a: &crate::state::Unit, b: &crate::state::Unit) -> i32 {
+    a.stats.radius
+        + b.stats.radius
+        + if a.side == b.side {
+            tbg_core::content::occupancy::GAP
+        } else {
+            0
+        }
+}
+
+fn solid(a: &crate::state::Unit, b: &crate::state::Unit) -> bool {
+    b.alive() && b.fx.carrier == 0 && (a.team().is_none() || a.side != b.side || !b.mobile())
+}
+
+fn blocker(m: &MobaMatch, i: usize, from: Pos, to: Pos) -> Option<usize> {
+    let a = &m.units[i];
+    let mut best = None;
     m.grid.near(from, a.stats.radius + 8 * MM, |j| {
         let b = &m.units[j];
-        if !clear || i == j || !b.alive() || b.fx.carrier != 0 {
-            return;
+        if i != j && solid(a, b) && intersects(from, to, b.pos, gap(a, b)) {
+            let key = (from.dist2(b.pos), j);
+            if best.is_none_or(|old| key < old) {
+                best = Some(key);
+            }
         }
-        let gap = i64::from(a.stats.radius + b.stats.radius);
-        let initial = from.dist2(b.pos);
-        if initial < gap * gap {
-            clear = to.dist2(b.pos) >= initial;
-            return;
-        }
-        let along =
-            (i64::from(b.pos.x - from.x) * dx + i64::from(b.pos.y - from.y) * dy).clamp(0, len);
-        let p = Pos {
-            x: from.x + (dx * along / len.max(1)) as i32,
-            y: from.y + (dy * along / len.max(1)) as i32,
-        };
-        clear = p.dist2(b.pos) >= gap * gap;
     });
-    clear
+    best.map(|(_, j)| j)
 }
-fn blocked_step(m: &MobaMatch, i: usize, from: Pos, to: Pos) -> Pos {
-    if clear_step(m, i, from, to) {
-        return to;
+
+fn blocked_step(m: &mut MobaMatch, i: usize, from: Pos, to: Pos, goal: Pos, step: i32) -> Pos {
+    // Like the BattleLine's persistent lateral slot, keep one passing side
+    // until the obstacle is clear. A fresh direct step every tick oscillates.
+    let active = m.units[i].bypass.and_then(|(id, side)| {
+        let j = m.slot(id)?;
+        let b = &m.units[j];
+        (solid(&m.units[i], b) && intersects(from, goal, b.pos, gap(&m.units[i], b)))
+            .then_some((j, side))
+    });
+    if let Some((j, side)) = active {
+        let next = tangent(from, m.units[j].pos, step, side);
+        if next != from && blocker(m, i, from, next).is_none() {
+            return next;
+        }
     }
-    let dx = to.x - from.x;
-    let dy = to.y - from.y;
-    // Try approaching contact before following a tangent around the blocker.
+    let Some(j) = blocker(m, i, from, to) else {
+        if active.is_none() {
+            m.units[i].bypass = None;
+        }
+        return to;
+    };
+    let obstacle = &m.units[j];
+    let preferred = active.filter(|(old, _)| *old == j).map(|(_, side)| side);
+    let passing = [1, -1]
+        .into_iter()
+        .filter_map(|side| {
+            if m.units[i].target == obstacle.id || preferred.is_some_and(|old| old != side) {
+                return None;
+            }
+            let next = tangent(from, obstacle.pos, step, side);
+            (next != from && blocker(m, i, from, next).is_none()).then_some((next, side))
+        })
+        .min_by_key(|(next, _)| next.dist2(goal));
+    if let Some((next, side)) = passing {
+        m.units[i].bypass = Some((obstacle.id, side));
+        return next;
+    }
+    // No free side: close the gap and wait behind the next body.
     let mut lo = 0;
     let mut hi = 16;
+    let at = |k| Pos {
+        x: from.x + (to.x - from.x) * k / 16,
+        y: from.y + (to.y - from.y) * k / 16,
+    };
     while hi - lo > 1 {
         let mid = (hi + lo) / 2;
-        let p = Pos {
-            x: from.x + dx * mid / 16,
-            y: from.y + dy * mid / 16,
-        };
-        if clear_step(m, i, from, p) {
+        if blocker(m, i, from, at(mid)).is_none() {
             lo = mid;
         } else {
             hi = mid;
         }
     }
-    if lo > 0 {
-        return Pos {
-            x: from.x + dx * lo / 16,
-            y: from.y + dy * lo / 16,
-        };
-    }
-    for sign in [1, -1] {
-        let p = Pos {
-            x: from.x + (dx - sign * dy) * 7 / 10,
-            y: from.y + (dy + sign * dx) * 7 / 10,
-        }
-        .clamp_to_map();
-        if clear_step(m, i, from, p) {
-            return p;
-        }
-    }
-    for sign in [1, -1] {
-        let p = Pos {
-            x: from.x - sign * dy,
-            y: from.y + sign * dx,
-        }
-        .clamp_to_map();
-        if clear_step(m, i, from, p) {
-            return p;
-        }
-    }
-    from
+    at(lo)
 }
 
-/// Pushes overlapping units apart; structures never move (M-09).
-#[allow(clippy::needless_range_loop)] // pushes are gathered per slot, applied after
+fn tangent(from: Pos, center: Pos, step: i32, side: i32) -> Pos {
+    let dx = from.x - center.x;
+    let dy = from.y - center.y;
+    let goal = Pos {
+        x: from.x - dy * side + dx / 10,
+        y: from.y + dx * side + dy / 10,
+    };
+    let mut next = from;
+    next.step_toward(goal, step);
+    next.clamp_to_map()
+}
+
+/// Shared PK-01 bodies and gaps give allies soft pressure instead of a stop.
 pub(super) fn separate(m: &mut MobaMatch) {
-    let n = m.units.len();
-    let mut push = vec![(0i64, 0i64); n];
-    for i in 0..n {
-        let a = &m.units[i];
+    let mut pushes = vec![(0i64, 0i64); m.units.len()];
+    for (i, a) in m.units.iter().enumerate() {
         if !a.alive() || !a.mobile() || a.fx.carrier != 0 {
             continue;
         }
         m.grid.near(a.pos, a.stats.radius + 8 * MM, |j| {
-            if j == i || j >= n {
-                return;
-            }
             let b = &m.units[j];
-            if !b.alive() || b.fx.carrier != 0 {
+            if i == j || !b.alive() || b.fx.carrier != 0 {
                 return;
             }
-            let min = (a.stats.radius + b.stats.radius) as i64;
+            let limit = i64::from(gap(a, b));
             let d2 = a.pos.dist2(b.pos);
-            if d2 >= min * min {
+            if d2 >= limit * limit {
                 return;
             }
-            let d = d2.isqrt();
-            let overlap = min - d;
-            let share = if b.mobile() { overlap / 2 } else { overlap };
-            let (dx, dy) = if d == 0 {
-                (if i < j { -1 } else { 1 }, 0)
-            } else {
-                ((a.pos.x - b.pos.x) as i64, (a.pos.y - b.pos.y) as i64)
-            };
+            let distance = d2.isqrt();
+            let share = (limit - distance) / if b.mobile() { 2 } else { 1 };
+            let (dx, dy) = separation_direction(a, b);
             let len = (dx * dx + dy * dy).isqrt().max(1);
-            push[i].0 += dx * share / len;
-            push[i].1 += dy * share / len;
+            pushes[i].0 += dx * share / len;
+            pushes[i].1 += dy * share / len;
         });
     }
-    for (u, (dx, dy)) in m.units.iter_mut().zip(push) {
-        if !u.alive() || !u.mobile() || u.fx.carrier != 0 {
+    for (i, (dx, dy)) in pushes.into_iter().enumerate() {
+        let u = &m.units[i];
+        if dx == 0 && dy == 0 {
             continue;
         }
-        // Cap each tick's push so crowds relax smoothly instead of jumping.
-        let cap = (u.stats.speed as i64).max(1);
-        u.pos.x += dx.clamp(-cap, cap) as i32;
-        u.pos.y += dy.clamp(-cap, cap) as i32;
-        u.pos = u.pos.clamp_to_map();
+        // A crowd can spread without cancelling a walking tick's advance.
+        if u.team().is_none() {
+            let cap = i64::from(u.stats.speed.max(1));
+            m.units[i].pos = Pos {
+                x: u.pos.x + dx.clamp(-cap, cap) as i32,
+                y: u.pos.y + dy.clamp(-cap, cap) as i32,
+            }
+            .clamp_to_map();
+            continue;
+        }
+        let cap = i64::from((u.stats.speed / 2).max(1));
+        let len = (dx * dx + dy * dy).isqrt().max(cap);
+        let from = u.pos;
+        let to = Pos {
+            x: from.x + (dx * cap / len) as i32,
+            y: from.y + (dy * cap / len) as i32,
+        }
+        .clamp_to_map();
+        if blocker(m, i, from, to).is_none() {
+            m.units[i].pos = to;
+        }
+    }
+}
+
+fn separation_direction(a: &crate::state::Unit, b: &crate::state::Unit) -> (i64, i64) {
+    let dx = i64::from(a.pos.x - b.pos.x);
+    let dy = i64::from(a.pos.y - b.pos.y);
+    let tie = if a.id < b.id { -1 } else { 1 };
+    if a.team().is_some() && a.side == b.side && b.mobile() {
+        if let (Some(team), Brain::Lane { lane, waypoint }) = (a.team(), a.brain) {
+            let from = map::waypoint(lane, team, usize::from(waypoint.saturating_sub(1)));
+            let to = map::waypoint(lane, team, usize::from(waypoint));
+            let x = i64::from(from.y - to.y);
+            let y = i64::from(to.x - from.x);
+            let side = (dx * x + dy * y).signum();
+            let side = if side == 0 { tie } else { side };
+            if x != 0 || y != 0 {
+                return (x * side, y * side);
+            }
+        }
+    }
+    if dx == 0 && dy == 0 {
+        (tie, 0)
+    } else {
+        (dx, dy)
     }
 }

@@ -11,8 +11,12 @@ use tbg_moba_core::geom::Pos;
 #[derive(Component)]
 struct Cask(u32);
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(Update, draw.run_if(in_state(Screen::Match)))
-        .add_systems(OnExit(Screen::Match), clear);
+    app.add_systems(
+        Update,
+        draw.after(crate::link::Receive)
+            .run_if(in_state(Screen::Match)),
+    )
+    .add_systems(OnExit(Screen::Match), clear);
 }
 fn clear(mut c: Commands, all: Query<Entity, With<Cask>>) {
     for e in &all {
@@ -23,12 +27,11 @@ fn draw(
     mut c: Commands,
     feed: Res<Feed>,
     a: Res<VfxAssets>,
-    time: Res<Time>,
     mut active: Query<(Entity, &Cask, &mut Transform)>,
 ) {
     let Some(world) = &feed.curr else { return };
     let pos = |p: Pos| Vec2::new(p.x as f32, p.y as f32) / 1000.0;
-    let alpha = feed.alpha(time.elapsed_secs_f64());
+    let alpha = feed.alpha;
     for (e, k, _) in &active {
         if !world.barrels.iter().any(|b| b.source == k.0) {
             c.entity(e).despawn();

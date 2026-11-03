@@ -5,6 +5,7 @@ use crate::geom::{Pos, MM};
 use crate::map;
 use crate::state::{Brain, MobaMatch};
 use crate::types::{Champion, Destination, Lane, Seat, Side, Team, UnitKind};
+use tbg_core::content::occupancy::{CELL, GAP};
 
 /// Small fixed fan of offsets so units do not spawn stacked.
 fn fan(k: u32) -> Pos {
@@ -24,25 +25,108 @@ fn offset(p: Pos, d: Pos) -> Pos {
     .clamp_to_map()
 }
 
+#[derive(Clone, Copy)]
+struct Deployment {
+    kind: UnitKind,
+    team: Team,
+    owner: Option<Seat>,
+    destination: Destination,
+    power: i32,
+}
+
 pub(crate) fn troop(m: &mut MobaMatch, seat: Seat, kind: Champion, to: Destination) {
-    let team = seat.team();
-    let pos = offset(map::spawn_point(team), fan(m.next_id));
-    let brain = match to {
-        Destination::Lane(lane) => Brain::Lane { lane, waypoint: 1 },
-        Destination::Jungle => Brain::Jungle { camp: None },
-    };
-    let power = m.player(seat).tier as i32 * content::TIER_PERCENT;
-    m.spawn(
-        UnitKind::Troop(kind),
-        Side::Team(team),
-        Some(seat),
-        pos,
-        brain,
+    deploy_at_exit(
+        m,
+        Deployment {
+            kind: UnitKind::Troop(kind),
+            team: seat.team(),
+            owner: Some(seat),
+            destination: to,
+            power: i32::from(m.player(seat).tier) * content::TIER_PERCENT,
+        },
     );
-    let unit = m.units.last_mut().expect("just spawned");
-    unit.power = power;
-    unit.max_hp = unit.max_hp * (100 + power) / 100;
-    unit.hp = unit.max_hp;
+}
+
+fn deploy_at_exit(m: &mut MobaMatch, order: Deployment) {
+    let (a, b, brain) = match order.destination {
+        Destination::Lane(lane) => (
+            map::waypoint(lane, order.team, 0),
+            map::waypoint(lane, order.team, 1),
+            Brain::Lane { lane, waypoint: 1 },
+        ),
+        Destination::Jungle => {
+            let origin = map::stronghold(order.team);
+            let camp = (0..map::CAMP_COUNT)
+                .map(map::camp)
+                .filter(|(_, team)| *team == order.team)
+                .min_by_key(|(at, _)| origin.dist2(*at))
+                .map_or(origin, |(at, _)| at);
+            (origin, camp, Brain::Jungle { camp: None })
+        }
+    };
+    let radius = content::base_stats(order.kind).radius;
+    let length = a.dist(b).max(1) as i32;
+    let dx = b.x - a.x;
+    let dy = b.y - a.y;
+    // PK-01: start at the deployment line, find an open lateral cell, then
+    // try ranks behind it. Each 5v5 route has its own deployment strip.
+    let gate = (crate::map::BASE_RADIUS * MM + radius * 2).min(length - content::WAYPOINT_RADIUS);
+    let rear = content::base_stats(UnitKind::Stronghold).radius + radius + GAP;
+    let side = (crate::map::LANE_HALF_WIDTH - radius).max(0) / CELL;
+    let blockers: Vec<_> = m
+        .units
+        .iter()
+        .filter(|u| {
+            u.alive()
+                && u.fx.carrier == 0
+                && a.within(
+                    u.pos,
+                    gate + radius + u.stats.radius + crate::map::LANE_HALF_WIDTH,
+                )
+        })
+        .collect();
+    let point = |progress: i32, lateral: i32| Pos {
+        x: a.x
+            + (i64::from(dx) * i64::from(progress) - i64::from(dy) * i64::from(lateral))
+                .div_euclid(i64::from(length)) as i32,
+        y: a.y
+            + (i64::from(dy) * i64::from(progress) + i64::from(dx) * i64::from(lateral))
+                .div_euclid(i64::from(length)) as i32,
+    };
+    let mut best = None;
+    'ranks: for progress in (rear..=gate).rev().step_by((radius / 2).max(CELL) as usize) {
+        for cell in 0..=side * 2 {
+            let lateral = ((cell + 1) / 2) * if cell % 2 == 0 { -CELL } else { CELL };
+            let pos = point(progress, lateral);
+            let mut hard = 0;
+            let mut crowd = 0;
+            for unit in &blockers {
+                let overlap =
+                    (i64::from(radius + unit.stats.radius + GAP) - pos.dist(unit.pos)).max(0);
+                if unit.mobile() && unit.side == Side::Team(order.team) {
+                    crowd += overlap;
+                } else {
+                    hard += overlap;
+                }
+            }
+            // A free cell is preferred, but never required to deploy. In a
+            // full gate overlap teammates before overlapping a structure.
+            let score = (hard, crowd);
+            if best.is_none_or(|(old, _)| score < old) {
+                best = Some((score, pos));
+            }
+            if score == (0, 0) {
+                break 'ranks;
+            }
+        }
+    }
+    let pos = best.map_or_else(|| point(gate, 0), |(_, pos)| pos);
+    m.spawn(order.kind, Side::Team(order.team), order.owner, pos, brain);
+    if let Some(unit) = m.units.last_mut() {
+        unit.power = order.power;
+        unit.max_hp = unit.max_hp * (100 + order.power) / 100;
+        unit.hp = unit.max_hp;
+    }
 }
 
 pub(super) fn waves(m: &mut MobaMatch) {
@@ -53,21 +137,16 @@ pub(super) fn waves(m: &mut MobaMatch) {
     }
     for team in Team::ALL {
         for lane in Lane::ALL {
-            let base = map::waypoint(lane, team, 0);
-            let next = map::waypoint(lane, team, 1);
-            // Leave the Stronghold a third of the way to the first waypoint.
-            let start = Pos {
-                x: base.x + (next.x - base.x) * 2 / 5,
-                y: base.y + (next.y - base.y) * 2 / 5,
-            };
-            for (k, kind) in content::WAVE.into_iter().enumerate() {
-                let brain = Brain::Lane { lane, waypoint: 1 };
-                m.spawn(
-                    UnitKind::Minion(kind),
-                    Side::Team(team),
-                    None,
-                    offset(start, fan(k as u32)),
-                    brain,
+            for kind in content::WAVE {
+                deploy_at_exit(
+                    m,
+                    Deployment {
+                        kind: UnitKind::Minion(kind),
+                        team,
+                        owner: None,
+                        destination: Destination::Lane(lane),
+                        power: 0,
+                    },
                 );
             }
         }

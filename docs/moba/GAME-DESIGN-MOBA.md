@@ -77,7 +77,7 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
   Outer stands; a Base while its Inner stands; Nexus Towers while all three
   Base Towers stand; the Stronghold while either Nexus Tower stands.
 - **M-09** Structures never move. Walking units reserve space and recover from
-  spawn overlaps according to M-70.
+  spawn overlaps according to M-70/M-72.
 - Lane walkers and structures ignore neutral monsters; jungle Troops
   hunt them. Monsters are passive until hit and leash 9 units
   from their camp, healing fully at home.
@@ -278,3 +278,16 @@ new camps never spawn them. Their legacy stats are unchanged.
   5v5 Essence upgrades still affect HP and damage; there is no Evolution
   branch choice in this phase. Cargo draws keep their shared weight bands
   and use base profiles until Evolution forms are enabled in 5v5.
+
+
+- **M-72** Proposed owner revision: purchases and Minion waves deploy
+  immediately on the chosen route's exit. Lane deployments use the first
+  road segment and prefer a free cell clear of static structures. If the
+  exit is crowded, they choose the least-overlapped position and resolve
+  allied crowding as they advance. Mobile allies exert bounded pressure
+  and never hard-block each other. The lateral component follows the
+  road direction. The 2D adaptation reuses PK-01 body footprints, cell
+  size and allied gap. Melee Minions use the Shieldbearer footprint and
+  ranged Minions use the Archer footprint at the existing 95% mesh scale.
+  Opposing bodies and immobile structures still block swept movement.
+  A bypass keeps its passing side until the way ahead clears.

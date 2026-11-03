@@ -1,12 +1,12 @@
 //! Built places: base plateaus, the river plaza, jungle camps and bridges.
 
 use bevy::prelude::*;
-use tbg_moba_core::map::{self, PLAZA, RIVER, RIVER_HALF_WIDTH};
+use tbg_moba_core::map::{self, PLAZA, RIVER_HALF_WIDTH};
 use tbg_moba_core::{Lane, Team};
 
 use super::mesh::{hash, merge, Part, Shape};
 use super::nature::rock;
-use super::terrain::{height, segment_distance, v, LANE_HALF_WIDTH};
+use super::terrain::{height, v, LANE_HALF_WIDTH};
 use super::to_world;
 use crate::palette;
 
@@ -205,40 +205,55 @@ pub fn camps() -> Mesh {
     merge(&parts)
 }
 
+const BRIDGE_LENGTH: f32 = 2.0 * RIVER_HALF_WIDTH as f32 + 6.0;
+const BRIDGE_TOP: f32 = 0.25 + 0.35 / 2.0;
+
+fn bridge_axes() -> impl Iterator<Item = (Vec2, Vec2)> {
+    [Lane::Top, Lane::Bot].into_iter().flat_map(|lane| {
+        map::lane_units(lane).windows(2).filter_map(|w| {
+            let (a, b) = (v(w[0]), v(w[1]));
+            let cross = river_crossing(a, b)?;
+            Some((cross, (b - a).normalize()))
+        })
+    })
+}
+
+pub fn bridge_surface(point: Vec2) -> Option<f32> {
+    bridge_axes().find_map(|(cross, dir)| {
+        let offset = point - cross;
+        (offset.dot(dir).abs() <= BRIDGE_LENGTH / 2.0
+            && offset.perp_dot(dir).abs() <= LANE_HALF_WIDTH)
+            .then_some(BRIDGE_TOP)
+    })
+}
+
 /// Stone decks where the top and bot roads cross the river.
 pub fn bridges() -> Mesh {
     let mut parts = Vec::new();
-    for lane in [Lane::Top, Lane::Bot] {
-        for w in map::lane_units(lane).windows(2) {
-            let (a, b) = (v(w[0]), v(w[1]));
-            let Some(cross) = river_crossing(a, b) else {
-                continue;
-            };
-            let dir = (b - a).normalize();
-            let yaw = Quat::from_rotation_y(dir.y.atan2(dir.x));
-            let length = 2.0 * RIVER_HALF_WIDTH as f32 + 6.0;
-            let at = to_world(cross.x, cross.y, 0.25);
+    for (cross, dir) in bridge_axes() {
+        let yaw = Quat::from_rotation_y(dir.y.atan2(dir.x));
+        let length = BRIDGE_LENGTH;
+        let at = to_world(cross.x, cross.y, 0.25);
+        parts.push((
+            Shape::Box(length, 0.35, LANE_HALF_WIDTH * 2.0),
+            STONE,
+            Transform::from_translation(at).with_rotation(yaw),
+        ));
+        for side in [-1.0, 1.0] {
+            let offset = yaw * Vec3::new(0.0, 0.8, side * LANE_HALF_WIDTH);
             parts.push((
-                Shape::Box(length, 0.35, LANE_HALF_WIDTH * 2.0),
+                Shape::Box(length, 0.38, 0.6),
                 STONE,
-                Transform::from_translation(at).with_rotation(yaw),
+                Transform::from_translation(at + offset).with_rotation(yaw),
             ));
-            for side in [-1.0, 1.0] {
-                let offset = yaw * Vec3::new(0.0, 0.8, side * LANE_HALF_WIDTH);
+            for k in 0..5 {
+                let along =
+                    yaw * Vec3::new((k as f32 - 2.0) * length / 4.5, 0.4, side * LANE_HALF_WIDTH);
                 parts.push((
-                    Shape::Box(length, 0.38, 0.6),
+                    Shape::Box(0.8, 1.4, 0.8),
                     STONE,
-                    Transform::from_translation(at + offset).with_rotation(yaw),
+                    Transform::from_translation(at + along),
                 ));
-                for k in 0..5 {
-                    let along = yaw
-                        * Vec3::new((k as f32 - 2.0) * length / 4.5, 0.4, side * LANE_HALF_WIDTH);
-                    parts.push((
-                        Shape::Box(0.8, 1.4, 0.8),
-                        STONE,
-                        Transform::from_translation(at + along),
-                    ));
-                }
             }
         }
     }
@@ -247,19 +262,10 @@ pub fn bridges() -> Mesh {
 
 /// Where a road segment crosses the river centre line, if it does.
 fn river_crossing(a: Vec2, b: Vec2) -> Option<Vec2> {
-    let steps = 64;
-    (0..=steps)
-        .map(|s| a.lerp(b, s as f32 / steps as f32))
-        .map(|p| {
-            (
-                p,
-                RIVER
-                    .windows(2)
-                    .map(|w| segment_distance(p, v(w[0]), v(w[1])))
-                    .fold(f32::MAX, f32::min),
-            )
-        })
-        .filter(|(_, d)| *d < 1.0)
-        .min_by(|x, y| x.1.total_cmp(&y.1))
-        .map(|(p, _)| p)
+    let from = a.x + a.y - map::SIZE as f32;
+    let to = b.x + b.y - map::SIZE as f32;
+    if from == to || from * to > 0.0 {
+        return None;
+    }
+    Some(a.lerp(b, from / (from - to)))
 }

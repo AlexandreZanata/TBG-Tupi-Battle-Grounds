@@ -60,7 +60,11 @@ pub fn spawn_figure(
     );
     figure::spawn_glow(commands, &joints, &model.glow, &lib.glow_material);
     presentation::attachments(commands, lib, kind, (0, 0), &joints, &lib.material);
-    let mut animator = Animator::new(joints, model.plan, body, kind, id);
+    // The shared gait measures travelled world distance. Account for the
+    // scale on the MOBA parent when converting that distance into a stride.
+    let mut plan = model.plan;
+    plan.scale *= TROOP_SCALE;
+    let mut animator = Animator::new(joints, plan, body, kind, id);
     animator.native = model.native;
     animator.play(Clip::Spawn);
     commands.entity(entity).insert(animator);
@@ -138,11 +142,10 @@ fn corpses(
                 *t = crate::art::death::evaluate(
                     tbg_core::content::def(a.kind()).faction,
                     death.elapsed,
-                    a.plan.scale,
+                    a.plan.scale / root.scale.x,
                     yaw,
                 );
             }
         }
-        let _ = root;
     }
 }

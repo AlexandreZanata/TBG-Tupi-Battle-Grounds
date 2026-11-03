@@ -5,7 +5,7 @@ use bevy::prelude::*;
 
 pub mod fog;
 mod kit;
-mod landmarks;
+pub(crate) mod landmarks;
 mod motion;
 mod props;
 use fog::{FogMask, FogMaterial, FogTexture};

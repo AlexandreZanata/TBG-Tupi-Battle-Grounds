@@ -703,6 +703,16 @@
       "windows": "pending (P81)",
       "web": "pending (P81)",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-i-walk-and-route-exits",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Champion walking on local and online clocks, scaled cadence, road and bridge grounding, immediate lane exits, allied crowd pressure, Minion body spacing and solid obstacles",
+      "linux": "focused movement contracts passed; motion comparison pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
     }
   ]
 }

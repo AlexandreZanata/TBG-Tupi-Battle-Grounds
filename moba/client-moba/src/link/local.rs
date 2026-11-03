@@ -29,12 +29,11 @@ pub fn start(world: &mut World, launch: &Launch) {
         host::tick(&mut game, &mut none);
     }
     game.set_controller(seat, Controller::Human);
-    let now = world.resource::<Time>().elapsed_secs_f64();
     let mut feed = world.resource_mut::<Feed>();
     feed.seat = Some(seat);
     feed.status = Status::Live;
     feed.me = Some(view::private(&game, seat));
-    feed.push(view::world(&game, seat.team()), now);
+    feed.push(view::world(&game, seat.team()));
     world.insert_resource(LocalHost {
         game,
         seat,
@@ -69,9 +68,17 @@ pub fn run(
         let rejects = host::tick(&mut host.game, &mut host.inputs);
         feed.rejects.extend(rejects.into_iter().map(|(_, r)| r));
         feed.me = Some(view::private(&host.game, seat));
-        feed.push(
-            view::world(&host.game, seat.team()),
-            time.elapsed_secs_f64(),
-        );
+        if feed
+            .curr
+            .as_ref()
+            .is_none_or(|view| view.tick != host.game.tick)
+        {
+            feed.push(view::world(&host.game, seat.team()));
+        }
     }
+    feed.alpha = if host.game.outcome.is_some() {
+        1.0
+    } else {
+        host.pending / DT
+    };
 }

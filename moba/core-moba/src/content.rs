@@ -62,8 +62,12 @@ pub fn base_stats(kind: UnitKind) -> Stats {
     match kind {
         // Retained wire tag, never part of an active match (M-65).
         UnitKind::Commander(_) => stats(0, 0, 0, 1, 0),
-        UnitKind::Minion(MinionKind::Melee) => stats(300, 14, 16, 20, 32),
-        UnitKind::Minion(MinionKind::Ranged) => stats(200, 18, 60, 24, 32),
+        UnitKind::Minion(MinionKind::Melee) => {
+            minion_stats(Champion::Shieldbearer, stats(300, 14, 16, 20, 32))
+        }
+        UnitKind::Minion(MinionKind::Ranged) => {
+            minion_stats(Champion::Archer, stats(200, 18, 60, 24, 32))
+        }
         UnitKind::Troop(kind) => troop_stats(kind),
         UnitKind::Neutral(kind) => neutral_stats(kind),
         UnitKind::Tower(tier, _) => Stats {
@@ -83,6 +87,15 @@ pub fn base_stats(kind: UnitKind) -> Stats {
             ..stats(6000, 150, 100, 20, 0)
         },
     }
+}
+
+/// Match the existing 95% Minion mesh scale to the corresponding 1v1 body.
+pub const MINION_SCALE_PERCENT: i32 = 95;
+
+fn minion_stats(profile: Champion, mut stats: Stats) -> Stats {
+    stats.radius =
+        tbg_core::content::occupancy::footprint(profile, 0).body * MINION_SCALE_PERCENT / 100;
+    stats
 }
 
 /// A 1v1 champion on the MOBA map: its own HP, damage, attack interval and

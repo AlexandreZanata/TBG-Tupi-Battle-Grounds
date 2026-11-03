@@ -10,7 +10,7 @@ use super::to_world;
 const CELL: f32 = 2.0;
 const MARGIN: f32 = 18.0;
 pub const WATER_LEVEL: f32 = -0.45;
-pub const LANE_HALF_WIDTH: f32 = 3.6;
+pub const LANE_HALF_WIDTH: f32 = map::LANE_HALF_WIDTH as f32 / 1000.0;
 
 /// Distance from `p` to the segment `a`–`b`.
 pub fn segment_distance(p: Vec2, a: Vec2, b: Vec2) -> f32 {

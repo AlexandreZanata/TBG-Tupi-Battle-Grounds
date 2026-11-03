@@ -1399,3 +1399,15 @@ open slots, Destination, territorial fog and live units were observed
 together. Full movement/attack/ability/death and input journeys remain
 pending, along with Windows and desktop web pixel/motion checks. See the
 [P77 installed run](../phases/P77-moba-roles-vision-jungle-map.md#consolidated-linux-playtest-installation-2026-11-03).
+
+
+## P77 I — continuous walking and immediate route exits
+
+The 5v5 client renders the local fixed-step remainder, or a buffered
+server-tick clock online. The shared gait uses the figure's actual world
+scale. Feet follow the road height and the actual bridge deck bounds.
+Purchased Troops and Minions appear at their own exits immediately and
+spread laterally under crowding. Queue straight-line walking, bridge
+approaches, both sides of the base, dense waves and combat contact in
+the desktop motion matrix. Complete Linux, Windows and desktop web
+motion comparisons remain pending.

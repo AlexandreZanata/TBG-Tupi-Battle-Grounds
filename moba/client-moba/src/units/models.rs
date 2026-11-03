@@ -201,7 +201,7 @@ pub fn figure(kind: UnitKind, side: Side, damage: u8) -> Mesh {
 /// rigs scale themselves in champions.rs).
 pub fn scale(kind: UnitKind) -> f32 {
     match kind {
-        UnitKind::Minion(_) => 0.95,
+        UnitKind::Minion(_) => tbg_moba_core::content::MINION_SCALE_PERCENT as f32 / 100.0,
         UnitKind::Neutral(
             NeutralKind::Big
             | NeutralKind::Golem

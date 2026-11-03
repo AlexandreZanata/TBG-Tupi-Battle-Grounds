@@ -11,6 +11,8 @@ use crate::types::{Lane, Team, TowerTier};
 pub const SIZE: i32 = 200;
 /// Units cannot walk closer than this to the map border.
 pub const EDGE: i32 = 6;
+/// Half-width of the shared road and deployment strip, in millimetres.
+pub const LANE_HALF_WIDTH: i32 = 3_600;
 
 /// Blue's view of each lane, from its Stronghold to Red's.
 const TOP: [(i32, i32); 8] = [

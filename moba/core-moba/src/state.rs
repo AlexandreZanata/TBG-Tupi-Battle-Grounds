@@ -46,6 +46,7 @@ pub struct Unit {
     pub brain: Brain,
     pub target: u32,
     pub cooldown: u16,
+    pub(crate) bypass: Option<(u32, i32)>,
     /// Tick of the last attack fired, so views can animate it.
     pub last_attack: u32,
     pub last_hit: Option<Credit>,
@@ -298,6 +299,7 @@ impl MobaMatch {
             brain,
             target: 0,
             cooldown: 0,
+            bypass: None,
             last_attack: 0,
             last_hit: None,
             fx: Default::default(),
@@ -364,6 +366,12 @@ impl MobaMatch {
                 u.target as i64,
             ] {
                 mix(v);
+            }
+        }
+        for u in &self.units {
+            if let Some((id, side)) = u.bypass {
+                mix(i64::from(id));
+                mix(i64::from(side));
             }
         }
         for b in &self.barrels {
