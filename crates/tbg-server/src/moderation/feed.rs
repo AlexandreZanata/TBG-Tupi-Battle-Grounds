@@ -29,13 +29,26 @@ pub(crate) async fn start(
             let Some(store) = weak.upgrade() else {
                 return;
             };
+            let now = config.auth_clock.now().ok();
             let events = store
-                .release(move |db| crate::store::moderation::feed::read(db, cursor))
+                .release(move |db| {
+                    let events = crate::store::moderation::feed::read(db, cursor);
+                    if let Some(now) = now {
+                        // One bounded poll turn avoids queued maintenance aliasing with
+                        // every release heartbeat; all actual queued work remains counted.
+                        let _ = crate::store::emoji::prune(db, now);
+                        let _ = crate::store::social::prune(db, now);
+                        let _ = crate::store::operators::maintenance(db, now);
+                        let _ = crate::store::recovery::service::maintenance(db, now);
+                        let _ = crate::store::moderation::feed::prune(db, now);
+                    }
+                    events
+                })
                 .await;
             let Some(Ok(events)) = events else {
                 continue;
             };
-            let now = config.auth_clock.now().unwrap_or(0);
+            let now = now.unwrap_or(0);
             if !events.is_empty()
                 || config.moderation.0.read().is_ok_and(|s| {
                     s.states.values().any(|v| {
@@ -85,17 +98,6 @@ pub(crate) async fn start(
                 }
             }
             previous_now = now;
-            if let Ok(now) = config.auth_clock.now() {
-                let _ = store
-                    .release(move |db| {
-                        let _ = crate::store::emoji::prune(db, now);
-                        let _ = crate::store::social::prune(db, now);
-                        let _ = crate::store::operators::maintenance(db, now);
-                        let _ = crate::store::recovery::service::maintenance(db, now);
-                        crate::store::moderation::feed::prune(db, now)
-                    })
-                    .await;
-            }
         }
     });
     Ok(())

@@ -18,7 +18,11 @@ struct Sheets {
     epoch: u64,
 }
 pub fn plugin(app: &mut App) {
-    app.init_resource::<Sheets>().add_systems(Update, update);
+    app.init_resource::<Sheets>()
+        .add_systems(Startup, standard::preload)
+        // UI roots are rebuilt with deferred Commands during Update. Bind their
+        // images after that flush so even a slow frame renders the right texture.
+        .add_systems(PostUpdate, update.before(bevy::ui::UiSystems::Layout));
 }
 pub fn spawn(
     parent: &mut ChildSpawnerCommands,
@@ -149,5 +153,36 @@ fn update(
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::asset::AssetApp;
+
+    #[test]
+    fn p75_rebuilt_hud_has_a_standard_image_before_its_first_render_frame() {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()));
+        app.init_asset::<Image>();
+        plugin(&mut app);
+        app.add_systems(
+            Update,
+            (|mut commands: Commands| {
+                commands.spawn_empty().with_children(|parent| {
+                    spawn(parent, EmojiRef::Standard { id: 0 }, 0, 0., 24.);
+                });
+            })
+            .after(update),
+        );
+        app.update();
+        let mut query = app.world_mut().query::<&ImageNode>();
+        let image = query.single(app.world()).expect("one synthetic HUD sprite");
+        assert_ne!(
+            image.image,
+            Handle::<Image>::default(),
+            "BR-EM01/IC-11: a rebuilt HUD must not draw the unbound default texture"
+        );
     }
 }

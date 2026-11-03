@@ -7,15 +7,14 @@ pub(super) fn apply(action: Action, ctx: &mut Context<'_>) {
     let info = ctx.info;
     match action {
         Action::Chat => {
-            if !info.spectating
-                && ctx.game == GameState::InMatch
-                && chat.mode == 0
-                && chat
-                    .policy
-                    .as_ref()
-                    .is_some_and(|p| p.chat == tbg_core::protocol::ChatPermission::Allowed)
-            {
-                chat.focused = true;
+            if !info.spectating && ctx.game == GameState::InMatch && chat.mode < 2 {
+                chat.expanded = !chat.expanded;
+                chat.focused = chat.expanded
+                    && chat.mode == 0
+                    && chat
+                        .policy
+                        .as_ref()
+                        .is_some_and(|p| p.chat == tbg_core::protocol::ChatPermission::Allowed);
             }
         }
         Action::Mute => chat.muted = !chat.muted,

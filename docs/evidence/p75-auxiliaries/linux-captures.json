@@ -1,0 +1,142 @@
+{
+  "kind": "combined-tree Linux development captures; no cross-platform parity claim",
+  "source_base": "17398048d47e8409852a360c59bd02758bfae886",
+  "source_overlay_sha256": {
+    "crates/tbg-client/src/arena/auxiliaries/tests.rs": "a5855c4d1f6856f0e891ddb59efc707e34c2b2eb013f8146da9e68ba593baef4",
+    "crates/tbg-client/src/ui/match_chat/mod.rs": "6eddc80e557a2d17f22ceee3e2a6b62346a67d0bec17075d47624194e77b232f",
+    "crates/tbg-client/src/ui/p75/actions/social.rs": "23da3445d7757f0bc40cd26a9ddccd33420ac182f178204ab0bd4ad7763cb3d6"
+  },
+  "binary_sha256": "0b01e4b1bb699aab9f793d214909bbbb65ac127e8c280ed2d4671e1b64d4240a",
+  "build_info": {
+    "contract": "w40-r16-f2e253b98ccb313a",
+    "features": [
+      "ui-acceptance"
+    ],
+    "profile": "debug",
+    "protocol": 40,
+    "source_commit": "development",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "0.1.4-colossus.5"
+  },
+  "resolution": [
+    1920,
+    1080
+  ],
+  "capture_aux_tier": 3,
+  "capture_after": 12,
+  "capture_on": "running",
+  "captures": [
+    {
+      "arena": "forest",
+      "side": "blue",
+      "tier": 3,
+      "image": "forest-blue-t3.jpg",
+      "sha256": "89e42f2b50b334391b31548856c48446db2872fe5dc73be85f03fda2ac701615"
+    },
+    {
+      "arena": "forest",
+      "side": "red",
+      "tier": 3,
+      "image": "forest-red-t3.jpg",
+      "sha256": "9be6ecd65c2d67aa12a020cb6fc0b9bfe57c4518b834cdd9f61d146004ce6534"
+    },
+    {
+      "arena": "tundra",
+      "side": "blue",
+      "tier": 3,
+      "image": "tundra-blue-t3.jpg",
+      "sha256": "fc7c6b8ee3460a54954637dcbb8471187389d5d9719f4a35a4ef73efc689059d"
+    },
+    {
+      "arena": "tundra",
+      "side": "red",
+      "tier": 3,
+      "image": "tundra-red-t3.jpg",
+      "sha256": "11c31658ff261386651cbe4c5d2f5857caf127f9e495d92b31ad7d6eae239766"
+    },
+    {
+      "arena": "volcanic",
+      "side": "blue",
+      "tier": 3,
+      "image": "volcanic-blue-t3.jpg",
+      "sha256": "896243f47fb24539af9c7cf3f15fc43522b153a76cbe24bbe927877e78b7e73f"
+    },
+    {
+      "arena": "volcanic",
+      "side": "red",
+      "tier": 3,
+      "image": "volcanic-red-t3.jpg",
+      "sha256": "330a43981b2f8a1a0124c44ad1bd7b450f42652ed4e54184c750c57c12e901a4"
+    },
+    {
+      "arena": "ruins",
+      "side": "blue",
+      "tier": 3,
+      "image": "ruins-blue-t3.jpg",
+      "sha256": "64bd1b9125f502afc78bc70300b014de66f0d7bdbd0f4b29f84065055a36c920"
+    },
+    {
+      "arena": "ruins",
+      "side": "red",
+      "tier": 3,
+      "image": "ruins-red-t3.jpg",
+      "sha256": "2e0eba828296177786b865d64132bbad6f2e1055cad19953750421cd4d73c454"
+    },
+    {
+      "arena": "storm",
+      "side": "blue",
+      "tier": 3,
+      "image": "storm-blue-t3.jpg",
+      "sha256": "76128ac3109481d70764d1c116e8c752832e65cc4e674637d74cde962cec2f8e"
+    },
+    {
+      "arena": "storm",
+      "side": "red",
+      "tier": 3,
+      "image": "storm-red-t3.jpg",
+      "sha256": "5274bae16fead6888355ef51cdfa468de28412578be9b7100d1ab618feb8748f"
+    },
+    {
+      "arena": "celestial",
+      "side": "blue",
+      "tier": 3,
+      "image": "celestial-blue-t3.jpg",
+      "sha256": "eac88087562ef257dc04696bb0473bdf572ce6b409abc480752f32dd02964335"
+    },
+    {
+      "arena": "celestial",
+      "side": "red",
+      "tier": 3,
+      "image": "celestial-red-t3.jpg",
+      "sha256": "b35ac60cb064e68caa90fdfe3fcf2d3b95b340ef9f3a007dcac6c8932e0afad4"
+    },
+    {
+      "arena": "clockwork",
+      "side": "blue",
+      "tier": 3,
+      "image": "clockwork-blue-t3.jpg",
+      "sha256": "a9592f828d6b5aeb8e3dbe36130a0b78963bce4bc8da3cfcf91efeeae728a341"
+    },
+    {
+      "arena": "clockwork",
+      "side": "red",
+      "tier": 3,
+      "image": "clockwork-red-t3.jpg",
+      "sha256": "8c11a3c62d52cb7fa6f82b8efb244ab3100c45ad33a8ea577a7622ec5fc1accc"
+    },
+    {
+      "arena": "desert",
+      "side": "blue",
+      "tier": 3,
+      "image": "desert-blue-t3.jpg",
+      "sha256": "fa21c5cb17ca8eeb2a666178a138c5637024dec1e86b58846480c19427a62ad9"
+    },
+    {
+      "arena": "desert",
+      "side": "red",
+      "tier": 3,
+      "image": "desert-red-t3.jpg",
+      "sha256": "b134fad6b3b680f443efe20da84d2eb23ebbc9ba3628b18773c1341ec6090bfb"
+    }
+  ]
+}

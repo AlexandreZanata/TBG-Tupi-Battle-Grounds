@@ -881,3 +881,18 @@ explicit in the consolidation report; these shared paths alone prove no parity.
 BR-AX15 consolidation preserves all static land props even at a precinct anchor;
 only sea-surface floaters below the existing harbor threshold may yield. The
 unfiltered scenery collision contract remains mandatory for every Arena/side.
+
+P75/AX-T HUD integration: a compact two-row social dock at the upper right
+keeps both precinct flanks visible. Activating Chat opens the log in the central
+rectangle; guests can read it, while only the authoritative Allowed policy
+enables typing. Escape/close restores the dock and captures battle keys while
+open. Both rectangles are included in the eight-Arena precinct visibility test.
+Linux is the reference; actual Windows/web presentation and motion comparison
+remain pending until observed.
+
+The 1280×720 web observation exposed clipping from full-height kit controls in
+the compact dock. Its shared controls now use two 32 px rows; mute remains in
+the expanded log. Standard emoji handles stay resident and bind after Update
+command application, before layout/render extraction, so slow HUD rebuild
+frames never display an unbound placeholder. The first-frame regression is
+covered by a scheduled Bevy test; actual device correspondence remains pending.

@@ -7,6 +7,9 @@ use bevy::{
 };
 use std::collections::VecDeque;
 use tbg_core::protocol::{ChatPermission, ClientMsg, MatchSocial, ServerMsg};
+/// Normalized desktop rectangles shared with the precinct visibility contract.
+pub(crate) const COMPACT_BOUNDS: [f32; 4] = [0.79, 0.09, 0.20, 0.12];
+pub(crate) const EXPANDED_BOUNDS: [f32; 4] = [0.34, 0.15, 0.32, 0.55];
 static CONSUMED: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 pub fn consumed() -> bool {
     CONSUMED.load(std::sync::atomic::Ordering::Relaxed)
@@ -19,6 +22,7 @@ pub struct Chat {
     pub lines: VecDeque<(f64, tbg_core::Seat, String)>,
     pub bubbles: [Option<(u8, f64)>; 2],
     pub focused: bool,
+    pub expanded: bool,
     pub edit: kit::edit::Edit,
     pub muted: bool,
     pub mode: u8,
@@ -106,7 +110,10 @@ pub(crate) fn keys(
     time: Res<Time>,
     form: NonSend<super::textform::ActiveForm>,
 ) {
-    CONSUMED.store(chat.focused, std::sync::atomic::Ordering::Relaxed);
+    CONSUMED.store(
+        chat.focused || chat.expanded,
+        std::sync::atomic::Ordering::Relaxed,
+    );
     if *state.get() != GameState::InMatch
         || info.spectating
         || chat.mode == 2
@@ -116,6 +123,13 @@ pub(crate) fn keys(
     {
         events.clear();
         chat.focused = false;
+        chat.expanded = false;
+        return;
+    }
+    if keys.just_pressed(KeyCode::Escape) && chat.expanded {
+        chat.focused = false;
+        chat.expanded = false;
+        events.clear();
         return;
     }
     let now = time.elapsed_secs_f64();
@@ -126,6 +140,7 @@ pub(crate) fn keys(
                 .policy
                 .as_ref()
                 .is_some_and(|p| p.chat == ChatPermission::Allowed);
+            chat.expanded = chat.focused;
         } else {
             for (key, slot) in [
                 (KeyCode::Digit1, 0),
@@ -149,6 +164,7 @@ pub(crate) fn keys(
         match &e.logical_key {
             Key::Escape => {
                 chat.focused = false;
+                chat.expanded = false;
                 chat.edit = default();
             }
             Key::Enter => {
@@ -158,6 +174,7 @@ pub(crate) fn keys(
                 }
                 chat.edit = default();
                 chat.focused = false;
+                chat.expanded = false;
             }
             Key::Backspace => chat.edit.backspace(),
             Key::Delete => chat.edit.delete(),
@@ -197,7 +214,8 @@ fn render(
         && !info.spectating
         && matches!(&*link, MatchLink::Net(_));
     let signature = format!(
-        "{active}:{}:{}:{}:{}:{}:{}",
+        "{active}:{}:{}:{}:{}:{}:{}:{}",
+        chat.expanded,
         chat.focused,
         chat.edit.display(false),
         chat.lines.len(),
@@ -216,6 +234,11 @@ fn render(
         return;
     }
     let now = time.elapsed_secs_f64();
+    let bounds = if chat.expanded {
+        EXPANDED_BOUNDS
+    } else {
+        COMPACT_BOUNDS
+    };
     commands
         .spawn((
             Root,
@@ -223,19 +246,46 @@ fn render(
             GlobalZIndex(25),
             Node {
                 position_type: PositionType::Absolute,
-                right: percent(1.),
-                top: percent(9.),
-                width: percent(20.),
-                max_height: percent(58.),
-                padding: UiRect::all(px(10)),
+                left: percent(bounds[0] * 100.),
+                top: percent(bounds[1] * 100.),
+                width: percent(bounds[2] * 100.),
+                height: if chat.expanded {
+                    auto()
+                } else {
+                    percent(bounds[3] * 100.)
+                },
+                max_height: percent(bounds[3] * 100.),
+                overflow: if chat.expanded {
+                    Overflow::scroll_y()
+                } else {
+                    Overflow::clip()
+                },
+                padding: UiRect::all(px(if chat.expanded { 10 } else { 4 })),
                 flex_direction: FlexDirection::Column,
-                row_gap: px(6),
+                row_gap: px(if chat.expanded { 6 } else { 2 }),
                 ..default()
             },
             BackgroundColor(kit::PANEL.with_alpha(if chat.focused { 0.98 } else { 0.75 })),
         ))
         .with_children(|p| {
-            p.spawn(kit::heading(lang.key("p75.chat"), 18.));
+            if !chat.expanded {
+                p.spawn(kit::button(
+                    format!("{} ({})", lang.key("p75.chat"), chat.lines.len()),
+                    UiAction::P75(super::p75::Action::Chat),
+                    0.,
+                ))
+                .insert(compact_button(percent(100.)));
+                emoji_controls(p, &chat, &info, now, true);
+                return;
+            }
+            p.spawn(kit::row()).with_children(|row| {
+                row.spawn(kit::heading(lang.key("p75.chat"), 18.));
+                row.spawn(kit::button(
+                    lang.key("native.cancel"),
+                    UiAction::P75(super::p75::Action::Chat),
+                    120.,
+                ));
+            });
             let lines: Vec<_> = chat
                 .lines
                 .iter()
@@ -275,32 +325,7 @@ fn render(
                     p.spawn(kit::muted(lang.key(key), 14.));
                 }
             }
-            p.spawn(kit::row()).with_children(|r| {
-                for slot in 0..3 {
-                    let allowed = chat.policy.as_ref().is_some_and(|p| p.emojis);
-                    r.spawn(kit::button(
-                        (slot + 1).to_string(),
-                        if allowed {
-                            UiAction::P75(super::p75::Action::Emoji(slot))
-                        } else {
-                            UiAction::Disabled
-                        },
-                        64.,
-                    ))
-                    .with_children(|button| {
-                        if let Some(policy) = &chat.policy {
-                            let seat = info.you.map(|s| s.index()).unwrap_or(0);
-                            crate::emoji::spawn(
-                                button,
-                                policy.loadouts[seat][slot as usize].clone(),
-                                slot,
-                                now,
-                                30.,
-                            );
-                        }
-                    });
-                }
-            });
+            emoji_controls(p, &chat, &info, now, false);
             p.spawn(kit::button(
                 lang.key(if chat.muted { "p75.unmute" } else { "p75.mute" }),
                 UiAction::P75(super::p75::Action::Mute),
@@ -346,6 +371,61 @@ fn render(
             }
         }
     }
+}
+fn compact_button(width: Val) -> Node {
+    Node {
+        width,
+        min_width: px(0),
+        height: px(32),
+        min_height: px(32),
+        padding: UiRect::all(px(2)),
+        align_items: AlignItems::Center,
+        justify_content: JustifyContent::Center,
+        border: UiRect::all(px(1)),
+        border_radius: BorderRadius::all(px(5)),
+        ..default()
+    }
+}
+fn emoji_controls(
+    parent: &mut ChildSpawnerCommands,
+    chat: &Chat,
+    info: &MatchInfo,
+    now: f64,
+    compact: bool,
+) {
+    let mut node = kit::row();
+    if compact {
+        node.column_gap = px(4);
+    }
+    parent.spawn(node).with_children(|row| {
+        for slot in 0..3 {
+            let allowed = chat.policy.as_ref().is_some_and(|p| p.emojis);
+            let mut button = row.spawn(kit::button(
+                (slot + 1).to_string(),
+                if allowed {
+                    UiAction::P75(super::p75::Action::Emoji(slot))
+                } else {
+                    UiAction::Disabled
+                },
+                if compact { 0. } else { 80. },
+            ));
+            if compact {
+                button.insert(compact_button(percent(31.)));
+            }
+            button.with_children(|button| {
+                if let Some(policy) = &chat.policy {
+                    let seat = info.you.map(|s| s.index()).unwrap_or(0);
+                    crate::emoji::spawn(
+                        button,
+                        policy.loadouts[seat][slot as usize].clone(),
+                        slot,
+                        now,
+                        if compact { 20. } else { 30. },
+                    );
+                }
+            });
+        }
+    });
 }
 #[cfg(test)]
 mod tests {

@@ -442,7 +442,16 @@ fn offscreen(parts: &[Footprint]) -> Option<String> {
             let at = (part.bounds.min + part.bounds.max) * 0.5;
             let px = to_screen(at)?;
             let on_screen = (40.0..=1880.0).contains(&px.x) && (150.0..=1040.0).contains(&px.y);
-            let under_hud = (470.0..=1730.0).contains(&px.x) && px.y >= 720.0;
+            let under_social = [
+                crate::ui::match_chat::COMPACT_BOUNDS,
+                crate::ui::match_chat::EXPANDED_BOUNDS,
+            ]
+            .into_iter()
+            .any(|[x, y, w, h]| {
+                (x * 1920.0..=(x + w) * 1920.0).contains(&px.x)
+                    && (y * 1080.0..=(y + h) * 1080.0).contains(&px.y)
+            });
+            let under_hud = ((470.0..=1730.0).contains(&px.x) && px.y >= 720.0) || under_social;
             (!on_screen || under_hud)
                 .then(|| format!("{} is not visible on screen at {px:?}", part.name))
         })
