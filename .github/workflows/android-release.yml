@@ -49,10 +49,10 @@ jobs:
           java-version: ${{ env.ANDROID_JAVA_VERSION }}
       - name: Verify the public package's Java pin before main publication
         run: java -version
-      - name: Provision the same pinned SDK and resolve the Android Gradle plugins
-        run: |
-          python3 scripts/setup-android-toolchain.py
-          ./platform/android/gradlew -p platform/android help --no-parallel --max-workers=2 --console=plain
+      - name: Provision and verify the same pinned Android SDK
+        run: python3 scripts/setup-android-toolchain.py
+      - name: Resolve the pinned Android Gradle plugins with the exported toolchain
+        run: ./platform/android/gradlew -p platform/android help --no-parallel --max-workers=2 --console=plain
       - run: |
           python3 scripts/test-android-package.py
           python3 scripts/test-android-release.py
