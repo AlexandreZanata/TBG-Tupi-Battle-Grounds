@@ -66,3 +66,25 @@ correspondence and owner look/fun retain P69's explicit pending status. The
 personal phone was not touched by this follow-up. No local Cargo suite or
 balance gate was inferred. Public build, emulator smoke and actual GitHub
 CI/publication outcomes are recorded separately when completed.
+
+## First public-mode local package
+
+Source `27a5bed9f381a15b35f006224bf6f74c9f003e39`, revision 55, x86_64 emulator APK:
+`c2c854eeb7f4f9ff668afef4386f2f94ef7cc1fe73e5c72a8e050f862c335dc8`.
+The common nonblocking lock and two build jobs were used. Rust release completed
+in 1m33s; Gradle assembleRelease succeeded in 1m09s. Inspection passed official
+WSS/no-loopback marker, non-debuggable mode, stable certificate, source/asset
+inventory and ELF/ZIP checks. This x86_64 artifact is private emulator evidence,
+not the ARM64 public download. The first attempt selected a Rust alias without
+Android std; the already-installed stable alias was checked as exact rustc
+1.99.0 with Android targets and used successfully without a fresh build cache.
+
+PR CI first reported seven missing Action version comments in the new workflow;
+all actions were already SHA pinned. Added the required version comments without
+relaxing the regression guard. Public-mode emulator execution remains separate
+from this successful package inspection.
+
+Automatic approval review rejected uploading the existing private signing key,
+password and alias to persistent GitHub Secrets without explicit payload/destination
+authorization. No key material was sent. Automatic signing configuration remains
+pending that permission; unaffected local validation and PR work continue.

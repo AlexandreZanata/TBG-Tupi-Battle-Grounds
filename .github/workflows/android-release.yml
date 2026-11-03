@@ -84,7 +84,7 @@ jobs:
         with:
           ref: ${{ needs.scope.outputs.source }}
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; compiler pinned by input
         with:
           toolchain: ${{ env.RUST_TOOLCHAIN }}
           targets: aarch64-linux-android
@@ -92,7 +92,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21.0.0+35'
-      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           key: android-arm64-ndk28-release
           save-if: ${{ github.ref == 'refs/heads/main' }}
@@ -135,7 +135,7 @@ jobs:
       contents: write
       actions: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ needs.scope.outputs.source }}
           persist-credentials: false
@@ -150,7 +150,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - name: Verify completed main build, source, CI and tag
@@ -169,10 +169,10 @@ jobs:
       id-token: write
       attestations: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: tupi-battle-grounds-android-${{ github.sha }}
           run-id: ${{ inputs.promotion_run }}
@@ -180,7 +180,7 @@ jobs:
           path: release
       - name: Recheck the promoted APK bytes and manifest
         run: python3 scripts/android-release-manifest.py --artifacts release
-      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         id: provenance
         with:
           subject-path: release/*
