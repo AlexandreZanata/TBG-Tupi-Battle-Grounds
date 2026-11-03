@@ -44,7 +44,7 @@ pub fn bytes(name: &JNIStr, limit: usize) -> Option<Vec<u8>> {
         if object.is_null() {
             return Ok(None);
         }
-        let array: jni::objects::JByteArray = env.cast_local(object)?;
+        let array: jni::objects::JByteArray = env.cast_local::<jni::objects::JByteArray>(object)?;
         let len = array.len(env)?;
         if len > limit {
             return Ok(None);

@@ -191,12 +191,12 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         )),
         18.,
     ));
-    p.spawn(row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.enter_code", Action::EmailVerify);
         button(r, lang, "p75.resend", Action::EmailResend);
     });
     p.spawn(kit::muted(lang.key("p75.change_safeguard"), 15.));
-    p.spawn(row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.key_proof", Action::KeyProof);
         button(r, lang, "p75.new_email", Action::NewEmail);
     });
@@ -212,7 +212,7 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         Action::Hold,
     );
     button(p, lang, "p75.change_email", Action::EmailChange);
-    p.spawn(row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.old_code", Action::OldCode);
         button(r, lang, "p75.new_code", Action::NewCode);
     });
@@ -234,7 +234,7 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
 }
 fn recovery(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
     p.spawn(kit::muted(lang.key("p75.recovery_guidance"), 18.));
-    p.spawn(row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.name_prompt", Action::RecoveryName);
         button(r, lang, "p75.email_prompt", Action::RecoveryEmail);
     });
@@ -248,7 +248,7 @@ fn recovery(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
 fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
     p.spawn(kit::muted(lang.key("p75.report_privacy"), 16.));
     for row in 0..4 {
-        p.spawn(row()).with_children(|r| {
+        p.spawn(control_row()).with_children(|r| {
             for col in 0..2 {
                 let index = row * 2 + col;
                 button(
@@ -272,7 +272,7 @@ fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
     button(p, lang, "p75.send_report", Action::SendReport);
 }
 fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
-    p.spawn(row()).with_children(|r| {
+    p.spawn(control_row()).with_children(|r| {
         for slot in 0..3 {
             button(
                 r,
@@ -287,7 +287,7 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
         17.,
     ));
     for row in 0..4 {
-        p.spawn(row()).with_children(|r| {
+        p.spawn(control_row()).with_children(|r| {
             for col in 0..4 {
                 let id = row * 4 + col;
                 r.spawn((
@@ -369,11 +369,11 @@ fn parse_id(s: &str) -> Option<[u8; 16]> {
 }
 
 #[cfg(not(target_os = "android"))]
-fn row() -> impl Bundle {
+fn control_row() -> impl Bundle {
     kit::row()
 }
 #[cfg(target_os = "android")]
-fn row() -> impl Bundle {
+fn control_row() -> impl Bundle {
     Node {
         width: percent(100),
         column_gap: px(6),

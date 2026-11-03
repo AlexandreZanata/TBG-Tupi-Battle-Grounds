@@ -83,7 +83,7 @@ pub(super) fn input(
         }
     }
     if mouse.just_released(MouseButton::Left) {
-        pointer(&visible, &window);
+        mouse_pointer(&visible, &window);
     }
 }
 fn activate(action: &UiAction) {
@@ -91,7 +91,7 @@ fn activate(action: &UiAction) {
         request(*a);
     }
 }
-fn pointer(buttons: &[ButtonRef<'_>], window: &Window) {
+fn mouse_pointer(buttons: &[ButtonRef<'_>], window: &Window) {
     let Some(pos) = window.cursor_position().map(|p| p * window.scale_factor()) else {
         return;
     };
