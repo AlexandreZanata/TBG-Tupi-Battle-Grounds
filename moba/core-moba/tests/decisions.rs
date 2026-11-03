@@ -526,3 +526,51 @@ fn cargo_opened_on_a_bridge_places_larger_contents_on_valid_ground() {
         ));
     }
 }
+
+#[test]
+fn mission_approaches_a_distant_occupied_front_instead_of_waiting_for_it_to_clear() {
+    let mut g = quiet();
+    let a = walker(
+        &mut g,
+        UnitKind::Troop(Champion::Shieldbearer),
+        Team::Blue,
+        Pos::units(75, 75),
+    );
+    let i = g.slot(a).unwrap();
+    g.units[i].hp = 100_000;
+    g.units[i].max_hp = 100_000;
+    let mut defenders = Vec::new();
+    for (x, y) in [
+        (94, 94),
+        (100, 94),
+        (106, 94),
+        (94, 100),
+        (106, 100),
+        (94, 106),
+        (100, 106),
+        (106, 106),
+    ] {
+        let id = dummy(&mut g, Pos::units(x, y));
+        let j = g.slot(id).unwrap();
+        g.units[j].stats.radius = 5_000;
+        defenders.push(id);
+    }
+    let mut engaged = false;
+    for _ in 0..500 {
+        g.step();
+        engaged |= defenders.contains(&g.unit(a).unwrap().target);
+        if defenders
+            .iter()
+            .any(|id| g.unit(*id).is_some_and(|u| u.hp < 100_000))
+        {
+            break;
+        }
+    }
+    assert!(
+        engaged,
+        "a distant crowd must not immobilise the mission at its origin"
+    );
+    assert!(defenders
+        .iter()
+        .any(|id| g.unit(*id).is_some_and(|u| u.hp < 100_000)));
+}

@@ -803,3 +803,15 @@ build passed in 18.09 seconds. All compilation/tests held the shared
 nonblocking lock with two Cargo jobs and one test thread. No full suite.
 The exact command batch and logs are retained for the final evidence record.
 Native final motion/installation results follow after observation.
+
+Follow-up native finding on `2b75170252da`: a Lane route could fail globally
+because a distant mobile fight occupied the future waypoint. The Unit then
+never approached acquisition range. M-76 now plans unengaged Lane travel
+against terrain/permanent structures, while every actual step still checks
+current bodies and nearby combat acquires normally. Local Jungle/neutral
+routes retain contested-body planning; applying the relaxed mission search
+to Jungle first failed Bonehorn Camp 4, so it was restricted to Lane missions.
+The focused rerun passed all 14 decision and 7 navigation tests. Deployment
+also passed with the same Lane planning change. Together with the unaffected
+consolidated contracts, 43 distinct focused tests passed. Logs preserve the
+intermediate failure and the successful final scoped rerun.

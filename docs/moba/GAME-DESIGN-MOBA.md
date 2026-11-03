@@ -414,3 +414,10 @@ new camps never spawn them. Their legacy stats are unchanged.
   ground on the same bank: stable eight-direction **500 mm** rings up to
   **20 units**, preserving owner and mission. Ordinary valid spawns stay
   immediate and mobile allies remain soft obstacles.
+
+- Lane mission routing considers terrain and permanent structures, so a distant
+  mobile battle front does not prevent approaching it. Engagement routing
+  also considers contested bodies, as do local Jungle/neutral routes.
+  Every executed step, including a cached
+  mission step, still validates all current hostile/immobile bodies. A
+  nearby enemy is acquired under M-07 before the mission resumes.

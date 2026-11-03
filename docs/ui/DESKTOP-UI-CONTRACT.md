@@ -1472,3 +1472,8 @@ Rigs, clips, slew, blending and map geometry remain shared across Linux,
 Windows and desktop web. Focused core assertions do not prove visual parity.
 Linux follow-up observation is recorded in the P77 delivery report;
 Windows/web comparison and complete roster motion remain pending.
+
+M-76 follow-up: include an occupied distant Lane front. Units must visibly
+approach before acquiring a nearby opponent, retain collision clearance,
+and continue after the front clears; they must not wait at the previous
+waypoint for the entire future route to become empty.

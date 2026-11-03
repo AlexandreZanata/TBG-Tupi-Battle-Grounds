@@ -12,6 +12,21 @@ pub(super) fn route(
     target: Option<&Unit>,
     goal: Pos,
 ) -> Option<Vec<Pos>> {
+    // A mission route must reach a future combat front, not demand that
+    // every distant mobile opponent has already left the entire route.
+    // Engagement routes still account for the nearby contested bodies;
+    // every actual step is always checked against all current bodies.
+    let permanent;
+    let units = if target.is_none() && matches!(a.brain, crate::state::Brain::Lane { .. }) {
+        permanent = units
+            .iter()
+            .filter(|u| u.kind.structure())
+            .cloned()
+            .collect::<Vec<_>>();
+        &permanent[..]
+    } else {
+        units
+    };
     let portals = bridge_portals(a.stats.radius);
     let mut cost = vec![i64::MAX; WIDTH * WIDTH + portals.len()];
     let mut parent = vec![usize::MAX; WIDTH * WIDTH + portals.len()];
