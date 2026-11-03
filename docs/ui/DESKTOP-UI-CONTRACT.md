@@ -1393,3 +1393,9 @@ Queue every base champion's attack, ability, idle/walk, spawn/hit/death,
 and representative packed engagements across Linux, Windows and web.
 Focused Linux compile and core contract tests are not a motion comparison;
 full motion and cross-platform visual verification remain pending.
+
+Installed Linux overview (`f6d2b000f3ac`): the five-card Shop, localized
+open slots, Destination, territorial fog and live units were observed
+together. Full movement/attack/ability/death and input journeys remain
+pending, along with Windows and desktop web pixel/motion checks. See the
+[P77 installed run](../phases/P77-moba-roles-vision-jungle-map.md#consolidated-linux-playtest-installation-2026-11-03).

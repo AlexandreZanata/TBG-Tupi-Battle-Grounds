@@ -679,7 +679,7 @@
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
       "affected_cases": "Shared map/minimap: fully visible home half, river boundary, invading Troop/Minion sight, permanently revealed destroyed enemy Tower circles, scout retreat/death and new-match reset; both Teams/all Tower tiers",
-      "linux": "pending runtime/pixel/motion",
+      "linux": "installed overview observed: home half, dim enemy half, scout reveal; transitions pending",
       "windows": "pending (P81)",
       "web": "pending (P81)",
       "android": "out of scope"
@@ -689,7 +689,7 @@
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
       "affected_cases": "Restored five-card row/resource strip, three Role slots plus two full-roster slots, locks/reroll/purchase, Destination panel and hotkeys 1–5",
-      "linux": "pending runtime",
+      "linux": "installed overview observed: five cards, localized open captions and Destination; interactions pending",
       "windows": "pending (P81)",
       "web": "pending (P81)",
       "android": "out of scope"
@@ -699,7 +699,7 @@
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
       "affected_cases": "MOBA base champions: PK-01 spacing, spawn, walk/idle, facing, melee/ranged releases, powered/secondary shots, muzzle flashes, lunge/recoil, footfalls, hit/heal, specials, status links, rolling casks, transport, summons, visible death and fog removal",
-      "linux": "focused core contracts passed; runtime and full motion matrix pending",
+      "linux": "installed battle overview and 30 focused contracts passed; complete motion matrix pending",
       "windows": "pending (P81)",
       "web": "pending (P81)",
       "android": "out of scope"

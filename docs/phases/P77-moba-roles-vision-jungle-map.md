@@ -540,6 +540,32 @@ windup/root, Mantis's fourth-hit bonus and poison credit after caster death.
 Full workspace, balance, full champion motion gallery and Windows/web
 visual correspondence remain deferred.
 
+### Consolidated Linux playtest installation (2026-11-03)
+
+`moba/scripts/install-linux-moba.sh` built the client and room server
+with `CARGO_TARGET_DIR=/data/tbg-moba-target` and the previously recorded
+`PKG_CONFIG_PATH` (37.87 s, dev profile). The existing `TBG Arena 5v5`
+menu entry and both local commands resolve to `0.1.0-f6d2b000f3ac`;
+`--version` reports MOBA protocol 3. Installed and cached client SHA-256:
+`c77a43d0e97a52b264b27bf9fe7e45f729590f94b749688f0ca79789b8afb348`.
+
+```bash
+cargo test --offline --locked --manifest-path moba/Cargo.toml -p tbg-moba-server \
+  --test room m52 -- --test-threads=1
+timeout --signal=TERM --kill-after=5s 45s xvfb-run -a -s '-screen 0 1920x1080x24' \
+  env WAYLAND_DISPLAY= RUST_LOG=warn /home/iiii/.local/bin/tbg-moba \
+  --capture /tmp/tbg-p77-final-linux/overview.png --seed 11 --warp 60 --role mid --overview
+```
+
+M-52 passed (1 room contract, 3 filtered; 30 focused tests including core).
+The installed smoke exited 0. Inspected the 1600×900 overview: five cards,
+Portuguese unrestricted captions, the Destination panel, full home-half
+sight, dim enemy half and local scout reveal appear in map and minimap;
+units are present and both Teams have scored. The smoke log has only Xvfb
+XSETTINGS/display-size warnings. This screenshot does not prove full
+motion, gestures, per-champion correspondence, performance, or parity
+with Windows and desktop web; those checks remain pending.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 champion Evolution forms and coverage beyond the automatic base kits ·
