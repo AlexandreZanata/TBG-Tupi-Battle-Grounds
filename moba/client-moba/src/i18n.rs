@@ -72,8 +72,8 @@ impl Lang {
             Key::Kills => ("Abates", "Kills"),
             Key::Auto => ("Automático", "Automatic"),
             Key::Hint => (
-                "Carta ou 1–5: comprar e enviar · Z X C V: destino · R: reroll · Botão direito: mover comandante · A: automático · Espaço: centralizar",
-                "Card or 1–5: buy and send · Z X C V: destination · R: reroll · Right click: move commander · A: automatic · Space: centre",
+                "Carta ou 1–3: comprar e enviar · Z X C V: destino · R: reroll · Botão direito: mover comandante · A: automático · Espaço: centralizar",
+                "Card or 1–3: buy and send · Z X C V: destination · R: reroll · Right click: move commander · A: automatic · Space: centre",
             ),
             Key::Victory => ("Vitória!", "Victory!"),
             Key::Defeat => ("Derrota", "Defeat"),

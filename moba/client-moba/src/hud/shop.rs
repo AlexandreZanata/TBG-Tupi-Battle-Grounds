@@ -1,5 +1,5 @@
 //! Bottom of the screen in the 1v1 battle layout: the framed resource strip
-//! over the five Shop cards (same frame, portraits, texts and lock as the
+//! over the three role-locked Shop cards (same frame, portraits, texts and lock as the
 //! 1v1 cards), the Troop Destination and the player card.
 
 use bevy::prelude::*;
@@ -35,6 +35,7 @@ enum Card {
     Portrait(usize),
     Name(usize),
     Role(usize),
+    Rules(usize),
     Cost(usize),
     Lock(usize),
     LockFrame(usize),
@@ -64,7 +65,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
     })
     .with_children(|row| {
         row.spawn(Node {
-            width: px(width),
+            width: px(862.),
             flex_direction: FlexDirection::Column,
             row_gap: px(6),
             ..default()
@@ -74,6 +75,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
             column
                 .spawn(Node {
                     column_gap: px(GAP),
+                    justify_content: JustifyContent::Center,
                     ..default()
                 })
                 .with_children(|cards| {
@@ -223,11 +225,21 @@ fn card(parent: &mut ChildSpawnerCommands, ctx: &Ctx, i: usize) {
                 Node {
                     position_type: PositionType::Absolute,
                     left: px(12),
-                    top: px(170),
+                    top: px(167),
                     ..default()
                 },
                 chrome::muted("", 11.),
                 Card::Role(i),
+            ));
+            card.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(12),
+                    top: px(181),
+                    ..default()
+                },
+                chrome::muted("", 9.),
+                Card::Rules(i),
             ));
             card.spawn(Node {
                 position_type: PositionType::Absolute,
@@ -454,6 +466,21 @@ fn cards(
         let value = match *card {
             Card::Name(i) => def(i).name.to_string(),
             Card::Role(i) => format!("{:?}", def(i).archetype),
+            Card::Rules(i) => {
+                use tbg_core::types::Archetype;
+                [
+                    Archetype::Tank,
+                    Archetype::Dps,
+                    Archetype::Support,
+                    Archetype::Ranged,
+                    Archetype::Control,
+                ]
+                .into_iter()
+                .filter(|a| me.slot_rules[i] & (1 << *a as u8) != 0)
+                .map(|a| format!("{a:?}"))
+                .collect::<Vec<_>>()
+                .join(" · ")
+            }
             Card::Cost(i) => content::troop_cost(me.offers[i]).to_string(),
             _ => continue,
         };

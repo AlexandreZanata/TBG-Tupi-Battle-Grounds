@@ -95,8 +95,9 @@ pub struct PrivateView {
     pub troops: u8,
     pub destination: Destination,
     pub commander_auto: bool,
-    /// The seat's five Shop offers and locked-slot bits.
+    /// The seat's three role-locked Shop offers and locked-slot bits.
     pub offers: [Champion; OFFERS],
+    pub slot_rules: [u8; OFFERS],
     pub locked: u8,
 }
 

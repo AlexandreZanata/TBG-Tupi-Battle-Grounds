@@ -141,8 +141,25 @@ pub fn troop_cost(kind: Champion) -> u32 {
 pub const REROLL_COST: u32 = GOLD_PER_ENERGY;
 /// Splash victims around a champion's target take this percent of the hit (M-07).
 pub const SPLASH_PERCENT: i32 = 50;
-/// Offers on the Shop, as in the 1v1 game.
-pub const OFFERS: usize = tbg_core::content::OFFERS;
+/// Three role-locked Shop slots (Proposed, M-19/M-20).
+pub const OFFERS: usize = 3;
+
+/// Per-slot categories, derived separately for future player-selected rules (M-20).
+pub fn slot_rules(role: Role) -> [&'static [Archetype]; OFFERS] {
+    let allowed: &'static [Archetype] = match role {
+        Role::Top => &[Archetype::Dps, Archetype::Tank],
+        Role::Mid => &[Archetype::Control, Archetype::Dps],
+        Role::Bot => &[Archetype::Ranged, Archetype::Dps],
+        Role::Support => &[Archetype::Support, Archetype::Control],
+        Role::Jungle => &[Archetype::Dps, Archetype::Tank, Archetype::Ranged],
+    };
+    [allowed; OFFERS]
+}
+
+/// Bits follow the shared Archetype order: Tank, Dps, Support, Ranged, Control.
+pub fn archetype_mask(rules: &[Archetype]) -> u8 {
+    rules.iter().fold(0, |mask, kind| mask | (1 << *kind as u8))
+}
 
 /// The champion each role's Commander is drawn as and fights like (Proposed).
 pub fn commander_champion(role: Role) -> Champion {

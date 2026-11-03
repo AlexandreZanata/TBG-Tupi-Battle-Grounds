@@ -37,7 +37,7 @@
 | `Destination` | Where a purchased Troop goes: a `Lane` or the `Jungle` ("Destino da Tropa"). |
 | `Commander` | The player's own unit on the map, drawn as its role's 1v1 champion. Auto by default; Move/Hold on command. |
 | `Troop` | A 1v1 champion (`tbg_core::UnitKind`) bought in the `Shop` and sent to a `Destination`. |
-| `Shop` | Five offers per player drawn from the 1v1 online pool, with locks and a paid reroll, as in the 1v1 game. |
+| `Shop` | Three role-locked offers per player drawn from the 1v1 online pool, with locks and a paid reroll, as in the 1v1 game. |
 | `Minion` | Free lane unit spawned in `Wave`s by each Stronghold. |
 | `Wave` | Three melee + two ranged Minions per lane, per team, every 30 s. |
 | `Camp` | A jungle pit of neutral monsters (one big, two small). |
@@ -80,7 +80,7 @@
 
 ## 5. Economy, shop and progression
 
-- **M-10** Clicking a Shop card (or pressing 1–5) buys that champion for its
+- **M-10** Clicking a Shop card (or pressing 1–3) buys that champion for its
   card price and sends it to the chosen Destination; insufficient Gold is
   rejected. Price = the champion's 1v1 Energy cost × 6 Gold.
 - **M-18** A champion keeps its 1v1 HP, damage, attack interval and range
@@ -90,7 +90,7 @@
   ally in range instead of attacking; champions with a 1v1 `splash` also hit
   enemies around their target for 50 %. 1v1 abilities and Evolutions are
   not active in 5v5 yet (P77).
-- **M-19** Shop: five distinct offers from the 1v1 online pool, drawn from
+- **M-19** Shop: three distinct offers from the role-filtered 1v1 online pool, drawn from
   each seat's own seeded stream (1v1 BR-S01/S05); every purchase redraws all
   unlocked offers (BR-S04); locking a slot is free and keeps it through
   redraws (buying it unlocks it); a reroll redraws the unlocked offers for 6
@@ -106,7 +106,12 @@
 - **M-16** Team Gold on the scoreboard is the sum of Gold earned.
 - **M-17** Upgrade costs `15 + 10 × tier` Essence, up to tier 5; each tier
   gives +10 % HP and damage to Troops bought afterwards.
-- **M-20** Commanders level 1–12 from experience shared by every allied
+- **M-20** Proposed: each of the three Shop slots derives its allowed
+  Archetypes from the Role: Top Dps/Tank, Mid Control/Dps, Bot Ranged/Dps,
+  Support Support/Control, Jungle Dps/Tank/Ranged. Unlocked slots draw in
+  slot order, excluding locked champions and earlier draws. The wire sends
+  a bitmask per slot (Tank=1, Dps=2, Support=4, Ranged=8, Control=16).
+  Category selection is reserved for a future intention. Commanders level 1–12 from experience shared by every allied
   Commander within 12 units of an enemy death (Minion 20, Troop 25, small
   monster 30, big 60, Commander 120). Level = +80 HP, +4 damage.
 - **M-21** A dead Commander respawns at its base after `5 s + 1.5 s × level`.
@@ -147,11 +152,9 @@ after cleared. Start Gold 60.
 ## 9. Bots (M-26)
 
 Bots think twice per second. They upgrade when they can; otherwise they buy
-the first affordable offer of their role's favourite archetype (Top Tank,
-Jungle Dps, Mid Control, Bot Ranged, Support Support), any affordable offer
-once Gold piles up (≥ 72), or reroll when nothing fits and Gold ≥ 48. They
-send Troops to their role's lane (Jungle: own camps while any is up, else
-Mid). Both teams use the same habits; offers differ per seat stream.
+the first affordable offer, preferring their Role's first allowed Archetype
+(Top/Jungle Dps, Mid Control, Bot Ranged, Support Support). If nothing is
+affordable and Gold ≥ 48, they reroll. Destinations and streams are unchanged.
 
 ## 9a. Minions (new in 5v5)
 

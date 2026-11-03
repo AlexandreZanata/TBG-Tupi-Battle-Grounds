@@ -86,7 +86,7 @@ owner-approved phase (see the P76 backlog).
   centre) and an orthographic minimap camera drawn into the HUD frame's
   viewport.
 - `hud`: 1920×1080 design grid scaled by window height, in the 1v1 battle
-  layout (score plates and round clock on top; resource strip and five
+  layout (score plates and round clock on top; resource strip and three role-locked
   Shop cards at the bottom; Destination and player card beside them).
 - `input`: manual UI hit-testing (no picking backend), hotkeys, right-click
   orders with ground ray casts.

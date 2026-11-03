@@ -26,7 +26,7 @@ tbg-moba --play --role mid             # straight into a practice match
 tbg-moba-server & tbg-moba --online    # local room; more clients take bot seats
 ```
 
-Controls: a click on a Shop card (or **1–5**) buys that champion and sends
+Controls: a click on a Shop card (or **1–3**) buys that champion and sends
 it to the Destination (**Z X C V** = Top/Mid/Bot/Jungle); the card's lock
 keeps it through redraws; **R** or the Reroll button redraws the offers;
 **U** upgrades; right click moves your Commander (then it holds there),

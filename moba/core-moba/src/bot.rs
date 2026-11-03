@@ -4,19 +4,7 @@ use crate::content::{self, MAX_TIER, TROOP_CAP};
 use crate::intent::MobaIntention;
 use crate::sim::spawn::nearest_camp;
 use crate::state::MobaMatch;
-use crate::types::{Champion, Destination, Lane, Role, Seat};
-use tbg_core::types::Archetype;
-
-/// The archetype each role buys first; anything affordable comes next.
-fn favourite(role: Role) -> Archetype {
-    match role {
-        Role::Top => Archetype::Tank,
-        Role::Jungle => Archetype::Dps,
-        Role::Mid => Archetype::Control,
-        Role::Bot => Archetype::Ranged,
-        Role::Support => Archetype::Support,
-    }
-}
+use crate::types::{Champion, Destination, Lane, Seat};
 
 fn destination(m: &MobaMatch, seat: Seat) -> Destination {
     match seat.role().lane() {
@@ -45,16 +33,12 @@ pub fn decide(m: &MobaMatch, seat: Seat) -> Option<MobaIntention> {
         return None;
     }
     let affordable = |k: &&Champion| p.gold >= content::troop_cost(**k);
-    let wanted = favourite(seat.role());
+    let wanted = content::slot_rules(seat.role())[0][0];
     let pick = p
         .offers
         .iter()
         .position(|k| affordable(&k) && tbg_core::content::def(*k).archetype == wanted)
-        .or_else(|| {
-            // Saving up for a favourite is pointless when gold piles up.
-            (p.gold >= 3 * content::REROLL_COST * 4)
-                .then(|| p.offers.iter().position(|k| affordable(&k)))?
-        });
+        .or_else(|| p.offers.iter().position(|k| affordable(&k)));
     match pick {
         Some(slot) => Some(MobaIntention::BuyTroop {
             slot: slot as u8,

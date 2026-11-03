@@ -141,7 +141,7 @@ fn m10_buying_spends_the_exact_card_price_of_a_1v1_champion() {
         Err(Reject::NotEnoughGold)
     );
     assert_eq!(
-        m.apply(seat, MobaIntention::BuyTroop { slot: 5, to }),
+        m.apply(seat, MobaIntention::BuyTroop { slot: 3, to }),
         Err(Reject::InvalidSlot)
     );
 }
@@ -165,7 +165,9 @@ fn m11_troop_cap_limits_alive_troops_per_player() {
 fn m19_shop_offers_follow_the_1v1_rules_with_locks_and_reroll() {
     let mut m = MobaMatch::new(5);
     let seat = Seat(7);
-    let distinct = |o: &[Champion; 5]| (0..5).all(|i| (0..i).all(|j| o[i] != o[j]));
+    let distinct = |o: &[Champion; content::OFFERS]| {
+        (0..content::OFFERS).all(|i| (0..i).all(|j| o[i] != o[j]))
+    };
     assert!(distinct(&m.player(seat).offers));
     assert_ne!(
         m.player(Seat(0)).offers,
@@ -268,4 +270,47 @@ fn m40_frames_round_trip_and_hostile_frames_are_refused() {
         protocol::decode_client(&protocol::encode(&long)),
         Err(WireError::BadName)
     );
+}
+
+#[test]
+fn m20_role_slots_only_offer_the_role_archetypes() {
+    // M-19/M-20: locked and redrawn offers remain distinct and inside each Role.
+    let mut m = MobaMatch::new(77);
+    for seat in Seat::all() {
+        m.player_mut(seat).gold = 100_000;
+        let rules = content::slot_rules(seat.role());
+        for draw in 0..256 {
+            let offers = m.player(seat).offers;
+            for (i, kind) in offers.iter().enumerate() {
+                assert!(rules[i].contains(&tbg_core::content::def(*kind).archetype));
+                assert!(!offers[..i].contains(kind));
+            }
+            assert_eq!(
+                view::private(&m, seat).slot_rules,
+                rules.map(content::archetype_mask)
+            );
+            m.apply(
+                seat,
+                MobaIntention::ToggleLock {
+                    slot: (draw % 3) as u8,
+                },
+            )
+            .unwrap();
+            m.apply(seat, MobaIntention::Reroll).unwrap();
+        }
+        assert_eq!(
+            m.apply(seat, MobaIntention::ToggleLock { slot: 3 }),
+            Err(Reject::InvalidSlot)
+        );
+        assert_eq!(
+            m.apply(
+                seat,
+                MobaIntention::BuyTroop {
+                    slot: 255,
+                    to: Destination::Jungle
+                }
+            ),
+            Err(Reject::InvalidSlot)
+        );
+    }
 }

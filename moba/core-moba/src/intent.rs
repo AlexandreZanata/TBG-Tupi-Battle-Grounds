@@ -75,7 +75,12 @@ impl MobaMatch {
         // As in the 1v1 Shop, a purchase redraws every offer (BR-S04),
         // except locked ones; the bought slot unlocks.
         player.locked &= !(1 << slot);
-        player.offers = crate::shop::redraw(&mut player.shop_rng, &player.offers, player.locked);
+        player.offers = crate::shop::redraw(
+            &mut player.shop_rng,
+            &player.offers,
+            player.locked,
+            &content::slot_rules(seat.role()),
+        );
         crate::sim::spawn::troop(self, seat, troop, to);
         self.events.push(Event::TroopSent { seat, troop, to });
         Ok(())
@@ -87,7 +92,12 @@ impl MobaMatch {
             return Err(Reject::NotEnoughGold);
         }
         player.gold -= content::REROLL_COST;
-        player.offers = crate::shop::redraw(&mut player.shop_rng, &player.offers, player.locked);
+        player.offers = crate::shop::redraw(
+            &mut player.shop_rng,
+            &player.offers,
+            player.locked,
+            &content::slot_rules(seat.role()),
+        );
         Ok(())
     }
 

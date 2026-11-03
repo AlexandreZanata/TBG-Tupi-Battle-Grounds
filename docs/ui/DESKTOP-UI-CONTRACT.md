@@ -1302,3 +1302,10 @@ Kills and Towers replace HP), the Arena chip, the `resources.webp` strip and
 five `shop-card.webp` cards with the 1v1 portraits, texts, Cost and lock.
 Linux offline/overview/fight/lock/reroll/purchase and installed-asset runs
 were observed; Windows and desktop web remain pending (P80).
+
+## P77 A — role Shop slots (2026-11-03)
+
+MOBA only: three centred 166×225 cards, 8 px gaps, unchanged 862 px centred
+resource strip, slot category captions, locks/reroll/purchase, hotkeys 1–3
+for every Role. Shared HUD code on all desktop targets. Linux runtime and
+Windows/web pixel correspondence pending; champion motion unchanged.

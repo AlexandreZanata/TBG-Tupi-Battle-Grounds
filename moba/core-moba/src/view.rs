@@ -71,6 +71,7 @@ pub fn private(m: &MobaMatch, seat: Seat) -> PrivateView {
         destination: p.destination,
         commander_auto: p.mode == CommandMode::Auto,
         offers: p.offers,
+        slot_rules: crate::content::slot_rules(seat.role()).map(crate::content::archetype_mask),
         locked: p.locked,
     }
 }

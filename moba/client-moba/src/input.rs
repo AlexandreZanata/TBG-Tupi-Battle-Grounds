@@ -140,8 +140,6 @@ fn hotkeys(keys: Res<ButtonInput<KeyCode>>, mut actions: ResMut<Actions>) {
         (KeyCode::Digit1, Action::BuySlot(0)),
         (KeyCode::Digit2, Action::BuySlot(1)),
         (KeyCode::Digit3, Action::BuySlot(2)),
-        (KeyCode::Digit4, Action::BuySlot(3)),
-        (KeyCode::Digit5, Action::BuySlot(4)),
         (KeyCode::KeyZ, Action::SetDestination(0)),
         (KeyCode::KeyX, Action::SetDestination(1)),
         (KeyCode::KeyC, Action::SetDestination(2)),

@@ -37,7 +37,7 @@ ServerMsg = Welcome { protocol, seat, seed, tick_hz }
 MobaIntention = BuyTroop { slot: u8, to } | Upgrade | MoveCommander { to: Pos(mm) } | CommanderAuto
               | Reroll | ToggleLock { slot: u8 }
 PrivateView   = { seat, gold, essence, tier, troops, destination, commander_auto,
-                  offers: [UnitKind; 5] (1v1 champions), locked: u8 }
+                  offers: [UnitKind; 3] (1v1 champions), slot_rules: [u8; 3], locked: u8 }
 ```
 
 - Variant order is part of the wire: **append new variants only**, never
@@ -70,6 +70,7 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 | `m11_troop_cap_limits_alive_troops_per_player` | M-11 |
 | `m17_upgrade_spends_essence_and_caps_at_max_tier` | M-17 |
 | `m19_shop_offers_follow_the_1v1_rules_with_locks_and_reroll` | M-19 |
+| `m20_role_slots_only_offer_the_role_archetypes` | M-19/M-20 |
 | `m30_a_ten_bot_match_always_ends` | M-30 |
 | `m40_frames_round_trip_and_hostile_frames_are_refused` | M-40 |
 | `m41_seats_come_from_connections_and_purchases_are_authoritative` (server) | M-05, M-41 |

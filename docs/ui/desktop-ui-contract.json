@@ -623,6 +623,16 @@
       "windows": "pending (no MOBA package yet)",
       "web": "pending (WASM compile only)",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-a-role-shop-slots-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "MOBA three role-locked cards, captions, resource strip, locks/reroll/purchase, hotkeys 1–3; shared presentation; champion motion unchanged",
+      "linux": "pending runtime",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
     }
   ]
 }

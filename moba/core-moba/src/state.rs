@@ -106,7 +106,7 @@ pub struct Player {
     pub mode: CommandMode,
     /// Last Destination chosen, echoed to the HUD.
     pub destination: Destination,
-    /// The five Shop offers, locked-slot bits and the seat's own Shop stream.
+    /// The three Shop offers, locked-slot bits and the seat's own Shop stream.
     pub offers: [crate::types::Champion; content::OFFERS],
     pub locked: u8,
     pub shop_rng: Rng,
@@ -239,7 +239,7 @@ impl MobaMatch {
             let p = m.player_mut(seat);
             p.shop_rng =
                 Rng::new(seed ^ (u64::from(seat.0) + 1).wrapping_mul(0xA24B_AED4_963E_E407));
-            p.offers = crate::shop::opening(&mut p.shop_rng);
+            p.offers = crate::shop::opening(&mut p.shop_rng, &content::slot_rules(seat.role()));
             crate::sim::spawn::commander(&mut m, seat);
         }
         m
