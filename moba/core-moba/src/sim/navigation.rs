@@ -143,7 +143,7 @@ fn route(units: &[Unit], a: &Unit, target: Option<&Unit>, goal: Pos) -> Option<V
                 path.push(node(n));
             }
             path.reverse();
-            return Some(path);
+            return Some(simplify(units, a, path));
         }
         for (dx, dy) in [
             (0, -1),
@@ -175,6 +175,24 @@ fn route(units: &[Unit], a: &Unit, target: Option<&Unit>, goal: Pos) -> Option<V
         }
     }
     None
+}
+
+/// Remove lattice corners visible from the previous corner. Besides smoother
+/// routes, this avoids trying to stand exactly on a seed cell under ally pressure.
+fn simplify(units: &[Unit], a: &Unit, path: Vec<Pos>) -> Vec<Pos> {
+    let mut result = Vec::new();
+    let mut from = a.pos;
+    let mut first = 0;
+    while first < path.len() {
+        let next = (first..path.len())
+            .rev()
+            .find(|&j| clear(units, a, from, path[j]))
+            .unwrap_or(first);
+        result.push(path[next]);
+        from = path[next];
+        first = next + 1;
+    }
+    result
 }
 
 fn approach(a: &Unit, target: Option<&Unit>, goal: Pos) -> Pos {

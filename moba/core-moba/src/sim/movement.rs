@@ -37,7 +37,12 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
         if formation_holds(m, i, to) {
             continue;
         }
-        m.units[i].pos = super::navigation::step(m, &snapshot, i, goal, step);
+        let next = super::navigation::step(m, &snapshot, i, goal, step);
+        // Decisions use the snapshot; settled bodies reserve their swept step
+        // in id order so opposing movers cannot walk into each other.
+        if super::navigation::clear(&m.units, &m.units[i], from, next) {
+            m.units[i].pos = next;
+        }
         if m.units[i].pos != from {
             crate::champions::walked(&mut m.units[i]);
         }

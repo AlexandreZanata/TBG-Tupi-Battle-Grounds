@@ -1,7 +1,7 @@
 //! Bounded Hatch, cargo production and non-recursive drill fusion using 1v1 catalog profiles.
 use super::{abilities, cue};
 use crate::{
-    state::{Brain, MobaMatch, Unit},
+    state::{MobaMatch, Unit},
     types::{Champion, UnitKind},
 };
 use tbg_core::content::{self, Ability};
@@ -55,7 +55,7 @@ pub fn tick(g: &mut MobaMatch) {
                 Ability::Cargo { every, open, .. } if g.units[i].fx.summon_cd == 0 => {
                     let id = spawn(g, &u, Champion::Crate, 0);
                     if let Some(j) = g.slot(id) {
-                        g.units[j].brain = Brain::Static;
+                        // The crate is immobile by stats; its contents inherit the saved mission.
                         g.units[j].fx.summon_cd = open;
                     }
                     g.units[i].fx.summon_cd = every;

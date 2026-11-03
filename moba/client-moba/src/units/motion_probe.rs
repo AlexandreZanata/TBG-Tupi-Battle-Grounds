@@ -55,7 +55,7 @@ fn record(
         let Some(a) = animator else { continue };
         let _ = writeln!(
             probe.0,
-            "unit,{t:.6},{},{:.6},{:.6},{:.6},{:?},{:?},{},{:.6}",
+            "unit,{t:.6},{},{:.6},{:.6},{:.6},{:?},{:?},{},{:.6},{:?}",
             v.id,
             transform.translation.x,
             transform.translation.z,
@@ -63,7 +63,8 @@ fn record(
             v.activity,
             a.clip_time().0,
             v.target,
-            v.curr.distance(v.prev)
+            v.curr.distance(v.prev),
+            v.kind
         );
     }
     let _ = probe.0.flush();

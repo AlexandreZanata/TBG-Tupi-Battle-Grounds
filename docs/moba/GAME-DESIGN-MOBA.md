@@ -331,6 +331,10 @@ new camps never spawn them. Their legacy stats are unchanged.
   deterministic 2-unit navigation lattice with stable cost/node ties.
   Finish on a continuous attack position between lattice nodes; the contact
   annulus must not disappear because it is narrower than a grid cell.
+  Remove redundant lattice corners by swept line of sight so ally pressure
+  cannot pin a walker to its first seed cell. Cargo crates keep their parent's
+  mission while immobile; released champions inherit it. Settle swept steps
+  in id order to prevent opposing movers entering each other.
   Keep the resulting detour until obstructed, the goal moves over 2 units,
   or the target changes. Project blocked steps along a free axis. Forty
   ticks without at least 5 mm of progress toward the next path point clear

@@ -290,3 +290,64 @@ fn unreachable_target_is_released_and_the_lane_mission_continues() {
         }
     ));
 }
+
+#[test]
+fn mixed_crowd_and_cargo_contents_keep_a_forward_mission() {
+    use tbg_moba_core::{Destination, Lane, MobaIntention};
+    let mut game = MobaMatch::new(11);
+    game.units.retain(|u| u.team() == Some(Team::Blue));
+    let kinds = [
+        Champion::Rotcap,
+        Champion::Rootcaller,
+        Champion::Mantis,
+        Champion::Leechroot,
+        Champion::Colossus,
+        Champion::Sawbot,
+        Champion::Smuggler,
+        Champion::Shieldbearer,
+    ];
+    for kind in kinds {
+        let p = game.player_mut(Seat(0));
+        p.gold = 10_000;
+        p.offers[0] = kind;
+        game.apply(
+            Seat(0),
+            MobaIntention::BuyTroop {
+                slot: 0,
+                to: Destination::Lane(Lane::Mid),
+            },
+        )
+        .unwrap();
+    }
+    let ids = game
+        .units
+        .iter()
+        .filter(|u| u.owner == Some(Seat(0)))
+        .map(|u| u.id)
+        .collect::<Vec<_>>();
+    for _ in 0..900 {
+        game.step();
+        game.units.retain(|u| u.team() == Some(Team::Blue));
+        game.events.clear();
+    }
+    for id in ids {
+        let u = game.unit(id).unwrap();
+        assert!(
+            u.pos.dist(map::stronghold(Team::Blue)) > 30_000,
+            "crowded unit never left the Nexus: {u:?}"
+        );
+    }
+    assert!(
+        game.units
+            .iter()
+            .filter(|u| matches!(u.kind, UnitKind::Troop(_)))
+            .all(|u| matches!(
+                u.brain,
+                Brain::Lane {
+                    lane: Lane::Mid,
+                    ..
+                }
+            )),
+        "cargo contents must inherit their route"
+    );
+}
