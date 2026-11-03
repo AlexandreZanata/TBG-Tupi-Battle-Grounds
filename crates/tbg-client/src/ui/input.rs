@@ -47,7 +47,7 @@ pub(super) fn taps(
     mut queue: ResMut<ActionQueue>,
     (time, mut pressed_at): (Res<Time>, Local<f64>),
 ) {
-    if crate::ui::p75::captured() {
+    if crate::ui::p75::modal() {
         return;
     }
     #[cfg(target_os = "android")]
@@ -130,6 +130,12 @@ pub(super) fn taps(
             Some(a) => Some(a),
             None => nearest_unit(p, &units, &camera, scale.0),
         };
+        // Chat captures gameplay, but its own compose/close/mute/emoji controls must still work.
+        if crate::ui::p75::captured()
+            && !matches!(action, Some(UiAction::P75(_) | UiAction::Disabled))
+        {
+            continue;
+        }
         queue.0.push(action.unwrap_or(UiAction::Deselect));
     }
 }

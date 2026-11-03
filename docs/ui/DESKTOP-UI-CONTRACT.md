@@ -1171,3 +1171,11 @@ The Arena side chip retains ownership identification; desktop name suffix,
 plate layout and every authoritative value remain unchanged. The overlapping
 candidate42 failure and actual41 Evolution/Fortification evidence are recorded
 in the continuation report. Corrected header observation remains pending.
+
+
+P69/P75 pointer capture: expanded chat captures gameplay while permitting its
+own compose/close/mute/emoji actions on all targets. Actual P75 dialogs retain
+their dedicated handler; native forms retain their existing guard. No geometry,
+chat permission or authority change. Candidate42's inert chat controls are a
+recorded failure; corrected delivery and background-gameplay exclusion remain
+pending actual runtime repetition.

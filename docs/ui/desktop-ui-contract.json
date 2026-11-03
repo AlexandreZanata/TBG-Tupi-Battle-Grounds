@@ -493,6 +493,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-p75-chat-capture-permits-own-controls",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared expanded-chat compose/close/mute/emoji pointer controls remain usable while gameplay is captured; actual dialogs/forms preserve their handlers and all geometry is unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }
