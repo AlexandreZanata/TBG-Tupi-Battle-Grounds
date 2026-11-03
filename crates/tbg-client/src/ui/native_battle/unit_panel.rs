@@ -461,7 +461,7 @@ fn evolution_text(
     format!(
         "{} · {} {}\n{}",
         crate::i18n::content::form_name(lang, u.kind, u.tier.saturating_add(1), branch)
-            .unwrap_or_else(|| form.name.into()),
+            .unwrap_or(form.name),
         v.evolve_costs[usize::from(u.tier.min(1))] / ENERGY_SCALE,
         lang.key("mobile.energy"),
         {

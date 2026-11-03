@@ -45,6 +45,15 @@ pub(super) fn plugin(app: &mut App) {
         );
 }
 type ModelFilter = (With<Model>, Without<ArenaCamera>);
+type PreviewFraming<'w, 's> = (
+    Single<'w, 's, &'static Window>,
+    Query<
+        'w,
+        's,
+        (&'static ComputedNode, &'static UiGlobalTransform),
+        With<super::catalog::viewer::Viewport>,
+    >,
+);
 
 #[allow(clippy::too_many_arguments)]
 fn show(
@@ -59,10 +68,7 @@ fn show(
     arena: Res<crate::arena::ActiveArena>,
     mut ambient: ResMut<GlobalAmbientLight>,
     mut camera: Single<(&mut Transform, &mut Projection, &mut DistanceFog), With<ArenaCamera>>,
-    framing: (
-        Single<&Window>,
-        Query<(&ComputedNode, &UiGlobalTransform), With<super::catalog::viewer::Viewport>>,
-    ),
+    framing: PreviewFraming<'_, '_>,
     mut clear: ResMut<ClearColor>,
     mut scenery: Query<&mut Visibility, With<crate::arena::ArenaScene>>,
     mut model: Query<(Entity, &mut Transform, &mut Animator), ModelFilter>,

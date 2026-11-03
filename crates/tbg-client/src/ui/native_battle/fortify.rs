@@ -375,7 +375,7 @@ fn note(v: &MatchView, pending: bool, lang: crate::i18n::Lang) -> String {
     let tower = fortify::own(v);
     let branch = crate::i18n::content::stronghold_branch(lang, tower.kind, tower.branch.min(1));
     match fortify::offer(v, tower.branch.min(1), pending) {
-        Offer::Max => lang.key("fortify.note.full").replace("{branch}", &branch),
+        Offer::Max => lang.key("fortify.note.full").replace("{branch}", branch),
         Offer::Pending => lang.key("fortify.note.pending"),
         Offer::Paused => lang.key("fortify.note.paused"),
         Offer::Idle => lang.key("fortify.note.idle"),

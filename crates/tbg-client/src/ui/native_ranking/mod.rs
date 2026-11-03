@@ -36,6 +36,12 @@ fn text(value: impl Into<String>, size: f32) -> impl Bundle {
     (super::label(value, size), TextLayout::no_wrap())
 }
 
+type ScrollPositions<'w, 's> = (
+    Query<'w, 's, &'static ScrollPosition, With<table::List>>,
+    Query<'w, 's, &'static ScrollPosition, With<Root>>,
+    Query<'w, 's, &'static ScrollPosition, With<profile::Sidebar>>,
+);
+
 #[allow(clippy::too_many_arguments)]
 fn render(
     mut commands: Commands,
@@ -45,11 +51,7 @@ fn render(
     assets: Res<AssetServer>,
     lang: Res<Lang>,
     roots: Query<Entity, With<Root>>,
-    (positions, page_positions, profile_positions): (
-        Query<&ScrollPosition, With<table::List>>,
-        Query<&ScrollPosition, With<Root>>,
-        Query<&ScrollPosition, With<profile::Sidebar>>,
-    ),
+    (positions, page_positions, profile_positions): ScrollPositions<'_, '_>,
     mut page_at: Local<u16>,
 ) {
     if !crate::config::bevy_ui() {
