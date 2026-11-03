@@ -82,6 +82,11 @@ fn show(
         Node {
             position_type: PositionType::Absolute,
             top: percent(40.0),
+            max_width: if cfg!(target_os = "android") {
+                percent(90)
+            } else {
+                Val::Auto
+            },
             justify_self: JustifySelf::Center,
             padding: UiRect::axes(px(16.0), px(10.0)),
             border_radius: BorderRadius::all(px(10.0)),
@@ -89,7 +94,15 @@ fn show(
         },
         BackgroundColor(PANEL),
         Toast(secs),
-        children![label(text, 18.0)],
+        GlobalZIndex(if cfg!(target_os = "android") { 1000 } else { 0 }),
+        children![label(
+            text,
+            if cfg!(target_os = "android") {
+                14.
+            } else {
+                18.
+            }
+        )],
     ));
 }
 

@@ -7,8 +7,8 @@ pub fn spawn(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) 
     let data = stronghold_data();
     root.spawn(kit::panel()).with_children(|p| {
         p.spawn(kit::heading(lang.key("lobby.tabs.stronghold"), 32.));
-        p.spawn(kit::muted(text(&data["copy"], "intro"), 18.));
-        p.spawn(kit::muted(text(&data["copy"], "scope"), 15.));
+        p.spawn(kit::muted(lang.key("stronghold.copy.intro"), 18.));
+        p.spawn(kit::muted(lang.key("stronghold.copy.scope"), 15.));
     });
     root.spawn(catalog::grid()).with_children(|grid| {
         for v in data["kinds"].as_array().into_iter().flatten() {

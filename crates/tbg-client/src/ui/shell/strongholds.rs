@@ -60,9 +60,23 @@ fn details(
     kind: tbg_core::StrongholdKind,
     lang: Lang,
 ) {
-    p.spawn(kit::heading(text(v, "name"), 26.));
-    p.spawn(kit::muted(text(v, "specialty"), 16.));
-    p.spawn((super::super::label(text(v, "summary"), 15.), detail_node()));
+    let slug = format!("{kind:?}").to_lowercase();
+    p.spawn(kit::heading(
+        crate::i18n::content::stronghold_name(lang, kind),
+        if cfg!(target_os = "android") {
+            20.
+        } else {
+            26.
+        },
+    ));
+    p.spawn(kit::muted(
+        lang.key(&format!("stronghold.{slug}.specialty")),
+        16.,
+    ));
+    p.spawn((
+        super::super::label(lang.key(&format!("stronghold.{slug}.summary")), 15.),
+        detail_node(),
+    ));
     let stats = &v["stats"];
     p.spawn(super::super::label(
         format!(
@@ -83,28 +97,49 @@ fn details(
         17.,
     ));
     p.spawn((kit::muted(passive(lang, kind, stats), 14.), detail_node()));
-    for (heading, field) in [("+", "advantages"), ("-", "disadvantages")] {
-        for line in v[field]
+    for (heading, field, key) in [
+        ("+", "advantages", "advantage"),
+        ("-", "disadvantages", "disadvantage"),
+    ] {
+        for (index, _line) in v[field]
             .as_array()
             .into_iter()
             .flatten()
             .filter_map(Value::as_str)
+            .enumerate()
         {
             p.spawn((
-                kit::muted(format!("{heading} {}", expand(line, stats)), 13.),
+                kit::muted(
+                    format!(
+                        "{heading} {}",
+                        expand(
+                            &lang.key(&format!("stronghold.{slug}.{key}.{index}")),
+                            stats
+                        )
+                    ),
+                    13.,
+                ),
                 detail_node(),
             ));
         }
     }
-    for branch in v["branches"].as_array().into_iter().flatten() {
-        p.spawn(kit::heading(text(branch, "name"), 17.));
+    for (branch_id, branch) in v["branches"].as_array().into_iter().flatten().enumerate() {
+        p.spawn(kit::heading(
+            crate::i18n::content::stronghold_branch(lang, kind, branch_id as u8),
+            17.,
+        ));
         for (i, step) in branch["steps"].as_array().into_iter().flatten().enumerate() {
             let s = &step["stats"];
             p.spawn((
                 kit::muted(
                     format!(
                         "{} · {} Energy · HP {} · {} {}",
-                        text(step, "name"),
+                        crate::i18n::content::stronghold_step(
+                            lang,
+                            kind,
+                            branch_id as u8,
+                            (i + 1) as u8
+                        ),
                         data["fortifyCost"][i.min(1)].as_u64().unwrap_or(0)
                             / data["energyScale"].as_u64().unwrap_or(600),
                         s["maxHp"],

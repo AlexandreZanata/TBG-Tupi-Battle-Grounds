@@ -24,7 +24,14 @@ pub fn spawn(
     // The native resume record (P66) lives in the OS vault; the browser has none.
     #[cfg(not(target_arch = "wasm32"))]
     if !crate::platform::resume::available() {
-        root.spawn(kit::muted(lang.key("update.resume.temporary"), 13.));
+        root.spawn(kit::muted(
+            lang.key(if cfg!(target_os = "android") {
+                "auth.session_only"
+            } else {
+                "update.resume.temporary"
+            }),
+            13.,
+        ));
     }
     root.spawn(Node {
         grid_template_columns: RepeatedGridTrack::flex(2, 1.),
@@ -238,7 +245,14 @@ fn account_panel(
         |card| {
             if let Some(profile) = &account.profile {
                 card.spawn(kit::heading(profile.name.clone(), 18.));
-                card.spawn(kit::muted(lang.key("lobby.settings.key_note"), 12.));
+                card.spawn(kit::muted(
+                    lang.key(if cfg!(target_os = "android") {
+                        "android.account.backup_prompt"
+                    } else {
+                        "lobby.settings.key_note"
+                    }),
+                    12.,
+                ));
                 card.spawn(controls::group()).with_children(|actions| {
                     actions.spawn((
                         controls::button(lang.key("lobby.settings.copy"), false),

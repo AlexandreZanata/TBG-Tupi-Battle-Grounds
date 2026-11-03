@@ -21,8 +21,14 @@ pub fn panel() -> impl Bundle {
     (
         Node {
             flex_direction: FlexDirection::Column,
-            padding: UiRect::all(px(20)),
-            row_gap: px(12),
+            padding: UiRect::all(px(if cfg!(target_os = "android") { 12 } else { 20 })),
+            row_gap: px(if cfg!(target_os = "android") { 8 } else { 12 }),
+            #[cfg(target_os = "android")]
+            flex_shrink: 0.,
+            #[cfg(target_os = "android")]
+            min_width: px(0),
+            #[cfg(target_os = "android")]
+            max_width: percent(100),
             border: UiRect::all(px(1)),
             border_radius: BorderRadius::all(px(10)),
             ..default()
@@ -59,12 +65,25 @@ pub fn display_font() -> Handle<Font> {
 pub fn heading(text: impl Into<String>, size: f32) -> impl Bundle {
     (
         Text::new(text),
-        TextFont::from_font_size(FontSize::Px(size)).with_font(display_font()),
+        TextFont::from_font_size(FontSize::Px(if cfg!(target_os = "android") {
+            size.min(26.)
+        } else {
+            size
+        }))
+        .with_font(display_font()),
         TextColor(GOLD),
     )
 }
 pub fn muted(text: impl Into<String>, size: f32) -> impl Bundle {
-    text_color(text, size, MUTED)
+    text_color(
+        text,
+        if cfg!(target_os = "android") {
+            size.min(14.)
+        } else {
+            size
+        },
+        MUTED,
+    )
 }
 pub fn image(
     assets: &AssetServer,

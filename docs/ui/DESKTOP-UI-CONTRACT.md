@@ -928,3 +928,23 @@ phase, Stronghold and paid Reroll labels use the active language; desktop
 text/geometry remain unchanged. An internal loopback-only gameplay intention
 trace records sequence/type without auth/room/resume data, enabling one-touch
 and inspection/scroll no-purchase observations. Emulator validation is pending.
+
+## 2026-11-02 — P69 menu density and protected form layout
+
+Android uses smaller panel spacing/type, three Arcana family columns instead
+of full-width banner stacks, and independent unshrunk Arena title/theme/effect
+regions. Settings actions wrap long localized labels and retain48dp minima.
+The saved-key panel owns a high-layer shield and a scrollable body; temporary
+session information moves to Settings instead of covering menu content.
+Toasts remain readable above the mobile modal. Native text forms have a short
+localized heading, a scrollable full prompt, and a reveal control beside the
+field so the software keyboard cannot hide it below the input.
+
+Shared native Arcana family/node and Stronghold name/summary/branch/advantage
+copy now uses the existing English/PT-BR catalogs, matching browser content
+instead of showing raw English catalog fields. This affects corresponding
+Linux, Windows and desktop web copy; their geometry stays unchanged.
+Coverage: Arcanas, Strongholds, Arenas, menu kit panels, Settings account
+actions, temporary account states, save-key modal, toast stacking and native
+IME/reveal/Done/Back. Corrected emulator journeys and updated same-source
+desktop observations remain pending.

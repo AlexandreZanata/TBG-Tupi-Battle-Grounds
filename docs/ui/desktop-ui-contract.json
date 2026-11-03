@@ -235,6 +235,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-menu-density-protected-forms-localization",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Arcanas/Strongholds/Arenas/Settings, save-key/modal/toast, native IME; shared native Arcana/Stronghold locale copy",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

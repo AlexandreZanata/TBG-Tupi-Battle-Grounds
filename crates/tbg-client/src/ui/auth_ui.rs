@@ -108,7 +108,11 @@ fn render(
     if !crate::config::bevy_ui() {
         return;
     }
-    let key = status_key(&view);
+    let key = if cfg!(target_os = "android") && view.status == Status::Authenticated {
+        None // The account settings already explain the session lifetime.
+    } else {
+        status_key(&view)
+    };
     let signature = format!(
         "{:?}|{:?}|{}|{}|{}",
         view.status,

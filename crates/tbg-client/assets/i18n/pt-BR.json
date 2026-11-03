@@ -1919,5 +1919,7 @@
   "android.sign_in": "Entrar",
   "android.arenas": "Arenas",
   "android.live": "Ao vivo",
-  "android.battle.phase": "Batalha"
+  "android.battle.phase": "Batalha",
+  "android.account.backup_title": "Backup da conta",
+  "android.reveal_short": "Mostrar"
 }

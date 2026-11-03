@@ -9,6 +9,8 @@ import android.view.inputmethod.EditorInfo
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ScrollView
+import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import org.json.JSONObject
 
@@ -22,7 +24,7 @@ internal class NativeTextInput(private val activity: MainActivity) {
         val id = request.optLong("id", -1)
         val limit = request.optInt("limit", 0)
         if (id < 0 || limit !in 1..4096) return false
-        for (key in listOf("title", "done", "cancel", "reveal")) {
+        for (key in listOf("heading", "title", "done", "cancel", "reveal", "reveal_short")) {
             if (request.optString(key).length !in 1..256) return false
         }
         activity.runOnUiThread { open(request, id, limit) }
@@ -34,6 +36,7 @@ internal class NativeTextInput(private val activity: MainActivity) {
         val secret = request.optBoolean("secret", false)
         val field = EditText(activity).apply {
             isSingleLine = true
+            textSize = 16f
             isSaveEnabled = false
             importantForAutofill = View.IMPORTANT_FOR_AUTOFILL_NO_EXCLUDE_DESCENDANTS
             inputType = InputType.TYPE_CLASS_TEXT or if (secret) {
@@ -49,22 +52,37 @@ internal class NativeTextInput(private val activity: MainActivity) {
         }
         val content = LinearLayout(activity).apply {
             orientation = LinearLayout.VERTICAL
-            val padding = (16 * resources.displayMetrics.density).toInt()
+            val density = resources.displayMetrics.density
+            val padding = (12 * density).toInt()
             setPadding(padding, padding, padding, padding)
-            addView(field)
-            if (secret) addView(CheckBox(activity).apply {
-                text = request.getString("reveal")
-                minHeight = (48 * resources.displayMetrics.density).toInt()
-                setOnCheckedChangeListener { _, checked ->
-                    field.transformationMethod = if (checked) null else PasswordTransformationMethod.getInstance()
-                    field.setSelection(field.text.length)
-                }
+            if (request.getString("heading") != request.getString("title")) {
+                addView(TextView(activity).apply {
+                    text = request.getString("title")
+                    textSize = 14f
+                    setPadding(0, 0, 0, (4 * density).toInt())
+                })
+            }
+            addView(LinearLayout(activity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = android.view.Gravity.CENTER_VERTICAL
+                addView(field, LinearLayout.LayoutParams(0, (48 * density).toInt(), 1f))
+                if (secret) addView(CheckBox(activity).apply {
+                    text = request.getString("reveal_short")
+                    contentDescription = request.getString("reveal")
+                    minHeight = (48 * density).toInt()
+                    minWidth = (48 * density).toInt()
+                    setOnCheckedChangeListener { _, checked ->
+                        field.transformationMethod = if (checked) null else PasswordTransformationMethod.getInstance()
+                        field.setSelection(field.text.length)
+                    }
+                })
             })
         }
+        val scroll = ScrollView(activity).apply { addView(content) }
         var submitted = false
         val modal = AlertDialog.Builder(activity)
-            .setTitle(request.getString("title"))
-            .setView(content)
+            .setTitle(request.getString("heading"))
+            .setView(scroll)
             .setPositiveButton(request.getString("done"), null)
             .setNegativeButton(request.getString("cancel")) { _, _ -> }
             .create()
@@ -88,6 +106,10 @@ internal class NativeTextInput(private val activity: MainActivity) {
                 if (action == EditorInfo.IME_ACTION_DONE) { submit(); true } else false
             }
             field.requestFocus()
+            field.post {
+                activity.getSystemService(android.view.inputmethod.InputMethodManager::class.java)
+                    .showSoftInput(field, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
+            }
             modal.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or
                 WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         }
