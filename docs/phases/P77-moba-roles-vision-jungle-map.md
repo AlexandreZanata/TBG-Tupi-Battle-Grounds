@@ -590,6 +590,14 @@ appearance and forward progress from each spawn position. It also checks
 a static obstacle bypass. The 25-minute bot match was excluded. Full
 motion comparison and Windows/web verification remain pending.
 
+Installed Linux build `0.1.0-e48e3108e9ad` using the local 5v5
+installer (29.56 s). The installed binary exited successfully after a
+base capture with `--seed 11 --warp 57 --role bot`. The inspected image
+shows units beyond the base plaza on the roads, with no game or shader
+errors in the log. Evidence: `/tmp/tbg-p77-route-exits/base.png` and
+`/tmp/tbg-p77-route-exits/smoke.log`. This is a startup and placement
+observation. The complete motion comparison remains pending.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 champion Evolution forms and coverage beyond the automatic base kits ·
