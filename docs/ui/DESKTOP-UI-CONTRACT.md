@@ -1221,3 +1221,10 @@ cosmetic roots face that fitted camera without restarting clips. The range
 label fits both real pages. Nonwinning Result and desktop geometry remain
 unchanged. Actual counts/paging and the too-small above-panel failure are
 recorded separately; corrected sidebar/cast/motion/cleanup observation is pending.
+
+
+P69 emoji selection: the shared standard library uses art-only controls with
+enough width for the existing32px icon and padding. Numeric IDs no longer
+overlap the emoji. Selection, slots, permissions and server authority are
+unchanged. Actual Android47 library/cancel evidence exposed this issue;
+corrected Android/Linux/web observations are queued.

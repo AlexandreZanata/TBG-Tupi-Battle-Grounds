@@ -291,7 +291,7 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
             for col in 0..4 {
                 let id = row * 4 + col;
                 r.spawn((
-                    kit::control(id.to_string(), true, 44.),
+                    kit::control("", true, 64.),
                     UiAction::P75(Action::Standard(id)),
                     DialogButton,
                 ))

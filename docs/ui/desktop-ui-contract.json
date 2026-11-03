@@ -553,6 +553,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-shared-emoji-library-icon-buttons",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Shared P75 standard emoji selection uses centered art without numeric debug labels;64px width contains32px art and existing padding; native48dp minimum retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }
