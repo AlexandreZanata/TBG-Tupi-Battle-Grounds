@@ -84,7 +84,7 @@ pub struct Player {
     pub deaths: u16,
     /// Last Destination chosen, echoed to the HUD.
     pub destination: Destination,
-    /// The three Shop offers, locked-slot bits and the seat's own Shop stream.
+    /// The five Shop offers, locked-slot bits and the seat's own Shop stream.
     pub offers: [crate::types::Champion; content::OFFERS],
     pub locked: u8,
     pub shop_rng: Rng,

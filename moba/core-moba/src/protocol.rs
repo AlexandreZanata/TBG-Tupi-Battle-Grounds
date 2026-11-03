@@ -1,4 +1,4 @@
-//! MOBA wire protocol v2 (immutable once merged; `docs/moba/CONTRACTS.md` §3).
+//! MOBA wire protocol v3 (immutable once merged; `docs/moba/CONTRACTS.md` §3).
 //!
 //! Binary postcard frames over WebSocket. One filtered world per team per tick;
 //! private economy goes to its owner only (M-50–M-55).
@@ -10,7 +10,7 @@ use crate::intent::{MobaIntention, Reject};
 use crate::state::{Event, Outcome};
 use crate::types::{Champion, Destination, Seat, Side, UnitKind};
 
-pub const MOBA_PROTOCOL_VERSION: u16 = 2;
+pub const MOBA_PROTOCOL_VERSION: u16 = 3;
 /// Largest client frame accepted; anything bigger closes the socket (M-40).
 pub const MAX_CLIENT_FRAME: usize = 256;
 /// Largest server frame a client accepts.
@@ -89,7 +89,7 @@ pub struct PrivateView {
     pub tier: u8,
     pub troops: u8,
     pub destination: Destination,
-    /// The seat's three role-locked Shop offers and locked-slot bits.
+    /// The seat's five Shop offers (three role-filtered and two unrestricted) and locked-slot bits.
     pub offers: [Champion; OFFERS],
     pub slot_rules: [u8; OFFERS],
     pub locked: u8,

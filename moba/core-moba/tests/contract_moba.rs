@@ -146,7 +146,7 @@ fn m10_buying_spends_the_exact_card_price_of_a_1v1_champion() {
         Err(Reject::NotEnoughGold)
     );
     assert_eq!(
-        m.apply(seat, MobaIntention::BuyTroop { slot: 3, to }),
+        m.apply(seat, MobaIntention::BuyTroop { slot: 5, to }),
         Err(Reject::InvalidSlot)
     );
 }
@@ -297,14 +297,14 @@ fn m20_role_slots_only_offer_the_role_archetypes() {
             m.apply(
                 seat,
                 MobaIntention::ToggleLock {
-                    slot: (draw % 3) as u8,
+                    slot: (draw % content::OFFERS) as u8,
                 },
             )
             .unwrap();
             m.apply(seat, MobaIntention::Reroll).unwrap();
         }
         assert_eq!(
-            m.apply(seat, MobaIntention::ToggleLock { slot: 3 }),
+            m.apply(seat, MobaIntention::ToggleLock { slot: 5 }),
             Err(Reject::InvalidSlot)
         );
         assert_eq!(
@@ -689,4 +689,50 @@ fn m14_automatic_champion_kills_keep_card_bounty_and_update_score() {
     assert_eq!(m.player(killer).kills, 1);
     assert_eq!(m.player(victim).deaths, 1);
     assert_eq!(m.score, [0, 1]);
+}
+
+#[test]
+fn m20_five_cards_keep_three_role_slots_and_two_full_pool_slots() {
+    // Owner revision M-19/M-20: both open slots can draw outside the Role; locks/purchase still redraw distinctly.
+    let mut m = MobaMatch::new(205);
+    for seat in Seat::all() {
+        m.player_mut(seat).gold = 100_000;
+        let role = content::slot_rules(seat.role())[0];
+        let mut outside = [false; 2];
+        for _ in 0..512 {
+            let offers = m.player(seat).offers;
+            assert_eq!(offers.len(), 5);
+            for i in 0..3 {
+                assert!(role.contains(&tbg_core::content::def(offers[i]).archetype));
+            }
+            for i in 3..5 {
+                outside[i - 3] |= !role.contains(&tbg_core::content::def(offers[i]).archetype);
+            }
+            assert_eq!(view::private(&m, seat).slot_rules[3..], [31, 31]);
+            m.apply(seat, MobaIntention::Reroll).unwrap();
+        }
+        assert!(outside.into_iter().all(|seen| seen));
+        m.apply(seat, MobaIntention::ToggleLock { slot: 4 })
+            .unwrap();
+        let kept = m.player(seat).offers[4];
+        m.apply(
+            seat,
+            MobaIntention::BuyTroop {
+                slot: 3,
+                to: Destination::Lane(Lane::Top),
+            },
+        )
+        .unwrap();
+        assert_eq!(m.player(seat).offers[4], kept);
+        assert_eq!(
+            m.apply(
+                seat,
+                MobaIntention::BuyTroop {
+                    slot: 5,
+                    to: Destination::Jungle
+                }
+            ),
+            Err(Reject::InvalidSlot)
+        );
+    }
 }

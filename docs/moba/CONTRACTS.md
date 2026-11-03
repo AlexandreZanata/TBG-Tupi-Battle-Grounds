@@ -20,9 +20,9 @@ id-ordered units, no clocks, no I/O, no async, no graphics, no unseeded
 randomness, no HashMap iteration in the simulation. Same seed and same
 intentions per tick ⇒ same `state_hash` every tick.
 
-## 3. Wire protocol v2 (M-40 – M-42)
+## 3. Wire protocol v3 (M-40 – M-42)
 
-`MOBA_PROTOCOL_VERSION = 2`. Binary WebSocket frames, postcard encoding of:
+`MOBA_PROTOCOL_VERSION = 3`. Binary WebSocket frames, postcard encoding of:
 
 ```text
 ClientMsg = Hello { protocol: u16, name: String (≤ 24 chars, no control chars) }
@@ -37,10 +37,12 @@ ServerMsg = Welcome { protocol, seat, seed, tick_hz }
 MobaIntention = BuyTroop { slot: u8, to } | Reroll | ToggleLock { slot: u8 } | Upgrade
               | MoveCommander { to: Pos(mm) } | CommanderAuto  // reserved, always rejected (M-65)
 PrivateView   = { seat, gold, essence, tier, troops, destination,
-                  offers: [UnitKind; 3] (1v1 champions), slot_rules: [u8; 3], locked: u8 }
+                  offers: [UnitKind; 5] (1v1 champions), slot_rules: [u8; 5], locked: u8 }
 ```
 
-- Protocol v2 also removes avatar fields from SeatView and PrivateView;
+- Protocol v3 restores five offers/masks, slots 0–2 Role-filtered and
+  slots 3–4 all Archetypes. It rejects v1/v2 clients.
+- Protocol v2 previously removed avatar fields from SeatView and PrivateView;
   SeatView now contains human/kills/deaths. MoveCommander/CommanderAuto,
   UnitKind::Commander and the old avatar Event tags keep their original
   discriminants and are never applied/spawned/emitted (M-65).
@@ -55,7 +57,7 @@ PrivateView   = { seat, gold, essence, tier, troops, destination,
   mille, `attacked` marks an attack or heal on that tick.
 
 Territory revision (owner, 2026-11-03): M-67–M-69 change the visibility
-contract, not the v2 frame schema. Every surviving structure is still in
+contract, not the frame schema. Every surviving structure is still in
 every Team World, so conquered Tower circles can be reconstructed from
 public Tower sites without transmitting hidden units or new client claims.
 Core territory scenarios are in `tests/contract_vision_territory.rs`.
@@ -81,6 +83,7 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 | `m17_upgrade_spends_essence_and_caps_at_max_tier` | M-17 |
 | `m19_shop_offers_follow_the_1v1_rules_with_locks_and_reroll` | M-19 |
 | `m20_role_slots_only_offer_the_role_archetypes` | M-19/M-20 |
+| `m20_five_cards_keep_three_role_slots_and_two_full_pool_slots` | M-19/M-20 five-slot revision |
 | `m60_each_camp_spawns_its_kind` | M-60 |
 | `m61_monsters_stay_passive_until_hit` | M-61 |
 | `m62_leashed_monsters_heal_home` | M-62 |

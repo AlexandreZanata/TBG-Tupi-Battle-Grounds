@@ -54,7 +54,7 @@ owner-approved phase (see the P76 backlog).
 
 ## 4. Network model
 
-- One WebSocket per player at `/moba/ws`; binary postcard frames, protocol v2.
+- One WebSocket per player at `/moba/ws`; binary postcard frames, protocol v3.
 - Handshake: client `Hello{protocol}` within 5 s → server `Welcome{seat}`.
 - Per tick the room encodes **two** filtered `World` frames (one per Team,
   quantised to centi-units and HP per mille) and shares each only with that
@@ -87,7 +87,7 @@ owner-approved phase (see the P76 backlog).
   centre) and an orthographic minimap camera drawn into the HUD frame's
   viewport.
 - `hud`: 1920×1080 design grid scaled by window height, in the 1v1 battle
-  layout (score plates and round clock on top; resource strip and three role-locked
+  layout (score plates and round clock on top; resource strip and five
   Shop cards at the bottom; Destination and player card beside them).
 - `input`: UI hit-testing, purchase/lock/reroll/upgrade hotkeys and
   per-purchase Destination selection. Left drag on uncovered map ground
@@ -103,7 +103,7 @@ Both modes share one roster (owner request, 2026-11-03):
 - **Rules:** `tbg-moba-core` turns each `tbg_core::UnitKind` into a MOBA
   Troop from its 1v1 `UnitDef` (HP, damage, interval, range, speed × 4,
   heal, splash, Energy cost × 6 Gold) and draws Shop offers from
-  `tbg_core::types::FULL_POOL` with the three role-locked MOBA slots and the 1v1 lock/redraw rules.
+  `tbg_core::types::FULL_POOL` with the five MOBA slots (three role-filtered, two open) and the 1v1 lock/redraw rules.
 - **Figures:** `client-moba/src/main.rs` compiles
   `crates/tbg-client/src/art/mod.rs` as its own `art` module (`#[path]`),
   plus the 1v1 `vfx/impacts.rs` and `vfx/shots.rs` under a small runtime in
@@ -143,7 +143,7 @@ VPS is not touched until the owner asks.
 
 A Seat is an economic/strategic player, never a unit. Removed Commander
 spawning/brains, XP, personal respawn/fountain and manual movement handlers.
-Legacy wire variants are reserved and rejected; protocol v2 prevents old
+Legacy wire variants are reserved and rejected; protocol v3 prevents old
 clients from joining silently. Gold/Essence and Troop Upgrade tiers remain.
 Troop kills feed the public score/K/D without exposing hidden unit identity
 or coordinates; last-hit card-price bounties are unchanged.

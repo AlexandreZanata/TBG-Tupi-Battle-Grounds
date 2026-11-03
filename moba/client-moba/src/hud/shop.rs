@@ -1,5 +1,5 @@
 //! Bottom of the screen in the 1v1 battle layout: the framed resource strip
-//! over the three role-locked Shop cards (same frame, portraits, texts and lock as the
+//! over the five Shop cards (three role-filtered and two unrestricted) (same frame, portraits, texts and lock as the
 //! 1v1 cards), the Troop Destination and the player card.
 
 use bevy::prelude::*;
@@ -469,6 +469,7 @@ fn cards(
         let value = match *card {
             Card::Name(i) => def(i).name.to_string(),
             Card::Role(i) => format!("{:?}", def(i).archetype),
+            Card::Rules(i) if i >= content::ROLE_OFFERS => "Any Archetype".to_string(),
             Card::Rules(i) => {
                 use tbg_core::types::Archetype;
                 [

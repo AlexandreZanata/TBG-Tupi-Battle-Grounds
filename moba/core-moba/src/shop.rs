@@ -1,4 +1,4 @@
-//! Three deterministic role-locked Shop slots, purchase redraws, locks and rerolls (M-19/M-20).
+//! Five deterministic Shop slots: three role-filtered, two open; distinct draws, locks and rerolls.
 
 use crate::content::OFFERS;
 use crate::rng::Rng;
@@ -26,7 +26,7 @@ pub fn redraw(
                     && !(0..OFFERS).any(|j| (held(j) || j < i) && result[j] == *kind)
             })
             .collect();
-        // M-20's fixed sets always contain more than three champions.
+        // M-20's fixed sets always contain more than five champions.
         let j = rng.below(candidates.len() as u32) as usize;
         candidates.swap(0, j);
         result[i] = candidates[0];

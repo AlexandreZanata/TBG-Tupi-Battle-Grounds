@@ -1369,3 +1369,11 @@ loss removes its temporary vision, while a Tower clear persists until a
 new match. Coverage includes both Teams, river boundary, all Tower tiers,
 scout movement/death and known structure HP/camp timers/projectiles.
 Linux runtime/pixel/motion observations pending; Windows/web pending (P81).
+
+## P77 G — restored five-card Shop (2026-11-03)
+
+Original 166×225 five-card geometry, 8 px gaps and centred 862 px resource
+strip; three Role captions and two unrestricted captions; hotkeys 1–5.
+Destination sits to the left of the row, restoring the original five-card
+layout. Shared across desktop clients; Linux, Windows/web observations
+pending. Existing champion movement/animations unchanged by the Shop.

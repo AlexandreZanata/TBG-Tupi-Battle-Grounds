@@ -71,8 +71,8 @@ impl Lang {
             Key::Towers => ("Torres", "Towers"),
             Key::Kills => ("Abates", "Kills"),
             Key::Hint => (
-                "Carta ou 1–3: comprar e enviar · Z X C V: destino · R: reroll · Arraste com o botão esquerdo: mover câmera · Minimap: navegar · Espaço: base",
-                "Card or 1–3: buy and send · Z X C V: destination · R: reroll · Left drag: pan camera · Minimap: navigate · Space: base",
+                "Carta ou 1–5: comprar e enviar · Z X C V: destino · R: reroll · Arraste com o botão esquerdo: mover câmera · Minimap: navegar · Espaço: base",
+                "Card or 1–5: buy and send · Z X C V: destination · R: reroll · Left drag: pan camera · Minimap: navigate · Space: base",
             ),
             Key::Victory => ("Vitória!", "Victory!"),
             Key::Defeat => ("Derrota", "Defeat"),

@@ -497,6 +497,20 @@ and `cargo test --locked -p tbg-moba-server --test room m52 -- --test-threads=1`
 under the shared nonblocking lock and two-job policy. Windows/web coverage
 remains pending; no visual parity or full verification is claimed.
 
+### Five-card revision (owner, 2026-11-03)
+
+Restored the original five-card row and hotkeys 1–5. Slots 1–3 use the
+Role's allowed Archetypes; slots 4–5 use all Archetypes from the full
+roster. Locks, rerolls and purchases keep all five offers distinct. Protocol
+v3 carries five offers and masks. Updated M-19/M-20 and their existing
+boundary test; added many-draw checks proving both open slots draw outside
+the Role and that a locked fifth card survives a fourth-card purchase.
+Formatting and whitespace pass; focused compilation/install and runtime
+will follow the champion presentation/ability work in this request.
+Queue `cargo test --locked -p tbg-moba-core --test contract_moba m20 -- --test-threads=1`
+at consolidation, under the shared lock with two Cargo jobs. No tests or
+extra platform builds ran on this front.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 1v1 champion abilities and Evolutions in 5v5 (automatic, no Commander kit/orders) ·

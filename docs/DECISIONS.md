@@ -3530,3 +3530,10 @@ after home Tower losses. This is the owner's custom rule; no claim of exact
 League of Legends gameplay parity is made. The server still omits hidden
 units/events and owns combat. Clients derive the same territory from the
 shared map and public standing Towers; protocol v2's schema is unchanged.
+
+
+**D-112 fourth amendment (owner, 2026-11-03, P77 / M-19–M-20).**
+Restore the original five-card layout. Slots 1–3 draw only the player's Role
+Archetypes; slots 4–5 draw from the full shared roster. All five remain
+distinct across purchase/reroll/locks; destinations remain unrestricted.
+Protocol v3 advertises the new five-offer/five-mask PrivateView schema.

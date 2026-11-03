@@ -40,7 +40,7 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
 | `Destination` | Where a purchased Troop goes: a `Lane` or the `Jungle` ("Destino da Tropa"). |
 | `Commander` | Reserved P76 protocol term only. There is no player avatar or Commander in an active match (M-65). |
 | `Troop` | A 1v1 champion (`tbg_core::UnitKind`) bought in the `Shop` and sent to a `Destination`. |
-| `Shop` | Three role-locked offers per player drawn from the 1v1 online pool, with locks and a paid reroll, as in the 1v1 game. |
+| `Shop` | Five offers per player: three role-filtered and two unrestricted drawn from the 1v1 online pool, with locks and a paid reroll, as in the 1v1 game. |
 | `Minion` | Free lane unit spawned in `Wave`s by each Stronghold. |
 | `Wave` | Three melee + two ranged Minions per lane, per team, every 30 s. |
 | `Camp` | A jungle pit of Wolves, Golems, Jaguar or Frogs (M-60). |
@@ -83,7 +83,7 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
 
 ## 5. Economy, shop and progression
 
-- **M-10** Clicking a Shop card (or pressing 1–3) buys that champion for its
+- **M-10** Clicking a Shop card (or pressing 1–5) buys that champion for its
   card price and sends it to the chosen Destination; insufficient Gold is
   rejected. Price = the champion's 1v1 Energy cost × 6 Gold.
 - **M-18** A champion keeps its 1v1 HP, damage, attack interval and range
@@ -93,7 +93,7 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
   ally in range instead of attacking; champions with a 1v1 `splash` also hit
   enemies around their target for 50 %. 1v1 abilities and Evolutions are
   not active in 5v5 yet (P78).
-- **M-19** Shop: three distinct offers from the role-filtered 1v1 online pool, drawn from
+- **M-19** Shop: five distinct offers from the 1v1 online pool, drawn from
   each seat's own seeded stream (1v1 BR-S01/S05); every purchase redraws all
   unlocked offers (BR-S04); locking a slot is free and keeps it through
   redraws (buying it unlocks it); a reroll redraws the unlocked offers for 6
@@ -112,12 +112,14 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
 - **M-16** Team Gold on the scoreboard is the sum of Gold earned.
 - **M-17** Upgrade costs `15 + 10 × tier` Essence, up to tier 5; each tier
   gives +10 % HP and damage to Troops bought afterwards.
-- **M-20** Proposed: each of the three Shop slots derives its allowed
+- **M-20** Proposed: the first three Shop slots derive their allowed
   Archetypes from the Role: Top Dps/Tank, Mid Control/Dps, Bot Ranged/Dps,
   Support Support/Control, Jungle Dps/Tank/Ranged. Unlocked slots draw in
   slot order, excluding locked champions and earlier draws. The wire sends
   a bitmask per slot (Tank=1, Dps=2, Support=4, Ranged=8, Control=16).
-  Category selection is reserved for a future intention. The former M-20
+  The last two slots draw from all Archetypes in the full pool. Offers stay
+  distinct across all five slots, including locks. Role never restricts a
+  purchase's Destination. Category selection is reserved for a future intention. The former M-20
   avatar XP/level clause is retired by the owner's M-65 revision.
 - **M-21/M-22** Retired by M-65: no avatar respawn or fountain healing.
 
@@ -143,8 +145,8 @@ Waves: first at 0:10, then every 30 s. Camps: first at 0:20, per-kind respawn af
   ability aiming or movement skill is required. There are no avatar
   levels, XP, assists, respawns or personal fountain. Essence still buys
   Troop Upgrade tiers. Legacy MoveCommander/CommanderAuto wire variants
-  return ManualControlDisabled with no state mutation. Protocol v2 rejects
-  old v1 handshakes; old variant positions remain reserved.
+  return ManualControlDisabled with no state mutation. Protocol v3 rejects
+  old v1/v2 handshakes; old variant positions remain reserved.
 - **M-66** Proposed: hold the left button on uncovered map ground and drag
   to pan the camera, keeping the grabbed ground point under the cursor.
   A drag starting on a HUD card/control/overlay cannot move the camera.

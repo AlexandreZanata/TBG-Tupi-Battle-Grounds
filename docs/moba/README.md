@@ -30,9 +30,10 @@ tbg-moba-server & tbg-moba --online    # local room; more clients take bot seats
 ```
 
 Controls: choose a Destination (**Z X C V** = Top/Mid/Bot/Jungle), then
-click a Shop card (or **1–3**) to buy and send that champion. Choose another
+click a Shop card (or **1–5**) to buy and send that champion. Choose another
 Destination before the next purchase to split champions across lanes.
-The Role limits Shop categories, never where a Troop can go. The card lock
+Cards 1–3 draw from the Role categories; cards 4–5 draw from the entire
+roster. All five are distinct. The Role never limits where a Troop can go. The card lock
 keeps it through redraws; **R** rerolls and **U** upgrades future Troops.
 Movement and combat are automatic; there is no player avatar or manual
 unit order. **Left-drag empty map ground** pans the camera; left-click/drag
