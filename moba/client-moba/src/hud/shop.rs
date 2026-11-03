@@ -428,6 +428,7 @@ fn readouts(feed: Res<Feed>, lang: Res<Lang>, mut texts: Query<(&Readout, &mut T
 #[allow(clippy::type_complexity)] // one card's image, texts, lock and outline
 fn cards(
     feed: Res<Feed>,
+    lang: Res<Lang>,
     assets: Res<AssetServer>,
     mut images: Query<(&Card, &mut ImageNode)>,
     mut texts: Query<(&Card, &mut Text)>,
@@ -469,7 +470,9 @@ fn cards(
         let value = match *card {
             Card::Name(i) => def(i).name.to_string(),
             Card::Role(i) => format!("{:?}", def(i).archetype),
-            Card::Rules(i) if i >= content::ROLE_OFFERS => "Any Archetype".to_string(),
+            Card::Rules(i) if i >= content::ROLE_OFFERS => {
+                lang.t(crate::i18n::Key::AnyArchetype).to_string()
+            }
             Card::Rules(i) => {
                 use tbg_core::types::Archetype;
                 [

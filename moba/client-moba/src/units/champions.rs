@@ -6,19 +6,20 @@ use tbg_core::types::Archetype;
 use tbg_moba_core::{Champion, UnitKind};
 
 use super::UnitVisual;
-use crate::art::anim::{Animator, Clip, ClipEvent};
-use crate::art::kits::Attack;
+use crate::art::anim::{Animator, Clip};
+use crate::art::melee::{lunge_distance, strike_profile_for_unit};
 use crate::art::{figure, presentation, FigureLibrary};
-use crate::vfx::impacts::{self, Area};
-use crate::vfx::{shots, VfxAssets};
 use crate::visuals::CORPSE_SECS;
 
 /// Figure scale on the MOBA map (its lanes are far longer than the BattleLine).
-const TROOP_SCALE: f32 = 3.0;
+const TROOP_SCALE: f32 = tbg_moba_core::content::CHAMPION_FIGURE_SCALE as f32;
 
 /// A figure finishing its Death clip after the unit left the snapshot.
 #[derive(Component)]
-pub struct Dying(f32);
+pub struct Dying {
+    elapsed: f32,
+    duration: f32,
+}
 
 /// The 1v1 champion a MOBA unit is drawn as, if any.
 pub fn champion_of(kind: UnitKind) -> Option<Champion> {
@@ -77,113 +78,71 @@ pub fn attack_clip(kind: Champion) -> Clip {
 pub fn plugin(app: &mut App) {
     app.add_systems(
         PostUpdate,
-        (face, strikes)
-            .chain()
-            .after(bevy::transform::TransformSystems::Propagate),
+        (super::attacks::release, super::attacks::stomp)
+            .after(bevy::transform::TransformSystems::Propagate)
+            .run_if(in_state(crate::app::Screen::Match)),
     )
     .add_systems(Update, corpses);
 }
 
-/// Figures face along the unit's heading (+Z forward in the 1v1 rig).
-fn face(
-    units: Query<(&UnitVisual, &Animator)>,
+/// The body faces before rig evaluation and weapon-joint propagation.
+pub(super) fn face(
+    time: Res<Time>,
+    mut units: Query<(&mut UnitVisual, &Animator, &Transform)>,
     mut bodies: Query<&mut Transform, Without<UnitVisual>>,
 ) {
-    for (v, a) in &units {
-        if let Ok(mut body) = bodies.get_mut(a.figure) {
-            body.rotation = Quat::from_rotation_y(v.yaw + std::f32::consts::PI);
-        }
+    for (mut v, a, root) in &mut units {
+        let Ok(mut body) = bodies.get_mut(a.figure) else {
+            continue;
+        };
+        let (clip, at) = a.clip_time();
+        let profile = strike_profile_for_unit(a.kind(), a.form.0, a.form.1);
+        let lunge = if clip == Clip::AttackMelee
+            && a.aim_at.is_some_and(|p| {
+                p.xz().distance(root.translation.xz()) < super::attacks::REACH * TROOP_SCALE
+            }) {
+            lunge_distance(at, 0.30, 0.50, profile.lunge)
+        } else {
+            0.0
+        };
+        body.rotation = Quat::from_rotation_y(v.yaw);
+        v.recoil.update(time.delta_secs());
+        body.translation = body.rotation * Vec3::Z * lunge + v.recoil.offset_vec3();
     }
 }
 
-/// Fires each kit's shot on Release and lands its melee impact on Strike,
-/// from the weapon joint, like the 1v1 battle presentation.
-fn strikes(
-    mut commands: Commands,
-    vfx: Res<VfxAssets>,
-    animators: Query<&Animator>,
-    globals: Query<&GlobalTransform>,
-) {
-    for a in &animators {
-        let Some(kit) = a.kit else { continue };
-        let (t, b) = a.form;
-        let joint = |node: crate::art::rig::Node| globals.get(a.joints[node.index()]).ok();
-        let release = a.events.contains(&ClipEvent::Release);
-        let strike = a.events.contains(&ClipEvent::Strike);
-        let to = a.aim_at;
-        match kit.attack {
-            Attack::Shot {
-                from, muzzle, shot, ..
-            } if release => {
-                if let (Some(g), Some(to)) = (joint(from), to) {
-                    shots::fire(
-                        &mut commands,
-                        &vfx,
-                        shot(t, b),
-                        g.transform_point(muzzle(t, b)),
-                        to,
-                        Area::default(),
-                    );
-                }
-            }
-            Attack::CountedShot {
-                from,
-                muzzle,
-                normal,
-                ..
-            } if release => {
-                if let (Some(g), Some(to)) = (joint(from), to) {
-                    shots::fire(
-                        &mut commands,
-                        &vfx,
-                        normal,
-                        g.transform_point(muzzle(t, b)),
-                        to,
-                        Area::default(),
-                    );
-                }
-            }
-            Attack::TwinShot {
-                hands,
-                muzzle,
-                shot,
-                ..
-            } if release => {
-                if let (Some(g), Some(to)) = (joint(hands[a.attack_variant()]), to) {
-                    shots::fire(
-                        &mut commands,
-                        &vfx,
-                        shot,
-                        g.transform_point(muzzle),
-                        to,
-                        Area::default(),
-                    );
-                }
-            }
-            Attack::Melee { from, tip, impact } if strike => {
-                if let Some(g) = joint(from) {
-                    let at = to.unwrap_or_else(|| g.transform_point(tip(t, b)));
-                    impacts::land(&mut commands, &vfx, impact(t, b), at, Area::default());
-                }
-            }
-            _ => {}
-        }
-    }
-}
-
-/// Starts the Death clip of a figure whose unit just died.
+/// Only the server's death event starts a corpse; leaving sight removes the mirror immediately.
 pub fn die(commands: &mut Commands, entity: Entity, animator: &mut Animator) {
     animator.play(Clip::Death);
-    commands
-        .entity(entity)
-        .insert(Dying(Clip::Death.duration() + CORPSE_SECS));
+    commands.entity(entity).insert(Dying {
+        elapsed: 0.0,
+        duration: animator.duration(Clip::Death) + CORPSE_SECS,
+    });
 }
 
-fn corpses(mut commands: Commands, time: Res<Time>, mut dying: Query<(Entity, &mut Dying)>) {
-    for (entity, mut left) in &mut dying {
-        left.0 -= time.delta_secs();
-        if left.0 <= 0.0 {
+fn corpses(
+    mut commands: Commands,
+    time: Res<Time>,
+    mut dying: Query<(Entity, &mut Dying, &Animator, &Transform)>,
+    mut body: Query<&mut Transform, Without<Dying>>,
+) {
+    for (entity, mut death, a, root) in &mut dying {
+        death.elapsed += time.delta_secs();
+        if death.elapsed >= death.duration {
             commands.entity(entity).despawn();
+            continue;
         }
+        if a.kit.is_none() {
+            if let Ok(mut t) = body.get_mut(a.figure) {
+                let (_, yaw, _) = t.rotation.to_euler(EulerRot::XYZ);
+                *t = crate::art::death::evaluate(
+                    tbg_core::content::def(a.kind()).faction,
+                    death.elapsed,
+                    a.plan.scale,
+                    yaw,
+                );
+            }
+        }
+        let _ = root;
     }
 }

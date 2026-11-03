@@ -24,7 +24,7 @@ pub enum Brain {
 }
 
 /// Who dealt the last hit, for bounties.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Credit {
     pub side: Side,
     pub seat: Option<Seat>,
@@ -49,6 +49,7 @@ pub struct Unit {
     /// Tick of the last attack fired, so views can animate it.
     pub last_attack: u32,
     pub last_hit: Option<Credit>,
+    pub fx: crate::champions::state::Fx,
 }
 
 impl Unit {
@@ -142,6 +143,33 @@ pub enum Event {
         tier: u8,
     },
     Ended(Outcome),
+    CombatTrace {
+        kind: crate::Champion,
+        unit: u32,
+        from: Pos,
+        to: Pos,
+    },
+    /// A visible combat removal, distinct from leaving team sight.
+    UnitHit {
+        unit: u32,
+        from: Pos,
+        at: Pos,
+    },
+    UnitDied {
+        unit: u32,
+        kind: UnitKind,
+        side: Side,
+        at: Pos,
+    },
+    ChampionAbility {
+        unit: u32,
+        kind: crate::Champion,
+        side: Side,
+        target: u32,
+        at: Pos,
+        radius: i32,
+        started: bool,
+    },
     /// Public Troop kill counts without hidden champion identity or coordinates.
     TroopKilled {
         victim: Seat,
@@ -157,6 +185,7 @@ pub struct MobaMatch {
     pub rng: Rng,
     pub next_id: u32,
     pub units: Vec<Unit>,
+    pub barrels: Vec<crate::champions::barrels::Barrel>,
     pub players: Vec<Player>,
     pub camps: [Camp; map::CAMP_COUNT],
     /// Champion Troop kills per team (M-14/M-65).
@@ -190,6 +219,7 @@ impl MobaMatch {
             rng: Rng::new(seed),
             next_id: 1,
             units: Vec::with_capacity(512),
+            barrels: Vec::new(),
             players: vec![player; SEATS],
             camps: [Camp {
                 respawn_at: Some(content::secs(20)),
@@ -270,7 +300,11 @@ impl MobaMatch {
             cooldown: 0,
             last_attack: 0,
             last_hit: None,
+            fx: Default::default(),
         });
+        if let Some(unit) = self.units.last_mut() {
+            crate::champions::initialise(unit);
+        }
         id
     }
 
@@ -289,7 +323,9 @@ impl MobaMatch {
     pub fn troops_alive(&self, seat: Seat) -> u8 {
         self.units
             .iter()
-            .filter(|u| u.owner == Some(seat) && matches!(u.kind, UnitKind::Troop(_)))
+            .filter(|u| {
+                u.owner == Some(seat) && u.fx.summon == 0 && matches!(u.kind, UnitKind::Troop(_))
+            })
             .count()
             .min(u8::MAX as usize) as u8
     }
@@ -328,6 +364,22 @@ impl MobaMatch {
                 u.target as i64,
             ] {
                 mix(v);
+            }
+        }
+        for b in &self.barrels {
+            for v in [
+                b.source.id as i64,
+                b.at.x as i64,
+                b.at.y as i64,
+                b.remaining as i64,
+            ] {
+                mix(v);
+            }
+        }
+        // Ability timers, payloads and attribution are authoritative replay state.
+        for u in &self.units {
+            for byte in crate::protocol::encode(&u.fx) {
+                mix(i64::from(byte));
             }
         }
         for p in &self.players {

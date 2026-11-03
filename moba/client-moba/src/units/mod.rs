@@ -9,7 +9,9 @@ use tbg_moba_core::types::Side;
 use tbg_moba_core::UnitKind;
 
 use crate::app::Screen;
+use crate::art::aim::AimTarget;
 use crate::art::anim::{Animator, Clip};
+use crate::art::melee::HitRecoil;
 use crate::art::FigureLibrary;
 use crate::link::Feed;
 use crate::palette;
@@ -17,10 +19,15 @@ use crate::scene::fog::{FogMask, FogMaterial, FogTexture};
 use crate::scene::terrain::{height, lane_distance, LANE_HALF_WIDTH};
 use crate::scene::{to_world, Painted};
 
+// This adapter provides the same visual facts expected by the BattleLine release system.
+#[path = "../../../../crates/tbg-client/src/visuals/attacks.rs"]
+mod attacks;
 pub mod champions;
+mod cues;
 mod fx;
 pub mod models;
 mod monsters;
+mod status;
 
 /// Render layer seen only by the minimap camera.
 pub const MINIMAP_LAYER: usize = 2;
@@ -36,12 +43,28 @@ pub struct UnitVisual {
     target: u32,
     pub yaw: f32,
     lunge: f32,
+    still: f32,
+    effect: tbg_moba_core::protocol::ChampionView,
+    aim: Option<(AimTarget, Vec3)>,
+    range: f32,
+    hold: f32,
+    splash: f32,
+    secondary_shot: Option<Vec3>,
+    recoil: HitRecoil,
+    dying: bool,
+    flash_applied: bool,
     age: f32,
     flash: f32,
     /// Height of the health bar above the feet.
     bar_height: f32,
     bar: Entity,
     fill: Entity,
+}
+
+impl UnitVisual {
+    fn kind(&self) -> tbg_moba_core::Champion {
+        champions::champion_of(self.kind).unwrap_or(tbg_moba_core::Champion::Shieldbearer)
+    }
 }
 
 #[derive(Component)]
@@ -74,14 +97,23 @@ pub fn plugin(app: &mut App) {
         .add_systems(Startup, setup.after(crate::scene::fog::setup))
         .add_systems(
             Update,
-            (sync, structures, animate, bars)
+            (
+                sync,
+                cues::apply,
+                structures,
+                animate,
+                champions::face,
+                bars,
+            )
                 .chain()
+                .before(crate::art::anim::animate)
                 .run_if(in_state(Screen::Match)),
         )
         .add_systems(OnExit(Screen::Match), clear);
     fx::plugin(app);
     champions::plugin(app);
     monsters::plugin(app);
+    status::plugin(app);
 }
 
 fn unlit(materials: &mut Assets<StandardMaterial>, color: Color) -> Handle<StandardMaterial> {
@@ -216,15 +248,48 @@ fn sync(
                 if let (Some(mut a), Some(champion)) = (animator, champions::champion_of(u.kind)) {
                     // The same cues as the 1v1 battle: attack clip, flinch on a hit.
                     if u.attacked {
+                        a.observe_counter(u.champion.counter);
                         a.play(champions::attack_clip(champion));
                     } else if hp < v.hp {
                         a.play_if_free(Clip::Hit);
                     }
+                    if !matches!(
+                        a.clip_time().0,
+                        Clip::AttackMelee | Clip::AttackRanged | Clip::Cast
+                    ) {
+                        a.observe_counter(u.champion.counter);
+                    }
+                    a.set_reduction(u.champion.reduction);
+                    let f = u.champion;
+                    a.observe_special(
+                        f.ready_in == 0,
+                        (f.cast_left > 0).then_some(f.cast_left),
+                        f.cast_windup,
+                        f.rooted,
+                    );
+                    if u.attacked {
+                        v.aim = positions.get(&u.target).map(|p| {
+                            let target = if world
+                                .units
+                                .iter()
+                                .any(|w| w.id == u.target && w.kind.structure())
+                            {
+                                AimTarget::Stronghold(tbg_core::Seat::B)
+                            } else {
+                                AimTarget::Unit(u.target)
+                            };
+                            (
+                                target,
+                                to_world(p.x, p.y, ground_y(*p) + 0.6 * champions::scale(u.kind)),
+                            )
+                        });
+                    }
                 }
+                v.effect = u.champion;
                 v.prev = v.curr;
                 v.curr = pos;
-                if hp < v.hp {
-                    v.flash = 0.16;
+                if hp != v.hp {
+                    v.flash = if hp < v.hp { 0.08 } else { -0.15 };
                 }
                 v.hp = hp;
                 v.target = u.target;
@@ -270,7 +335,11 @@ fn sync(
             continue;
         };
         if let Ok((v, animator)) = visuals.get_mut(entity) {
-            if !crate::scene::fog::point_visible(&feed, v.curr) {
+            if !feed
+                .motion_events
+                .iter()
+                .any(|e| matches!(e, tbg_moba_core::state::Event::UnitDied{unit,..} if *unit==id))
+            {
                 despawn_unit(&mut commands, entity, &visuals);
                 continue;
             }
@@ -332,14 +401,21 @@ fn spawn_unit(
         ))
         .id();
     let yaw = match u.side {
-        Side::Team(tbg_moba_core::Team::Red) => std::f32::consts::PI * 0.75,
-        _ => -std::f32::consts::PI * 0.25,
+        Side::Team(tbg_moba_core::Team::Red) => -std::f32::consts::PI * 0.25,
+        _ => std::f32::consts::PI * 0.75,
     };
     let champion = champions::champion_of(u.kind);
     let scale = champion.map_or(models::scale(u.kind), |_| champions::scale(u.kind));
     let bar_height = champion.map_or(models::bar_height(u.kind), |k| {
         lib.get(k, 0, 0).overhead * scale + 0.5
     });
+    let stats = tbg_moba_core::content::base_stats(u.kind);
+    let hold = champion
+        .and_then(|k| tbg_core::content::def(k).on_hit)
+        .map_or(0.0, |hit| match hit {
+            tbg_core::OnHit::Root { ticks } => f32::from(ticks) / tbg_core::content::TICK_HZ as f32,
+            _ => 0.0,
+        });
     let id = commands
         .spawn((
             Transform::from_translation(to_world(pos.x, pos.y, ground_y(pos)))
@@ -355,6 +431,16 @@ fn spawn_unit(
                 target: u.target,
                 yaw,
                 lunge: 0.0,
+                still: 0.15,
+                effect: u.champion,
+                aim: None,
+                range: stats.range as f32 / 1000.0,
+                hold,
+                splash: stats.splash as f32 / 1000.0,
+                secondary_shot: None,
+                recoil: HitRecoil::default(),
+                dying: false,
+                flash_applied: false,
                 age: 0.0,
                 flash: 0.0,
                 bar_height,
@@ -398,6 +484,9 @@ fn spawn_unit(
 }
 
 fn animate(
+    mut commands: Commands,
+    lib: Res<FigureLibrary>,
+    vfx: Res<crate::vfx::VfxAssets>,
     feed: Res<Feed>,
     time: Res<Time>,
     shared: Res<Shared>,
@@ -416,7 +505,10 @@ fn animate(
     let alpha = feed.alpha(time.elapsed_secs_f64());
     let dt = time.delta_secs();
     let t = time.elapsed_secs();
-    let targets: HashMap<u32, Vec2> = units.iter().map(|(v, ..)| (v.id, v.curr)).collect();
+    let targets: HashMap<u32, (Vec2, Side)> = units
+        .iter()
+        .map(|(v, ..)| (v.id, (v.prev.lerp(v.curr, alpha), v.side)))
+        .collect();
     for (mut v, mut transform, animator, material) in &mut units {
         if v.kind.structure() {
             continue;
@@ -428,15 +520,18 @@ fn animate(
         } else {
             targets
                 .get(&v.target)
-                .map(|t| *t - v.curr)
+                .map(|(t, _)| *t - v.curr)
                 .filter(|d| d.length_squared() > 1e-4)
         };
         if let Some(d) = facing {
-            // Map (x, y-north) → Bevy (x, -z); figures face -Z.
-            let goal = (-d.x).atan2(d.y);
-            let diff = (goal - v.yaw + std::f32::consts::PI).rem_euclid(std::f32::consts::TAU)
-                - std::f32::consts::PI;
-            v.yaw += diff * (dt * 12.0).min(1.0);
+            // The shared rigs face +Z; the map's north is -Z.
+            let goal = d.x.atan2(-d.y);
+            v.yaw = crate::art::aim::turn_toward(
+                v.yaw,
+                goal,
+                dt * crate::art::aim::MAX_SLEW_RATE,
+                crate::art::aim::DEAD_ZONE,
+            );
         }
         v.lunge = (v.lunge - dt * 5.0).max(0.0);
         let walking = step.length_squared() > 1e-4;
@@ -445,18 +540,60 @@ fn animate(
         } else {
             0.0
         };
-        let forward =
-            Vec3::new(-v.yaw.sin(), 0.0, -v.yaw.cos()) * (v.lunge * (1.0 - v.lunge) * 1.2);
+        let forward = Vec3::new(v.yaw.sin(), 0.0, v.yaw.cos()) * (v.lunge * (1.0 - v.lunge) * 1.2);
         if let Some(mut a) = animator {
-            // The 1v1 rig walks, faces and aims by itself (champions.rs).
-            a.aim_at = targets
-                .get(&v.target)
-                .map(|t| to_world(t.x, t.y, ground_y(*t) + 1.0));
-            transform.translation = to_world(pos.x, pos.y, ground_y(pos));
+            let chest = 0.6 * champions::scale(v.kind);
+            let aim = targets.get(&v.target);
+            a.aim_at = aim
+                .map(|(p, _)| to_world(p.x, p.y, ground_y(*p) + chest))
+                .or_else(|| v.aim.map(|(_, p)| p));
+            a.aim_is_ally = aim.is_some_and(|(_, side)| *side == v.side);
+            let mut at = to_world(pos.x, pos.y, ground_y(pos));
+            if let Some((mount, _)) = targets.get(&v.effect.carrier) {
+                let hip = crate::art::rig::rest(
+                    crate::art::rig::Node::Body(crate::art::rig::Joint::Hips),
+                    &a.plan,
+                )
+                .y * a.plan.scale;
+                at = to_world(
+                    mount.x,
+                    mount.y,
+                    ground_y(*mount)
+                        + (crate::art::kits::saddle_height(0) - hip) * champions::scale(v.kind),
+                );
+            }
+            v.still = if transform.translation.xz().distance_squared(at.xz()) > 0.0004_f32.powi(2) {
+                0.0
+            } else {
+                v.still + dt
+            };
+            a.set_base(if v.still < 0.15 && v.effect.carrier == 0 {
+                Clip::Walk
+            } else {
+                Clip::Idle
+            });
+            transform.translation = at;
+            let flash = v.flash;
+            if flash != 0.0 && !v.flash_applied {
+                let mat = vfx.champion_tint(flash > 0.0);
+                for j in a.joints {
+                    commands.entity(j).try_insert(MeshMaterial3d(mat.clone()));
+                }
+                v.flash_applied = true;
+            }
+            v.flash = flash.signum() * (flash.abs() - dt).max(0.0);
+            if v.flash == 0.0 && v.flash_applied {
+                for j in a.joints {
+                    commands
+                        .entity(j)
+                        .try_insert(MeshMaterial3d(lib.material.clone()));
+                }
+                v.flash_applied = false;
+            }
             continue;
         }
         transform.translation = to_world(pos.x, pos.y, ground_y(pos) + bob) + forward;
-        transform.rotation = Quat::from_rotation_y(v.yaw);
+        transform.rotation = Quat::from_rotation_y(v.yaw + std::f32::consts::PI);
         if let UnitKind::Neutral(kind) = v.kind {
             v.age += dt;
             v.flash = (v.flash - dt).max(0.0);

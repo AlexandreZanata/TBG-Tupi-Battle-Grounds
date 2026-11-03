@@ -20,6 +20,7 @@ impl MobaMatch {
         upkeep::income(self);
         spawn::waves(self);
         spawn::camps(self);
+        crate::champions::tick(self);
         let positions = self.units.iter().map(|u| u.pos).collect::<Vec<_>>();
         self.grid.rebuild(positions.into_iter());
         let engaged = combat::fight(self);

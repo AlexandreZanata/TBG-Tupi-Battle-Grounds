@@ -1,8 +1,9 @@
 //! Target selection, attacks, heals and their simultaneous resolution (M-06..M-09).
 
+use crate::champions::{self, state::Cast};
 use crate::content;
 use crate::map;
-use crate::state::{Brain, Credit, MobaMatch, Unit};
+use crate::state::{Brain, MobaMatch, Unit};
 use crate::types::{Lane, Side, Team, TowerTier, UnitKind};
 
 /// Which structures may be damaged this tick (M-08).
@@ -46,102 +47,144 @@ impl Vulnerability {
     }
 }
 
-/// Runs every unit's combat decision on the start-of-tick state, then applies
-/// all damage at once. Returns which slots stood still to fight.
-// Slot loops: each step reads other units while writing this one.
-#[allow(clippy::needless_range_loop)]
+/// Decide each basic before applying the completed batch. The shared windup
+/// drives the same weapon release and contact poses as the BattleLine.
 pub(super) fn fight(m: &mut MobaMatch) -> Vec<bool> {
     let vul = Vulnerability::of(m);
-    let n = m.units.len();
-    let mut engaged = vec![false; n];
-    let mut hits: Vec<(usize, usize, i32)> = Vec::new();
-    let mut heals: Vec<(usize, i32)> = Vec::new();
-    for i in 0..n {
-        let u = &mut m.units[i];
-        u.cooldown = u.cooldown.saturating_sub(1);
-        if !u.alive() || u.stats.damage == 0 {
-            continue;
-        }
-        // Healing champions (1v1 `heal` > 0) mend the most injured ally first.
-        if u.stats.heal > 0 {
-            if let Some(j) = most_injured_ally(m, i) {
-                engaged[i] = true;
-                if m.units[i].cooldown == 0 {
-                    heals.push((j, m.units[i].stats.heal));
-                    let target = m.units[j].id;
-                    let u = &mut m.units[i];
-                    u.cooldown = u.stats.attack_ticks;
-                    u.last_attack = m.tick;
-                    u.target = target;
-                }
-                continue;
-            }
-        }
-        let target = select_target(m, &vul, i);
-        m.units[i].target = target.map_or(0, |j| m.units[j].id);
-        let Some(j) = target else { continue };
-        let (a, b) = (&m.units[i], &m.units[j]);
-        if a.pos.within(b.pos, a.stats.range + b.stats.radius) {
-            engaged[i] = true;
-            if a.cooldown == 0 {
-                let a = &m.units[i];
-                hits.push((i, j, a.stats.damage * (100 + a.power) / 100));
-                let a = &mut m.units[i];
-                a.cooldown = a.stats.attack_ticks;
-                a.last_attack = m.tick;
-            }
-        }
+    let mut hits = Vec::new();
+    let mut engaged = Vec::with_capacity(m.units.len());
+    for i in 0..m.units.len() {
+        engaged.push(decide(m, &vul, i, &mut hits));
     }
-    for (j, amount) in heals {
-        let u = &mut m.units[j];
-        u.hp = (u.hp + amount).min(u.max_hp);
-    }
-    for (i, j, dmg) in hits {
-        land(m, i, j, dmg);
+    for (i, j) in hits {
+        land(m, i, j);
     }
     engaged
 }
-
-fn land(m: &mut MobaMatch, i: usize, j: usize, dmg: i32) {
-    let (splash, center) = (m.units[i].stats.splash, m.units[j].pos);
-    strike(m, i, j, dmg);
-    if splash <= 0 {
+fn decide(
+    m: &mut MobaMatch,
+    vul: &Vulnerability,
+    i: usize,
+    hits: &mut Vec<(usize, usize)>,
+) -> bool {
+    let u = &mut m.units[i];
+    u.cooldown = u.cooldown.saturating_sub(1);
+    if !u.alive() {
+        return true;
+    }
+    if champions::cannot_basic(u, m.tick) {
+        u.fx.basic = None;
+        u.fx.betrayed = false;
+        return true;
+    }
+    if let Some(mut cast) = u.fx.basic {
+        cast.left = cast.left.saturating_sub(1);
+        u.fx.basic = (cast.left > 0).then_some(cast);
+        if cast.left == 0 {
+            if let Some(j) = m.slot(cast.target).filter(|&j| m.units[j].alive()) {
+                hits.push((i, j));
+            }
+        }
+        return true;
+    }
+    let heal = (u.stats.heal > 0)
+        .then(|| most_injured_ally(m, i))
+        .flatten();
+    let cast = champions::control::target(m, &m.units[i]);
+    let special = cast.flatten().and_then(|id| m.slot(id));
+    let target = special.or(heal).or_else(|| select_target(m, vul, i));
+    let id = target.map_or(0, |j| m.units[j].id);
+    let u = &mut m.units[i];
+    if u.fx.target != id && champions::same_target_counter(u) {
+        u.fx.attacks = 0;
+        u.fx.target = id;
+    }
+    u.target = id;
+    let Some(j) = target else { return false };
+    let (a, b) = (&m.units[i], &m.units[j]);
+    if heal.is_none() && special.is_none() && !a.pos.within(b.pos, champions::reach(a, b)) {
+        return false;
+    }
+    if a.cooldown != 0
+        || ((a.stats.damage == 0 || cast.is_some()) && heal.is_none() && special.is_none())
+    {
+        return true;
+    }
+    let betrayal = if heal.is_none() && special.is_none() {
+        champions::control::betrayal(m, a)
+    } else {
+        None
+    };
+    let id = betrayal.unwrap_or(id);
+    let centre = m.unit(id).map_or(b.pos, |u| u.pos);
+    let a = &mut m.units[i];
+    a.cooldown = champions::interval(a, m.tick);
+    a.last_attack = m.tick;
+    a.target = id;
+    a.fx.betrayed = betrayal.is_some();
+    if matches!(a.kind, UnitKind::Troop(_)) {
+        let windup = tbg_core::content::WINDUP;
+        a.fx.basic = Some(Cast {
+            slot: 0,
+            target: id,
+            centre,
+            left: windup,
+            windup,
+        });
+    } else {
+        hits.push((i, j));
+    }
+    true
+}
+fn land(m: &mut MobaMatch, i: usize, j: usize) {
+    let a = m.units[i].clone();
+    let b = m.units[j].clone();
+    if !b.alive() {
         return;
     }
-    // Splash champions also hurt other mobile enemies around the target.
-    let mut around = Vec::new();
-    m.grid.near(center, splash, |k| {
-        let (a, b) = (&m.units[i], &m.units[k]);
+    if champions::control::resolve(m, &a, &b) {
+        return;
+    }
+    if a.fx.betrayed {
+        let base = a.stats.damage * (100 + a.power) / 100;
+        let dmg = champions::before_basic(m, i, j, base);
+        champions::control::betray_hit(m, &a, &b, dmg);
+        return;
+    }
+    if a.side == b.side {
+        champions::healing(m, &a, b.id);
+        return;
+    }
+    let base = a.stats.damage * (100 + a.power) / 100;
+    let dmg = champions::before_basic(m, i, j, base);
+    if champions::flame(m, &a, &b, dmg) {
+        return;
+    }
+    let removed = champions::hurt(m, &a, b.id, dmg);
+    if !b.kind.structure() && b.fx.summon == 0 {
+        champions::feed(m, a.id, &b, removed);
+    }
+    champions::after_basic(m, a.id, b.id);
+    if a.stats.splash <= 0 {
+        return;
+    }
+    let friendly =
+        champions::abilities(&a).contains(&tbg_core::content::Ability::Blast { friendly: true });
+    let mut ids = Vec::new();
+    m.grid.near(b.pos, a.stats.splash, |k| {
+        let v = &m.units[k];
         if k != j
-            && b.alive()
-            && b.mobile()
-            && a.side.hostile(b.side)
-            && b.pos.within(center, splash)
+            && v.alive()
+            && !v.kind.structure()
+            && v.pos.within(b.pos, a.stats.splash)
+            && (champions::enemy(&a, v) || friendly && v.side == a.side)
         {
-            around.push(k);
+            ids.push(v.id);
         }
     });
-    around.sort_unstable();
-    for k in around {
-        strike(m, i, k, dmg * content::SPLASH_PERCENT / 100);
-    }
-}
-
-fn strike(m: &mut MobaMatch, i: usize, j: usize, dmg: i32) {
-    let credit = Credit {
-        side: m.units[i].side,
-        seat: m.units[i].owner,
-    };
-    let attacker_id = m.units[i].id;
-    let t = &mut m.units[j];
-    if !t.alive() {
-        return;
-    }
-    t.hp -= (dmg * (100 - t.stats.armor) / 100).max(1);
-    t.last_hit = Some(credit);
-    // Neutral monsters are passive until hit, then answer the attacker.
-    if matches!(t.brain, Brain::Neutral { .. }) && t.target == 0 {
-        t.target = attacker_id;
+    ids.sort_unstable();
+    for id in ids {
+        champions::hurt(m, &a, id, base * content::SPLASH_PERCENT / 100);
     }
 }
 
@@ -152,6 +195,7 @@ fn most_injured_ally(m: &MobaMatch, i: usize) -> Option<usize> {
     m.grid.near(a.pos, reach, |k| {
         let u = &m.units[k];
         if u.side != a.side
+            || (u.id == a.id && a.kind == UnitKind::Troop(crate::Champion::GustDrummer))
             || !u.alive()
             || !u.mobile()
             || u.hp >= u.max_hp
@@ -169,7 +213,7 @@ fn most_injured_ally(m: &MobaMatch, i: usize) -> Option<usize> {
 
 /// Whether `a` may attack `b` at all right now.
 fn attackable(vul: &Vulnerability, a: &Unit, b: &Unit) -> bool {
-    if !b.alive() || !a.side.hostile(b.side) {
+    if !b.alive() || b.fx.carrier != 0 || !a.side.hostile(b.side) {
         return false;
     }
     // Lane walkers and structures ignore the jungle; jungle Troops hunt it.
@@ -177,7 +221,9 @@ fn attackable(vul: &Vulnerability, a: &Unit, b: &Unit) -> bool {
         return false;
     }
     match b.team() {
-        Some(team) if b.kind.structure() => vul.open(b.kind, team),
+        Some(team) if b.kind.structure() => {
+            champions::can_attack_structure(a) && vul.open(b.kind, team)
+        }
         _ => true,
     }
 }
@@ -216,8 +262,8 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
     } else {
         a.stats.range
     };
-    let mut best: Option<(i64, usize)> = None;
-    m.grid.near(a.pos, sight + 4 * crate::geom::MM, |k| {
+    let mut best: Option<(bool, i64, usize)> = None;
+    m.grid.near(a.pos, sight + 7 * crate::geom::MM, |k| {
         let b = &m.units[k];
         if !attackable(vul, a, b) || !a.pos.within(b.pos, sight + b.stats.radius) {
             return;
@@ -226,9 +272,10 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
             return;
         }
         let d = a.pos.dist2(b.pos);
-        if best.is_none_or(|(bd, bk)| (d, k) < (bd, bk)) {
-            best = Some((d, k));
+        let not_guard = !champions::abilities(b).contains(&tbg_core::content::Ability::Guard);
+        if best.is_none_or(|old| (not_guard, d, k) < old) {
+            best = Some((not_guard, d, k));
         }
     });
-    best.map(|(_, k)| k).or(current)
+    best.map(|(_, _, k)| k).or(current)
 }

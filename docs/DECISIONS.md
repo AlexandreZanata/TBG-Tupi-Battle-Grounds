@@ -3537,3 +3537,14 @@ Restore the original five-card layout. Slots 1–3 draw only the player's Role
 Archetypes; slots 4–5 draw from the full shared roster. All five remain
 distinct across purchase/reroll/locks; destinations remain unrestricted.
 Protocol v3 advertises the new five-offer/five-mask PrivateView schema.
+
+
+**D-112 fifth amendment (owner, 2026-11-03, P77 / M-70–M-71).**
+The owner clarified that space block means spacing and collisions between
+champions, and requested real abilities in automatic combat. Share the
+1v1 authored body envelopes, base ability and OnHit parameters, rigs,
+animations and projectile release logic. The separate 5v5 engine resolves
+contacts, radii and lines in two dimensions and keeps credit per Seat.
+No player orders or avatar are added. Base ability execution moves from
+P78 into P77; selectable Evolutions and a full visual comparison remain
+separate work. No 1v1 source or release inputs are changed.

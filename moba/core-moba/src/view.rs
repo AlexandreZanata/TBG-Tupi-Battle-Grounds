@@ -53,6 +53,27 @@ pub fn world(m: &MobaMatch, team: Team) -> WorldView {
             } else {
                 0
             },
+            champion: if vision.visible[i] {
+                {
+                    let mut c = crate::champions::view(u, m.tick);
+                    if !vision.unit(c.bond) {
+                        c.bond = 0;
+                    }
+                    if !vision.unit(c.carrier) {
+                        c.carrier = 0;
+                    }
+                    if c.completion
+                        .is_some_and(|fx| fx.channel_target.is_some_and(|id| !vision.unit(id)))
+                    {
+                        if let Some(fx) = &mut c.completion {
+                            fx.channel_target = None;
+                        }
+                    }
+                    c
+                }
+            } else {
+                Default::default()
+            },
             attacked: vision.visible[i]
                 && vision.unit(u.target)
                 && m.tick > 0
@@ -78,6 +99,25 @@ pub fn world(m: &MobaMatch, team: Team) -> WorldView {
                         respawn_ticks: at.saturating_sub(m.tick).min(u16::MAX as u32) as u16,
                     },
                 )
+            })
+            .collect(),
+        barrels: m
+            .barrels
+            .iter()
+            .filter(|b| vision.point(b.at) && vision.unit(b.source.id))
+            .map(|b| crate::protocol::BarrelView {
+                source: if vision.unit(b.source.id) {
+                    b.source.id
+                } else {
+                    0
+                },
+                at: b.at,
+                origin: if vision.point(b.origin) {
+                    b.origin
+                } else {
+                    b.at
+                },
+                end: if vision.point(b.end) { b.end } else { b.at },
             })
             .collect(),
         events: m
@@ -116,6 +156,20 @@ fn event_visible(vision: &crate::vision::Vision<'_>, team: Team, event: &Event) 
         Event::TroopKilled { .. } | Event::TowerDestroyed { .. } | Event::Ended(_) => true,
         Event::CampCleared { camp, .. } => vision.point(crate::map::camp(camp as usize).0),
         Event::TroopSent { seat, .. } | Event::Upgraded { seat, .. } => seat.team() == team,
+        Event::CombatTrace { unit, from, to, .. } => {
+            vision.unit(unit) && vision.point(from) && vision.point(to)
+        }
+        Event::UnitHit { unit, from, at } => {
+            vision.unit(unit) && vision.point(from) && vision.point(at)
+        }
+        Event::UnitDied { side, at, .. } => side.team() == Some(team) || vision.point(at),
+        Event::ChampionAbility {
+            at, unit, target, ..
+        } => {
+            vision.point(at)
+                && (vision.unit(unit) || target == 0)
+                && (target == 0 || vision.unit(target))
+        }
         Event::LevelUp { .. } | Event::CommanderKilled { .. } => false,
     }
 }

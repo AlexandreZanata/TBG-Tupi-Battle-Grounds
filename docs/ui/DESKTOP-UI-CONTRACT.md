@@ -1377,3 +1377,19 @@ strip; three Role captions and two unrestricted captions; hotkeys 1–5.
 Destination sits to the left of the row, restoring the original five-card
 layout. Shared across desktop clients; Linux, Windows/web observations
 pending. Existing champion movement/animations unchanged by the Shop.
+
+
+## P77 H — automatic champion combat presentation (2026-11-03)
+
+Shared desktop MOBA client: PK-01 body spacing, spawn, Walk/Idle with
+interpolated planar motion, facing, the BattleLine release/strike and
+footfall system, authored muzzle flashes, normal and powered shots,
+secondary projectiles, lunge/recoil, hit/heal tint, ability windups and
+resolution, status markers, rolling casks, carried placement, summon
+figures and visible death. Fog removals never produce a death animation.
+Map coordinates and the larger figure scale are the 2D adapter; the
+BattleLine rigs, clips, weapon joints and effects supply the motion.
+Queue every base champion's attack, ability, idle/walk, spawn/hit/death,
+and representative packed engagements across Linux, Windows and web.
+Focused Linux compile and core contract tests are not a motion comparison;
+full motion and cross-platform visual verification remain pending.

@@ -50,6 +50,7 @@ pub struct Feed {
     pub status: Status,
     /// Events not yet shown by the HUD.
     pub events: Vec<Event>,
+    pub motion_events: Vec<Event>,
     pub rejects: Vec<Reject>,
 }
 
@@ -65,6 +66,7 @@ impl Default for Feed {
             seat: None,
             status: Status::Idle,
             events: Vec::new(),
+            motion_events: Vec::new(),
             rejects: Vec::new(),
         }
     }
@@ -77,6 +79,21 @@ impl Feed {
             self.interval = (self.interval * 0.9 + gap.clamp(0.02, 0.25) * 0.1).max(0.02);
         }
         self.events.extend(world.events.iter().copied());
+        self.motion_events.extend(
+            world
+                .events
+                .iter()
+                .filter(|event| {
+                    matches!(
+                        event,
+                        Event::CombatTrace { .. }
+                            | Event::ChampionAbility { .. }
+                            | Event::UnitDied { .. }
+                            | Event::UnitHit { .. }
+                    )
+                })
+                .copied(),
+        );
         self.prev = self.curr.replace(world);
         self.received = now;
         self.generation += 1;

@@ -41,7 +41,9 @@ PrivateView   = { seat, gold, essence, tier, troops, destination,
 ```
 
 - Protocol v3 restores five offers/masks, slots 0–2 Role-filtered and
-  slots 3–4 all Archetypes. It rejects v1/v2 clients.
+  slots 3–4 all Archetypes. Team World frames also carry visible champion
+  combat facts, rolling casks and the associated attack, ability and death
+  cues. It rejects v1/v2 clients.
 - Protocol v2 previously removed avatar fields from SeatView and PrivateView;
   SeatView now contains human/kills/deaths. MoveCommander/CommanderAuto,
   UnitKind::Commander and the old avatar Event tags keep their original

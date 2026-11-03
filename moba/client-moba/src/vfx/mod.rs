@@ -14,7 +14,9 @@ use crate::art::{
     palette::*,
 };
 
+mod barrels;
 pub(crate) mod completion;
+pub(crate) mod flame;
 #[path = "../../../../crates/tbg-client/src/vfx/impacts.rs"]
 #[allow(clippy::all)]
 pub mod impacts;
@@ -23,32 +25,32 @@ pub mod impacts;
 pub mod shots;
 
 pub fn plugin(app: &mut App) {
+    barrels::plugin(app);
+    app.add_systems(
+        PostUpdate,
+        flame::animate.after(bevy::transform::TransformSystems::Propagate),
+    );
     app.add_systems(PreStartup, init)
         .add_systems(Update, (animate, shots::fly, cull_fog.after(shots::fly)));
 }
 
-/// Stand-ins for the 1v1 cargo barrels (only the Cargo Crab drops them).
-fn casks(meshes: &mut Assets<Mesh>) -> [Handle<Mesh>; 5] {
-    std::array::from_fn(|i| meshes.add(Cylinder::new(0.18 + i as f32 * 0.02, 0.4)))
-}
-
 #[derive(Resource)]
 pub struct VfxAssets {
-    pub(super) ring: Handle<Mesh>,
-    pub(super) ball: Handle<Mesh>,
+    pub(crate) ring: Handle<Mesh>,
+    pub(crate) ball: Handle<Mesh>,
     /// A smoother ball for smoke and dust that grows large.
     pub(super) puff: Handle<Mesh>,
     /// Unit cone along +Y with its base at the origin (root spikes, thorns).
     pub(super) spike: Handle<Mesh>,
     /// Unit cube (debris, chips).
-    pub(super) chip: Handle<Mesh>,
+    pub(crate) chip: Handle<Mesh>,
     /// A flat half ring in the XZ plane (scythe and cleaver sweeps).
-    pub(super) crescent: Handle<Mesh>,
-    pub(super) gold: Handle<StandardMaterial>,
-    pub(super) green: Handle<StandardMaterial>,
+    pub(crate) crescent: Handle<Mesh>,
+    pub(crate) gold: Handle<StandardMaterial>,
+    pub(crate) green: Handle<StandardMaterial>,
     pub(super) white: Handle<StandardMaterial>,
     pub(super) orange: Handle<StandardMaterial>,
-    pub(super) grey: Handle<StandardMaterial>,
+    pub(crate) grey: Handle<StandardMaterial>,
     pub(super) ally: Handle<StandardMaterial>,
     pub(super) enemy: Handle<StandardMaterial>,
     pub(super) smoke: Handle<StandardMaterial>,
@@ -58,14 +60,14 @@ pub struct VfxAssets {
     pub(super) flash: Handle<StandardMaterial>,
     pub(super) bone: Handle<StandardMaterial>,
     pub(super) root: Handle<StandardMaterial>,
-    pub(super) spore: Handle<StandardMaterial>,
+    pub(crate) spore: Handle<StandardMaterial>,
     pub(super) rock: Handle<StandardMaterial>,
     pub(super) leaf: Handle<StandardMaterial>,
-    pub(super) amber: Handle<StandardMaterial>,
-    pub(super) violet: Handle<StandardMaterial>,
+    pub(crate) amber: Handle<StandardMaterial>,
+    pub(crate) violet: Handle<StandardMaterial>,
     pub(super) blood: Handle<StandardMaterial>,
     pub(super) water: Handle<StandardMaterial>,
-    pub(super) turquoise: Handle<StandardMaterial>,
+    pub(crate) turquoise: Handle<StandardMaterial>,
     pub(super) petal: Handle<StandardMaterial>,
     pub(super) oil: Handle<StandardMaterial>,
     /// Lit vertex colors, for painted projectile meshes.
@@ -196,7 +198,7 @@ fn init(
         oil,
         painted,
         shots,
-        casks: casks(&mut meshes),
+        casks: barrels::meshes(&mut meshes),
     });
 }
 
@@ -335,6 +337,16 @@ fn cull_fog(
     for (entity, transform) in &shots {
         if !crate::scene::fog::point_visible(&feed, crate::scene::to_map(transform.translation)) {
             commands.entity(entity).despawn();
+        }
+    }
+}
+
+impl VfxAssets {
+    pub(crate) fn champion_tint(&self, hit: bool) -> &Handle<StandardMaterial> {
+        if hit {
+            &self.flash
+        } else {
+            &self.green
         }
     }
 }

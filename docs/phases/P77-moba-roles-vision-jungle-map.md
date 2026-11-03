@@ -511,9 +511,38 @@ Queue `cargo test --locked -p tbg-moba-core --test contract_moba m20 -- --test-t
 at consolidation, under the shared lock with two Cargo jobs. No tests or
 extra platform builds ran on this front.
 
+### Automatic abilities and body spacing (owner, 2026-11-03)
+
+M-70/M-71 activate shared base champion abilities in the authoritative
+5v5 simulation. Cadence, heal, control, shields, counters, pulses, summons
+and hit attribution advance by fixed ticks. The 2D adapter uses swept body
+movement, disk contact for area payloads, aimed segments, and Team-filtered
+combat cues. The client compiles the 1v1 weapon release/strike/footfall
+system and uses its champion rigs, clips, projectiles and impact recipes.
+Copied completion/flame and cask recipes are kept separate from the
+BattleLine snapshot plumbing. The unrestricted Shop caption is localized.
+No purchased Evolution choices or 1v1 input files changed.
+
+Validation at consolidation (shared lock, two build jobs):
+
+```bash
+cargo fmt --manifest-path moba/Cargo.toml -p tbg-moba-core -p tbg-moba-client
+git diff --check
+cargo test --offline --locked --manifest-path moba/Cargo.toml -p tbg-moba-core \
+  --test contract_champion_combat --test contract_vision_territory --test contract_moba \
+  -- --skip m30_a_ten_bot_match_always_ends --test-threads=1
+```
+
+Results: format/whitespace passed; 4 champion combat, 3 territory and 22
+existing MOBA contracts passed (29 total; one full-match contract skipped).
+The combat checks cover solid contact plus melee reach, Weaver's real
+windup/root, Mantis's fourth-hit bonus and poison credit after caster death.
+Full workspace, balance, full champion motion gallery and Windows/web
+visual correspondence remain deferred.
+
 ## 10. After P77 (renumbered backlog)
 
-P78 1v1 champion abilities and Evolutions in 5v5 (automatic, no Commander kit/orders) ·
+P78 champion Evolution forms and coverage beyond the automatic base kits ·
 P79 online rooms for real players · P80 presentation polish (sound,
 scoreboard, settings) · P81 Windows and desktop web · P82 balance (only on
 explicit owner request).

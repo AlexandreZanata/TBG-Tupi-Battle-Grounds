@@ -90,7 +90,6 @@ pub fn base_stats(kind: UnitKind) -> Stats {
 /// faster because lanes here are ~12x longer than the 1v1 BattleLine (M-18).
 fn troop_stats(kind: Champion) -> Stats {
     let def = tbg_core::content::def(kind);
-    let melee = def.range < 1_500;
     Stats {
         hp: def.hp,
         damage: def.damage,
@@ -103,11 +102,14 @@ fn troop_stats(kind: Champion) -> Stats {
             0
         },
         sight: u(80),
-        radius: if melee { u(7) } else { u(6) },
+        radius: tbg_core::content::occupancy::footprint(kind, 0).body * CHAMPION_FIGURE_SCALE,
         heal: def.heal,
         splash: def.splash,
     }
 }
+
+/// Shared scale for the champion rig and its body reservation (M-70).
+pub const CHAMPION_FIGURE_SCALE: i32 = 3;
 
 /// Champion walking speed multiplier over its 1v1 value (Proposed).
 pub const CHAMPION_SPEED_FACTOR: i32 = 4;

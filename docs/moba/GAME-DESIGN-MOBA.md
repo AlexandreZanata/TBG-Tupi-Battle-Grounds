@@ -76,7 +76,8 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
 - **M-08** Tower order: an Inner Tower is invulnerable while its lane's
   Outer stands; a Base while its Inner stands; Nexus Towers while all three
   Base Towers stand; the Stronghold while either Nexus Tower stands.
-- **M-09** Units separate softly; structures never move.
+- **M-09** Structures never move. Walking units reserve space and recover from
+  spawn overlaps according to M-70.
 - Lane walkers and structures ignore neutral monsters; jungle Troops
   hunt them. Monsters are passive until hit and leash 9 units
   from their camp, healing fully at home.
@@ -91,8 +92,8 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
   because MOBA lanes are ~12× longer than the BattleLine. Tank archetypes
   ignore 20 % of damage. Champions with a 1v1 `heal` mend the most injured
   ally in range instead of attacking; champions with a 1v1 `splash` also hit
-  enemies around their target for 50 %. 1v1 abilities and Evolutions are
-  not active in 5v5 yet (P78).
+  enemies around their target for 50 %. Automatic base champion abilities
+  follow M-71; Evolution choices remain in P78.
 - **M-19** Shop: five distinct offers from the 1v1 online pool, drawn from
   each seat's own seeded stream (1v1 BR-S01/S05); every purchase redraws all
   unlocked offers (BR-S04); locking a slot is free and keeps it through
@@ -256,3 +257,24 @@ new camps never spawn them. Their legacy stats are unchanged.
   half. Structure destruction is already public map knowledge, so both
   authority and presentation derive the same conquered sites from the
   fixed map and surviving Towers without adding wire fields.
+
+- **M-70** Proposed: a champion's 2D solid body uses its PK-01 authored body
+  radius at the existing 3× 5v5 figure scale. Swept steps block crossings;
+  a walker tries a shorter step and then local sideways steps around the
+  obstacle. Units already overlapping at spawn may separate; Towers and
+  Strongholds stay fixed. Basic range is at least body contact plus the
+  existing PK-01 gap. Formation anchors use the direction of their engaged
+  target on the ground plane.
+- **M-71** Proposed: deployed Troops use their shared 1v1 base ability and
+  OnHit values automatically. Basic windups use the 1v1 `WINDUP`; timed
+  specials keep an independent readiness and locked target. Root cancels
+  actions; a Nectar channel also ends if its target leaves range. Area
+  effects query 2D body intersections, line effects follow the aim vector,
+  and drill fusion uses contact plus its existing 200 mm allowance. Direct
+  and periodic damage keep last-hit seat credit, while summons never fill
+  the bought Troop cap or grant a Troop kill bounty. Enemy and allied
+  abilities obey the existing structure order and neutral targeting rules.
+  Room snapshots reveal combat presentation facts only in Team vision.
+  5v5 Essence upgrades still affect HP and damage; there is no Evolution
+  branch choice in this phase. Cargo draws keep their shared weight bands
+  and use base profiles until Evolution forms are enabled in 5v5.

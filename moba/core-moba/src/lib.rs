@@ -5,6 +5,7 @@
 //! Canon: `docs/moba/GAME-DESIGN-MOBA.md`. Contracts: `docs/moba/CONTRACTS.md`.
 
 pub mod bot;
+pub mod champions;
 pub mod content;
 pub mod geom;
 pub mod grid;

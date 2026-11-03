@@ -10,17 +10,33 @@ struct Death {
     owner: Option<Seat>,
     credit: Option<Credit>,
     camp: Option<u8>,
+    summon: bool,
 }
 
 pub(super) fn resolve_deaths(m: &mut MobaMatch) {
+    // Freeze the initial death set: death bursts never recurse in one tick.
+    let dead: Vec<_> = m.units.iter().filter(|u| !u.alive()).cloned().collect();
+    for unit in &dead {
+        crate::champions::died(m, unit);
+    }
+    for unit in m.units.iter().filter(|u| !u.alive()) {
+        m.events.push(Event::UnitDied {
+            unit: unit.id,
+            kind: unit.kind,
+            side: unit.side,
+            at: unit.pos,
+        });
+    }
+
     let deaths: Vec<Death> = m
         .units
         .iter()
         .filter(|u| !u.alive())
         .map(|u| Death {
             kind: u.kind,
+            summon: u.fx.summon != 0,
             side: u.side,
-            owner: u.owner,
+            owner: if u.fx.summon == 0 { u.owner } else { None },
             credit: u.last_hit,
             camp: match u.brain {
                 Brain::Neutral { camp } => Some(camp),
@@ -55,6 +71,9 @@ fn killer_team(d: &Death) -> Option<Team> {
 }
 
 fn reward(m: &mut MobaMatch, d: &Death) {
+    if d.summon {
+        return;
+    }
     let killer = d.credit.and_then(|c| c.seat);
     let Some(team) = killer_team(d) else { return };
     match d.kind {

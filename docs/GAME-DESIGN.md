@@ -2725,7 +2725,7 @@ BR-AX11) are unchanged. All values are **Proposed** and still need
 
 ## 24. TBG Arena 5v5 — MOBA mode (P76, Proposed)
 
-A separate 5v5 mode (ten Commanders, three lanes, jungle, Troops sent to a
+A separate 5v5 mode (ten strategic Seats, three lanes, jungle, Troops sent to a
 Destination, bots on empty seats). Its canon, glossary and every number are
 **Proposed** and unbalanced in [GAME-DESIGN-MOBA.md](moba/GAME-DESIGN-MOBA.md);
 nothing in sections 1–23 changes and no 1v1 term or value is reused by it.

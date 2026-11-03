@@ -55,6 +55,7 @@ pub struct WorldView {
     pub seats: Vec<SeatView>,
     pub units: Vec<UnitView>,
     pub camps: Vec<CampView>,
+    pub barrels: Vec<BarrelView>,
     pub events: Vec<Event>,
     pub outcome: Option<Outcome>,
 }
@@ -79,6 +80,7 @@ pub struct UnitView {
     pub target: u32,
     /// An attack or heal left this unit on this tick.
     pub attacked: bool,
+    pub champion: ChampionView,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -133,4 +135,31 @@ pub fn decode_server(bytes: &[u8]) -> Result<ServerMsg, WireError> {
 pub struct CampView {
     pub camp: u8,
     pub respawn_ticks: u16,
+}
+
+/// Authoritative presentation facts; never used to decide damage on the client.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ChampionView {
+    pub counter: u8,
+    pub reduction: u16,
+    pub shield: u16,
+    pub plates: u8,
+    pub rooted: bool,
+    pub slowed: bool,
+    pub poison: u8,
+    pub carrier: u32,
+    pub bond: u32,
+    pub cast_left: u16,
+    pub cast_windup: u16,
+    pub ready_in: u16,
+    pub completion: Option<tbg_core::completion::state::View>,
+}
+
+/// Authoritative rolling cask position, with the launch line for visual roll.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BarrelView {
+    pub source: u32,
+    pub at: crate::geom::Pos,
+    pub origin: crate::geom::Pos,
+    pub end: crate::geom::Pos,
 }
