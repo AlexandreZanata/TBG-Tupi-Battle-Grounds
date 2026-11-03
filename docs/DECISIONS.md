@@ -3548,3 +3548,19 @@ contacts, radii and lines in two dimensions and keeps credit per Seat.
 No player orders or avatar are added. Base ability execution moves from
 P78 into P77; selectable Evolutions and a full visual comparison remain
 separate work. No 1v1 source or release inputs are changed.
+
+
+**D-112 sixth amendment (owner, 2026-11-03, P77 / M-66, M-73–M-75).**
+Remove automatic edge camera panning. Keep each champion's basic Lane or
+Jungle mission through combat, including waiting for first-spawn Camps.
+Use deterministic body-aware navigation and stable target commitment,
+release proved inaccessible targets, and preserve immediate Nexus spawns,
+soft allied pressure, champion 3× reach and all economy values. Water is
+now blocked outside the shared crossings; enlarge the plaza radius from
+10 to 12 as a Proposed implementation value so the widest existing body
+has a valid crossing. Bridges retain their size. Reuse authoritative last-hit
+Credit and emit personal/Team Gold receipts with vision-safe origins.
+Protocol v4 adds activity and receipt fields; no manual intentions return.
+Reuse the 1v1 rigs/clips read-only. Validate focused cases and Linux motion,
+install locally, and do not push, merge or deploy. Windows/web verification
+remains required before any claim of desktop visual correspondence.

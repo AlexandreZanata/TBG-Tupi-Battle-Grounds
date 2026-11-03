@@ -4,6 +4,8 @@
 //! reflection of Blue's across the anti-diagonal `x + y = SIZE`, so both
 //! sides share every lane and the river splits the jungles.
 
+pub mod surface;
+
 use crate::geom::Pos;
 use crate::types::{Lane, Team, TowerTier};
 
@@ -56,8 +58,7 @@ const BLUE_TOWERS: [(TowerTier, Option<Lane>, (i32, i32)); 11] = [
 /// Blue-side camps (between Blue's lanes, south of the river); Red's are mirrored.
 const BLUE_CAMPS: [(i32, i32); 4] = [(48, 86), (72, 112), (86, 48), (112, 72)];
 
-/// River centre line, corner to corner (presentation only; it never slows
-/// units). The top and bot lanes cross it on bridges near the corners.
+/// River centre line, corner to corner; only bridges and the plaza are walkable. The top and bot lanes cross it on bridges near the corners.
 pub const RIVER: [(i32, i32); 7] = [
     (8, 192),
     (40, 160),
@@ -70,7 +71,7 @@ pub const RIVER: [(i32, i32); 7] = [
 pub const RIVER_HALF_WIDTH: i32 = 6;
 /// The stone plaza where the mid lane crosses the river.
 pub const PLAZA: (i32, i32) = (100, 100);
-pub const PLAZA_RADIUS: i32 = 10;
+pub const PLAZA_RADIUS: i32 = 12;
 /// Radius of each base plateau around a Stronghold.
 pub const BASE_RADIUS: i32 = 26;
 /// Radius of the Nexus plinth and the origin of its deployment exits, in millimetres.
@@ -167,4 +168,27 @@ pub fn camp_kind(id: usize) -> crate::types::CampKind {
         CampKind::Jaguar,
         CampKind::Frogs,
     ][id % 4]
+}
+
+/// Actual visible water ribbon and bridge dimensions, shared with the client.
+pub const WATER_HALF_WIDTH: i32 = 8_200;
+pub const BRIDGE_HALF_WIDTH: i32 = LANE_HALF_WIDTH;
+pub const BRIDGE_LENGTH: i32 = 18_000;
+
+pub fn bridges() -> impl Iterator<Item = Pos> {
+    [Lane::Top, Lane::Bot].into_iter().flat_map(|lane| {
+        lane_units(lane).windows(2).filter_map(|w| {
+            let a = Pos::units(w[0].0, w[0].1);
+            let b = Pos::units(w[1].0, w[1].1);
+            let from = a.x + a.y - SIZE * 1000;
+            let to = b.x + b.y - SIZE * 1000;
+            if from == to || i64::from(from) * i64::from(to) > 0 {
+                return None;
+            }
+            Some(Pos {
+                x: a.x + (i64::from(b.x - a.x) * i64::from(from) / i64::from(from - to)) as i32,
+                y: a.y + (i64::from(b.y - a.y) * i64::from(from) / i64::from(from - to)) as i32,
+            })
+        })
+    })
 }

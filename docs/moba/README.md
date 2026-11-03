@@ -37,9 +37,11 @@ roster. All five are distinct. The Role never limits where a Troop can go. The c
 keeps it through redraws; **R** rerolls and **U** upgrades future Troops.
 Movement and combat are automatic; there is no player avatar or manual
 unit order. **Left-drag empty map ground** pans the camera; left-click/drag
-the minimap navigates it. Wheel zooms, arrows/edges/middle-drag pan,
+the minimap navigates it. Wheel zooms, arrows/middle-drag pan,
 **Space** or **H** on the minimap centres the Team base, **Esc** returns
-to the menu. Right click does not issue orders.
+to the menu. Right click does not issue orders. A stationary pointer never pans at the window edge.
+Troops keep their Lane/Jungle mission through combat and resume it afterward.
+Gold receipts distinguish personal bounties from Team Tower rewards.
 
 Vision: the entire allied half is visible. Across the river, allied
 Troops/Minions reveal only their sight circles after crossing. Destroying

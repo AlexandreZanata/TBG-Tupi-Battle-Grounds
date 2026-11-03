@@ -56,7 +56,7 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
 - **M-01** A match has 10 Seats in 2 Teams of 5 with roles Top, Jungle,
   Mid, Bot, Support. No Seat owns an avatar. The simulation ticks at 20 Hz.
 - **M-02** One map, *Tupi Valley* (`moba/core-moba/src/map.rs`), 200 × 200
-  units: three Lanes, a river from corner to corner (presentation only),
+  units: three Lanes, a river from corner to corner (water blocks bodies outside crossings, M-74),
   a central plaza, 8 Camps (4 per jungle), 11 Towers and 1 Stronghold per Team.
   Red's layout is Blue's reflected across the anti-diagonal.
 - **M-03** Same seed + same intentions ⇒ identical match (integer state,
@@ -157,14 +157,14 @@ Waves: first at 0:10, then every 30 s. Camps: first at 0:20, per-kind respawn af
   ability aiming or movement skill is required. There are no avatar
   levels, XP, assists, respawns or personal fountain. Essence still buys
   Troop Upgrade tiers. Legacy MoveCommander/CommanderAuto wire variants
-  return ManualControlDisabled with no state mutation. Protocol v3 rejects
-  old v1/v2 handshakes; old variant positions remain reserved.
+  return ManualControlDisabled with no state mutation. Protocol v4 rejects
+  old v1/v2/v3 handshakes; old variant positions remain reserved.
 - **M-66** Proposed: hold the left button on uncovered map ground and drag
   to pan the camera, keeping the grabbed ground point under the cursor.
   A drag starting on a HUD card/control/overlay cannot move the camera.
   A gesture starting in the minimap navigates the camera only. Release or
   focus loss ends a map drag; the camera stays within map bounds. Wheel,
-  arrows, edge pan and middle drag remain; Space/H centres the Team base.
+  arrows and middle drag remain; a stationary cursor at any window edge never pans; Space/H centres the Team base.
   Camera gestures never create MobaIntentions or change the simulation.
 
 ## 8. End of match
@@ -305,3 +305,61 @@ new camps never spawn them. Their legacy stats are unchanged.
   ranged Minions use the Archer footprint at the existing 95% mesh scale.
   Opposing bodies and immobile structures still block swept movement.
   A bypass keeps its passing side until the way ahead clears.
+
+
+## 13. Persistent missions, accessible combat and receipts (owner, 2026-11-03)
+
+- **M-73 Proposed.** Every Troop and Minion retains its basic mission while
+  fighting: advance along its chosen Lane toward the enemy Stronghold, or
+  visit and clear Jungle Camps. A Jungle mission survives the first-spawn
+  wait and waits at the earliest respawning Camp when no Camp is alive;
+  it never silently becomes Mid. Within a Camp, approach the nearest living
+  monster (distance, then id), rather than its empty centre. Lane arrival
+  accepts the existing 2-unit waypoint radius plus the walker's body radius
+  so a large body can pass a road point beside a structure.
+- Decision priority: death/control/channel holds; finish the locked basic
+  windup; retain an eligible control recipient or wounded patient; retain
+  a valid enemy under M-07; otherwise acquire by Guard, in-position,
+  distance and id; pursue an accessible attack position; attack/cool down;
+  with no target, resume the saved mission. Non-damaging supports do not
+  chase an enemy they cannot attack. Existing abilities and 3× reach define
+  melee, ranged and support behaviour. No manual unit orders are added.
+- **M-74 Proposed.** Server movement validates the entire circular body
+  against the playable rim, water, surviving structures and hostile bodies.
+  Allied mobile bodies remain soft lateral pressure, with immediate Nexus
+  deployment. Use a direct swept approach when possible, otherwise a
+  deterministic 2-unit navigation lattice with stable cost/node ties.
+  Finish on a continuous attack position between lattice nodes; the contact
+  annulus must not disappear because it is narrower than a grid cell.
+  Keep the resulting detour until obstructed, the goal moves over 2 units,
+  or the target changes. Project blocked steps along a free axis. Forty
+  ticks without at least 5 mm of progress toward the next path point clear
+  the route; an unreachable enemy is released and excluded for 40 ticks,
+  then may be retried. An exhaustive failed route also releases that enemy.
+  These limits are navigation safeguards, not combat stat tuning.
+- Shared map geometry: water half-width 8.2 units (the existing visible
+  ribbon), bridge length 18 and half-width 3.6, playable rim 6 plus body
+  radius. The central plaza radius is **12** instead of 10 so the largest
+  6.75-unit body can cross the water; bodies too wide for a bridge use the
+  plaza and then resume their Lane. Integer clearance is conservative by
+  2 mm and sweeps sample at no more than 250 mm. Camp spawn offsets move
+  toward their home base in 250 mm steps if the old offset overlaps water.
+  Jungle attack positions stay inside the existing 9-unit home leash;
+  monster retaliation, return and full healing within 4 units remain.
+- The server exposes Advance/Pursue/Attack/Hold for presentation. Actual
+  interpolated displacement drives the shared 1v1 gait; Attack/Hold cannot
+  become Walk solely because crowd pressure displaces the body. Facing
+  follows the committed target with the existing shared turn slew/blends.
+- **M-75 Proposed.** M-13/M-15/M-64 values are unchanged. Each dead enemy
+  Minion pays only its last hitter's owner, each monster pays its own Gold
+  and Essence, and each destroyed Tower pays all five destroying-Team
+  Seats. Stored Credit survives direct/area/periodic damage and owned
+  summons, including source death before a pulse. No owner means no
+  personal bounty; allied damage cannot award a personal enemy bounty.
+  Dead units are removed once, and every grant creates one GoldGranted
+  receipt. A receipt contains its recipient, Gold, Essence and personal/
+  Team scope. Only the receiving Team gets it; origin kind/position is
+  removed outside current Team sight. The HUD shows only the local Seat's
+  receipts for 2.5 seconds and labels Personal versus Team. A duplicate
+  World tick cannot replay a HUD receipt. Protocol v4 carries receipts and
+  activity without adding a client intention.

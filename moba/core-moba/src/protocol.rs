@@ -1,4 +1,4 @@
-//! MOBA wire protocol v3 (immutable once merged; `docs/moba/CONTRACTS.md` §3).
+//! MOBA wire protocol v4 (immutable once merged; `docs/moba/CONTRACTS.md` §3).
 //!
 //! Binary postcard frames over WebSocket. One filtered world per team per tick;
 //! private economy goes to its owner only (M-50–M-55).
@@ -10,7 +10,7 @@ use crate::intent::{MobaIntention, Reject};
 use crate::state::{Event, Outcome};
 use crate::types::{Champion, Destination, Seat, Side, UnitKind};
 
-pub const MOBA_PROTOCOL_VERSION: u16 = 3;
+pub const MOBA_PROTOCOL_VERSION: u16 = 4;
 /// Largest client frame accepted; anything bigger closes the socket (M-40).
 pub const MAX_CLIENT_FRAME: usize = 256;
 /// Largest server frame a client accepts.
@@ -81,6 +81,7 @@ pub struct UnitView {
     /// An attack or heal left this unit on this tick.
     pub attacked: bool,
     pub champion: ChampionView,
+    pub activity: crate::state::Activity,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

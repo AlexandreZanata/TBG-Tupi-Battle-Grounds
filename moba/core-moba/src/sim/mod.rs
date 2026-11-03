@@ -1,7 +1,9 @@
 //! One fixed simulation tick, split by responsibility.
 
 mod combat;
+mod decision;
 mod movement;
+pub(crate) mod navigation;
 mod outcome;
 mod rewards;
 pub(crate) mod spawn;

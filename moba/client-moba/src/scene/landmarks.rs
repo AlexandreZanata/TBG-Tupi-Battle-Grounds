@@ -1,7 +1,7 @@
 //! Built places: base plateaus, the river plaza, jungle camps and bridges.
 
 use bevy::prelude::*;
-use tbg_moba_core::map::{self, PLAZA, RIVER_HALF_WIDTH};
+use tbg_moba_core::map::{self, PLAZA};
 use tbg_moba_core::{Lane, Team};
 
 use super::mesh::{hash, merge, Part, Shape};
@@ -106,7 +106,7 @@ pub fn plaza() -> Mesh {
     let mut parts = Vec::new();
     let c = v(PLAZA);
     parts.push((
-        Shape::Cyl(10.2, 1.7),
+        Shape::Cyl(map::PLAZA_RADIUS as f32 + 0.2, 1.7),
         STONE_DARK,
         Transform::from_translation(to_world(c.x, c.y, -0.6)),
     ));
@@ -205,16 +205,15 @@ pub fn camps() -> Mesh {
     merge(&parts)
 }
 
-const BRIDGE_LENGTH: f32 = 2.0 * RIVER_HALF_WIDTH as f32 + 6.0;
+const BRIDGE_LENGTH: f32 = map::BRIDGE_LENGTH as f32 / 1000.0;
 const BRIDGE_TOP: f32 = 0.25 + 0.35 / 2.0;
 
 fn bridge_axes() -> impl Iterator<Item = (Vec2, Vec2)> {
-    [Lane::Top, Lane::Bot].into_iter().flat_map(|lane| {
-        map::lane_units(lane).windows(2).filter_map(|w| {
-            let (a, b) = (v(w[0]), v(w[1]));
-            let cross = river_crossing(a, b)?;
-            Some((cross, (b - a).normalize()))
-        })
+    map::bridges().map(|p| {
+        (
+            Vec2::new(p.x as f32, p.y as f32) / 1000.0,
+            Vec2::ONE.normalize(),
+        )
     })
 }
 
@@ -258,14 +257,4 @@ pub fn bridges() -> Mesh {
         }
     }
     merge(&parts)
-}
-
-/// Where a road segment crosses the river centre line, if it does.
-fn river_crossing(a: Vec2, b: Vec2) -> Option<Vec2> {
-    let from = a.x + a.y - map::SIZE as f32;
-    let to = b.x + b.y - map::SIZE as f32;
-    if from == to || from * to > 0.0 {
-        return None;
-    }
-    Some(a.lerp(b, from / (from - to)))
 }

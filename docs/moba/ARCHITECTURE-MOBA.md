@@ -54,7 +54,7 @@ owner-approved phase (see the P76 backlog).
 
 ## 4. Network model
 
-- One WebSocket per player at `/moba/ws`; binary postcard frames, protocol v3.
+- One WebSocket per player at `/moba/ws`; binary postcard frames, protocol v4.
 - Handshake: client `Hello{protocol}` within 5 s → server `Welcome{seat}`.
 - Per tick the room encodes **two** filtered `World` frames (one per Team,
   quantised to centi-units and HP per mille) and shares each only with that
@@ -83,7 +83,7 @@ owner-approved phase (see the P76 backlog).
   worlds, facing movement or target, walk bob, attack lunge; billboard
   health bars; minimap icons on render layer 2; projectiles, sparks, death
   bursts and move markers in `units/fx`.
-- `camera`: RTS rig (arrows/edge pan, middle drag, wheel zoom, Space to
+- `camera`: RTS rig (arrows, left/middle drag, wheel zoom, Space to
   centre) and an orthographic minimap camera drawn into the HUD frame's
   viewport.
 - `hud`: 1920×1080 design grid scaled by window height, in the 1v1 battle
@@ -143,7 +143,7 @@ VPS is not touched until the owner asks.
 
 A Seat is an economic/strategic player, never a unit. Removed Commander
 spawning/brains, XP, personal respawn/fountain and manual movement handlers.
-Legacy wire variants are reserved and rejected; protocol v3 prevents old
+Legacy wire variants are reserved and rejected; protocol v4 prevents old
 clients from joining silently. Gold/Essence and Troop Upgrade tiers remain.
 Troop kills feed the public score/K/D without exposing hidden unit identity
 or coordinates; last-hit card-price bounties are unchanged.
@@ -159,3 +159,21 @@ and public surviving Tower list determine conquered circles, including on
 reconnect; no extra state or wire field is needed. There is no ordinary
 exploration memory. The mask uses the same predicates on received data;
 it never decides online visibility or combat outcomes.
+
+
+## 9. P77 automatic mission and navigation correction
+
+`sim/combat` owns action priority and target commitment; `sim/decision`
+shares attack-position eligibility with navigation, including the Camp
+leash. `Brain` retains the mission. `sim/navigation` stores the deterministic
+route, next-point progress and short rejected-target list per Unit; all
+of that state participates in replay hashing. Movement plans against one
+frozen position set; allied pressure does not become a hard obstacle.
+`map/surface` provides integer circular-body clearance over the shared
+river, bridge and plaza geometry. Rendering reads the same dimensions.
+`sim/rewards` emits receipts at the existing grant point, and `view` removes
+unseen origins before transport. No client decides rewards or movement.
+
+Native `--motion-log PATH` optionally records per-frame camera input/focus,
+rig coordinates and champion position/yaw/activity/clip. It adds no gameplay
+UI or online authority and is disabled unless explicitly requested on launch.

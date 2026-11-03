@@ -74,6 +74,11 @@ pub fn world(m: &MobaMatch, team: Team) -> WorldView {
             } else {
                 Default::default()
             },
+            activity: if vision.visible[i] {
+                u.activity
+            } else {
+                crate::state::Activity::Hold
+            },
             attacked: vision.visible[i]
                 && vision.unit(u.target)
                 && m.tick > 0
@@ -125,6 +130,14 @@ pub fn world(m: &MobaMatch, team: Team) -> WorldView {
             .iter()
             .copied()
             .filter(|event| event_visible(&vision, team, event))
+            .map(|mut event| {
+                if let Event::GoldGranted { ref mut origin, .. } = event {
+                    if origin.is_some_and(|(_, at)| !vision.point(at)) {
+                        *origin = None;
+                    }
+                }
+                event
+            })
             .collect(),
         outcome: m.outcome,
     }
@@ -154,6 +167,7 @@ fn event_visible(vision: &crate::vision::Vision<'_>, team: Team, event: &Event) 
     match *event {
         // Kills, destroyed structures and outcome are public scoreboard information.
         Event::TroopKilled { .. } | Event::TowerDestroyed { .. } | Event::Ended(_) => true,
+        Event::GoldGranted { seat, .. } => seat.team() == team,
         Event::CampCleared { camp, .. } => vision.point(crate::map::camp(camp as usize).0),
         Event::TroopSent { seat, .. } | Event::Upgraded { seat, .. } => seat.team() == team,
         Event::CombatTrace { unit, from, to, .. } => {

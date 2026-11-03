@@ -1432,3 +1432,22 @@ Nexus face out of its plinth. The three mirrored route exits and widened
 Mid base corridor use the shared map geometry. Check motion while
 pursuing competing targets, target loss, crowd pressure, and spawn
 heading on every route. Full desktop motion comparisons remain pending.
+
+
+## P77 L — persistent missions, camera capture and reward receipts
+
+Shared desktop presentation: no edge panning; world drags remain captured
+across HUD/minimap until release, focus loss or cursor loss; preserve
+minimap, zoom and base centring. Local Gold notices last 2.5 seconds and
+label Personal/Team; hidden origins are absent. Rigs and clips remain the
+1v1 sources. Actual displacement drives Walk, authoritative Attack/Hold
+keeps the planted stance under lateral pressure, and facing follows the
+locked target smoothly. Water, bridge bounds and the enlarged 12-unit plaza
+come from core map geometry. Large bodies route via the plaza when a
+bridge cannot fit them. Include moving sequences for all eight Camps,
+competing targets, post-kill mission resumption, Nexus crowds, bank/rim
+pursuit, personal/team receipts and every camera capture transition.
+
+Core focused validation passed; Linux runtime evidence is recorded in the
+P77 report after installation. Windows and desktop web motion/pixel
+comparison remain pending. Shared code and compilation do not prove parity.

@@ -10,12 +10,16 @@ use crate::types::{Lane, Team};
 // Slot loop: brains read the whole match while one unit moves.
 #[allow(clippy::needless_range_loop)]
 pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
+    let snapshot = m.units.clone();
     for i in 0..engaged.len() {
         let u = &m.units[i];
         if !u.alive() || !u.mobile() || engaged[i] {
             continue;
         }
-        let chase = m.slot(u.target).map(|j| m.units[j].pos);
+        let chase = snapshot
+            .iter()
+            .find(|v| v.id == u.target && v.alive())
+            .map(|v| v.pos);
         let goal = match chase {
             Some(p) => p,
             None => match brain_goal(m, i) {
@@ -30,11 +34,10 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
         let from = m.units[i].pos;
         let mut to = from;
         to.step_toward(goal, step);
-        let to = to.clamp_to_map();
         if formation_holds(m, i, to) {
             continue;
         }
-        m.units[i].pos = blocked_step(m, i, from, to, goal, step);
+        m.units[i].pos = super::navigation::step(m, &snapshot, i, goal, step);
         if m.units[i].pos != from {
             crate::champions::walked(&mut m.units[i]);
         }
@@ -64,7 +67,9 @@ fn lane_goal(m: &mut MobaMatch, i: usize, lane: Lane, waypoint: u8) -> Pos {
     let u = &mut m.units[i];
     let team = u.team().unwrap_or(Team::Blue);
     let goal = map::waypoint(lane, team, waypoint as usize);
-    if u.pos.within(goal, WAYPOINT_RADIUS) && (waypoint as usize) + 1 < map::waypoint_count(lane) {
+    if u.pos.within(goal, WAYPOINT_RADIUS + u.stats.radius)
+        && (waypoint as usize) + 1 < map::waypoint_count(lane)
+    {
         u.brain = Brain::Lane {
             lane,
             waypoint: waypoint + 1,
@@ -74,26 +79,35 @@ fn lane_goal(m: &mut MobaMatch, i: usize, lane: Lane, waypoint: u8) -> Pos {
 }
 
 /// Walks to a live camp (any jungle for Troops);
-/// Troops with no camp left join the mid lane.
+/// A Jungle mission waits at the next camp even before the first spawn.
 fn jungle_goal(m: &mut MobaMatch, i: usize, camp: Option<u8>, only: Option<Team>) -> Pos {
     let pos = m.units[i].pos;
     let chosen = camp
         .filter(|&c| camp_alive(m, c as usize))
-        .or_else(|| nearest_camp(m, pos, only));
+        .or_else(|| nearest_camp(m, pos, only))
+        .or_else(|| {
+            (0..map::CAMP_COUNT)
+                .filter(|&c| only.is_none_or(|t| map::camp(c).1 == t))
+                .min_by_key(|&c| {
+                    (
+                        m.camps[c].respawn_at.unwrap_or(0),
+                        pos.dist2(map::camp(c).0),
+                    )
+                })
+                .map(|c| c as u8)
+        });
     let u = &mut m.units[i];
     match (&mut u.brain, chosen) {
         (Brain::Jungle { camp }, Some(c)) => *camp = Some(c),
-        (Brain::Jungle { .. }, None) => {
-            let team = u.team().unwrap_or(Team::Blue);
-            let waypoint = map::nearest_waypoint(Lane::Mid, team, pos) as u8;
-            u.brain = Brain::Lane {
-                lane: Lane::Mid,
-                waypoint,
-            };
-        }
         _ => {}
     }
-    chosen.map_or(pos, |c| map::camp(c as usize).0)
+    chosen.map_or(pos, |c| {
+        m.units
+            .iter()
+            .filter(|u| u.alive() && u.brain == Brain::Neutral { camp: c })
+            .min_by_key(|u| (pos.dist2(u.pos), u.id))
+            .map_or(map::camp(c as usize).0, |u| u.pos)
+    })
 }
 
 /// An engaged Oilpress anchors nearby followers behind its battle front.
@@ -137,122 +151,6 @@ fn formation_holds(m: &MobaMatch, i: usize, to: Pos) -> bool {
     hold
 }
 
-/// Swept body contact in the map plane, with the shared PK-01 gap.
-fn intersects(from: Pos, to: Pos, center: Pos, gap: i32) -> bool {
-    let dx = i64::from(to.x - from.x);
-    let dy = i64::from(to.y - from.y);
-    let len = dx * dx + dy * dy;
-    let projection = i64::from(center.x - from.x) * dx + i64::from(center.y - from.y) * dy;
-    let along = projection.clamp(0, len);
-    let nearest = Pos {
-        x: from.x + (dx * along / len.max(1)) as i32,
-        y: from.y + (dy * along / len.max(1)) as i32,
-    };
-    let initial = from.dist2(center);
-    let limit = i64::from(gap).pow(2);
-    if initial < limit {
-        projection > 0
-    } else {
-        nearest.dist2(center) < limit
-    }
-}
-
-fn gap(a: &crate::state::Unit, b: &crate::state::Unit) -> i32 {
-    a.stats.radius
-        + b.stats.radius
-        + if a.side == b.side {
-            tbg_core::content::occupancy::GAP
-        } else {
-            0
-        }
-}
-
-fn solid(a: &crate::state::Unit, b: &crate::state::Unit) -> bool {
-    b.alive() && b.fx.carrier == 0 && (a.team().is_none() || a.side != b.side || !b.mobile())
-}
-
-fn blocker(m: &MobaMatch, i: usize, from: Pos, to: Pos) -> Option<usize> {
-    let a = &m.units[i];
-    let mut best = None;
-    m.grid.near(from, a.stats.radius + 8 * MM, |j| {
-        let b = &m.units[j];
-        if i != j && solid(a, b) && intersects(from, to, b.pos, gap(a, b)) {
-            let key = (from.dist2(b.pos), j);
-            if best.is_none_or(|old| key < old) {
-                best = Some(key);
-            }
-        }
-    });
-    best.map(|(_, j)| j)
-}
-
-fn blocked_step(m: &mut MobaMatch, i: usize, from: Pos, to: Pos, goal: Pos, step: i32) -> Pos {
-    // Like the BattleLine's persistent lateral slot, keep one passing side
-    // until the obstacle is clear. A fresh direct step every tick oscillates.
-    let active = m.units[i].bypass.and_then(|(id, side)| {
-        let j = m.slot(id)?;
-        let b = &m.units[j];
-        (solid(&m.units[i], b) && intersects(from, goal, b.pos, gap(&m.units[i], b)))
-            .then_some((j, side))
-    });
-    if let Some((j, side)) = active {
-        let next = tangent(from, m.units[j].pos, step, side);
-        if next != from && blocker(m, i, from, next).is_none() {
-            return next;
-        }
-    }
-    let Some(j) = blocker(m, i, from, to) else {
-        if active.is_none() {
-            m.units[i].bypass = None;
-        }
-        return to;
-    };
-    let obstacle = &m.units[j];
-    let preferred = active.filter(|(old, _)| *old == j).map(|(_, side)| side);
-    let passing = [1, -1]
-        .into_iter()
-        .filter_map(|side| {
-            if m.units[i].target == obstacle.id || preferred.is_some_and(|old| old != side) {
-                return None;
-            }
-            let next = tangent(from, obstacle.pos, step, side);
-            (next != from && blocker(m, i, from, next).is_none()).then_some((next, side))
-        })
-        .min_by_key(|(next, _)| next.dist2(goal));
-    if let Some((next, side)) = passing {
-        m.units[i].bypass = Some((obstacle.id, side));
-        return next;
-    }
-    // No free side: close the gap and wait behind the next body.
-    let mut lo = 0;
-    let mut hi = 16;
-    let at = |k| Pos {
-        x: from.x + (to.x - from.x) * k / 16,
-        y: from.y + (to.y - from.y) * k / 16,
-    };
-    while hi - lo > 1 {
-        let mid = (hi + lo) / 2;
-        if blocker(m, i, from, at(mid)).is_none() {
-            lo = mid;
-        } else {
-            hi = mid;
-        }
-    }
-    at(lo)
-}
-
-fn tangent(from: Pos, center: Pos, step: i32, side: i32) -> Pos {
-    let dx = from.x - center.x;
-    let dy = from.y - center.y;
-    let goal = Pos {
-        x: from.x - dy * side + dx / 10,
-        y: from.y + dx * side + dy / 10,
-    };
-    let mut next = from;
-    next.step_toward(goal, step);
-    next.clamp_to_map()
-}
-
 /// Shared PK-01 bodies and gaps give allies soft pressure instead of a stop.
 pub(super) fn separate(m: &mut MobaMatch) {
     let mut pushes = vec![(0i64, 0i64); m.units.len()];
@@ -265,7 +163,7 @@ pub(super) fn separate(m: &mut MobaMatch) {
             if i == j || !b.alive() || b.fx.carrier != 0 {
                 return;
             }
-            let limit = i64::from(gap(a, b));
+            let limit = i64::from(super::navigation::gap(a, b));
             let d2 = a.pos.dist2(b.pos);
             if d2 >= limit * limit {
                 return;
@@ -283,16 +181,6 @@ pub(super) fn separate(m: &mut MobaMatch) {
         if dx == 0 && dy == 0 {
             continue;
         }
-        // A crowd can spread without cancelling a walking tick's advance.
-        if u.team().is_none() {
-            let cap = i64::from(u.stats.speed.max(1));
-            m.units[i].pos = Pos {
-                x: u.pos.x + dx.clamp(-cap, cap) as i32,
-                y: u.pos.y + dy.clamp(-cap, cap) as i32,
-            }
-            .clamp_to_map();
-            continue;
-        }
         let cap = i64::from((u.stats.speed / 2).max(1));
         let len = (dx * dx + dy * dy).isqrt().max(cap);
         let from = u.pos;
@@ -301,7 +189,7 @@ pub(super) fn separate(m: &mut MobaMatch) {
             y: from.y + (dy * cap / len) as i32,
         }
         .clamp_to_map();
-        if blocker(m, i, from, to).is_none() {
+        if super::navigation::clear(&m.units, u, from, to) {
             m.units[i].pos = to;
         }
     }

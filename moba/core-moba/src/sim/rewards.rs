@@ -6,6 +6,7 @@ use crate::types::{Seat, Side, Team, UnitKind};
 
 struct Death {
     kind: UnitKind,
+    at: crate::geom::Pos,
     side: Side,
     owner: Option<Seat>,
     credit: Option<Credit>,
@@ -34,6 +35,7 @@ pub(super) fn resolve_deaths(m: &mut MobaMatch) {
         .filter(|u| !u.alive())
         .map(|u| Death {
             kind: u.kind,
+            at: u.pos,
             summon: u.fx.summon != 0,
             side: u.side,
             owner: if u.fx.summon == 0 { u.owner } else { None },
@@ -74,23 +76,31 @@ fn reward(m: &mut MobaMatch, d: &Death) {
     if d.summon {
         return;
     }
-    let killer = d.credit.and_then(|c| c.seat);
+    let killer = d
+        .credit
+        .filter(|c| c.side.hostile(d.side))
+        .and_then(|c| c.seat)
+        .filter(|seat| {
+            seat.valid() && d.credit.is_some_and(|c| c.side.team() == Some(seat.team()))
+        });
     let Some(team) = killer_team(d) else { return };
     match d.kind {
-        UnitKind::Minion(_) => grant(m, killer, content::MINION_BOUNTY, 0),
+        UnitKind::Minion(_) => grant(m, d, killer, content::MINION_BOUNTY, 0, false),
         UnitKind::Troop(kind) => troop_death(m, d, killer, kind),
         UnitKind::Neutral(kind) => {
             let (gold, essence) = content::neutral_rewards(kind);
-            grant(m, killer, gold, essence);
+            grant(m, d, killer, gold, essence, false);
         }
         UnitKind::Commander(_) => {} // Reserved wire kind, never spawned (M-65).
         UnitKind::Tower(tier, lane) => {
             for seat in Seat::all().filter(|s| s.team() == team) {
                 grant(
                     m,
+                    d,
                     Some(seat),
                     content::TOWER_TEAM_BOUNTY,
                     content::TOWER_TEAM_ESSENCE,
+                    true,
                 );
             }
             m.events.push(Event::TowerDestroyed {
@@ -111,12 +121,15 @@ fn reward(m: &mut MobaMatch, d: &Death) {
 }
 
 fn troop_death(m: &mut MobaMatch, d: &Death, killer: Option<Seat>, kind: crate::Champion) {
-    grant(m, killer, content::troop_cost(kind) / 3, 0);
+    grant(m, d, killer, content::troop_cost(kind) / 3, 0, false);
     let Some(victim) = d.owner else { return };
     m.player_mut(victim).deaths += 1;
     let Some(by) = d.credit.and_then(|c| c.side.team()) else {
         return;
     };
+    if by == victim.team() {
+        return;
+    }
     m.score[by.index()] += 1;
     if let Some(killer) = killer {
         m.player_mut(killer).kills += 1;
@@ -124,12 +137,26 @@ fn troop_death(m: &mut MobaMatch, d: &Death, killer: Option<Seat>, kind: crate::
     m.events.push(Event::TroopKilled { victim, killer, by });
 }
 
-fn grant(m: &mut MobaMatch, seat: Option<Seat>, gold: u32, essence: u32) {
+fn grant(
+    m: &mut MobaMatch,
+    death: &Death,
+    seat: Option<Seat>,
+    gold: u32,
+    essence: u32,
+    team_reward: bool,
+) {
     if let Some(seat) = seat {
         let p = m.player_mut(seat);
         p.gold += gold;
         p.gold_earned += gold;
         p.essence += essence;
+        m.events.push(Event::GoldGranted {
+            seat,
+            gold,
+            essence,
+            team_reward,
+            origin: Some((death.kind, death.at)),
+        });
     }
 }
 

@@ -16,7 +16,6 @@ const FOV: f32 = 32.0 * std::f32::consts::PI / 180.0;
 const PITCH: f32 = 56.0 * std::f32::consts::PI / 180.0;
 pub const MIN_DISTANCE: f32 = 32.0;
 pub const MAX_DISTANCE: f32 = 290.0;
-const EDGE: f32 = 6.0;
 
 #[derive(Component)]
 pub struct MainCamera;
@@ -173,10 +172,14 @@ fn control(
         drag.active = window.focused && !over_ui.0 && window.cursor_position().is_some();
         drag.previous = window.cursor_position();
     }
-    let pan = keyboard_pan(&keys) + edge_pan(&window, over_ui.0, &mouse);
+    let pan = if window.focused {
+        keyboard_pan(&keys)
+    } else {
+        Vec2::ZERO
+    };
     rig.focus += pan.normalize_or_zero() * speed * dt;
     drag_camera(&mut drag, &mut rig, &window, &mouse, camera.0, camera.1);
-    if mouse.pressed(MouseButton::Middle) {
+    if window.focused && mouse.pressed(MouseButton::Middle) {
         let k = rig.distance / window.height().max(1.0) * 1.3;
         rig.focus += Vec2::new(-motion.delta.x, motion.delta.y) * k;
     }
@@ -241,19 +244,6 @@ fn keyboard_pan(keys: &ButtonInput<KeyCode>) -> Vec2 {
         }
     }
     pan
-}
-fn edge_pan(window: &Window, over_ui: bool, mouse: &ButtonInput<MouseButton>) -> Vec2 {
-    if !window.focused || over_ui || mouse.pressed(MouseButton::Left) {
-        return Vec2::ZERO;
-    }
-    let Some(cursor) = window.cursor_position() else {
-        return Vec2::ZERO;
-    };
-    let size = window.size();
-    Vec2::new(
-        u8::from(cursor.x > size.x - EDGE) as f32 - u8::from(cursor.x < EDGE) as f32,
-        u8::from(cursor.y < EDGE) as f32 - u8::from(cursor.y > size.y - EDGE) as f32,
-    )
 }
 fn ground_point(camera: &Camera, transform: &GlobalTransform, point: Vec2) -> Option<Vec3> {
     let ray = camera.viewport_to_world(transform, point).ok()?;

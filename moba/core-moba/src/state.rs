@@ -23,6 +23,16 @@ pub enum Brain {
     Neutral { camp: u8 },
 }
 
+/// Authoritative intent for presentation; crowd displacement does not change the action.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Activity {
+    #[default]
+    Advance,
+    Pursue,
+    Attack,
+    Hold,
+}
+
 /// Who dealt the last hit, for bounties.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Credit {
@@ -46,7 +56,8 @@ pub struct Unit {
     pub brain: Brain,
     pub target: u32,
     pub cooldown: u16,
-    pub(crate) bypass: Option<(u32, i32)>,
+    pub(crate) navigation: crate::sim::navigation::Navigation,
+    pub activity: Activity,
     /// Tick of the last attack fired, so views can animate it.
     pub last_attack: u32,
     pub last_hit: Option<Credit>,
@@ -177,6 +188,14 @@ pub enum Event {
         killer: Option<Seat>,
         by: Team,
     },
+    GoldGranted {
+        seat: Seat,
+        gold: u32,
+        essence: u32,
+        team_reward: bool,
+        /// None when the receipt's origin is outside the receiving Team's sight.
+        origin: Option<(UnitKind, Pos)>,
+    },
 }
 
 #[derive(Clone, Debug)]
@@ -299,7 +318,8 @@ impl MobaMatch {
             brain,
             target: 0,
             cooldown: 0,
-            bypass: None,
+            navigation: Default::default(),
+            activity: Activity::Advance,
             last_attack: 0,
             last_hit: None,
             fx: Default::default(),
@@ -369,9 +389,26 @@ impl MobaMatch {
             }
         }
         for u in &self.units {
-            if let Some((id, side)) = u.bypass {
-                mix(i64::from(id));
-                mix(i64::from(side));
+            for byte in crate::protocol::encode(&u.navigation) {
+                mix(i64::from(byte));
+            }
+            mix(u.activity as i64);
+            mix(i64::from(u.cooldown));
+            match u.brain {
+                Brain::Static => mix(0),
+                Brain::Lane { lane, waypoint } => {
+                    mix(1);
+                    mix(lane as i64);
+                    mix(i64::from(waypoint));
+                }
+                Brain::Jungle { camp } => {
+                    mix(2);
+                    mix(camp.map_or(-1, i64::from));
+                }
+                Brain::Neutral { camp } => {
+                    mix(3);
+                    mix(i64::from(camp));
+                }
             }
         }
         for b in &self.barrels {

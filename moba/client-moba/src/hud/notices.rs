@@ -90,6 +90,37 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
 fn line(lang: Lang, event: &Event, mine: Option<tbg_moba_core::Seat>) -> Option<(String, Color)> {
     let team_color = |t: Team| palette::glow(t);
     match *event {
+        Event::GoldGranted {
+            seat,
+            gold,
+            essence,
+            team_reward,
+            origin,
+        } if Some(seat) == mine => {
+            let scope = lang.t(if team_reward {
+                Key::TeamReward
+            } else {
+                Key::PersonalReward
+            });
+            let source = origin
+                .and_then(|(kind, _)| match kind {
+                    tbg_moba_core::UnitKind::Minion(_) => Some(Key::MinionReward),
+                    tbg_moba_core::UnitKind::Neutral(_) => Some(Key::JungleReward),
+                    tbg_moba_core::UnitKind::Troop(_) => Some(Key::TroopReward),
+                    tbg_moba_core::UnitKind::Tower(..) => Some(Key::TowerReward),
+                    _ => None,
+                })
+                .map_or(String::new(), |key| format!(" · {}", lang.t(key)));
+            let essence = if essence > 0 {
+                format!(" +{essence} {}", lang.t(Key::Essence))
+            } else {
+                String::new()
+            };
+            Some((
+                format!("+{gold} {}{essence} · {scope}{source}", lang.t(Key::Gold)),
+                palette::GOLD,
+            ))
+        }
         Event::TroopKilled { victim, killer, by } => {
             let who = |s: tbg_moba_core::Seat| {
                 if Some(s) == mine {
@@ -154,7 +185,11 @@ fn events(
                         ..default()
                     },
                     BackgroundColor(palette::PANEL),
-                    Ttl(6.0),
+                    Ttl(if matches!(event, Event::GoldGranted { .. }) {
+                        2.5
+                    } else {
+                        6.0
+                    }),
                 ))
                 .with_children(|r| {
                     r.spawn(text(value, 15.0, color));

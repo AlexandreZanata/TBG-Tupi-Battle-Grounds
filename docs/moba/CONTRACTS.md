@@ -20,9 +20,9 @@ id-ordered units, no clocks, no I/O, no async, no graphics, no unseeded
 randomness, no HashMap iteration in the simulation. Same seed and same
 intentions per tick ⇒ same `state_hash` every tick.
 
-## 3. Wire protocol v3 (M-40 – M-42)
+## 3. Wire protocol v4 (M-40 – M-42)
 
-`MOBA_PROTOCOL_VERSION = 3`. Binary WebSocket frames, postcard encoding of:
+`MOBA_PROTOCOL_VERSION = 4`. Binary WebSocket frames, postcard encoding of:
 
 ```text
 ClientMsg = Hello { protocol: u16, name: String (≤ 24 chars, no control chars) }
@@ -40,7 +40,10 @@ PrivateView   = { seat, gold, essence, tier, troops, destination,
                   offers: [UnitKind; 5] (1v1 champions), slot_rules: [u8; 5], locked: u8 }
 ```
 
-- Protocol v3 restores five offers/masks, slots 0–2 Role-filtered and
+- Protocol v4 appends GoldGranted receipts and UnitView activity (M-73–M-75).
+  Older handshakes are rejected. Receipt origins are redacted outside the
+  receiving Team's current sight.
+- Protocol v3 restored five offers/masks, slots 0–2 Role-filtered and
   slots 3–4 all Archetypes. Team World frames also carry visible champion
   combat facts, rolling casks and the associated attack, ability and death
   cues. It rejects v1/v2 clients.
@@ -121,3 +124,17 @@ shared validation lock. Full-workspace tests require an explicit owner request.
   files therefore changes the MOBA too; the MOBA workflow runs on them.
 - `UnitKind::Troop` carries a `tbg_core::UnitKind`; a champion's
   `Debug` name lowercased is its portrait file, as in the 1v1 Shop.
+
+
+## 7. Missions, geometry and reward receipts (M-73–M-75)
+
+The owner requested these changes on 2026-11-03 (D-112 sixth amendment).
+`tests/navigation.rs` guards all eight Camps with five melee champions,
+first-spawn mission persistence, both body sizes across water, playable
+rim clearance, inaccessible-target release and per-tick replay equality.
+`tests/rewards.rs` guards individual/team recipients, all monster values,
+source-independent periodic credit, owned summons, splash, simultaneous
+source death, one grant per death and hidden-origin redaction. Existing
+aggro, deployment, range and champion-combat contracts remain unchanged.
+Camera and motion evidence belongs to the desktop correspondence matrix;
+core assertions alone do not establish visual parity.

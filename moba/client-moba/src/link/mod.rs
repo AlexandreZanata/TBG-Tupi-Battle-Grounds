@@ -70,6 +70,9 @@ impl Default for Feed {
 
 impl Feed {
     pub fn push(&mut self, world: WorldView) {
+        if self.curr.as_ref().is_some_and(|old| old.tick == world.tick) {
+            return;
+        }
         self.events.extend(world.events.iter().copied());
         self.motion_events.extend(
             world

@@ -54,7 +54,17 @@ pub(super) fn fight(m: &mut MobaMatch) -> Vec<bool> {
     let mut hits = Vec::new();
     let mut engaged = Vec::with_capacity(m.units.len());
     for i in 0..m.units.len() {
-        engaged.push(decide(m, &vul, i, &mut hits));
+        let hold = decide(m, &vul, i, &mut hits);
+        m.units[i].activity = if m.units[i].fx.basic.is_some() || hold && m.units[i].target != 0 {
+            crate::state::Activity::Attack
+        } else if hold {
+            crate::state::Activity::Hold
+        } else if m.units[i].target != 0 {
+            crate::state::Activity::Pursue
+        } else {
+            crate::state::Activity::Advance
+        };
+        engaged.push(hold);
     }
     for (i, j) in hits {
         land(m, i, j);
@@ -92,7 +102,11 @@ fn decide(
         .flatten();
     let cast = champions::control::target(m, &m.units[i]);
     let special = cast.flatten().and_then(|id| m.slot(id));
-    let target = special.or(heal).or_else(|| select_target(m, vul, i));
+    let target = special.or(heal).or_else(|| {
+        (m.units[i].stats.damage > 0)
+            .then(|| select_target(m, vul, i))
+            .flatten()
+    });
     let id = target.map_or(0, |j| m.units[j].id);
     let u = &mut m.units[i];
     if u.fx.target != id && champions::same_target_counter(u) {
@@ -102,7 +116,7 @@ fn decide(
     u.target = id;
     let Some(j) = target else { return false };
     let (a, b) = (&m.units[i], &m.units[j]);
-    if heal.is_none() && special.is_none() && !a.pos.within(b.pos, champions::reach(a, b)) {
+    if heal.is_none() && special.is_none() && !super::decision::in_position(a, b) {
         return false;
     }
     if a.cooldown != 0
@@ -258,7 +272,8 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
         } else {
             champions::reach(a, b)
         };
-        attackable(vul, a, b)
+        !super::navigation::rejected(a, b.id, m.tick)
+            && attackable(vul, a, b)
             && a.pos.within(b.pos, limit)
             && anchor.is_none_or(|p| b.pos.within(p, leash))
     });
@@ -277,7 +292,10 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
     let mut best: Option<(bool, bool, i64, usize)> = None;
     m.grid.near(a.pos, sight + 7 * crate::geom::MM, |k| {
         let b = &m.units[k];
-        if !attackable(vul, a, b) || !a.pos.within(b.pos, sight + b.stats.radius) {
+        if super::navigation::rejected(a, b.id, m.tick)
+            || !attackable(vul, a, b)
+            || !a.pos.within(b.pos, sight + b.stats.radius)
+        {
             return;
         }
         if anchor.is_some_and(|p| !b.pos.within(p, leash + a.stats.range)) {
@@ -285,7 +303,7 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
         }
         let d = a.pos.dist2(b.pos);
         let not_guard = !champions::abilities(b).contains(&tbg_core::content::Ability::Guard);
-        let out_of_range = !a.pos.within(b.pos, champions::reach(a, b));
+        let out_of_range = !super::decision::in_position(a, b);
         if out_of_range && !a.mobile() {
             return;
         }

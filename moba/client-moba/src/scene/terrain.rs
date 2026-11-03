@@ -262,7 +262,7 @@ fn disc(out: &mut Vec<(Vec3, Color)>, center: Vec2, r: f32, lift: f32, color: Co
 /// The river surface: a flat translucent ribbon, lighter along its centre.
 pub fn water() -> Mesh {
     let mut vertices = Vec::new();
-    let half = RIVER_HALF_WIDTH as f32 + 2.2;
+    let half = map::WATER_HALF_WIDTH as f32 / 1000.0;
     for w in RIVER.windows(2) {
         let (a, b) = (v(w[0]), v(w[1]));
         let dir = (b - a).normalize_or_zero();

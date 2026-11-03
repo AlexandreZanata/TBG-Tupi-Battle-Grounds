@@ -161,20 +161,22 @@ pub(super) fn camps(m: &mut MobaMatch) {
             _ => continue,
         }
         m.camps[c].respawn_at = None;
-        let (center, _) = map::camp(c);
+        let (center, team) = map::camp(c);
         let brain = Brain::Neutral { camp: c as u8 };
         for (i, &kind) in content::camp_content(map::camp_kind(c))
             .0
             .iter()
             .enumerate()
         {
-            m.spawn(
-                UnitKind::Neutral(kind),
-                Side::Neutral,
-                None,
-                offset(center, fan(i as u32)),
-                brain,
-            );
+            let mut pos = offset(center, fan(i as u32));
+            let radius = content::base_stats(UnitKind::Neutral(kind)).radius;
+            for _ in 0..32 {
+                if map::surface::walkable(pos, radius) {
+                    break;
+                }
+                pos.step_toward(map::stronghold(team), 250);
+            }
+            m.spawn(UnitKind::Neutral(kind), Side::Neutral, None, pos, brain);
         }
     }
 }

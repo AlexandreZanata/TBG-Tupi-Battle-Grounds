@@ -733,6 +733,23 @@
       "windows": "pending",
       "web": "pending",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-l-missions-camera-reward-motion",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Shared MOBA desktop camera capture/edges/focus, personal and Team reward receipts with hidden origins, eight Camps, target commitment, route resumption, crowded Nexus, water/rim pursuit, shared 1v1 gait/attack transitions and 12-unit plaza",
+      "linux": "26 focused core tests and native compile passed; runtime evidence pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
     }
+  ],
+  "moba_motion_screens": [
+    "moba-camera-edges-and-capture",
+    "moba-rewards-personal-team-hidden-origin",
+    "moba-jungle-melee-eight-camps",
+    "moba-nexus-crowd-mission-resume",
+    "moba-water-rim-pursuit-target-commitment"
   ]
 }

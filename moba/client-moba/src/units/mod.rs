@@ -27,6 +27,8 @@ mod cues;
 mod fx;
 pub mod models;
 mod monsters;
+#[cfg(not(target_arch = "wasm32"))]
+mod motion_probe;
 mod status;
 
 /// Render layer seen only by the minimap camera.
@@ -41,6 +43,7 @@ pub struct UnitVisual {
     pub curr: Vec2,
     pub hp: f32,
     target: u32,
+    activity: tbg_moba_core::state::Activity,
     pub yaw: f32,
     lunge: f32,
     still: f32,
@@ -115,6 +118,8 @@ pub fn plugin(app: &mut App) {
     champions::plugin(app);
     monsters::plugin(app);
     status::plugin(app);
+    #[cfg(not(target_arch = "wasm32"))]
+    motion_probe::plugin(app);
 }
 
 fn unlit(materials: &mut Assets<StandardMaterial>, color: Color) -> Handle<StandardMaterial> {
@@ -302,6 +307,7 @@ fn sync(
                 }
                 v.hp = hp;
                 v.target = u.target;
+                v.activity = u.activity;
                 if u.attacked {
                     v.lunge = 1.0;
                 }
@@ -449,6 +455,7 @@ fn spawn_unit(
                 curr: pos,
                 hp: u.hp_permille as f32 / 1000.0,
                 target: u.target,
+                activity: u.activity,
                 yaw,
                 lunge: 0.0,
                 still: 0.15,
@@ -594,11 +601,20 @@ fn animate(
             } else {
                 v.still + dt
             };
-            a.set_base(if v.still < 0.15 && v.effect.carrier == 0 {
-                Clip::Walk
-            } else {
-                Clip::Idle
-            });
+            a.set_base(
+                if v.still < 0.15
+                    && v.effect.carrier == 0
+                    && matches!(
+                        v.activity,
+                        tbg_moba_core::state::Activity::Advance
+                            | tbg_moba_core::state::Activity::Pursue
+                    )
+                {
+                    Clip::Walk
+                } else {
+                    Clip::Idle
+                },
+            );
             transform.translation = at;
             let flash = v.flash;
             if flash != 0.0 && !v.flash_applied {
