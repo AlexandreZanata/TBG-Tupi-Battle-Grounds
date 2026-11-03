@@ -77,8 +77,44 @@ renderer — not a performance measurement):
   matches even (7 vs 7 towers at 25:00 with the seed shift disabled).
 
 ![Menu](../moba/media/p76-menu.webp)
-![Lane close-up](../moba/media/p76-lane-closeup.webp)
-![Overview at 07:27](../moba/media/p76-overview-0727.webp)
+![1v1 champions on a lane at 7:03](../moba/media/p76-champions-lane.webp)
+![Overview at 7:03](../moba/media/p76-overview.webp)
+
+## Revision 2 — shared champions and the 1v1 battle HUD (owner, 2026-11-03)
+
+Owner request: copy the 1v1 battle cards exactly (same frame, the same 3D
+champion photos), use the 1v1 top HUD with the clock and each side's Gold
+instead of HP, make the 5v5 champions exactly the 1v1 champions (both modes
+share them), keep automatic Minion waves as the new element, then open a PR.
+
+| Step | Result |
+|---|---|
+| R1 Troops are `tbg_core::UnitKind` champions; stats/prices from their 1v1 `UnitDef`; heal and splash honoured (M-18) | done |
+| R2 Per-seat Shop with the 1v1 rules, locks and a paid reroll; buying by slot (M-19); protocol v1 intentions updated before first merge | done |
+| R3 Client compiles the 1v1 `art/`, `vfx/impacts.rs`, `vfx/shots.rs` in place; champions and Commanders use the 1v1 rigs, clips, shots and impacts | done |
+| R4 HUD in the 1v1 battle layout: score plates with crests around the round clock (Gold · Kills · Towers instead of HP), Arena chip, `resources.webp` strip (Gold, Essence/Upgrade, Army, Reroll), five `shop-card.webp` cards with 1v1 portraits, names, archetypes, Cost and lock | done |
+| R5 Minion waves every 30 s per lane attacking Troops, Commanders and structures on the way | kept from S2 (documented as §9a) |
+| R6 Installer copies the 1v1 `battle/` and `lobby/native-icons/` assets; RNG seeds no longer collide (splitmix64) | done |
+
+Validation of the revision (MOBA workspace, shared lock, two jobs):
+
+```text
+cargo fmt --all -- --check                                              → ok
+cargo clippy --locked --workspace --all-targets -- -D warnings          → ok
+cargo test --locked --workspace                                         → 13 passed (11 core, 2 server)
+cargo check --locked -p tbg-moba-core -p tbg-moba-client --target wasm32-unknown-unknown → ok
+```
+
+Observed on Linux (Xvfb on the local NVIDIA RTX 4060 through Vulkan):
+offline start, 7:03 lane fight and overview (`--seed 11 --warp 420`),
+installed binary loading the copied 1v1 assets with zero load errors, and
+real X input: lock on card 1 (closed-lock icon), Reroll (card 1 kept, the
+other four redrawn, 6 Gold spent), card purchase. Online: `tbg-moba-server`
+assigned seat 0, the bot resumed it on leave. Bot-only probe: seeds 1–3
+reach 25:00 with Towers falling on both sides, ~25–48 µs per tick, peak
+world frame ~2.7 KB.
+
+![Locked card after a reroll](../moba/media/p76-card-lock.webp)
 
 ## Deviations
 
@@ -102,6 +138,10 @@ renderer — not a performance measurement):
 
 ## Known limitations (honest list for the next agent)
 
+- 1v1 champion abilities and Evolutions are not active in 5v5 yet (base
+  form and base stats only); Upgrade tiers are a MOBA percentage boost.
+- The 1v1 sources are shared by `#[path]`, so a 1v1 refactor of `art/` or
+  `vfx/` can break the MOBA build (the MOBA workflow watches those paths).
 - No Commander abilities, items, fog of war, pings, chat, sounds or music.
 - One room per server process; no matchmaking, reconnect token, TLS or metrics.
 - Commander Auto is simple (follows the lane front, retreats at 25 % HP).
@@ -112,7 +152,9 @@ renderer — not a performance measurement):
 
 ## Backlog — next phases (each its own spec before work starts)
 
-1. **P77 — Commander kit and orders.** One active ability per role (Q),
+1. **P77 — Champion abilities and Evolutions in 5v5, Commander kit and orders.**
+   Run each champion's 1v1 abilities and Evolution forms in the MOBA core;
+   one active ability per Commander role (Q),
    attack-move, stop, health/cooldown HUD, ability VFX; bots use them.
    Contracts: append `MobaIntention` variants (protocol v2 only if needed).
 2. **P78 — Online rooms for real players.** Several rooms per process,

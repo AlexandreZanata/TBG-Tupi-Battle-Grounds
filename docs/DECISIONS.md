@@ -3491,3 +3491,13 @@ image. Bots fill every empty seat through the same intentions as humans.
 **Reopen when** the owner wants the mode inside the 1v1 launcher or server,
 shared crates between modes become worth their coupling, or balance work
 (only on explicit request) needs a lab like D-33.
+
+**Amendment (owner, 2026-11-03).** Both modes share the same champions and
+the same battle HUD language. The MOBA now depends read-only on
+`crates/tbg-core` (roster, stats, prices, pool) and compiles the 1v1 figure
+sources (`crates/tbg-client/src/art`, `vfx/impacts.rs`, `vfx/shots.rs`) in
+place, loading the 1v1 battle assets, so its Troops and Commanders are the
+1v1 champions with their rigs, animations, shots and impacts. Nothing in
+`crates/` is edited, so the 1v1 build and release inputs stay unchanged;
+the MOBA workflow also runs when those shared files change. A shared art
+crate remains the cleaner end state and needs a 1v1 release (owner gate).

@@ -1294,3 +1294,11 @@ input journeys were observed (see the [P76 report](../phases/P76-moba-5v5-founda
 Presentation code has no OS-specific branches; the WASM client passes
 `cargo check` without warnings (locally and in the MOBA CI). Windows and desktop web packaging, runtime and pixel/motion
 correspondence are **pending** (P80) and block visual acceptance there.
+
+P76 revision 2 (2026-11-03): the MOBA client now shows the 1v1 champions
+with the shared 1v1 rigs, clips, shots and impacts, and copies the 1v1
+battle HUD language: score plates with crests around the round clock (Gold,
+Kills and Towers replace HP), the Arena chip, the `resources.webp` strip and
+five `shop-card.webp` cards with the 1v1 portraits, texts, Cost and lock.
+Linux offline/overview/fight/lock/reroll/purchase and installed-asset runs
+were observed; Windows and desktop web remain pending (P80).

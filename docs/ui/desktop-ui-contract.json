@@ -618,8 +618,8 @@
       "id": "p76-moba-5v5-foundation-20261103",
       "date": "2026-11-03",
       "report": "docs/phases/P76-moba-5v5-foundation.md",
-      "affected_cases": "New separate tbg-moba client (moba/client-moba): menu, match HUD, overlays, Tupi Valley scene, unit figures and combat effects; outside the 1v1 capture matrix",
-      "linux": "offline, overview, online and real-input journeys observed; pixel/motion matrix for the MOBA pending",
+      "affected_cases": "Separate tbg-moba client (moba/client-moba): menu, 1v1-style match HUD (score plates, round clock, resource strip, five Shop cards with 1v1 portraits and locks), overlays, Tupi Valley scene, shared 1v1 champion figures/clips/shots/impacts, Minions and structures; outside the 1v1 capture matrix",
+      "linux": "offline, overview, fight, online, lock/reroll/purchase and installed-asset journeys observed; pixel/motion matrix for the MOBA pending",
       "windows": "pending (no MOBA package yet)",
       "web": "pending (WASM compile only)",
       "android": "out of scope"

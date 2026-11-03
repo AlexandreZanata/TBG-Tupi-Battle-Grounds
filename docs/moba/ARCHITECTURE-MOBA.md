@@ -8,14 +8,17 @@
 
 `moba/` is a **separate Cargo workspace** (`moba/Cargo.toml`, `moba/Cargo.lock`).
 
-- No dependency in either direction between `moba/*` and `crates/*`.
+- The 1v1 crates never depend on `moba/*`. The MOBA reads the 1v1
+  champions (see §5a) but never edits a 1v1 file.
 - The root `Cargo.toml`/`Cargo.lock` are untouched, so the 1v1 desktop
   release policy (`scripts/native_release_policy.py`) never sees a MOBA
   change and the 1v1 packages never rebuild because of it.
 - Its own CI workflow (`.github/workflows/moba.yml`, path-filtered to `moba/**`).
 - Its own installer and binaries (`tbg-moba`, `tbg-moba-server`).
-- Shared only by copy: the two OFL UI fonts (`client-moba/assets/fonts`) and
-  the TBG icon used by the installer. The lock file started as a copy of the
+- Shared by copy: the two OFL UI fonts (`client-moba/assets/fonts`). Shared
+  in place: `tbg-core`, the 1v1 champion art sources and the 1v1 battle
+  assets (§5a); the installer copies `battle/` and `lobby/native-icons/`
+  beside the binary. The lock file started as a copy of the
   root lock so dependency versions match the audited 1v1 set.
 
 Integrating the mode into the 1v1 launcher or server later is a separate,
@@ -82,12 +85,37 @@ owner-approved phase (see the P76 backlog).
 - `camera`: RTS rig (arrows/edge pan, middle drag, wheel zoom, Space to
   centre) and an orthographic minimap camera drawn into the HUD frame's
   viewport.
-- `hud`: 1920×1080 design grid scaled by window height; portraits are live
-  render-to-texture shots of the same 3D figures.
+- `hud`: 1920×1080 design grid scaled by window height, in the 1v1 battle
+  layout (score plates and round clock on top; resource strip and five
+  Shop cards at the bottom; Destination and player card beside them).
 - `input`: manual UI hit-testing (no picking backend), hotkeys, right-click
   orders with ground ray casts.
 - `--capture PATH [--warp S] [--overview] [--seed N] [--role R]` makes the
   Linux reference screenshots used in reports.
+
+## 5a. Shared 1v1 champions
+
+Both modes share one roster (owner request, 2026-11-03):
+
+- **Rules:** `tbg-moba-core` turns each `tbg_core::UnitKind` into a MOBA
+  Troop from its 1v1 `UnitDef` (HP, damage, interval, range, speed × 4,
+  heal, splash, Energy cost × 6 Gold) and draws Shop offers from
+  `tbg_core::types::FULL_POOL` with the 1v1 Shop rules.
+- **Figures:** `client-moba/src/main.rs` compiles
+  `crates/tbg-client/src/art/mod.rs` as its own `art` module (`#[path]`),
+  plus the 1v1 `vfx/impacts.rs` and `vfx/shots.rs` under a small runtime in
+  `client-moba/src/vfx/mod.rs` (a verbatim copy of the 1v1 `vfx.rs` asset
+  table, motions and spawn helpers). `units/champions.rs` spawns each
+  champion with the 1v1 rig and `Animator` (Spawn, Walk, AttackMelee/
+  AttackRanged/Cast, Hit, Death clips) and fires the kit's shot on Release
+  or lands its impact on Strike. Commanders are their role's champion at a
+  larger scale.
+- **HUD:** cards, resource strip, score plates, crests, locks and icons use
+  the 1v1 assets and a copy of the 1v1 battle chrome helpers
+  (`hud/chrome.rs`).
+- ponytail: path-shared sources stand in for a shared `tbg-art` crate,
+  which would need a 1v1 release (owner decision). Upgrade path: move
+  `art/`, `vfx/` and the chrome helpers into a crate both clients depend on.
 
 ## 6. Running
 

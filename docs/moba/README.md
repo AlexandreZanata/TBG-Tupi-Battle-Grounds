@@ -1,11 +1,12 @@
 # TBG Arena 5v5 — MOBA mode
 
 A separate 5v5 game mode of Tupi Battle Grounds: ten Commanders, three
-lanes, a jungle, Troops bought in the Shop and sent to a Destination, and
-bots on every empty seat. Status: **P76 foundation — playable offline
+lanes, a jungle, automatic Minion waves, the **same champions as the 1v1
+game** bought in the same Shop and sent to a Destination, and bots on every
+empty seat. Status: **P76 foundation — playable offline
 against 9 bots and online on a local room server; unbalanced.**
 
-![Lane close-up with the HUD](media/p76-lane-closeup.webp)
+![1v1 champions fighting on a lane, 1v1-style HUD](media/p76-champions-lane.webp)
 
 | Read | For |
 |---|---|
@@ -23,11 +24,12 @@ tbg-moba --play --role mid             # straight into a practice match
 tbg-moba-server & tbg-moba --online    # local room; more clients take bot seats
 ```
 
-Controls: right click moves your Commander (then it holds there), **A**
-returns it to automatic, **Space** centres the camera, arrows/screen edges/
-middle drag pan, wheel zooms, **1–5** pick a Troop, **Z X C V** pick
-Top/Mid/Bot/Jungle, **Enter** or the gold button buys and sends, **U**
-upgrades, **Esc** returns to the menu. The minimap moves the camera (left)
+Controls: a click on a Shop card (or **1–5**) buys that champion and sends
+it to the Destination (**Z X C V** = Top/Mid/Bot/Jungle); the card's lock
+keeps it through redraws; **R** or the Reroll button redraws the offers;
+**U** upgrades; right click moves your Commander (then it holds there),
+**A** returns it to automatic, **Space** centres the camera, arrows/screen
+edges/middle drag pan, wheel zooms, **Esc** returns to the menu. The minimap moves the camera (left)
 or your Commander (right).
 
 ## Develop
