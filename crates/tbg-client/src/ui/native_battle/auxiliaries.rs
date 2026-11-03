@@ -188,14 +188,33 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, slot: usize) {
                         AuxReadout::Name(slot),
                     ));
                 });
-            card.spawn(absolute(8., 6., 105., 14.))
-                .with_children(|sub| {
-                    sub.spawn((
-                        kit::muted("", 9.),
-                        TextLayout::no_wrap(),
-                        AuxReadout::Subtitle(slot),
-                    ));
-                });
+            card.spawn(absolute(
+                8.,
+                6.,
+                105.,
+                if cfg!(target_os = "android") {
+                    22.
+                } else {
+                    14.
+                },
+            ))
+            .with_children(|sub| {
+                sub.spawn((
+                    kit::muted("", 9.),
+                    #[cfg(target_os = "android")]
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
+                    if cfg!(target_os = "android") {
+                        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter)
+                    } else {
+                        TextLayout::no_wrap()
+                    },
+                    AuxReadout::Subtitle(slot),
+                ));
+            });
             card.spawn(Node {
                 position_type: PositionType::Absolute,
                 left: px(6.),

@@ -24,8 +24,9 @@
   "appcompat": "1.7.1",
   "game_activity_aar_sha256": "3a8b0887ac55a0a6ab56021ced7353a250539eac811278b74bccd8a5b678d9c9",
   "emulator_abi": "x86_64",
-  "emulator_api": 35,
-  "emulator_page_size": 16384,
-  "emulator_rendering": "SwiftShader after host GPU emulator crash",
-  "reference_linux_commit": "b964875e2219bafe129b19960f7f1369307870d5"
+  "emulator_api": 36,
+  "emulator_page_size": 4096,
+  "emulator_rendering": "Task-owned Intel Vulkan API36 x86_64; API35 16KB runtime remains unverified",
+  "reference_linux_commit": "83cffd5442690504b137616a1a623d236d416675",
+  "emulator_system_image_revision": 7
 }

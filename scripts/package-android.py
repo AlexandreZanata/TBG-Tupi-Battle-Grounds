@@ -19,8 +19,8 @@ ROOT = Path(__file__).resolve().parents[1]
 STAGE = ROOT / "platform/android/app/build/native-input"
 ASSETS = ROOT / "crates/tbg-client/assets"
 PACKAGE = "io.github.alexandrezanata.tbg.prototype"
-# Owner-selected main reference; PR #57 and #58 are inherited by the execution branch.
-BASE = "b964875e2219bafe129b19960f7f1369307870d5"
+# The reviewed main reference is pinned once; its merged PRs remain ancestors of the candidate.
+BASE = json.loads((ROOT / "platform/android/toolchain.json").read_text())["reference_linux_commit"]
 
 
 def digest(raw):

@@ -1,6 +1,6 @@
 # Native Android landscape candidate
 
-Version: `0.1.4-colossus.5`. Ruleset15 / `cc459351581b7763`, protocol38.
+Version: `0.1.4-colossus.6`. Ruleset16 / `f2e253b98ccb313a`, protocol40.
 
 The native Android prototype inherits the current Linux game and medieval art,
 with compact landscape menus and safe controls over an edge-to-edge scene.

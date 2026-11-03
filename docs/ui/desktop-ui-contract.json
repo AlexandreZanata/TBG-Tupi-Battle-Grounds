@@ -473,6 +473,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-mobile-complete-auxiliary-tier-subtitle",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android auxiliary subtitle wraps complete Merchant T3 progress/charge state in its existing card; desktop geometry/art/motion unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

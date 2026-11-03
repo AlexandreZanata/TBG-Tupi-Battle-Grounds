@@ -1155,3 +1155,11 @@ it cannot grow across the HP plates. Expanded chat and policies are shared;
 desktop score/social/surrender geometry remains unchanged. Actual candidate41
 body visibility, drawer/Back and one-confirm Council evidence are recorded in
 the P69 continuation; the compact dock repetition is pending candidate42.
+
+
+P69 tier readouts: Android permits two wrapped lines in the existing auxiliary
+subtitle region, so Merchant T3 progress and remaining charges stay complete.
+Desktop subtitle geometry, every tier's art/motion and all authoritative values
+are preserved. The actual T1/T2/T3 candidate41 observations and clipped status
+failure are recorded in the P69 continuation; wrapped-runtime repetition remains
+pending the next package.
