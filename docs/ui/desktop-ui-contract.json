@@ -275,6 +275,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-short-battle-owned-scroll-auxiliary-drawer",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android short-height Shop/score/resource text bounds, Energy grouping, explicit auxiliary drawer and modal shields, scrolling across owned controls; desktop presentation/motion unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

@@ -74,10 +74,10 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             card.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    top: px(9),
-                    left: px(7),
-                    width: px(if cfg!(target_os = "android") { 44 } else { 152 }),
-                    height: px(if cfg!(target_os = "android") { 44 } else { 137 }),
+                    top: px(if cfg!(target_os = "android") { 6 } else { 9 }),
+                    left: px(if cfg!(target_os = "android") { 6 } else { 7 }),
+                    width: px(if cfg!(target_os = "android") { 24 } else { 152 }),
+                    height: px(if cfg!(target_os = "android") { 24 } else { 137 }),
                     ..default()
                 },
                 ImageNode::default(),
@@ -85,25 +85,31 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             ));
             card.spawn(Node {
                 position_type: PositionType::Absolute,
-                left: px(if cfg!(target_os = "android") { 58 } else { 12 }),
-                right: px(10),
-                top: px(if cfg!(target_os = "android") { 12 } else { 147 }),
-                height: px(if cfg!(target_os = "android") { 32 } else { 22 }),
+                left: px(if cfg!(target_os = "android") { 36 } else { 12 }),
+                right: px(if cfg!(target_os = "android") { 6 } else { 10 }),
+                top: px(if cfg!(target_os = "android") { 6 } else { 147 }),
+                height: px(if cfg!(target_os = "android") { 38 } else { 22 }),
                 overflow: Overflow::clip(),
                 ..default()
             })
             .with_children(|title| {
                 title.spawn((
+                    #[cfg(target_os = "android")]
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
                     chrome::title(
                         "",
                         if cfg!(target_os = "android") {
-                            12.
+                            10.
                         } else {
                             16.
                         },
                     ),
                     if cfg!(target_os = "android") {
-                        TextLayout::default()
+                        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter)
                     } else {
                         TextLayout::no_wrap()
                     },
@@ -113,11 +119,15 @@ fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
             card.spawn((
                 Node {
                     position_type: PositionType::Absolute,
-                    left: px(if cfg!(target_os = "android") { 58 } else { 12 }),
-                    top: px(if cfg!(target_os = "android") { 40 } else { 170 }),
+                    left: px(if cfg!(target_os = "android") { 6 } else { 12 }),
+                    top: px(if cfg!(target_os = "android") { 46 } else { 170 }),
+                    #[cfg(target_os = "android")]
+                    right: px(52),
+                    #[cfg(target_os = "android")]
+                    min_width: px(0),
                     ..default()
                 },
-                kit::muted("", 11.),
+                kit::muted("", if cfg!(target_os = "android") { 9. } else { 11. }),
                 Readout::Role(i),
             ));
             card.spawn(Node {

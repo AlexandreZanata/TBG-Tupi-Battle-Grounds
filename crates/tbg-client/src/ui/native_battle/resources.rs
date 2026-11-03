@@ -38,7 +38,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                     px(if cfg!(target_os = "android") { 6 } else { 15 }),
                     px(if cfg!(target_os = "android") { 0 } else { 5 }),
                 ),
-                column_gap: px(if cfg!(target_os = "android") { 6 } else { 14 }),
+                column_gap: px(if cfg!(target_os = "android") { 4 } else { 14 }),
                 align_items: AlignItems::Center,
                 ..default()
             },
@@ -49,11 +49,25 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
             },
         ))
         .with_children(|bar| {
+            #[cfg(target_os = "android")]
+            bar.spawn(Node {
+                width: px(48),
+                min_width: px(48),
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            })
+            .with_children(|energy| {
+                energy.spawn((chrome::title("", 10.), Readout::EnergyLabel));
+                energy.spawn((label("", 13.), Readout::Energy));
+            });
+            #[cfg(not(target_os = "android"))]
             bar.spawn((
                 chrome::title(
                     "Energy",
                     if cfg!(target_os = "android") {
-                        12.
+                        11.
                     } else {
                         17.
                     },
@@ -63,8 +77,8 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
             bar.spawn((
                 Node {
                     flex_grow: 1.,
-                    min_width: px(if cfg!(target_os = "android") { 32 } else { 70 }),
-                    max_width: px(if cfg!(target_os = "android") { 80 } else { 240 }),
+                    min_width: px(if cfg!(target_os = "android") { 24 } else { 70 }),
+                    max_width: px(if cfg!(target_os = "android") { 48 } else { 240 }),
                     height: px(21),
                     border: UiRect::all(px(2)),
                     border_radius: BorderRadius::all(px(20)),
@@ -86,6 +100,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                     Hud::EnergyFill,
                 ));
             });
+            #[cfg(not(target_os = "android"))]
             bar.spawn((
                 label("", 13.),
                 Node {
@@ -99,7 +114,7 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 chrome::title(
                     "Interest",
                     if cfg!(target_os = "android") {
-                        12.
+                        11.
                     } else {
                         17.
                     },
@@ -125,10 +140,20 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 chrome::CREAM,
             ));
             bar.spawn((
+                #[cfg(target_os = "android")]
+                Node {
+                    flex_grow: 1.,
+                    flex_basis: px(0),
+                    min_width: px(0),
+                    max_height: percent(100),
+                    ..default()
+                },
+                #[cfg(target_os = "android")]
+                TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
                 chrome::title(
                     "",
                     if cfg!(target_os = "android") {
-                        12.
+                        11.
                     } else {
                         17.
                     },
@@ -166,8 +191,21 @@ pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
                 },
             ))
             .with_children(|button| {
-                button.spawn((label("", 13.), Readout::Reroll));
+                button.spawn((
+                    #[cfg(target_os = "android")]
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
+                    #[cfg(target_os = "android")]
+                    TextLayout::new(Justify::Center, LineBreak::WordOrCharacter),
+                    label("", 13.),
+                    Readout::Reroll,
+                ));
             });
+            #[cfg(target_os = "android")]
+            super::auxiliaries::spawn_toggle(bar);
         });
 }
 

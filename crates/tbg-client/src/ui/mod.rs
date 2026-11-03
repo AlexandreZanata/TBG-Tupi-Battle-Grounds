@@ -110,6 +110,8 @@ pub enum UiAction {
     Buy(u8),
     #[cfg_attr(not(tbg_native_ui), allow(dead_code))]
     HireAuxiliary(u8),
+    #[cfg(target_os = "android")]
+    ToggleAuxiliaries,
     #[cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
     Reserve {
         offer: u8,

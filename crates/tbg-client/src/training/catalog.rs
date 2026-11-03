@@ -283,7 +283,14 @@ fn list(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetServer, lang: L
                         12.,
                     ));
                 });
-                row.spawn(kit::heading(">", 22.));
+                row.spawn(kit::heading(
+                    ">",
+                    if cfg!(target_os = "android") {
+                        16.
+                    } else {
+                        22.
+                    },
+                ));
             });
         }
     });

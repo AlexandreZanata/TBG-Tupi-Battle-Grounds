@@ -1005,3 +1005,11 @@ P69 copy bounds: Android readouts retain intrinsic height and use word wrapping
 with a character fallback for individual long names/labels. Ranking sidebar
 stat labels are bounded; Browser button copy is shortened equivalently on Android.
 Desktop geometry/copy remains unchanged. See the P69 per-profile observations.
+
+P69 short battle viewport: Android Shop cells bound compact portraits/names/roles,
+Energy label/value share a column, and the48dp auxiliary drawer button flows in
+the resource bar beside Reroll. The dismissible drawer retains both choices and
+all server-derived prices/progress while shielding background actions. Scroll
+ownership permits a viewport's own buttons and blocks unrelated modal branches.
+Desktop geometry and all motion/gameplay remain unchanged. Runtime evidence and
+pending targets are recorded in the P69 continuation report.

@@ -1,6 +1,9 @@
 //! Bottom-right War Auxiliaries (`Mineiro` and `Mercador`) panel in the native battle HUD (P74).
 //! Separated from the five conventional Shop cards, sharing the navy-and-gold visual language.
 
+#[cfg(target_os = "android")]
+mod mobile;
+
 use super::{
     super::{hud::Hud, kit, PendingBuy, UiAction},
     chrome, SHOP_BOTTOM, SHOP_SCALE,
@@ -24,6 +27,8 @@ struct AuxCoinIcon(usize);
 #[derive(Component)]
 enum AuxReadout {
     Header,
+    #[cfg(target_os = "android")]
+    Toggle,
     Name(usize),
     Subtitle(usize),
     BadgePrefix(usize),
@@ -31,10 +36,25 @@ enum AuxReadout {
 }
 
 pub fn plugin(app: &mut App) {
+    #[cfg(target_os = "android")]
+    mobile::plugin(app);
     app.add_systems(Update, update.run_if(in_state(GameState::InMatch)));
 }
 
+#[cfg(target_os = "android")]
+pub(super) fn spawn_toggle(parent: &mut ChildSpawnerCommands) {
+    mobile::button(parent);
+}
+
 pub fn spawn(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
+    #[cfg(target_os = "android")]
+    mobile::spawn(parent, assets);
+    #[cfg(not(target_os = "android"))]
+    desktop(parent, assets);
+}
+
+#[cfg(not(target_os = "android"))]
+fn desktop(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
     parent
         .spawn((
             Node {
@@ -390,6 +410,15 @@ fn update(
     for (readout, mut text) in &mut texts {
         let want = match readout {
             AuxReadout::Header => header_text(slots, *lang),
+            #[cfg(target_os = "android")]
+            AuxReadout::Toggle => format!(
+                "Aux.\n{}/{}",
+                slots
+                    .iter()
+                    .filter(|slot| slot.phase != AuxiliaryPhase::Available)
+                    .count(),
+                AUXILIARY_SLOTS
+            ),
             AuxReadout::Name(i) => slot_strings(slots[*i], *lang).0.to_string(),
             AuxReadout::Subtitle(i) => slot_strings(slots[*i], *lang).1,
             AuxReadout::BadgePrefix(i) => slot_strings(slots[*i], *lang).2.to_string(),

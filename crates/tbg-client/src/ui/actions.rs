@@ -373,6 +373,8 @@ pub(super) fn apply(
                     pending.0 = Some((u8::MAX, seq.0));
                 }
             }
+            #[cfg(target_os = "android")]
+            UiAction::ToggleAuxiliaries => {}
             UiAction::HireAuxiliary(slot) => {
                 if pending.0.is_some() {
                     continue;

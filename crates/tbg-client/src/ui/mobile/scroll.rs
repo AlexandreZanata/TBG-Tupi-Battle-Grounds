@@ -24,6 +24,7 @@ type Shields<'w, 's> = Query<
     'w,
     's,
     (
+        Entity,
         &'static ComputedNode,
         &'static UiGlobalTransform,
         &'static InheritedVisibility,
@@ -70,20 +71,20 @@ pub fn scroll(
         // A modal's shield cannot pass a drag into a background page.
         let shield = shields
             .iter()
-            .filter(|(node, t, visible, _, clip)| {
+            .filter(|(_, node, t, visible, _, clip)| {
                 visible.get()
                     && node.contains_point(**t, point)
                     && clip.is_none_or(|c| c.contains_point(point))
             })
-            .map(|(_, _, _, stack, _)| stack.0)
-            .max()
-            .unwrap_or(0);
+            .max_by_key(|(_, _, _, _, stack, _)| stack.0)
+            .map(|(entity, _, _, _, stack, _)| (entity, stack.0));
         let target = lists
             .iter()
-            .filter(|(_, style, node, t, visible, stack, clip, _)| {
+            .filter(|(entity, style, node, t, visible, stack, clip, _)| {
                 style.overflow.y == Overflow::scroll_y().y
                     && visible.get()
-                    && stack.0 >= shield
+                    && shield
+                        .is_none_or(|(shield, z)| stack.0 >= z || owns(*entity, shield, &parents))
                     && node.content_size.y > node.size.y
                     && node.contains_point(**t, point)
                     && clip.is_none_or(|c| c.contains_point(point))
@@ -109,5 +110,18 @@ fn chain(mut target: Option<Entity>, mut delta: f32, lists: &mut Lists, parents:
             break;
         }
         target = parents.get(entity).ok().map(ChildOf::parent);
+    }
+}
+
+// A list owns its buttons: dragging over one scrolls the list, while an unrelated modal shields it.
+fn owns(ancestor: Entity, mut child: Entity, parents: &Query<&ChildOf>) -> bool {
+    loop {
+        if ancestor == child {
+            return true;
+        }
+        let Ok(parent) = parents.get(child) else {
+            return false;
+        };
+        child = parent.parent();
     }
 }

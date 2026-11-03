@@ -187,13 +187,34 @@ fn plate(
                         line.spawn((
                             Node {
                                 max_width: percent(68),
+                                #[cfg(target_os = "android")]
+                                min_width: px(0),
                                 overflow: Overflow::clip(),
                                 ..default()
                             },
-                            chrome::title(display_name, 14.),
+                            chrome::title(
+                                display_name,
+                                if cfg!(target_os = "android") {
+                                    11.
+                                } else {
+                                    14.
+                                },
+                            ),
                             TextLayout::no_wrap(),
                         ));
-                        line.spawn((kit::muted("", 9.), Readout::Tower(relative)));
+                        line.spawn((
+                            #[cfg(target_os = "android")]
+                            Node {
+                                max_width: percent(32),
+                                min_width: px(0),
+                                overflow: Overflow::clip(),
+                                ..default()
+                            },
+                            kit::muted("", if cfg!(target_os = "android") { 8. } else { 9. }),
+                            #[cfg(target_os = "android")]
+                            TextLayout::no_wrap(),
+                            Readout::Tower(relative),
+                        ));
                     });
                     vitality(body, relative);
                 });
