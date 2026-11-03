@@ -1244,3 +1244,11 @@ headers with a full explanatory legend, wrapped bounded values and a secondary
 rank-status size. Desktop geometry, server eligibility and all data/actions are
 preserved. Actual48 clipping/overlay failures remain recorded; corrected
 font100/130, report and scroll observations are pending.
+
+
+P69 body readouts: Android P75 account/recovery/report/library text and retained
+chat lines have bounded width, nonshrinking height and word/character wrapping,
+including maximum-length unbroken input. Desktop typography/geometry and
+shared input/protocol limits remain unchanged. Actual48 report stored500 of
+501 attempted ASCII scalars and showed Report sent; overflow is recorded
+separately from the successful submission. Corrected rendering is pending.

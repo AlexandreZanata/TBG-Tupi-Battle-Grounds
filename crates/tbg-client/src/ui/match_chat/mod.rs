@@ -345,7 +345,7 @@ fn render(
                 .take(8)
                 .collect();
             for (_, _, line) in lines.into_iter().rev() {
-                p.spawn(kit::muted(line, 14.));
+                p.spawn(kit::paragraph(line, 14.));
             }
             if chat.mode == 0 {
                 if chat

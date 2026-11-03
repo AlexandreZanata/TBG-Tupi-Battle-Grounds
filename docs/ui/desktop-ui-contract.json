@@ -583,6 +583,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-bounded-mobile-social-body-copy",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android bounded P75 account/recovery/report/library and chat body readouts wrap unbroken input while preserving full limits and desktop presentation",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

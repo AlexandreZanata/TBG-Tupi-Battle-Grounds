@@ -101,6 +101,22 @@ pub fn image(
         },
     )
 }
+/// Keep native body readouts inside their scrollable column, including unbroken input.
+pub fn paragraph(value: impl Into<String>, size: f32) -> impl Bundle {
+    (
+        muted(value, size),
+        #[cfg(target_os = "android")]
+        Node {
+            width: percent(100),
+            min_width: px(0),
+            flex_shrink: 0.,
+            ..default()
+        },
+        #[cfg(target_os = "android")]
+        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
+    )
+}
+
 pub fn control(text: impl Into<String>, enabled: bool, width: f32) -> impl Bundle {
     (
         Node {

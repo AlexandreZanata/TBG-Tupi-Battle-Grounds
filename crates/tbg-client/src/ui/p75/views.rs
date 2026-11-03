@@ -164,9 +164,9 @@ pub(super) fn render(
                         28.,
                     ));
                     #[cfg(not(target_os = "android"))]
-                    p.spawn(kit::muted(lang.key("p75.keyboard"), 14.));
+                    p.spawn(kit::paragraph(lang.key("p75.keyboard"), 14.));
                     if !s.notice.is_empty() {
-                        p.spawn(kit::muted(lang.key(s.notice), 16.));
+                        p.spawn(kit::paragraph(lang.key(s.notice), 16.));
                     }
                     match s.page {
                         Page::Account => {
@@ -178,11 +178,11 @@ pub(super) fn render(
                         Page::Emojis => emojis(p, &s, *lang, time.elapsed_secs_f64()),
                         Page::Suspended => {
                             if let Some((until, reason)) = s.suspension {
-                                p.spawn(kit::muted(
+                                p.spawn(kit::paragraph(
                                     lang.key(&format!("p75.reason.{}", reason.as_str())),
                                     20.,
                                 ));
-                                p.spawn(kit::muted(
+                                p.spawn(kit::paragraph(
                                     until
                                         .map(|v| {
                                             i64::try_from(v)
@@ -204,11 +204,11 @@ pub(super) fn render(
     let _ = &chat;
 }
 fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         s.data["email_masked"].as_str().unwrap_or(""),
         20.,
     ));
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         lang.key(&format!(
             "p75.email_state.{}",
             s.data["email_state"].as_str().unwrap_or("none")
@@ -219,12 +219,12 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         button(r, lang, "p75.enter_code", Action::EmailVerify);
         button(r, lang, "p75.resend", Action::EmailResend);
     });
-    p.spawn(kit::muted(lang.key("p75.change_safeguard"), 15.));
+    p.spawn(kit::paragraph(lang.key("p75.change_safeguard"), 15.));
     p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.key_proof", Action::KeyProof);
         button(r, lang, "p75.new_email", Action::NewEmail);
     });
-    p.spawn(kit::muted(&s.email.email, 16.));
+    p.spawn(kit::paragraph(&s.email.email, 16.));
     button(
         p,
         lang,
@@ -246,7 +246,7 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         .as_i64()
         .filter(|until| *until > 0)
     {
-        p.spawn(kit::muted(
+        p.spawn(kit::paragraph(
             format!(
                 "{}: {}",
                 lang.key("p75.hold_until"),
@@ -257,20 +257,20 @@ fn account(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
     }
 }
 fn recovery(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
-    p.spawn(kit::muted(lang.key("p75.recovery_guidance"), 18.));
+    p.spawn(kit::paragraph(lang.key("p75.recovery_guidance"), 18.));
     p.spawn(control_row()).with_children(|r| {
         button(r, lang, "p75.name_prompt", Action::RecoveryName);
         button(r, lang, "p75.email_prompt", Action::RecoveryEmail);
     });
-    p.spawn(kit::muted(&s.recovery.name, 18.));
+    p.spawn(kit::paragraph(&s.recovery.name, 18.));
     button(p, lang, "p75.send_code", Action::RecoveryRequest);
     if s.recovery.requested {
-        p.spawn(kit::muted(lang.key("p75.recovery_generic"), 17.));
+        p.spawn(kit::paragraph(lang.key("p75.recovery_generic"), 17.));
         button(p, lang, "p75.enter_code", Action::RecoveryCode);
     }
 }
 fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
-    p.spawn(kit::muted(lang.key("p75.report_privacy"), 16.));
+    p.spawn(kit::paragraph(lang.key("p75.report_privacy"), 16.));
     for row in 0..4 {
         p.spawn(control_row()).with_children(|r| {
             for col in 0..2 {
@@ -284,7 +284,7 @@ fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
             }
         });
     }
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         lang.key(&format!(
             "p75.reason.{}",
             super::super::report::REASONS[usize::from(s.report.reason)]
@@ -292,7 +292,7 @@ fn report(p: &mut ChildSpawnerCommands, s: &State, lang: Lang) {
         18.,
     ));
     button(p, lang, "p75.comment", Action::Comment);
-    p.spawn(kit::muted(&s.report.comment, 16.));
+    p.spawn(kit::paragraph(&s.report.comment, 16.));
     button(p, lang, "p75.send_report", Action::SendReport);
 }
 fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
@@ -306,7 +306,7 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
             );
         }
     });
-    p.spawn(kit::muted(
+    p.spawn(kit::paragraph(
         format!("{} {}", lang.key("p75.selected_slot"), s.library.slot + 1),
         17.,
     ));
@@ -331,17 +331,17 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
             }
         });
     }
-    p.spawn(kit::muted(lang.key("p75.upload_guidance"), 16.));
+    p.spawn(kit::paragraph(lang.key("p75.upload_guidance"), 16.));
     button(p, lang, "p75.choose_file", Action::Upload);
     button(p, lang, "p75.label", Action::UploadLabel);
-    p.spawn(kit::muted(&s.library.label, 16.));
+    p.spawn(kit::paragraph(&s.library.label, 16.));
     if let Some((_, name)) = &s.library.selected {
-        p.spawn(kit::muted(name, 16.));
+        p.spawn(kit::paragraph(name, 16.));
         button(p, lang, "p75.upload_send", Action::UploadSend);
     }
     if let Some(uploads) = s.data["uploads"].as_array() {
         for asset in uploads.iter().take(10) {
-            p.spawn(kit::muted(
+            p.spawn(kit::paragraph(
                 format!(
                     "{} · {}",
                     asset["label"].as_str().unwrap_or(""),
@@ -365,7 +365,7 @@ fn emojis(p: &mut ChildSpawnerCommands, s: &State, lang: Lang, now: f64) {
                     crate::emoji::preview(p, id, reference, now);
                 }
                 if let Some(reason) = asset["reason"].as_str() {
-                    p.spawn(kit::muted(reason, 16.));
+                    p.spawn(kit::paragraph(reason, 16.));
                 }
                 if matches!(asset["status"].as_str(), Some("pending" | "approved")) {
                     button(p, lang, "p75.withdraw", Action::Withdraw(id));
