@@ -139,7 +139,7 @@ mod tests {
             .init_resource::<Toasts>()
             .init_resource::<Changes>()
             .insert_resource(Lang::En)
-            .insert_non_send_resource(ActiveForm::default())
+            .insert_non_send(ActiveForm::default())
             .add_systems(Update, (finish, observe).chain());
         app.update();
         app.update();
