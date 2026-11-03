@@ -986,3 +986,7 @@ bounds, the catalog list keeps a reachable scroll viewport, and Ranking supports
 whole-page scrolling for short landscape surfaces. The Android system splash
 uses the existing dark background. Desktop geometry remains unchanged. Actual
 source/profile evidence and failed intermediate captures stay in the P69 report.
+
+P69 laboratory refinement: Android-only status/actions toolbar with equivalent
+short labels, wrapped participant navigation/headings and bounded generic
+button text. Desktop layout/copy remains unchanged; see P69 runtime evidence.

@@ -1928,5 +1928,9 @@
   "stronghold.stat.spoils": "Spoils",
   "stronghold.stat.spoils_cap": "Spoils cap",
   "stronghold.stat.aura": "War Banner",
-  "stronghold.stat.aura_range": "War Banner radius"
+  "stronghold.stat.aura_range": "War Banner radius",
+  "mobile.training.play_pause": "Play / pause",
+  "mobile.training.step": "One tick",
+  "mobile.training.reset": "Reset",
+  "mobile.training.back": "Catalog"
 }

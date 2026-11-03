@@ -127,7 +127,17 @@ pub fn control(text: impl Into<String>, enabled: bool, width: f32) -> impl Bundl
             enabled,
             focused: false,
         },
-        children![super::label(text, 16.)],
+        children![(
+            #[cfg(target_os = "android")]
+            Node {
+                width: percent(100),
+                min_width: px(0),
+                ..default()
+            },
+            super::label(text, 16.),
+            #[cfg(target_os = "android")]
+            TextLayout::new(Justify::Center, LineBreak::AnyCharacter),
+        )],
     )
 }
 

@@ -1928,5 +1928,9 @@
   "stronghold.stat.spoils": "Espólios",
   "stronghold.stat.spoils_cap": "Limite de Espólios",
   "stronghold.stat.aura": "Estandarte de Guerra",
-  "stronghold.stat.aura_range": "Raio do Estandarte de Guerra"
+  "stronghold.stat.aura_range": "Raio do Estandarte de Guerra",
+  "mobile.training.play_pause": "Iniciar / pausar",
+  "mobile.training.step": "Um tick",
+  "mobile.training.reset": "Reiniciar",
+  "mobile.training.back": "Catálogo"
 }

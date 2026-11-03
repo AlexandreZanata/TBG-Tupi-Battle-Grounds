@@ -12,6 +12,9 @@ use tbg_core::{
     Seat,
 };
 
+#[cfg(target_os = "android")]
+mod mobile;
+
 const ROWS: usize = 12;
 #[derive(Component)]
 struct Root;
@@ -102,6 +105,9 @@ fn build(
             ZIndex(20),
         ))
         .with_children(|root| {
+            #[cfg(target_os = "android")]
+            mobile::toolbar(root, lang, id);
+            #[cfg(not(target_os = "android"))]
             root.spawn((
                 Node {
                     position_type: if cfg!(target_os = "android") {
@@ -181,6 +187,9 @@ fn build(
             })
             .with_children(|body| {
                 body.spawn(panel(2., 17., 23., 74.)).with_children(|p| {
+                    #[cfg(target_os = "android")]
+                    mobile::heading(p, lang.key("training.measurements"));
+                    #[cfg(not(target_os = "android"))]
                     p.spawn(kit::heading(lang.key("training.measurements"), 20.));
                     p.spawn(kit::muted(lang.key("training.measurement_note"), 12.));
                     p.spawn((kit::muted("", 12.), Field::Selected));
@@ -189,8 +198,19 @@ fn build(
                     }
                 });
                 body.spawn(panel(76., 17., 22., 74.)).with_children(|p| {
+                    #[cfg(target_os = "android")]
+                    mobile::heading(p, lang.key("training.instances"));
+                    #[cfg(not(target_os = "android"))]
                     p.spawn(kit::heading(lang.key("training.instances"), 20.));
-                    p.spawn(kit::row()).with_children(|r| {
+                    p.spawn(Node {
+                        #[cfg(target_os = "android")]
+                        flex_wrap: FlexWrap::Wrap,
+                        #[cfg(target_os = "android")]
+                        column_gap: px(4),
+                        row_gap: px(4),
+                        ..kit::row()
+                    })
+                    .with_children(|r| {
                         r.spawn(button("<", Action::Page(-1), 45.));
                         r.spawn(kit::muted(
                             format!(
