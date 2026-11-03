@@ -603,6 +603,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-final-emulator-consolidation-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Native Android full surface/safe controls, real menu/gameplay/IME/social/Result journeys and representative API36 profiles; shared Linux reference/web Hard runtime; current source identities and exact limitations in P69-emulator-20261103.json",
+      "linux": "scoped runtime observed; complete pixel/motion matrix pending",
+      "windows": "visual pending; CI tests/build/package passed",
+      "web": "scoped desktop runtime observed; portrait stays portrait with crowded existing layout",
+      "android": "scoped emulator runtime observed; physical ARM64/16KB pending"
     }
   ]
 }

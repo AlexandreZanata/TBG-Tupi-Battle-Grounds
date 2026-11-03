@@ -1,7 +1,9 @@
 # P69 — Independent native Android landscape prototype
 
-**Status:** resumed by the owner on2026-11-02; native landscape implementation
-and emulator consolidation in progress on`codex/p69-mobile-playable`. See the
+**Status:** native landscape emulator implementation delivered for review in
+[PR62](https://github.com/AlexandreZanata/TBG-Tupi-Battle-Grounds/pull/62),
+on`codex/p69-mobile-playable`. Physical/16KB/Windows visual and owner look/fun
+acceptance remain separate. See the
 [current continuation](P69-mobile-20261102.md). The2026-11-01 physical-phone
 checkpoint below remains historical, partial device evidence; no current
 physical-phone validation is claimed.

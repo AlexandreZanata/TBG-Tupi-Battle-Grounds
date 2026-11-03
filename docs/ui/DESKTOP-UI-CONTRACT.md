@@ -1260,3 +1260,14 @@ limits, values, submission and server rules remain intact. Desktop/web editing
 geometry/behavior is preserved. Actual52 recovery succeeded; the generic email
 keyboard is a recorded presentation issue. Corrected IME observations remain
 pending the next package.
+
+
+P69 final emulator consolidation (2026-11-03): APK54/Linux/web share executable
+sourcecd958bd0 and current main177da4a0/w40/R16. Actual scoped screen/input/
+profile/cross-play/terminal-recovery observations,612s active/paused reference
+measurements and safe original-frame hashes are indexed in
+[the consolidated evidence](../phases/P69-emulator-20261103.json). This records
+scoped Linux/web runtime, not complete pixel/motion equivalence. Windows visual
+coverage, physical ARM64/16KB and owner look/fun remain pending; Windows CI
+build/tests/package success does not change that status. Earlier candidate
+failures and their corrected repetitions remain distinct in the phase report.
