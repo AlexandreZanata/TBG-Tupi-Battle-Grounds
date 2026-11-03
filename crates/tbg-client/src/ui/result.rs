@@ -78,6 +78,15 @@ fn spawn(
         }
         None => (lang.t(Msg::ResultOver), None),
     };
+    let reason = match info
+        .personal
+        .as_ref()
+        .map(|summary| summary.reason.as_str())
+    {
+        Some("disconnect") => Some(lang.key("p73.reason.disconnect")),
+        Some("moderation") => Some(lang.key("p73.reason.moderation")),
+        _ => reason.map(str::to_owned),
+    };
     let celebrating = crate::celebration::total(&info).is_some();
     let secs = info
         .personal

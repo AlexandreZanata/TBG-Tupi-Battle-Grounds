@@ -1204,3 +1204,11 @@ Welcome alone cannot leave a frozen battle marked ready. No window, game value,
 seat authority or layout changes. The45s recovery passed; the120s terminal
 failure, targeted regressions and pending rebuilt-harness repetition are
 recorded separately in the P69 continuation.
+
+
+P69 Result cause correspondence: shared Result copy uses the existing
+server-provided disconnect/moderation cause when present, preserving manual
+surrender/local fallback copy. Geometry, outcomes and authority are unchanged.
+The34 focused client/two server passes and actual45 chat/pointer negatives are
+recorded in the continuation. Disconnect-label runtime repetition is pending
+the rebuilt local backend.
