@@ -237,11 +237,18 @@ async fn actual_two_slot_loopback_snapshots_share_counts_and_protect_the_interna
         .await
         .unwrap()
     }
-    let snapshot = tokio::time::timeout(std::time::Duration::from_secs(8), async {
+    let (snapshot, live) = tokio::time::timeout(std::time::Duration::from_secs(8), async {
         loop {
             let (_, v) = get(ports[0], "/api/online?limit=1", false).await;
-            if v["total"] == 2 && v["complete"] == true {
-                break v;
+            let (_, live) = get(ports[1], "/api/live", false).await;
+            // Each slot refreshes its own cached snapshot on an independent timer.
+            // A converged directory on A cannot synchronize the live cache on B.
+            if v["total"] == 2
+                && v["complete"] == true
+                && live["online"]["accounts"] == 2
+                && live["online"]["players"] == 2
+            {
+                break (v, live);
             }
             tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
@@ -250,7 +257,6 @@ async fn actual_two_slot_loopback_snapshots_share_counts_and_protect_the_interna
     .expect("two real slot snapshots did not aggregate");
     assert_eq!(snapshot["rows"].as_array().unwrap().len(), 1);
     assert_eq!(snapshot["next_offset"], 1);
-    let (_, live) = get(ports[1], "/api/live", false).await;
     assert_eq!(live["online"]["accounts"], 2);
     assert_eq!(live["online"]["players"], 2);
     assert_eq!(get(ports[0], "/api/internal/presence", true).await.0, 404);

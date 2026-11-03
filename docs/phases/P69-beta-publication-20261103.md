@@ -179,3 +179,24 @@ A local ARM64 preflight attempt was deferred once because the nonblocking common
 validation lock returned 75. No Cargo process started; no other validation was
 stopped and no polling or cache bypass was used. Hosted ARM64 packaging remains
 the required shipping proof, separate from the completed x86_64 emulator smoke.
+
+## Existing presence integration-test synchronization
+
+PR 65's SDK/Gradle preflight and all required CI passed, and merged as
+`7118130fd21c8b14d07fcade03d9afd3c15cfd83`. Its main run 41677119769 exposed
+an existing timing assumption in `presence_global`: at line 254, slot B's live
+account count was 1 while 2 was expected. Slot A's directory had already converged.
+Client/core/server production sources are unchanged from the task's main base.
+
+The presence worker publishes a cached snapshot on its own one-second timer in
+each slot. Waiting for A alone does not synchronize B's next cached publication.
+The fixture now observes both required endpoint views within its original
+8-second deadline, retaining the exact expected counts, pagination, internal-route
+protection, draining and stale-peer assertions. No server behavior or game rule
+changes, relaxed count, longer timeout, skip or masked failure is introduced.
+
+`rustfmt --edition 2021 --check crates/tbg-server/tests/presence_global.rs` and
+`git diff --check` passed. The focused local command
+`flock -n -E 75 /tmp/tbg-validation-1000.lock env CARGO_BUILD_JOBS=2 CARGO_TARGET_DIR=<existing-root-target> cargo test --locked -p tbg-server --test presence_global actual_two_slot_loopback_snapshots_share_counts_and_protect_the_internal_route -- --exact`
+was deferred on lock exit 75 before any Cargo process started. The corrected
+fixture is queued for the required CI; the other host validation is preserved.
