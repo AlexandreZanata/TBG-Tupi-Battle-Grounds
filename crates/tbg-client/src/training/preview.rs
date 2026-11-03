@@ -15,6 +15,9 @@ use bevy::{
     prelude::*,
 };
 
+#[cfg(target_os = "android")]
+mod mobile;
+
 #[derive(Component)]
 struct Model;
 #[derive(Resource, Default)]
@@ -56,7 +59,10 @@ fn show(
     arena: Res<crate::arena::ActiveArena>,
     mut ambient: ResMut<GlobalAmbientLight>,
     mut camera: Single<(&mut Transform, &mut Projection, &mut DistanceFog), With<ArenaCamera>>,
-    window: Single<&Window>,
+    framing: (
+        Single<&Window>,
+        Query<(&ComputedNode, &UiGlobalTransform), With<super::catalog::viewer::Viewport>>,
+    ),
     mut clear: ResMut<ClearColor>,
     mut scenery: Query<&mut Visibility, With<crate::arena::ArenaScene>>,
     mut model: Query<(Entity, &mut Transform, &mut Animator), ModelFilter>,
@@ -68,6 +74,7 @@ fn show(
         ),
     >,
 ) {
+    let (window, _viewport) = framing;
     let (mut meshes, mut materials) = assets;
     let same_theme = preview.theme.is_none_or(|theme| theme == arena.0);
     let active = *state.get() == GameState::Menu && shell.panel == Panel::Troops;
@@ -186,6 +193,13 @@ fn show(
     let aim = Vec3::new(8. + distance * tan * aspect * 0.025, 1.12, 0.);
     *camera.0 = Transform::from_translation(aim + Vec3::new(0., 0.22, 1.).normalize() * distance)
         .looking_at(aim, Vec3::Y);
+    #[cfg(target_os = "android")]
+    if let Some(viewport) = _viewport
+        .iter()
+        .find(|(node, _)| node.size.min_element() > 0.)
+    {
+        *camera.0 = mobile::frame(&window, viewport, radius * scale, height * scale, c.zoom);
+    }
     camera.2.color = super::stage::SKY;
     camera.2.falloff = FogFalloff::Linear {
         start: 19.,

@@ -1018,3 +1018,8 @@ P69 native IME keeps essential actions together above short landscape keyboards;
 Android OS Back follows the existing Training editor return action. Native
 Fortification tier and Evolution headings use equivalent localized copy, with
 desktop geometry retained. Actual observations are in the P69 continuation report.
+
+P69 Android catalog camera uses the measured central preview rectangle to fit
+and center the unchanged model envelope below the tabs and above controls.
+Desktop camera, models and motion remain unchanged; zoom remains available.
+Per-model/form runtime coverage is recorded in the P69 continuation report.
