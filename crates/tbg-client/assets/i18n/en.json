@@ -1922,5 +1922,11 @@
   "android.battle.phase": "Battle",
   "android.account.backup_title": "Account backup",
   "android.reveal_short": "Show",
-  "mobile.link_unavailable": "This public page could not be opened. It requires a secure address and a browser."
+  "mobile.link_unavailable": "This public page could not be opened. It requires a secure address and a browser.",
+  "mobile.energy": "Energy",
+  "stronghold.stat.max_hp": "Max HP",
+  "stronghold.stat.spoils": "Spoils",
+  "stronghold.stat.spoils_cap": "Spoils cap",
+  "stronghold.stat.aura": "War Banner",
+  "stronghold.stat.aura_range": "War Banner radius"
 }

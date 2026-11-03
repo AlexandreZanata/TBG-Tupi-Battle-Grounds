@@ -1922,5 +1922,11 @@
   "android.battle.phase": "Batalha",
   "android.account.backup_title": "Backup da conta",
   "android.reveal_short": "Mostrar",
-  "mobile.link_unavailable": "Não foi possível abrir esta página pública. Ela exige um endereço seguro e um navegador."
+  "mobile.link_unavailable": "Não foi possível abrir esta página pública. Ela exige um endereço seguro e um navegador.",
+  "mobile.energy": "Energia",
+  "stronghold.stat.max_hp": "Vida máxima",
+  "stronghold.stat.spoils": "Espólios",
+  "stronghold.stat.spoils_cap": "Limite de Espólios",
+  "stronghold.stat.aura": "Estandarte de Guerra",
+  "stronghold.stat.aura_range": "Raio do Estandarte de Guerra"
 }

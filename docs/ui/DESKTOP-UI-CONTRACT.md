@@ -972,3 +972,11 @@ retained; Council copy now uses existing locale keys on native targets, and
 eligible non-Challenge rematches show shared waiting/closed feedback. Arena
 mobile body copy uses intrinsic height. Runtime coverage remains pending until
 recorded in `docs/phases/P69-mobile-20261102.md`; Windows/web parity is pending.
+
+P69 details consolidation: Android Training toolbar consumes intrinsic space
+before measurement panels; catalog stat labels wrap in their actual cells,
+Ranking sidebar names wrap, and Android unit details combine full ability/effect
+copy and Evolution choices in a scrollable safe panel. Loading scene decoration
+fills the surface separately. Native shared unit/Stronghold labels and form names
+use existing locales plus equivalent stat-label keys. Desktop geometry is retained;
+all affected runtime coverage is recorded separately in the P69 report.

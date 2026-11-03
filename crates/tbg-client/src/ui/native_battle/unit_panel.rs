@@ -51,6 +51,10 @@ enum Field {
     Stat(Stat),
     Evolution(u8),
     EvolutionHeading,
+    #[cfg(target_os = "android")]
+    Ability,
+    #[cfg(target_os = "android")]
+    Effects,
 }
 
 pub fn plugin(app: &mut App) {
@@ -61,7 +65,7 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
+fn spawn(mut commands: Commands, assets: Res<AssetServer>, lang: Res<Lang>) {
     commands
         .spawn((
             Node {
@@ -83,6 +87,7 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 } else {
                     Overflow::default()
                 },
+                max_width: percent(96),
                 width: px(if cfg!(target_os = "android") {
                     330
                 } else {
@@ -166,20 +171,57 @@ fn spawn(mut commands: Commands, assets: Res<AssetServer>) {
                 })
                 .with_children(|stats| {
                     for (name, kind) in [
-                        ("Damage", Stat::Attack),
-                        ("Per second", Stat::PerSecond),
-                        ("Attack every", Stat::Every),
-                        ("Range", Stat::Range),
-                        ("Speed", Stat::Speed),
-                        ("Splash", Stat::Splash),
-                        ("On hit", Stat::OnHit),
-                        ("Status", Stat::Status),
-                        ("Synergy", Stat::Synergy),
+                        ("damage", Stat::Attack),
+                        ("per_second", Stat::PerSecond),
+                        ("every", Stat::Every),
+                        ("range", Stat::Range),
+                        ("speed", Stat::Speed),
+                        ("splash", Stat::Splash),
+                        ("on_hit", Stat::OnHit),
+                        ("status", Stat::Status),
+                        ("synergy", Stat::Synergy),
                     ] {
-                        stat(stats, name, kind);
+                        stat(stats, &lang.key(&format!("inspect.{name}")), kind);
                     }
                 });
+            #[cfg(target_os = "android")]
+            {
+                panel.spawn((
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        flex_shrink: 0.,
+                        ..default()
+                    },
+                    label("", 12.),
+                    Field::Ability,
+                ));
+                panel.spawn((
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        flex_shrink: 0.,
+                        ..default()
+                    },
+                    kit::muted("", 11.),
+                    Field::Effects,
+                ));
+                panel
+                    .spawn((
+                        Node {
+                            width: percent(100),
+                            flex_direction: FlexDirection::Column,
+                            row_gap: px(6),
+                            flex_shrink: 0.,
+                            ..default()
+                        },
+                        Upgrades,
+                        UiAction::Disabled,
+                    ))
+                    .with_children(upgrade_content);
+            }
         });
+    #[cfg(not(target_os = "android"))]
     upgrades(&mut commands);
 }
 
@@ -216,20 +258,38 @@ fn header(parent: &mut ChildSpawnerCommands, assets: &AssetServer) {
             .with_children(|copy| {
                 copy.spawn(Node {
                     width: percent(100),
-                    height: px(21),
+                    min_height: px(21),
+                    height: if cfg!(target_os = "android") {
+                        Val::Auto
+                    } else {
+                        px(21)
+                    },
                     overflow: Overflow::clip(),
                     ..default()
                 })
                 .with_children(|clip| {
-                    clip.spawn((chrome::title("", 17.), TextLayout::no_wrap(), Field::Name));
+                    clip.spawn((
+                        Node {
+                            max_width: percent(100),
+                            ..default()
+                        },
+                        chrome::title("", 17.),
+                        if cfg!(target_os = "android") {
+                            TextLayout::default()
+                        } else {
+                            TextLayout::no_wrap()
+                        },
+                        Field::Name,
+                    ));
                 });
                 copy.spawn((kit::heading("", 11.), Field::Form));
                 copy.spawn((kit::muted("", 10.), Field::Tags));
             });
             head.spawn((
                 Node {
-                    width: px(20),
-                    height: px(20),
+                    width: px(if cfg!(target_os = "android") { 48 } else { 20 }),
+                    height: px(if cfg!(target_os = "android") { 48 } else { 20 }),
+                    flex_shrink: 0.,
                     align_self: AlignSelf::Start,
                     align_items: AlignItems::Center,
                     justify_content: JustifyContent::Center,
@@ -337,13 +397,17 @@ fn field_text(
         Field::Form => r.form.clone(),
         Field::Tags => format!(
             "{} · {} · {}",
-            if r.own { "Yours" } else { "Enemy" },
+            lang.key(if r.own {
+                "inspect.owner.yours"
+            } else {
+                "inspect.owner.enemy"
+            }),
             r.faction,
             r.role
         ),
         Field::Hp => format!("{} / {}", r.hp, r.max_hp),
         Field::AttackLabel => r.attack.0.into(),
-        Field::Stat(kind) => stat_text(*kind, r),
+        Field::Stat(kind) => stat_text(*kind, r, lang),
         Field::EvolutionHeading => format!(
             "{} · {}",
             r.name,
@@ -354,21 +418,25 @@ fn field_text(
             }
         ),
         Field::Evolution(branch) => evolution_text(view, id, *branch, lang),
+        #[cfg(target_os = "android")]
+        Field::Ability => r.ability.clone(),
+        #[cfg(target_os = "android")]
+        Field::Effects => r.effects.clone(),
     }
 }
 
-fn stat_text(kind: Stat, r: &Report) -> String {
+fn stat_text(kind: Stat, r: &Report, lang: Lang) -> String {
     match kind {
         Stat::Attack => r.attack.1.to_string(),
         Stat::PerSecond => r.per_second.clone(),
         Stat::Every => r.every.clone(),
-        Stat::Range => format!("{} tiles", r.range),
-        Stat::Speed => format!("{} tiles/s", r.speed),
+        Stat::Range => lang.key("inspect.tiles").replace("{n}", &r.range),
+        Stat::Speed => lang.key("inspect.tiles_per_s").replace("{n}", &r.speed),
         Stat::Splash => {
             if r.splash == "-" {
                 r.splash.clone()
             } else {
-                format!("{} tiles", r.splash)
+                lang.key("inspect.tiles").replace("{n}", &r.splash)
             }
         }
         Stat::OnHit => r.on_hit.clone(),
@@ -391,9 +459,11 @@ fn evolution_text(
         return String::new();
     };
     format!(
-        "{} · {} Energy\n{}",
-        form.name,
+        "{} · {} {}\n{}",
+        crate::i18n::content::form_name(lang, u.kind, u.tier.saturating_add(1), branch)
+            .unwrap_or_else(|| form.name.into()),
         v.evolve_costs[usize::from(u.tier.min(1))] / ENERGY_SCALE,
+        lang.key("mobile.energy"),
         {
             let stats = evolve::describe(form, lang);
             if stats.is_empty() {
@@ -444,6 +514,7 @@ fn choices(
     }
 }
 
+#[cfg(not(target_os = "android"))]
 fn upgrades(commands: &mut Commands) {
     commands
         .spawn((
@@ -454,27 +525,29 @@ fn upgrades(commands: &mut Commands) {
             ZIndex(5),
             DespawnOnExit(GameState::InMatch),
         ))
+        .with_children(upgrade_content);
+}
+
+fn upgrade_content(options: &mut ChildSpawnerCommands) {
+    options
+        .spawn(chrome::upgrade_header())
+        .with_children(|heading| {
+            heading.spawn((kit::heading("Evolution", 12.), Field::EvolutionHeading));
+            heading.spawn(chrome::upgrade_close(UiAction::CloseEvolve));
+        });
+    options
+        .spawn(Node {
+            width: percent(100),
+            column_gap: px(6),
+            ..default()
+        })
         .with_children(|options| {
-            options
-                .spawn(chrome::upgrade_header())
-                .with_children(|heading| {
-                    heading.spawn((kit::heading("Evolution", 12.), Field::EvolutionHeading));
-                    heading.spawn(chrome::upgrade_close(UiAction::CloseEvolve));
-                });
-            options
-                .spawn(Node {
-                    width: percent(100),
-                    column_gap: px(6),
-                    ..default()
-                })
-                .with_children(|options| {
-                    for branch in 0..2 {
-                        options.spawn((
-                            chrome::upgrade_choice(),
-                            Choice(branch),
-                            children![(label("", 10.), Field::Evolution(branch))],
-                        ));
-                    }
-                });
+            for branch in 0..2 {
+                options.spawn((
+                    chrome::upgrade_choice(),
+                    Choice(branch),
+                    children![(label("", 10.), Field::Evolution(branch))],
+                ));
+            }
         });
 }

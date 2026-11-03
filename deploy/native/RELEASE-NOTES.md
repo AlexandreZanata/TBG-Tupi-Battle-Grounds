@@ -1,3 +1,22 @@
+TBG 0.1.4-colossus.5 — Native Android landscape candidate
+
+The Android prototype now inherits current Linux gameplay, content and account
+settings. Compact landscape navigation, catalogs, Shop, War Auxiliary controls,
+War Council and scrollable unit details use the existing medieval artwork.
+Scenery fills the native surface; important controls avoid measured cutouts and
+system gestures. Native keyboard, manual key backup and document export use
+Android services. Account/session credentials remain memory-only on Android.
+Desktop geometry and browser portrait remain separate platform contracts.
+
+This candidate preserves protocol38, schema10 (history11 opt-in), ruleset15 /
+cc459351581b7763. No simulation values, roster pools, authority or outcomes
+change. Emulator/Linux observations, source identities and exact limitations
+are recorded in docs/phases/P69-mobile-20261102.md. Physical ARM64/16KB and
+Windows/browser visual acceptance are independent checks, never inferred from
+compilation. No store, production deployment or managed-update activation.
+
+Previous candidate notes follow; their evidence remains historical.
+
 TBG 0.1.4-colossus.4 — Account backups and in-app update candidate
 
 Update history now displays the newest note first and retains every historical entry.

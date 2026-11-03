@@ -56,6 +56,7 @@ pub(super) fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
             grid.spawn((
                 Node {
                     width: percent(50),
+                    min_width: px(0),
                     flex_direction: FlexDirection::Column,
                     row_gap: px(3),
                     ..default()
@@ -63,7 +64,14 @@ pub(super) fn details(p: &mut ChildSpawnerCommands, c: &Catalog, lang: Lang) {
                 BackgroundColor(kit::INK),
             ))
             .with_children(|cell| {
-                cell.spawn(kit::muted(lang.key(&format!("training.stat.{key}")), 11.));
+                cell.spawn((
+                    Node {
+                        width: percent(100),
+                        min_width: px(0),
+                        ..default()
+                    },
+                    kit::muted(lang.key(&format!("training.stat.{key}")), 11.),
+                ));
                 cell.spawn(crate::ui::label(value, 17.));
             });
         }

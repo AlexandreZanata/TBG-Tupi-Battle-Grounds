@@ -88,8 +88,9 @@ pub(super) fn upgrade_header() -> Node {
 pub(super) fn upgrade_close(action: super::super::UiAction) -> impl Bundle {
     (
         Node {
-            width: px(20),
-            height: px(20),
+            width: px(if cfg!(target_os = "android") { 48 } else { 20 }),
+            height: px(if cfg!(target_os = "android") { 48 } else { 20 }),
+            flex_shrink: 0.,
             align_items: AlignItems::Center,
             justify_content: JustifyContent::Center,
             ..default()

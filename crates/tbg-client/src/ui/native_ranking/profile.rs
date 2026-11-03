@@ -253,10 +253,18 @@ fn centered(parent: &mut ChildSpawnerCommands, value: String, size: f32, pending
         .with_children(|row| {
             row.spawn((
                 kit::heading(value, size),
-                TextLayout::no_wrap().with_justify(Justify::Center),
+                if cfg!(target_os = "android") {
+                    TextLayout::new(Justify::Center, LineBreak::WordBoundary)
+                } else {
+                    TextLayout::no_wrap().with_justify(Justify::Center)
+                },
                 kit::Pending(pending),
                 Node {
-                    width: if pending { percent(100) } else { Val::Auto },
+                    width: if pending || cfg!(target_os = "android") {
+                        percent(100)
+                    } else {
+                        Val::Auto
+                    },
                     min_height: px(size * 1.2),
                     ..default()
                 },

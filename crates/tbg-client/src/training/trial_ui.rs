@@ -37,9 +37,17 @@ fn panel(left: f32, top: f32, width: f32, height: f32) -> impl Bundle {
         Node {
             position_type: PositionType::Absolute,
             left: percent(left),
-            top: percent(top),
+            top: if cfg!(target_os = "android") {
+                px(0)
+            } else {
+                percent(top)
+            },
             width: percent(width),
-            height: percent(height),
+            height: if cfg!(target_os = "android") {
+                percent(100)
+            } else {
+                percent(height)
+            },
             padding: UiRect::all(px(12)),
             border: UiRect::all(px(1)),
             flex_direction: FlexDirection::Column,
@@ -83,6 +91,10 @@ fn build(
                 position_type: PositionType::Absolute,
                 width: percent(100),
                 height: percent(100),
+                flex_direction: FlexDirection::Column,
+                #[cfg(target_os = "android")]
+                padding: UiRect::all(px(8)),
+                row_gap: px(8),
                 ..default()
             },
             Root,
@@ -92,10 +104,27 @@ fn build(
         .with_children(|root| {
             root.spawn((
                 Node {
-                    position_type: PositionType::Absolute,
-                    left: percent(2),
-                    top: percent(2),
-                    width: percent(96),
+                    position_type: if cfg!(target_os = "android") {
+                        PositionType::Relative
+                    } else {
+                        PositionType::Absolute
+                    },
+                    left: if cfg!(target_os = "android") {
+                        px(0)
+                    } else {
+                        percent(2)
+                    },
+                    top: if cfg!(target_os = "android") {
+                        px(0)
+                    } else {
+                        percent(2)
+                    },
+                    width: if cfg!(target_os = "android") {
+                        percent(100)
+                    } else {
+                        percent(96)
+                    },
+                    flex_shrink: 0.,
                     padding: UiRect::all(px(10)),
                     column_gap: px(10),
                     row_gap: px(6),
@@ -107,7 +136,14 @@ fn build(
                 BorderColor::all(kit::GOLD),
             ))
             .with_children(|bar| {
-                bar.spawn(kit::heading(lang.key("training.editor"), 21.));
+                bar.spawn(kit::heading(
+                    lang.key("training.editor"),
+                    if cfg!(target_os = "android") {
+                        16.
+                    } else {
+                        21.
+                    },
+                ));
                 bar.spawn((kit::muted("", 13.), Field::Clock));
                 for (key, action) in [
                     ("pause_resume", Action::Control(id, 0)),
@@ -115,50 +151,76 @@ fn build(
                     ("reset", Action::Control(id, 2)),
                     ("back", Action::Back),
                 ] {
-                    bar.spawn(button(lang.key(&format!("training.{key}")), action, 155.));
+                    bar.spawn(button(
+                        lang.key(&format!("training.{key}")),
+                        action,
+                        if cfg!(target_os = "android") {
+                            112.
+                        } else {
+                            155.
+                        },
+                    ));
                 }
                 bar.spawn((kit::muted("", 13.), Field::Status));
             });
-            root.spawn(panel(2., 17., 23., 74.)).with_children(|p| {
-                p.spawn(kit::heading(lang.key("training.measurements"), 20.));
-                p.spawn(kit::muted(lang.key("training.measurement_note"), 12.));
-                p.spawn((kit::muted("", 12.), Field::Selected));
-                for seat in Seat::BOTH {
-                    p.spawn((crate::ui::label("", 14.), Field::Team(seat)));
-                }
-            });
-            root.spawn(panel(76., 17., 22., 74.)).with_children(|p| {
-                p.spawn(kit::heading(lang.key("training.instances"), 20.));
-                p.spawn(kit::row()).with_children(|r| {
-                    r.spawn(button("<", Action::Page(-1), 45.));
-                    r.spawn(kit::muted(
-                        format!(
-                            "{}-{} / {rows}",
-                            if rows == 0 { 0 } else { page * ROWS + 1 },
-                            ((page + 1) * ROWS).min(rows)
-                        ),
-                        12.,
-                    ));
-                    r.spawn(button(">", Action::Page(1), 45.));
-                });
-                if let Some(session) = &trial.session {
-                    for row in session.metrics().rows().iter().skip(page * ROWS).take(ROWS) {
-                        p.spawn(button(
-                            format!(
-                                "#{} {}",
-                                row.id,
-                                if row.dummy {
-                                    lang.key("training.dummy")
-                                } else {
-                                    content::unit_name(lang, row.kind).into()
-                                }
-                            ),
-                            Action::Target(row.id),
-                            230.,
-                        ));
-                        p.spawn((kit::muted("", 11.), Field::Unit(row.id)));
+            root.spawn(Node {
+                position_type: if cfg!(target_os = "android") {
+                    PositionType::Relative
+                } else {
+                    PositionType::Absolute
+                },
+                width: percent(100),
+                height: if cfg!(target_os = "android") {
+                    Val::Auto
+                } else {
+                    percent(100)
+                },
+                min_height: px(0),
+                flex_grow: 1.,
+                ..default()
+            })
+            .with_children(|body| {
+                body.spawn(panel(2., 17., 23., 74.)).with_children(|p| {
+                    p.spawn(kit::heading(lang.key("training.measurements"), 20.));
+                    p.spawn(kit::muted(lang.key("training.measurement_note"), 12.));
+                    p.spawn((kit::muted("", 12.), Field::Selected));
+                    for seat in Seat::BOTH {
+                        p.spawn((crate::ui::label("", 14.), Field::Team(seat)));
                     }
-                }
+                });
+                body.spawn(panel(76., 17., 22., 74.)).with_children(|p| {
+                    p.spawn(kit::heading(lang.key("training.instances"), 20.));
+                    p.spawn(kit::row()).with_children(|r| {
+                        r.spawn(button("<", Action::Page(-1), 45.));
+                        r.spawn(kit::muted(
+                            format!(
+                                "{}-{} / {rows}",
+                                if rows == 0 { 0 } else { page * ROWS + 1 },
+                                ((page + 1) * ROWS).min(rows)
+                            ),
+                            12.,
+                        ));
+                        r.spawn(button(">", Action::Page(1), 45.));
+                    });
+                    if let Some(session) = &trial.session {
+                        for row in session.metrics().rows().iter().skip(page * ROWS).take(ROWS) {
+                            p.spawn(button(
+                                format!(
+                                    "#{} {}",
+                                    row.id,
+                                    if row.dummy {
+                                        lang.key("training.dummy")
+                                    } else {
+                                        content::unit_name(lang, row.kind).into()
+                                    }
+                                ),
+                                Action::Target(row.id),
+                                230.,
+                            ));
+                            p.spawn((kit::muted("", 11.), Field::Unit(row.id)));
+                        }
+                    }
+                });
             });
         });
 }

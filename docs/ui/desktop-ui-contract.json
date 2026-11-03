@@ -255,6 +255,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-training-unit-details-loading",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android Training toolbar/body, intrinsic catalog/Ranking text, combined scrollable unit/Evolution details, full-bleed loading decoration; shared native unit/Stronghold localized copy",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

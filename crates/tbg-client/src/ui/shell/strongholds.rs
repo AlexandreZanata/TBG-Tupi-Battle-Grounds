@@ -150,7 +150,7 @@ fn details(
                 ),
                 detail_node(),
             ));
-            p.spawn((kit::muted(branch_effect(step), 13.), detail_node()));
+            p.spawn((kit::muted(branch_effect(step, lang), 13.), detail_node()));
         }
     }
     #[cfg(tbg_native_ui)]
@@ -232,24 +232,32 @@ mod tests {
     }
 }
 
-pub(in crate::ui) fn branch_effect(step: &Value) -> String {
+pub(in crate::ui) fn branch_effect(step: &Value, lang: Lang) -> String {
     let stats = &step["stats"];
     let delta = &step["delta"];
     let mut parts = Vec::new();
     for (key, label, stat) in [
-        ("hpBp", "max HP", "maxHp"),
+        ("hpBp", "max_hp", "maxHp"),
         ("dmgBp", "damage", "damage"),
         ("rangeAdd", "range", "range"),
-        ("interval", "attack interval", "interval"),
-        ("spoilsAdd", "Spoils", "spoils"),
-        ("spoilsCapAdd", "Spoils cap", "spoilsCap"),
-        ("auraBpAdd", "War Banner", "auraBp"),
-        ("auraRangeAdd", "War Banner radius", "auraRange"),
+        ("interval", "every", "interval"),
+        ("spoilsAdd", "spoils", "spoils"),
+        ("spoilsCapAdd", "spoils_cap", "spoilsCap"),
+        ("auraBpAdd", "aura", "auraBp"),
+        ("auraRangeAdd", "aura_range", "auraRange"),
     ] {
         if delta[key].as_i64().is_some_and(|n| n != 0) {
             parts.push(format!(
-                "{label}: {}",
-                expand(&format!("{{{stat}}}"), stats)
+                "{}: {}",
+                lang.key(&format!("stronghold.stat.{label}")),
+                expand(&format!("{{{stat}}}"), stats).replace(
+                    " tiles",
+                    if lang == Lang::PtBr {
+                        " casas"
+                    } else {
+                        " tiles"
+                    }
+                )
             ));
         }
     }
