@@ -16,6 +16,10 @@ pub struct Pointer {
     pub consumed: bool,
 }
 impl Pointer {
+    /// The gesture must start in a preview before its drag can rotate that model.
+    pub fn drag_origin(&self) -> Option<Vec2> {
+        self.drag.map(|_| self.start)
+    }
     pub fn event(&mut self, id: u64, phase: TouchPhase, point: Vec2, now: f64) {
         if phase == TouchPhase::Started {
             self.active.insert(id);

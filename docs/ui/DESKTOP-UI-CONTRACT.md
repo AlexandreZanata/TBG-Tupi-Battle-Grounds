@@ -1107,3 +1107,9 @@ related resource changes, refreshes insets, schedules IME after window focus,
 and gives the explicit key-save panel an owned scroll viewport. No desktop/web
 layout or motion changes. Profile failures and repeat evidence are tracked
 separately in the P69 continuation report.
+
+P69 native overlays: Android explicitly handles assetsPaths configuration
+changes through the shared host callback. Model preview rotation consumes an
+owned touch drag confined to its measured viewport and excludes its controls
+drawer; real mouse behavior and all desktop motion/assets remain unchanged.
+Actual cancellation/rotation/configuration observations are in the P69 report.

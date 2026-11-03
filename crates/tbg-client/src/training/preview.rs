@@ -223,11 +223,29 @@ fn drag(
     mut motion: MessageReader<MouseMotion>,
     mut wheel: MessageReader<MouseWheel>,
     mouse: Res<ButtonInput<MouseButton>>,
+    #[cfg(target_os = "android")] pointer: Res<crate::ui::mobile::input::Pointer>,
     window: Single<&Window>,
     shell: Res<Shell>,
     viewport: Query<(&ComputedNode, &UiGlobalTransform), With<super::catalog::viewer::Viewport>>,
     mut c: ResMut<Catalog>,
 ) {
+    #[cfg(target_os = "android")]
+    if pointer.touch_frame {
+        motion.clear();
+        wheel.clear();
+        if shell.panel == Panel::Troops && !c.preview_controls {
+            if let (Some(origin), Some((point, delta))) = (pointer.drag_origin(), pointer.drag) {
+                let scale = window.scale_factor();
+                if viewport.iter().any(|(node, transform)| {
+                    node.contains_point(*transform, origin * scale)
+                        && node.contains_point(*transform, point * scale)
+                }) {
+                    c.yaw += delta.x * 0.008;
+                }
+            }
+        }
+        return;
+    }
     let inside = shell.panel == Panel::Troops
         && window.cursor_position().is_some_and(|p| {
             viewport
