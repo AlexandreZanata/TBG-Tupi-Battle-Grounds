@@ -128,3 +128,54 @@ no source-ancestry guard was removed. Actionlint/workflow policy were rechecked.
 - public55-match.png: 574b7f8c0926223cc44f175fcce3aa3566549e0f4f758d27b7878a6a6deb5258
 
 - public55-after-purchase.png: ed906e4c13d9cba13c91604fc8a948ea71353b2ce09010048776685e1a155344
+
+## First main publication and Java provider correction
+
+PR 63 merged as `c3dbc999c2df4bbacb54c81b72e32d17165549a7` after all seven
+PR CI jobs and the separate Android contracts passed. Main CI run 41666585844
+also passed all seven jobs. The integrated tree matches the reviewed PR tree
+and retains the earlier main as an ancestor.
+
+Static run 41668880875 published the new images as
+`static-c3dbc999c2df4bbacb54c81b72e32d17165549a7`. The downloaded tarball digest
+is `113431a78fe614908c2d6bc98da37f4d0f7093502d122b68de371044b81527c1`.
+It contains all eight new hero/social/Android derivatives. Hosted-builder
+attestation verification passed for the static workflow, main ref and exact
+source using a task-local official GitHub CLI 2.103.3 archive verified against
+cli/cli's release digest. The system CLI 2.45 lacks attestation commands.
+
+Android run 41668880863 passed its source/CI scope and fetched the ancestry, but
+failed before compilation: setup-java could not resolve `21.0.0+35`. Its actual
+provider inventory lists that same reviewed JDK as `21.0.0+35.0.LTS`. The pin is
+corrected to the provider's exact identifier and shared by main/PR jobs. The PR
+package-contract job now actually resolves the JDK and prints `java -version`
+before running package tests. No signing key is exposed to that PR job.
+
+Full-history checkout also uses the pinned action's supported `blob:none`
+filter: commit ancestry stays available for the inspector, while historical
+art blobs are fetched only if needed. This addresses the observed multi-minute
+cold checkout without reducing source checks. No Android tag or public APK
+was created by the failed build; revision 55 remains the first public candidate.
+
+## SDK runner-path correction
+
+PR 64 and its JDK/provider smoke passed, and merged as
+`d061db6e40cecdd41ad07419d666abcc93989a57`. Its main CI run 41672338033 passed
+all seven lanes. Android run 41673897998 resolved/downloaded the reviewed JDK,
+but stopped before compilation with `sdkmanager: command not found` (exit 127).
+The runner ships the SDK at ANDROID_HOME with the manager under
+`cmdline-tools/latest/bin`; that directory is not on PATH. This is documented
+in actions/runner-images' installer and issue 13674.
+
+The common setup helper now calls that exact SDK manager path, installs the
+packages declared in toolchain.json, verifies platform/build-tools/NDK revision
+files, and exports all NDK aliases consistently. PR preflight performs the same
+SDK installation and resolves the real pinned Android Gradle plugins without
+receiving a signing secret. A focused regression covers absent PATH and rejects
+an unexpected installed platform revision. No Android tag/APK was published by
+either failed preparation run.
+
+A local ARM64 preflight attempt was deferred once because the nonblocking common
+validation lock returned 75. No Cargo process started; no other validation was
+stopped and no polling or cache bypass was used. Hosted ARM64 packaging remains
+the required shipping proof, separate from the completed x86_64 emulator smoke.
