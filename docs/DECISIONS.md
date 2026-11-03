@@ -3501,3 +3501,18 @@ place, loading the 1v1 battle assets, so its Troops and Commanders are the
 `crates/` is edited, so the 1v1 build and release inputs stay unchanged;
 the MOBA workflow also runs when those shared files change. A shared art
 crate remains the cleaner end state and needs a 1v1 release (owner gate).
+
+
+**D-112 second amendment (owner, 2026-11-03, P77 / M-65–M-66).**
+The owner clarified that 5v5 is strategy-only: no player has a champion that
+represents them, no player controls a champion, and movement skill must not
+be required. Buy a champion and choose its Lane/Jungle Destination each
+time; all subsequent movement and combat are authoritative and automatic.
+Remove the Commander avatar/XP/respawn/fountain/manual-order model.
+Troop kills now supply the scoreboard/K/D, preserving their existing card
+bounty and removing avatar rewards. Role Shop filters never restrict a
+purchase's Destination. Left-button ground dragging pans the camera; HUD
+and minimap gestures stay separate. Protocol v2 removes avatar readouts and
+rejects reserved manual-order variants. This supersedes the earlier
+steerable-Commander choice and P78 Commander-kit backlog, affects only
+`moba/`, and authorizes no 1v1 edit, balancing, push, merge or deployment.

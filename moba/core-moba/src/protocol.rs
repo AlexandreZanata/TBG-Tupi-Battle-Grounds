@@ -1,4 +1,4 @@
-//! MOBA wire protocol v1 (immutable once merged; `docs/moba/CONTRACTS.md` §3).
+//! MOBA wire protocol v2 (immutable once merged; `docs/moba/CONTRACTS.md` §3).
 //!
 //! Binary postcard frames over WebSocket. One filtered world per team per tick;
 //! private economy goes to its owner only (M-50–M-55).
@@ -10,7 +10,7 @@ use crate::intent::{MobaIntention, Reject};
 use crate::state::{Event, Outcome};
 use crate::types::{Champion, Destination, Seat, Side, UnitKind};
 
-pub const MOBA_PROTOCOL_VERSION: u16 = 1;
+pub const MOBA_PROTOCOL_VERSION: u16 = 2;
 /// Largest client frame accepted; anything bigger closes the socket (M-40).
 pub const MAX_CLIENT_FRAME: usize = 256;
 /// Largest server frame a client accepts.
@@ -62,13 +62,8 @@ pub struct WorldView {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SeatView {
     pub human: bool,
-    pub level: u8,
-    pub hp_permille: u16,
-    /// Ticks until the Commander respawns, 0 while alive.
-    pub respawn_ticks: u16,
     pub kills: u16,
     pub deaths: u16,
-    pub commander: u32,
 }
 
 /// Positions are centi-units (`x / 100` = world units).
@@ -94,7 +89,6 @@ pub struct PrivateView {
     pub tier: u8,
     pub troops: u8,
     pub destination: Destination,
-    pub commander_auto: bool,
     /// The seat's three role-locked Shop offers and locked-slot bits.
     pub offers: [Champion; OFFERS],
     pub slot_rules: [u8; OFFERS],

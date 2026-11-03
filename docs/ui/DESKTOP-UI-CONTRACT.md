@@ -1339,3 +1339,15 @@ damage bands. Warm key/cool ambient, three shadow cascades and distance haze.
 All pixel/motion observations remain pending, including Linux. No platform
 waiver or parity claim; queue overview/lane/camp/base/river checks on all
 three desktop targets at consolidation (Windows/web runtime in P81).
+
+## P77 E — strategy-only Seats and left-drag camera (2026-11-03)
+
+Owner revision: no Commander/avatar, personal HP/XP/respawn panel, Auto
+button, right-click orders or movement markers. Seat crests/role labels
+show public Troop K/D; the player card shows army/tier. Cards still buy and
+send champions to the chosen Lane/Jungle. Left drags beginning on map
+pan by ground intersections, remain captured across HUD boundaries and
+end on release/focus loss. HUD/minimap starts never initiate map dragging;
+minimap navigates the camera, Space/H returns to the Team base. Shared
+input, UI and automatic champion motion on Linux/Windows/web; all gesture,
+pixel and motion observations pending, with no parity claim.

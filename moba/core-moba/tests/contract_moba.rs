@@ -29,7 +29,12 @@ fn m01_ten_seats_two_teams_five_roles() {
     let m = MobaMatch::new(1);
     assert_eq!(m.towers_left(Team::Blue), 11);
     assert_eq!(m.towers_left(Team::Red), 11);
-    assert!(Seat::all().all(|s| m.unit(m.player(s).commander).is_some()));
+    assert!(
+        !m.units
+            .iter()
+            .any(|u| matches!(u.kind, UnitKind::Commander(_))),
+        "M-01/M-65: Seats have no avatar"
+    );
 }
 
 #[test]
@@ -494,7 +499,6 @@ fn m50_enemies_outside_allied_sight_are_absent_from_that_team_frame() {
         Brain::Static,
     );
     m.units[0].target = hidden;
-    m.player_mut(Seat(5)).commander = hidden;
     m.events.push(Event::TroopSent {
         seat: Seat(5),
         troop: Champion::Longaxe,
@@ -505,8 +509,6 @@ fn m50_enemies_outside_allied_sight_are_absent_from_that_team_frame() {
     assert!(w.units.iter().any(|u| u.id == near));
     assert!(!w.units.iter().any(|u| u.id == hidden));
     assert_eq!(w.units.iter().find(|u| u.id == ally).unwrap().target, 0);
-    assert_eq!(w.seats[5].commander, 0);
-    assert_eq!(w.seats[5].hp_permille, 0);
     assert!(w.events.is_empty());
     assert!(w.camps.is_empty());
     assert_eq!(
@@ -536,7 +538,13 @@ fn m51_structures_are_always_in_every_frame() {
     assert_eq!(u.hp_permille, 1000);
     assert!(!u.attacked);
     // Enter sight, remember damage; leave sight and subsequent damage stays hidden.
-    let observer = m.player(Seat(0)).commander;
+    let observer = m.spawn(
+        UnitKind::Minion(tbg_moba_core::types::MinionKind::Melee),
+        Side::Team(Team::Blue),
+        None,
+        m.units[i].pos,
+        Brain::Static,
+    );
     let a = m.slot(observer).unwrap();
     m.units[a].pos = m.units[i].pos;
     m.units[i].stats.damage = 0;
@@ -578,4 +586,103 @@ fn m53_vision_is_deterministic() {
             );
         }
     }
+}
+
+#[test]
+fn m65_seats_have_no_avatar_and_manual_control_is_rejected() {
+    // Owner revision M-01/M-65: strategy only, including hostile legacy movement messages.
+    let mut m = MobaMatch::new(65);
+    assert!(m.units.iter().all(|u| u.kind.structure()));
+    let before = m.state_hash();
+    for seat in Seat::all() {
+        assert_eq!(
+            m.apply(
+                seat,
+                MobaIntention::MoveCommander {
+                    to: Pos {
+                        x: i32::MAX,
+                        y: i32::MIN
+                    }
+                }
+            ),
+            Err(Reject::ManualControlDisabled)
+        );
+        assert_eq!(
+            m.apply(seat, MobaIntention::CommanderAuto),
+            Err(Reject::ManualControlDisabled)
+        );
+    }
+    assert_eq!(
+        m.state_hash(),
+        before,
+        "manual commands cannot affect the match"
+    );
+    run(&mut m, 600);
+    assert!(!m
+        .units
+        .iter()
+        .any(|u| matches!(u.kind, UnitKind::Commander(_))));
+}
+
+#[test]
+fn m65_each_purchase_chooses_its_lane_then_walks_automatically() {
+    // M-10/M-65: a Role filters Shop offers, never forces the purchased champion's lane.
+    let mut m = MobaMatch::new(65);
+    let seat = Seat::of(Team::Blue, Role::Support);
+    m.set_controller(seat, Controller::Human);
+    m.player_mut(seat).gold = 10_000;
+    let mut bought = Vec::new();
+    for lane in Lane::ALL {
+        m.apply(
+            seat,
+            MobaIntention::BuyTroop {
+                slot: 0,
+                to: Destination::Lane(lane),
+            },
+        )
+        .unwrap();
+        let u = m.units.last().unwrap();
+        assert!(matches!(u.brain,Brain::Lane{lane:l,..} if l==lane));
+        bought.push((u.id, u.pos));
+    }
+    run(&mut m, 100);
+    for (id, start) in bought {
+        assert!(
+            m.unit(id).is_some_and(|u| u.pos != start),
+            "the champion must walk without movement inputs"
+        );
+    }
+}
+
+#[test]
+fn m14_automatic_champion_kills_keep_card_bounty_and_update_score() {
+    // Owner revision M-14/M-65: no avatar bounty/XP; automatic Troop kills drive the scoreboard.
+    use tbg_moba_core::state::Credit;
+    let mut m = MobaMatch::new(14);
+    let victim = Seat(0);
+    let killer = Seat(5);
+    m.player_mut(victim).gold = 1000;
+    m.apply(
+        victim,
+        MobaIntention::BuyTroop {
+            slot: 0,
+            to: Destination::Lane(Lane::Mid),
+        },
+    )
+    .unwrap();
+    let kind = match m.units.last().unwrap().kind {
+        UnitKind::Troop(k) => k,
+        _ => unreachable!(),
+    };
+    m.units.last_mut().unwrap().hp = 0;
+    m.units.last_mut().unwrap().last_hit = Some(Credit {
+        side: Side::Team(Team::Red),
+        seat: Some(killer),
+    });
+    let gold = m.player(killer).gold;
+    m.step();
+    assert_eq!(m.player(killer).gold, gold + content::troop_cost(kind) / 3);
+    assert_eq!(m.player(killer).kills, 1);
+    assert_eq!(m.player(victim).deaths, 1);
+    assert_eq!(m.score, [0, 1]);
 }

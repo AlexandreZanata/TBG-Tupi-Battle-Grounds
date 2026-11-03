@@ -1,9 +1,9 @@
-//! Everything that enters the map: Commanders, purchased Troops, lane waves, camps.
+//! Automatic spawns: purchased Troops, lane waves and neutral camps.
 
-use crate::content::{self, COMMANDER_LEVEL_DAMAGE, COMMANDER_LEVEL_HP};
+use crate::content;
 use crate::geom::{Pos, MM};
 use crate::map;
-use crate::state::{Brain, CommandMode, MobaMatch};
+use crate::state::{Brain, MobaMatch};
 use crate::types::{Champion, Destination, Lane, Seat, Side, Team, UnitKind};
 
 /// Small fixed fan of offsets so units do not spawn stacked.
@@ -22,35 +22,6 @@ fn offset(p: Pos, d: Pos) -> Pos {
         y: p.y + d.y,
     }
     .clamp_to_map()
-}
-
-pub(crate) fn commander(m: &mut MobaMatch, seat: Seat) {
-    let team = seat.team();
-    let role = seat.role();
-    let mode = match m.player(seat).mode {
-        CommandMode::Move(p) | CommandMode::Hold(p) => CommandMode::Move(p),
-        CommandMode::Auto => CommandMode::Auto,
-    };
-    let pos = offset(map::spawn_point(team), fan(role as u32 + 1));
-    let brain = Brain::Commander {
-        seat,
-        mode,
-        retreating: false,
-        camp: None,
-    };
-    let id = m.spawn(
-        UnitKind::Commander(role),
-        Side::Team(team),
-        Some(seat),
-        pos,
-        brain,
-    );
-    let level = m.player(seat).level as i32 - 1;
-    let unit = m.units.last_mut().expect("just spawned");
-    unit.max_hp += COMMANDER_LEVEL_HP * level;
-    unit.hp = unit.max_hp;
-    unit.stats.damage += COMMANDER_LEVEL_DAMAGE * level;
-    m.player_mut(seat).commander = id;
 }
 
 pub(crate) fn troop(m: &mut MobaMatch, seat: Seat, kind: Champion, to: Destination) {
@@ -124,15 +95,6 @@ pub(super) fn camps(m: &mut MobaMatch) {
                 offset(center, fan(i as u32)),
                 brain,
             );
-        }
-    }
-}
-
-pub(super) fn respawns(m: &mut MobaMatch) {
-    for seat in Seat::all() {
-        let p = m.player(seat);
-        if p.commander == 0 && m.tick >= p.respawn_at {
-            commander(m, seat);
         }
     }
 }

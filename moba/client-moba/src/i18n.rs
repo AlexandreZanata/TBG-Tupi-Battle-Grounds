@@ -30,7 +30,6 @@ pub enum Key {
     Cost,
     Towers,
     Kills,
-    Auto,
     Hint,
     Victory,
     Defeat,
@@ -41,19 +40,20 @@ pub enum Key {
     ConnectionLost,
     RoomFull,
     TowerFallen,
-    Respawn,
     NotEnoughGold,
     TroopCap,
     NotEnoughEssence,
     MaxTier,
-    Level,
+    Tier,
+    Player,
+    Bot,
 }
 
 impl Lang {
     pub fn t(self, key: Key) -> &'static str {
         let (pt, en) = match key {
             Key::Title => ("TBG · Arena 5v5", "TBG · 5v5 Arena"),
-            Key::Subtitle => ("Vale Tupi — três rotas, uma selva, dez comandantes", "Tupi Valley — three lanes, one jungle, ten commanders"),
+            Key::Subtitle => ("Vale Tupi — três rotas, uma selva, estratégia em equipe", "Tupi Valley — three lanes, one jungle, team strategy"),
             Key::PlayBots => ("Treinar contra 9 bots", "Practice against 9 bots"),
             Key::PlayOnline => ("Jogar online (sala local)", "Play online (local room)"),
             Key::Quit => ("Sair", "Quit"),
@@ -70,10 +70,9 @@ impl Lang {
             Key::Cost => ("Cost", "Cost"),
             Key::Towers => ("Torres", "Towers"),
             Key::Kills => ("Abates", "Kills"),
-            Key::Auto => ("Automático", "Automatic"),
             Key::Hint => (
-                "Carta ou 1–3: comprar e enviar · Z X C V: destino · R: reroll · Botão direito: mover comandante · A: automático · Espaço: centralizar",
-                "Card or 1–3: buy and send · Z X C V: destination · R: reroll · Right click: move commander · A: automatic · Space: centre",
+                "Carta ou 1–3: comprar e enviar · Z X C V: destino · R: reroll · Arraste com o botão esquerdo: mover câmera · Minimap: navegar · Espaço: base",
+                "Card or 1–3: buy and send · Z X C V: destination · R: reroll · Left drag: pan camera · Minimap: navigate · Space: base",
             ),
             Key::Victory => ("Vitória!", "Victory!"),
             Key::Defeat => ("Derrota", "Defeat"),
@@ -84,12 +83,13 @@ impl Lang {
             Key::ConnectionLost => ("Conexão perdida", "Connection lost"),
             Key::RoomFull => ("Sala cheia", "Room full"),
             Key::TowerFallen => ("Torre destruída", "Tower destroyed"),
-            Key::Respawn => ("renasce em", "respawns in"),
             Key::NotEnoughGold => ("Ouro insuficiente", "Not enough gold"),
             Key::TroopCap => ("Limite de tropas vivas", "Live troop limit reached"),
             Key::NotEnoughEssence => ("Essência insuficiente", "Not enough essence"),
             Key::MaxTier => ("Tropas no nível máximo", "Troops at max tier"),
-            Key::Level => ("Nível", "Level"),
+            Key::Tier => ("Tier", "Tier"),
+            Key::Player => ("Jogador", "Player"),
+            Key::Bot => ("Bot", "Bot"),
         };
         match self {
             Lang::Pt => pt,

@@ -1,49 +1,15 @@
-//! Walking: lane waypoints, jungle camps, Commander modes, chasing and spacing.
+//! Automatic lane/jungle walking, neutral leashes, chasing and spacing.
 
 use super::spawn::{camp_alive, nearest_camp};
-use crate::content::{self, WAYPOINT_RADIUS};
+use crate::content::WAYPOINT_RADIUS;
 use crate::geom::{Pos, MM};
 use crate::map;
-use crate::state::{Brain, CommandMode, MobaMatch};
-use crate::types::{Lane, Role, Team, UnitKind};
-
-/// The most advanced allied lane walker per team and lane; Auto Commanders follow it.
-type Fronts = [[Option<Pos>; 3]; 2];
-
-fn fronts(m: &MobaMatch) -> Fronts {
-    let mut best: [[Option<(i64, Pos)>; 3]; 2] = [[None; 3]; 2];
-    for u in &m.units {
-        let (Brain::Lane { lane, waypoint }, Some(team)) = (u.brain, u.team()) else {
-            continue;
-        };
-        let goal = map::waypoint(lane, team, waypoint as usize);
-        let progress = waypoint as i64 * 1_000_000_000 - u.pos.dist(goal);
-        let slot = &mut best[team.index()][lane as usize];
-        if slot.is_none_or(|(p, _)| progress > p) {
-            *slot = Some((progress, u.pos));
-        }
-    }
-    best.map(|lanes| lanes.map(|b| b.map(|(_, p)| p)))
-}
-
-/// Nearest standing own tower of a lane, outer first; else the Stronghold.
-fn lane_anchor(m: &MobaMatch, team: Team, lane: Lane) -> Pos {
-    m.units
-        .iter()
-        .filter(|u| {
-            u.team() == Some(team) && matches!(u.kind, UnitKind::Tower(_, Some(l)) if l == lane)
-        })
-        .min_by_key(|u| match u.kind {
-            UnitKind::Tower(tier, _) => tier as u8,
-            _ => u8::MAX,
-        })
-        .map_or(map::stronghold(team), |u| u.pos)
-}
+use crate::state::{Brain, MobaMatch};
+use crate::types::{Lane, Team};
 
 // Slot loop: brains read the whole match while one unit moves.
 #[allow(clippy::needless_range_loop)]
 pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
-    let fronts = fronts(m);
     for i in 0..engaged.len() {
         let u = &m.units[i];
         if !u.alive() || !u.mobile() || engaged[i] {
@@ -52,7 +18,7 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
         let chase = m.slot(u.target).map(|j| m.units[j].pos);
         let goal = match chase {
             Some(p) => p,
-            None => match brain_goal(m, i, &fronts) {
+            None => match brain_goal(m, i) {
                 Some(p) => p,
                 None => continue,
             },
@@ -66,9 +32,8 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
 
 /// Where the unit's behaviour wants it when it has no target; may update its
 /// brain (next waypoint, next camp, arrival).
-fn brain_goal(m: &mut MobaMatch, i: usize, fronts: &Fronts) -> Option<Pos> {
+fn brain_goal(m: &mut MobaMatch, i: usize) -> Option<Pos> {
     let u = &m.units[i];
-    let team = u.team();
     match u.brain {
         Brain::Static => None,
         Brain::Lane { lane, waypoint } => Some(lane_goal(m, i, lane, waypoint)),
@@ -81,74 +46,6 @@ fn brain_goal(m: &mut MobaMatch, i: usize, fronts: &Fronts) -> Option<Pos> {
             }
             Some(home)
         }
-        Brain::Commander {
-            mode,
-            retreating,
-            camp,
-            seat,
-        } => {
-            let team = team?;
-            match mode {
-                CommandMode::Move(p) => {
-                    if u.pos.within(p, MM) {
-                        set_mode(m, i, CommandMode::Hold(p));
-                    }
-                    Some(p)
-                }
-                CommandMode::Hold(p) => Some(p),
-                CommandMode::Auto => {
-                    Some(auto_goal(m, i, seat.role(), team, retreating, camp, fronts))
-                }
-            }
-        }
-    }
-}
-
-fn auto_goal(
-    m: &mut MobaMatch,
-    i: usize,
-    role: Role,
-    team: Team,
-    retreating: bool,
-    camp: Option<u8>,
-    fronts: &Fronts,
-) -> Pos {
-    let u = &m.units[i];
-    let percent = u.hp * 100 / u.max_hp.max(1);
-    let retreat = if retreating {
-        percent < content::RETURN_PERCENT
-    } else {
-        percent < content::RETREAT_PERCENT
-    };
-    if let Brain::Commander { retreating, .. } = &mut m.units[i].brain {
-        *retreating = retreat;
-    }
-    if retreat {
-        return map::stronghold(team);
-    }
-    match role.lane() {
-        Some(lane) => {
-            fronts[team.index()][lane as usize].unwrap_or_else(|| lane_anchor(m, team, lane))
-        }
-        None if nearest_camp(m, m.units[i].pos, Some(team)).is_some() || camp.is_some() => {
-            jungle_goal(m, i, camp, Some(team))
-        }
-        // No own camp up: help the mid lane.
-        None => fronts[team.index()][Lane::Mid as usize]
-            .unwrap_or_else(|| lane_anchor(m, team, Lane::Mid)),
-    }
-}
-
-fn set_mode(m: &mut MobaMatch, i: usize, mode: CommandMode) {
-    if let Brain::Commander {
-        mode: current,
-        seat,
-        ..
-    } = &mut m.units[i].brain
-    {
-        *current = mode;
-        let seat = *seat;
-        m.player_mut(seat).mode = mode;
     }
 }
 
@@ -165,7 +62,7 @@ fn lane_goal(m: &mut MobaMatch, i: usize, lane: Lane, waypoint: u8) -> Pos {
     goal
 }
 
-/// Walks to a live camp (any jungle for Troops, own jungle for Commanders);
+/// Walks to a live camp (any jungle for Troops);
 /// Troops with no camp left join the mid lane.
 fn jungle_goal(m: &mut MobaMatch, i: usize, camp: Option<u8>, only: Option<Team>) -> Pos {
     let pos = m.units[i].pos;
@@ -174,9 +71,7 @@ fn jungle_goal(m: &mut MobaMatch, i: usize, camp: Option<u8>, only: Option<Team>
         .or_else(|| nearest_camp(m, pos, only));
     let u = &mut m.units[i];
     match (&mut u.brain, chosen) {
-        (Brain::Jungle { camp }, Some(c)) | (Brain::Commander { camp, .. }, Some(c)) => {
-            *camp = Some(c)
-        }
+        (Brain::Jungle { camp }, Some(c)) => *camp = Some(c),
         (Brain::Jungle { .. }, None) => {
             let team = u.team().unwrap_or(Team::Blue);
             let waypoint = map::nearest_waypoint(Lane::Mid, team, pos) as u8;
@@ -185,7 +80,6 @@ fn jungle_goal(m: &mut MobaMatch, i: usize, camp: Option<u8>, only: Option<Team>
                 waypoint,
             };
         }
-        (Brain::Commander { camp, .. }, None) => *camp = None,
         _ => {}
     }
     chosen.map_or(pos, |c| map::camp(c as usize).0)

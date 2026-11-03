@@ -24,6 +24,13 @@ pub struct MainCamera;
 #[derive(Component)]
 pub struct MinimapCamera;
 
+/// World drags start only on uncovered map pixels and stay captured until release.
+#[derive(Resource, Default)]
+pub struct CameraDrag {
+    pub active: bool,
+    previous: Option<Vec2>,
+}
+
 /// Where the main camera looks (map units) and from how far.
 #[derive(Resource)]
 pub struct Rig {
@@ -65,21 +72,28 @@ impl MinimapRect {
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Rig>()
+        .init_resource::<CameraDrag>()
         .init_resource::<MinimapRect>()
         .add_systems(Startup, spawn)
         .add_systems(
             Update,
             (
                 orbit.run_if(in_state(Screen::Menu)),
-                control.run_if(in_state(Screen::Match)),
+                control
+                    .before(crate::input::minimap_camera)
+                    .run_if(in_state(Screen::Match)),
                 place,
             )
                 .chain(),
         )
         .add_systems(Update, minimap_viewport)
-        .add_systems(OnEnter(Screen::Match), |mut rig: ResMut<Rig>| {
-            rig.distance = 95.0
-        })
+        .add_systems(
+            OnEnter(Screen::Match),
+            |mut rig: ResMut<Rig>, mut drag: ResMut<CameraDrag>| {
+                rig.distance = 95.0;
+                *drag = CameraDrag::default();
+            },
+        )
         .add_systems(OnEnter(Screen::Menu), |mut rig: ResMut<Rig>| {
             *rig = Rig::default()
         });
@@ -150,36 +164,18 @@ fn control(
     window: Single<&Window>,
     over_ui: Res<PointerOverUi>,
     time: Res<Time>,
+    mut drag: ResMut<CameraDrag>,
+    camera: Single<(&Camera, &GlobalTransform), With<MainCamera>>,
 ) {
     let dt = time.delta_secs();
     let speed = rig.distance * 1.1;
-    let mut pan = Vec2::ZERO;
-    for (key, dir) in [
-        (KeyCode::ArrowUp, Vec2::Y),
-        (KeyCode::ArrowDown, Vec2::NEG_Y),
-        (KeyCode::ArrowLeft, Vec2::NEG_X),
-        (KeyCode::ArrowRight, Vec2::X),
-    ] {
-        if keys.pressed(key) {
-            pan += dir;
-        }
+    if mouse.just_pressed(MouseButton::Left) {
+        drag.active = window.focused && !over_ui.0 && window.cursor_position().is_some();
+        drag.previous = window.cursor_position();
     }
-    if let Some(cursor) = window.cursor_position().filter(|_| window.focused) {
-        let size = window.size();
-        if cursor.x < EDGE {
-            pan.x -= 1.0;
-        }
-        if cursor.x > size.x - EDGE {
-            pan.x += 1.0;
-        }
-        if cursor.y < EDGE {
-            pan.y += 1.0;
-        }
-        if cursor.y > size.y - EDGE {
-            pan.y -= 1.0;
-        }
-    }
+    let pan = keyboard_pan(&keys) + edge_pan(&window, over_ui.0, &mouse);
     rig.focus += pan.normalize_or_zero() * speed * dt;
+    drag_camera(&mut drag, &mut rig, &window, &mouse, camera.0, camera.1);
     if mouse.pressed(MouseButton::Middle) {
         let k = rig.distance / window.height().max(1.0) * 1.3;
         rig.focus += Vec2::new(-motion.delta.x, motion.delta.y) * k;
@@ -230,4 +226,65 @@ fn minimap_viewport(
     {
         camera.viewport = Some(viewport);
     }
+}
+
+fn keyboard_pan(keys: &ButtonInput<KeyCode>) -> Vec2 {
+    let mut pan = Vec2::ZERO;
+    for (key, dir) in [
+        (KeyCode::ArrowUp, Vec2::Y),
+        (KeyCode::ArrowDown, Vec2::NEG_Y),
+        (KeyCode::ArrowLeft, Vec2::NEG_X),
+        (KeyCode::ArrowRight, Vec2::X),
+    ] {
+        if keys.pressed(key) {
+            pan += dir;
+        }
+    }
+    pan
+}
+fn edge_pan(window: &Window, over_ui: bool, mouse: &ButtonInput<MouseButton>) -> Vec2 {
+    if !window.focused || over_ui || mouse.pressed(MouseButton::Left) {
+        return Vec2::ZERO;
+    }
+    let Some(cursor) = window.cursor_position() else {
+        return Vec2::ZERO;
+    };
+    let size = window.size();
+    Vec2::new(
+        u8::from(cursor.x > size.x - EDGE) as f32 - u8::from(cursor.x < EDGE) as f32,
+        u8::from(cursor.y < EDGE) as f32 - u8::from(cursor.y > size.y - EDGE) as f32,
+    )
+}
+fn ground_point(camera: &Camera, transform: &GlobalTransform, point: Vec2) -> Option<Vec3> {
+    let ray = camera.viewport_to_world(transform, point).ok()?;
+    let distance = ray.intersect_plane(Vec3::ZERO, InfinitePlane3d::new(Vec3::Y))?;
+    Some(ray.get_point(distance))
+}
+fn drag_camera(
+    drag: &mut CameraDrag,
+    rig: &mut Rig,
+    window: &Window,
+    mouse: &ButtonInput<MouseButton>,
+    camera: &Camera,
+    transform: &GlobalTransform,
+) {
+    let cursor = window.cursor_position();
+    // Start eligibility was captured by control from the HUD hit test.
+    if !window.focused || !mouse.pressed(MouseButton::Left) || cursor.is_none() {
+        *drag = CameraDrag::default();
+        return;
+    }
+    if !drag.active {
+        return;
+    }
+    if let (Some(previous), Some(current)) = (drag.previous, cursor) {
+        if let (Some(a), Some(b)) = (
+            ground_point(camera, transform, previous),
+            ground_point(camera, transform, current),
+        ) {
+            let delta = a - b;
+            rig.focus += Vec2::new(delta.x, -delta.z);
+        }
+    }
+    drag.previous = cursor;
 }

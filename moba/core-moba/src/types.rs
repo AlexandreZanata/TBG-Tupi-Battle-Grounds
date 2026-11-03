@@ -93,7 +93,7 @@ pub enum Role {
 impl Role {
     pub const ALL: [Role; 5] = [Role::Top, Role::Jungle, Role::Mid, Role::Bot, Role::Support];
 
-    /// The lane a role's Commander walks in Auto mode (Jungle has none).
+    /// Default bot purchase lane for this Role (Jungle has none).
     pub fn lane(self) -> Option<Lane> {
         match self {
             Role::Top => Some(Lane::Top),
@@ -174,6 +174,7 @@ pub enum TowerTier {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum UnitKind {
+    /// Reserved P76 wire discriminant; never spawned in strategy-only matches (M-65).
     Commander(Role),
     Minion(MinionKind),
     Troop(Champion),

@@ -10,16 +10,6 @@ use crate::map;
 use crate::rng::Rng;
 use crate::types::{Destination, Lane, Seat, Side, Team, TowerTier, UnitKind, SEATS};
 
-/// How a Commander is steered; Auto unless its player issued a command.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum CommandMode {
-    Auto,
-    /// Walk to the point ignoring enemies, then Hold there.
-    Move(Pos),
-    /// Fight anything near the point, within [`content::HOLD_LEASH`].
-    Hold(Pos),
-}
-
 /// Per-unit behaviour state.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Brain {
@@ -31,12 +21,6 @@ pub enum Brain {
     Jungle { camp: Option<u8> },
     /// Passive until hit; leashed to its camp.
     Neutral { camp: u8 },
-    Commander {
-        seat: Seat,
-        mode: CommandMode,
-        retreating: bool,
-        camp: Option<u8>,
-    },
 }
 
 /// Who dealt the last hit, for bounties.
@@ -51,7 +35,7 @@ pub struct Unit {
     pub id: u32,
     pub kind: UnitKind,
     pub side: Side,
-    /// The player who bought it (Troops) or controls it (Commanders).
+    /// The player who bought this Troop; Seats have no avatar (M-65).
     pub owner: Option<Seat>,
     pub pos: Pos,
     pub hp: i32,
@@ -96,14 +80,8 @@ pub struct Player {
     pub gold_earned: u32,
     pub essence: u32,
     pub tier: u8,
-    pub level: u8,
-    pub xp: u32,
     pub kills: u16,
     pub deaths: u16,
-    /// Live Commander unit id, 0 while dead.
-    pub commander: u32,
-    pub respawn_at: u32,
-    pub mode: CommandMode,
     /// Last Destination chosen, echoed to the HUD.
     pub destination: Destination,
     /// The three Shop offers, locked-slot bits and the seat's own Shop stream.
@@ -134,6 +112,7 @@ pub struct Outcome {
 /// Something worth telling players, drained by hosts each tick.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Event {
+    /// Reserved P76 wire tag; no avatar exists in current matches.
     CommanderKilled {
         victim: Seat,
         killer: Option<Seat>,
@@ -153,6 +132,7 @@ pub enum Event {
         troop: crate::types::Champion,
         to: Destination,
     },
+    /// Reserved P76 wire tag; avatar XP/levels were removed by M-65.
     LevelUp {
         seat: Seat,
         level: u8,
@@ -162,6 +142,12 @@ pub enum Event {
         tier: u8,
     },
     Ended(Outcome),
+    /// Public Troop kill counts without hidden champion identity or coordinates.
+    TroopKilled {
+        victim: Seat,
+        killer: Option<Seat>,
+        by: Team,
+    },
 }
 
 #[derive(Clone, Debug)]
@@ -173,7 +159,7 @@ pub struct MobaMatch {
     pub units: Vec<Unit>,
     pub players: Vec<Player>,
     pub camps: [Camp; map::CAMP_COUNT],
-    /// Commander kills per team.
+    /// Champion Troop kills per team (M-14/M-65).
     pub score: [u16; 2],
     pub outcome: Option<Outcome>,
     pub events: Vec<Event>,
@@ -191,13 +177,8 @@ impl MobaMatch {
             gold_earned: content::START_GOLD,
             essence: 0,
             tier: 0,
-            level: 1,
-            xp: 0,
             kills: 0,
             deaths: 0,
-            commander: 0,
-            respawn_at: 0,
-            mode: CommandMode::Auto,
             destination: Destination::Lane(Lane::Mid),
             offers: [crate::types::POOL[0]; content::OFFERS],
             locked: 0,
@@ -243,7 +224,6 @@ impl MobaMatch {
             p.shop_rng =
                 Rng::new(seed ^ (u64::from(seat.0) + 1).wrapping_mul(0xA24B_AED4_963E_E407));
             p.offers = crate::shop::opening(&mut p.shop_rng, &content::slot_rules(seat.role()));
-            crate::sim::spawn::commander(&mut m, seat);
         }
         crate::vision::remember_structures(&mut m);
         m
@@ -260,9 +240,6 @@ impl MobaMatch {
     pub fn set_controller(&mut self, seat: Seat, controller: Controller) {
         if seat.valid() {
             self.player_mut(seat).controller = controller;
-            if controller == Controller::Bot {
-                self.player_mut(seat).mode = CommandMode::Auto;
-            }
         }
     }
 
@@ -357,7 +334,6 @@ impl MobaMatch {
             for v in [
                 p.gold as i64,
                 p.essence as i64,
-                p.xp as i64,
                 p.tier as i64,
                 p.locked as i64,
                 p.shop_rng.state() as i64,

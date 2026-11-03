@@ -24,7 +24,7 @@ enum Readout {
     Upgrade,
     Army,
     Reroll,
-    Level,
+    Seat,
     Who,
     Line,
 }
@@ -379,7 +379,7 @@ fn player_card(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
             Emblem,
         ))
         .with_children(|s| {
-            s.spawn((title("1", 26., &ctx.fonts), Readout::Level));
+            s.spawn((title("1", 26., &ctx.fonts), Readout::Seat));
         });
         p.spawn(Node {
             flex_direction: FlexDirection::Column,
@@ -406,12 +406,15 @@ fn readouts(feed: Res<Feed>, lang: Res<Lang>, mut texts: Query<(&Readout, &mut T
             Readout::Upgrade => format!("T{} · +{}", me.tier, content::upgrade_cost(me.tier)),
             Readout::Army => format!("{} {}/{}", lang.t(Key::Army), me.troops, content::TROOP_CAP),
             Readout::Reroll => format!("Reroll · {} {}", content::REROLL_COST, lang.t(Key::Gold)),
-            Readout::Level => seat.level.to_string(),
+            Readout::Seat => (me.seat.0 % 5 + 1).to_string(),
             Readout::Who => format!("{} ({})", lang.t(Key::You), lang.role(me.seat.role())),
             Readout::Line => format!(
-                "{} {} · {}/{}",
-                lang.t(Key::Level),
-                seat.level,
+                "{} {}/{} · {} {} · {}/{}",
+                lang.t(Key::Army),
+                me.troops,
+                content::TROOP_CAP,
+                lang.t(Key::Tier),
+                me.tier,
                 seat.kills,
                 seat.deaths
             ),

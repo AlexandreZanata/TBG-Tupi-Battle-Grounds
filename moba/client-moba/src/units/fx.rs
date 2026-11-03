@@ -1,4 +1,4 @@
-//! Short-lived combat feedback: projectiles, hit sparks, death bursts, move markers.
+//! Short-lived automatic combat feedback: projectiles, hit sparks and death bursts.
 
 use bevy::prelude::*;
 use tbg_moba_core::types::Side;
@@ -26,12 +26,6 @@ pub struct Burst {
     pub side: Side,
 }
 
-/// The player ordered a move to `at`.
-#[derive(Message, Clone, Copy)]
-pub struct Marker {
-    pub at: Vec2,
-}
-
 #[derive(Component)]
 struct Flight {
     target: u32,
@@ -54,7 +48,6 @@ struct Fade {
 #[derive(Resource)]
 struct FxAssets {
     ball: Handle<Mesh>,
-    ring: Handle<Mesh>,
     /// Blue, red, neutral, dust, gold.
     glow: [Handle<StandardMaterial>; 5],
 }
@@ -62,9 +55,8 @@ struct FxAssets {
 pub fn plugin(app: &mut App) {
     app.add_message::<Shot>()
         .add_message::<Burst>()
-        .add_message::<Marker>()
         .add_systems(Startup, setup)
-        .add_systems(Update, (shots, bursts, markers, fly, fade));
+        .add_systems(Update, (shots, bursts, fly, fade));
 }
 
 fn setup(
@@ -86,13 +78,6 @@ fn setup(
                 .mesh()
                 .ico(1)
                 .unwrap_or_else(|_| Sphere::new(1.0).into()),
-        ),
-        ring: meshes.add(
-            Annulus::new(0.8, 1.0)
-                .mesh()
-                .resolution(24)
-                .build()
-                .rotated_by(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
         ),
         glow: [
             glow(palette::BLUE_GLOW, LinearRgba::rgb(0.4, 1.6, 4.0)),
@@ -166,11 +151,7 @@ fn bursts(mut commands: Commands, mut reader: MessageReader<Burst>, assets: Res<
             let spread = if big { 3.0 } else { 0.6 };
             let at = lifted(burst.at, if big { 3.0 } else { 0.6 })
                 + Vec3::new(a.cos(), 0.0, a.sin()) * spread;
-            let material = if big || matches!(burst.kind, UnitKind::Commander(_)) {
-                side_index(burst.side)
-            } else {
-                4
-            };
+            let material = if big { side_index(burst.side) } else { 4 };
             commands.spawn((
                 Mesh3d(assets.ball.clone()),
                 MeshMaterial3d(assets.glow[material].clone()),
@@ -184,23 +165,6 @@ fn bursts(mut commands: Commands, mut reader: MessageReader<Burst>, assets: Res<
                 },
             ));
         }
-    }
-}
-
-fn markers(mut commands: Commands, mut reader: MessageReader<Marker>, assets: Res<FxAssets>) {
-    for marker in reader.read() {
-        commands.spawn((
-            Mesh3d(assets.ring.clone()),
-            MeshMaterial3d(assets.glow[4].clone()),
-            Transform::from_translation(lifted(marker.at, 0.15)).with_scale(Vec3::splat(1.6)),
-            Fade {
-                t: 0.0,
-                duration: 0.5,
-                grow: 0.2,
-                size: 1.6,
-                rise: 0.0,
-            },
-        ));
     }
 }
 

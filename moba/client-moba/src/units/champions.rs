@@ -3,7 +3,6 @@
 
 use bevy::prelude::*;
 use tbg_core::types::Archetype;
-use tbg_moba_core::content::commander_champion;
 use tbg_moba_core::{Champion, UnitKind};
 
 use super::UnitVisual;
@@ -16,7 +15,6 @@ use crate::visuals::CORPSE_SECS;
 
 /// Figure scale on the MOBA map (its lanes are far longer than the BattleLine).
 const TROOP_SCALE: f32 = 3.0;
-const COMMANDER_SCALE: f32 = 3.8;
 
 /// A figure finishing its Death clip after the unit left the snapshot.
 #[derive(Component)]
@@ -26,17 +24,12 @@ pub struct Dying(f32);
 pub fn champion_of(kind: UnitKind) -> Option<Champion> {
     match kind {
         UnitKind::Troop(champion) => Some(champion),
-        UnitKind::Commander(role) => Some(commander_champion(role)),
         _ => None,
     }
 }
 
-pub fn scale(kind: UnitKind) -> f32 {
-    if matches!(kind, UnitKind::Commander(_)) {
-        COMMANDER_SCALE
-    } else {
-        TROOP_SCALE
-    }
+pub fn scale(_kind: UnitKind) -> f32 {
+    TROOP_SCALE
 }
 
 /// Builds the base-form figure under `entity` and gives it an Animator,

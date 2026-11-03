@@ -3,10 +3,9 @@
 use bevy::prelude::*;
 use bevy::ui::UiGlobalTransform;
 
-use super::{panel, text, Ctx};
+use super::{panel, text};
 use crate::app::Screen;
 use crate::camera::MinimapRect;
-use crate::i18n::Key;
 use crate::input::Action;
 use crate::palette;
 
@@ -31,7 +30,7 @@ pub fn plugin(app: &mut App) {
     });
 }
 
-pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
+pub fn spawn(root: &mut ChildSpawnerCommands) {
     root.spawn(Node {
         position_type: PositionType::Absolute,
         right: px(10),
@@ -50,8 +49,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
             for (label, action) in [
                 ("+", Action::ZoomIn),
                 ("-", Action::ZoomOut),
-                ("A", Action::Auto),
-                ("o", Action::Center),
+                ("H", Action::Center),
             ] {
                 col.spawn((
                     panel(
@@ -70,7 +68,6 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
                     b.spawn(text(label, 20.0, palette::TEXT));
                 });
             }
-            col.spawn(text(ctx.lang.t(Key::Auto), 10.0, palette::MUTED));
         });
         row.spawn(panel(
             Node {

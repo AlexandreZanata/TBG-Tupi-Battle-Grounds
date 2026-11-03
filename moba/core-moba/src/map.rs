@@ -144,7 +144,7 @@ pub fn camp(id: usize) -> (Pos, Team) {
     (Pos::units(at.0, at.1), team)
 }
 
-/// Where a team's purchased Troops and respawned Commanders appear.
+/// Where a team's purchased Troops appear.
 pub fn spawn_point(team: Team) -> Pos {
     let (x, y) = match team {
         Team::Blue => (32, 32),

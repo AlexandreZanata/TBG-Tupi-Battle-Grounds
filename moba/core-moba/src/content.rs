@@ -58,24 +58,10 @@ const fn stats(hp: i32, damage: i32, range_x10: i32, attack_ticks: u16, speed_x1
     }
 }
 
-pub const COMMANDER_LEVEL_HP: i32 = 80;
-pub const COMMANDER_LEVEL_DAMAGE: i32 = 4;
-pub const MAX_LEVEL: u8 = 12;
-
 pub fn base_stats(kind: UnitKind) -> Stats {
     match kind {
-        UnitKind::Commander(role) => {
-            // Reach and rhythm of the role's champion; bulk of a Commander.
-            let champion = tbg_core::content::def(commander_champion(role));
-            Stats {
-                armor: 10,
-                radius: u(8),
-                sight: u(90),
-                range: champion.range.max(u(18)),
-                attack_ticks: champion.interval.max(1),
-                ..stats(900, 40, 0, 0, 42)
-            }
-        }
+        // Retained wire tag, never part of an active match (M-65).
+        UnitKind::Commander(_) => stats(0, 0, 0, 1, 0),
         UnitKind::Minion(MinionKind::Melee) => stats(300, 14, 16, 20, 32),
         UnitKind::Minion(MinionKind::Ranged) => stats(200, 18, 60, 24, 32),
         UnitKind::Troop(kind) => troop_stats(kind),
@@ -157,17 +143,6 @@ pub fn archetype_mask(rules: &[Archetype]) -> u8 {
     rules.iter().fold(0, |mask, kind| mask | (1 << *kind as u8))
 }
 
-/// The champion each role's Commander is drawn as and fights like (Proposed).
-pub fn commander_champion(role: Role) -> Champion {
-    match role {
-        Role::Top => Champion::Longaxe,
-        Role::Jungle => Champion::Mantis,
-        Role::Mid => Champion::Hexer,
-        Role::Bot => Champion::CelestialArcher,
-        Role::Support => Champion::LuminousOracle,
-    }
-}
-
 /// Alive Troops one player may own at once (M-11).
 pub const TROOP_CAP: u8 = 8;
 
@@ -176,12 +151,8 @@ pub const START_GOLD: u32 = 60;
 pub const GOLD_PER_SECOND: u32 = 1;
 pub const ESSENCE_EVERY_TICKS: u32 = secs(10);
 pub const MINION_BOUNTY: u32 = 4;
-pub const COMMANDER_BOUNTY: u32 = 40;
-pub const ASSIST_BOUNTY: u32 = 15;
 pub const TOWER_TEAM_BOUNTY: u32 = 25;
 pub const TOWER_TEAM_ESSENCE: u32 = 2;
-pub const COMMANDER_KILL_ESSENCE: u32 = 3;
-pub const SHARE_RANGE: i32 = 12 * MM;
 
 /// Troop upgrade tiers bought with Essence (M-17).
 pub const MAX_TIER: u8 = 5;
@@ -190,32 +161,6 @@ pub const TIER_PERCENT: i32 = 10;
 pub fn upgrade_cost(tier: u8) -> u32 {
     15 + 10 * tier as u32
 }
-
-// Commander progression (M-20..M-22).
-pub fn xp_to_next(level: u8) -> u32 {
-    80 + 40 * level as u32
-}
-
-pub fn respawn_ticks(level: u8) -> u32 {
-    secs(5) + level as u32 * TICK_HZ * 3 / 2
-}
-
-pub fn xp_reward(kind: UnitKind) -> u32 {
-    match kind {
-        UnitKind::Minion(_) => 20,
-        UnitKind::Troop(_) => 25,
-        UnitKind::Neutral(kind) => neutral_rewards(kind).2,
-        UnitKind::Commander(_) => 120,
-        UnitKind::Tower(..) | UnitKind::Stronghold => 0,
-    }
-}
-
-/// Auto Commanders retreat below this HP percent and return above the second.
-pub const RETREAT_PERCENT: i32 = 25;
-pub const RETURN_PERCENT: i32 = 95;
-pub const FOUNTAIN_RANGE: i32 = 14 * MM;
-/// HP per tick at the fountain, as a divisor of max HP (≈5 %/s).
-pub const FOUNTAIN_DIVISOR: i32 = 400;
 
 // Waves and camps (M-23..M-25).
 pub const FIRST_WAVE_TICK: u32 = secs(10);
@@ -228,8 +173,6 @@ pub const WAVE: [MinionKind; 5] = [
     MinionKind::Ranged,
 ];
 pub const CAMP_LEASH: i32 = 9 * MM;
-/// Manual Hold leash around the hold point.
-pub const HOLD_LEASH: i32 = 7 * MM;
 /// Lane units advance to the next waypoint inside this radius.
 pub const WAYPOINT_RADIUS: i32 = 2 * MM;
 
@@ -254,19 +197,19 @@ fn neutral_stats(kind: NeutralKind) -> Stats {
     }
 }
 
-/// Last-hit Gold, Essence and nearby Commander XP (M-64).
-pub fn neutral_rewards(kind: NeutralKind) -> (u32, u32, u32) {
+/// Last-hit Gold and Essence; no avatar or XP progression (M-64/M-65).
+pub fn neutral_rewards(kind: NeutralKind) -> (u32, u32) {
     use NeutralKind::*;
     match kind {
-        Small => (6, 0, 30),
-        Big => (15, 2, 60),
-        WolfAlpha => (18, 1, 60),
-        WolfPup => (5, 0, 20),
-        Golem => (20, 2, 70),
-        SmallGolem => (6, 0, 30),
-        Jaguar => (32, 3, 120),
-        Frog => (18, 2, 60),
-        SmallFrog => (6, 0, 25),
+        Small => (6, 0),
+        Big => (15, 2),
+        WolfAlpha => (18, 1),
+        WolfPup => (5, 0),
+        Golem => (20, 2),
+        SmallGolem => (6, 0),
+        Jaguar => (32, 3),
+        Frog => (18, 2),
+        SmallFrog => (6, 0),
     }
 }
 

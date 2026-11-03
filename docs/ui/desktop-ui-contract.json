@@ -663,6 +663,16 @@
       "windows": "pending (P81)",
       "web": "pending (P81)",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-e-strategy-left-drag-camera-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "No player avatar/manual orders; strategic Seat crests and Troop K/D, army/tier; per-purchase Destination; captured left-button ground pan, HUD/minimap isolation, focus/release/base-centre; shared automatic champion motion",
+      "linux": "pending runtime/input/pixel/motion",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
     }
   ]
 }

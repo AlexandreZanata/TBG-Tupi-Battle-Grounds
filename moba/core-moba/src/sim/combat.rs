@@ -2,7 +2,7 @@
 
 use crate::content;
 use crate::map;
-use crate::state::{Brain, CommandMode, Credit, MobaMatch, Unit};
+use crate::state::{Brain, Credit, MobaMatch, Unit};
 use crate::types::{Lane, Side, Team, TowerTier, UnitKind};
 
 /// Which structures may be damaged this tick (M-08).
@@ -172,7 +172,7 @@ fn attackable(vul: &Vulnerability, a: &Unit, b: &Unit) -> bool {
     if !b.alive() || !a.side.hostile(b.side) {
         return false;
     }
-    // Lane walkers and structures ignore the jungle; junglers and Commanders hunt it.
+    // Lane walkers and structures ignore the jungle; jungle Troops hunt it.
     if b.side == Side::Neutral && matches!(a.brain, Brain::Lane { .. } | Brain::Static) {
         return false;
     }
@@ -186,17 +186,6 @@ fn attackable(vul: &Vulnerability, a: &Unit, b: &Unit) -> bool {
 fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> {
     let a = &m.units[i];
     let (anchor, leash) = match a.brain {
-        Brain::Commander {
-            mode: CommandMode::Move(_),
-            ..
-        }
-        | Brain::Commander {
-            retreating: true, ..
-        } => return None,
-        Brain::Commander {
-            mode: CommandMode::Hold(p),
-            ..
-        } => (Some(p), content::HOLD_LEASH),
         Brain::Neutral { camp } => {
             let home = map::camp(camp as usize).0;
             if !a.pos.within(home, content::CAMP_LEASH) {

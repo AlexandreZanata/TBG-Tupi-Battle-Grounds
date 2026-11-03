@@ -19,7 +19,6 @@ use crate::scene::{to_world, Painted};
 
 pub mod champions;
 mod fx;
-pub use fx::Marker;
 pub mod models;
 mod monsters;
 
@@ -66,7 +65,6 @@ struct Shared {
     icon_material: [Handle<StandardMaterial>; 4],
     crystal: Handle<Mesh>,
     crystal_material: [Handle<FogMaterial>; 2],
-    ring: Handle<Mesh>,
     flash: Handle<FogMaterial>,
 }
 
@@ -154,13 +152,6 @@ fn setup(
             &mut fog_materials,
             Color::WHITE,
             LinearRgba::rgb(1.2, 0.8, 0.4),
-        ),
-        ring: meshes.add(
-            Annulus::new(1.0, 1.25)
-                .mesh()
-                .resolution(24)
-                .build()
-                .rotated_by(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
         ),
     };
     commands.insert_resource(shared);
@@ -385,7 +376,6 @@ fn spawn_unit(
     let icon_size = match u.kind {
         UnitKind::Stronghold => 5.0,
         UnitKind::Tower(..) => 3.0,
-        UnitKind::Commander(_) => 2.8,
         _ => 1.3,
     } / scale;
     entity.with_children(|c| {
@@ -401,14 +391,6 @@ fn spawn_unit(
                 MeshMaterial3d(shared.crystal_material[team.index()].clone()),
                 Transform::from_xyz(0.0, y, 0.0).with_scale(Vec3::splat(s)),
                 Crystal { base: y },
-            ));
-        }
-        if tint == 3 && matches!(u.kind, UnitKind::Commander(_)) {
-            c.spawn((
-                Mesh3d(shared.ring.clone()),
-                MeshMaterial3d(shared.bar_fill[3].clone()),
-                // The ring keeps the same ground size whatever the rig scale.
-                Transform::from_xyz(0.0, 0.08, 0.0).with_scale(Vec3::splat(1.3 / scale)),
             ));
         }
     });
@@ -504,7 +486,7 @@ fn bars(
     let rotation = camera.compute_transform().rotation;
     for (v, transform) in &units {
         let width = models::bar_width(v.kind);
-        let always = v.kind.structure() || matches!(v.kind, UnitKind::Commander(_));
+        let always = v.kind.structure();
         let shown = always || v.hp < 0.999;
         let top = transform
             .translation

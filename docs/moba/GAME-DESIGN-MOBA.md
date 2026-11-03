@@ -11,16 +11,19 @@
 
 ![Overview at 7:03, ten bots](media/p76-overview.webp)
 
+Historical P76 capture; current P77 Seats have no avatars (M-65).
+
 ## 1. Pillars
 
-1. **Ten commanders, one valley.** Two teams of five, one role each, on a
+1. **Ten strategists, one valley.** Two teams of five, one role each, on a
    three-lane map with a jungle and a river — readable at a glance.
-2. **Strategy over twitch.** A player steers one Commander with a right
-   click and wins by *what* champions they buy and *where* they send them.
+2. **Strategy over twitch.** Players have no avatar and never steer a
+   champion. Choose what to buy and its Lane/Jungle Destination; movement
+   and combat are automatic (owner revision, 2026-11-03, M-65).
 3. **One roster, two modes.** Troops *are* the 1v1 champions: same names,
    archetypes, base stats, prices (in Gold), Shop rules, portraits, 3D
    figures, animations, shots and impacts. What is new in 5v5 are the lane
-   Minions, Towers, the jungle and the Commanders' roles.
+   Minions, Towers, the jungle and the five strategic Roles.
 4. **No delay for anyone.** The server ticks at 20 Hz, sends one shared
    world frame per Team per tick and never lets a slow player delay the other nine.
 5. **Bots everywhere.** Every empty seat is a bot using the same intentions
@@ -35,7 +38,7 @@
 | `Role` | `Top`, `Jungle`, `Mid`, `Bot`, `Support` — seat index modulo 5. |
 | `Lane` | `Top`, `Mid`, `Bot` road between the two Strongholds. |
 | `Destination` | Where a purchased Troop goes: a `Lane` or the `Jungle` ("Destino da Tropa"). |
-| `Commander` | The player's own unit on the map, drawn as its role's 1v1 champion. Auto by default; Move/Hold on command. |
+| `Commander` | Reserved P76 protocol term only. There is no player avatar or Commander in an active match (M-65). |
 | `Troop` | A 1v1 champion (`tbg_core::UnitKind`) bought in the `Shop` and sent to a `Destination`. |
 | `Shop` | Three role-locked offers per player drawn from the 1v1 online pool, with locks and a paid reroll, as in the 1v1 game. |
 | `Minion` | Free lane unit spawned in `Wave`s by each Stronghold. |
@@ -46,12 +49,12 @@
 | `Gold` | Currency for Troops (coins on the HUD). |
 | `Essence` | Second currency (purple gem) spent on Troop `Upgrade`s. |
 | `Upgrade` | Raises the player's Troop tier (+HP and damage for new Troops). |
-| `MobaIntention` | The only way a player or bot acts: `BuyTroop`, `Reroll`, `ToggleLock`, `Upgrade`, `MoveCommander`, `CommanderAuto`. |
+| `MobaIntention` | The only way a player or bot acts: `BuyTroop`, `Reroll`, `ToggleLock`, `Upgrade`. Legacy movement intentions are rejected (M-65). |
 
 ## 3. Match structure
 
 - **M-01** A match has 10 Seats in 2 Teams of 5 with roles Top, Jungle,
-  Mid, Bot, Support. The simulation ticks at 20 Hz.
+  Mid, Bot, Support. No Seat owns an avatar. The simulation ticks at 20 Hz.
 - **M-02** One map, *Tupi Valley* (`moba/core-moba/src/map.rs`), 200 × 200
   units: three Lanes, a river from corner to corner (presentation only),
   a central plaza, 8 Camps (4 per jungle), 11 Towers and 1 Stronghold per Team.
@@ -74,8 +77,8 @@
   Outer stands; a Base while its Inner stands; Nexus Towers while all three
   Base Towers stand; the Stronghold while either Nexus Tower stands.
 - **M-09** Units separate softly; structures never move.
-- Lane walkers and structures ignore neutral monsters; jungle Troops and
-  Commanders hunt them. Monsters are passive until hit and leash 9 units
+- Lane walkers and structures ignore neutral monsters; jungle Troops
+  hunt them. Monsters are passive until hit and leash 9 units
   from their camp, healing fully at home.
 
 ## 5. Economy, shop and progression
@@ -89,7 +92,7 @@
   ignore 20 % of damage. Champions with a 1v1 `heal` mend the most injured
   ally in range instead of attacking; champions with a 1v1 `splash` also hit
   enemies around their target for 50 %. 1v1 abilities and Evolutions are
-  not active in 5v5 yet (P77).
+  not active in 5v5 yet (P78).
 - **M-19** Shop: three distinct offers from the role-filtered 1v1 online pool, drawn from
   each seat's own seeded stream (1v1 BR-S01/S05); every purchase redraws all
   unlocked offers (BR-S04); locking a slot is free and keeps it through
@@ -99,8 +102,11 @@
 - **M-12** Passive income: +1 Gold per second, +1 Essence every 10 s.
 - **M-13** Bounties go to the owner of the unit that landed the last hit:
   Minion 4, Troop cost/3, monsters by M-64.
-- **M-14** Commander kill: killer +40 Gold +3 Essence; every allied Commander
-  within 12 units +15 Gold (assist); the killing Team scores 1.
+- **M-14** Proposed owner revision: an owned Troop killed by an enemy Team
+  increases that Team's score and its last-hitting player's kills by one;
+  its buyer records one death. The card-price/3 Gold bounty (M-13) stays.
+  Neutral kills record a loss without scoring for either Team. Avatar
+  bounties, assists and XP no longer exist (M-65).
 - **M-15** Tower destroyed: every player of the destroying Team +25 Gold
   +2 Essence.
 - **M-16** Team Gold on the scoreboard is the sum of Gold earned.
@@ -111,41 +117,47 @@
   Support Support/Control, Jungle Dps/Tank/Ranged. Unlocked slots draw in
   slot order, excluding locked champions and earlier draws. The wire sends
   a bitmask per slot (Tank=1, Dps=2, Support=4, Ranged=8, Control=16).
-  Category selection is reserved for a future intention. Commanders level 1–12 from experience shared by every allied
-  Commander within 12 units of an enemy death (Minion 20, Troop 25, monsters by M-64, Commander 120). Level = +80 HP, +4 damage.
-- **M-21** A dead Commander respawns at its base after `5 s + 1.5 s × level`.
-- **M-22** Commanders within 14 units of their own Stronghold heal ~5 %/s.
+  Category selection is reserved for a future intention. The former M-20
+  avatar XP/level clause is retired by the owner's M-65 revision.
+- **M-21/M-22** Retired by M-65: no avatar respawn or fountain healing.
 
 ## 6. Proposed values
 
 | Unit | HP | Dmg | Range | Attack (s) | Speed (u/s) | Armor | Rule |
 |---|---|---|---|---|---|---|---|
-| Commander | 900 | 40 | its champion's range (≥ 1.8) | its champion's interval | 4.2 | 10 % | Top Longaxe, Jungle Mantis, Mid Hexer, Bot Celestial Archer, Support Luminous Oracle |
 | Minion melee | 300 | 14 | 1.6 | 1.0 | 3.2 | 0 | — |
 | Minion ranged | 200 | 18 | 6.0 | 1.2 | 3.2 | 0 | — |
 | Any 1v1 champion — 1v1 Energy × 6 Gold | 1v1 HP | 1v1 | 1v1 | 1v1 | 1v1 × 4 | Tank 20 % | M-18 |
-| Small monster | 350 | 16 | 1.6 | 1.0 | 3.0 | 0 | passive |
-| Big monster | 900 | 35 | 2.0 | 1.2 | 2.8 | 0 | passive |
 | Tower Outer / Inner / Base / Nexus | 2500 / 2800 / 3000 / 3500 | 120 | 9.0 | 1.0 | — | 0 | M-08 |
 | Stronghold | 6000 | 150 | 10.0 | 1.0 | — | 0 | win condition |
 
 Waves: first at 0:10, then every 30 s. Camps: first at 0:20, per-kind respawn after cleared (M-63). Start Gold 60.
 
-## 7. Commanders
+## 7. Automatic champion strategy (owner revision, M-65/M-66)
 
-- **Auto** (default, all bots): lane roles follow their lane's most advanced
-  allied Minion/Troop, or wait at their outermost Tower; Support joins Bot;
-  Jungle clears its own Camps, then helps Mid. Below 25 % HP the Commander
-  walks home to heal and returns at 95 %.
-- **Move** (right click on ground or minimap): walk there ignoring enemies,
-  then **Hold**: fight anything within 7 units of that point.
-- **A** returns to Auto. A command given while dead applies after respawn.
+- **M-65** Proposed, explicitly requested 2026-11-03: players have no avatar.
+  Every champion is a purchased Troop. Choose a Destination before each
+  purchase; any Role may send each champion to any Lane or Jungle. After
+  spawning it walks, acquires targets, attacks/heals and advances by the
+  server's rules without manual orders. No selection, steering, Hold,
+  ability aiming or movement skill is required. There are no avatar
+  levels, XP, assists, respawns or personal fountain. Essence still buys
+  Troop Upgrade tiers. Legacy MoveCommander/CommanderAuto wire variants
+  return ManualControlDisabled with no state mutation. Protocol v2 rejects
+  old v1 handshakes; old variant positions remain reserved.
+- **M-66** Proposed: hold the left button on uncovered map ground and drag
+  to pan the camera, keeping the grabbed ground point under the cursor.
+  A drag starting on a HUD card/control/overlay cannot move the camera.
+  A gesture starting in the minimap navigates the camera only. Release or
+  focus loss ends a map drag; the camera stays within map bounds. Wheel,
+  arrows, edge pan and middle drag remain; Space/H centres the Team base.
+  Camera gestures never create MobaIntentions or change the simulation.
 
 ## 8. End of match
 
 - **M-30** Destroying the enemy Stronghold wins at once. At 25:00 the
   Team with more Towers standing wins; then higher Stronghold HP; then
-  more Commander kills; else a draw. The room starts a new match 10 s later.
+  more enemy Troop kills; else a draw. The room starts a new match 10 s later.
 
 ## 9. Bots (M-26)
 
@@ -158,12 +170,12 @@ affordable and Gold ≥ 48, they reroll. Destinations and streams are unchanged.
 
 Every 30 s (first at 0:10) each Stronghold sends a Wave of three melee and
 two ranged Minions down each lane. They walk towards the enemy Towers and
-Stronghold and attack any enemy Troop, Minion, Commander or structure on the
+Stronghold and attack any enemy Troop, Minion or structure on the
 way (structures in the M-08 order); they never enter the jungle.
 
 ## 10. Out of scope until later phases
 
-1v1 champion abilities and Evolutions in 5v5, Commander abilities and items, pings/chat, ranked/MMR,
+1v1 champion abilities and Evolutions in 5v5, items, pings/chat, ranked/MMR,
 matchmaking across rooms, spectators, reconnect-to-same-seat tokens,
 mobile layout, sounds/music, balance.
 
@@ -180,19 +192,19 @@ mobile layout, sounds/music, balance.
   after 45 s, Golems 75 s, Jaguar 90 s, Frogs 60 s. Partial clears do not
   start a timer. The timer is exposed only while the camp is in team vision.
 - **M-64** The following are initial Proposed content values, not tuning.
-  Bounties are last-hit Gold/Essence and nearby Commander XP. All monsters
+  Bounties are last-hit Gold/Essence. XP was retired by M-65. All monsters
   have 8-unit sight. Radius: alpha/big frog 1, pup 0.5, golem/jaguar 1.2,
   small golem 0.7, small frog 0.6. No river objective is added.
 
-| Monster | HP | Damage | Range | Interval (s) | Speed (u/s) | Armor | Gold/Essence/XP |
+| Monster | HP | Damage | Range | Interval (s) | Speed (u/s) | Armor | Gold/Essence |
 |---|---|---|---|---|---|---|---|
-| Wolf alpha | 600 | 30 | 1.8 | 0.8 | 4.2 | 0 | 18/1/60 |
-| Wolf pup | 180 | 12 | 1.4 | 0.8 | 4.5 | 0 | 5/0/20 |
-| Golem | 1200 | 32 | 2 | 1.5 | 2 | 25% | 20/2/70 |
-| Small golem | 450 | 14 | 1.6 | 1.5 | 2.2 | 20% | 6/0/30 |
-| Jaguar | 1000 | 70 | 2 | 1 | 4 | 5% | 32/3/120 |
-| Big frog | 750 | 28 | 6 | 1.2 | 2.8 | 0 | 18/2/60 |
-| Small frog | 240 | 12 | 5 | 1.2 | 3 | 0 | 6/0/25 |
+| Wolf alpha | 600 | 30 | 1.8 | 0.8 | 4.2 | 0 | 18/1 |
+| Wolf pup | 180 | 12 | 1.4 | 0.8 | 4.5 | 0 | 5/0 |
+| Golem | 1200 | 32 | 2 | 1.5 | 2 | 25% | 20/2 |
+| Small golem | 450 | 14 | 1.6 | 1.5 | 2.2 | 20% | 6/0 |
+| Jaguar | 1000 | 70 | 2 | 1 | 4 | 5% | 32/3 |
+| Big frog | 750 | 28 | 6 | 1.2 | 2.8 | 0 | 18/2 |
+| Small frog | 240 | 12 | 5 | 1.2 | 3 | 0 | 6/0 |
 
 P76 Small/Big protocol discriminants remain reserved for compatibility;
 new camps never spawn them. Their legacy stats are unchanged.
@@ -209,13 +221,13 @@ new camps never spawn them. Their legacy stats are unchanged.
   only their Team's World. Offline practice uses the human's Team.
 - **M-53** Visibility uses integer squared distances and an id-ordered
   spatial grid. Same state and Team give identical frames.
-- **M-54** Hidden units, target ids, enemy Commander HP/id, CampCleared,
-  enemy purchases/upgrades and unseen LevelUp events are omitted/redacted.
-  Commander kills, levels, K/D, respawn timers, destroyed Towers, team
-  Gold, scores and outcome remain public. Camp timers are sent only while
+- **M-54** Hidden units, target ids, CampCleared and enemy purchases/upgrades
+  are omitted/redacted. Troop kill counts (without champion identity or
+  location), K/D, destroyed Towers, team Gold, scores and outcome remain
+  public. Retired avatar events are never emitted. Camp timers are sent only while
   cleared and the Camp centre is visible. First-spawn countdown follows
   the same visibility rule. Hidden figures disappear without a Death clip.
-- **M-55** Sight: Troops/Minions 8 units, Commanders/Towers 9, Strongholds
+- **M-55** Sight: Troops/Minions 8 units, Towers 9, Strongholds
   10. The client and minimap use this shared table with two fog levels,
   visible and unseen, and a 256×256 mask with a soft inner edge. The
   smoothed edge is cosmetic; the server uses the exact sight radius.

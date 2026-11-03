@@ -20,13 +20,11 @@ impl MobaMatch {
         upkeep::income(self);
         spawn::waves(self);
         spawn::camps(self);
-        spawn::respawns(self);
         let positions = self.units.iter().map(|u| u.pos).collect::<Vec<_>>();
         self.grid.rebuild(positions.into_iter());
         let engaged = combat::fight(self);
         movement::advance(self, &engaged);
         movement::separate(self);
-        upkeep::fountain(self);
         rewards::resolve_deaths(self);
         outcome::check(self);
         crate::vision::remember_structures(self);

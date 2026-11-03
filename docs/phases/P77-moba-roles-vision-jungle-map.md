@@ -247,14 +247,25 @@ Install for the owner: `moba/scripts/install-linux-moba.sh` (menu entry
 | No `crates/*` or root Cargo change; 1v1 policy scripts pass | `check-native-version.py --base origin/main` etc. |
 | Windows/web correspondence | pending (P81), recorded honestly |
 
-## 9. Report (to be written by the executor)
+## Owner steering — section E (2026-11-03)
 
-> Fill in: validation level, exact command output, measurements, captures,
-> deviations, deferred checks with reasons.
+Explicit follow-up during execution: players must not have personal
+champion avatars or manual champion control. Purchases choose a Lane (or
+the existing Jungle Destination), then movement/combat is automatic.
+Add left-button ground dragging for camera navigation only. This revises
+M-01/M-10/M-14/M-20/M-21/M-22/M-30/M-40/M-41/M-50–M-55/M-64 and adds
+M-65/M-66; see the D-112 second amendment. Avatar XP/respawns/fountain and
+manual orders from P76 are retired. Legacy enum tags are reserved, manual
+orders rejected, and the wire moves to v2. The earlier Commander references
+in sections A–D are historical input, superseded by this steering.
+
+## 9. Report
+
+Pending final work-front evidence below.
 
 ## 10. After P77 (renumbered backlog)
 
-P78 1v1 champion abilities and Evolutions in 5v5 + Commander kit/orders ·
+P78 1v1 champion abilities and Evolutions in 5v5 (automatic, no Commander kit/orders) ·
 P79 online rooms for real players · P80 presentation polish (sound,
 scoreboard, settings) · P81 Windows and desktop web · P82 balance (only on
 explicit owner request).

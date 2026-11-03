@@ -8,7 +8,7 @@
 ## 1. Authority and seats (M-04, M-05, M-41)
 
 1. The server alone runs the simulation for online play and decides combat,
-   Gold, Essence, purchases, levels and the outcome.
+   Gold, Essence, purchases, Upgrade tiers and the outcome.
 2. A client only sends `MobaIntention`s. The seat is taken from the
    connection; no frame carries a seat.
 3. Bots act through the same `MobaIntention` validation as humans.
@@ -20,9 +20,9 @@ id-ordered units, no clocks, no I/O, no async, no graphics, no unseeded
 randomness, no HashMap iteration in the simulation. Same seed and same
 intentions per tick ⇒ same `state_hash` every tick.
 
-## 3. Wire protocol v1 (M-40 – M-42)
+## 3. Wire protocol v2 (M-40 – M-42)
 
-`MOBA_PROTOCOL_VERSION = 1`. Binary WebSocket frames, postcard encoding of:
+`MOBA_PROTOCOL_VERSION = 2`. Binary WebSocket frames, postcard encoding of:
 
 ```text
 ClientMsg = Hello { protocol: u16, name: String (≤ 24 chars, no control chars) }
@@ -34,12 +34,16 @@ ServerMsg = Welcome { protocol, seat, seed, tick_hz }
           | Rejected(Reject)
           | Pong(u32)
           | Full
-MobaIntention = BuyTroop { slot: u8, to } | Upgrade | MoveCommander { to: Pos(mm) } | CommanderAuto
-              | Reroll | ToggleLock { slot: u8 }
-PrivateView   = { seat, gold, essence, tier, troops, destination, commander_auto,
+MobaIntention = BuyTroop { slot: u8, to } | Reroll | ToggleLock { slot: u8 } | Upgrade
+              | MoveCommander { to: Pos(mm) } | CommanderAuto  // reserved, always rejected (M-65)
+PrivateView   = { seat, gold, essence, tier, troops, destination,
                   offers: [UnitKind; 3] (1v1 champions), slot_rules: [u8; 3], locked: u8 }
 ```
 
+- Protocol v2 also removes avatar fields from SeatView and PrivateView;
+  SeatView now contains human/kills/deaths. MoveCommander/CommanderAuto,
+  UnitKind::Commander and the old avatar Event tags keep their original
+  discriminants and are never applied/spawned/emitted (M-65).
 - Variant order is part of the wire: **append new variants only**, never
   reorder or remove; a breaking change bumps the version.
 - Limits: client frame ≤ 256 bytes, ≤ 30 frames/s, Hello within 5 s, idle
@@ -61,7 +65,7 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 
 | Test | Guards |
 |---|---|
-| `m01_ten_seats_two_teams_five_roles` | M-01, M-02 structure |
+| `m01_ten_seats_two_teams_five_roles` | M-01, M-02, M-65: ten strategic Seats without avatars |
 | `m03_same_seed_and_inputs_replay_identically` | M-03 |
 | `m04_bots_never_act_for_human_seats` | M-04 |
 | `m05_seat_outside_the_match_is_rejected` | M-05 |
@@ -79,12 +83,17 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 | `m51_structures_are_always_in_every_frame` | M-51 |
 | `m52_each_socket_receives_its_team_frame` (server) | M-52 |
 | `m53_vision_is_deterministic` | M-53 |
+| `m65_seats_have_no_avatar_and_manual_control_is_rejected` | M-01/M-65 |
+| `m65_each_purchase_chooses_its_lane_then_walks_automatically` | M-10/M-65 |
+| `m14_automatic_champion_kills_keep_card_bounty_and_update_score` | M-14/M-65 |
+| `m65_socket_cannot_send_manual_unit_orders` (server) | M-41/M-65 |
 | `m30_a_ten_bot_match_always_ends` | M-30 |
 | `m40_frames_round_trip_and_hostile_frames_are_refused` | M-40 |
 | `m41_seats_come_from_connections_and_purchases_are_authoritative` (server) | M-05, M-41 |
 | `m42_hostile_frames_close_the_socket` (server) | M-42 |
 
-Run them with `cd moba && cargo test --locked --workspace`.
+Queue focused commands from the P77 report at consolidation, under the
+shared validation lock. Full-workspace tests require an explicit owner request.
 
 ## 6. Isolation and the shared champions (D-112, amended 2026-11-03)
 

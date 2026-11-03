@@ -83,13 +83,14 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
         },
         BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.55)),
         Overlay,
+        crate::input::Blocks,
     ));
 }
 
 fn line(lang: Lang, event: &Event, mine: Option<tbg_moba_core::Seat>) -> Option<(String, Color)> {
     let team_color = |t: Team| palette::glow(t);
     match *event {
-        Event::CommanderKilled { victim, killer, by } => {
+        Event::TroopKilled { victim, killer, by } => {
             let who = |s: tbg_moba_core::Seat| {
                 if Some(s) == mine {
                     lang.t(Key::You).to_string()
@@ -128,7 +129,10 @@ fn reject_key(reject: Reject) -> Option<Key> {
         Reject::TroopCap => Some(Key::TroopCap),
         Reject::NotEnoughEssence => Some(Key::NotEnoughEssence),
         Reject::MaxTier => Some(Key::MaxTier),
-        Reject::MatchOver | Reject::InvalidSeat | Reject::InvalidSlot => None,
+        Reject::MatchOver
+        | Reject::InvalidSeat
+        | Reject::InvalidSlot
+        | Reject::ManualControlDisabled => None,
     }
 }
 

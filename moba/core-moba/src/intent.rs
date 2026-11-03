@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::content;
 use crate::geom::Pos;
-use crate::state::{CommandMode, Event, MobaMatch};
+use crate::state::{Event, MobaMatch};
 use crate::types::{Destination, Seat};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -17,9 +17,9 @@ pub enum MobaIntention {
     ToggleLock { slot: u8 },
     /// Spend Essence on the next Troop tier.
     Upgrade,
-    /// Walk the Commander to a point (then Hold there).
+    /// Reserved P76 wire variant; rejected by the strategy-only rules (M-65).
     MoveCommander { to: Pos },
-    /// Hand the Commander back to its role's Auto behaviour.
+    /// Reserved P76 wire variant; rejected by M-65.
     CommanderAuto,
 }
 
@@ -32,6 +32,7 @@ pub enum Reject {
     NotEnoughEssence,
     MaxTier,
     InvalidSlot,
+    ManualControlDisabled,
 }
 
 impl MobaMatch {
@@ -49,10 +50,9 @@ impl MobaMatch {
             MobaIntention::Reroll => self.reroll(seat),
             MobaIntention::ToggleLock { slot } => self.toggle_lock(seat, slot),
             MobaIntention::Upgrade => self.upgrade(seat),
-            MobaIntention::MoveCommander { to } => {
-                self.command(seat, CommandMode::Move(to.clamp_to_map()))
+            MobaIntention::MoveCommander { .. } | MobaIntention::CommanderAuto => {
+                Err(Reject::ManualControlDisabled)
             }
-            MobaIntention::CommanderAuto => self.command(seat, CommandMode::Auto),
         }
     }
 
@@ -122,25 +122,6 @@ impl MobaMatch {
         player.tier += 1;
         let tier = player.tier;
         self.events.push(Event::Upgraded { seat, tier });
-        Ok(())
-    }
-
-    fn command(&mut self, seat: Seat, mode: CommandMode) -> Result<(), Reject> {
-        let id = self.player(seat).commander;
-        self.player_mut(seat).mode = mode;
-        // A dead Commander keeps the order and obeys it after respawning.
-        if let Some(slot) = self.slot(id) {
-            if let crate::state::Brain::Commander {
-                mode: m,
-                retreating,
-                ..
-            } = &mut self.units[slot].brain
-            {
-                *m = mode;
-                *retreating = false;
-            }
-            self.units[slot].target = 0;
-        }
         Ok(())
     }
 }

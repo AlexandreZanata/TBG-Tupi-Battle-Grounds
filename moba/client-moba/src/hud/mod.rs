@@ -71,7 +71,7 @@ fn spawn(mut commands: Commands, lang: Res<Lang>, fonts: Res<Fonts>, assets: Res
             top::spawn(root, &ctx);
             roster::spawn(root, &ctx);
             shop::spawn(root, &ctx);
-            minimap::spawn(root, &ctx);
+            minimap::spawn(root);
             notices::spawn(root, &ctx);
         });
 }
@@ -111,38 +111,6 @@ pub fn panel(node: Node, border: Color) -> impl Bundle {
         BorderColor::all(border),
         Blocks,
     )
-}
-
-/// A thin horizontal bar: background node with a fill child marked `marker`.
-pub fn bar(
-    parent: &mut ChildSpawnerCommands,
-    width: f32,
-    height: f32,
-    fill: Color,
-    marker: impl Component,
-) {
-    parent
-        .spawn((
-            Node {
-                width: px(width),
-                height: px(height),
-                border_radius: BorderRadius::all(px(height / 2.0)),
-                ..default()
-            },
-            BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.6)),
-        ))
-        .with_children(|b| {
-            b.spawn((
-                Node {
-                    width: percent(100),
-                    height: percent(100),
-                    border_radius: BorderRadius::all(px(height / 2.0)),
-                    ..default()
-                },
-                BackgroundColor(fill),
-                marker,
-            ));
-        });
 }
 
 /// `18400` → `18.4k`.
