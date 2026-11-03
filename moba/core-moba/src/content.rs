@@ -98,15 +98,13 @@ fn minion_stats(profile: Champion, mut stats: Stats) -> Stats {
     stats
 }
 
-/// A 1v1 champion on the MOBA map: its own HP, damage, attack interval and
-/// range (both modes tick at 20 Hz and measure in millimetres), walking
-/// faster because lanes here are ~12x longer than the 1v1 BattleLine (M-18).
+/// Keep the 1v1 profiles and scale their reach with the larger 5v5 figures (M-18).
 fn troop_stats(kind: Champion) -> Stats {
     let def = tbg_core::content::def(kind);
     Stats {
         hp: def.hp,
         damage: def.damage,
-        range: def.range.max(u(10)),
+        range: champion_range(def.range),
         attack_ticks: def.interval.max(1),
         speed: def.speed * CHAMPION_SPEED_FACTOR,
         armor: if def.archetype == Archetype::Tank {
@@ -123,6 +121,11 @@ fn troop_stats(kind: Champion) -> Stats {
 
 /// Shared scale for the champion rig and its body reservation (M-70).
 pub const CHAMPION_FIGURE_SCALE: i32 = 3;
+
+/// Project an authored champion cast distance into 5v5 world millimetres.
+pub const fn champion_range(range: i32) -> i32 {
+    range * CHAMPION_FIGURE_SCALE
+}
 
 /// Champion walking speed multiplier over its 1v1 value (Proposed).
 pub const CHAMPION_SPEED_FACTOR: i32 = 4;

@@ -119,7 +119,8 @@ pub fn bonus(g: &mut MobaMatch, i: usize, j: usize, damage: i32) -> i32 {
         }
         if v.fx.spark_until > g.tick
             && v.fx.spark_credit != Some(super::credit(&u))
-            && u.stats.range <= tbg_core::content::completion::SPARK_MELEE_RANGE
+            && u.stats.range
+                <= crate::content::champion_range(tbg_core::content::completion::SPARK_MELEE_RANGE)
         {
             flat += v.fx.spark;
             g.units[j].fx.spark_until = 0;

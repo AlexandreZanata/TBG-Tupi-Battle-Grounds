@@ -1,6 +1,7 @@
 //! Independent special readiness, locked windups and two-dimensional area resolution.
 use super::{abilities, cue, effects, nearby, state::Cast};
 use crate::{
+    content::champion_range,
     geom::Pos,
     state::{MobaMatch, Unit},
 };
@@ -27,8 +28,10 @@ fn period(a: Ability) -> Option<u16> {
 }
 fn primary(g: &MobaMatch, u: &Unit, a: Ability) -> Option<u32> {
     let reach = match a {
-        Ability::StickyWeb { range_add, .. } => super::reach(u, u) + range_add,
-        Ability::ShoulderPistol { range, .. } | Ability::SolarBarrier { range, .. } => range,
+        Ability::StickyWeb { range_add, .. } => super::reach(u, u) + champion_range(range_add),
+        Ability::ShoulderPistol { range, .. } | Ability::SolarBarrier { range, .. } => {
+            champion_range(range)
+        }
         _ => super::reach(u, u),
     };
     let allied = matches!(a, Ability::SolarBarrier { .. });

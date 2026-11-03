@@ -598,6 +598,21 @@ errors in the log. Evidence: `/tmp/tbg-p77-route-exits/base.png` and
 `/tmp/tbg-p77-route-exits/smoke.log`. This is a startup and placement
 observation. The complete motion comparison remains pending.
 
+### Scaled champion attack reach (M-18)
+
+The figures and collision bodies were three times larger while the
+printed basic range was still in unscaled BattleLine coordinates.
+Combat acquisition also stopped at eight units even for longer printed
+ranges. Use the existing 3× figure scale for basic reach and explicit
+cast distances, and scan at least the weapon's range. Keep Team vision
+and area radii independent. The shared Animator and projectile recipes
+consume the same authoritative positions across platforms.
+
+28 focused core contracts passed across `contract_champion_range`,
+`contract_champion_combat` and `contract_moba`, excluding the 25-minute
+bot match. The new tests cover every Shop champion and a Farwatch
+firing at 36 units without stepping toward the target.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 champion Evolution forms and coverage beyond the automatic base kits ·

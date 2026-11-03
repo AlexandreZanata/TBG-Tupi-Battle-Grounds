@@ -1411,3 +1411,13 @@ spread laterally under crowding. Queue straight-line walking, bridge
 approaches, both sides of the base, dense waves and combat contact in
 the desktop motion matrix. Complete Linux, Windows and desktop web
 motion comparisons remain pending.
+
+
+## P77 J — scaled champion attack distance
+
+Champion attacks and direct casts use the same 3× map conversion as
+their figures. The shared client aims and animates the authoritative
+attack at the new distance. Check close melee contact, ranged release
+and projectile travel, support casts, and shots crossing Team vision.
+Focused Linux core checks cover reach and acquisition. Desktop motion
+comparison on Linux, Windows and web remains pending.

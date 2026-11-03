@@ -713,6 +713,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-j-scaled-champion-range",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Champion attack and cast reach, stance, muzzle releases and projectile travel with 3× world distance; close contact and vision boundaries",
+      "linux": "focused core contracts passed; motion comparison pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
     }
   ]
 }

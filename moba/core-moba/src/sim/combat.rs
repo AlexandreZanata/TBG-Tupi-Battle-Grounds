@@ -242,7 +242,7 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
         _ => (None, 0),
     };
     let keep = if a.mobile() {
-        a.stats.sight * 3 / 2
+        (a.stats.sight * 3 / 2).max(a.stats.range)
     } else {
         a.stats.range
     };
@@ -257,8 +257,10 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
     if current.is_some() && !rescan || matches!(a.brain, Brain::Neutral { .. }) {
         return current;
     }
+    // Weapon acquisition must reach the end of the weapon range. The
+    // separate Team vision radius continues to filter the wire view.
     let sight = if a.mobile() {
-        a.stats.sight
+        a.stats.sight.max(a.stats.range)
     } else {
         a.stats.range
     };

@@ -88,7 +88,10 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
   card price and sends it to the chosen Destination; insufficient Gold is
   rejected. Price = the champion's 1v1 Energy cost × 6 Gold.
 - **M-18** A champion keeps its 1v1 HP, damage, attack interval and range
-  (both modes tick at 20 Hz in millimetres); it walks 4× its 1v1 speed
+  proportions. **Proposed owner revision:** scale the authored basic and
+  explicit champion cast reach by the existing 3× figure scale. Combat can
+  acquire a target at the full weapon range, with Team sight still governed
+  by M-50/M-55. Both modes tick at 20 Hz in millimetres. A champion walks 4× its 1v1 speed
   because MOBA lanes are ~12× longer than the BattleLine. Tank archetypes
   ignore 20 % of damage. Champions with a 1v1 `heal` mend the most injured
   ally in range instead of attacking; champions with a 1v1 `splash` also hit
@@ -130,7 +133,7 @@ Historical P76 capture; current P77 Seats have no avatars (M-65).
 |---|---|---|---|---|---|---|---|
 | Minion melee | 300 | 14 | 1.6 | 1.0 | 3.2 | 0 | — |
 | Minion ranged | 200 | 18 | 6.0 | 1.2 | 3.2 | 0 | — |
-| Any 1v1 champion — 1v1 Energy × 6 Gold | 1v1 HP | 1v1 | 1v1 | 1v1 | 1v1 × 4 | Tank 20 % | M-18 |
+| Any 1v1 champion — 1v1 Energy × 6 Gold | 1v1 HP | 1v1 | 1v1 × 3 | 1v1 | 1v1 × 4 | Tank 20 % | M-18 |
 | Tower Outer / Inner / Base / Nexus | 2500 / 2800 / 3000 / 3500 | 120 | 9.0 | 1.0 | — | 0 | M-08 |
 | Stronghold | 6000 | 150 | 10.0 | 1.0 | — | 0 | win condition |
 
