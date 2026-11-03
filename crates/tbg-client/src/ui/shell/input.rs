@@ -2,11 +2,9 @@
 
 use super::{arcanas, Action, Lang, Panel, Shell, UiAction};
 use crate::platform::storage::{self, Scope};
-use bevy::{
-    input::mouse::{MouseScrollUnit, MouseWheel},
-    prelude::*,
-    window::PresentMode,
-};
+#[cfg(not(target_os = "android"))]
+use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+use bevy::{prelude::*, window::PresentMode};
 
 #[allow(clippy::type_complexity)]
 type Buttons<'w, 's> = Query<
@@ -344,66 +342,6 @@ pub fn scroll(
     }
 }
 
-/// Android scrolls only the foremost scrollable viewport, in that node's logical units.
+/// Android touch scrolling owns one visible branch and chains only through its ancestors.
 #[cfg(target_os = "android")]
-#[allow(clippy::type_complexity)]
-pub fn scroll(
-    mut events: MessageReader<MouseWheel>,
-    pointer: Res<super::super::mobile::input::Pointer>,
-    window: Single<&Window>,
-    form: NonSend<super::ActiveForm>,
-    mut lists: Query<(
-        Entity,
-        &Node,
-        &ComputedNode,
-        &UiGlobalTransform,
-        &InheritedVisibility,
-        &bevy::ui::ComputedStackIndex,
-        Option<&bevy::ui::CalculatedClip>,
-        &mut ScrollPosition,
-    )>,
-) {
-    if super::textform::is_open(&form) {
-        events.clear();
-        return;
-    }
-    let mut motions = Vec::new();
-    if let Some((point, delta)) = pointer.drag {
-        motions.push((
-            point * window.scale_factor(),
-            delta.y * window.scale_factor(),
-        ));
-    }
-    if let Some(point) = window.cursor_position() {
-        for event in events.read() {
-            let dy = event.y
-                * if event.unit == MouseScrollUnit::Line {
-                    36.
-                } else {
-                    1.
-                };
-            motions.push((point * window.scale_factor(), dy * window.scale_factor()));
-        }
-    } else {
-        events.clear();
-    }
-    for (point, delta) in motions {
-        let target = lists
-            .iter()
-            .filter(|(_, style, node, t, visible, _, clip, _)| {
-                style.overflow.y == Overflow::scroll_y().y
-                    && visible.get()
-                    && node.content_size.y > node.size.y
-                    && node.contains_point(**t, point)
-                    && clip.is_none_or(|c| c.contains_point(point))
-            })
-            .max_by_key(|(_, _, _, _, _, stack, _, _)| stack.0)
-            .map(|(entity, ..)| entity);
-        if let Some(entity) = target {
-            if let Ok((_, _, node, _, _, _, _, mut position)) = lists.get_mut(entity) {
-                let max = ((node.content_size.y - node.size.y) * node.inverse_scale_factor).max(0.);
-                position.0.y = (position.0.y - delta * node.inverse_scale_factor).clamp(0., max);
-            }
-        }
-    }
-}
+pub use super::super::mobile::scroll::scroll;

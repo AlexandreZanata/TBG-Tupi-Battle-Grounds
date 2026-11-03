@@ -990,3 +990,8 @@ source/profile evidence and failed intermediate captures stay in the P69 report.
 P69 laboratory refinement: Android-only status/actions toolbar with equivalent
 short labels, wrapped participant navigation/headings and bounded generic
 button text. Desktop layout/copy remains unchanged; see P69 runtime evidence.
+
+P69 nested-scroll pass: Android scroll residuals propagate only to ancestor
+viewports, respecting visible action shields. Mobile catalog removes the duplicate
+heading and scrolls its hint with bounded thumbnail/name rows. Desktop unchanged;
+actual runtime coverage is recorded separately in the P69 report.

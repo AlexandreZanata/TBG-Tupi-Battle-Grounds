@@ -6,6 +6,8 @@ pub(in crate::ui) mod insets;
 #[cfg(target_os = "android")]
 pub mod layout;
 #[cfg(target_os = "android")]
+pub(in crate::ui) mod scroll;
+#[cfg(target_os = "android")]
 pub mod shell;
 #[cfg(target_os = "android")]
 pub mod text;
