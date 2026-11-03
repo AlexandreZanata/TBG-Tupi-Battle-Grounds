@@ -24,6 +24,8 @@ pub struct Chat {
     pub policy: Option<MatchSocial>,
     pub lines: VecDeque<(f64, tbg_core::Seat, String)>,
     pub bubbles: [Option<(u8, f64)>; 2],
+    #[cfg(target_os = "android")]
+    pub compose_result: Option<[u8; 16]>,
     pub focused: bool,
     pub expanded: bool,
     pub edit: kit::edit::Edit,

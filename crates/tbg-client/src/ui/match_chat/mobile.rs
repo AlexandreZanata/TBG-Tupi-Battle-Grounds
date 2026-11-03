@@ -15,7 +15,9 @@ pub(super) fn submit(
         .read()
         .filter(|message| message.kind == TextKind::MatchChat)
     {
-        if *state.get() == GameState::InMatch
+        if chat.compose_result.is_some()
+            && chat.compose_result == info.result_id
+            && *state.get() == GameState::InMatch
             && !info.spectating
             && chat.mode == 0
             && matches!(&*link, MatchLink::Net(_))
@@ -41,6 +43,7 @@ pub(super) fn submit(
             }
         }
         textform::close(&mut form);
+        chat.compose_result = None;
         chat.focused = false;
         chat.expanded = false;
     }
