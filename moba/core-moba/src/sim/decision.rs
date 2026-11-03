@@ -70,7 +70,16 @@ pub fn phase(u: &mut Unit, next: Phase) {
 }
 
 fn commit(m: &mut MobaMatch, i: usize, target: u32, reason: Reason) {
+    let reachable = m.unit(target).is_some_and(|b| in_position(&m.units[i], b));
     let u = &mut m.units[i];
+    // Contact is fresh proof that an old blocked-route hint no longer holds.
+    // In particular, a patient walking back into range must not be rejected
+    // again on the very next tick because of the previous failed approach.
+    if reachable {
+        u.navigation.rejected.retain(|&(id, _)| id != target);
+        u.navigation.failed_since = None;
+        u.navigation.stalled = 0;
+    }
     if u.decision.target != target {
         u.decision.anchor = u.pos;
         u.decision.since = m.tick;

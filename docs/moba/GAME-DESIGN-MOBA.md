@@ -424,3 +424,8 @@ new camps never spawn them. Their legacy stats are unchanged.
   nearby enemy is acquired under M-07 before the mission resumes. Neutral
   monsters and immobile allies remain route obstacles because a Lane unit
   cannot clear them through ordinary enemy acquisition.
+
+- A newly reachable action position clears the target's old blocked-route
+  hint. In particular a patient returning into range supplies fresh proof
+  of reachability; following it must not alternate between acquire/reject
+  because of an earlier failed approach.

@@ -635,3 +635,71 @@ fn lane_detours_around_passive_camps_that_it_must_not_attack() {
             .all(|u| u.hp == u.max_hp));
     }
 }
+
+#[test]
+fn patient_returning_to_range_clears_the_previous_unreachable_hint() {
+    use tbg_moba_core::types::TowerTier;
+    let mut g = quiet();
+    let a = walker(
+        &mut g,
+        UnitKind::Troop(Champion::Bloomkeeper),
+        Team::Blue,
+        Pos::units(62, 60),
+    );
+    let b = walker(
+        &mut g,
+        UnitKind::Minion(MinionKind::Melee),
+        Team::Blue,
+        Pos::units(75, 60),
+    );
+    let j = g.slot(b).unwrap();
+    g.units[j].hp = 10;
+    g.units[j].max_hp = 100_000;
+    g.units[j].stats.speed = 1;
+    g.units[j].stats.damage = 0;
+    g.units[j].fx.root_until = 10_000;
+    let wall = g.spawn(
+        UnitKind::Tower(TowerTier::Outer, Some(Lane::Mid)),
+        Side::Team(Team::Blue),
+        None,
+        Pos::units(75, 60),
+        Brain::Static,
+    );
+    let j = g.slot(wall).unwrap();
+    g.units[j].stats.radius = 10_000;
+    g.units[j].stats.damage = 0;
+    let i = g.slot(a).unwrap();
+    g.units[i].target = b;
+    let mut released = false;
+    for _ in 0..80 {
+        g.step();
+        if g.unit(a).unwrap().target == 0 {
+            released = true;
+            break;
+        }
+    }
+    assert!(released);
+    assert_eq!(
+        g.unit(a).unwrap().decision.changed_because,
+        tbg_moba_core::sim::decision::Reason::Unreachable
+    );
+    g.units.retain(|u| u.id != wall);
+    let from = g.unit(a).unwrap().pos;
+    let j = g.slot(b).unwrap();
+    g.units[j].pos = Pos {
+        x: from.x + 8_900,
+        y: from.y,
+    };
+    g.step();
+    assert_eq!(g.unit(a).unwrap().target, b);
+    for _ in 0..30 {
+        let j = g.slot(b).unwrap();
+        g.units[j].pos.x += 80;
+        g.step();
+        assert_eq!(
+            g.unit(a).unwrap().target,
+            b,
+            "old rejection must not undo successful reacquisition"
+        );
+    }
+}

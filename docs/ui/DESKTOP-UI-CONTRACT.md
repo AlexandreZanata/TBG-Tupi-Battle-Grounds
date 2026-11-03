@@ -1481,3 +1481,7 @@ waypoint for the entire future route to become empty.
 Also cover a Lane detouring past passive Golems/Frogs: it must keep its Lane
 mission, move around the camp and leave neutral HP unchanged. This covers
 the Ravager/Leechroot stalls observed in the intermediate Linux recording.
+
+Patient-following coverage includes a formerly unreachable patient returning
+into range, then moving away: successful reacquisition must clear the old
+blocked-route hint and preserve aim/following through recovery.

@@ -748,7 +748,7 @@
       "id": "p77-m-decision-commitment-motion",
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
-      "affected_cases": "M-76 mission/engagement transitions; moving targets and patients; root/channel/recovery; effective motion facing; narrow bridge centres; large cargo ground placement; crowded Nexus and lane/jungle resumption; distant occupied Lane front and passive-camp detours",
+      "affected_cases": "M-76 mission/engagement transitions; moving targets and patients; root/channel/recovery; effective motion facing; narrow bridge centres; large cargo ground placement; crowded Nexus and lane/jungle resumption; distant occupied Lane front and passive-camp detours; patient returning after a rejected approach",
       "linux": "Follow-up scoped native motion validation in progress; see report",
       "windows": "pending",
       "web": "pending",

@@ -825,3 +825,13 @@ route obstacles. The final filter keeps neutral bodies and immobile allies,
 while still allowing approach to a distant hostile front. A regression uses
 both observed positions and asserts departure with neutral HP unchanged.
 All 15 decision plus 7 navigation tests passed after this correction.
+
+Native observation on `72ecd16dbb2c` removed the two champion mission stalls:
+only two Minion replanning runs slightly exceeded 40 ticks (41 ticks each).
+One Bloomkeeper still reacquired the same patient repeatedly: an old rejected
+route survived after the patient returned into legal action range. M-76 now
+clears that hint when commitment has fresh proof of an action position.
+The regression first asserts an `Unreachable` release, then moves the patient
+back and out again, requiring uninterrupted retention. Sixteen decision,
+seven navigation, aggro and champion-combat tests passed; the tightened
+single patient fixture also passed. The union is 45 distinct focused tests.
