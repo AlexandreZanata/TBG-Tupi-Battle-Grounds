@@ -146,6 +146,8 @@ fn spawn(
         padding: UiRect::all(px(6)),
         ..default()
     });
+    #[cfg(target_os = "android")]
+    root.insert(crate::celebration::ui::ResultSurface);
     root.with_children(|root| {
         root.spawn((
             Node {
@@ -177,6 +179,8 @@ fn spawn(
             BackgroundColor(PANEL),
             #[cfg(target_os = "android")]
             ScrollPosition::default(),
+            #[cfg(target_os = "android")]
+            crate::celebration::ui::ResultPanel,
         ))
         .with_children(|panel| {
             #[cfg(feature = "ui-acceptance")]

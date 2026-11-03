@@ -20,6 +20,8 @@ struct Scene {
     built: Option<([u8; 16], u64, bool, bool, Vec2)>,
     camera: Option<(Entity, Transform, Projection, Vec2)>,
     view: Option<Transform>,
+    #[cfg(target_os = "android")]
+    viewport: Option<layout::ViewportFit>,
 }
 
 pub(super) fn plugin(app: &mut App) {
@@ -121,6 +123,10 @@ fn build(
         }
     }
     scene.view = Some(formation.camera);
+    #[cfg(target_os = "android")]
+    {
+        scene.viewport = Some(formation.viewport);
+    }
     for ((index, entry), position) in entries.into_iter().zip(formation.positions) {
         let transform = Transform::from_translation(position)
             .with_rotation(layout::facing(position, formation.camera.translation))
@@ -169,6 +175,10 @@ fn restore(
     cameras: &mut Query<(Entity, &mut Transform, &mut Projection), With<ArenaCamera>>,
     size: Vec2,
 ) {
+    #[cfg(target_os = "android")]
+    {
+        scene.viewport = None;
+    }
     if let Some((entity, transform, projection, old_size)) = scene.camera.take() {
         if let Ok((_, mut t, mut p)) = cameras.get_mut(entity) {
             *t = transform;
@@ -199,10 +209,41 @@ fn exit(
     scene.view = None;
 }
 
-fn aim(scene: Res<Scene>, mut camera: Query<&mut Transform, With<ArenaCamera>>) {
+fn aim(
+    scene: Res<Scene>,
+    mut camera: Query<&mut Transform, With<ArenaCamera>>,
+    #[cfg(target_os = "android")] window: Single<&Window>,
+    #[cfg(target_os = "android")] panels: Query<
+        (&ComputedNode, &UiGlobalTransform),
+        With<super::ui::ResultPanel>,
+    >,
+    #[cfg(target_os = "android")] surfaces: Query<
+        (&ComputedNode, &UiGlobalTransform),
+        With<super::ui::ResultSurface>,
+    >,
+) {
     if let Some(view) = scene.view {
         if let Ok(mut transform) = camera.single_mut() {
             *transform = view;
+            #[cfg(target_os = "android")]
+            if let (Some(fit), Ok((panel, panel_t)), Ok((surface, surface_t))) =
+                (&scene.viewport, panels.single(), surfaces.single())
+            {
+                let size = Vec2::new(
+                    window.physical_width() as f32,
+                    window.physical_height() as f32,
+                );
+                let padding = Vec2::splat(6. * window.scale_factor());
+                let min = surface_t.translation - surface.size * 0.5 + padding;
+                let max = Vec2::new(
+                    surface_t.translation.x + surface.size.x * 0.5,
+                    panel_t.translation.y - panel.size.y * 0.5,
+                ) - padding;
+                if size.min_element() > 0. && (max - min).min_element() > 0. {
+                    *transform =
+                        fit.frame(size.x / size.y, Rect::from_corners(min / size, max / size));
+                }
+            }
         }
     }
 }
@@ -229,6 +270,8 @@ mod tests {
             built: Some(([63; 16], 1, false, false, size)),
             camera: Some((camera, original, Projection::default(), size)),
             view: Some(Transform::from_xyz(8., 2., 5.)),
+            #[cfg(target_os = "android")]
+            viewport: None,
         });
 
         world.run_system_once(exit).unwrap();

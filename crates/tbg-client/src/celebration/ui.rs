@@ -15,6 +15,12 @@ struct Range;
 struct Toggle;
 #[derive(Component)]
 struct Motion;
+#[cfg(target_os = "android")]
+#[derive(Component)]
+pub(crate) struct ResultPanel;
+#[cfg(target_os = "android")]
+#[derive(Component)]
+pub(crate) struct ResultSurface;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(Update, update.run_if(in_state(GameState::Result)));
@@ -49,7 +55,7 @@ pub(crate) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: L
                 ),
                 Node {
                     width: px(if cfg!(target_os = "android") {
-                        100
+                        120
                     } else {
                         190
                     }),
@@ -59,20 +65,20 @@ pub(crate) fn spawn(parent: &mut ChildSpawnerCommands, info: &MatchInfo, lang: L
             ));
             row.spawn(button(">", UiAction::CelebrationNext, 48.));
             row.spawn(button(
-                lang.t(Msg::CelebrationHide),
+                &caption(lang, Msg::CelebrationHide),
                 UiAction::CelebrationHide,
                 if cfg!(target_os = "android") {
-                    108.
+                    100.
                 } else {
                     145.
                 },
             ))
             .insert(Toggle);
             row.spawn(button(
-                lang.t(Msg::CelebrationMotion),
+                &caption(lang, Msg::CelebrationMotion),
                 UiAction::CelebrationMotion,
                 if cfg!(target_os = "android") {
-                    108.
+                    100.
                 } else {
                     165.
                 },
@@ -137,7 +143,7 @@ fn update(
             if let Some(children) = children {
                 for child in children {
                     if let Ok(mut text) = texts.get_mut(*child) {
-                        text.0 = lang.t(key).to_string();
+                        text.0 = caption(*lang, key);
                     }
                 }
             }
@@ -145,6 +151,20 @@ fn update(
         // Controls always stay clickable; their bounded actions are no-ops at the ends.
         let _ = &mut action;
     }
+}
+
+fn caption(lang: Lang, key: Msg) -> String {
+    #[cfg(target_os = "android")]
+    if let Some(key) = match key {
+        Msg::CelebrationHide => Some("android.celebration.hide"),
+        Msg::CelebrationShow => Some("android.celebration.show"),
+        Msg::CelebrationMotion => Some("android.celebration.reduce"),
+        Msg::CelebrationMotionOff => Some("android.celebration.full"),
+        _ => None,
+    } {
+        return lang.key(key);
+    }
+    lang.t(key).to_owned()
 }
 
 fn button(text: &str, action: UiAction, width: f32) -> impl Bundle + use<> {

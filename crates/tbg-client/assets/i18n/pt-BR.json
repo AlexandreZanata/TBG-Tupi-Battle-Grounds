@@ -2024,5 +2024,9 @@
   "android.chat_compose": "Escrever mensagem",
   "android.battle.details": "Detalhes da batalha",
   "android.battle.shop_help": "Toque para recrutar · Segure para detalhes",
-  "android.chat_short": "Chat"
+  "android.chat_short": "Chat",
+  "android.celebration.hide": "Ocultar celebração",
+  "android.celebration.show": "Mostrar celebração",
+  "android.celebration.reduce": "Reduzir movimento",
+  "android.celebration.full": "Movimento completo"
 }

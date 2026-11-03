@@ -2024,5 +2024,9 @@
   "android.chat_compose": "Write a message",
   "android.battle.details": "Battle details",
   "android.battle.shop_help": "Tap to recruit · Hold for details",
-  "android.chat_short": "Chat"
+  "android.chat_short": "Chat",
+  "android.celebration.hide": "Hide celebration",
+  "android.celebration.show": "Show celebration",
+  "android.celebration.reduce": "Reduce motion",
+  "android.celebration.full": "Full motion"
 }

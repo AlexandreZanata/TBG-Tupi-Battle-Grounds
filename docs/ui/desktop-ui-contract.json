@@ -503,6 +503,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-mobile-celebration-measured-free-space",
+      "date": "2026-11-03",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android celebration camera fits the measured space above Result without rebuilding dancers; compact paging and touch-only captions; shared cast/world slots/clips and desktop camera unchanged",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

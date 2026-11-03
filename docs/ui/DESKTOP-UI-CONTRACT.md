@@ -1179,3 +1179,12 @@ their dedicated handler; native forms retain their existing guard. No geometry,
 chat permission or authority change. Candidate42's inert chat controls are a
 recorded failure; corrected delivery and background-gameplay exclusion remain
 pending actual runtime repetition.
+
+
+P69 celebration visibility: Android fits the unchanged formation envelope into
+the actual safe space above the measured Result panel by changing only the
+camera. Dancers are not rebuilt on panel-height changes; cast, world slots,
+page size, clips and desktop camera/motion are preserved. Mobile paging gets a
+wider range label and hide/show/motion captions omit desktop keyboard hints.
+The actual42 complete-summary pass and occluded-cast failure remain distinct;
+corrected full-cast/motion/cleanup observations are pending.
