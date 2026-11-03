@@ -233,3 +233,24 @@ release_slots -- br_p04 br_ar05 br_as11 br_u07 p74_red u13_a
 --test-threads=1`, under the required host lock/two jobs. The lock returned
 exit 75 before compilation; this attempt is deferred, not a pass. There was
 no automatic lock retry. Formatting and `git diff --check` passed.
+
+
+At `9ff55a16`, GitHub job 125665780186 confirms the account-message,
+Arcana-reply, historical-upgrade, exact army-reconstruction and ownership
+regressions passed. All six release-slot cases also passed on this run; that
+single success does not resolve the previously repeated intermittent failure
+or authorize the stopped step. The remaining test failure reached a later
+legacy assertion: `(7, NotEnoughEnergy)` versus `(7, AuxiliaryAlreadyHired)`.
+BR-AX12 permits that second hire to evolve. The online scenario now pays the
+canonical price for tiers 2 and 3, checks preserved activation history, rejects
+the fourth step and pays the canonical Miner hire price. Its real opponent
+continues reading and answering pings throughout the longer tier journey.
+No balance value, simulation implementation or original privacy/outcome
+assertion is weakened.
+
+The corrected BR-AX12 online scenario's one local attempt used
+`cargo test -p tbg-server --test online
+p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative --
+--test-threads=1`, with the same lock/two-job prefix and existing P75 cache.
+It returned exit 75 before compilation and is deferred to the next GitHub
+run. No lock retry or full local suite ran. Formatting/diff checks passed.

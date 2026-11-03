@@ -1517,7 +1517,6 @@ async fn celebration_finished_result_replays_to_either_seat_without_a_live_view(
 async fn p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative() {
     use tbg_core::{
         auxiliary::{AuxiliaryKind, AuxiliaryPhase, AUXILIARY_RULE},
-        content::ENERGY_SCALE,
         Phase,
     };
     let url = server(30).await;
@@ -1535,6 +1534,18 @@ async fn p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative() 
     } else {
         (b, tb, a)
     };
+    // A real peer answers pings throughout the cumulative tier purchases.
+    let peer = tokio::spawn(async move {
+        let visible = wait_for_view(&mut other, |v| {
+            matches!(
+                v.auxiliaries[1][0].phase,
+                AuxiliaryPhase::Preparing { .. } | AuxiliaryPhase::Active { .. }
+            )
+        })
+        .await;
+        let outcome = await_end(&mut other).await;
+        (visible, outcome)
+    });
     let hire_cost = AUXILIARY_RULE.cost_of(AuxiliaryKind::Merchant, 1).unwrap();
     wait_for_view(&mut buyer, |v| {
         v.phase == Phase::Running && v.energy >= hire_cost
@@ -1615,51 +1626,76 @@ async fn p74_red_seat_auxiliaries_free_reroll_and_reconnect_are_authoritative() 
     .await;
     let spent = wait_for_view(&mut resumed, |v| v.last_seq == 6).await;
     assert_eq!(spent.free_rerolls, 0);
+    // BR-AX12/14: the same server-stamped intention now evolves through tiers,
+    // preserving tier-1 activation history across reconnect and both Evolutions.
+    for tier in 2..=3 {
+        let cost = AUXILIARY_RULE
+            .cost_of(AuxiliaryKind::Merchant, tier)
+            .unwrap();
+        wait_for_view(&mut resumed, |v| {
+            v.energy >= cost && v.augment_round.is_none()
+        })
+        .await;
+        let seq = u32::from(tier) + 5;
+        send(
+            &mut resumed,
+            &ClientMsg::Intent {
+                seq,
+                intent: PlayerIntention::HireAuxiliary { slot: 1 },
+            },
+        )
+        .await;
+        let evolved = wait_for_view(&mut resumed, |v| v.last_seq == seq).await;
+        assert_eq!(evolved.auxiliaries[1][1].tier, tier);
+        assert!(matches!(
+            evolved.auxiliaries[1][1].phase,
+            AuxiliaryPhase::Active {
+                activations_used: 1,
+                ..
+            }
+        ));
+    }
     send(
         &mut resumed,
         &ClientMsg::Intent {
-            seq: 7,
+            seq: 9,
             intent: PlayerIntention::HireAuxiliary { slot: 1 },
         },
     )
     .await;
-    expect_rejection(&mut resumed, 7, Rejection::AuxiliaryAlreadyHired).await;
+    expect_rejection(&mut resumed, 9, Rejection::AuxiliaryAlreadyHired).await;
+    let mine_cost = AUXILIARY_RULE.cost_of(AuxiliaryKind::Miner, 1).unwrap();
     wait_for_view(&mut resumed, |v| {
-        v.energy >= 6 * ENERGY_SCALE && v.augment_round.is_none()
+        v.energy >= mine_cost && v.augment_round.is_none()
     })
     .await;
     send(
         &mut resumed,
         &ClientMsg::Intent {
-            seq: 8,
+            seq: 10,
             intent: PlayerIntention::HireAuxiliary { slot: 0 },
         },
     )
     .await;
-    let preparing = wait_for_view(&mut resumed, |v| v.last_seq == 8).await;
+    let preparing = wait_for_view(&mut resumed, |v| v.last_seq == 10).await;
     assert!(matches!(
         preparing.auxiliaries[1][0].phase,
         AuxiliaryPhase::Preparing { .. }
     ));
-    let visible = wait_for_view(&mut other, |v| {
-        matches!(
-            v.auxiliaries[1][0].phase,
-            AuxiliaryPhase::Preparing { .. } | AuxiliaryPhase::Active { .. }
-        )
+    send(&mut resumed, &ClientMsg::Surrender).await;
+    let (end, other_end) = tokio::time::timeout(Duration::from_secs(10), async {
+        tokio::join!(await_end(&mut resumed), peer)
     })
-    .await;
+    .await
+    .expect("both auxiliary participants receive the result");
+    let (visible, other_end) = other_end.expect("responsive peer task");
     assert_eq!(visible.you, Seat::A);
     assert_eq!(
         visible.free_rerolls, 0,
         "BR-AX11: the other seat never receives private free currency"
     );
     assert_eq!(visible.auxiliaries[0][0].phase, AuxiliaryPhase::Available);
-    send(&mut resumed, &ClientMsg::Surrender).await;
-    let (end, other_end) = tokio::time::timeout(Duration::from_secs(10), async {
-        tokio::join!(await_end(&mut resumed), await_end(&mut other))
-    })
-    .await
-    .expect("both auxiliary participants receive the result");
+    assert_eq!(visible.auxiliaries[1][1].tier, 3);
     assert_eq!(end, other_end);
     assert_eq!(end.winner, Some(Seat::A));
 }
