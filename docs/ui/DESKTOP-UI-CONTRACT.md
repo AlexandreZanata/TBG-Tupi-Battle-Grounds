@@ -1271,3 +1271,12 @@ scoped Linux/web runtime, not complete pixel/motion equivalence. Windows visual
 coverage, physical ARM64/16KB and owner look/fun remain pending; Windows CI
 build/tests/package success does not change that status. Earlier candidate
 failures and their corrected repetitions remain distinct in the phase report.
+
+P69 beta publication (2026-11-03): Android's launcher label becomes Tupi Battle
+Grounds Beta. Shared game art, layouts and champion motion are unchanged. The
+landing reuses eight README Linux frames, adds three labeled Android emulator
+frames and refreshes hero/social media and content-hash portrait/Arena URLs.
+Desktop/390 x 844 PT/EN landing observations are in
+[the media report](../evidence/landing-android-beta-20261103.md). This adds no
+in-game parity evidence: Windows pixel/motion and physical ARM64/16 KB remain
+pending. Public download compatibility uses the actual running server.

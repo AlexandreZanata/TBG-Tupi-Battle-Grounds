@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "channel": "beta",
+  "version_code": 55,
+  "package": "io.github.alexandrezanata.tbg.prototype",
+  "abi": "arm64-v8a",
+  "certificate_sha256": "5b0762f8270e29e73466305224b3315ffc69bea77cc8c828b7a5b1999696f168"
+}

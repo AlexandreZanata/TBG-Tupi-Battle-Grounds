@@ -5,7 +5,7 @@
     {
       "id": 0,
       "slug": "forest",
-      "image": "media/arenas/forest.webp",
+      "image": "media/arenas/forest.webp?v=76596e48ba4aa8fd",
       "accent": "#7bb661",
       "name": {
         "en": "Verdant Forest",
@@ -25,7 +25,7 @@
     {
       "id": 1,
       "slug": "tundra",
-      "image": "media/arenas/tundra.webp",
+      "image": "media/arenas/tundra.webp?v=25d3ddbea2ab9718",
       "accent": "#9fd3ec",
       "name": {
         "en": "Frozen Tundra",
@@ -45,7 +45,7 @@
     {
       "id": 2,
       "slug": "volcanic",
-      "image": "media/arenas/volcanic.webp",
+      "image": "media/arenas/volcanic.webp?v=8db7decb0eace25f",
       "accent": "#ff8a3d",
       "name": {
         "en": "Volcanic Forge",
@@ -65,7 +65,7 @@
     {
       "id": 3,
       "slug": "ruins",
-      "image": "media/arenas/ruins.webp",
+      "image": "media/arenas/ruins.webp?v=d5edcc379f081ac4",
       "accent": "#d9b44a",
       "name": {
         "en": "Ancient Ruins",
@@ -85,7 +85,7 @@
     {
       "id": 4,
       "slug": "storm",
-      "image": "media/arenas/storm.webp",
+      "image": "media/arenas/storm.webp?v=ac98831b12deaebd",
       "accent": "#8fa8ff",
       "name": {
         "en": "Storm Valley",
@@ -105,7 +105,7 @@
     {
       "id": 5,
       "slug": "celestial",
-      "image": "media/arenas/celestial.webp",
+      "image": "media/arenas/celestial.webp?v=7d0b1cdef131dccc",
       "accent": "#6cd3f1",
       "name": {
         "en": "Celestial Citadel",
@@ -125,7 +125,7 @@
     {
       "id": 6,
       "slug": "clockwork",
-      "image": "media/arenas/clockwork.webp",
+      "image": "media/arenas/clockwork.webp?v=fb08e12118cac69d",
       "accent": "#df9d49",
       "name": {
         "en": "Clockwork Bastion",
@@ -149,7 +149,7 @@
     {
       "id": 7,
       "slug": "desert",
-      "image": "media/arenas/desert.webp",
+      "image": "media/arenas/desert.webp?v=9a8e63502f04d9ea",
       "accent": "#e7c06f",
       "name": {
         "en": "Desert Relics",

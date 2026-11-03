@@ -99,6 +99,17 @@ certify Windows or browser pixel and motion parity. See
 [RELEASES](docs/RELEASES.md), [ROADMAP](docs/ROADMAP.md) and the
 [desktop UI contract](docs/ui/DESKTOP-UI-CONTRACT.md) for current limits.
 
+### Android beta
+
+Native Android runs the same game in landscape with compact touch controls.
+The ARM64 beta requires Android 12/API31 or newer. Its automatic release uses
+an inspected non-debuggable APK, a stable upgrade signature, SHA-256 checksums
+and GitHub hosted-builder provenance. See [Android release notes](platform/android/RELEASE-NOTES.md)
+and [official platform availability](https://tupibg.com/#play).
+Online play requires the same live server contract; a public beta release is
+not a claim of server activation, universal physical-device or16KB runtime
+acceptance. Practice and Training remain available locally.
+
 ## Technology
 
 Rust everywhere: a Bevy client compiled to WebAssembly (WebGL2), a shared

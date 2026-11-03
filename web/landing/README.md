@@ -35,7 +35,11 @@ exactly and `en.json` must have the same keys (`check.py` enforces both). Choice
   with `kind` (`appimage`|`tarball`), exact URL, `sha256` and `bytes`. On 2026-11-01 the
   newest published package, `v0.1.1-rc.1`, is protocol 30 (`w30-r2-3d56156049e626c5`) and the
   server is protocol 31 (`w31-r6-097385fee9a10b0f`), so no download is offered.
-- No Windows entry: there is no supported Windows package.
+- Windows uses the same verified catalog for its installer and portable ZIP.
+- Android beta uses a separately versioned, source-bound ARM64 APK, a pinned
+  signing certificate and the same live compatibility gate. It requires Android
+  12/API 31 or newer. The static fallback for all three systems remains pending;
+  only the server-side verified catalog can enable downloads.
 
 The browser repeats the same validation, so a malformed file stays in the safe pending state.
 
@@ -52,8 +56,15 @@ The browser repeats the same validation, so a malformed file stays in the safe p
   of a complete match. See [capture provenance](../../docs/evidence/readme-linux-release.md)
   for the exact CI package, hashes, method and acceptance limits. Derivatives
   are 1280 × 720 with 800 × 450 thumbnails; no content was painted over.
-- Hero art: `crates/tbg-client/assets/ranking/podium-grove.webp`; wordmark:
+- Hero/social background: real Linux Forest release capture; wordmark:
   `lobby/wordmark.webp` (owner-selected wordmark for the lobby brand); emblem: branding.
+
+The 2026-11-03 update uses the README's real release captures for the hero and
+gallery, with a real Forest frame for the social image/background. Three
+additional native Android emulator captures show battle, Council and the
+Colossus B2 catalog. All 84 portraits and eight Arena previews keep their canonical
+client files with content-hash URLs, so updated assets do not reuse stale cache
+entries. See [media provenance](../../docs/evidence/landing-android-beta-20261103.md).
 
 ## Legal pages
 

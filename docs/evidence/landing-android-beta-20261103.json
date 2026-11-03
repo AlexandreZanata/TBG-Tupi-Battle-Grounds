@@ -1,0 +1,62 @@
+[
+  {
+    "source_frame": "practice-hard54-audio-combat.png",
+    "source_sha256": "9bbe1ac66e0d56cfdb6f8873cc1079cf123873b2834bbb90851094c04326acbb",
+    "file": "web/landing/media/captures/android-beta-battle-1280.webp",
+    "sha256": "afd169cf6a9e00c60256142db0a0e330c5b9e0c878b6774936d83382fb5cc250",
+    "dimensions": "1280x720",
+    "bytes": 105670
+  },
+  {
+    "source_frame": "practice-hard54-audio-combat.png",
+    "source_sha256": "9bbe1ac66e0d56cfdb6f8873cc1079cf123873b2834bbb90851094c04326acbb",
+    "file": "web/landing/media/captures/android-beta-battle-800.webp",
+    "sha256": "7cd98f31335ddbd456a4f535d0a6292e5f07e8725ba726eb74298ddecd03f047",
+    "dimensions": "800x450",
+    "bytes": 56332
+  },
+  {
+    "source_frame": "lock-return54.png",
+    "source_sha256": "91b0e173d7daf070f9569281ec59692a3304e65ac84eed3295bdbc099ad44f06",
+    "file": "web/landing/media/captures/android-beta-council-1280.webp",
+    "sha256": "8629124f39d41cb121b13879bd029884e5add0d718d264da8bc439a61190376c",
+    "dimensions": "1280x720",
+    "bytes": 75366
+  },
+  {
+    "source_frame": "lock-return54.png",
+    "source_sha256": "91b0e173d7daf070f9569281ec59692a3304e65ac84eed3295bdbc099ad44f06",
+    "file": "web/landing/media/captures/android-beta-council-800.webp",
+    "sha256": "0d67a3063b28b52de06d4240765a0a3c732f8fa8e26b25ec6e5bd8dcbbf281fb",
+    "dimensions": "800x450",
+    "bytes": 39818
+  },
+  {
+    "source_frame": "colossus-b2-ability54.png",
+    "source_sha256": "b26668993fad9ae88e6ffbf1a083e08fc5b9a09aab0e99b1f279ad9c8f09f342",
+    "file": "web/landing/media/captures/android-beta-catalog-1280.webp",
+    "sha256": "2f76185570fce1352c63e3631620f03dfc34db9a9694f8288ece5bbd19452935",
+    "dimensions": "1280x720",
+    "bytes": 69280
+  },
+  {
+    "source_frame": "colossus-b2-ability54.png",
+    "source_sha256": "b26668993fad9ae88e6ffbf1a083e08fc5b9a09aab0e99b1f279ad9c8f09f342",
+    "file": "web/landing/media/captures/android-beta-catalog-800.webp",
+    "sha256": "57fa76b68520141f27a902989aace43c52adf691d349dbf8f2a62a4a2f2e5d00",
+    "dimensions": "800x450",
+    "bytes": 39284
+  },
+  {
+    "file": "web/landing/media/hero-release-forest-1280.webp",
+    "sha256": "b88bdf18a27e8737967ea98577c0da7e4ca514962fac19faa02b885bc93bf08e",
+    "dimensions": "1280x400",
+    "bytes": 54016
+  },
+  {
+    "file": "web/landing/media/og-beta-20261103.jpg",
+    "sha256": "ee192e47308cfe535212b945d1827e7c3a94ea5ffb40f44a5271b16dbf3bfecb",
+    "dimensions": "1200x675",
+    "bytes": 188313
+  }
+]

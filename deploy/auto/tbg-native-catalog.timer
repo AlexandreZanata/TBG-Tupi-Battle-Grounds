@@ -1,5 +1,5 @@
 [Unit]
-Description=Check for verified Linux and Windows downloads every ten minutes
+Description=Check for verified Linux, Windows and Android downloads every ten minutes
 
 [Timer]
 OnActiveSec=200s

@@ -11,6 +11,7 @@ it drifts from the sources.
 
 import argparse
 import json
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -60,7 +61,8 @@ def champions(i18n):
     active = set(pool())
     for kind in pool("COMPLETION_POOL"):
         faction, archetype = table[kind]
-        portrait = f"media/portraits/{kind.lower()}.webp"
+        image = ASSETS / "battle/portraits" / f"{kind.lower()}.webp"
+        portrait = f"media/portraits/{kind.lower()}.webp?v={hashlib.sha256(image.read_bytes()).hexdigest()[:16]}"
         if not (ASSETS / "battle/portraits" / f"{kind.lower()}.webp").is_file():
             raise SystemExit(f"no portrait for {kind}")
         out.append({
@@ -113,7 +115,7 @@ def arenas(i18n):
         out.append({
             "id": arena["id"],
             "slug": slug,
-            "image": f"media/arenas/{arena['image']}",
+            "image": f"media/arenas/{arena['image']}?v={hashlib.sha256((ASSETS / 'arenas' / arena['image']).read_bytes()).hexdigest()[:16]}",
             "accent": arena["accent"],
             "name": text(i18n, f"arenas.{slug}.name"),
             "theme": text(i18n, f"arenas.{slug}.theme"),

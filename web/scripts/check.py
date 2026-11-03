@@ -203,13 +203,13 @@ def check_release(mapping):
     web = config.get("webGame", {})
     if web.get("state") not in ("pending", "live") or not str(web.get("url", "")).startswith("https://app.tupibg.com/"):
         fail("release.json webGame needs state pending|live and an https://app.tupibg.com/ URL")
-    for os, kinds in {"linux": {"appimage", "tarball"}, "windows": {"installer", "zip"}}.items():
+    for os in ["linux", "windows", "android"]:
         native = config.get(os, {})
         if native.get("state") != "pending":
             fail(f"release.json {os} must stay pending; only the verified live catalog may enable native downloads")
     fallback = json.loads(mapping["downloads.json"].read_text())
-    if fallback != {"schema": 1, "server": server, "linux": {"state": "pending"}, "windows": {"state": "pending"}}:
-        fail("downloads.json fallback must match the authored server contract and keep both native downloads pending")
+    if fallback != {"schema": 1, "server": server, **{os: {"state": "pending"} for os in ["linux", "windows", "android"]}}:
+        fail("downloads.json fallback must match the authored server contract and keep native downloads pending")
     return config
 
 

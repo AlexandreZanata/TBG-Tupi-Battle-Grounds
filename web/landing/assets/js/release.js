@@ -29,7 +29,7 @@ export async function loadRelease() {
     config = mergeCatalog(config, catalog);
   } catch {
     // An unavailable verifier cannot enable downloads; preserve the authored pending state.
-    config = { ...config, linux: { state: 'pending' }, windows: { state: 'pending' } };
+    config = { ...config, linux: { state: 'pending' }, windows: { state: 'pending' }, android: { state: 'pending' } };
   }
   renderRelease();
 }

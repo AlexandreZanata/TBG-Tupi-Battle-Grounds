@@ -25,7 +25,7 @@ android {
         ndk { abiFilters += prototypeAbi.get() }
     }
 
-    // A private, stable test key is supplied locally; never silently change signatures.
+    // A private, stable key is supplied by the caller; never silently change signatures.
     signingConfigs {
         create("prototype") {
             storeFile = providers.environmentVariable("TBG_ANDROID_KEYSTORE").orNull?.let(::file)

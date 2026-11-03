@@ -1,0 +1,199 @@
+name: Android beta release
+
+on:
+  pull_request:
+    paths:
+      - 'platform/android/**'
+      - 'scripts/*android*'
+      - 'deploy/auto/android*'
+      - '.github/workflows/android-release.yml'
+  workflow_run:
+    workflows: [ci]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the exact tested Android bytes from a beta tag
+        type: boolean
+        default: false
+      promotion_run:
+        description: Completed main Android build run to promote without rebuilding
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-beta-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  RUST_TOOLCHAIN: 1.99.0
+
+jobs:
+  package-contracts:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - run: |
+          python3 scripts/test-android-package.py
+          python3 scripts/test-android-release.py
+
+  scope:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.scope.outputs.build }}
+      source: ${{ steps.scope.outputs.source }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - name: Require current main CI and a new Android revision
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: python3 scripts/android-main-release.py scope
+
+  android:
+    needs: [scope]
+    if: needs.scope.outputs.build == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    environment: android-beta
+    env:
+      TBG_ANDROID_STORE_PASSWORD: ${{ secrets.TBG_ANDROID_STORE_PASSWORD }}
+      TBG_ANDROID_KEY_PASSWORD: ${{ secrets.TBG_ANDROID_STORE_PASSWORD }}
+      TBG_ANDROID_KEY_ALIAS: ${{ secrets.TBG_ANDROID_KEY_ALIAS }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.scope.outputs.source }}
+          # The APK inspector proves ancestry from the retained Linux reference.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; compiler pinned by input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: aarch64-linux-android
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: '21.0.0+35'
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          key: android-arm64-ndk28-release
+          save-if: ${{ github.ref == 'refs/heads/main' }}
+      - name: Install the pinned Android tools
+        run: |
+          sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;28.2.13676358'
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/28.2.13676358" >> "$GITHUB_ENV"
+          cargo install cargo-ndk --version 4.1.2 --locked
+      - name: Materialize the stable signing key only in private runner storage
+        env:
+          KEYSTORE: ${{ secrets.TBG_ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          python3 - <<'PY'
+          import base64, os, pathlib
+          os.umask(0o077)
+          key = pathlib.Path(os.environ['RUNNER_TEMP'])/'tbg-android.p12'
+          key.write_bytes(base64.b64decode(os.environ['KEYSTORE'], validate=True))
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write('TBG_ANDROID_KEYSTORE='+str(key)+'\n')
+          PY
+      - name: Build, sign and inspect the production-endpoint ARM64 APK
+        run: python3 scripts/build-android-beta.py
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: tupi-battle-grounds-android-${{ needs.scope.outputs.source }}
+          path: target/android-release/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Remove the ephemeral key and generated APK outputs
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/tbg-android.p12"
+          rm -rf target/android-release
+
+  release-main:
+    needs: [scope, android]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ needs.scope.outputs.source }}
+          persist-credentials: false
+      - name: Name the beta once and dispatch exact-byte publication
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ needs.scope.outputs.source }}
+        run: python3 scripts/android-main-release.py release-main
+
+  promotion-source:
+    if: github.event_name == 'workflow_dispatch' && github.ref_type == 'tag' && inputs.publish && inputs.promotion_run != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - name: Verify completed main build, source, CI and tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ANDROID_BUILD_RUN: ${{ inputs.promotion_run }}
+        run: python3 scripts/android-main-release.py promote
+
+  publish:
+    needs: [promotion-source]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: tupi-battle-grounds-android-${{ github.sha }}
+          run-id: ${{ inputs.promotion_run }}
+          github-token: ${{ github.token }}
+          path: release
+      - name: Recheck the promoted APK bytes and manifest
+        run: python3 scripts/android-release-manifest.py --artifacts release
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        id: provenance
+        with:
+          subject-path: release/*
+      - name: Keep hosted-builder provenance beside the inspected APK
+        env:
+          BUNDLE: ${{ steps.provenance.outputs.bundle-path }}
+        run: cp "$BUNDLE" release/android-provenance.jsonl
+      - name: Publish the complete immutable beta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 scripts/native-publication.py --artifacts release --tag "$GITHUB_REF_NAME"
+          --title "Tupi Battle Grounds $GITHUB_REF_NAME · Android beta"
+          --notes platform/android/RELEASE-NOTES.md

@@ -255,3 +255,54 @@ DNS change was made. Private logs/config backups remain off Git.
 Technical references: [Cloudflare 525](https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-5xx-errors/error-525/),
 [Caddy WebSocket lifecycle](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy),
 [GitHub attestation verification](https://cli.github.com/manual/gh_attestation_verify).
+
+## Automatic Android beta publication
+
+`android-release.yml` follows the native exact-source promotion model. Successful
+main push CI triggers a signed non-debuggable ARM64 APK with production WSS and
+no `android-loopback`. `platform/android/release.json` owns the monotonic revision
+and stable certificate. Increase `version_code` for changed APK inputs. Tags are
+`android-v<client-version>-android.<revision>`. The tag run promotes the original
+artifact within 13 days, rechecks inspected bytes, attests it with GitHub OIDC and
+publishes draft-first with checksums, `android-inspection.json`,
+`tbg-android-release.json` and `android-provenance.jsonl`. Never upload an internal
+debug/emulator APK as the public beta.
+
+Signing uses environment `android-beta`, restricted to exact branch `main`, with
+`TBG_ANDROID_KEYSTORE_BASE64`, `TBG_ANDROID_STORE_PASSWORD` and `TBG_ANDROID_KEY_ALIAS`.
+Store/key passwords are identical for the retained P69 key. Key material exists
+only in private runner temporary storage and is removed after packaging; PR/tag
+publication jobs receive no key. Retain the private recovery copy; changing the
+certificate breaks upgrades.
+
+The native catalog service also verifies Android provenance, original URL/size/
+hash, certificate, ABI, build mode, ancestry and live contract. Independent
+`android-current.json`/`android-checked.json` receipts use the existing lock and
+atomic JSON writer. Compatible desktop entries survive Android refreshes;
+revocation disables only the affected family. An incompatible backend keeps
+downloads pending. GitHub publication is distinct from website/online readiness.
+
+### Activating after VPS access returns
+
+The owner confirmed the VPS is unreachable from this network; these production
+steps were not executed. Observed live protocol: 38; revision 55 needs
+`w40-r16-f2e253b98ccb313a`. Never edit metadata to fake compatibility. A required
+backend upgrade follows its existing staged migration/backup/rollback procedure.
+
+1. Inspect current receipts/timers and retain the deployed sources/configuration.
+   Disable controller timers and let running operations finish before using the
+   reviewed `deploy/auto/install.sh` from the merged source. It installs Android
+   verifier modules without enabling timers, restarting the game or changing DBs.
+2. Dry-verify a real main static candidate with `static_pull.py`, then activate it
+   through its existing `--apply --recheck`/adoption procedure. Inspect eleven
+   gallery frames, PT/EN hero/captions/social card and content-hash images.
+3. Run `native_pull.py` with `GH_CONFIG_DIR=/var/lib/tbg-deploy/gh`. Inspect hosted
+   provenance, digests, live contract and `/srv/tbg/downloads/current.json`.
+   Pending on protocol 38 is expected, not successful Android activation.
+4. After compatible metadata and real links are observed, restore previously
+   enabled timers and enable `tbg-native-catalog.timer` with its existing
+   `/etc/tbg/native-catalog.enabled` flag. Check public `/downloads.json` and the
+   Android checksum dialog. Retain pending device/visual acceptance separately.
+
+Actual validation/publication results are recorded in
+[the P69 follow-up](phases/P69-beta-publication-20261103.md).
