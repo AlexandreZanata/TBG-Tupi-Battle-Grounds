@@ -673,6 +673,16 @@
       "windows": "pending (P81)",
       "web": "pending (P81)",
       "android": "out of scope"
+    },
+    {
+      "id": "p77-f-territory-vision-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Shared map/minimap: fully visible home half, river boundary, invading Troop/Minion sight, permanently revealed destroyed enemy Tower circles, scout retreat/death and new-match reset; both Teams/all Tower tiers",
+      "linux": "pending runtime/pixel/motion",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
     }
   ]
 }

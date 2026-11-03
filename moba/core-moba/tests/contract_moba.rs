@@ -468,7 +468,7 @@ fn m50_enemies_outside_allied_sight_are_absent_from_that_team_frame() {
     let mut m = MobaMatch::new(50);
     m.units.clear();
     let p = Pos {
-        x: 100_000,
+        x: 100_001,
         y: 100_000,
     };
     let ally = m.spawn(
@@ -510,7 +510,11 @@ fn m50_enemies_outside_allied_sight_are_absent_from_that_team_frame() {
     assert!(!w.units.iter().any(|u| u.id == hidden));
     assert_eq!(w.units.iter().find(|u| u.id == ally).unwrap().target, 0);
     assert!(w.events.is_empty());
-    assert!(w.camps.is_empty());
+    assert_eq!(
+        w.camps.iter().map(|c| c.camp).collect::<Vec<_>>(),
+        vec![0, 1, 2, 3],
+        "M-50/M-67: own-half camp countdowns are visible without nearby allies"
+    );
     assert_eq!(
         protocol::decode_server(&protocol::encode(&ServerMsg::World(w.clone()))),
         Ok(ServerMsg::World(w))

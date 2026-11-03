@@ -1358,3 +1358,14 @@ no-avatar Seat HUD and map/minimap fog without game/shader errors. This is
 scoped startup/overview evidence; gesture interactions, full detail/pixel/
 motion coverage, performance and Windows/web remain pending. See the P77
 installation follow-up for the exact command and local screenshot/log.
+
+## P77 F — home-half and conquered Tower vision (2026-11-03)
+
+Owner-requested shared MOBA presentation: the home half is fully revealed,
+including camps/intruders; the enemy half is dim except around invading
+Troops/Minions and permanently conquered Tower sight circles. Map and
+minimap share the core river-boundary/territory model; a scout retreat or
+loss removes its temporary vision, while a Tower clear persists until a
+new match. Coverage includes both Teams, river boundary, all Tower tiers,
+scout movement/death and known structure HP/camp timers/projectiles.
+Linux runtime/pixel/motion observations pending; Windows/web pending (P81).

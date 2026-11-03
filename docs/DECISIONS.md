@@ -3516,3 +3516,17 @@ and minimap gestures stay separate. Protocol v2 removes avatar readouts and
 rejects reserved manual-order variants. This supersedes the earlier
 steerable-Commander choice and P78 Commander-kit backlog, affects only
 `moba/`, and authorizes no 1v1 edit, balancing, push, merge or deployment.
+
+
+**D-112 third amendment (owner, 2026-11-03, P77 / M-50, M-67–M-69).**
+The owner requested full live vision over the entire allied half, enemy-half
+vision only around allied troops already on that side, and allied vision
+around a destroyed enemy Tower. The river centre line divides the home
+halves; both Teams see that line. Troops and Minions count as scouts only
+after crossing it. A destroyed Tower permanently reveals its original sight
+circle until the next match, reusing the existing 9-unit Tower sight
+rather than introducing a new radius. All home territory stays visible
+after home Tower losses. This is the owner's custom rule; no claim of exact
+League of Legends gameplay parity is made. The server still omits hidden
+units/events and owns combat. Clients derive the same territory from the
+shared map and public standing Towers; protocol v2's schema is unchanged.

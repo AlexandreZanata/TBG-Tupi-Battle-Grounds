@@ -211,9 +211,11 @@ new camps never spawn them. Their legacy stats are unchanged.
 
 ## 12. Team vision (P77, Proposed M-50–M-55)
 
-- **M-50** Each Team sees its own living units and enemy/neutral centres
-  within at least one living allied unit's sight radius (inclusive).
-  Vision does not change combat decisions. No walls or exploration memory.
+- **M-50** Proposed owner revision (2026-11-03): each Team sees all of its
+  home half, the sight circles of allied Troops/Minions whose centres have
+  crossed into the enemy half, and conquered enemy Tower circles (M-67–69).
+  Allied units remain visible everywhere. Enemy/neutral centres outside
+  these regions are omitted. Vision does not change combat decisions.
 - **M-51** Structure locations are always map knowledge. Outside sight,
   their HP stays at its last observed value (initially full), with no
   attack or target updates. Structure destruction is public map knowledge.
@@ -228,6 +230,27 @@ new camps never spawn them. Their legacy stats are unchanged.
   cleared and the Camp centre is visible. First-spawn countdown follows
   the same visibility rule. Hidden figures disappear without a Death clip.
 - **M-55** Sight: Troops/Minions 8 units, Towers 9, Strongholds
-  10. The client and minimap use this shared table with two fog levels,
-  visible and unseen, and a 256×256 mask with a soft inner edge. The
-  smoothed edge is cosmetic; the server uses the exact sight radius.
+  10. The client and minimap use the same home-half boundary, invading
+  scout predicate and conquered Tower circles as the server. A 256×256 mask
+  shows visible/unseen ground; only sight circles have a soft inner edge.
+  This cosmetic feather never increases the authoritative sight radius.
+- **M-67** Proposed: the river centre line `x+y=200` divides the map. Blue's
+  home half is `x+y <= 200`, Red's `x+y >= 200` (the line is visible to
+  both Teams). Every point in the home half has full live vision, including
+  enemy intruders, monsters and camp timers, without nearby allied units
+  and even after all home Towers are destroyed.
+- **M-68** Proposed: enemy-half scouting comes from living allied Troops
+  and Minions already across the centre line, within their existing sight
+  radius. A home-side unit does not reveal enemy ground across the river.
+  When a scout dies, retreats or moves away, that scouting circle leaves
+  unless another scout or conquered region still covers the point. No
+  ordinary exploration memory or manual unit control is introduced.
+- **M-69** Proposed: destroying an enemy Tower permanently reveals a circle
+  centred on its original site, with that Tower's existing sight radius
+  (9 units, inclusive), to the opposing Team. Damage alone does not grant
+  this vision. It persists without nearby troops until the match ends and
+  resets with the new map. All Tower tiers, including both Nexus Towers,
+  use the rule; losing a home Tower never reduces the fully visible home
+  half. Structure destruction is already public map knowledge, so both
+  authority and presentation derive the same conquered sites from the
+  fixed map and surviving Towers without adding wire fields.

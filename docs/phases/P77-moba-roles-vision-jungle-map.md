@@ -478,6 +478,25 @@ Full visual/motion/gesture checks, tests, performance, Windows/web and
 owner look/fun approval remain pending. No 1v1 package or installation
 was changed.
 
+### Territory vision revision (owner, 2026-11-03)
+
+Implemented M-50/M-67–M-69: full live home-half vision, scouting only from
+allied Troops/Minions across the river, and permanent original-sight circles
+around destroyed enemy Towers. One shared integer Territory model drives
+server visibility and the map/minimap mask. Tower sites come from the fixed
+map and surviving public structures; no wire-schema change or new radius.
+Updated the affected M-50 camp/boundary contract and added mirrored home,
+river-crossing/retreat, destruction-only, exact-radius and new-match reset
+scenarios in `contract_vision_territory.rs`. Formatting and `git diff --check`
+pass. Native compilation/install and a scoped runtime observation will be
+consolidated with the owner's subsequent five-card/presentation revision.
+Tests are written, not yet executed; queue at consolidation:
+`cargo test --locked -p tbg-moba-core --test contract_vision_territory -- --test-threads=1`,
+`cargo test --locked -p tbg-moba-core --test contract_moba m5 -- --test-threads=1`
+and `cargo test --locked -p tbg-moba-server --test room m52 -- --test-threads=1`
+under the shared nonblocking lock and two-job policy. Windows/web coverage
+remains pending; no visual parity or full verification is claimed.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 1v1 champion abilities and Evolutions in 5v5 (automatic, no Commander kit/orders) ·

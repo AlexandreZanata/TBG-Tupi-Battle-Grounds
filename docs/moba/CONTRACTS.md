@@ -54,6 +54,12 @@ PrivateView   = { seat, gold, essence, tier, troops, destination,
 - `UnitView` positions are centi-units (`x / 100` = map units), HP is per
   mille, `attacked` marks an attack or heal on that tick.
 
+Territory revision (owner, 2026-11-03): M-67–M-69 change the visibility
+contract, not the v2 frame schema. Every surviving structure is still in
+every Team World, so conquered Tower circles can be reconstructed from
+public Tower sites without transmitting hidden units or new client claims.
+Core territory scenarios are in `tests/contract_vision_territory.rs`.
+
 ## 4. Map coordinates
 
 Map units: `x` east, `y` north, `(0,0)` south-west corner, size 200. Blue
@@ -83,6 +89,9 @@ base south-west, Red north-east; Red = Blue reflected by `(x, y) → (200 − y,
 | `m51_structures_are_always_in_every_frame` | M-51 |
 | `m52_each_socket_receives_its_team_frame` (server) | M-52 |
 | `m53_vision_is_deterministic` | M-53 |
+| `m67_home_half_is_fully_visible_without_scouts_or_standing_home_towers` | M-50/M-67 |
+| `m68_only_allied_troops_across_the_river_reveal_enemy_ground` | M-50/M-68 |
+| `m69_destroyed_enemy_tower_reveals_only_its_sight_circle_until_match_end` | M-51/M-69 |
 | `m65_seats_have_no_avatar_and_manual_control_is_rejected` | M-01/M-65 |
 | `m65_each_purchase_chooses_its_lane_then_walks_automatically` | M-10/M-65 |
 | `m14_automatic_champion_kills_keep_card_bounty_and_update_score` | M-14/M-65 |

@@ -1,13 +1,17 @@
-//! Deterministic team visibility and last-observed structure health (M-50–M-55).
+//! Team territory/army visibility and last-observed structure health (M-50–M-55, M-67–M-69).
 
 use crate::geom::Pos;
 use crate::grid::Grid;
 use crate::state::MobaMatch;
-use crate::types::Team;
+use crate::types::{Team, UnitKind};
+
+mod territory;
+pub use territory::{home_half, invading_scout, SightCircle, Territory};
 
 pub struct Vision<'a> {
     game: &'a MobaMatch,
     team: Team,
+    territory: Territory,
     pub visible: Vec<bool>,
 }
 impl<'a> Vision<'a> {
@@ -15,11 +19,24 @@ impl<'a> Vision<'a> {
         // Post-movement positions and post-death slots differ from the combat grid.
         let mut grid = Grid::default();
         grid.rebuild(game.units.iter().map(|u| u.pos));
-        let mut visible = vec![false; game.units.len()];
+        let standing: Vec<_> = game
+            .units
+            .iter()
+            .filter(|u| {
+                u.alive() && u.team() == Some(team.enemy()) && matches!(u.kind, UnitKind::Tower(..))
+            })
+            .map(|u| u.pos)
+            .collect();
+        let territory = Territory::new(team, &standing);
+        let mut visible = game
+            .units
+            .iter()
+            .map(|u| u.team() == Some(team) || territory.contains(u.pos))
+            .collect::<Vec<_>>();
         for ally in game
             .units
             .iter()
-            .filter(|u| u.alive() && u.team() == Some(team))
+            .filter(|u| u.alive() && invading_scout(team, u.side, u.kind, u.pos))
         {
             grid.near(ally.pos, ally.stats.sight, |i| {
                 if ally.pos.within(game.units[i].pos, ally.stats.sight) {
@@ -30,14 +47,17 @@ impl<'a> Vision<'a> {
         Self {
             game,
             team,
+            territory,
             visible,
         }
     }
     pub fn point(&self, point: Pos) -> bool {
-        self.game
-            .units
-            .iter()
-            .any(|u| u.alive() && u.team() == Some(self.team) && u.pos.within(point, u.stats.sight))
+        self.territory.contains(point)
+            || self.game.units.iter().any(|u| {
+                u.alive()
+                    && invading_scout(self.team, u.side, u.kind, u.pos)
+                    && u.pos.within(point, u.stats.sight)
+            })
     }
     pub fn unit(&self, id: u32) -> bool {
         self.game

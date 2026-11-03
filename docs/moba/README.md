@@ -40,6 +40,11 @@ the minimap navigates it. Wheel zooms, arrows/edges/middle-drag pan,
 **Space** or **H** on the minimap centres the Team base, **Esc** returns
 to the menu. Right click does not issue orders.
 
+Vision: the entire allied half is visible. Across the river, allied
+Troops/Minions reveal only their sight circles after crossing. Destroying
+an enemy Tower permanently reveals its former 9-unit sight circle until
+the next match. Map and minimap share these authoritative rules.
+
 ## Develop
 
 Use the work-front checks in [VALIDATION.md](../VALIDATION.md) and the

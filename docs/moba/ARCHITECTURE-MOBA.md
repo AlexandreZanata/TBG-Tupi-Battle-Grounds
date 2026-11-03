@@ -152,6 +152,10 @@ The core builds visibility with a fresh spatial grid after movement/deaths.
 Only allied/seen units enter a Team World, plus known structure locations
 with last-observed HP. World encoding is shared within each Team. Camp
 countdowns are present only in current sight. The client shares one R8 fog
-mask/material extension between the world and minimap cameras, with no
-exploration memory. The mask is rebuilt from received allied positions and
-shared sight radii; it never decides online visibility or combat outcomes.
+mask/material extension between the world and minimap cameras. The
+shared `vision::Territory` model combines the entire home half, invading
+Troop/Minion sight and destroyed enemy Tower sight circles. The fixed map
+and public surviving Tower list determine conquered circles, including on
+reconnect; no extra state or wire field is needed. There is no ordinary
+exploration memory. The mask uses the same predicates on received data;
+it never decides online visibility or combat outcomes.
