@@ -20,6 +20,7 @@ pub fn poll(
     mut account: ResMut<ui::account::Account>,
     mut toasts: ResMut<ui::Toasts>,
     state: Res<State<GameState>>,
+    lang: Res<crate::i18n::Lang>,
     sinks: Query<&AudioSink>,
     mut previous: Local<bool>,
     mut battle_mode: Local<Option<bool>>,
@@ -68,6 +69,8 @@ pub fn poll(
                 } else {
                     queue.0.push(ui::UiAction::Deselect);
                 }
+            } else if event["type"] == "link-unavailable" {
+                toasts.push_for(lang.key("mobile.link_unavailable"), 4.);
             } else if event["type"] == "backup-export" {
                 if let (Some(epoch), Some(name), Some(saved), Some(cancelled)) = (
                     event["epoch"].as_u64(),

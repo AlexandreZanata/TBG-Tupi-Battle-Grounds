@@ -37,13 +37,17 @@ internal class PlatformServices(private val activity: MainActivity) {
     }
 
     fun openPublicPage(url: String): Boolean {
-        if (url.length > 2048) return false
+        fun unavailable(): Boolean {
+            activity.events.offer(org.json.JSONObject().put("type", "link-unavailable"))
+            return false
+        }
+        if (url.length > 2048) return unavailable()
         val uri = Uri.parse(url)
-        if (uri.scheme != "https" || uri.host.isNullOrBlank() || uri.userInfo != null) return false
+        if (uri.scheme != "https" || uri.host.isNullOrBlank() || uri.userInfo != null) return unavailable()
         // Public navigation never carries credentials, room tokens or deep-link commands.
-        if (uri.query != null || uri.fragment != null) return false
+        if (uri.query != null || uri.fragment != null) return unavailable()
         if (uri.host != "github.com" && uri.path !in setOf("/", "/ranking", "/ranking/", "/download", "/patch-notes") &&
-            uri.path?.startsWith("/profile/") != true) return false
+            uri.path?.startsWith("/profile/") != true) return unavailable()
         activity.runOnUiThread {
             try {
                 activity.startActivity(Intent(Intent.ACTION_VIEW, uri).apply {

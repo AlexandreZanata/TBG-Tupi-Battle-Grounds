@@ -245,6 +245,16 @@
       "windows": "pending",
       "web": "pending",
       "android": "pending"
+    },
+    {
+      "id": "p69-council-ranking-rematch-intrinsic-copy",
+      "date": "2026-11-02",
+      "report": "docs/phases/P69-mobile-20261102.md",
+      "affected_cases": "Android horizontal War Council with selected full effect, Ranking compact header/podium/sidebar, intrinsic Arena copy, external-link error; shared localized Council copy and eligible-mode rematch feedback; desktop geometry retained",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "pending"
     }
   ]
 }

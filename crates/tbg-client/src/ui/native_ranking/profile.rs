@@ -12,7 +12,11 @@ pub(super) fn spawn(
 ) {
     parent
         .spawn(Node {
-            width: px(252),
+            width: if cfg!(target_os = "android") {
+                percent(27)
+            } else {
+                px(252)
+            },
             min_height: px(0),
             flex_shrink: 0.,
             flex_direction: FlexDirection::Column,
@@ -60,7 +64,20 @@ fn summary(
                 ..default()
             })
             .with_children(|crest| {
-                crest.spawn(kit::image(assets, "ranking/player-crest.webp", 108., 108.));
+                crest.spawn(kit::image(
+                    assets,
+                    "ranking/player-crest.webp",
+                    if cfg!(target_os = "android") {
+                        52.
+                    } else {
+                        108.
+                    },
+                    if cfg!(target_os = "android") {
+                        52.
+                    } else {
+                        108.
+                    },
+                ));
             });
             centered(
                 card,

@@ -75,11 +75,11 @@ fn render(
     commands
         .spawn((
             Node {
-                padding: UiRect::all(px(16)),
+                padding: UiRect::all(px(if cfg!(target_os = "android") { 8 } else { 16 })),
                 border: UiRect::all(px(2)),
                 border_radius: BorderRadius::all(px(9)),
                 overflow: Overflow::clip(),
-                row_gap: px(12),
+                row_gap: px(if cfg!(target_os = "android") { 6 } else { 12 }),
                 ..super::shell::page_node()
             },
             frame(),
@@ -93,7 +93,7 @@ fn render(
                 width: percent(100),
                 flex_grow: 1.,
                 min_height: px(0),
-                column_gap: px(16),
+                column_gap: px(if cfg!(target_os = "android") { 8 } else { 16 }),
                 ..default()
             })
             .with_children(|body| {
@@ -119,9 +119,9 @@ fn heading(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
     root.spawn((
         Node {
             width: percent(100),
-            min_height: px(78),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 78 }),
             flex_shrink: 0.,
-            padding: UiRect::bottom(px(10)),
+            padding: UiRect::bottom(px(if cfg!(target_os = "android") { 4 } else { 10 })),
             border: UiRect::bottom(px(1)),
             align_items: AlignItems::Center,
             column_gap: px(14),
@@ -133,8 +133,16 @@ fn heading(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
         head.spawn(kit::image(
             assets,
             "ranking/champions-trophy.webp",
-            60.,
-            64.,
+            if cfg!(target_os = "android") {
+                40.
+            } else {
+                60.
+            },
+            if cfg!(target_os = "android") {
+                43.
+            } else {
+                64.
+            },
         ));
         head.spawn(Node {
             flex_grow: 1.,
@@ -149,7 +157,11 @@ fn heading(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
             ));
             title.spawn(kit::heading(
                 words(lang, "Global Rankings", "Ranking Global"),
-                32.,
+                if cfg!(target_os = "android") {
+                    22.
+                } else {
+                    32.
+                },
             ));
             title.spawn(kit::muted(
                 words(
@@ -160,34 +172,51 @@ fn heading(root: &mut ChildSpawnerCommands, assets: &AssetServer, lang: Lang) {
                 12.,
             ));
         });
-        for (label, value) in [
-            (
-                words(lang, "Scope", "Período"),
-                words(lang, "All time", "Todo o período"),
-            ),
-            (words(lang, "Region", "Região"), "Global".into()),
-            (words(lang, "Queue", "Fila"), "Ranked 1v1".into()),
-        ] {
-            head.spawn(Node {
-                width: px(125),
-                row_gap: px(4),
-                flex_direction: FlexDirection::Column,
-                ..default()
-            })
-            .with_children(|scope| {
-                scope.spawn(kit::muted(label, 10.));
-                scope.spawn((
-                    Node {
-                        width: percent(100),
-                        padding: UiRect::all(px(9)),
-                        border: UiRect::all(px(1)),
-                        border_radius: BorderRadius::all(px(4)),
-                        ..default()
-                    },
-                    frame(),
-                    children![text(value, 12.)],
-                ));
-            });
+        if cfg!(target_os = "android") {
+            head.spawn((
+                Node {
+                    max_width: percent(32),
+                    ..default()
+                },
+                kit::muted(
+                    words(
+                        lang,
+                        "All time · Global · Ranked 1v1",
+                        "Todo o período · Global · Ranqueada 1v1",
+                    ),
+                    11.,
+                ),
+            ));
+        } else {
+            for (label, value) in [
+                (
+                    words(lang, "Scope", "Período"),
+                    words(lang, "All time", "Todo o período"),
+                ),
+                (words(lang, "Region", "Região"), "Global".into()),
+                (words(lang, "Queue", "Fila"), "Ranked 1v1".into()),
+            ] {
+                head.spawn(Node {
+                    width: px(125),
+                    row_gap: px(4),
+                    flex_direction: FlexDirection::Column,
+                    ..default()
+                })
+                .with_children(|scope| {
+                    scope.spawn(kit::muted(label, 10.));
+                    scope.spawn((
+                        Node {
+                            width: percent(100),
+                            padding: UiRect::all(px(9)),
+                            border: UiRect::all(px(1)),
+                            border_radius: BorderRadius::all(px(4)),
+                            ..default()
+                        },
+                        frame(),
+                        children![text(value, 12.)],
+                    ));
+                });
+            }
         }
         head.spawn(kit::button("×", UiAction::CloseRanking, 32.));
     });

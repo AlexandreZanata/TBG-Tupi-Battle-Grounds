@@ -87,6 +87,8 @@ pub(super) fn spawn(
             footer
                 .spawn(Node {
                     column_gap: px(8),
+                    flex_wrap: FlexWrap::Wrap,
+                    row_gap: px(4),
                     ..default()
                 })
                 .with_children(|buttons| {

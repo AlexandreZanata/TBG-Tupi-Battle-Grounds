@@ -963,3 +963,12 @@ visible for private/casual rematch offers on every target, matching their
 existing server eligibility; a focused regression covers the non-Challenge
 state. Neither change alters a rule, cost, deadline or outcome. Runtime
 remeasurement and same-source desktop observations remain pending.
+
+P69 continuation: Android War Council uses four horizontal choices with original
+frame/illustration proportions, local selection plus a scrollable full-effect
+readout and explicit 48dp confirmation. Ranking compacts its header/podium and
+keeps the public table/sidebar available through scroll. Desktop geometry is
+retained; Council copy now uses existing locale keys on native targets, and
+eligible non-Challenge rematches show shared waiting/closed feedback. Arena
+mobile body copy uses intrinsic height. Runtime coverage remains pending until
+recorded in `docs/phases/P69-mobile-20261102.md`; Windows/web parity is pending.

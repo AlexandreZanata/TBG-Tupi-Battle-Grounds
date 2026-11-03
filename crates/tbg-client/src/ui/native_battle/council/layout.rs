@@ -2,6 +2,11 @@
 
 use super::*;
 
+#[cfg(target_os = "android")]
+mod mobile;
+#[cfg(target_os = "android")]
+use mobile::card;
+
 pub(super) fn spawn(
     mut commands: Commands,
     assets: Res<AssetServer>,
@@ -40,22 +45,20 @@ pub(super) fn spawn(
                         } else {
                             Val::Auto
                         },
-                        overflow: if cfg!(target_os = "android") {
-                            Overflow::scroll_y()
-                        } else {
-                            Overflow::default()
-                        },
-                        padding: UiRect::axes(px(28), px(18)),
+                        padding: UiRect::axes(
+                            px(if cfg!(target_os = "android") { 12 } else { 28 }),
+                            px(if cfg!(target_os = "android") { 8 } else { 18 }),
+                        ),
                         border: UiRect::all(px(3)),
                         border_radius: BorderRadius::all(px(5)),
                         flex_direction: FlexDirection::Column,
-                        row_gap: px(14),
+                        row_gap: px(if cfg!(target_os = "android") { 6 } else { 14 }),
                         ..default()
                     },
                     chrome::frame(Color::srgb_u8(36, 48, 57)),
                 ))
                 .with_children(|modal| {
-                    heading(modal);
+                    heading(modal, *lang);
                     modal
                         .spawn((
                             Node {
@@ -93,6 +96,8 @@ pub(super) fn spawn(
                                 card(row, &assets, i);
                             }
                         });
+                    #[cfg(target_os = "android")]
+                    mobile::details(modal);
                     modal
                         .spawn((
                             Node {
@@ -106,7 +111,7 @@ pub(super) fn spawn(
                         .with_children(|actions| {
                             actions.spawn((
                                 control(
-                                    "Forgo",
+                                    &lang.key("council.forgo"),
                                     UiAction::ForgoAugment,
                                     Color::srgb_u8(42, 39, 32),
                                 ),
@@ -114,7 +119,7 @@ pub(super) fn spawn(
                             ));
                             actions.spawn((
                                 control(
-                                    "Confirm choice",
+                                    &lang.key("council.confirm"),
                                     UiAction::Disabled,
                                     Color::srgb_u8(54, 76, 44),
                                 ),
@@ -136,25 +141,56 @@ pub(super) fn spawn(
         });
 }
 
-fn heading(parent: &mut ChildSpawnerCommands) {
-    parent.spawn(Node {width:percent(100),justify_content:JustifyContent::SpaceBetween,column_gap:px(16),..default()}).with_children(|head| {
-        head.spawn(Node {flex_direction:FlexDirection::Column,row_gap:px(4),..default()}).with_children(|title| {
-            title.spawn(kit::heading("BATTLE PAUSED",9.));
-            title.spawn(chrome::title("Choose an Augment",32.));
-            title.spawn(kit::muted("Both players choose one Augment from the same four. The battle resumes when both confirm or time runs out.",12.));
+fn heading(parent: &mut ChildSpawnerCommands, lang: crate::i18n::Lang) {
+    parent
+        .spawn(Node {
+            width: percent(100),
+            justify_content: JustifyContent::SpaceBetween,
+            column_gap: px(16),
+            ..default()
+        })
+        .with_children(|head| {
+            head.spawn(Node {
+                flex_direction: FlexDirection::Column,
+                row_gap: px(4),
+                ..default()
+            })
+            .with_children(|title| {
+                title.spawn(kit::heading(lang.key("council.battle_paused"), 9.));
+                title.spawn(chrome::title(
+                    lang.key("council.title"),
+                    if cfg!(target_os = "android") {
+                        20.
+                    } else {
+                        32.
+                    },
+                ));
+                if !cfg!(target_os = "android") {
+                    title.spawn(kit::muted(lang.key("council.help"), 12.));
+                }
+            });
+            head.spawn(Node {
+                flex_direction: FlexDirection::Column,
+                align_items: AlignItems::End,
+                ..default()
+            })
+            .with_children(|clock| {
+                clock.spawn(kit::muted(lang.key("council.time_left"), 9.));
+                clock.spawn((
+                    Text::new("0:20"),
+                    TextFont::from_font_size(FontSize::Px(30.)),
+                    TextColor(Color::srgb_u8(200, 240, 160)),
+                    Field::Time,
+                ));
+            });
         });
-        head.spawn(Node {flex_direction:FlexDirection::Column,align_items:AlignItems::End,..default()}).with_children(|clock| {
-            clock.spawn(kit::muted("TIME LEFT",9.));
-            clock.spawn((Text::new("0:20"),TextFont::from_font_size(FontSize::Px(30.)),TextColor(Color::srgb_u8(200,240,160)),Field::Time));
-        });
-    });
 }
 
 fn control(text: &str, action: UiAction, idle: Color) -> impl Bundle {
     (
         Node {
             min_width: px(156),
-            min_height: px(41),
+            min_height: px(if cfg!(target_os = "android") { 48 } else { 41 }),
             padding: UiRect::axes(px(18), px(9)),
             border: UiRect::all(px(1)),
             border_radius: BorderRadius::all(px(4)),
@@ -180,6 +216,7 @@ fn control(text: &str, action: UiAction, idle: Color) -> impl Bundle {
     )
 }
 
+#[cfg(not(target_os = "android"))]
 fn card(parent: &mut ChildSpawnerCommands, assets: &AssetServer, i: usize) {
     parent
         .spawn((

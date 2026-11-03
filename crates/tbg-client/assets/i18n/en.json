@@ -1921,5 +1921,6 @@
   "android.live": "Live",
   "android.battle.phase": "Battle",
   "android.account.backup_title": "Account backup",
-  "android.reveal_short": "Show"
+  "android.reveal_short": "Show",
+  "mobile.link_unavailable": "This public page could not be opened. It requires a secure address and a browser."
 }

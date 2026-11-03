@@ -1921,5 +1921,6 @@
   "android.live": "Ao vivo",
   "android.battle.phase": "Batalha",
   "android.account.backup_title": "Backup da conta",
-  "android.reveal_short": "Mostrar"
+  "android.reveal_short": "Mostrar",
+  "mobile.link_unavailable": "Não foi possível abrir esta página pública. Ela exige um endereço seguro e um navegador."
 }
