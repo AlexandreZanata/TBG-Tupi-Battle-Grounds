@@ -1,6 +1,6 @@
 //! New play follows active admission; existing matches reconnect to their original slot.
 //! Socket pump and reconnect backoff: 0.25 s, 0.5 s, 1 s, then every 2 s
-//! until `GIVE_UP` (the server window is 30 s). A frame that runs after the
+//! through the server's pause, reconnect and terminal replay windows. A frame that runs after the
 //! tab becomes visible again retries at once when a retry is due. A socket
 //! that goes silent is treated as lost (P71): a dropped network often never
 //! reports `Closed`, and the seat is only safe if the client comes back.
@@ -11,7 +11,7 @@ use tbg_core::protocol::{self, ClientMsg, ServerMsg};
 use super::{NetFailure, NetLink, NetStatus};
 use crate::config;
 
-/// Give up reconnecting after this long (server window is 30 s).
+/// Ordinary reconnect/replay window (BR-M03); an active seat also has P71's pause budget.
 pub(crate) const GIVE_UP: f64 = 30.0;
 
 /// A draining slot refuses new play with `ServerFull`; the request is asked again through admission
@@ -128,12 +128,23 @@ impl NetLink {
         if self.socket.is_some() || matches!(self.status, NetStatus::Failed(_)) {
             return;
         }
-        if now - lost > GIVE_UP {
+        if now - lost > self.reconnect_window() {
             self.status = NetStatus::Failed(NetFailure::ConnectionLost);
         } else if now >= self.next_try {
             self.connect(now);
             self.tries += 1;
             self.next_try = now + delay(self.tries);
+        }
+    }
+
+    /// BR-M03: keep trying while the server can still resume this seat or replay its result.
+    pub(crate) fn reconnect_window(&self) -> f64 {
+        if self.in_match {
+            // The shared canonical maximum pause is120s, followed by the normal
+            // reconnect window and its terminal replay retention. This grants no server grace.
+            120.0 + 2.0 * GIVE_UP
+        } else {
+            GIVE_UP
         }
     }
 
@@ -449,6 +460,27 @@ mod tests {
         net.read_socket(14.1);
         assert!(!net.opened);
         assert!(matches!(net.status, NetStatus::Reconnecting { since } if since == 14.1));
+    }
+
+    #[test]
+    fn p71_retries_through_the_authoritative_pause_and_terminal_replay() {
+        // BR-M03: the old30s client cutoff stranded a recoverable seat during its120s pause.
+        let mut net = link(Mode::Quick);
+        net.in_match = true;
+        net.lost(0.);
+        net.next_try = 1000.;
+        for now in [35., 90., 160.] {
+            net.reconnect(now);
+            assert!(matches!(net.status, NetStatus::Reconnecting { .. }));
+        }
+        net.reconnect(181.);
+        assert_eq!(net.status, NetStatus::Failed(NetFailure::ConnectionLost));
+
+        let mut queue = link(Mode::Quick);
+        queue.lost(0.);
+        queue.next_try = 1000.;
+        queue.reconnect(31.);
+        assert_eq!(queue.status, NetStatus::Failed(NetFailure::ConnectionLost));
     }
 
     #[test]

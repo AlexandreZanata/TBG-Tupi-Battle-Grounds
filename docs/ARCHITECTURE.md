@@ -1032,7 +1032,7 @@ adds, without touching `tbg-core` simulation:
 Architecture §§21–24 are reserved by separate planning workstreams. P69
 starts directly from reviewed Linux native.3 commit `014b0e0`, with no
 dependency on P68 Windows or new authentication implementation. See
-[P69](phases/P69-android-native-prototype.md), GAME-DESIGN §22 and D-98.
+[P69](phases/P69-android-native-prototype.md), GAME-DESIGN §23 and D-98.
 
 One shared `tbg-client` library/app builder serves desktop/web and Android.
 A thin Gradle/GameActivity Kotlin host loads the ARM64 cdylib; Bevy/winit

@@ -3431,7 +3431,7 @@ Android 16/API 36, arm64-v8a, physical 1220×2712 panel, 480 dpi and 4096-byte
 pages. No identifier/private data, APK install or gameplay measurement was
 included. Validate the actual landscape viewport, touch/IME/lifecycle,
 existing Linux/ARM64 traces and packaged cross-play. Proposed configuration
-and test inputs live in GAME-DESIGN §22, not claimed performance numbers.
+and test inputs live in GAME-DESIGN §23, not claimed performance numbers.
 
 **Why.** The existing Rust/game-art investment can be reused while mobile
 needs explicit touch layout, native services and lifecycle support. A

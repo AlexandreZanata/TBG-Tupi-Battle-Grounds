@@ -1138,3 +1138,12 @@ celebration rows retain48dp controls and leave scene space; keyboard hints stay
 on desktop. Cast, animation, page size and Linux/Windows/web geometry remain
 unchanged. The overflowing candidate40 Result is a recorded failure; new-source
 winner/loser/celebration observations remain pending.
+
+
+P69/P71 retry correspondence: all clients retain an active seat's retry path
+through the canonical connection pause, reconnect window and terminal replay
+retention. Queue/probe timeout and the existing banner layout remain unchanged;
+the numeric banner now reflects the longer active-seat retry limit. Only the
+server determines continuation/forfeit. Actual Android40 early-abandonment and
+Linux pause/result evidence, plus the focused regression and pending corrected
+runtime repetition, are recorded in the P69 continuation report.

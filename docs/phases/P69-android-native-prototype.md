@@ -9,7 +9,7 @@ request; see the [execution checkpoint](P69-device-20261101.md#owner-requested-p
 **Execution branch:** `codex/p69-android-native-prototype`.
 **Reviewed Linux base:** `014b0e0c046b38c551ee24534ee00709cde0e493`
 (`0.1.0-native.3`, protocol 29, RulesetVersion 2).
-**Decision:** D-98. **Architecture:** §25. **Canon:** GAME-DESIGN §22.
+**Decision:** D-98. **Architecture:** §29. **Canon:** GAME-DESIGN §23.
 
 ## Current owner continuation (2026-11-02)
 
@@ -288,9 +288,10 @@ Back dismisses keyboard/dialog/details first, then follows navigation;
 leaving an active online match needs a clear confirmation and the existing
 disconnect/surrender semantics. It must not silently surrender. Suspended
 surfaces/audio/input are restored without duplicate apps/cameras/units.
-Online simulation continues on the server; the normal 30-second reconnect
-window applies. No background-service trick, force-pausing the opponent or
-longer mobile reconnect grace. Offline execution does not gain wall-clock
+The server applies the same BR-M03 connection-pause budget and reconnect
+window used by Linux, then decides any forfeit. Clients keep retrying through
+the existing terminal replay retention. No background-service trick or
+Android-specific pause or reconnect grace is allowed. Offline execution does not gain wall-clock
 catch-up rewards; process death may lose an unsaved local session as on the
 current unsaved client, and that limitation is stated honestly.
 
