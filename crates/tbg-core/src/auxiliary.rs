@@ -1,5 +1,6 @@
 //! War Auxiliaries (`Mineiro` and `Mercador`): off-lane economic and shop
-//! specialists hired with Energy during `Phase::Running` (P74, BR-AX01–BR-AX10).
+//! specialists hired with Energy during `Phase::Running` and evolved through
+//! three cumulative tiers (P74, BR-AX01–BR-AX10; tiers BR-AX12–BR-AX15).
 
 use serde::{Deserialize, Serialize};
 
@@ -10,13 +11,16 @@ use crate::types::Seat;
 
 /// Number of War Auxiliary slots per seat.
 pub const AUXILIARY_SLOTS: usize = 2;
+/// Highest War Auxiliary tier (BR-AX12): hire = tier 1, two Evolutions after it.
+pub const AUXILIARY_MAX_TIER: u8 = 3;
+const TIERS: usize = AUXILIARY_MAX_TIER as usize;
 
 /// The two War Auxiliaries available to both seats in fixed slots.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AuxiliaryKind {
-    /// Slot 0: builds a mine over 12 s, then produces +0.06 Energy/s for 180 s.
+    /// Slot 0: builds a mine over 12 s, then produces Energy for 180 s per tier.
     Miner,
-    /// Slot 1: counts conventional champion purchases after hiring; every 3 grants 1 free reroll.
+    /// Slot 1: counts conventional champion purchases after hiring and pays out free rerolls (and Energy from tier 2).
     Merchant,
 }
 
@@ -63,6 +67,8 @@ pub enum AuxiliaryPhase {
 pub struct AuxiliarySlotView {
     pub kind: AuxiliaryKind,
     pub phase: AuxiliaryPhase,
+    /// `0` while not hired, else `1..=AUXILIARY_MAX_TIER` (BR-AX12).
+    pub tier: u8,
 }
 
 impl AuxiliarySlotView {
@@ -70,37 +76,46 @@ impl AuxiliarySlotView {
         Self {
             kind,
             phase: AuxiliaryPhase::Available,
+            tier: 0,
         }
     }
 }
 
-/// Balance parameters for War Auxiliaries (D-33 / P74).
+/// Balance parameters for War Auxiliaries (D-33 / P74). Every array is
+/// indexed by `tier - 1`; costs are paid per step (hire, then each Evolution).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct AuxiliaryRule {
-    /// Sub-energy cost to hire the Miner (6 Energy = 3,600 sub-energy).
-    pub miner_cost: u32,
+    /// Sub-energy paid to reach each Miner tier (hire 8, then 14, then 22 Energy).
+    pub miner_cost: [u32; TIERS],
     /// Construction ticks before Miner production starts (12 s = 240 ticks).
     pub miner_prep_ticks: u16,
-    /// Active production window in combat ticks (180 s = 3,600 ticks).
+    /// Active production window in combat ticks; each Evolution restarts it (180 s).
     pub miner_duration_ticks: u16,
-    /// Flat sub-energy produced per combat second (0.06 Energy/s = 36 sub-energy/s).
-    pub miner_sub_energy_per_sec: u32,
-    /// Sub-energy cost to hire the Merchant (4 Energy = 2,400 sub-energy).
-    pub merchant_cost: u32,
-    /// Conventional champion purchases after hiring required per free reroll.
-    pub merchant_purchases_per_reroll: u8,
-    /// Maximum free-reroll activations per match before the Merchant completes.
-    pub merchant_max_activations: u8,
+    /// Cumulative sub-energy produced per combat second at each tier.
+    pub miner_sub_energy_per_sec: [u32; TIERS],
+    /// Sub-energy paid to reach each Merchant tier (hire 6, then 10, then 16 Energy).
+    pub merchant_cost: [u32; TIERS],
+    /// Conventional champion purchases required per activation at each tier.
+    pub merchant_purchases_per_activation: [u8; TIERS],
+    /// Free rerolls granted per activation at each tier.
+    pub merchant_rerolls_per_activation: [u8; TIERS],
+    /// Sub-energy refunded per activation at each tier.
+    pub merchant_energy_per_activation: [u32; TIERS],
+    /// Cumulative activation cap per match at each tier.
+    pub merchant_max_activations: [u8; TIERS],
 }
 
 pub const AUXILIARY_RULE: AuxiliaryRule = AuxiliaryRule {
-    miner_cost: 6 * ENERGY_SCALE,
+    miner_cost: [8 * ENERGY_SCALE, 14 * ENERGY_SCALE, 22 * ENERGY_SCALE],
     miner_prep_ticks: (12 * TICK_HZ) as u16,
     miner_duration_ticks: (180 * TICK_HZ) as u16,
-    miner_sub_energy_per_sec: 36,
-    merchant_cost: 4 * ENERGY_SCALE,
-    merchant_purchases_per_reroll: 3,
-    merchant_max_activations: 3,
+    // +0.15, +0.30 and +0.50 Energy/s.
+    miner_sub_energy_per_sec: [90, 180, 300],
+    merchant_cost: [6 * ENERGY_SCALE, 10 * ENERGY_SCALE, 16 * ENERGY_SCALE],
+    merchant_purchases_per_activation: [3, 2, 2],
+    merchant_rerolls_per_activation: [1, 1, 2],
+    merchant_energy_per_activation: [0, ENERGY_SCALE, 2 * ENERGY_SCALE],
+    merchant_max_activations: [4, 8, 12],
 };
 
 impl Default for AuxiliaryRule {
@@ -110,11 +125,13 @@ impl Default for AuxiliaryRule {
 }
 
 impl AuxiliaryRule {
-    pub const fn cost_of(&self, kind: AuxiliaryKind) -> u32 {
-        match kind {
-            AuxiliaryKind::Miner => self.miner_cost,
-            AuxiliaryKind::Merchant => self.merchant_cost,
-        }
+    /// Sub-energy to reach `tier` (`1..=AUXILIARY_MAX_TIER`); `None` past the last tier.
+    pub fn cost_of(&self, kind: AuxiliaryKind, tier: u8) -> Option<u32> {
+        let table = match kind {
+            AuxiliaryKind::Miner => &self.miner_cost,
+            AuxiliaryKind::Merchant => &self.merchant_cost,
+        };
+        table.get(usize::from(tier.checked_sub(1)?)).copied()
     }
 }
 
@@ -127,49 +144,79 @@ pub const fn default_slot_views() -> [AuxiliarySlotView; AUXILIARY_SLOTS] {
 
 pub fn views(state: &MatchState) -> [[AuxiliarySlotView; AUXILIARY_SLOTS]; 2] {
     Seat::BOTH.map(|seat| {
-        let phases = state.player(seat).auxiliaries;
-        [
+        let p = state.player(seat);
+        AuxiliaryKind::ALL.map(|kind| {
+            let idx = usize::from(kind.slot());
             AuxiliarySlotView {
-                kind: AuxiliaryKind::Miner,
-                phase: phases[0],
-            },
-            AuxiliarySlotView {
-                kind: AuxiliaryKind::Merchant,
-                phase: phases[1],
-            },
-        ]
+                kind,
+                phase: p.auxiliaries[idx],
+                tier: p.auxiliary_tiers[idx],
+            }
+        })
     })
 }
 
-/// Validate and apply `PlayerIntention::HireAuxiliary { slot }` (BR-AX01–BR-AX03).
+/// Index into a per-tier table for a hired slot (tier `0` reads tier 1).
+fn tier_index(tier: u8) -> usize {
+    usize::from(tier.clamp(1, AUXILIARY_MAX_TIER) - 1)
+}
+
+/// Validate and apply `PlayerIntention::HireAuxiliary { slot }`: hire at
+/// tier 1, or evolve a hired slot one tier (BR-AX01–BR-AX03, BR-AX12–BR-AX13).
 pub(crate) fn hire(state: &mut MatchState, seat: Seat, slot: u8) -> Result<(), Rejection> {
     let Some(kind) = AuxiliaryKind::from_slot(slot) else {
         return Err(Rejection::BadAuxiliarySlot);
     };
     let idx = usize::from(slot);
-    if state.player(seat).auxiliaries[idx] != AuxiliaryPhase::Available {
-        return Err(Rejection::AuxiliaryAlreadyHired);
-    }
+    let tier = state.player(seat).auxiliary_tiers[idx];
+    let next_tier = tier + 1;
     let rule = state.rules().auxiliary;
-    let cost = rule.cost_of(kind);
+    let Some(cost) = rule.cost_of(kind, next_tier) else {
+        return Err(Rejection::AuxiliaryAlreadyHired);
+    };
     if !state.player_mut(seat).spend(cost) {
         return Err(Rejection::NotEnoughEnergy);
     }
-    let next_phase = match kind {
-        AuxiliaryKind::Miner => AuxiliaryPhase::Preparing {
-            ticks_left: rule.miner_prep_ticks,
-        },
-        AuxiliaryKind::Merchant => AuxiliaryPhase::Active {
-            ticks_left: 0,
-            progress: 0,
-            activations_used: 0,
-        },
-    };
-    state.player_mut(seat).auxiliaries[idx] = next_phase;
+    let p = state.player_mut(seat);
+    p.auxiliary_tiers[idx] = next_tier;
+    p.auxiliaries[idx] = next_phase(kind, p.auxiliaries[idx], tier, &rule);
     state
         .pending
         .push(Event::AuxiliaryHired { seat, slot, kind });
     Ok(())
+}
+
+/// Phase after a hire or Evolution (BR-AX13): a Miner keeps building if it
+/// is still Preparing, otherwise restarts its full production window; a
+/// Merchant (re)opens with its activation history kept.
+fn next_phase(
+    kind: AuxiliaryKind,
+    phase: AuxiliaryPhase,
+    tier: u8,
+    rule: &AuxiliaryRule,
+) -> AuxiliaryPhase {
+    match (kind, phase) {
+        (AuxiliaryKind::Miner, AuxiliaryPhase::Available) => AuxiliaryPhase::Preparing {
+            ticks_left: rule.miner_prep_ticks,
+        },
+        (AuxiliaryKind::Miner, AuxiliaryPhase::Preparing { .. }) => phase,
+        (AuxiliaryKind::Miner, _) => AuxiliaryPhase::Active {
+            ticks_left: rule.miner_duration_ticks,
+            progress: 0,
+            activations_used: 0,
+        },
+        (AuxiliaryKind::Merchant, AuxiliaryPhase::Active { .. }) => phase,
+        (AuxiliaryKind::Merchant, AuxiliaryPhase::Completed) => AuxiliaryPhase::Active {
+            ticks_left: 0,
+            progress: 0,
+            activations_used: rule.merchant_max_activations[tier_index(tier)],
+        },
+        (AuxiliaryKind::Merchant, _) => AuxiliaryPhase::Active {
+            ticks_left: 0,
+            progress: 0,
+            activations_used: 0,
+        },
+    }
 }
 
 /// Advance War Auxiliaries by one live combat tick (BR-AX04–BR-AX06).
@@ -180,6 +227,7 @@ pub(crate) fn tick(state: &mut MatchState, ev: &mut Vec<Event>) {
     let cap = state.rules().energy_cap;
     for seat in Seat::BOTH {
         let p = &mut state.players[seat.index()];
+        let per_sec = rule.miner_sub_energy_per_sec[tier_index(p.auxiliary_tiers[0])];
         match p.auxiliaries[0] {
             AuxiliaryPhase::Preparing { ticks_left } => {
                 let next = ticks_left.saturating_sub(1);
@@ -199,10 +247,8 @@ pub(crate) fn tick(state: &mut MatchState, ev: &mut Vec<Event>) {
                 activations_used,
             } if ticks_left > 0 => {
                 let elapsed = u64::from(rule.miner_duration_ticks.saturating_sub(ticks_left)) + 1;
-                let total_now =
-                    (elapsed * u64::from(rule.miner_sub_energy_per_sec)) / u64::from(TICK_HZ);
-                let total_prev =
-                    ((elapsed - 1) * u64::from(rule.miner_sub_energy_per_sec)) / u64::from(TICK_HZ);
+                let total_now = (elapsed * u64::from(per_sec)) / u64::from(TICK_HZ);
+                let total_prev = ((elapsed - 1) * u64::from(per_sec)) / u64::from(TICK_HZ);
                 let gain = (total_now - total_prev) as u32;
                 p.energy = p.energy.saturating_add(gain);
                 if let Some(cap) = cap {
@@ -228,179 +274,54 @@ pub(crate) fn tick(state: &mut MatchState, ev: &mut Vec<Event>) {
     }
 }
 
-/// Record a conventional champion purchase for the seat's Merchant (BR-AX07–BR-AX10).
+/// Record a conventional champion purchase for the seat's Merchant
+/// (BR-AX07–BR-AX10, tier payouts BR-AX14).
 pub(crate) fn on_champion_purchase(state: &mut MatchState, seat: Seat) {
     let rule = state.rules().auxiliary;
+    let cap = state.rules().energy_cap;
     let p = state.player_mut(seat);
-    if let AuxiliaryPhase::Active {
+    let AuxiliaryPhase::Active {
         ticks_left,
         progress,
         activations_used,
     } = p.auxiliaries[1]
-    {
-        let next_progress = progress.saturating_add(1);
-        if next_progress >= rule.merchant_purchases_per_reroll {
-            let next_used = activations_used.saturating_add(1);
-            p.free_rerolls = p.free_rerolls.saturating_add(1);
-            p.auxiliaries[1] = if next_used >= rule.merchant_max_activations {
-                AuxiliaryPhase::Completed
-            } else {
-                AuxiliaryPhase::Active {
-                    ticks_left,
-                    progress: 0,
-                    activations_used: next_used,
-                }
-            };
-            state.pending.push(Event::AuxiliaryTriggered {
-                seat,
-                kind: AuxiliaryKind::Merchant,
-            });
-        } else {
-            p.auxiliaries[1] = AuxiliaryPhase::Active {
-                ticks_left,
-                progress: next_progress,
-                activations_used,
-            };
-        }
+    else {
+        return;
+    };
+    let t = tier_index(p.auxiliary_tiers[1]);
+    let next_progress = progress.saturating_add(1);
+    if next_progress < rule.merchant_purchases_per_activation[t] {
+        p.auxiliaries[1] = AuxiliaryPhase::Active {
+            ticks_left,
+            progress: next_progress,
+            activations_used,
+        };
+        return;
     }
+    let next_used = activations_used.saturating_add(1);
+    p.free_rerolls = p
+        .free_rerolls
+        .saturating_add(rule.merchant_rerolls_per_activation[t]);
+    p.energy = p
+        .energy
+        .saturating_add(rule.merchant_energy_per_activation[t]);
+    if let Some(cap) = cap {
+        p.energy = p.energy.min(cap);
+    }
+    p.auxiliaries[1] = if next_used >= rule.merchant_max_activations[t] {
+        AuxiliaryPhase::Completed
+    } else {
+        AuxiliaryPhase::Active {
+            ticks_left,
+            progress: 0,
+            activations_used: next_used,
+        }
+    };
+    state.pending.push(Event::AuxiliaryTriggered {
+        seat,
+        kind: AuxiliaryKind::Merchant,
+    });
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{ArcanaPreset, Phase, PlayerIntention};
-
-    fn running_match() -> MatchState {
-        let mut s = MatchState::with_preview(77, [ArcanaPreset::NEUTRAL; 2]);
-        while s.phase != Phase::Running {
-            s.step();
-        }
-        s
-    }
-
-    #[test]
-    fn br_ax01_to_ax06_miner_hires_once_prepares_12s_and_produces_exact_unmultiplied_energy() {
-        let mut s = running_match();
-        s.players[0].energy = 6 * ENERGY_SCALE;
-        assert_eq!(
-            s.apply_intention(Seat::A, 1, PlayerIntention::HireAuxiliary { slot: 2 }),
-            Err(Rejection::BadAuxiliarySlot)
-        );
-        s.apply_intention(Seat::A, 2, PlayerIntention::HireAuxiliary { slot: 0 })
-            .unwrap();
-        assert_eq!(s.players[0].energy, 0);
-        assert_eq!(
-            s.players[0].auxiliaries[0],
-            AuxiliaryPhase::Preparing { ticks_left: 240 }
-        );
-        assert_eq!(
-            s.apply_intention(Seat::A, 3, PlayerIntention::HireAuxiliary { slot: 0 }),
-            Err(Rejection::AuxiliaryAlreadyHired)
-        );
-
-        let mut twin = running_match();
-        twin.players[0].energy = 0;
-
-        for _ in 0..240 {
-            s.step();
-            twin.step();
-        }
-        assert_eq!(
-            s.players[0].auxiliaries[0],
-            AuxiliaryPhase::Active {
-                ticks_left: 3_600,
-                progress: 0,
-                activations_used: 0,
-            }
-        );
-        assert_eq!(
-            s.players[0].energy, twin.players[0].energy,
-            "no extra Energy during the 12 s preparation window"
-        );
-
-        // Give both seats maximum Interest (25+ Energy) so any Interest leak would multiply Miner output.
-        s.players[0].energy = 30 * ENERGY_SCALE;
-        twin.players[0].energy = 30 * ENERGY_SCALE;
-        for _ in 0..3_600 {
-            // Keep both seats in the same Interest band and avoid Augment pauses.
-            s.augments.next_open_at = u32::MAX;
-            twin.augments.next_open_at = u32::MAX;
-            s.step();
-            twin.step();
-        }
-        assert_eq!(s.players[0].auxiliaries[0], AuxiliaryPhase::Completed);
-        assert_eq!(
-            s.players[0].energy - twin.players[0].energy,
-            6_480,
-            "Miner produces exactly 10.8 Energy (6,480 sub-energy) over 180 s without Interest multiplication"
-        );
-        assert_eq!(
-            s.apply_intention(Seat::A, 4, PlayerIntention::HireAuxiliary { slot: 0 }),
-            Err(Rejection::AuxiliaryAlreadyHired)
-        );
-    }
-
-    #[test]
-    fn br_ax07_to_ax10_merchant_counts_post_hire_purchases_grants_three_free_rerolls_and_preserves_streak(
-    ) {
-        let mut s = running_match();
-        s.players[0].energy = 100 * ENERGY_SCALE;
-        // Pre-hire purchase must not advance Merchant progress.
-        s.apply_intention(Seat::A, 1, PlayerIntention::Purchase { offer: 0 })
-            .unwrap();
-        // Paid reroll raises streak to 1.
-        let paid_cost = s.view_for(Seat::A, &[]).reroll_cost.unwrap();
-        assert_eq!(paid_cost, 600);
-        s.apply_intention(Seat::A, 2, PlayerIntention::Reroll { cost: paid_cost })
-            .unwrap();
-        assert_eq!(s.players[0].reroll_streak, 1);
-
-        // Hire Merchant (slot 1, cost 4 Energy = 2,400 sub-energy).
-        let before_hire = s.players[0].energy;
-        s.apply_intention(Seat::A, 3, PlayerIntention::HireAuxiliary { slot: 1 })
-            .unwrap();
-        assert_eq!(s.players[0].energy, before_hire - 4 * ENERGY_SCALE);
-        assert_eq!(
-            s.players[0].auxiliaries[1],
-            AuxiliaryPhase::Active {
-                ticks_left: 0,
-                progress: 0,
-                activations_used: 0,
-            }
-        );
-
-        // Make 3 purchases -> 1 free reroll granted.
-        for seq in 4..=6 {
-            s.apply_intention(Seat::A, seq, PlayerIntention::Purchase { offer: 0 })
-                .unwrap();
-        }
-        assert_eq!(s.players[0].free_rerolls, 1);
-        assert_eq!(s.view_for(Seat::A, &[]).reroll_cost, Some(0));
-
-        // Do another paid reroll after spending the free one: first spend the free reroll.
-        let energy_before_free = s.players[0].energy;
-        s.apply_intention(Seat::A, 7, PlayerIntention::Reroll { cost: 0 })
-            .unwrap();
-        assert_eq!(s.players[0].energy, energy_before_free);
-        assert_eq!(s.players[0].free_rerolls, 0);
-        assert_eq!(
-            s.players[0].reroll_streak, 0,
-            "free reroll does not increment reroll_streak"
-        );
-
-        // Accumulate the remaining 2 activations (6 more purchases) and complete at 3 total activations.
-        for seq in 8..=13 {
-            s.apply_intention(Seat::A, seq, PlayerIntention::Purchase { offer: 0 })
-                .unwrap();
-        }
-        assert_eq!(s.players[0].free_rerolls, 2);
-        assert_eq!(s.players[0].auxiliaries[1], AuxiliaryPhase::Completed);
-
-        // Further purchases after Completed grant no extra free rerolls.
-        for seq in 14..=16 {
-            s.apply_intention(Seat::A, seq, PlayerIntention::Purchase { offer: 0 })
-                .unwrap();
-        }
-        assert_eq!(s.players[0].free_rerolls, 2);
-    }
-}
+mod tests;

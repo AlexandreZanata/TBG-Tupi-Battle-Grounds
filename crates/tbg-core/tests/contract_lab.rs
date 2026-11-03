@@ -197,6 +197,14 @@ fn c2_per_tick_traces_are_frozen() {
             (1000, 0xa73ffde0640d4369, 0x8acf4d4069f570b0, 58307),
             (65535, 0xd8eff0a864f58a7d, 0xe247d987c99d5cca, 24291),
         ],
+        // BR-AX12: tiered auxiliary slots change hashes; all five R15 end ticks are unchanged.
+        (16, 0xf2e253b98ccb313a) => [
+            (1, 0x5744fba5c8699022, 0xab276f79c601a5ec, 16625),
+            (7, 0x9503189030cb1009, 0x252ea41f2ca9de65, 14265),
+            (42, 0x74019686f02f599f, 0x244926d4c6d3fd01, 23274),
+            (1000, 0x801231c22c8043d1, 0xf62e42692b000f18, 58307),
+            (65535, 0x4d10b0fa56d68b05, 0x87fcd3250d25955a, 24291),
+        ],
         revision => panic!("register an explicit canonical trace for {revision:?}"),
     };
     for (seed, t, h, tick) in goldens {

@@ -3405,3 +3405,14 @@ sheets to content-addressed files or object storage if they exceed 256 MiB.
 
 **Reopen when** sharing/selling custom emojis, animated WebP/APNG or
 larger frames are requested.
+
+
+### D-110 / BR-AX12 integration — combined wire 40 (2026-11-02)
+
+The owner authorized integrating tiered War Auxiliaries with P75. Each isolated
+branch had claimed wire 39 for an incompatible shape. Their combined release
+uses wire 40: the tier field from BR-AX12 and P75 appended client tags 27–28 /
+server tags 37–41. Existing message tags stay unchanged. R16 belongs solely to
+the owner-requested BR-AX12–BR-AX14 gameplay change; P75 adds no simulation
+behavior. R16 fingerprint `f2e253b98ccb313a` and measured lab traces remain
+unchanged by the merge. Wire 39 peers must be rejected.

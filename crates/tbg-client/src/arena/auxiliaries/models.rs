@@ -13,7 +13,7 @@ const BELT_LEATHER: Color = Color::srgb(0.42, 0.27, 0.15);
 const HARDHAT_YELLOW: Color = Color::srgb(0.98, 0.78, 0.14);
 const PICKAXE_STEEL: Color = Color::srgb(0.76, 0.80, 0.86);
 
-fn team_trim(blue: bool) -> Color {
+pub(super) fn team_trim(blue: bool) -> Color {
     if blue {
         Color::srgb(0.22, 0.52, 0.88)
     } else {

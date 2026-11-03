@@ -13,8 +13,8 @@ use tbg_core::PlayerIntention;
 #[test]
 fn protocol_version() {
     assert_eq!(
-        PROTOCOL_VERSION, 39,
-        "D-110: P75 appends seat-only social messages on wire 39"
+        PROTOCOL_VERSION, 40,
+        "D-110 / BR-AX12: combined social messages and tiered views require wire 40"
     );
 }
 

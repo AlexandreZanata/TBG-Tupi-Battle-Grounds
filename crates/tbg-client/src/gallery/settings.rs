@@ -52,6 +52,7 @@ impl Gallery {
             || self.mode == "blockout"
             || self.mode == "strongholds"
             || self.mode == "aim"
+            || self.mode == "auxiliary"
     }
     pub fn hide_arena(&self) -> bool {
         self.silhouette || self.studio()

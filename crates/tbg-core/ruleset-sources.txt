@@ -92,3 +92,4 @@ exclude barrel/tests.rs OG-02 regression scenarios, not simulation rules
 
 exclude occupancy/tests.rs PK-01 regression tests, not gameplay
 exclude stronghold_power/tests.rs TW-01 regression tests, not gameplay
+exclude auxiliary/tests.rs BR-AX12-BR-AX15 regression scenarios, not simulation rules

@@ -834,3 +834,38 @@ The `p75-*` cases in `desktop-ui-contract.json` cover the states listed by P75-C
 
 
 P75 S14 consolidation adds modal-only focus, PageUp/PageDown scrolling, private preview cache invalidation on identity changes, unavailable chat states, guest report guards, the existing localized history date formatter for hold/suspension deadlines, persistent All/Emojis/Off modes and immediate mute filtering through the same shared presentation. Native and WASM checks passed; every corresponding in-game capture and Windows comparison remains pending. The console-only EN/pt-BR captures in the P75 execution report are outside this game's parity evidence.
+
+## AX-T — Tiered War Auxiliaries: compact cards, real portraits, red side and per-Arena precincts (2026-11-02)
+
+Shared Linux/Windows/desktop web path, no platform branch
+(`crates/tbg-client/src/ui/native_battle/auxiliaries.rs`,
+`crates/tbg-client/src/arena/auxiliaries/`):
+
+- **HUD:** the two auxiliary cards are 112×152 (two thirds of a Shop card) in
+  a panel anchored inside the scaled Shop column, `10 px` right of the fifth
+  card, bottom-aligned, sharing the Shop scale. Each card shows three tier
+  pips, the status line, and `Custo`/`Cost`, `Evoluir`/`Evolve` with the next
+  price, or `Nível III`/`Tier III` when maxed.
+- **Portraits:** renders of the in-game low-poly `Mineiro`/`Mercador` figures
+  in the viewer's team colors (`aux_{miner,merchant}_{blue,red}.webp`),
+  captured with `--gallery=auxiliary --aux=… --side=… --portrait`.
+- **Red side:** Seat B precincts are mirrored with a negative X scale; their
+  material renders both faces so the outward faces keep correct lighting
+  instead of the grey interiors previously shown.
+- **Placement:** per-Arena offsets and Merchant sea lanes (`placement.rs`
+  `LAYOUTS`) keep every tier, platform, bridge and ship course clear of the
+  road, Stronghold footprints and existing scenery
+  (`br_ax15_every_tier_bridge_and_ship_course_clears_existing_arena_scenery`).
+  Offshore pads stand on stilts; a plank bridge is laid plank by plank from
+  the shore during construction.
+- **Tier motion:** tier 2 adds a winch with a bucket and an ore heap
+  (`Mineiro`), goods and pennants (`Mercador`); tier 3 adds a headframe with a
+  spinning sheave, a crystal crown, a banner and an apprentice (`Mineiro`), a
+  pavilion and a coin chest that opens on payouts (`Mercador`). Swing speed,
+  sparks and ship size grow per tier; a golden ring sweeps out on each
+  Evolution. Low motion keeps static poses and instant reveals.
+
+Affected cases: battle HUD shop row (both sides), every Arena × both sides ×
+tiers 1–3 precinct rendering and motion. Linux native captures are the
+reference; Windows and desktop web rows for these cases remain **pending**
+until captured on those targets.

@@ -104,6 +104,28 @@ fn pieces(kind: StrongholdKind, form: Form) -> Vec<Piece> {
     p
 }
 
+/// Every Stronghold piece any kind and Fortification form can show, as
+/// world-space meshes on both sides (for scenery clearance checks).
+#[cfg(test)]
+pub(in crate::arena) fn all_tower_meshes() -> Vec<(Mesh, Transform)> {
+    let far = LANE_LEN as f32 / 1000.0 + SETBACK;
+    let kinds = [StrongholdKind::Classic]
+        .into_iter()
+        .chain(StrongholdKind::SELECTABLE);
+    let mut out = Vec::new();
+    for kind in kinds {
+        for form in [Form::Base, Form::A1, Form::A2, Form::B1, Form::B2] {
+            for piece in pieces(kind, form) {
+                for (own, x) in [(true, -SETBACK), (false, far)] {
+                    let root = Transform::from_xyz(x, 0.0, 0.0);
+                    out.push((parts::build(piece.def, own), root * piece.placed(own)));
+                }
+            }
+        }
+    }
+    out
+}
+
 /// The pieces a look shows: those its damage has not taken yet.
 #[cfg(test)]
 fn visible(look: Look) -> impl Iterator<Item = Piece> {
