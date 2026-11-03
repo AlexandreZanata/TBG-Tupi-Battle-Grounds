@@ -118,7 +118,7 @@ fn plate(
                 flex_basis: px(0),
                 min_width: px(0),
                 height: px(PLATE_HEIGHT),
-                padding: UiRect::axes(px(8), px(4)),
+                padding: UiRect::axes(px(8), px(if cfg!(target_os = "android") { 2 } else { 4 })),
                 border: UiRect::all(px(2)),
                 border_radius: BorderRadius::all(px(7)),
                 column_gap: px(10),
@@ -165,15 +165,25 @@ fn plate(
                     flex_basis: px(0),
                     min_width: px(0),
                     flex_direction: FlexDirection::Column,
-                    row_gap: px(4),
+                    row_gap: px(if cfg!(target_os = "android") { 2 } else { 4 }),
                     ..default()
                 })
                 .with_children(|body| {
                     body.spawn(Node {
                         width: percent(100),
                         justify_content: JustifyContent::SpaceBetween,
-                        align_items: AlignItems::Center,
-                        flex_direction: if blue {
+                        align_items: if cfg!(target_os = "android") {
+                            if blue {
+                                AlignItems::Start
+                            } else {
+                                AlignItems::End
+                            }
+                        } else {
+                            AlignItems::Center
+                        },
+                        flex_direction: if cfg!(target_os = "android") {
+                            FlexDirection::Column
+                        } else if blue {
                             FlexDirection::Row
                         } else {
                             FlexDirection::RowReverse
@@ -188,15 +198,22 @@ fn plate(
                         };
                         let display_name = rating
                             .map_or_else(|| name.clone(), |rating| format!("{name} ({rating})"));
-                        let display_name =
-                            if own && !info.spectating && name.as_str() != lang.t(Msg::BattleYou) {
-                                format!("{display_name} · {}", lang.t(Msg::BattleYou))
-                            } else {
-                                display_name
-                            };
+                        let display_name = if !cfg!(target_os = "android")
+                            && own
+                            && !info.spectating
+                            && name.as_str() != lang.t(Msg::BattleYou)
+                        {
+                            format!("{display_name} · {}", lang.t(Msg::BattleYou))
+                        } else {
+                            display_name
+                        };
                         line.spawn((
                             Node {
-                                max_width: percent(68),
+                                max_width: percent(if cfg!(target_os = "android") {
+                                    100
+                                } else {
+                                    68
+                                }),
                                 #[cfg(target_os = "android")]
                                 min_width: px(0),
                                 overflow: Overflow::clip(),
@@ -215,7 +232,7 @@ fn plate(
                         line.spawn((
                             #[cfg(target_os = "android")]
                             Node {
-                                max_width: percent(32),
+                                max_width: percent(100),
                                 min_width: px(0),
                                 overflow: Overflow::clip(),
                                 ..default()

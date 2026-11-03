@@ -1163,3 +1163,11 @@ Desktop subtitle geometry, every tier's art/motion and all authoritative values
 are preserved. The actual T1/T2/T3 candidate41 observations and clipped status
 failure are recorded in the P69 continuation; wrapped-runtime repetition remains
 pending the next package.
+
+
+P69 score readability: Android stacks the existing name/rating and Stronghold
+labels on separate full-width lines above HP, within the same plate height.
+The Arena side chip retains ownership identification; desktop name suffix,
+plate layout and every authoritative value remain unchanged. The overlapping
+candidate42 failure and actual41 Evolution/Fortification evidence are recorded
+in the continuation report. Corrected header observation remains pending.
