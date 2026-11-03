@@ -80,3 +80,23 @@ fn clock_seed() -> u64 {
         1
     }
 }
+
+/// `--name value` (or bare `--name`) from the command line; the shared 1v1
+/// art reads its options through this name.
+pub fn url_param(name: &str) -> Option<String> {
+    let flag = format!("--{name}");
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let i = args.iter().position(|a| *a == flag)?;
+    Some(
+        args.get(i + 1)
+            .filter(|v| !v.starts_with("--"))
+            .cloned()
+            .unwrap_or_default(),
+    )
+}
+
+/// `--quality low` trims motion detail in the shared 1v1 animation.
+pub fn low_motion() -> bool {
+    static LOW: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *LOW.get_or_init(|| url_param("quality").as_deref() == Some("low"))
+}

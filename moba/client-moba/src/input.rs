@@ -3,7 +3,7 @@
 use bevy::prelude::*;
 use bevy::ui::{ComputedStackIndex, UiGlobalTransform};
 use tbg_moba_core::geom::Pos;
-use tbg_moba_core::{Destination, MobaIntention, Role, TroopKind};
+use tbg_moba_core::{Destination, MobaIntention, Role};
 
 use crate::app::Screen;
 use crate::camera::{MainCamera, MinimapRect, Rig, MAX_DISTANCE, MIN_DISTANCE};
@@ -14,9 +14,11 @@ use crate::units::{Marker, Spawned, UnitVisual};
 /// Everything a click or hotkey can do.
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Action {
-    SelectTroop(usize),
+    /// Buy the offer in this Shop slot and send it to the Destination.
+    BuySlot(usize),
+    ToggleLock(usize),
+    Reroll,
     SetDestination(usize),
-    Buy,
     Upgrade,
     Auto,
     Center,
@@ -37,10 +39,9 @@ pub struct Blocks;
 #[derive(Resource, Default)]
 pub struct PointerOverUi(pub bool);
 
-/// Current card and destination choice of the Shop.
+/// The Destination new Troops are sent to.
 #[derive(Resource, Clone, Copy)]
 pub struct Selection {
-    pub troop: usize,
     pub destination: usize,
 }
 
@@ -52,10 +53,7 @@ impl Selection {
             Role::Bot | Role::Support => 2,
             Role::Jungle => 3,
         };
-        Self {
-            troop: 0,
-            destination,
-        }
+        Self { destination }
     }
 }
 
@@ -139,17 +137,16 @@ fn clicks(
 
 fn hotkeys(keys: Res<ButtonInput<KeyCode>>, mut actions: ResMut<Actions>) {
     let map = [
-        (KeyCode::Digit1, Action::SelectTroop(0)),
-        (KeyCode::Digit2, Action::SelectTroop(1)),
-        (KeyCode::Digit3, Action::SelectTroop(2)),
-        (KeyCode::Digit4, Action::SelectTroop(3)),
-        (KeyCode::Digit5, Action::SelectTroop(4)),
+        (KeyCode::Digit1, Action::BuySlot(0)),
+        (KeyCode::Digit2, Action::BuySlot(1)),
+        (KeyCode::Digit3, Action::BuySlot(2)),
+        (KeyCode::Digit4, Action::BuySlot(3)),
+        (KeyCode::Digit5, Action::BuySlot(4)),
         (KeyCode::KeyZ, Action::SetDestination(0)),
         (KeyCode::KeyX, Action::SetDestination(1)),
         (KeyCode::KeyC, Action::SetDestination(2)),
         (KeyCode::KeyV, Action::SetDestination(3)),
-        (KeyCode::Enter, Action::Buy),
-        (KeyCode::KeyB, Action::Buy),
+        (KeyCode::KeyR, Action::Reroll),
         (KeyCode::KeyU, Action::Upgrade),
         (KeyCode::KeyA, Action::Auto),
         (KeyCode::Space, Action::Center),
@@ -228,12 +225,15 @@ pub fn apply(
 ) {
     for action in actions.0.drain(..) {
         match action {
-            Action::SelectTroop(i) => selection.troop = i.min(4),
             Action::SetDestination(i) => selection.destination = i.min(3),
-            Action::Buy => outbox.0.push(MobaIntention::BuyTroop {
-                troop: TroopKind::ALL[selection.troop],
+            Action::BuySlot(slot) => outbox.0.push(MobaIntention::BuyTroop {
+                slot: slot as u8,
                 to: Destination::ALL[selection.destination],
             }),
+            Action::ToggleLock(slot) => outbox
+                .0
+                .push(MobaIntention::ToggleLock { slot: slot as u8 }),
+            Action::Reroll => outbox.0.push(MobaIntention::Reroll),
             Action::Upgrade => outbox.0.push(MobaIntention::Upgrade),
             Action::Auto => outbox.0.push(MobaIntention::CommanderAuto),
             Action::Center => center(&feed, &spawned, &units, &mut rig),

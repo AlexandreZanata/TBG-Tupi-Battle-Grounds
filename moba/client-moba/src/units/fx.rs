@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 use tbg_moba_core::types::Side;
-use tbg_moba_core::{TroopKind, UnitKind};
+use tbg_moba_core::UnitKind;
 
 use super::ground_y;
 use crate::palette;
@@ -53,8 +53,8 @@ struct Fade {
 struct FxAssets {
     ball: Handle<Mesh>,
     ring: Handle<Mesh>,
-    /// Blue, red, neutral, heal, dust, gold.
-    glow: [Handle<StandardMaterial>; 6],
+    /// Blue, red, neutral, dust, gold.
+    glow: [Handle<StandardMaterial>; 5],
 }
 
 pub fn plugin(app: &mut App) {
@@ -96,7 +96,6 @@ fn setup(
             glow(palette::BLUE_GLOW, LinearRgba::rgb(0.4, 1.6, 4.0)),
             glow(palette::RED_GLOW, LinearRgba::rgb(4.0, 0.9, 0.4)),
             glow(palette::NEUTRAL, LinearRgba::rgb(3.0, 1.4, 0.3)),
-            glow(Color::srgb(0.6, 1.0, 0.55), LinearRgba::rgb(1.0, 3.5, 1.0)),
             glow(Color::srgb(0.75, 0.72, 0.66), LinearRgba::BLACK),
             glow(palette::GOLD, LinearRgba::rgb(3.0, 2.2, 0.5)),
         ],
@@ -117,10 +116,9 @@ fn lifted(p: Vec2, y: f32) -> Vec3 {
 fn shots(mut commands: Commands, mut reader: MessageReader<Shot>, assets: Res<FxAssets>) {
     for shot in reader.read() {
         let ranged = shot.from.distance(shot.to) > 3.5;
-        let healer = shot.kind == UnitKind::Troop(TroopKind::Healer);
-        let material = if healer { 3 } else { side_index(shot.side) };
-        if healer || !ranged {
-            // Melee and heals: a spark on the target.
+        let material = side_index(shot.side);
+        if !ranged {
+            // Melee: a spark on the target.
             commands.spawn((
                 Mesh3d(assets.ball.clone()),
                 MeshMaterial3d(assets.glow[material].clone()),
@@ -130,7 +128,7 @@ fn shots(mut commands: Commands, mut reader: MessageReader<Shot>, assets: Res<Fx
                     duration: 0.28,
                     grow: 1.6,
                     size: 0.25,
-                    rise: if healer { 1.5 } else { 0.0 },
+                    rise: 0.0,
                 },
             ));
             continue;
@@ -190,7 +188,7 @@ fn markers(mut commands: Commands, mut reader: MessageReader<Marker>, assets: Re
     for marker in reader.read() {
         commands.spawn((
             Mesh3d(assets.ring.clone()),
-            MeshMaterial3d(assets.glow[5].clone()),
+            MeshMaterial3d(assets.glow[4].clone()),
             Transform::from_translation(lifted(marker.at, 0.15)).with_scale(Vec3::splat(1.6)),
             Fade {
                 t: 0.0,

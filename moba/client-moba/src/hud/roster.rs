@@ -77,7 +77,10 @@ fn row(parent: &mut ChildSpawnerCommands, ctx: &Ctx, seat: Seat) {
                     ..default()
                 },
                 BorderColor::all(palette::team(team)),
-                ImageNode::new(ctx.portraits.commanders[team.index()].clone()),
+                ImageNode::new(super::chrome::portrait(
+                    &ctx.assets,
+                    tbg_moba_core::content::commander_champion(seat.role()),
+                )),
             ));
             r.spawn(Node {
                 flex_direction: FlexDirection::Column,

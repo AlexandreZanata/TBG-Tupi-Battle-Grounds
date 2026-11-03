@@ -12,7 +12,6 @@ pub const RED_GLOW: Color = Color::srgb(1.0, 0.35, 0.25);
 pub const NEUTRAL: Color = Color::srgb(0.85, 0.55, 0.20);
 pub const GOLD: Color = Color::srgb(0.96, 0.76, 0.26);
 pub const GOLD_DARK: Color = Color::srgb(0.55, 0.40, 0.12);
-pub const ESSENCE: Color = Color::srgb(0.66, 0.42, 0.98);
 pub const TEXT: Color = Color::srgb(0.95, 0.93, 0.88);
 pub const MUTED: Color = Color::srgb(0.66, 0.68, 0.72);
 pub const PANEL: Color = Color::srgba(0.06, 0.08, 0.12, 0.88);

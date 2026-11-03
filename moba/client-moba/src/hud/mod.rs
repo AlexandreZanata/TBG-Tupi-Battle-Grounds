@@ -8,10 +8,10 @@ use crate::i18n::{Fonts, Lang};
 use crate::input::Blocks;
 use crate::palette;
 
+pub mod chrome;
 mod minimap;
 mod notices;
 pub use notices::button as notices_button;
-pub mod portraits;
 mod roster;
 mod shop;
 mod top;
@@ -24,7 +24,6 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Update, scale_ui)
         .add_systems(OnEnter(Screen::Match), spawn)
         .add_systems(OnExit(Screen::Match), despawn::<HudRoot>);
-    portraits::plugin(app);
     top::plugin(app);
     roster::plugin(app);
     shop::plugin(app);
@@ -52,16 +51,11 @@ pub fn despawn<T: Component>(mut commands: Commands, roots: Query<Entity, With<T
     }
 }
 
-fn spawn(
-    mut commands: Commands,
-    lang: Res<Lang>,
-    fonts: Res<Fonts>,
-    portraits: Res<portraits::Portraits>,
-) {
+fn spawn(mut commands: Commands, lang: Res<Lang>, fonts: Res<Fonts>, assets: Res<AssetServer>) {
     let ctx = Ctx {
         lang: *lang,
         fonts: fonts.clone(),
-        portraits: portraits.clone(),
+        assets: assets.clone(),
     };
     commands
         .spawn((
@@ -86,7 +80,7 @@ fn spawn(
 pub struct Ctx {
     pub lang: Lang,
     pub fonts: Fonts,
-    pub portraits: portraits::Portraits,
+    pub assets: AssetServer,
 }
 
 pub fn text(value: impl Into<String>, size: f32, color: Color) -> impl Bundle {
@@ -151,66 +145,6 @@ pub fn bar(
         });
 }
 
-/// A small round coin or a diamond-ish gem as pure UI shapes.
-pub fn coin(parent: &mut ChildSpawnerCommands, size: f32) {
-    parent.spawn((
-        Node {
-            width: px(size),
-            height: px(size),
-            border: UiRect::all(px(2)),
-            border_radius: BorderRadius::all(percent(50)),
-            ..default()
-        },
-        BackgroundColor(palette::GOLD),
-        BorderColor::all(palette::GOLD_DARK),
-    ));
-}
-
-pub fn gem(parent: &mut ChildSpawnerCommands, size: f32) {
-    parent.spawn((
-        Node {
-            width: px(size * 0.8),
-            height: px(size * 0.8),
-            margin: UiRect::all(px(size * 0.1)),
-            border: UiRect::all(px(2)),
-            ..default()
-        },
-        BackgroundColor(palette::ESSENCE),
-        BorderColor::all(Color::srgb(0.35, 0.18, 0.6)),
-        UiTransform::from_rotation(Rot2::degrees(45.0)),
-    ));
-}
-
-/// A small tower glyph: a square keep with a team crystal on top.
-pub fn tower_glyph(parent: &mut ChildSpawnerCommands, color: Color) {
-    parent
-        .spawn(Node {
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Center,
-            ..default()
-        })
-        .with_children(|t| {
-            t.spawn((
-                Node {
-                    width: px(8),
-                    height: px(8),
-                    ..default()
-                },
-                BackgroundColor(color),
-                UiTransform::from_rotation(Rot2::degrees(45.0)),
-            ));
-            t.spawn((
-                Node {
-                    width: px(14),
-                    height: px(14),
-                    margin: UiRect::top(px(1)),
-                    ..default()
-                },
-                BackgroundColor(Color::srgb(0.78, 0.76, 0.72)),
-            ));
-        });
-}
-
 /// `18400` → `18.4k`.
 pub fn short(value: u32) -> String {
     if value >= 1000 {
@@ -220,7 +154,8 @@ pub fn short(value: u32) -> String {
     }
 }
 
+/// `m:ss`, like the 1v1 match clock.
 pub fn clock(tick: u32) -> String {
     let s = tick / tbg_moba_core::content::TICK_HZ;
-    format!("{:02}:{:02}", s / 60, s % 60)
+    format!("{}:{:02}", s / 60, s % 60)
 }

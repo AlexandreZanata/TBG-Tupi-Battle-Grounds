@@ -9,11 +9,14 @@ use tbg_moba_core::types::Side;
 use tbg_moba_core::UnitKind;
 
 use crate::app::Screen;
+use crate::art::anim::{Animator, Clip};
+use crate::art::FigureLibrary;
 use crate::link::Feed;
 use crate::palette;
 use crate::scene::terrain::{height, lane_distance, LANE_HALF_WIDTH};
 use crate::scene::{to_world, Painted};
 
+pub mod champions;
 mod fx;
 pub use fx::Marker;
 pub mod models;
@@ -30,8 +33,10 @@ pub struct UnitVisual {
     pub curr: Vec2,
     pub hp: f32,
     target: u32,
-    yaw: f32,
+    pub yaw: f32,
     lunge: f32,
+    /// Height of the health bar above the feet.
+    bar_height: f32,
     bar: Entity,
     fill: Entity,
 }
@@ -72,6 +77,7 @@ pub fn plugin(app: &mut App) {
         )
         .add_systems(OnExit(Screen::Match), clear);
     fx::plugin(app);
+    champions::plugin(app);
 }
 
 fn unlit(materials: &mut Assets<StandardMaterial>, color: Color) -> Handle<StandardMaterial> {
@@ -176,7 +182,8 @@ fn sync(
     mut meshes: ResMut<Assets<Mesh>>,
     painted: Res<Painted>,
     shared: Res<Shared>,
-    mut visuals: Query<&mut UnitVisual>,
+    lib: Res<FigureLibrary>,
+    mut visuals: Units,
     mut shots: MessageWriter<fx::Shot>,
     mut bursts: MessageWriter<fx::Burst>,
 ) {
@@ -195,10 +202,19 @@ fn sync(
     for u in &world.units {
         let pos = map_pos(u);
         if let Some(&entity) = spawned.by_id.get(&u.id) {
-            if let Ok(mut v) = visuals.get_mut(entity) {
+            if let Ok((mut v, animator)) = visuals.get_mut(entity) {
+                let hp = u.hp_permille as f32 / 1000.0;
+                if let (Some(mut a), Some(champion)) = (animator, champions::champion_of(u.kind)) {
+                    // The same cues as the 1v1 battle: attack clip, flinch on a hit.
+                    if u.attacked {
+                        a.play(champions::attack_clip(champion));
+                    } else if hp < v.hp {
+                        a.play_if_free(Clip::Hit);
+                    }
+                }
                 v.prev = v.curr;
                 v.curr = pos;
-                v.hp = u.hp_permille as f32 / 1000.0;
+                v.hp = hp;
                 v.target = u.target;
                 if u.attacked {
                     v.lunge = 1.0;
@@ -214,10 +230,12 @@ fn sync(
                 &mut meshes,
                 &painted,
                 &shared,
+                &lib,
             );
             spawned.by_id.insert(u.id, entity);
         }
-        if u.attacked {
+        // Champions fire their own kit shots from the animation (champions.rs).
+        if u.attacked && champions::champion_of(u.kind).is_none() {
             if let Some(&to) = positions.get(&u.target) {
                 shots.write(fx::Shot {
                     from: pos,
@@ -235,16 +253,25 @@ fn sync(
         .filter(|id| !positions.contains_key(id))
         .collect();
     for id in gone {
-        if let Some(entity) = spawned.by_id.remove(&id) {
-            if let Ok(v) = visuals.get(entity) {
-                bursts.write(fx::Burst {
-                    at: v.curr,
-                    kind: v.kind,
-                    side: v.side,
-                });
+        let Some(entity) = spawned.by_id.remove(&id) else {
+            continue;
+        };
+        if let Ok((v, animator)) = visuals.get_mut(entity) {
+            if let Some(mut a) = animator {
+                // Champions play their 1v1 Death clip before leaving the field.
+                commands.entity(v.bar).despawn();
+                commands.entity(v.fill).despawn();
+                commands.entity(entity).remove::<UnitVisual>();
+                champions::die(&mut commands, entity, &mut a);
+                continue;
             }
-            despawn_unit(&mut commands, entity, &visuals);
+            bursts.write(fx::Burst {
+                at: v.curr,
+                kind: v.kind,
+                side: v.side,
+            });
         }
+        despawn_unit(&mut commands, entity, &visuals);
     }
 }
 
@@ -258,6 +285,7 @@ fn spawn_unit(
     meshes: &mut Assets<Mesh>,
     painted: &Painted,
     shared: &Shared,
+    lib: &FigureLibrary,
 ) -> Entity {
     let tint = tint(u.side, u.owner, feed);
     let width = models::bar_width(u.kind);
@@ -280,26 +308,42 @@ fn spawn_unit(
         Side::Team(tbg_moba_core::Team::Red) => std::f32::consts::PI * 0.75,
         _ => -std::f32::consts::PI * 0.25,
     };
-    let scale = models::scale(u.kind);
-    let mut entity = commands.spawn((
-        Mesh3d(models.get(u.kind, u.side, meshes)),
-        MeshMaterial3d(painted.0.clone()),
-        Transform::from_translation(to_world(pos.x, pos.y, ground_y(pos)))
-            .with_scale(Vec3::splat(scale)),
-        UnitVisual {
-            id: u.id,
-            kind: u.kind,
-            side: u.side,
-            prev: pos,
-            curr: pos,
-            hp: u.hp_permille as f32 / 1000.0,
-            target: u.target,
-            yaw,
-            lunge: 0.0,
-            bar,
-            fill,
-        },
-    ));
+    let champion = champions::champion_of(u.kind);
+    let scale = champion.map_or(models::scale(u.kind), |_| champions::scale(u.kind));
+    let bar_height = champion.map_or(models::bar_height(u.kind), |k| {
+        lib.get(k, 0, 0).overhead * scale + 0.5
+    });
+    let id = commands
+        .spawn((
+            Transform::from_translation(to_world(pos.x, pos.y, ground_y(pos)))
+                .with_scale(Vec3::splat(scale)),
+            Visibility::default(),
+            UnitVisual {
+                id: u.id,
+                kind: u.kind,
+                side: u.side,
+                prev: pos,
+                curr: pos,
+                hp: u.hp_permille as f32 / 1000.0,
+                target: u.target,
+                yaw,
+                lunge: 0.0,
+                bar_height,
+                bar,
+                fill,
+            },
+        ))
+        .id();
+    match champion {
+        Some(kind) => champions::spawn_figure(commands, lib, id, kind, u.id),
+        None => {
+            commands.entity(id).insert((
+                Mesh3d(models.get(u.kind, u.side, meshes)),
+                MeshMaterial3d(painted.0.clone()),
+            ));
+        }
+    }
+    let mut entity = commands.entity(id);
     let icon_size = match u.kind {
         UnitKind::Stronghold => 5.0,
         UnitKind::Tower(..) => 3.0,
@@ -325,7 +369,8 @@ fn spawn_unit(
             c.spawn((
                 Mesh3d(shared.ring.clone()),
                 MeshMaterial3d(shared.bar_fill[3].clone()),
-                Transform::from_xyz(0.0, 0.08, 0.0).with_scale(Vec3::splat(0.8)),
+                // The ring keeps the same ground size whatever the rig scale.
+                Transform::from_xyz(0.0, 0.08, 0.0).with_scale(Vec3::splat(1.3 / scale)),
             ));
         }
     });
@@ -335,14 +380,14 @@ fn spawn_unit(
 fn animate(
     feed: Res<Feed>,
     time: Res<Time>,
-    mut units: Query<(&mut UnitVisual, &mut Transform), Without<Crystal>>,
+    mut units: Query<(&mut UnitVisual, &mut Transform, Option<&mut Animator>), Without<Crystal>>,
     mut crystals: Query<(&Crystal, &mut Transform), Without<UnitVisual>>,
 ) {
     let alpha = feed.alpha(time.elapsed_secs_f64());
     let dt = time.delta_secs();
     let t = time.elapsed_secs();
-    let targets: HashMap<u32, Vec2> = units.iter().map(|(v, _)| (v.id, v.curr)).collect();
-    for (mut v, mut transform) in &mut units {
+    let targets: HashMap<u32, Vec2> = units.iter().map(|(v, ..)| (v.id, v.curr)).collect();
+    for (mut v, mut transform, animator) in &mut units {
         if v.kind.structure() {
             continue;
         }
@@ -372,6 +417,14 @@ fn animate(
         };
         let forward =
             Vec3::new(-v.yaw.sin(), 0.0, -v.yaw.cos()) * (v.lunge * (1.0 - v.lunge) * 1.2);
+        if let Some(mut a) = animator {
+            // The 1v1 rig walks, faces and aims by itself (champions.rs).
+            a.aim_at = targets
+                .get(&v.target)
+                .map(|t| to_world(t.x, t.y, ground_y(*t) + 1.0));
+            transform.translation = to_world(pos.x, pos.y, ground_y(pos));
+            continue;
+        }
         transform.translation = to_world(pos.x, pos.y, ground_y(pos) + bob) + forward;
         transform.rotation = Quat::from_rotation_y(v.yaw);
     }
@@ -395,7 +448,7 @@ fn bars(
         let shown = always || v.hp < 0.999;
         let top = transform
             .translation
-            .with_y(transform.translation.y.max(0.0) + models::bar_height(v.kind));
+            .with_y(transform.translation.y.max(0.0) + v.bar_height);
         if let Ok((mut bar, mut vis)) = parts.get_mut(v.bar) {
             bar.translation = top;
             bar.rotation = rotation;
@@ -420,19 +473,26 @@ fn bars(
 }
 
 /// Removes a figure with its free-standing health bar parts.
-fn despawn_unit<F: bevy::ecs::query::QueryFilter>(
-    commands: &mut Commands,
-    entity: Entity,
-    units: &Query<&mut UnitVisual, F>,
-) {
-    if let Ok(v) = units.get(entity) {
+/// The mirror's unit query: every figure, with its rig when it is a champion.
+type Units<'w, 's> = Query<'w, 's, (&'static mut UnitVisual, Option<&'static mut Animator>)>;
+
+fn despawn_unit(commands: &mut Commands, entity: Entity, units: &Units) {
+    if let Ok((v, _)) = units.get(entity) {
         commands.entity(v.bar).despawn();
         commands.entity(v.fill).despawn();
     }
     commands.entity(entity).despawn();
 }
 
-fn clear(mut commands: Commands, mut spawned: ResMut<Spawned>, units: Query<&mut UnitVisual>) {
+fn clear(
+    mut commands: Commands,
+    mut spawned: ResMut<Spawned>,
+    units: Units,
+    dying: Query<Entity, With<champions::Dying>>,
+) {
+    for entity in &dying {
+        commands.entity(entity).despawn();
+    }
     for (_, entity) in spawned.by_id.drain() {
         despawn_unit(&mut commands, entity, &units);
     }

@@ -1,38 +1,50 @@
-//! Bottom bar: player card, the five Troop cards, Destination and "Buy and Send".
+//! Bottom of the screen in the 1v1 battle layout: the framed resource strip
+//! over the five Shop cards (same frame, portraits, texts and lock as the
+//! 1v1 cards), the Troop Destination and the player card.
 
 use bevy::prelude::*;
-use tbg_moba_core::content::{self, MAX_TIER};
-use tbg_moba_core::{Destination, TroopKind};
+use tbg_moba_core::content::{self, MAX_TIER, OFFERS};
+use tbg_moba_core::Destination;
 
-use super::{coin, gem, panel, text, title, Ctx};
+use super::chrome::{self, frame, title};
+use super::Ctx;
 use crate::app::Screen;
 use crate::i18n::{Key, Lang};
 use crate::input::{Action, Selection};
 use crate::link::Feed;
-use crate::palette;
+
+const CARD_W: f32 = 166.;
+const CARD_H: f32 = 225.;
+const GAP: f32 = 8.;
 
 #[derive(Component)]
 enum Readout {
     Gold,
     Essence,
+    Upgrade,
+    Army,
+    Reroll,
     Level,
     Who,
-    Upgrade,
-    Troops,
+    Line,
 }
 
 #[derive(Component)]
-struct Card(usize);
-#[derive(Component)]
-struct Cost(usize);
+enum Card {
+    Surface(usize),
+    Portrait(usize),
+    Name(usize),
+    Role(usize),
+    Cost(usize),
+    Lock(usize),
+    LockFrame(usize),
+}
+
 #[derive(Component)]
 struct DestinationRow(usize);
-/// The shield on the player card, painted in the player's team colour.
+/// The shield on the player card, in the player's team colour.
 #[derive(Component)]
 struct Emblem;
-
-const CARD_W: f32 = 132.0;
-const CARD_H: f32 = 176.0;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(
@@ -42,275 +54,330 @@ pub fn plugin(app: &mut App) {
 }
 
 pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
+    let width = CARD_W * OFFERS as f32 + GAP * (OFFERS as f32 - 1.);
     root.spawn(Node {
         position_type: PositionType::Absolute,
-        left: px(10),
-        bottom: px(10),
-        align_items: AlignItems::FlexEnd,
-        column_gap: px(12),
+        bottom: px(20),
+        width: percent(100),
+        justify_content: JustifyContent::Center,
         ..default()
     })
     .with_children(|row| {
-        player_card(row, ctx);
         row.spawn(Node {
-            column_gap: px(8),
-            ..default()
-        })
-        .with_children(|cards| {
-            for (i, troop) in TroopKind::ALL.into_iter().enumerate() {
-                card(cards, ctx, i, troop);
-            }
-        });
-        destination(row, ctx);
-        buy(row, ctx);
-    });
-}
-
-fn player_card(row: &mut ChildSpawnerCommands, ctx: &Ctx) {
-    row.spawn(panel(
-        Node {
-            width: px(372),
-            height: px(118),
-            align_items: AlignItems::Center,
-            column_gap: px(14),
-            padding: UiRect::all(px(10)),
-            ..default()
-        },
-        palette::GOLD_DARK,
-    ))
-    .with_children(|p| {
-        p.spawn((
-            Node {
-                width: px(70),
-                height: px(84),
-                border: UiRect::all(px(3)),
-                border_radius: BorderRadius {
-                    top_left: px(10).into(),
-                    top_right: px(10).into(),
-                    bottom_left: px(35).into(),
-                    bottom_right: px(35).into(),
-                },
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            BackgroundColor(palette::BLUE_DARK),
-            BorderColor::all(palette::GOLD),
-            Emblem,
-        ))
-        .with_children(|s| {
-            s.spawn((title("1", 32.0, palette::TEXT, &ctx.fonts), Readout::Level));
-        });
-        p.spawn(Node {
+            width: px(width),
             flex_direction: FlexDirection::Column,
-            row_gap: px(8),
-            flex_grow: 1.0,
+            row_gap: px(6),
             ..default()
         })
-        .with_children(|c| {
-            c.spawn((
-                title(ctx.lang.t(Key::You), 21.0, palette::TEXT, &ctx.fonts),
-                Readout::Who,
-            ));
-            c.spawn(Node {
-                align_items: AlignItems::Center,
-                column_gap: px(8),
-                ..default()
-            })
-            .with_children(|r| {
-                coin(r, 22.0);
-                r.spawn((text("0", 24.0, palette::GOLD), Readout::Gold));
-                r.spawn(Node {
-                    width: px(10),
+        .with_children(|column| {
+            resources(column, ctx);
+            column
+                .spawn(Node {
+                    column_gap: px(GAP),
                     ..default()
+                })
+                .with_children(|cards| {
+                    for i in 0..OFFERS {
+                        card(cards, ctx, i);
+                    }
                 });
-                gem(r, 22.0);
-                r.spawn((text("0", 24.0, palette::ESSENCE), Readout::Essence));
-            });
-            c.spawn((text("", 14.0, palette::MUTED), Readout::Troops));
-        });
-        p.spawn((
-            Node {
-                width: px(46),
-                height: px(46),
-                border: UiRect::all(px(2)),
-                border_radius: BorderRadius::all(px(8)),
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                flex_direction: FlexDirection::Column,
-                ..default()
-            },
-            BackgroundColor(palette::GOLD),
-            BorderColor::all(palette::GOLD_DARK),
-            Action::Upgrade,
-        ))
-        .with_children(|u| {
-            u.spawn(title("+", 26.0, palette::SKY, &ctx.fonts));
-            u.spawn((text("", 11.0, palette::SKY), Readout::Upgrade));
         });
     });
+    root.spawn(Node {
+        position_type: PositionType::Absolute,
+        bottom: px(20),
+        right: percent(50),
+        margin: UiRect::right(px(width / 2. + 14.)),
+        ..default()
+    })
+    .with_children(|slot| destination(slot, ctx));
+    player_card(root, ctx);
 }
 
-fn card(row: &mut ChildSpawnerCommands, ctx: &Ctx, i: usize, troop: TroopKind) {
-    let (name, kind) = ctx.lang.troop(troop);
-    row.spawn((
-        panel(
+fn resources(column: &mut ChildSpawnerCommands, ctx: &Ctx) {
+    column
+        .spawn((
+            Node {
+                width: percent(100),
+                height: px(43),
+                padding: UiRect::axes(px(15), px(5)),
+                column_gap: px(14),
+                align_items: AlignItems::Center,
+                ..default()
+            },
+            ImageNode {
+                image_mode: NodeImageMode::Stretch,
+                visual_box: bevy::ui::VisualBox::BorderBox,
+                ..ImageNode::new(ctx.assets.load("battle/native/resources.webp"))
+            },
+            crate::input::Blocks,
+        ))
+        .with_children(|bar| {
+            bar.spawn(title(ctx.lang.t(Key::Gold), 17., &ctx.fonts));
+            bar.spawn(chrome::coin(18.));
+            bar.spawn((
+                Text::new("0"),
+                TextFont::from_font_size(FontSize::Px(17.)).with_font(ctx.fonts.display.clone()),
+                TextColor(Color::srgb_u8(255, 220, 120)),
+                Readout::Gold,
+            ));
+            chrome::divider(bar);
+            bar.spawn(title(ctx.lang.t(Key::Essence), 17., &ctx.fonts));
+            bar.spawn((
+                Text::new("0"),
+                TextFont::from_font_size(FontSize::Px(13.)),
+                TextColor(Color::srgb_u8(223, 156, 255)),
+                Readout::Essence,
+            ));
+            bar.spawn((
+                chrome::button(Node {
+                    min_width: px(58),
+                    height: px(26),
+                    padding: UiRect::horizontal(px(6)),
+                    ..default()
+                }),
+                Action::Upgrade,
+            ))
+            .with_children(|b| {
+                b.spawn((
+                    Text::new(""),
+                    TextFont::from_font_size(FontSize::Px(11.)),
+                    TextColor(chrome::CREAM),
+                    Readout::Upgrade,
+                ));
+            });
+            chrome::divider(bar);
+            bar.spawn(chrome::icon(&ctx.assets, "friends", 27., chrome::CREAM));
+            bar.spawn((title("", 17., &ctx.fonts), Readout::Army));
+            bar.spawn(Node {
+                flex_grow: 1.,
+                ..default()
+            });
+            bar.spawn((
+                chrome::button(Node {
+                    min_width: px(150),
+                    height: px(30),
+                    padding: UiRect::horizontal(px(8)),
+                    ..default()
+                }),
+                Action::Reroll,
+            ))
+            .with_children(|b| {
+                b.spawn((
+                    Text::new(""),
+                    TextFont::from_font_size(FontSize::Px(13.)),
+                    TextColor(chrome::CREAM),
+                    Readout::Reroll,
+                ));
+            });
+        });
+}
+
+fn card(parent: &mut ChildSpawnerCommands, ctx: &Ctx, i: usize) {
+    parent
+        .spawn((
             Node {
                 width: px(CARD_W),
                 height: px(CARD_H),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                padding: UiRect::all(px(5)),
-                row_gap: px(2),
+                flex_shrink: 0.,
                 ..default()
             },
-            palette::GOLD_DARK,
-        ),
-        Action::SelectTroop(i),
-        Card(i),
-    ))
-    .with_children(|c| {
-        c.spawn((
-            Node {
-                width: px(CARD_W - 14.0),
-                height: px(100),
-                border_radius: BorderRadius::all(px(6)),
-                ..default()
+            ImageNode {
+                image_mode: NodeImageMode::Stretch,
+                ..ImageNode::new(ctx.assets.load("battle/native/shop-card.webp"))
             },
-            ImageNode::new(ctx.portraits.troops[i].clone()),
-        ));
-        c.spawn(title(name, 19.0, palette::TEXT, &ctx.fonts));
-        c.spawn(text(kind, 13.0, palette::MUTED));
-        c.spawn(Node {
-            align_items: AlignItems::Center,
-            column_gap: px(5),
-            ..default()
-        })
-        .with_children(|r| {
-            coin(r, 16.0);
-            r.spawn((
-                title(
-                    content::troop_cost(troop).to_string(),
-                    19.0,
-                    palette::GOLD,
-                    &ctx.fonts,
-                ),
-                Cost(i),
+            Action::BuySlot(i),
+            Card::Surface(i),
+            crate::input::Blocks,
+        ))
+        .with_children(|card| {
+            card.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    top: px(9),
+                    left: px(7),
+                    width: px(152),
+                    height: px(137),
+                    ..default()
+                },
+                ImageNode::default(),
+                Card::Portrait(i),
             ));
-        });
-        c.spawn((
-            Node {
+            card.spawn(Node {
                 position_type: PositionType::Absolute,
-                top: px(6),
-                left: px(9),
-                ..default()
-            },
-            text((i + 1).to_string(), 13.0, palette::TEXT),
-        ));
-    });
-}
-
-fn destination(row: &mut ChildSpawnerCommands, ctx: &Ctx) {
-    row.spawn(panel(
-        Node {
-            width: px(196),
-            height: px(CARD_H),
-            flex_direction: FlexDirection::Column,
-            padding: UiRect::all(px(8)),
-            row_gap: px(5),
-            ..default()
-        },
-        palette::GOLD_DARK,
-    ))
-    .with_children(|p| {
-        p.spawn(text(ctx.lang.t(Key::Destination), 17.0, palette::TEXT));
-        for (i, (to, hotkey)) in Destination::ALL
-            .into_iter()
-            .zip(["Z", "X", "C", "V"])
-            .enumerate()
-        {
-            p.spawn((
-                Node {
-                    height: px(29),
-                    padding: UiRect::horizontal(px(10)),
-                    align_items: AlignItems::Center,
-                    justify_content: JustifyContent::SpaceBetween,
-                    border: UiRect::all(px(2)),
-                    border_radius: BorderRadius::all(px(6)),
-                    ..default()
-                },
-                BackgroundColor(palette::PANEL_LIGHT),
-                BorderColor::all(Color::NONE),
-                Action::SetDestination(i),
-                DestinationRow(i),
-            ))
-            .with_children(|r| {
-                r.spawn(text(ctx.lang.lane(to), 16.0, palette::TEXT));
-                r.spawn(text(hotkey, 12.0, palette::MUTED));
-            });
-        }
-    });
-}
-
-fn buy(row: &mut ChildSpawnerCommands, ctx: &Ctx) {
-    row.spawn((
-        Node {
-            width: px(172),
-            height: px(96),
-            flex_direction: FlexDirection::Column,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            row_gap: px(4),
-            border: UiRect::all(px(3)),
-            border_radius: BorderRadius::all(px(10)),
-            ..default()
-        },
-        BackgroundColor(palette::GOLD),
-        BorderColor::all(Color::srgb(1.0, 0.9, 0.55)),
-        Action::Buy,
-        crate::input::Blocks,
-    ))
-    .with_children(|b| {
-        // A simple cart: basket and two wheels.
-        b.spawn(Node {
-            flex_direction: FlexDirection::Column,
-            align_items: AlignItems::Center,
-            ..default()
-        })
-        .with_children(|cart| {
-            cart.spawn((
-                Node {
-                    width: px(30),
-                    height: px(14),
-                    border_radius: BorderRadius::bottom(px(4)),
-                    ..default()
-                },
-                BackgroundColor(palette::SKY),
-            ));
-            cart.spawn(Node {
-                column_gap: px(10),
-                margin: UiRect::top(px(2)),
+                left: px(12),
+                right: px(10),
+                top: px(147),
+                height: px(22),
+                overflow: Overflow::clip(),
                 ..default()
             })
-            .with_children(|w| {
-                for _ in 0..2 {
-                    w.spawn((
-                        Node {
-                            width: px(7),
-                            height: px(7),
-                            border_radius: BorderRadius::all(percent(50)),
-                            ..default()
-                        },
-                        BackgroundColor(palette::SKY),
-                    ));
-                }
+            .with_children(|t| {
+                t.spawn((
+                    title("", 16., &ctx.fonts),
+                    TextLayout::no_wrap(),
+                    Card::Name(i),
+                ));
+            });
+            card.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(12),
+                    top: px(170),
+                    ..default()
+                },
+                chrome::muted("", 11.),
+                Card::Role(i),
+            ));
+            card.spawn(Node {
+                position_type: PositionType::Absolute,
+                left: px(9),
+                right: px(9),
+                bottom: px(8),
+                height: px(29),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                column_gap: px(7),
+                ..default()
+            })
+            .with_children(|cost| {
+                cost.spawn(chrome::coin(16.));
+                cost.spawn(chrome::muted(ctx.lang.t(Key::Cost), 12.));
+                cost.spawn((title("", 19., &ctx.fonts), Card::Cost(i)));
+            });
+            // The locked-slot outline and the lock button of the 1v1 Shop.
+            card.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    width: percent(100),
+                    height: percent(100),
+                    border: UiRect::all(px(2)),
+                    border_radius: BorderRadius::all(px(7)),
+                    ..default()
+                },
+                BorderColor::all(chrome::GOLD),
+                Visibility::Hidden,
+                Card::LockFrame(i),
+            ));
+            card.spawn((
+                Node {
+                    position_type: PositionType::Absolute,
+                    right: px(8),
+                    top: px(12),
+                    width: px(27),
+                    height: px(28),
+                    border: UiRect::all(px(1)),
+                    border_radius: BorderRadius::all(px(5)),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                BackgroundColor(chrome::INK),
+                BorderColor::all(chrome::GOLD),
+                Action::ToggleLock(i),
+                ZIndex(4),
+            ))
+            .with_children(|lock| {
+                lock.spawn((
+                    Node {
+                        width: px(15),
+                        height: px(16),
+                        ..default()
+                    },
+                    ImageNode::new(ctx.assets.load("battle/native/shop-lock-open.webp")),
+                    Card::Lock(i),
+                ));
             });
         });
-        b.spawn((
-            title(ctx.lang.t(Key::BuyAndSend), 19.0, palette::SKY, &ctx.fonts),
-            TextLayout::new(Justify::Center, LineBreak::WordBoundary),
-        ));
-        b.spawn(text("Enter", 11.0, Color::srgb(0.3, 0.22, 0.05)));
+}
+
+fn destination(parent: &mut ChildSpawnerCommands, ctx: &Ctx) {
+    parent
+        .spawn((
+            Node {
+                width: px(190),
+                flex_direction: FlexDirection::Column,
+                padding: UiRect::all(px(10)),
+                row_gap: px(6),
+                border: UiRect::all(px(2)),
+                border_radius: BorderRadius::all(px(7)),
+                ..default()
+            },
+            frame(chrome::GOLD),
+            crate::input::Blocks,
+        ))
+        .with_children(|p| {
+            p.spawn(title(ctx.lang.t(Key::Destination), 16., &ctx.fonts));
+            for (i, (to, hotkey)) in Destination::ALL
+                .into_iter()
+                .zip(["Z", "X", "C", "V"])
+                .enumerate()
+            {
+                p.spawn((
+                    Node {
+                        height: px(34),
+                        padding: UiRect::horizontal(px(10)),
+                        align_items: AlignItems::Center,
+                        justify_content: JustifyContent::SpaceBetween,
+                        border: UiRect::all(px(1)),
+                        border_radius: BorderRadius::all(px(5)),
+                        ..default()
+                    },
+                    BackgroundColor(chrome::INK),
+                    BorderColor::all(Color::srgb_u8(60, 72, 80)),
+                    Action::SetDestination(i),
+                    DestinationRow(i),
+                ))
+                .with_children(|r| {
+                    r.spawn(title(ctx.lang.lane(to), 15., &ctx.fonts));
+                    r.spawn(chrome::muted(hotkey, 11.));
+                });
+            }
+        });
+}
+
+fn player_card(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
+    root.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: px(12),
+            bottom: px(20),
+            width: px(300),
+            padding: UiRect::all(px(10)),
+            column_gap: px(12),
+            align_items: AlignItems::Center,
+            border: UiRect::all(px(2)),
+            border_radius: BorderRadius::all(px(7)),
+            ..default()
+        },
+        frame(chrome::GOLD),
+        crate::input::Blocks,
+    ))
+    .with_children(|p| {
+        p.spawn((
+            Node {
+                width: px(58),
+                height: px(68),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                padding: UiRect::bottom(px(10)),
+                ..default()
+            },
+            ImageNode::new(ctx.assets.load("battle/native/crest-ally.webp")),
+            Emblem,
+        ))
+        .with_children(|s| {
+            s.spawn((title("1", 26., &ctx.fonts), Readout::Level));
+        });
+        p.spawn(Node {
+            flex_direction: FlexDirection::Column,
+            row_gap: px(4),
+            ..default()
+        })
+        .with_children(|c| {
+            c.spawn((title(ctx.lang.t(Key::You), 18., &ctx.fonts), Readout::Who));
+            c.spawn((chrome::muted("", 12.), Readout::Line));
+        });
     });
 }
 
@@ -323,22 +390,18 @@ fn readouts(feed: Res<Feed>, lang: Res<Lang>, mut texts: Query<(&Readout, &mut T
         let value = match readout {
             Readout::Gold => me.gold.to_string(),
             Readout::Essence => me.essence.to_string(),
+            Readout::Upgrade if me.tier >= MAX_TIER => format!("T{} MAX", me.tier),
+            Readout::Upgrade => format!("T{} · +{}", me.tier, content::upgrade_cost(me.tier)),
+            Readout::Army => format!("{} {}/{}", lang.t(Key::Army), me.troops, content::TROOP_CAP),
+            Readout::Reroll => format!("Reroll · {} {}", content::REROLL_COST, lang.t(Key::Gold)),
             Readout::Level => seat.level.to_string(),
             Readout::Who => format!("{} ({})", lang.t(Key::You), lang.role(me.seat.role())),
-            Readout::Upgrade => {
-                if me.tier >= MAX_TIER {
-                    "MAX".into()
-                } else {
-                    content::upgrade_cost(me.tier).to_string()
-                }
-            }
-            Readout::Troops => format!(
-                "{} {}/{} · {} {}",
-                lang.t(Key::Troops),
-                me.troops,
-                content::TROOP_CAP,
-                lang.t(Key::Tier),
-                me.tier
+            Readout::Line => format!(
+                "{} {} · {}/{}",
+                lang.t(Key::Level),
+                seat.level,
+                seat.kills,
+                seat.deaths
             ),
         };
         if t.0 != value {
@@ -347,40 +410,67 @@ fn readouts(feed: Res<Feed>, lang: Res<Lang>, mut texts: Query<(&Readout, &mut T
     }
 }
 
+#[allow(clippy::type_complexity)] // one card's image, texts, lock and outline
 fn cards(
     feed: Res<Feed>,
-    selection: Res<Selection>,
-    mut cards: Query<(&Card, &mut BorderColor, &mut BackgroundColor)>,
-    mut costs: Query<(&Cost, &mut TextColor)>,
+    assets: Res<AssetServer>,
+    mut images: Query<(&Card, &mut ImageNode)>,
+    mut texts: Query<(&Card, &mut Text)>,
+    mut frames: Query<(&Card, &mut Visibility)>,
 ) {
-    let gold = feed.me.map_or(0, |m| m.gold);
-    for (Card(i), mut border, mut background) in &mut cards {
-        let affordable = gold >= content::troop_cost(TroopKind::ALL[*i]);
-        let wanted = BorderColor::all(if selection.troop == *i {
-            palette::GOLD
-        } else {
-            palette::GOLD_DARK
-        });
-        if *border != wanted {
-            *border = wanted;
-        }
-        let shade = if affordable {
-            palette::PANEL
-        } else {
-            Color::srgba(0.03, 0.03, 0.05, 0.95)
-        };
-        if background.0 != shade {
-            background.0 = shade;
+    let Some(me) = &feed.me else { return };
+    let locked = |i: usize| me.locked & (1 << i) != 0;
+    for (card, mut image) in &mut images {
+        match *card {
+            Card::Surface(i) => {
+                // Unaffordable offers dim, exactly like the 1v1 Shop.
+                let wanted = if me.gold >= content::troop_cost(me.offers[i]) {
+                    Color::WHITE
+                } else {
+                    Color::srgb(0.65, 0.65, 0.65)
+                };
+                if image.color != wanted {
+                    image.color = wanted;
+                }
+            }
+            Card::Portrait(i) => {
+                let handle = chrome::portrait(&assets, me.offers[i]);
+                if image.image != handle {
+                    image.image = handle;
+                }
+            }
+            Card::Lock(i) => {
+                let name = if locked(i) { "closed" } else { "open" };
+                let handle = assets.load(format!("battle/native/shop-lock-{name}.webp"));
+                if image.image != handle {
+                    image.image = handle;
+                }
+            }
+            _ => {}
         }
     }
-    for (Cost(i), mut color) in &mut costs {
-        let wanted = if gold >= content::troop_cost(TroopKind::ALL[*i]) {
-            palette::GOLD
-        } else {
-            palette::HP_ENEMY
+    for (card, mut t) in &mut texts {
+        let def = |i: usize| tbg_core::content::def(me.offers[i]);
+        let value = match *card {
+            Card::Name(i) => def(i).name.to_string(),
+            Card::Role(i) => format!("{:?}", def(i).archetype),
+            Card::Cost(i) => content::troop_cost(me.offers[i]).to_string(),
+            _ => continue,
         };
-        if color.0 != wanted {
-            color.0 = wanted;
+        if t.0 != value {
+            t.0 = value;
+        }
+    }
+    for (card, mut vis) in &mut frames {
+        if let Card::LockFrame(i) = *card {
+            let wanted = if locked(i) {
+                Visibility::Inherited
+            } else {
+                Visibility::Hidden
+            };
+            if *vis != wanted {
+                *vis = wanted;
+            }
         }
     }
 }
@@ -391,14 +481,18 @@ fn destinations(
 ) {
     for (DestinationRow(i), mut border, mut background) in &mut rows {
         let on = selection.destination == *i;
-        let wanted = BorderColor::all(if on { palette::GOLD } else { Color::NONE });
+        let wanted = BorderColor::all(if on {
+            chrome::GOLD
+        } else {
+            Color::srgb_u8(60, 72, 80)
+        });
         if *border != wanted {
             *border = wanted;
         }
         let shade = if on {
-            Color::srgba(0.35, 0.27, 0.08, 0.95)
+            Color::srgb_u8(58, 46, 18)
         } else {
-            palette::PANEL_LIGHT
+            chrome::INK
         };
         if background.0 != shade {
             background.0 = shade;
@@ -406,12 +500,21 @@ fn destinations(
     }
 }
 
-fn emblem(feed: Res<Feed>, mut shields: Query<&mut BackgroundColor, With<Emblem>>) {
+fn emblem(
+    feed: Res<Feed>,
+    assets: Res<AssetServer>,
+    mut shields: Query<&mut ImageNode, With<Emblem>>,
+) {
     let Some(seat) = feed.seat else { return };
-    for mut background in &mut shields {
-        let wanted = palette::team_dark(seat.team());
-        if background.0 != wanted {
-            background.0 = wanted;
+    let side = if seat.team() == tbg_moba_core::Team::Blue {
+        "ally"
+    } else {
+        "enemy"
+    };
+    let handle = assets.load(format!("battle/native/crest-{side}.webp"));
+    for mut image in &mut shields {
+        if image.image != handle {
+            image.image = handle.clone();
         }
     }
 }

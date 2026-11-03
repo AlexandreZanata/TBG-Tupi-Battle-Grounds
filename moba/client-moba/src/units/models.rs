@@ -3,10 +3,10 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
 use tbg_moba_core::types::{MinionKind, NeutralKind, Side, TowerTier};
-use tbg_moba_core::{Role, Team, TroopKind, UnitKind};
+use tbg_moba_core::{Team, UnitKind};
 
 use crate::palette;
-use crate::scene::mesh::{merge, mix, Part, Shape};
+use crate::scene::mesh::{merge, Part, Shape};
 
 const SKIN: Color = Color::srgb(0.93, 0.76, 0.60);
 const STEEL: Color = Color::srgb(0.72, 0.74, 0.78);
@@ -43,51 +43,6 @@ fn sword(p: &mut Vec<Part>, x: f32, len: f32) {
     ));
 }
 
-fn staff(p: &mut Vec<Part>, orb: Color) {
-    p.push((Shape::Cyl(0.05, 1.8), WOOD, at(0.42, 0.95, -0.12)));
-    p.push((Shape::Ball(0.17), orb, at(0.42, 1.92, -0.12)));
-}
-
-fn commander(p: &mut Vec<Part>, role: Role, team: Team) {
-    let c = palette::team(team);
-    humanoid(p, c, DARK, SKIN);
-    p.push((
-        Shape::Box(0.62, 0.16, 0.42),
-        palette::GOLD,
-        at(0.0, 1.08, 0.0),
-    ));
-    p.push((
-        Shape::Box(0.6, 0.85, 0.06),
-        palette::team_dark(team),
-        at(0.0, 0.85, 0.24),
-    ));
-    p.push((Shape::Frustum(0.18, 0.26, 0.24), STEEL, at(0.0, 1.46, 0.0)));
-    p.push((Shape::Cone(0.08, 0.35), palette::GOLD, at(0.0, 1.72, 0.0)));
-    for x in [-0.36, 0.36] {
-        p.push((Shape::Ball(0.17), STEEL, at(x, 1.08, 0.0)));
-    }
-    match role {
-        Role::Top => sword(p, 0.42, 1.1),
-        Role::Jungle => {
-            p.push((Shape::Cyl(0.05, 1.1), WOOD, at(0.42, 0.9, -0.18)));
-            p.push((Shape::Box(0.08, 0.36, 0.42), STEEL, at(0.42, 1.35, -0.3)));
-        }
-        Role::Mid => staff(p, palette::glow(team)),
-        Role::Bot => {
-            p.push((Shape::Box(0.1, 0.12, 0.8), WOOD, at(0.38, 0.95, -0.3)));
-            p.push((Shape::Box(0.7, 0.06, 0.08), WOOD, at(0.38, 0.95, -0.6)));
-        }
-        Role::Support => {
-            staff(p, palette::GOLD);
-            p.push((
-                Shape::Box(0.06, 0.5, 0.4),
-                palette::glow(team),
-                at(0.42, 1.55, 0.05),
-            ));
-        }
-    }
-}
-
 fn minion(p: &mut Vec<Part>, kind: MinionKind, team: Team) {
     let c = palette::team(team);
     match kind {
@@ -110,84 +65,6 @@ fn minion(p: &mut Vec<Part>, kind: MinionKind, team: Team) {
                 at(0.0, 1.42, 0.0),
             ));
             p.push((Shape::Box(0.06, 1.0, 0.06), WOOD, at(0.38, 0.95, -0.2)));
-        }
-    }
-}
-
-fn troop(p: &mut Vec<Part>, kind: TroopKind, team: Team) {
-    let c = palette::team(team);
-    match kind {
-        TroopKind::Guardian => {
-            humanoid(p, STEEL, DARK, SKIN);
-            p.push((Shape::Frustum(0.2, 0.26, 0.3), STEEL, at(0.0, 1.42, 0.0)));
-            p.push((Shape::Box(0.06, 0.12, 0.4), c, at(0.0, 1.62, 0.05)));
-            p.push((Shape::Box(0.1, 0.95, 0.72), c, at(-0.46, 0.85, -0.2)));
-            p.push((
-                Shape::Box(0.12, 0.3, 0.3),
-                palette::GOLD,
-                at(-0.5, 0.9, -0.2),
-            ));
-            sword(p, 0.42, 0.75);
-        }
-        TroopKind::Healer => {
-            p.push((
-                Shape::Cone(0.46, 1.25),
-                Color::srgb(0.95, 0.94, 0.9),
-                at(0.0, 0.62, 0.0),
-            ));
-            p.push((Shape::Box(0.5, 0.12, 0.38), c, at(0.0, 0.95, 0.0)));
-            p.push((Shape::Ball(0.21), SKIN, at(0.0, 1.32, 0.0)));
-            p.push((
-                Shape::Cone(0.27, 0.42),
-                Color::srgb(0.95, 0.94, 0.9),
-                at(0.0, 1.5, 0.02),
-            ));
-            staff(p, Color::srgb(0.6, 1.0, 0.6));
-        }
-        TroopKind::Bard => {
-            humanoid(p, Color::srgb(0.55, 0.36, 0.2), DARK, SKIN);
-            p.push((
-                Shape::Cyl(0.32, 0.06),
-                Color::srgb(0.4, 0.26, 0.14),
-                at(0.0, 1.48, 0.0),
-            ));
-            p.push((
-                Shape::Cone(0.18, 0.3),
-                Color::srgb(0.4, 0.26, 0.14),
-                at(0.0, 1.62, 0.0),
-            ));
-            p.push((Shape::Box(0.05, 0.35, 0.05), c, at(0.12, 1.7, 0.1)));
-            p.push((Shape::Ball(0.26), WOOD, at(0.1, 0.8, -0.3)));
-            p.push((Shape::Box(0.06, 0.06, 0.6), WOOD, at(0.3, 0.95, -0.55)));
-        }
-        TroopKind::Colossus => {
-            let rock = mix(STONE, palette::team_dark(team), 0.15);
-            for x in [-0.4, 0.4] {
-                p.push((Shape::Box(0.5, 0.8, 0.55), rock, at(x, 0.4, 0.0)));
-                p.push((Shape::Box(0.48, 1.2, 0.5), rock, at(x * 2.3, 1.2, 0.0)));
-            }
-            p.push((Shape::Box(1.5, 1.1, 0.95), rock, at(0.0, 1.35, 0.0)));
-            p.push((Shape::Box(0.6, 0.45, 0.55), rock, at(0.0, 2.1, -0.1)));
-            for x in [-0.14, 0.14] {
-                p.push((
-                    Shape::Box(0.12, 0.08, 0.05),
-                    palette::glow(team),
-                    at(x, 2.15, -0.38),
-                ));
-            }
-            p.push((
-                Shape::Crystal(0.25, 0.7),
-                palette::glow(team),
-                at(0.0, 1.5, 0.48),
-            ));
-        }
-        TroopKind::Summoner => {
-            let robe = Color::srgb(0.42, 0.24, 0.62);
-            p.push((Shape::Cone(0.45, 1.25), robe, at(0.0, 0.62, 0.0)));
-            p.push((Shape::Box(0.48, 0.1, 0.36), c, at(0.0, 0.9, 0.0)));
-            p.push((Shape::Ball(0.2), SKIN, at(0.0, 1.3, 0.0)));
-            p.push((Shape::Cone(0.3, 0.75), robe, at(0.0, 1.65, 0.0)));
-            staff(p, palette::glow(team));
         }
     }
 }
@@ -315,34 +192,30 @@ pub fn figure(kind: UnitKind, side: Side) -> Mesh {
     let team = side.team().unwrap_or(Team::Blue);
     let mut p = Vec::new();
     match kind {
-        UnitKind::Commander(role) => commander(&mut p, role, team),
         UnitKind::Minion(m) => minion(&mut p, m, team),
-        UnitKind::Troop(t) => troop(&mut p, t, team),
         UnitKind::Neutral(n) => neutral(&mut p, n),
         UnitKind::Tower(tier, _) => tower(&mut p, tier, team),
         UnitKind::Stronghold => stronghold(&mut p, team),
+        // Commanders and Troops are 1v1 champion rigs (champions.rs).
+        UnitKind::Commander(_) | UnitKind::Troop(_) => {}
     }
     merge(&p)
 }
 
-/// Visual scale per kind (models are authored at minion size).
+/// Visual scale per kind (models are authored at minion size; champion
+/// rigs scale themselves in champions.rs).
 pub fn scale(kind: UnitKind) -> f32 {
     match kind {
-        UnitKind::Commander(_) => 1.45,
         UnitKind::Minion(_) => 0.95,
-        UnitKind::Troop(TroopKind::Colossus) => 1.25,
-        UnitKind::Troop(_) => 1.15,
         UnitKind::Neutral(NeutralKind::Big) => 1.25,
         UnitKind::Neutral(NeutralKind::Small) => 1.1,
-        UnitKind::Tower(..) | UnitKind::Stronghold => 1.0,
+        _ => 1.0,
     }
 }
 
 /// Height of the health bar above the feet.
 pub fn bar_height(kind: UnitKind) -> f32 {
     match kind {
-        UnitKind::Commander(_) => 3.3,
-        UnitKind::Troop(TroopKind::Colossus) => 3.4,
         UnitKind::Neutral(NeutralKind::Big) => 3.6,
         UnitKind::Tower(..) => 10.6,
         UnitKind::Stronghold => 11.5,
@@ -355,7 +228,7 @@ pub fn bar_width(kind: UnitKind) -> f32 {
         UnitKind::Commander(_) => 2.4,
         UnitKind::Tower(..) => 3.4,
         UnitKind::Stronghold => 6.0,
-        UnitKind::Neutral(NeutralKind::Big) | UnitKind::Troop(TroopKind::Colossus) => 1.8,
+        UnitKind::Neutral(NeutralKind::Big) => 1.8,
         _ => 1.2,
     }
 }

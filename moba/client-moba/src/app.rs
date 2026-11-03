@@ -43,6 +43,7 @@ pub fn run() {
                 // Every asset is embedded or generated; never probe for `.meta` files.
                 .set(AssetPlugin {
                     meta_check: AssetMetaCheck::Never,
+                    file_path: asset_root(),
                     ..default()
                 }),
         )
@@ -60,8 +61,32 @@ pub fn run() {
             input::plugin,
             menu::plugin,
         ))
+        .add_plugins((crate::art::plugin, crate::vfx::plugin))
         .add_plugins(native_plugins)
         .run();
+}
+
+/// The 1v1 asset tree (card frames, portraits, crests, icons) is shared:
+/// installed builds carry a copy beside the binary, development builds read
+/// the 1v1 crate's folder directly.
+fn asset_root() -> String {
+    #[cfg(not(target_arch = "wasm32"))]
+    if let Some(beside) = std::env::current_exe()
+        .ok()
+        .and_then(|exe| exe.parent().map(|dir| dir.join("assets")))
+        .filter(|dir| dir.join("battle").is_dir())
+    {
+        return beside.to_string_lossy().into_owned();
+    }
+    if cfg!(target_arch = "wasm32") {
+        "assets".into()
+    } else {
+        concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../crates/tbg-client/assets"
+        )
+        .into()
+    }
 }
 
 fn native_plugins(app: &mut App) {

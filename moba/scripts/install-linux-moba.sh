@@ -35,7 +35,13 @@ for bin in tbg-moba tbg-moba-server; do
     install -m 0755 "$CARGO_TARGET_DIR/$out/$bin" "$install/$bin"
     ln -sfn "$install/$bin" "$base/bin/$bin"
 done
-icon="$repo_dir/crates/tbg-client/assets/branding/tbg-icon-512.png"
+# The shared 1v1 card frames, portraits, crests and icons (D-112).
+assets="$repo_dir/crates/tbg-client/assets"
+rm -rf "$install/assets"
+mkdir -p "$install/assets/lobby"
+cp -R "$assets/battle" "$install/assets/battle"
+cp -R "$assets/lobby/native-icons" "$install/assets/lobby/native-icons"
+icon="$assets/branding/tbg-icon-512.png"
 [[ -f "$icon" ]] && install -m 0644 "$icon" "$install/icon.png"
 applications="${XDG_DATA_HOME:-$base/share}/applications"
 mkdir -p "$applications"

@@ -1,7 +1,7 @@
 //! Interface text in Brazilian Portuguese (default) and English.
 
 use bevy::prelude::*;
-use tbg_moba_core::{Destination, Lane, Role, TroopKind};
+use tbg_moba_core::{Destination, Lane, Role};
 
 #[derive(Resource, Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Lang {
@@ -22,7 +22,14 @@ pub enum Key {
     RedTeam,
     You,
     Destination,
-    BuyAndSend,
+    Battle,
+    Valley,
+    Gold,
+    Essence,
+    Army,
+    Cost,
+    Towers,
+    Kills,
     Auto,
     Hint,
     Victory,
@@ -40,8 +47,6 @@ pub enum Key {
     NotEnoughEssence,
     MaxTier,
     Level,
-    Tier,
-    Troops,
 }
 
 impl Lang {
@@ -57,11 +62,18 @@ impl Lang {
             Key::RedTeam => ("Equipe Vermelha", "Red Team"),
             Key::You => ("Você", "You"),
             Key::Destination => ("Destino da Tropa", "Troop Destination"),
-            Key::BuyAndSend => ("Comprar e Enviar", "Buy and Send"),
+            Key::Battle => ("BATALHA", "BATTLE"),
+            Key::Valley => ("Vale Tupi · Arena 5v5", "Tupi Valley · 5v5 Arena"),
+            Key::Gold => ("Ouro", "Gold"),
+            Key::Essence => ("Essência", "Essence"),
+            Key::Army => ("Exército", "Army"),
+            Key::Cost => ("Cost", "Cost"),
+            Key::Towers => ("Torres", "Towers"),
+            Key::Kills => ("Abates", "Kills"),
             Key::Auto => ("Automático", "Automatic"),
             Key::Hint => (
-                "Botão direito: mover comandante · A: automático · Espaço: centralizar · 1–5 tropa · Z X C V destino · Enter comprar",
-                "Right click: move commander · A: automatic · Space: centre · 1–5 troop · Z X C V destination · Enter buy",
+                "Carta ou 1–5: comprar e enviar · Z X C V: destino · R: reroll · Botão direito: mover comandante · A: automático · Espaço: centralizar",
+                "Card or 1–5: buy and send · Z X C V: destination · R: reroll · Right click: move commander · A: automatic · Space: centre",
             ),
             Key::Victory => ("Vitória!", "Victory!"),
             Key::Defeat => ("Derrota", "Defeat"),
@@ -78,8 +90,6 @@ impl Lang {
             Key::NotEnoughEssence => ("Essência insuficiente", "Not enough essence"),
             Key::MaxTier => ("Tropas no nível máximo", "Troops at max tier"),
             Key::Level => ("Nível", "Level"),
-            Key::Tier => ("Aprimoramento", "Tier"),
-            Key::Troops => ("Tropas", "Troops"),
         };
         match self {
             Lang::Pt => pt,
@@ -104,27 +114,6 @@ impl Lang {
             Destination::Lane(Lane::Mid) => self.role(Role::Mid),
             Destination::Lane(Lane::Bot) => self.role(Role::Bot),
             Destination::Jungle => self.role(Role::Jungle),
-        }
-    }
-
-    /// Card name and archetype subtitle.
-    pub fn troop(self, troop: TroopKind) -> (&'static str, &'static str) {
-        let pt = matches!(self, Lang::Pt);
-        match troop {
-            TroopKind::Guardian => (if pt { "Guardião" } else { "Guardian" }, "Tank"),
-            TroopKind::Healer => (
-                if pt { "Curandeiro" } else { "Healer" },
-                if pt { "Suporte" } else { "Support" },
-            ),
-            TroopKind::Bard => (
-                if pt { "Bardo" } else { "Bard" },
-                if pt { "Suporte" } else { "Support" },
-            ),
-            TroopKind::Colossus => (if pt { "Colosso" } else { "Colossus" }, "Tank"),
-            TroopKind::Summoner => (
-                if pt { "Invocador" } else { "Summoner" },
-                if pt { "Controle" } else { "Control" },
-            ),
         }
     }
 }

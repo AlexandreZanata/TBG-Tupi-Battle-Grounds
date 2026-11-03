@@ -59,7 +59,7 @@ pub fn spawn(root: &mut ChildSpawnerCommands, ctx: &Ctx) {
         Node {
             position_type: PositionType::Absolute,
             left: px(10),
-            bottom: px(196),
+            bottom: px(250),
             max_width: px(372),
             padding: UiRect::axes(px(10), px(5)),
             border_radius: BorderRadius::all(px(6)),
@@ -128,7 +128,7 @@ fn reject_key(reject: Reject) -> Option<Key> {
         Reject::TroopCap => Some(Key::TroopCap),
         Reject::NotEnoughEssence => Some(Key::NotEnoughEssence),
         Reject::MaxTier => Some(Key::MaxTier),
-        Reject::MatchOver | Reject::InvalidSeat => None,
+        Reject::MatchOver | Reject::InvalidSeat | Reject::InvalidSlot => None,
     }
 }
 
