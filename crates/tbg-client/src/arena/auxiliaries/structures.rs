@@ -56,7 +56,7 @@ pub(super) fn platform(pal: AuxPalette, center: Vec2, half: Vec2) -> Mesh {
 
 /// One bridge plank, its axis along local X.
 pub(super) fn bridge_plank(pal: AuxPalette, index: usize) -> Mesh {
-    let wood = if index % 2 == 0 {
+    let wood = if index.is_multiple_of(2) {
         pal.pier_wood
     } else {
         pal.timber_beam

@@ -3416,3 +3416,8 @@ server tags 37–41. Existing message tags stay unchanged. R16 belongs solely to
 the owner-requested BR-AX12–BR-AX14 gameplay change; P75 adds no simulation
 behavior. R16 fingerprint `f2e253b98ccb313a` and measured lab traces remain
 unchanged by the merge. Wire 39 peers must be rejected.
+
+The combined candidate classifies `protocol/social.rs` with the other wire-only
+modules in `ruleset-sources.txt`. The frozen standard emoji asset table stays
+in `protocol.rs`; its hexadecimal identifiers are not simulation operations.
+No watched source, R16 fingerprint or simulation guard changes for this move.

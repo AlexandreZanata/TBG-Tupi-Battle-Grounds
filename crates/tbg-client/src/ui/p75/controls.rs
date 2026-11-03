@@ -1,18 +1,14 @@
 //! Modal-only keyboard focus and pointer hit testing; gameplay controls remain captured.
 use super::*;
-type Buttons<'w, 's> = Query<
-    'w,
-    's,
-    (
-        Entity,
-        &'static UiAction,
-        &'static ComputedNode,
-        &'static UiGlobalTransform,
-        &'static InheritedVisibility,
-        Option<&'static bevy::ui::CalculatedClip>,
-    ),
-    With<DialogButton>,
->;
+type ButtonRef<'a> = (
+    Entity,
+    &'a UiAction,
+    &'a ComputedNode,
+    &'a UiGlobalTransform,
+    &'a InheritedVisibility,
+    Option<&'a bevy::ui::CalculatedClip>,
+);
+type Buttons<'w, 's> = Query<'w, 's, ButtonRef<'static>, With<DialogButton>>;
 #[allow(clippy::too_many_arguments)]
 pub(super) fn input(
     keys: Res<ButtonInput<KeyCode>>,
@@ -74,17 +70,7 @@ fn activate(action: &UiAction) {
         request(*a);
     }
 }
-fn pointer(
-    buttons: &[(
-        Entity,
-        &UiAction,
-        &ComputedNode,
-        &UiGlobalTransform,
-        &InheritedVisibility,
-        Option<&bevy::ui::CalculatedClip>,
-    )],
-    window: &Window,
-) {
+fn pointer(buttons: &[ButtonRef<'_>], window: &Window) {
     let Some(pos) = window.cursor_position().map(|p| p * window.scale_factor()) else {
         return;
     };

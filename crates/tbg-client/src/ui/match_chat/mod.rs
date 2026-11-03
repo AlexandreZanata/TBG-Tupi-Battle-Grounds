@@ -95,6 +95,7 @@ fn receive(
         }
     }
 }
+#[allow(clippy::too_many_arguments)] // Bevy injects the independent input, identity and modal resources.
 pub(crate) fn keys(
     mut chat: ResMut<Chat>,
     mut events: MessageReader<KeyboardInput>,
@@ -179,6 +180,7 @@ pub(crate) fn keys(
         }
     }
 }
+#[allow(clippy::too_many_arguments)] // One presentation system reads the seat policy and existing HUD context.
 fn render(
     mut commands: Commands,
     roots: Query<Entity, With<Root>>,

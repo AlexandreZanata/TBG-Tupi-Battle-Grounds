@@ -181,3 +181,15 @@ Pre-session CSRF bootstrap, nonce-bound sign-in attempts, private owner-history 
 ## Publication and stop point
 
 The Draft PR associated with `phase/p75-admin-moderation-social` contains this report's S14 delivery commit. Its exact URL and final SHA are returned in the executor handoff and recorded in GitHub metadata. The branch is pushed normally. Nothing is merged, deployed, auto-merged or activated. Stop for reviewer/owner acceptance; pending gates are not passes.
+
+## Subsequent owner-authorized consolidation
+
+After the original Draft delivery, the owner requested integration of the
+War Auxiliary handoff, final CI fixes, normal publication and merge conditional
+on passing validation. The original S0–S14 evidence above is historical; its
+no-merge instruction and R15/wire-39 identity describe that original delivery.
+The new combined candidate is documented in
+[the consolidation report](../phases/P75-AUXILIARIES-CONSOLIDATION.md), including
+main/PR #57 integration, R16/wire 40, actual current checks, busy-lock deferrals
+and unchanged production activation gates. Nothing in P75 changes simulation;
+the owner-requested auxiliary tier rules are the separately identified R16 change.
