@@ -636,6 +636,13 @@ their advance. The aggro test changes the nearest enemy during pursuit
 and verifies retargeting after the locked target leaves. Full desktop
 motion comparison remains pending.
 
+The Linux installer built and installed `0.1.0-0a0afee693ab` in
+13.04 s. The installed client exited successfully after the local
+`--seed 11 --warp 16 --role mid` capture. The inspected image shows
+the clear Mid corridor and Minions on the three lanes. Xvfb reported
+display warnings only. Evidence: `/tmp/tbg-p77-nexus/base.png` and
+`/tmp/tbg-p77-nexus/smoke.log`.
+
 ## 10. After P77 (renumbered backlog)
 
 P78 champion Evolution forms and coverage beyond the automatic base kits ·
