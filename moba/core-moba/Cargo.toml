@@ -1,0 +1,21 @@
+# tbg-moba-core: deterministic 5v5 MOBA rules, map, bots and wire protocol.
+# Shared by tbg-moba-server (native) and tbg-moba-client (native/WASM).
+# Same boundary as tbg-core: no I/O, graphics, async, clocks, floats in
+# simulation state, unseeded randomness or HashMap iteration.
+
+[package]
+name = "tbg-moba-core"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license-file = "../../LICENSE"
+
+[lib]
+name = "tbg_moba_core"
+path = "src/lib.rs"
+
+[dependencies]
+# Derives for the wire messages.
+serde = { version = "1", features = ["derive"] }
+# Compact varint binary wire format, already used by tbg-core.
+postcard = { version = "1", default-features = false, features = ["alloc"] }

@@ -1,0 +1,119 @@
+//! The static Tupi Valley diorama, generated once from `tbg_moba_core::map`.
+
+use bevy::light::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
+use bevy::prelude::*;
+
+mod landmarks;
+pub mod mesh;
+mod nature;
+pub mod terrain;
+
+/// World units (map space, y = north) → Bevy space (x right, -z north).
+pub fn to_world(x: f32, y: f32, h: f32) -> Vec3 {
+    Vec3::new(x - 100.0, h, 100.0 - y)
+}
+
+/// Bevy ground point → map units.
+pub fn to_map(p: Vec3) -> Vec2 {
+    Vec2::new(p.x + 100.0, 100.0 - p.z)
+}
+
+/// The one material every vertex-coloured mesh shares.
+#[derive(Resource, Clone)]
+pub struct Painted(pub Handle<StandardMaterial>);
+
+pub fn plugin(app: &mut App) {
+    app.insert_resource(DirectionalLightShadowMap { size: 4096 })
+        .add_systems(Startup, (setup_material, build).chain());
+}
+
+pub fn setup_material(mut commands: Commands, mut materials: ResMut<Assets<StandardMaterial>>) {
+    commands.insert_resource(Painted(materials.add(StandardMaterial {
+        base_color: Color::WHITE,
+        perceptual_roughness: 0.92,
+        reflectance: 0.18,
+        ..default()
+    })));
+}
+
+fn build(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    painted: Res<Painted>,
+) {
+    let paint = painted.0.clone();
+    let mut put = |mesh: Mesh| {
+        commands.spawn((
+            Mesh3d(meshes.add(mesh)),
+            MeshMaterial3d(paint.clone()),
+            Transform::default(),
+        ));
+    };
+    put(terrain::ground());
+    put(terrain::lanes());
+    for chunk in nature::forest() {
+        put(chunk);
+    }
+    put(landmarks::bases());
+    put(landmarks::plaza());
+    put(landmarks::camps());
+    put(landmarks::bridges());
+    let water = materials.add(StandardMaterial {
+        base_color: Color::srgba(0.20, 0.62, 0.78, 0.86),
+        perceptual_roughness: 0.12,
+        reflectance: 0.55,
+        alpha_mode: AlphaMode::Blend,
+        ..default()
+    });
+    commands.spawn((
+        Mesh3d(meshes.add(terrain::water())),
+        MeshMaterial3d(water),
+        Transform::default(),
+    ));
+    let crystal = materials.add(StandardMaterial {
+        base_color: Color::srgb(0.55, 0.9, 1.0),
+        emissive: LinearRgba::rgb(0.6, 2.2, 3.2),
+        ..default()
+    });
+    commands.spawn((
+        Mesh3d(meshes.add(landmarks::plaza_crystal())),
+        MeshMaterial3d(crystal),
+        Transform::default(),
+    ));
+    commands.spawn((
+        PointLight {
+            color: Color::srgb(0.5, 0.85, 1.0),
+            intensity: 400_000.0,
+            range: 18.0,
+            ..default()
+        },
+        Transform::from_translation(to_world(100.0, 100.0, 5.0)),
+    ));
+    lights(&mut commands);
+}
+
+fn lights(commands: &mut Commands) {
+    commands.spawn((
+        DirectionalLight {
+            color: Color::srgb(1.0, 0.95, 0.86),
+            illuminance: 12_500.0,
+            shadow_maps_enabled: true,
+            ..default()
+        },
+        // Low sun from the south-west: long readable shadows towards the north-east.
+        Transform::from_xyz(-60.0, 90.0, 70.0).looking_at(Vec3::ZERO, Vec3::Y),
+        CascadeShadowConfigBuilder {
+            num_cascades: 2,
+            first_cascade_far_bound: 70.0,
+            maximum_distance: 260.0,
+            ..default()
+        }
+        .build(),
+    ));
+    commands.insert_resource(GlobalAmbientLight {
+        color: Color::srgb(0.72, 0.80, 1.0),
+        brightness: 950.0,
+        ..default()
+    });
+}
