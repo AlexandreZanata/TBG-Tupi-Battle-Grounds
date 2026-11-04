@@ -239,3 +239,34 @@ blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_l
 ![Longaxe modular Blender lineup](../media/blender-champions/longaxe.webp)
 
 ![Farwatch modular Blender lineup](../media/blender-champions/farwatch.webp)
+
+## Bombard and Rotcap
+
+Bombard's leather coat, riveted cuirass, helmet and smoked goggles are
+separate components on the existing rig. The right hand carries the
+mortar at the hip and the support grip encloses weapon-local
+`(0, -0.03, 0.24)`. The open muzzle planes sit at weapon-local Y 0.10
+and Z 0.43, 0.45, 0.51, 0.43 and 0.47 in Base, A1, A2, B1 and B2 order.
+A1 adds a flared mortar and bomb rack, and A2 adds a hot collar and a
+furnace pack. B1 adds a hull shield, and B2 adds paired bores on either
+side of the shared launch axis and a rear ammunition drum.
+
+Rotcap's stem, collar, limbs, cap skin, membrane and radial gills are
+individually modeled. The spitting rim is centered at head-local
+`(0, -0.05187, 0.13923)`, with the throat recessed behind it and the
+gills above it. A1 adds toxin freckles and vials, and A2 adds a broader
+violet cap with venom drops. B1 grows shoulder caps, and B2 grows a
+cluster of caps and pods on BackSpring. The palette stays the same
+across seats. The game uses the existing recoil, reload and spit clips.
+
+Bombard uses 5,266–6,526 triangles per form and 513,618 bytes. Rotcap
+uses 4,686–7,998 triangles per form and 408,832 bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- bombard rotcap
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- bombard rotcap
+```
+
+![Bombard modular Blender lineup](../media/blender-champions/bombard.webp)
+
+![Rotcap modular Blender lineup](../media/blender-champions/rotcap.webp)

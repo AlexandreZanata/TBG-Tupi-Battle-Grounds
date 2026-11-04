@@ -628,7 +628,9 @@
       "Nester",
       "Rampart",
       "Longaxe",
-      "Farwatch"
+      "Farwatch",
+      "Bombard",
+      "Rotcap"
     ],
     "forms": [
       "Base",
@@ -659,6 +661,8 @@
       "wall guard",
       "polearm strike",
       "arbalest release",
+      "mortar reload",
+      "spore cast",
       "hit",
       "death",
       "victory"

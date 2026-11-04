@@ -1363,4 +1363,20 @@ pending. Public download compatibility uses the actual running server.
 - Linux Vulkan loaded all ten meshes, captured Base and A2 for Longaxe
   and Base and B2 for Farwatch, and recorded damage from both champions
   in local Training encounters.
+- The standard Laboratory idle framing can crop the raised poleaxe.
+  The Blender lineup includes the full weapon.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Bombard and Rotcap
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and BattleLine. Both seats share meshes and materials.
+  Identify allegiance with the feet circle.
+- Cover Bombard's hip carry, recoil and mortar reload at the existing
+  grip and bore. Cover Rotcap's wobble, spore cast and wilt. Both
+  champions release their projectile at 0.18 s.
+- Linux Vulkan loaded all ten meshes at their Blender triangle counts.
+  The Laboratory captured Base and B2 for Bombard and Base and A2 for
+  Rotcap. In local Training, Bombard dealt 192 damage from seat A and
+  Rotcap dealt 60 damage from seat B.
 - Visual and motion comparison for Windows and desktop web remains pending.

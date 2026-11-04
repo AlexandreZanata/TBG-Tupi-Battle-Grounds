@@ -1,11 +1,11 @@
 """Render the production Blender components for Base, A1, A2, B1 and B2."""
 
-from math import radians
+from math import radians, sqrt
 from pathlib import Path
 import sys
 
 import bpy
-from mathutils import Matrix
+from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from export_game import FORMS, GAME_UNITS, collection
@@ -16,7 +16,7 @@ from rig import TO_BLENDER, rest_positions
 STUDIO_ANGLES = {
     "shieldbearer": -44, "hexer": 19, "sawbot": 24, "bloomkeeper": 15,
     "siegewalker": -27, "rootcaller": 13, "nester": -44, "rampart": 29,
-    "longaxe": 35, "farwatch": 27,
+    "longaxe": 35, "farwatch": 27, "bombard": 32, "rotcap": 24,
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -39,10 +39,38 @@ def saw_guard(joint, rest, tier, branch):
     return Matrix.Identity(4)
 
 
+def mortar_carry(joint, rest):
+    turn = Matrix.Rotation(radians(-20), 4, "X")
+    grip = TO_BLENDER @ (rest["Chest"] + Vector((-.06,.11,.14)))
+    if joint == "WeaponR":
+        return Matrix.Translation(grip) @ turn
+    for side, sign in (("R",-1),("L",1)):
+        upper, fore, hand = (f"{part}{side}" for part in ("UpperArm","Forearm","Hand"))
+        if joint not in (upper, fore, hand):
+            continue
+        target = grip if side == "R" else grip + turn.to_3x3() @ (TO_BLENDER @ Vector((0,-.03,.24)))
+        if joint == hand:
+            return Matrix.Translation(target) @ turn
+        shoulder = TO_BLENDER @ rest[upper]
+        delta = target - shoulder
+        axis = delta.normalized()
+        hint = TO_BLENDER @ Vector((sign,-.75,-.40))
+        outward = (hint-axis*hint.dot(axis)).normalized()
+        a, b = (rest[fore]-rest[upper]).length, (rest[hand]-rest[fore]).length
+        along = (a*a - b*b + delta.length_squared) / (2*delta.length)
+        elbow = shoulder + axis*along + outward*sqrt(max(0,a*a-along*along))
+        start, end = (shoulder, elbow) if joint == upper else (elbow, target)
+        rotate = Vector((0,0,-1)).rotation_difference(end-start).to_matrix().to_4x4()
+        return Matrix.Translation(start) @ rotate
+    return Matrix.Translation(TO_BLENDER @ rest[joint])
+
+
 def studio_pose(unit, joint, rest, tier, branch):
     transform = Matrix.Translation(TO_BLENDER @ rest[joint])
     if unit == "sawbot":
         return saw_guard(joint, rest, tier, branch) @ transform
+    if unit == "bombard":
+        return mortar_carry(joint, rest)
     if unit in RIGHT_CARRY:
         upper, fore, grip_pitch = RIGHT_CARRY[unit]
         shoulder = pitch(rest["UpperArmR"], upper)

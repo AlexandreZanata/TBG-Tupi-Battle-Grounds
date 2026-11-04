@@ -22,6 +22,8 @@ const NESTER: &[u8] = include_bytes!("../../assets/champions/blender/nester.tbgm
 const RAMPART: &[u8] = include_bytes!("../../assets/champions/blender/rampart.tbgmesh");
 const LONGAXE: &[u8] = include_bytes!("../../assets/champions/blender/longaxe.tbgmesh");
 const FARWATCH: &[u8] = include_bytes!("../../assets/champions/blender/farwatch.tbgmesh");
+const BOMBARD: &[u8] = include_bytes!("../../assets/champions/blender/bombard.tbgmesh");
+const ROTCAP: &[u8] = include_bytes!("../../assets/champions/blender/rotcap.tbgmesh");
 
 pub(super) fn form(
     kind: UnitKind,
@@ -43,6 +45,8 @@ pub(super) fn form(
         UnitKind::Rampart => RAMPART,
         UnitKind::Longaxe => LONGAXE,
         UnitKind::Farwatch => FARWATCH,
+        UnitKind::Bombard => BOMBARD,
+        UnitKind::Rotcap => ROTCAP,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -212,6 +216,8 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Rampart,
         UnitKind::Longaxe,
         UnitKind::Farwatch,
+        UnitKind::Bombard,
+        UnitKind::Rotcap,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -221,6 +227,7 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
             let grip = match kind {
                 UnitKind::Archer => Node::Prop(Socket::OffhandL),
+                UnitKind::Rotcap => Node::Body(rig::Joint::Head),
                 UnitKind::Sawbot | UnitKind::Rampart => Node::Body(rig::Joint::HandR),
                 _ => Node::Prop(Socket::WeaponR),
             };
