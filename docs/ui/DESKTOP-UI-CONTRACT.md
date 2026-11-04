@@ -1457,3 +1457,31 @@ pending. Public download compatibility uses the actual running server.
 - At consolidation, run the Blender loader test named in the modeling
   guide under the shared build lock. Windows and desktop web full-frame
   and motion comparisons for the six champions remain pending.
+
+### 2026-11-04 — Blender Whisperer, Bulwark, Demolisher, Crowcaller, Trigger and Rattle & Tick
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Both seats share the
+  meshes and materials. The feet circle carries allegiance.
+- Cover Whisperer's hover, six tendrils and eye release, Bulwark's
+  brace and two-hand hammer strike, and Demolisher's hydraulic
+  strike and shock pulse.
+- Cover Crowcaller's independently moving raven head and wing and
+  nocked bolt, Trigger's alternating revolvers and articulated
+  tail, and Rattle & Tick's club strike and independent rider aim
+  and recoil. Crowcaller and Rattle & Tick check all 26 rig nodes.
+- Blender checked all thirty forms for equipment placement and native
+  attack anchors. Static inspection checked 170 TBG4 and twenty TBG5
+  payloads for valid groups, indices and reserved allegiance colors.
+- The local Linux Vulkan client loaded all thirty forms at the
+  exported triangle counts. Laboratory captures covered Base and
+  one advanced form per champion at 1280×800. The toolbar overlaps
+  upper parts of Whisperer, Crowcaller and Trigger in this framing.
+- Live Training recorded 108 damage for Whisperer, 180 for Bulwark,
+  760 for Demolisher, 422 for Crowcaller, 350 for Trigger and 522
+  for Rattle & Tick. The native motion gallery played all five
+  Crowcaller and Rattle & Tick forms, including ranged release,
+  melee strike and Cast.
+- Queue the Blender loader test from the modeling guide under the
+  shared lock at consolidation. Windows and desktop web full-frame
+  and motion comparisons remain pending.

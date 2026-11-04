@@ -24,6 +24,8 @@ STUDIO_ANGLES = {
     "drumguard": 23, "leechroot": -25,
     "cargocrab": 32, "puppetmaster": 17, "smuggler": -33,
     "bonehorn": 42, "ravager": 34, "acidmaw": 24,
+    "whisperer": 16, "bulwark": -22, "demolisher": 27, "crowcaller": 24,
+    "trigger": -24, "rattletick": 20,
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -95,6 +97,23 @@ def drum_pose(joint,rest,tier,branch):
 
 def studio_pose(unit, joint, rest, tier, branch):
     transform = Matrix.Translation(TO_BLENDER @ rest[joint])
+    if unit == "bulwark":
+        return two_hand_carry(joint,rest,(0,.13,.20),(0,.12,0),-14)
+    if unit == "crowcaller":
+        return two_hand_carry(joint,rest,(0,.23,.23),(0,-.02,.09),5)
+    if unit in {"demolisher", "trigger"}:
+        for side in ("L","R"):
+            if joint in arm_nodes(side):
+                if unit=="demolisher":
+                    return folded_arm(joint,rest,side,-14,-39)
+                return folded_arm(joint,rest,side,-28,-56 if side=="R" else -73,3)
+    if unit == "rattletick":
+        if joint in ("Back","StringTop"):
+            return pitch(rest[joint],-65 if joint=="Back" else -82) @ transform
+        if joint in arm_nodes("R"):
+            grip = TO_BLENDER @ (rest["Chest"]+Vector((-.29,.10,.21)))
+            turn = Matrix.Rotation(radians(-13),4,"X")
+            return reach_arm(joint,rest,"R",grip,turn)
     if unit == "cargocrab":
         for side in ("L","R"):
             if joint in arm_nodes(side):
@@ -177,6 +196,7 @@ def render(unit, angle):
     spacing = {
         "siegewalker": 1.46, "longaxe": 1.64, "shatterback": 1.46, "oilpress": 1.46,
         "cargocrab": 1.66, "bonehorn": 2.06, "ravager": 1.80, "acidmaw": 1.15,
+        "whisperer": 1.42, "bulwark": 1.53, "demolisher": 1.46, "rattletick": 1.45,
     }.get(unit,1.27)
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
@@ -194,7 +214,8 @@ def render(unit, angle):
             part.obj.matrix_basis = studio_pose(unit, part.joint, rest, tier, branch)
         anchor.location.x = (column - 2) * spacing - (.20 if unit=="bonehorn" else 0)
         # Rear-mounted Evolution equipment needs a wider profile to stay legible.
-        rear_angle = {"oilpress": -23, "cargocrab": 23, "smuggler": -15}.get(unit,0)
+        rear_angle = {"oilpress": -23, "cargocrab": 23, "smuggler": -15,
+                      "rattletick": 29}.get(unit,0)
         anchor.rotation_euler.z = radians(angle+rear_angle if tier and branch==1 else angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)
@@ -216,6 +237,12 @@ def render(unit, angle):
             "cargocrab": (8.75,475,.39), "puppetmaster": (6.68,665,.79),
             "smuggler": (6.71,675,.78), "bonehorn": (11.15,600,.67),
             "ravager": (9.70,515,.45), "acidmaw": (6.25,720,.80),
+        }[unit]
+    if unit in {"whisperer","bulwark","demolisher","crowcaller","trigger","rattletick"}:
+        scale,height,aim = {
+            "whisperer": (7.50,570,.95), "bulwark": (8.15,565,.56),
+            "demolisher": (7.70,590,.67), "crowcaller": (6.70,665,.72),
+            "trigger": (6.63,640,.75), "rattletick": (7.75,605,.76),
         }[unit]
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)

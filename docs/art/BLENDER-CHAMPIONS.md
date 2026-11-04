@@ -515,3 +515,84 @@ for unit in cargocrab puppetmaster smuggler bonehorn ravager acidmaw; do
   convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
 done
 ```
+
+## Whisperer, Bulwark and Demolisher
+
+**Whisperer** has a hollow amethyst bell, a suspended clapper and
+six articulated tendrils. Echo of Fear adds an ivory shell with
+gilded hooks, then long cheek blades. Mental Pulse adds a rose-metal
+resonator cage, then six luminous cores. The animated eye remains
+on Back, with its release at `(0, 0, 0.15)`. The five forms use
+3,622–4,414 triangles and 273,030 bytes.
+
+**Bulwark** has staggered stone courses on a compact walking frame.
+Mobile Fortress adds sandstone side walls, then crenellations
+and a central keep. Earth Weight adds basalt counterweights, copper
+cleats and a broader hammer, then a flanged earthbreaker face.
+The hammer face crosses WeaponR-local Y -0.22 at Z 0.10 for
+Base and A, and Z 0.13 for B. The second hand rests on the shaft
+at `(0, 0.12, 0)`. The five forms use 4,736–6,248 triangles and
+610,599 bytes.
+
+**Demolisher** has exposed wrist pistons, separate knuckle pads
+and a hydraulic pressure bottle. Reinforced Fists adds ochre cheek
+armor and thick brass heels. Shock System adds indigo housings,
+luminous forearm coils and a second pair of capacitors on the back.
+The central right knuckle reaches HandR-local `(0, -0.05, 0.25)`.
+The five forms use 4,088–5,992 triangles and 638,285 bytes.
+
+![Whisperer modular Blender lineup](../media/blender-champions/whisperer.webp)
+
+![Bulwark modular Blender lineup](../media/blender-champions/bulwark.webp)
+
+![Demolisher modular Blender lineup](../media/blender-champions/demolisher.webp)
+
+## Crowcaller, Trigger and Rattle & Tick
+
+**Crowcaller** wears a fitted plague mask and carries a shoulder
+raven and a crossbow. Plague Crow adds olive cloth and spore
+ampoules, then respirator tubes and a raven spore carrier. Ruin
+Bow adds claret cloth, layered iron feathers and broader limbs,
+then a high arched sight. The raven body, head and wing use
+BackSpring, HeadGear and Back. The bolt uses Nock so the kit can
+hide it between release and reload. The WeaponR muzzle stays at
+`(0, 0.035, 0.34)`. The five forms use 3,542–4,132 triangles
+and 327,832 bytes.
+
+**Trigger** has sculpted feline ears, cheek stripes, a western hat,
+a jointed tail and two revolvers. Swift Gunman adds a jade scarf
+and brass spurs, then flowing scarf and tail ribbons. Ricochet
+Bullet adds indigo, bandoliers and faceted muzzle jackets, then
+goggles and tall front sights. Both bores meet their socket's muzzle
+at `(0, 0.055, 0.25)`. The five forms use 4,642–5,498 triangles
+and 420,868 bytes.
+
+**Rattle & Tick** share a shoulder harness. Big Brother's Fury
+adds carmine armor and iron club teeth, then a brass breastplate
+and broader teeth. Tico's Tricks adds a maritime blue tool roll
+and Tick's workshop goggles, then spare charges and a blunderbuss
+pressure valve. Rattle's club strikes from WeaponR-local
+`(0, -0.40, 0)`. Tick uses BackSpring for his torso, HeadGear
+for his head, Back and StringTop for his arms, and Nock for his
+recoiling weapon. The five forms use 4,480–5,220 triangles and
+481,218 bytes.
+
+![Crowcaller modular Blender lineup](../media/blender-champions/crowcaller.webp)
+
+![Trigger modular Blender lineup](../media/blender-champions/trigger.webp)
+
+![Rattle and Tick modular Blender lineup](../media/blender-champions/rattletick.webp)
+
+Crowcaller and Rattle & Tick use TBG5 to include their extended
+socket positions. The other four use TBG4. Reproduce the five
+forms and studio lineup per champion from the repository root.
+The Rattle & Tick B forms turn farther to expose the rear tool roll
+and spare charges.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- whisperer bulwark demolisher crowcaller trigger rattletick
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- whisperer bulwark demolisher crowcaller trigger rattletick
+for unit in whisperer bulwark demolisher crowcaller trigger rattletick; do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```

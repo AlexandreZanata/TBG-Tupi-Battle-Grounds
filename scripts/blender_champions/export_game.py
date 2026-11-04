@@ -11,12 +11,15 @@ sys.path.insert(0, str(HERE))
 from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
 from acidmaw import acidmaw
 from antidotebrewer import antidotebrewer
-from bonehorn import bonehorn
-from cargocrab import cargocrab
 from bloodfurnace import bloodfurnace
 from bloodweaver import bloodweaver
 from bloomkeeper import bloomkeeper
 from bombard import bombard
+from bonehorn import bonehorn
+from bulwark import bulwark
+from cargocrab import cargocrab
+from crowcaller import crowcaller
+from demolisher import demolisher
 from drumguard import drumguard
 from farwatch import farwatch
 from geometry import Model
@@ -28,6 +31,7 @@ from oldfinn import oldfinn
 from oilpress import oilpress
 from puppetmaster import puppetmaster
 from rampart import rampart
+from rattletick import rattletick
 from ravager import ravager
 from rig import NAMES, rest_positions
 from rootcaller import rootcaller
@@ -37,6 +41,8 @@ from shatterback import plate as shatter_plate, shatterback
 from shieldbearer import shieldbearer
 from siegewalker import siegewalker
 from smuggler import smuggler
+from trigger import trigger
+from whisperer import whisperer
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
@@ -68,6 +74,12 @@ GAME_UNITS = {
     "bonehorn": bonehorn,
     "ravager": ravager,
     "acidmaw": acidmaw,
+    "whisperer": whisperer,
+    "bulwark": bulwark,
+    "demolisher": demolisher,
+    "crowcaller": crowcaller,
+    "trigger": trigger,
+    "rattletick": rattletick,
 }
 
 

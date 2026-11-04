@@ -644,7 +644,13 @@
       "Smuggler",
       "Bonehorn",
       "Ravager",
-      "Acidmaw"
+      "Acidmaw",
+      "Whisperer",
+      "Bulwark",
+      "Demolisher",
+      "Crowcaller",
+      "Trigger",
+      "RattleTick"
     ],
     "forms": [
       "Base",
@@ -691,6 +697,12 @@
       "quadruped stride and horn charge",
       "six-leg crawl and scythe strike",
       "four-jaw opening, throat pulse and acid release",
+      "floating bell, articulated tendrils and eye release",
+      "fortress brace and two-hand hammer strike",
+      "hydraulic fist strike and shock pulse",
+      "shoulder raven aim, wing beat and crossbow reload",
+      "alternating revolvers and articulated tail",
+      "club strike and independent rider aim and recoil",
       "hit",
       "death",
       "victory"

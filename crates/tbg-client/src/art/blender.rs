@@ -39,6 +39,12 @@ const SMUGGLER: &[u8] = include_bytes!("../../assets/champions/blender/smuggler.
 const BONEHORN: &[u8] = include_bytes!("../../assets/champions/blender/bonehorn.tbgmesh");
 const RAVAGER: &[u8] = include_bytes!("../../assets/champions/blender/ravager.tbgmesh");
 const ACIDMAW: &[u8] = include_bytes!("../../assets/champions/blender/acidmaw.tbgmesh");
+const WHISPERER: &[u8] = include_bytes!("../../assets/champions/blender/whisperer.tbgmesh");
+const BULWARK: &[u8] = include_bytes!("../../assets/champions/blender/bulwark.tbgmesh");
+const DEMOLISHER: &[u8] = include_bytes!("../../assets/champions/blender/demolisher.tbgmesh");
+const CROWCALLER: &[u8] = include_bytes!("../../assets/champions/blender/crowcaller.tbgmesh");
+const TRIGGER: &[u8] = include_bytes!("../../assets/champions/blender/trigger.tbgmesh");
+const RATTLE_TICK: &[u8] = include_bytes!("../../assets/champions/blender/rattletick.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -82,6 +88,12 @@ pub(super) fn form(
         UnitKind::Bonehorn => BONEHORN,
         UnitKind::Ravager => RAVAGER,
         UnitKind::Acidmaw => ACIDMAW,
+        UnitKind::Whisperer => WHISPERER,
+        UnitKind::Bulwark => BULWARK,
+        UnitKind::Demolisher => DEMOLISHER,
+        UnitKind::Crowcaller => CROWCALLER,
+        UnitKind::Trigger => TRIGGER,
+        UnitKind::RattleTick => RATTLE_TICK,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -294,6 +306,12 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Bonehorn,
         UnitKind::Ravager,
         UnitKind::Acidmaw,
+        UnitKind::Whisperer,
+        UnitKind::Bulwark,
+        UnitKind::Demolisher,
+        UnitKind::Crowcaller,
+        UnitKind::Trigger,
+        UnitKind::RattleTick,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -312,12 +330,14 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                     Node::Body(rig::Joint::Head)
                 }
                 UnitKind::Ravager => Node::Body(rig::Joint::ForearmR),
+                UnitKind::Whisperer => Node::Prop(Socket::Back),
                 UnitKind::Sawbot
                 | UnitKind::Rampart
                 | UnitKind::Shatterback
                 | UnitKind::Oilpress
                 | UnitKind::Leechroot
-                | UnitKind::CargoCrab => Node::Body(rig::Joint::HandR),
+                | UnitKind::CargoCrab
+                | UnitKind::Demolisher => Node::Body(rig::Joint::HandR),
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
@@ -345,6 +365,9 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                     Socket::StringBottom,
                     Socket::Nock,
                 ],
+                UnitKind::Crowcaller => &[Socket::Back, Socket::Nock],
+                UnitKind::Trigger => &[Socket::OffhandL, Socket::Back],
+                UnitKind::RattleTick => &[Socket::Back, Socket::StringTop, Socket::Nock],
                 UnitKind::Ravager => &[
                     Socket::WeaponR,
                     Socket::OffhandL,

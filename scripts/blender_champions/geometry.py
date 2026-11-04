@@ -57,8 +57,23 @@ SWATCH = {
     "ravager_rust": (172, 77, 49, 0.06, 0.70),
     "acid_moss": (74, 113, 71, 0.0, 0.72),
     "acid_ivory": (218, 207, 151, 0.0, 0.73),
+    "bell_amethyst": (95, 69, 122, 0.15, 0.66),
+    "bell_rose": (175, 75, 128, 0.31, 0.48),
+    "bell_eye": (247, 130, 205, 0.0, 0.51),
+    "fortress_sand": (181, 154, 111, 0.03, 0.83),
+    "fortress_moss": (90, 107, 89, 0.06, 0.80),
+    "fortress_basalt": (69, 67, 74, 0.08, 0.79),
+    "press_ochre": (194, 132, 62, 0.31, 0.57),
+    "press_indigo": (63, 83, 138, 0.36, 0.53),
+    "crow_plague": (100, 119, 61, 0.02, 0.83),
+    "crow_claret": (126, 46, 61, 0.02, 0.77),
+    "gunner_fur": (209, 122, 54, 0.0, 0.79),
+    "gunner_jade": (53, 119, 92, 0.0, 0.81),
+    "gunner_indigo": (65, 60, 105, 0.0, 0.81),
+    "brother_carmine": (148, 58, 42, 0.0, 0.84),
+    "brother_coast": (56, 112, 130, 0.0, 0.82),
 }
-GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse"}
+GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse", "bell_eye"}
 
 
 def linear(byte):

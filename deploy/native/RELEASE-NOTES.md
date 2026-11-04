@@ -17,6 +17,10 @@ Cargo Crab, Puppetmaster and Smuggler add a mechanical saddle carrier,
 a marionette act and a longshore courier with articulated equipment.
 Bonehorn, Ravager and Acidmaw add a four-legged horn charger, a six-legged
 scythe predator and a stalker with four moving jaw petals.
+Whisperer, Bulwark and Demolisher add a hollow bone bell, a walking
+stone citadel and a hydraulic brawler. Crowcaller, Trigger and Rattle &
+Tick add an articulated shoulder raven, two feline revolvers and an
+independently aimed shoulder rider.
 Protocol 40 and ruleset 16 are unchanged.
 
 TBG 0.1.4-colossus.6 — Native Android landscape candidate

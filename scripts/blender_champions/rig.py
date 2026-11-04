@@ -11,6 +11,7 @@ NAMES = (
 )
 PARENT = (None, 0, 1, 2, 3, 3, 5, 6, 3, 8, 9, 1, 11, 12, 1, 14, 15, 3, 4, 1, 10, 7, 17)
 EXTENDED = ("StringTop", "StringBottom", "Nock")
+EXTENDED_KITS = {"ravager", "acidmaw", "crowcaller", "rattletick"}
 INDEX = {name: i for i, name in enumerate(NAMES + EXTENDED)}
 PARENT_OVERRIDES = {
     "ravager": {
@@ -18,6 +19,16 @@ PARENT_OVERRIDES = {
         "StringBottom": "Back", "Nock": "StringTop",
     },
     "acidmaw": dict.fromkeys(("WeaponR", "OffhandL", "Back", "StringTop"), "Head"),
+    "whisperer": {
+        **dict.fromkeys(("ThighL", "ThighR", "WeaponR", "OffhandL"), "Chest"),
+        "Back": "Head",
+    },
+    "crowcaller": {"HeadGear": "BackSpring", "Nock": "WeaponR"},
+    "trigger": {"BackSpring": "Hips"},
+    "rattletick": {
+        "WeaponR": "Chest", "Tabard": "Chest",
+        **dict.fromkeys(("HeadGear", "Back", "StringTop", "Nock"), "BackSpring"),
+    },
 }
 REST_OVERRIDES = {
     "bonehorn": {
@@ -31,9 +42,24 @@ REST_OVERRIDES = {
         "StringBottom": (.09,-.28,-.06), "Nock": (-.09,-.28,-.06),
     },
     "acidmaw": {"Head": (0,.70,.08), "BackSpring": (0,.42,.09)},
+    "whisperer": {
+        "Hips": (0,.92,0), "Head": (0,.18,.23),
+        "WeaponR": (.29,.04,0), "OffhandL": (-.29,.04,0),
+    },
+    "crowcaller": {
+        "BackSpring": (.22,.35,-.06), "HeadGear": (0,.075,.055),
+        "Tabard": (0,.30,-.15), "Nock": (0,.035,0),
+    },
+    "trigger": {"BackSpring": (0,-.02,-.14), "Back": (0,.04,-.30)},
+    "rattletick": {
+        "BackSpring": (.28,.42,-.05), "HeadGear": (0,.22,0), "Tabard": (0,.20,-.22),
+        "Back": (.09,.12,0), "StringTop": (-.09,.12,0), "Nock": (-.09,.035,.18),
+    },
 }
 for side, sign in (("L",1), ("R",-1)):
     for unit, offsets in (
+        ("whisperer", ((sign*.16,.01,.15),(0,-.17,0),(0,-.18,0),
+                       (sign*.16,.01,-.15),(0,-.17,0),(0,-.18,0))),
         ("bonehorn", ((sign*.29,-.02,.03),(0,-.32,0),(0,-.32,0),
                       (sign*.25,-.02,-.06),(0,-.30,0),(0,-.32,0))),
         ("ravager", ((sign*.24,0,.15),(sign*.18,-.20,.08),(sign*.08,-.27,.09),
@@ -72,18 +98,25 @@ BODY_PLANS = {
     "bonehorn": (.64, .46, .34, .24, .1365, .34),
     "ravager": (.45, .36, .34, .24, .1365, .17),
     "acidmaw": (.48, .25, .34, .24, .1365, .12),
+    "whisperer": (.38, .36, .34, .24, .1365, .17),
+    "bulwark": (.30, .46, .29, .24, .1365, .19),
+    "demolisher": (.32, .46, .34, .24, .1365, .25),
+    "crowcaller": (.38, .36 * .82, .34, .24, .1365, .21),
+    "trigger": (.38, .36 * .85, .34, .24, .1365, .18),
+    "rattletick": (.38, .46 * 1.10, .34, .24, .1365 * .90, .17),
 }
 # +Y up and +Z forward in TBG, +Z up and -Y forward in Blender.
 TO_BLENDER = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))
 
 
 def parents_for(unit):
-    names = NAMES + EXTENDED if unit in PARENT_OVERRIDES else NAMES
+    extended = unit in EXTENDED_KITS
+    names = NAMES + EXTENDED if extended else NAMES
+    parents = PARENT + (21, 21, 21) if extended else PARENT
     overrides = PARENT_OVERRIDES.get(unit, {})
     return {
         name: overrides.get(name, NAMES[parent] if parent is not None else None)
-        for name, parent in zip(names, PARENT + (21, 21, 21) if unit in PARENT_OVERRIDES else PARENT,
-                                strict=True)
+        for name, parent in zip(names, parents, strict=True)
     }
 
 
