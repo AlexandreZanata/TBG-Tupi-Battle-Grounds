@@ -622,7 +622,9 @@
       "Shieldbearer",
       "Hexer",
       "Sawbot",
-      "Bloomkeeper"
+      "Bloomkeeper",
+      "SiegeWalker",
+      "Rootcaller"
     ],
     "forms": [
       "Base",
@@ -647,6 +649,8 @@
       "attack",
       "saw spin",
       "healing cast",
+      "bombard reload",
+      "root cast",
       "hit",
       "death",
       "victory"

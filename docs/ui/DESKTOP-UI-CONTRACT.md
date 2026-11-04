@@ -1318,3 +1318,12 @@ pending. Public download compatibility uses the actual running server.
   triangle counts. Captures cover Sawbot Base and A2, Bloomkeeper Base
   and B2, and a local Practice match seeded with both on both seats.
 - Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Siege Walker and Rootcaller
+
+- Cover all five forms for each champion in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Each seat uses the same
+  figure and equipment, with allegiance on the feet circle.
+- Cover the Siege Walker's 0.18 s release, breech and animated reload
+  lever. Cover the Rootcaller's 0.22 s cast at the right claw tip.
+- Visual and motion comparison for Windows and desktop web remains pending.

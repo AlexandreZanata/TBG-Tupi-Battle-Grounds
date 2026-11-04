@@ -1,7 +1,7 @@
 TBG 0.1.4-colossus.7 — Blender champion figures
 
-Archer, Bone Brute, Shieldbearer, Hexer, Sawbot and Bloomkeeper have new
-component-modeled figures for Base and all four Evolution forms in the
+Archer, Bone Brute, Shieldbearer, Hexer, Sawbot, Bloomkeeper, Siege Walker
+and Rootcaller have new component-modeled figures for Base and all four Evolution forms in the
 Laboratory and in combat. The base Bone Brute has connected shoulders and
 a waist-mounted sash. The feet circle identifies the team in combat.
 Both teams share the same character and equipment colors.

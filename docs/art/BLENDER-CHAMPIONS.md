@@ -10,8 +10,7 @@ intrinsic material colors and the independent status outline.
 
 ## Editable source and export
 
-The Archer, Bone Brute, Shieldbearer, Hexer, Sawbot and Bloomkeeper
-use component modeling.
+The first eight production champions use component modeling.
 Each Blender object is named for its physical piece and has a material and
 a named rig node. The source is in
 [scripts/blender_champions](../../scripts/blender_champions).
@@ -152,3 +151,33 @@ The renders are in Base, A1, A2, B1, B2 order, from left to right.
 ![Sawbot modular Blender lineup](../media/blender-champions/sawbot.webp)
 
 ![Bloomkeeper modular Blender lineup](../media/blender-champions/bloomkeeper.webp)
+
+## Siege Walker and Rootcaller
+
+The Siege Walker has a broad sculpted ogre face, layered leather and a
+bored shoulder bombard. Longshot adds a telescope. Artillery gets twin
+bores, Shrapnel a flared bell, and Concussion a shell drum. The bore axis
+stays at weapon-local Y 0.26. Keep the kit's five muzzle planes, the
+support grip at `(0.28, 0.10, 0.36)` and the native animated reload
+lever on its own socket. The lineup shows the shoulder carry.
+
+The Rootcaller has a fluted trunk, jointed root claws, an amber eye glow
+and moss beard. The A branch adds vines and a crown of roots. The B
+branch adds a broad cap, glowing spores and a fungal cluster on the
+back spring. The middle claw on the right-hand socket ends at
+`(0, -0.06 - length, 0.04)`, with the kit's per-form claw length.
+
+The Siege Walker export has 4,248–5,090 triangles per form and uses
+424,061 bytes. This excludes the native reload lever. The Rootcaller
+has 2,386–5,692 triangles per form and uses 253,790 bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- siegewalker rootcaller
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- siegewalker rootcaller
+```
+
+The renders are in Base, A1, A2, B1, B2 order, from left to right.
+
+![Siege Walker modular Blender lineup](../media/blender-champions/siegewalker.webp)
+
+![Rootcaller modular Blender lineup](../media/blender-champions/rootcaller.webp)

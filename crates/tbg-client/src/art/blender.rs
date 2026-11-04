@@ -16,6 +16,8 @@ const SHIELDBEARER: &[u8] = include_bytes!("../../assets/champions/blender/shiel
 const HEXER: &[u8] = include_bytes!("../../assets/champions/blender/hexer.tbgmesh");
 const SAWBOT: &[u8] = include_bytes!("../../assets/champions/blender/sawbot.tbgmesh");
 const BLOOMKEEPER: &[u8] = include_bytes!("../../assets/champions/blender/bloomkeeper.tbgmesh");
+const SIEGE_WALKER: &[u8] = include_bytes!("../../assets/champions/blender/siegewalker.tbgmesh");
+const ROOTCALLER: &[u8] = include_bytes!("../../assets/champions/blender/rootcaller.tbgmesh");
 
 pub(super) fn form(
     kind: UnitKind,
@@ -31,6 +33,8 @@ pub(super) fn form(
         UnitKind::Hexer => HEXER,
         UnitKind::Sawbot => SAWBOT,
         UnitKind::Bloomkeeper => BLOOMKEEPER,
+        UnitKind::SiegeWalker => SIEGE_WALKER,
+        UnitKind::Rootcaller => ROOTCALLER,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -39,9 +43,9 @@ pub(super) fn form(
         return None;
     };
 
-    if kind == UnitKind::Archer {
-        // The game animates these three pieces independently from the bow limbs.
-        let bow = FigureSpec {
+    // The existing kit animates these sockets independently of the exported weapon.
+    if matches!(kind, UnitKind::Archer | UnitKind::SiegeWalker) {
+        let animated = FigureSpec {
             plan: spec.plan,
             parts: spec
                 .parts
@@ -49,13 +53,16 @@ pub(super) fn form(
                 .copied()
                 .filter(|part| {
                     matches!(
-                        part.node,
-                        Node::Prop(Socket::StringTop | Socket::StringBottom | Socket::Nock)
+                        (kind, part.node),
+                        (
+                            UnitKind::Archer,
+                            Node::Prop(Socket::StringTop | Socket::StringBottom | Socket::Nock)
+                        ) | (UnitKind::SiegeWalker, Node::Prop(Socket::Nock))
                     )
                 })
                 .collect(),
         };
-        for (node, mesh) in lit.iter_mut().zip(figure::build_joint_meshes(&bow)) {
+        for (node, mesh) in lit.iter_mut().zip(figure::build_joint_meshes(&animated)) {
             if mesh.is_some() {
                 *node = mesh;
             }
@@ -182,7 +189,7 @@ impl<'a> Reader<'a> {
 
 #[cfg(test)]
 #[test]
-fn blender_assets_cover_all_forms_and_keep_the_animated_archer_string() {
+fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
     let mut assets = Assets::default();
     for kind in [
         UnitKind::Archer,
@@ -191,6 +198,8 @@ fn blender_assets_cover_all_forms_and_keep_the_animated_archer_string() {
         UnitKind::Hexer,
         UnitKind::Sawbot,
         UnitKind::Bloomkeeper,
+        UnitKind::SiegeWalker,
+        UnitKind::Rootcaller,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -204,6 +213,9 @@ fn blender_assets_cover_all_forms_and_keep_the_animated_archer_string() {
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
+            if kind == UnitKind::SiegeWalker {
+                assert!(form.meshes[Node::Prop(Socket::Nock).index()].is_some());
+            }
             if kind == UnitKind::Archer {
                 for socket in [
                     Socket::OffhandL,
