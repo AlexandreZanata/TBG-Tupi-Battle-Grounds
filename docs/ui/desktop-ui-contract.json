@@ -696,7 +696,11 @@
       "AbyssHarpooner",
       "UndertowHerald",
       "TrenchLamplighter",
-      "FoamWeaver"
+      "FoamWeaver",
+      "PodSnapper",
+      "Colossus",
+      "Volthar",
+      "Astreon"
     ],
     "forms": [
       "Base",
@@ -795,6 +799,10 @@
       "two-hand conch and undertow pulse",
       "hand-held beacon and forward signal lens",
       "two-hand chalice and foam cast",
+      "independently hinged pod valves and seed release",
+      "one rigid obelisk, back carry, draw and slam",
+      "two-hand rune hammer, release and orbiting sparks",
+      "two-hand verdict lance and per-form thrust tip",
       "hit",
       "death",
       "victory"

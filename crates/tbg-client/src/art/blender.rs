@@ -99,6 +99,10 @@ const UNDERTOWHERALD: &[u8] =
 const TRENCHLAMPLIGHTER: &[u8] =
     include_bytes!("../../assets/champions/blender/trenchlamplighter.tbgmesh");
 const FOAMWEAVER: &[u8] = include_bytes!("../../assets/champions/blender/foamweaver.tbgmesh");
+const PODSNAPPER: &[u8] = include_bytes!("../../assets/champions/blender/podsnapper.tbgmesh");
+const COLOSSUS: &[u8] = include_bytes!("../../assets/champions/blender/colossus.tbgmesh");
+const VOLTHAR: &[u8] = include_bytes!("../../assets/champions/blender/volthar.tbgmesh");
+const ASTREON: &[u8] = include_bytes!("../../assets/champions/blender/astreon.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -194,6 +198,10 @@ pub(super) fn form(
         UnitKind::UndertowHerald => UNDERTOWHERALD,
         UnitKind::TrenchLamplighter => TRENCHLAMPLIGHTER,
         UnitKind::FoamWeaver => FOAMWEAVER,
+        UnitKind::PodSnapper => PODSNAPPER,
+        UnitKind::Colossus => COLOSSUS,
+        UnitKind::Volthar => VOLTHAR,
+        UnitKind::Astreon => ASTREON,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -458,6 +466,10 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::UndertowHerald,
         UnitKind::TrenchLamplighter,
         UnitKind::FoamWeaver,
+        UnitKind::PodSnapper,
+        UnitKind::Colossus,
+        UnitKind::Volthar,
+        UnitKind::Astreon,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -509,6 +521,12 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             if matches!(kind, UnitKind::Spinehurler | UnitKind::Needlewing) {
                 let quill = Node::Secondary(rig::Spring::HeadGear).index();
                 assert!(form.meshes[quill].is_some());
+            }
+            if kind == UnitKind::Astreon && tier > 0 && branch == 0 {
+                assert!(form.meshes[Node::Secondary(rig::Spring::HeadGear).index()].is_some());
+            }
+            if kind == UnitKind::Volthar {
+                assert!(form.glow[Node::Prop(Socket::OffhandL).index()].is_some());
             }
             if kind == UnitKind::LuminousOracle {
                 let ring = Node::Secondary(rig::Spring::HeadGear).index();
@@ -563,6 +581,7 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                     Socket::StringBottom,
                     Socket::Nock,
                 ],
+                UnitKind::PodSnapper => &[Socket::StringTop, Socket::StringBottom],
                 UnitKind::Hornet => &super::kits::hornet::hose::SOCKETS,
                 UnitKind::Crowcaller => &[Socket::Back, Socket::Nock],
                 UnitKind::Trigger => &[Socket::OffhandL, Socket::Back],

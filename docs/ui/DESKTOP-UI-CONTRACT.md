@@ -1642,3 +1642,29 @@ pending. Public download compatibility uses the actual running server.
   web visual comparisons remain pending. Queue the Blender
   loader test from the modeling guide under the shared lock
   at consolidation.
+
+### 2026-11-04 — Blender Pod Snapper and the Gods
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. These four complete the 84-model local
+  completion pool. Both seats use the same materials and geometry.
+  The feet circle carries allegiance.
+- Cover Pod Snapper's independently hinged pod valves and seed
+  release, Colossus's single obelisk through back carry, draw and
+  slam, Volthar's two-hand hammer and separate spark orbit, and
+  Astreon's two-hand lance and per-form tip.
+- Blender checked the twenty forms for joint placement, grip
+  reach and the native strike or release anchors. Static inspection
+  covered 375 TBG4 and 65 TBG5 payloads for group layout,
+  indices and reserved allegiance colors.
+- The installed Linux Vulkan client embedded all four final
+  assets byte for byte and loaded all twenty forms at their
+  exported counts. Eight Laboratory captures covered four
+  Base poses and four Evolution attack clips. At the default
+  1280×800 zoom, the toolbar covers part of Colossus's obelisk.
+- In local Training on Verdant Forest, seed 62, Colossus B2
+  removed 170 HP from a wooden dummy by the 4.35-second
+  sample. The other live combat scenarios and Windows and
+  desktop web comparisons remain pending. Queue the Blender
+  loader test from the modeling guide and the client `gd0`
+  test filter under the shared lock at consolidation.

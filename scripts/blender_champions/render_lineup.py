@@ -9,6 +9,8 @@ from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from abyssharpooner import SUPPORT as HARPOON_SUPPORT
+from astreon import SUPPORT as VERDICT_SUPPORT
+from volthar import HEAD_Z as HAMMER_HEAD_Z, SUPPORT as HAMMER_SUPPORT
 from foamweaver import SUPPORT as CHALICE_SUPPORT
 from undertowherald import SUPPORT as CONCH_SUPPORT
 from celestialarcher import HALF as CELESTIAL_BOW_HALF, TIP_Z as BOW_TIP_Z
@@ -45,6 +47,7 @@ STUDIO_ANGLES = {
     "pebbleslinger": 14, "rivetballista": 29, "nacreduelist": -23, "reeflancer": 21,
     "trenchfist": -19, "pearlslinger": 22, "abyssharpooner": -28, "undertowherald": 17,
     "trenchlamplighter": 27, "foamweaver": -24,
+    "podsnapper": -19, "colossus": 39, "volthar": -23, "astreon": 24,
 }
 INSECT_AND_PREVIEW_FRAMING = {
     "jawguard": (1.44,7.58,595,.62), "mantis": (1.32,7.10,665,.74),
@@ -69,6 +72,8 @@ COMPLETION_FRAMING = {
     "trenchfist": (1.44,7.59,625,.71), "pearlslinger": (1.37,7.23,645,.70),
     "abyssharpooner": (1.51,7.95,675,.80), "undertowherald": (1.44,7.57,665,.75),
     "trenchlamplighter": (1.42,7.51,710,.86), "foamweaver": (1.42,7.49,665,.78),
+    "podsnapper": (1.43,7.54,665,.75), "colossus": (1.59,8.36,780,.97),
+    "volthar": (1.55,8.17,730,.83), "astreon": (1.69,8.91,745,.86),
 }
 COMPLETION_CARRY = {
     "miretender": (("R",(-.154,.192,.211),-12,-9),("L",(.165,.147,.194),0,0)),
@@ -91,6 +96,7 @@ COMPLETION_CARRY = {
     "trenchfist": (("R",(-.247,.106,.239),-6,-6),("L",(.239,.089,.210),-12,18)),
     "pearlslinger": (("R",(-.186,.151,.206),-13,-34),("L",(.191,.073,.134),0,0)),
     "trenchlamplighter": (("R",(-.204,.133,.197),6,-36),),
+    "podsnapper": (("R",(-.196,.131,.231),-18,27),("L",(.194,.103,.136),0,0)),
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -265,7 +271,30 @@ ABYSSAL_TWO_HAND_CARRY = {
 }
 
 
+def deity_carry(unit,joint,rest,default):
+    if unit=="colossus":
+        if joint=="WeaponR":
+            return default @ Matrix.Rotation(radians(-8),4,"X")
+        for side,s in (("L",1),("R",-1)):
+            if joint in arm_nodes(side)[:-1]:
+                grip=TO_BLENDER @ (rest["Chest"]+Vector((s*.264,.082,.159)))
+                return reach_arm(joint,rest,side,grip,Matrix.Identity(4))
+        return default
+    if unit=="volthar":
+        at=(-.07,.084,.175)
+        if joint=="OffhandL":
+            hammer=two_hand_carry("WeaponR",rest,at,HAMMER_SUPPORT,-50,yaw=-35)
+            return hammer @ Matrix.Translation(TO_BLENDER @ Vector((0,0,HAMMER_HEAD_Z)))
+        return two_hand_carry(joint,rest,at,HAMMER_SUPPORT,-50,yaw=-35)
+    return two_hand_carry(joint,rest,(-.229,.154,.202),VERDICT_SUPPORT,-19,yaw=37)
+
+
 def latest_completion_pose(unit,joint,rest,tier,branch,default):
+    if unit in ("colossus","volthar","astreon"):
+        return deity_carry(unit,joint,rest,default)
+    if unit=="podsnapper" and joint in ("StringTop","StringBottom"):
+        weapon=latest_completion_pose(unit,"WeaponR",rest,tier,branch,default)
+        return weapon @ Matrix.Rotation(radians(-14 if joint=="StringTop" else 14),4,"Z")
     if unit in ABYSSAL_TWO_HAND_CARRY:
         at, support, angle, yaw = ABYSSAL_TWO_HAND_CARRY[unit]
         return two_hand_carry(joint,rest,at,support,angle,yaw=yaw)
@@ -453,7 +482,7 @@ def render(unit, angle):
         rear_angle = {"oilpress": -23, "cargocrab": 23, "smuggler": -15,
                       "rattletick": 29, "capybara": 18, "cindermaul": 10, "hookbrawler": -10,
                       "claybinder": 11, "hidemender": 12, "abyssharpooner": 8, "foamweaver": -12,
-                      "rivetballista": 14}.get(unit,0)
+                      "rivetballista": 14, "colossus": 9, "astreon": 7}.get(unit,0)
         anchor.rotation_euler.z = radians(angle+rear_angle if tier and branch==1 else angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)

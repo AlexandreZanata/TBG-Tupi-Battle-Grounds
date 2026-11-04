@@ -89,6 +89,10 @@ from abyssharpooner import abyssharpooner
 from undertowherald import undertowherald
 from trenchlamplighter import trenchlamplighter
 from foamweaver import foamweaver
+from podsnapper import podsnapper
+from colossus import colossus
+from volthar import volthar
+from astreon import astreon
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
@@ -172,6 +176,10 @@ GAME_UNITS = {
     "undertowherald": undertowherald,
     "trenchlamplighter": trenchlamplighter,
     "foamweaver": foamweaver,
+    "podsnapper": podsnapper,
+    "colossus": colossus,
+    "volthar": volthar,
+    "astreon": astreon,
 }
 
 

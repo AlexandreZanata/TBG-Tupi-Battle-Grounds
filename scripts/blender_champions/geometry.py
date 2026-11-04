@@ -121,8 +121,11 @@ SWATCH = {
     "prism_ice": (67, 121, 154, 0.10, 0.68),
     "leaf_ant": (63, 102, 67, 0.07, 0.70),
     "beetle_pumpkin": (179, 100, 48, 0.11, 0.67),
+    "storm_arc": (126, 220, 249, 0.0, 0.53),
+    "verdict_ember": (229, 101, 91, 0.0, 0.56),
 }
-GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse", "bell_eye"}
+GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse", "bell_eye",
+                 "storm_arc", "verdict_ember"}
 
 
 def linear(byte):

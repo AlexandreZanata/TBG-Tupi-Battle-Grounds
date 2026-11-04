@@ -14,7 +14,7 @@ EXTENDED = ("StringTop", "StringBottom", "Nock")
 INSECT_KITS = ("leafcutter", "blastbeetle", "needlewing", "nectarnurse", "stridulator")
 EXTENDED_KITS = {
     "ravager", "acidmaw", "crowcaller", "rattletick", "solarsentinel", "celestialarcher", "hornet",
-    *INSECT_KITS,
+    *INSECT_KITS, "podsnapper",
 }
 INDEX = {name: i for i, name in enumerate(NAMES + EXTENDED)}
 PARENT_OVERRIDES = {
@@ -48,6 +48,10 @@ PARENT_OVERRIDES = {
     "capybara": {"Tabard": "Chest"},
     "trident": {"WeaponR": "Chest"},
     "gustdrummer": {"WeaponR": "Chest"},
+    "podsnapper": dict.fromkeys(EXTENDED, "WeaponR"),
+    "colossus": {"WeaponR": "Chest"},
+    "volthar": {"WeaponR": "Chest", "OffhandL": "WeaponR"},
+    "astreon": {"WeaponR": "Chest"},
     "luminousoracle": {"HeadGear": "WeaponR"},
     "celestialarcher": dict.fromkeys(("BackSpring", "Tabard", "Back"), "Chest"),
     "rattletick": {
@@ -106,6 +110,9 @@ REST_OVERRIDES = {
     },
     "capybara": {"Head": (0,.38,.17), "Tabard": (0,.13,.14)},
     "gustdrummer": {"WeaponR": (0,.12,.29)},
+    "colossus": {"WeaponR": (0,.10,-.27)},
+    "volthar": {"OffhandL": (0,0,.66), "BackSpring": (0,.31,-.15)},
+    "astreon": {"BackSpring": (0,.32,-.15), "HeadGear": (0,.17,-.02)},
     "trident": {"HeadGear": (0,-.075,.13), "BackSpring": (0,.27,-.18)},
     "solarsentinel": {
         "HeadGear": (0,.15,-.06), "StringTop": (-.15,0,0), "StringBottom": (.15,0,0),
@@ -217,6 +224,10 @@ BODY_PLANS = {
     "undertowherald": (.41, .43, .34, .24, .140, .240),
     "trenchlamplighter": (.48, .29, .34, .24, .140, .240),
     "foamweaver": (.46, .31, .34, .24, .140, .220),
+    "podsnapper": (.34, .35, .34, .24, .140, .220),
+    "colossus": (.46, .52, .34, .24, .150, .300),
+    "volthar": (.46, .50, .36, .26, .145, .310),
+    "astreon": (.48, .46, .37, .25, .140, .330),
 }
 for insect in INSECT_KITS:
     leg, width, *_ = BODY_PLANS[insect]

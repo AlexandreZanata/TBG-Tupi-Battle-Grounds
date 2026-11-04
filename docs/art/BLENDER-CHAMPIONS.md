@@ -1166,3 +1166,71 @@ for unit do
   convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
 done
 ```
+
+## Pod Snapper and the Gods
+
+**Pod Snapper** has a carved rootstock face, a curled leaf
+crown and a forearm pod holding three visible seeds. Ironpod
+adds jade reinforcements over the valves and a curled green
+tendril. Royal Seeder flowers at the end of that tendril.
+Split Husk adds amber husk flares and waist leaves. Harvest
+Burst extends the flares and adds a seed cluster. Each pod
+valve stays on its own animated socket, StringTop or
+StringBottom, parented to WeaponR. The upper seed centers
+on the existing WeaponR-local `(0, 0.12, 0.28)` release.
+The five forms use 2,578–2,792 triangles and 189,013 bytes.
+
+![Pod Snapper modular Blender lineup](../media/blender-champions/podsnapper.webp)
+
+**Colossus** has a chiseled face, separate stone armor blocks
+and one rigid obelisk. Sun Obelisk adds pale stone and gold
+cutting fins. Pillar of Dawn extends the fins and crown.
+Ancient Monolith adds charcoal stone and long buttresses.
+Eternal Monument adds a crowned cap and taller rampart
+blocks. The obelisk rests on the chest socket at
+`(0, 0.10, -0.27)` and keeps the native impact point
+at WeaponR-local `(0, 1.27, 0)`. The five forms use
+3,532–4,396 triangles and 546,041 bytes.
+
+![Colossus modular Blender lineup](../media/blender-champions/colossus.webp)
+
+**Volthar** has a carved white beard, a split mantle and a
+crosswise rune hammer. Storm Herald adds ice-blue armor and
+a fitted halo. Celestial Sovereign extends the halo and adds
+diadem vanes. Hammer of Wrath adds dark armor, bronze horns
+and two hammer spurs. Divine Tempest adds a third flange and
+lengthens the crown spikes. The hammer keeps both grips at
+local Z 0 and 0.26. Its muzzle sits at Z 0.78, and the
+separate spark socket orbits the head at Z 0.66. The five
+forms use 4,652–5,458 triangles and 456,511 bytes.
+
+![Volthar modular Blender lineup](../media/blender-champions/volthar.webp)
+
+**Astreon** wears a T-visor helm with swept horns and carries a
+single lance. Giant Piercer adds ivory wings and an upright
+helmet fin. Primordial Lance lengthens the blade and fin and
+adds a luminous crystal at the guard. Final Sentence adds
+graphite plates, crimson barbs and a red mantle. Absolute
+Verdict widens the guard and adds a forward crimson crest.
+The two grips stay at local Z 0 and 0.20. The five blade
+tips reach Z 0.80, 0.86, 0.92, 0.80 and 0.88 in form
+order. The five forms use 4,304–4,668 triangles and
+438,601 bytes.
+
+![Astreon modular Blender lineup](../media/blender-champions/astreon.webp)
+
+This completes the 84 champions in the local completion pool.
+Pod Snapper uses TBG5 for both jaw sockets. The three Gods use
+TBG4. Both seats share materials and geometry, with allegiance
+shown by the circle at the feet.
+
+Reproduce the twenty forms and their studio lineups from the repository root.
+
+```sh
+set -- podsnapper colossus volthar astreon
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- "$@"
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- "$@"
+for unit do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```
