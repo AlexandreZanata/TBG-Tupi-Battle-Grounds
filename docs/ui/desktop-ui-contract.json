@@ -649,6 +649,15 @@
       "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "volcanic-forge-blender-arena-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-VOLCANIC-FORGE.md",
+      "affected_cases": "Volcanic Forge lava coast, basalt lane, Strongholds and desktop framing with two Mines and two Merchant quays, construction, work, berthing, upgrades, hoist and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }

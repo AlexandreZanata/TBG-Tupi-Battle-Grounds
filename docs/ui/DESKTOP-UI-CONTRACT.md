@@ -1326,3 +1326,18 @@ pending. Public download compatibility uses the actual running server.
 - Queue runtime presentation checks on Linux, Windows and desktop web at
   integration. Cover arena transitions, both seats, hire and upgrade
   reconciliation, work and delivery triggers, payouts and reduced motion.
+
+### 2026-11-04 — Volcanic Forge Blender study
+
+- The editable study covers the third arena's ash plateau, lava
+  shore, Strongholds, BattleLine and desktop match framing. Both
+  seats place a Mineiro and a Mercador on the Forest auxiliary
+  timeline. [Volcanic Forge study](../art/BLENDER-VOLCANIC-FORGE.md)
+- Linux Blender checked the shore approaches, keep-out corridor,
+  construction, work, crate lifts, chest motion and both barge
+  routes against drifting slag. The shared verifier also passed
+  on the saved Tundra project.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions and both seats of each auxiliary, including
+  authoritative work and delivery triggers, upgrades, payouts
+  and reduced motion.

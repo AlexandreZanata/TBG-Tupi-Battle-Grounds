@@ -52,6 +52,8 @@ ice-and-snow railings, angular snowy ridges and cliff icicles. Cool daylight and
 
 ## Volcanic Forge
 
+The editable adaptation includes both animated mines and both merchant quays. [Volcanic Forge Blender study](art/BLENDER-VOLCANIC-FORGE.md)
+
 Ash and cooled rock replace grass; broad gray paving gives troops a calm
 combat surface. Dark volcanic cliffs sit above a lava sea, orange shore
 bands and floating crust plates. Offshore basalt stacks replace sea rocks.

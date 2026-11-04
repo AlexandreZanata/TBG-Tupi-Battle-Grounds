@@ -79,3 +79,5 @@ The desktop match composition crops some of the offshore sites.
 The overview and close-ups cover both seats in full. Runtime asset
 integration, authoritative auxiliary events, and visual comparisons
 on Linux, Windows and desktop web remain pending.
+
+The next arena adapts the same offshore placement to slag mines and armored barges. [Volcanic Forge Blender study](BLENDER-VOLCANIC-FORGE.md)

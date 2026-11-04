@@ -1,18 +1,8 @@
 """Fit winter details to both animated auxiliary precincts and their moving pivots."""
 
-from aux_merchant import merchant
-from aux_miner import miner
 from aux_parts import component
-from hold_parts import empty, layer
-from mesh import box, material, pebble, surface, tube
-
-# Local bridges run from the pad to the shore. The east models mirror in X.
-SITES = (
-    ("Mineiro A",miner,(-4.93,2.44,0),(1.07,0,2.52,0),"blue"),
-    ("Mineiro B",miner,(20.93,2.44,0),(1.07,0,2.52,0),"red"),
-    ("Mercador A",merchant,(1.42,-6.39,0),(0,.70,0,2.10),"blue"),
-    ("Mercador B",merchant,(14.58,-6.39,0),(0,.70,0,2.10),"red"),
-)
+from mesh import box, pebble, surface, tube
+from offshore_sites import pivot, place as place_sites
 
 WINTER_MATERIALS = {
     "cliff": "frost-granite", "cliff-shadow": "frost-basalt", "stratum": "glacier-dark",
@@ -23,34 +13,19 @@ WINTER_MATERIALS = {
 }
 
 
-def pivot(group,prefix):
-    matches=[obj for obj in group.all_objects if obj.type=="EMPTY" and obj.name.startswith(prefix)]
-    if len(matches)!=1:
-        raise ValueError(f"{group.name} should contain one {prefix!r}, found {len(matches)}")
-    return matches[0]
-
-
 def place(parent):
-    for name,model,at,bridge,seat in SITES:
-        group=layer(parent,name)
-        root=empty(group,name+" precinct",at)
-        root.scale.x=-1 if seat=="red" else 1
-        root["Seat"]=name[-1]
-        root["Design"]="Frozen Tundra"
-        model(group,root,bridge,seat)
-        for obj in group.all_objects:
-            for slot in obj.material_slots:
-                replacement=WINTER_MATERIALS.get(slot.material.name) if slot.material else None
-                if replacement:
-                    slot.material=material(replacement)
-        if model is miner:
-            rock=pivot(group,"Rock outcrop pivot")
-            component(group,"Winter mine face",(0,0,0),mine_snow,rock)
-        else:
-            awning=pivot(group,"Canvas awning pivot")
-            ship=pivot(group,"Merchant caravel pivot")
-            component(group,"Winter market shelter",(0,0,0),awning_snow,awning)
-            component(group,"Icebreaker's bow shoe",(0,0,0),bow_shoe,ship)
+    place_sites(parent,WINTER_MATERIALS,decorate,"Frozen Tundra")
+
+
+def decorate(group,is_mine):
+    if is_mine:
+        rock=pivot(group,"Rock outcrop pivot")
+        component(group,"Winter mine face",(0,0,0),mine_snow,rock)
+    else:
+        awning=pivot(group,"Canvas awning pivot")
+        ship=pivot(group,"Merchant caravel pivot")
+        component(group,"Winter market shelter",(0,0,0),awning_snow,awning)
+        component(group,"Icebreaker's bow shoe",(0,0,0),bow_shoe,ship)
 
 
 def mine_snow(group):
