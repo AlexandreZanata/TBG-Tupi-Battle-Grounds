@@ -1313,3 +1313,16 @@ pending. Public download compatibility uses the actual running server.
 - Future runtime comparison covers hire and upgrade reconciliation,
   payouts, pause and reduced motion on the Forest BattleLine. Linux,
   Windows and desktop web runtime comparisons remain pending.
+
+### 2026-11-04 — Frozen Tundra Blender study
+
+- The editable study covers the second arena's winter terrain, coast,
+  BattleLine, Strongholds and desktop match framing. Both seats have a
+  Mineiro and Mercador with winter structures on the shared Forest
+  animation timelines. [Frozen Tundra study](../art/BLENDER-FROZEN-TUNDRA.md)
+- Linux Blender checks cover the camera, anchors, four shore approaches,
+  BattleLine clearance, construction and level reveals, pick contact,
+  ship berth, crane line, chest motion and departure.
+- Queue runtime presentation checks on Linux, Windows and desktop web at
+  integration. Cover arena transitions, both seats, hire and upgrade
+  reconciliation, work and delivery triggers, payouts and reduced motion.

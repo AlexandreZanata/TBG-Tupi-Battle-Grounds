@@ -640,6 +640,15 @@
       "linux": "Blender scene and animation checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "tundra-blender-arena-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-FROZEN-TUNDRA.md",
+      "affected_cases": "Frozen Tundra terrain, lane, Strongholds, scene framing and both seats of the Miner and Merchant with construction, work, arrival, hoist, upgrades and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }

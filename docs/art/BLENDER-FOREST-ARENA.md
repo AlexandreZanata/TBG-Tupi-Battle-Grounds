@@ -74,3 +74,5 @@ their Fortifications on this terrain.
 The [War Auxiliary companion study](BLENDER-WAR-AUXILIARIES.md) stages
 Mineiro and Mercador on both shores with construction, working and
 delivery animations.
+
+The same layout and assembly process supports the next arena. [Frozen Tundra Blender study](BLENDER-FROZEN-TUNDRA.md)

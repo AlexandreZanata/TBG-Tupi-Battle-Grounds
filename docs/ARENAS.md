@@ -37,6 +37,8 @@ Online assignment and symmetric gameplay modifiers are active under
 
 ## Frozen Tundra
 
+The editable Blender adaptation includes both animated auxiliary sites per seat. [Frozen Tundra Blender study](art/BLENDER-FROZEN-TUNDRA.md)
+
 Snow replaces the meadow; compact blue-gray paving keeps white troops
 separate from the BattleLine. Ice-colored cliff strata meet a cold sea with
 a frozen coastal shelf, chipped ice slabs with irregular beveled edges and pointed icebergs. The shelf
