@@ -1355,3 +1355,17 @@ pending. Public download compatibility uses the actual running server.
 - Queue runtime comparisons on Linux, Windows and desktop web
   for arena transitions, both seats, hire and upgrades, work and
   delivery triggers, payouts and reduced motion.
+
+### 2026-11-04 — Storm Valley Blender study
+
+- The editable study covers the fifth arena's slate coast, BattleLine,
+  Strongholds, conductor relay, static sky and desktop match framing.
+  Both seats use the shared auxiliary timeline with forged quarry
+  supports, standing-seam market roofs and riveted prows.
+  [Storm Valley study](../art/BLENDER-STORM-VALLEY.md)
+- Linux Blender checked the four shore approaches, lane clearance,
+  construction and upgrades, pick contacts, boat approach and
+  departure, parcel hoists and chest motion.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, both seats, hire and upgrades, work and
+  delivery triggers, payouts and reduced motion.

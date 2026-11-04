@@ -80,3 +80,5 @@ The reference match camera crops part of the offshore sites and
 the top of the sanctuary. The overview and close-ups show the
 complete models. Runtime integration, authoritative work and
 delivery events, payouts and desktop platform comparisons are pending.
+
+The next arena is the [Storm Valley Blender study](BLENDER-STORM-VALLEY.md).

@@ -82,6 +82,8 @@ moss shrubs, conifers, flowers, a stepped water entrance, stone balustrades and 
 
 ## Storm Valley
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-STORM-VALLEY.md)
+
 Slate-colored heath and silver-blue paving replace the green island.
 Blue-gray cliffs fall to dark open water, low linear whitecaps and jagged
 offshore rocks. Overlapping dark polygonal cloud banks form the distant horizon beyond the island.
