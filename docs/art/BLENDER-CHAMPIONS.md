@@ -1111,15 +1111,23 @@ and 281,535 bytes.
 
 ## Abyss Harpooner, Undertow Herald, Trench Lamplighter and Foam Weaver
 
-**Abyss Harpooner** carries a loaded harpoon and a side brace
-for the left hand. Nacre Harpoon uses a pale stock and a diver's
-sight. Trench Sight adds a raised sight frame and hinge. Barbed
-Spear adds a dark stock, red coral barbs and a back rack. Abyss
-Hunt splays the rack tips farther from the shoulders. The harpoon
-guide centers on the shared Abyssal release origin. The five forms
-use 3,394–3,766 triangles and 249,763 bytes.
+**Abyss Harpooner** carries a tapered launcher with polished
+draw rails, a lined receiver, a hollow guide sleeve, a retrieval
+reel and a shaped two-hand brace. Nacre Harpoon adds a pale
+stock and a launcher aperture. Trench Sight adds a front range
+marker and a raised sight hinge. Barbed Spear adds a dark stock,
+coral guides and a spear rack. Abyss Hunt adds a second pair
+of coral barbs and splays the rack tips.
+
+The loaded shaft crosses the existing WeaponR-local origin at
+`(0, 0.12, 0.28)`. The wrapped support grip encloses
+`(0.24, -0.01, 0.11)` relative to WeaponR. The spear point
+reaches local Z 0.627 in A and 0.552 in Base and B. The five
+forms use 5,280–5,746 triangles and 454,840 bytes.
 
 ![Abyss Harpooner modular Blender lineup](../media/blender-champions/abyssharpooner.webp)
+
+![Launcher before and after, with A2 and B2 details](../media/blender-champions/abyssharpooner-harpoon.webp)
 
 **Undertow Herald** has catfish barbels and a hollow fluted conch.
 Resonant Conch adds ivory, a second gold ring and a choir collar.

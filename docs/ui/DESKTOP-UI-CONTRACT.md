@@ -1668,3 +1668,18 @@ pending. Public download compatibility uses the actual running server.
   desktop web comparisons remain pending. Queue the Blender
   loader test from the modeling guide and the client `gd0`
   test filter under the shared lock at consolidation.
+
+### 2026-11-04 — Abyss Harpooner launcher refinement
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and local BattleLine. The tapered receiver, reel,
+  rails, spearhead and left support grip are weapon-local.
+- Blender checked the hollow guide and shaft at the native release
+  origin, both grips and the five spear tips. Static comparison
+  matched rest data and triangulated positions and colors outside
+  WeaponR in every form.
+- The installed Linux Vulkan client loaded all five final forms.
+  Laboratory captures cover Base idle and A2 attack. Local Training
+  on Verdant Forest, seed 62, recorded 256 HP removed by Abyss
+  Harpooner B2 at the 4.35-second sample. Windows and desktop web
+  visual comparisons remain pending.
