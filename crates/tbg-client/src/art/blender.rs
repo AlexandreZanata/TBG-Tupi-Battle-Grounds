@@ -12,6 +12,8 @@ use tbg_core::UnitKind;
 
 const ARCHER: &[u8] = include_bytes!("../../assets/champions/blender/archer.tbgmesh");
 const BONE_BRUTE: &[u8] = include_bytes!("../../assets/champions/blender/bonebrute.tbgmesh");
+const SHIELDBEARER: &[u8] = include_bytes!("../../assets/champions/blender/shieldbearer.tbgmesh");
+const HEXER: &[u8] = include_bytes!("../../assets/champions/blender/hexer.tbgmesh");
 
 pub(super) fn form(
     kind: UnitKind,
@@ -23,6 +25,8 @@ pub(super) fn form(
     let data = match kind {
         UnitKind::Archer => ARCHER,
         UnitKind::BoneBrute => BONE_BRUTE,
+        UnitKind::Shieldbearer => SHIELDBEARER,
+        UnitKind::Hexer => HEXER,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -176,13 +180,24 @@ impl<'a> Reader<'a> {
 #[test]
 fn blender_assets_cover_all_forms_and_keep_the_animated_archer_string() {
     let mut assets = Assets::default();
-    for kind in [UnitKind::Archer, UnitKind::BoneBrute] {
+    for kind in [
+        UnitKind::Archer,
+        UnitKind::BoneBrute,
+        UnitKind::Shieldbearer,
+        UnitKind::Hexer,
+    ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
             let spec = (kit.figure)(tier, branch);
             let form = form(kind, tier, branch, &spec, &mut assets).unwrap();
             assert!(form.meshes[rig::Joint::Head.index()].is_some());
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
+            let grip = if kind == UnitKind::Archer {
+                Socket::OffhandL
+            } else {
+                Socket::WeaponR
+            };
+            assert!(form.meshes[Node::Prop(grip).index()].is_some());
             if kind == UnitKind::Archer {
                 for socket in [
                     Socket::OffhandL,

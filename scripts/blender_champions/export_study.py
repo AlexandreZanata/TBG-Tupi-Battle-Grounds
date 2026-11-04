@@ -10,7 +10,7 @@ import bpy
 SRC=Path(__file__).resolve().parent
 sys.path.insert(0,str(SRC))
 from characters import archer, brute
-from geometry import Model, SWATCH
+from geometry import GLOW_SWATCHES, Model, SWATCH
 from rig import NAMES, INDEX, armature, bind_piece, rest_positions
 from volume import bind, generate
 
@@ -64,7 +64,7 @@ def groups_for(model, generated=None):
     for part in model.parts:
         obj=part.obj.evaluated_get(deps)
         evaluated=obj.to_mesh()
-        key=(1 if part.swatch=="soul" else 0,INDEX[part.joint])
+        key=(int(part.swatch in GLOW_SWATCHES),INDEX[part.joint])
         append_mesh(meshes[key],evaluated,SWATCH[part.swatch][:3],int(part.swatch=="team"))
         obj.to_mesh_clear()
     if generated is not None:

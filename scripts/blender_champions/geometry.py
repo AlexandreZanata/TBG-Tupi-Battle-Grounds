@@ -19,7 +19,11 @@ SWATCH = {
     "bone": (214, 188, 134, 0.0, 0.70), "oldbone": (150, 121, 81, 0.0, 0.83),
     "skin": (192, 123, 82, 0.0, 0.65), "ink": (31, 27, 26, 0.0, 0.87),
     "soul": (104, 255, 207, 0.0, 0.53),
+    "steel": (119, 131, 147, 0.63, 0.45), "steel_dark": (63, 72, 86, 0.54, 0.58),
+    "violet": (85, 58, 110, 0.0, 0.82), "violet_dark": (50, 34, 65, 0.0, 0.89),
+    "ritual": (199, 122, 255, 0.0, 0.53),
 }
+GLOW_SWATCHES = {"soul", "ritual"}
 
 
 def linear(byte):
@@ -48,7 +52,7 @@ def material(swatch):
     shader.inputs["Base Color"].default_value = color
     shader.inputs["Metallic"].default_value = metal
     shader.inputs["Roughness"].default_value = rough
-    if swatch == "soul":
+    if swatch in GLOW_SWATCHES:
         shader.inputs["Emission Color"].default_value = color
         shader.inputs["Emission Strength"].default_value = 1.35
     return mat

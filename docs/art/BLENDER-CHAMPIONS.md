@@ -10,13 +10,14 @@ intrinsic material colors and the independent status outline.
 
 ## Editable source and export
 
-The Archer and Bone Brute use component modeling. Each Blender object is
-named for its physical piece and has a material and a named rig node. The
-source is in [scripts/blender_champions](../../scripts/blender_champions).
+The Archer, Bone Brute, Shieldbearer and Hexer use component modeling.
+Each Blender object is named for its physical piece and has a material and
+a named rig node. The source is in
+[scripts/blender_champions](../../scripts/blender_champions).
 Blender 4.5.15 LTS was used for these exports.
 
-1. Build the base in joint-local, Y-up game coordinates in
-   `characters.py`. Use supported bevels for metal, profile lofts for
+1. Build the base in joint-local, Y-up game coordinates in a champion
+   model module. Use supported bevels for metal, profile lofts for
    cloth and faces, and tapered tubes for curved bones and bow limbs.
    Keep the skeleton, sockets and grip points from `art/rig.rs` and the
    champion kit. `rig.py` maps game +Y up and +Z forward to Blender +Z
@@ -42,6 +43,8 @@ Blender 4.5.15 LTS was used for these exports.
 ```sh
 blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py
 ```
+
+Pass champion IDs after `--` to export only those champions.
 
 5. Use the same FigureLibrary entry for the Laboratory, BattleLine,
    Evolution swap and inspection. Confirm stance, movement, weapon
@@ -70,7 +73,7 @@ and both generated bodies had higher triangle counts. The game uses the
 modular Blender pieces. This also keeps the existing kit pose and
 authoritative battle event path.
 
-`export_game.py` produces the two checked-in game assets. The editable
+`export_game.py` produces the game assets. The editable
 scenes and intermediate build outputs are generated locally.
 The Archer export has 5,058–5,464 triangles per form and occupies 436,544
 bytes. The Bone Brute export has 6,384–6,998 triangles per form and occupies
@@ -86,3 +89,34 @@ animated weapon sockets.
 ![Archer modular and generated Blender models](../media/blender-champions/archer.webp)
 
 ![Bone Brute modular and generated Blender models](../media/blender-champions/bonebrute.webp)
+
+## Shieldbearer and Hexer
+
+The Shieldbearer uses a quilted gambeson, curved armor, a forged kite
+shield and a diamond-section sword. The A branch moves from a kettle
+helm and wider shield to a great helm and crenellated tower shield.
+The B branch adds a cavalry mantle, plume, wing crest and longer sword.
+Keep the shield face along the offhand's +X axis. The blade point stays
+at weapon-local Z 0.62, 0.72 or 0.82 according to the kit.
+
+The Hexer uses a tattered robe, crooked hat and skull lantern in a
+forked blackthorn staff. Withering and Doom add a broken halo and
+gold thorns. Plague and Pestilence add a green censer and a stitched
+plague beak. The staff mouth stays at the kit's cast muzzle
+`(0.0, 0.88, 0.09)`. The runtime renders ritual violet and soul green
+in its separate glow layer.
+
+The exports contain 3,418–4,110 triangles per Shieldbearer form and
+4,160–4,568 per Hexer form. The files are 360,732 and 313,317 bytes,
+respectively. Render the ten forms with the same Blender studio setup.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- shieldbearer hexer
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py
+```
+
+The renders are in Base, A1, A2, B1, B2 order, from left to right.
+
+![Shieldbearer modular Blender lineup](../media/blender-champions/shieldbearer.webp)
+
+![Hexer modular Blender lineup](../media/blender-champions/hexer.webp)

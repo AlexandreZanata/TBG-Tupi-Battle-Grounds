@@ -8,12 +8,15 @@ import bpy
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-from export_study import FORMS, UNITS, collection, groups_for
+from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
 from geometry import Model
+from hexer import hexer
 from rig import NAMES, rest_positions
+from shieldbearer import shieldbearer
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
+GAME_UNITS = {**STUDY_UNITS, "shieldbearer": shieldbearer, "hexer": hexer}
 
 
 def quantize(values, scale):
@@ -32,9 +35,10 @@ def form_payload(groups, rest):
     return result
 
 
-def main():
+def main(units):
     OUTPUT.mkdir(parents=True, exist_ok=True)
-    for unit, make in UNITS.items():
+    for unit in units:
+        make = GAME_UNITS[unit]
         payloads = []
         for label, tier, branch in FORMS:
             bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -51,4 +55,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    units = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    main(units or GAME_UNITS)

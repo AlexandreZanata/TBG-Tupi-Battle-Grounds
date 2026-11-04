@@ -1293,3 +1293,15 @@ pending. Public download compatibility uses the actual running server.
   authoritative Archer-versus-Bone Brute training engagement. The combat
   recording captured 11 attack starts, 10 hits and one death.
 - Windows and desktop web comparison remain pending.
+
+### 2026-11-04 — Blender Shieldbearer and Hexer local preview
+
+- Cover Base and four Evolution forms for each champion in the shared
+  FigureLibrary, Laboratory and BattleLine. Both seats use the same
+  figure and its equipment. The feet circle identifies allegiance.
+- Keep the existing shield guard, sword strike at 0.30 s and staff cast
+  at 0.22 s. The matrix covers spawn, idle, walk, attack, hit, death,
+  victory and Evolution swap for both champions.
+- Linux Vulkan capture covered Shieldbearer Base and A2, Hexer Base and
+  B2, and a local Practice match with both champions on both seats.
+- Visual and motion comparison for Windows and desktop web remains pending.

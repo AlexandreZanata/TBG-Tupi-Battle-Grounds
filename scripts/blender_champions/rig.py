@@ -11,15 +11,18 @@ NAMES = (
 )
 PARENT = (None, 0, 1, 2, 3, 3, 5, 6, 3, 8, 9, 1, 11, 12, 1, 14, 15, 3, 4, 1, 10, 7, 17)
 INDEX = {name: i for i, name in enumerate(NAMES)}
+BODY_PLANS = {
+    "archer": (0.38, 0.36, 0.34, 0.24, 0.1365, 0.20),
+    "bonebrute": (0.36, 0.50, 0.38, 0.28, 0.14, 0.25),
+    "shieldbearer": (0.38, 0.36 * 1.08, 0.34, 0.24, 0.1365, 0.17),
+    "hexer": (0.38, 0.36, 0.34, 0.24, 0.1365, 0.17),
+}
 # +Y up and +Z forward in TBG, +Z up and -Y forward in Blender.
 TO_BLENDER = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))
 
 
 def rest_positions(unit, *, production=False, tier=0, branch=0):
-    leg, width, height, depth, head, arm = (
-        (0.38, 0.36, 0.34, 0.24, 0.1365, 0.20) if unit == "archer"
-        else (0.36, 0.50, 0.38, 0.28, 0.14, 0.25)
-    )
+    leg, width, height, depth, head, arm = BODY_PLANS[unit]
     if production and unit=="bonebrute" and tier==2 and branch==1:
         arm=.32
     a = width / 2 + 0.05

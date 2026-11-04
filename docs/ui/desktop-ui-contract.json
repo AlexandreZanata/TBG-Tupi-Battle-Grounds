@@ -618,7 +618,9 @@
   "blender_champions": {
     "champions": [
       "Archer",
-      "BoneBrute"
+      "BoneBrute",
+      "Shieldbearer",
+      "Hexer"
     ],
     "forms": [
       "Base",
@@ -647,6 +649,7 @@
     ],
     "samples_seconds": {
       "release": 0.18,
+      "cast_release": 0.22,
       "strike_or_hit": 0.3
     },
     "ownership": "feet circle only"

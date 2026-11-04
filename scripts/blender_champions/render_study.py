@@ -25,14 +25,7 @@ def light(name,location,color,power,size):
     aim(obj,(0,0,.64))
 
 
-def render(unit):
-    bpy.ops.wm.read_factory_settings(use_empty=True)
-    for method,x in (("parts",-.66),("volume",.66)):
-        before=set(bpy.context.scene.objects)
-        bpy.ops.import_scene.gltf(filepath=str(ROOT/"exports"/f"{unit}-{method}.glb"))
-        roots=[o for o in set(bpy.context.scene.objects)-before if o.parent is None]
-        for root in roots:
-            root.location.x+=x
+def studio(location, target, scale, size, output):
     bpy.ops.mesh.primitive_plane_add(size=200)
     floor=bpy.context.object
     floor.location.z=-.027
@@ -45,11 +38,11 @@ def render(unit):
     light("Warm key",(-3,-4,5),(1,.83,.67),390,3.0)
     light("Cool rim",(2.8,2,3.4),(.56,.78,1),500,2.4)
     light("Fill",(1.2,-4,1.8),(.72,.87,1),98,3.5)
-    bpy.ops.object.camera_add(location=(1.18,-6.1,2.05))
+    bpy.ops.object.camera_add(location=location)
     camera=bpy.context.object
-    aim(camera,(.04,0,.67))
+    aim(camera,target)
     camera.data.type="ORTHO"
-    camera.data.ortho_scale=2.98
+    camera.data.ortho_scale=scale
     scene=bpy.context.scene
     scene.camera=camera
     scene.render.engine="CYCLES"
@@ -57,17 +50,27 @@ def render(unit):
     scene.cycles.use_denoising=True
     scene.render.threads_mode="FIXED"
     scene.render.threads=2
-    scene.render.resolution_x=1040
-    scene.render.resolution_y=710
+    scene.render.resolution_x,scene.render.resolution_y=size
     scene.render.resolution_percentage=100
     scene.render.image_settings.file_format="PNG"
-    scene.render.filepath=str(OUT/f"blender-native-{unit}.png")
+    scene.render.filepath=str(output)
     scene.world=bpy.data.worlds.new("Studio")
     scene.world.use_nodes=True
     scene.world.node_tree.nodes["Background"].inputs[0].default_value=(.13,.16,.20,1)
     scene.world.node_tree.nodes["Background"].inputs[1].default_value=.32
+
+def render(unit):
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    for method,x in (("parts",-.66),("volume",.66)):
+        before=set(bpy.context.scene.objects)
+        bpy.ops.import_scene.gltf(filepath=str(ROOT/"exports"/f"{unit}-{method}.glb"))
+        roots=[o for o in set(bpy.context.scene.objects)-before if o.parent is None]
+        for root in roots:
+            root.location.x+=x
+    studio((1.18,-6.1,2.05),(.04,0,.67),2.98,(1040,710),OUT/f"blender-native-{unit}.png")
     bpy.ops.render.render(write_still=True)
 
 
-for unit in ("archer","bonebrute"):
-    render(unit)
+if __name__=="__main__":
+    for unit in ("archer","bonebrute"):
+        render(unit)
