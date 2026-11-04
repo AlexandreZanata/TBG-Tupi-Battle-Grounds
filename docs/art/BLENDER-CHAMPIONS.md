@@ -154,12 +154,15 @@ The renders are in Base, A1, A2, B1, B2 order, from left to right.
 
 ## Siege Walker and Rootcaller
 
-The Siege Walker has a broad sculpted ogre face, layered leather and a
-bored shoulder bombard. Longshot adds a telescope. Artillery gets twin
-bores, Shrapnel a flared bell, and Concussion a shell drum. The bore axis
-stays at weapon-local Y 0.26. Keep the kit's five muzzle planes, the
-support grip at `(0.28, 0.10, 0.36)` and the native animated reload
-lever on its own socket. The lineup shows the shoulder carry.
+The Siege Walker's face is sculpted as one shell with defined cheeks,
+recessed eyes and fitted tusks. The helmet visor clears the eye line.
+The shoulder bombard has a tapered steel barrel, a separate dark bore
+liner, a carved stock and a braced support grip. Longshot adds a
+centered telescope. Artillery gets twin bores, Shrapnel a flared bell,
+and Concussion a shell drum. The bore axis stays at weapon-local Y 0.26.
+Keep the five muzzle planes, the support grip at `(0.28, 0.10, 0.36)`
+and the native animated reload lever on its own socket. The lineup shows
+the shoulder carry.
 
 The Rootcaller has a fluted trunk, jointed root claws, an amber eye glow
 and moss beard. The A branch adds vines and a crown of roots. The B
@@ -167,8 +170,8 @@ branch adds a broad cap, glowing spores and a fungal cluster on the
 back spring. The middle claw on the right-hand socket ends at
 `(0, -0.06 - length, 0.04)`, with the kit's per-form claw length.
 
-The Siege Walker export has 4,248–5,090 triangles per form and uses
-424,061 bytes. This excludes the native reload lever. The Rootcaller
+The refined Siege Walker export has 5,234–6,348 triangles per form and
+uses 534,937 bytes. This excludes the native reload lever. The Rootcaller
 has 2,386–5,692 triangles per form and uses 253,790 bytes.
 
 ```sh

@@ -83,9 +83,10 @@ class Model:
         self.parts.append(Part(obj, joint, swatch, fuse))
         return obj
 
-    def ell(self, name, joint, swatch, center, radii, *, fuse=False, segments=12):
+    def ell(self, name, joint, swatch, center, radii, *, fuse=False, segments=12, rings=None):
         bm = bmesh.new()
-        bmesh.ops.create_uvsphere(bm, u_segments=segments, v_segments=max(6, segments // 2), radius=1)
+        bmesh.ops.create_uvsphere(bm, u_segments=segments,
+                                  v_segments=rings or max(6, segments // 2), radius=1)
         mesh = bpy.data.meshes.new(name)
         bm.to_mesh(mesh)
         bm.free()

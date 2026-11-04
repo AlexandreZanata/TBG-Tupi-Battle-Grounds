@@ -1326,6 +1326,9 @@ pending. Public download compatibility uses the actual running server.
   figure and equipment, with allegiance on the feet circle.
 - Cover the Siege Walker's 0.18 s release, breech and animated reload
   lever. Cover the Rootcaller's 0.22 s cast at the right claw tip.
+- Linux Vulkan captured Base and one tier-two Evolution for each champion
+  in the Laboratory. The client loaded all ten meshes at their exported
+  triangle counts, including the Siege Walker's native reload lever.
 - Visual and motion comparison for Windows and desktop web remains pending.
 
 ### 2026-11-04 — Blender Nester and Rampart
@@ -1335,4 +1338,18 @@ pending. Public download compatibility uses the actual running server.
   figure and equipment, with allegiance on the feet circle.
 - Cover the Nester's seed release and secondary basket motion. Cover
   Rampart's chest-local wall guard and right-hand strike at 0.30 s.
+- Linux Vulkan captured Base and one tier-two Evolution for each champion
+  in the Laboratory. Both pairs loaded together in the Practice client.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Siege Walker face and bombard refinement
+
+- Cover the five refined faces, sights, stock and open bores in the
+  Laboratory and on the BattleLine. Use the same figure in both seats.
+- Preserve the shared rig, support grip, muzzle and breech anchors,
+  the 0.18 s release, and the native animated reload lever.
+- Blender verified all five muzzle planes and the support grip.
+  The Linux Vulkan preview loaded all five refined forms with the native
+  lever, captured Base, A1, A2 and B2 in the Laboratory, and ran local
+  Practice with Siege Walker on both seats.
 - Visual and motion comparison for Windows and desktop web remains pending.
