@@ -76,6 +76,16 @@ const DAWNMENDER: &[u8] = include_bytes!("../../assets/champions/blender/dawnmen
 const PRISMANCER: &[u8] = include_bytes!("../../assets/champions/blender/prismancer.tbgmesh");
 const LEAFCUTTER: &[u8] = include_bytes!("../../assets/champions/blender/leafcutter.tbgmesh");
 const BLASTBEETLE: &[u8] = include_bytes!("../../assets/champions/blender/blastbeetle.tbgmesh");
+const NEEDLEWING: &[u8] = include_bytes!("../../assets/champions/blender/needlewing.tbgmesh");
+const NECTARNURSE: &[u8] = include_bytes!("../../assets/champions/blender/nectarnurse.tbgmesh");
+const STRIDULATOR: &[u8] = include_bytes!("../../assets/champions/blender/stridulator.tbgmesh");
+const BASALTBULWARK: &[u8] = include_bytes!("../../assets/champions/blender/basaltbulwark.tbgmesh");
+const CINDERMAUL: &[u8] = include_bytes!("../../assets/champions/blender/cindermaul.tbgmesh");
+const HOOKBRAWLER: &[u8] = include_bytes!("../../assets/champions/blender/hookbrawler.tbgmesh");
+const FLINTRUNNER: &[u8] = include_bytes!("../../assets/champions/blender/flintrunner.tbgmesh");
+const CLAYBINDER: &[u8] = include_bytes!("../../assets/champions/blender/claybinder.tbgmesh");
+const GUSTDRUMMER: &[u8] = include_bytes!("../../assets/champions/blender/gustdrummer.tbgmesh");
+const HIDEMENDER: &[u8] = include_bytes!("../../assets/champions/blender/hidemender.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -151,6 +161,16 @@ pub(super) fn form(
         UnitKind::Prismancer => PRISMANCER,
         UnitKind::Leafcutter => LEAFCUTTER,
         UnitKind::Blastbeetle => BLASTBEETLE,
+        UnitKind::Needlewing => NEEDLEWING,
+        UnitKind::NectarNurse => NECTARNURSE,
+        UnitKind::Stridulator => STRIDULATOR,
+        UnitKind::BasaltBulwark => BASALTBULWARK,
+        UnitKind::CinderMaul => CINDERMAUL,
+        UnitKind::HookBrawler => HOOKBRAWLER,
+        UnitKind::FlintRunner => FLINTRUNNER,
+        UnitKind::ClayBinder => CLAYBINDER,
+        UnitKind::GustDrummer => GUSTDRUMMER,
+        UnitKind::HideMender => HIDEMENDER,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -395,6 +415,16 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Prismancer,
         UnitKind::Leafcutter,
         UnitKind::Blastbeetle,
+        UnitKind::Needlewing,
+        UnitKind::NectarNurse,
+        UnitKind::Stridulator,
+        UnitKind::BasaltBulwark,
+        UnitKind::CinderMaul,
+        UnitKind::HookBrawler,
+        UnitKind::FlintRunner,
+        UnitKind::ClayBinder,
+        UnitKind::GustDrummer,
+        UnitKind::HideMender,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -415,7 +445,7 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 | UnitKind::Jawguard
                 | UnitKind::Hushfang => Node::Body(rig::Joint::Head),
                 UnitKind::Ravager => Node::Body(rig::Joint::ForearmR),
-                UnitKind::Gorgehowl => Node::Body(rig::Joint::Chest),
+                UnitKind::Gorgehowl | UnitKind::Stridulator => Node::Body(rig::Joint::Chest),
                 UnitKind::Whisperer => Node::Prop(Socket::Back),
                 UnitKind::Sawbot
                 | UnitKind::Rampart
@@ -425,7 +455,8 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 | UnitKind::CargoCrab
                 | UnitKind::Demolisher
                 | UnitKind::Capybara
-                | UnitKind::Justiciar => Node::Body(rig::Joint::HandR),
+                | UnitKind::Justiciar
+                | UnitKind::Needlewing => Node::Body(rig::Joint::HandR),
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
@@ -434,11 +465,13 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                     kind,
                     UnitKind::Bloodweaver | UnitKind::AntidoteBrewer | UnitKind::Smuggler
                 ) && (tier, branch) == (2, 1))
-                || (kind == UnitKind::Puppetmaster && tier > 0 && branch == 1)
+                || (matches!(kind, UnitKind::Puppetmaster | UnitKind::HookBrawler)
+                    && tier > 0
+                    && branch == 1)
             {
                 assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
             }
-            if kind == UnitKind::Spinehurler {
+            if matches!(kind, UnitKind::Spinehurler | UnitKind::Needlewing) {
                 let quill = Node::Secondary(rig::Spring::HeadGear).index();
                 assert!(form.meshes[quill].is_some());
             }
@@ -469,13 +502,24 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                     &[Socket::OffhandL]
                 }
                 UnitKind::MireTender | UnitKind::EclipseDancer => &[Socket::OffhandL],
-                UnitKind::Leafcutter => &[
+                UnitKind::Leafcutter | UnitKind::Stridulator => &[
                     Socket::Back,
                     Socket::StringTop,
                     Socket::StringBottom,
                     Socket::Nock,
                 ],
-                UnitKind::Blastbeetle => &[
+                UnitKind::Needlewing => &[
+                    Socket::WeaponR,
+                    Socket::Back,
+                    Socket::StringTop,
+                    Socket::StringBottom,
+                    Socket::Nock,
+                ],
+                UnitKind::BasaltBulwark
+                | UnitKind::CinderMaul
+                | UnitKind::FlintRunner
+                | UnitKind::ClayBinder => &[Socket::OffhandL],
+                UnitKind::Blastbeetle | UnitKind::NectarNurse => &[
                     Socket::OffhandL,
                     Socket::Back,
                     Socket::StringTop,

@@ -1576,3 +1576,38 @@ pending. Public download compatibility uses the actual running server.
   match observations and the Blender loader test from the modeling
   guide under the shared lock at consolidation. Windows and desktop
   web full-frame and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Needlewing through Hide Mender
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. BattleLine and Evolution swaps follow each
+  champion's existing local completion availability. Both seats
+  use the same meshes and materials. The feet circle carries
+  allegiance.
+- Cover Needlewing's chest-mounted wing pivot and loaded wrist
+  needle, Nectar Nurse's independent bowl and spoon, and
+  Stridulator's hinged wings and chest aperture. Each insect
+  preserves all 26 nodes and both auxiliary leg chains.
+- Cover Basalt Bulwark's braced shield and quarry maul, Cinder
+  Maul's paired hammers, Hook Brawler's right hook and B-family
+  offhand hook, and Flint Runner's paired blades.
+- Cover Clay Binder's cast seal and offhand clay charge, Barrel
+  Keeper's chest-mounted cask and two-hand carry, and Hide
+  Mender's sewing needle and spool. Inspect hand contact and
+  shoulder joins through movement and Evolution swaps.
+- Blender checked all fifty forms for native rest attachments,
+  grip positions and strike or release anchors as applicable.
+  Static inspection covered 310 TBG4 and 60 TBG5 payloads for
+  group layout, indices and reserved allegiance colors.
+- The installed Linux Vulkan client loaded all fifty forms at
+  their exported triangle counts. Twenty Laboratory captures
+  covered ten Base idle poses, eight Evolution attack clips,
+  one Evolution walk and one Evolution victory. The toolbar
+  can cover the top of tall forms at the default 1280×800 zoom.
+- Local Training remains pending. The isolated Xvfb editor
+  automation failed twice to locate the add-selected button,
+  so the trial did not start. At consolidation, add Needlewing
+  B2 against a wooden dummy and observe the needle release.
+  Queue the Blender loader test from the modeling guide under
+  the shared lock. Windows and desktop web full-frame and
+  motion comparisons remain pending.

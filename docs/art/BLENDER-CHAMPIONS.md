@@ -914,3 +914,133 @@ for unit do
   convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
 done
 ```
+
+## Needlewing, Nectar Nurse and Stridulator
+
+**Needlewing** has a narrow abdomen, compound eyes and four separately
+modeled wing vanes on a chest-mounted pivot. Keen Sight adds long
+ivory sight rails and extended vanes. Hunt Window adds a raised
+ivory crest. Needle Volley adds ice-teal wing panels and amber
+feed guides. Amber Guide adds forked vanes and spare needles. The
+loaded needle sits on HeadGear, 0.13 forward of HandR, and reaches
+the existing HandR-local shot origin at Z 0.25. All four wings stay
+on WeaponR when the loaded needle disappears.
+The five forms use 2,814–3,126 triangles and 216,818 bytes.
+
+![Needlewing modular Blender lineup](../media/blender-champions/needlewing.webp)
+
+**Nectar Nurse** has a striped bee abdomen, a shallow nectar bowl and
+a curved spoon. Honey Keeper adds golden thorax latticework and
+bowl handles. Golden Remedy adds a hexagonal diadem and taller
+handles. Silken Nectar adds an ivory apron, jade bowl and layered
+silvery wings. Hive Lifeline extends the silk and the bowl handles.
+The two tools move on independent hand sockets. The five forms
+use 2,658–2,976 triangles and 199,275 bytes.
+
+![Nectar Nurse modular Blender lineup](../media/blender-champions/nectarnurse.webp)
+
+**Stridulator** has a short cicada abdomen, two hinged wing shells
+and a recessed resonator. Echo Chamber adds ivory arches around
+the acoustic ribs. Resonant Crown adds two ivory crown blades.
+Cutting Rhythm adds amber side chambers. Amber Chorus adds
+overlapping amber wings. The aperture is centered at Chest-local
+`(0, 0, 0.30)`. The five forms use 2,852–3,224 triangles and
+214,201 bytes.
+
+![Stridulator modular Blender lineup](../media/blender-champions/stridulator.webp)
+
+## Basalt Bulwark, Cinder Maul, Hook Brawler and Flint Runner
+
+**Basalt Bulwark** carries a braced stone shield and a quarry
+maul. Cairn Guard adds pale masonry courses and a stone headband.
+Stonewall adds a taller wall and a masonry crest. Cracked Guard
+has a slate shield with a green fault line and split shoulders.
+Quake Bastion adds a shield spur and taller shoulder ridges. The
+shield grips OffhandL, and the maul encloses the WeaponR strike
+point at Z 0.25. The five forms use 4,338–4,816 triangles and
+413,614 bytes.
+
+![Basalt Bulwark modular Blender lineup](../media/blender-champions/basaltbulwark.webp)
+
+**Cinder Maul** carries a pair of wrapped hammers and a chimney
+pack. Coalbreaker adds wide squared heads and forged shoulder
+plates. Ember Anvil adds anvil horns and goggles. Twin Brands
+adds cylindrical fists with orange forge bands. Furnace Fists
+adds extended chimneys and vambrace fins. Both held heads cover
+the Z 0.25 contact line. The five forms use 4,620–5,346 triangles
+and 420,432 bytes.
+
+![Cinder Maul modular Blender lineup](../media/blender-champions/cindermaul.webp)
+
+**Hook Brawler** wears a split coat and knotted dock scarf.
+Ironhook adds pale anchor flukes to the steel hook. Anchorbreaker
+adds a longer hook and a shoulder guard. Barbed Loop adds an
+offhand hook, indigo cloth and a shackle buckle. Chainmaster
+adds three modeled links to each hook. The right shackle reaches
+the WeaponR strike line at Z 0.25. The five forms use
+4,812–5,712 triangles and 394,583 bytes.
+
+![Hook Brawler modular Blender lineup](../media/blender-champions/hookbrawler.webp)
+
+**Flint Runner** has a narrow frame, a knapped crown ridge and
+paired blades. Trailblade adds long ivory blades and layered
+trail wraps. Flint Gale extends the blades and raises the ridge.
+Sparksprinter has obsidian blades with glowing orange fractures.
+Obsidian Rush adds shoulder spurs and another crown shard. Each
+blade crosses its local Z 0.25 line. The five forms use
+4,236–4,260 triangles and 308,945 bytes.
+
+![Flint Runner modular Blender lineup](../media/blender-champions/flintrunner.webp)
+
+## Clay Binder, Barrel Keeper and Hide Mender
+
+**Clay Binder** carries a split ceramic mask, a handled clay jar
+and a hand-held seal. Clay Seal adds a limestone mask and a
+waist tablet. Earthlock adds a double brow crest and taller
+jar. Mire Mask introduces marsh-green cloth and a blue-green
+glazed mask. Quagmire Sage adds reeds tied to a tall jar. The
+seal lip centers on WeaponR-local Z 0.27. The five forms use
+4,818–4,942 triangles and 418,666 bytes.
+
+![Clay Binder modular Blender lineup](../media/blender-champions/claybinder.webp)
+
+**Barrel Keeper** (GustDrummer) carries a horizontal stave cask
+and fitted brewer's apron. Field Cask adds cream hoops and belt
+vials. Balm Reserve adds cap braces and a raised golden vessel.
+Rolling Remedy adds a green cask and brass tap. Harvest Cask
+adds a longer spout and a raised green vessel. The chest-mounted
+cask stays at `(0, 0.12, 0.29)` in rest, with palms at cask-local
+X ±0.25 and the front bung at Z 0.218. The five forms use
+5,170–5,696 triangles and 401,568 bytes.
+
+![Barrel Keeper modular Blender lineup](../media/blender-champions/gustdrummer.webp)
+
+**Hide Mender** wears open brass spectacles and carries a spool
+and steel needle. Field Stitch adds a layered ivory apron and
+spare tool pouch. Leather Surgeon adds a folded cap and a
+longer needle. Spirit Spool adds plum lapels and mint thread.
+Ancestral Seam adds raised collar tips and an exposed thread
+loop on the spool. The needle reaches WeaponR-local Z 0.40 in
+A and 0.33 in Base and B. The five forms use 5,178–5,610
+triangles and 474,430 bytes.
+
+![Hide Mender modular Blender lineup](../media/blender-champions/hidemender.webp)
+
+This batch continues the local completion pool. The three insects
+record the 26-node rig in TBG5, with each auxiliary leg authored as
+coxa, shin and foot. Neck and shoulder collars join their heads and
+upper arms to the thorax. The seven ogres use TBG4 and fitted anatomy
+with per-kit facial proportions, clothing and equipment.
+Both seats use the same materials. The feet circle shows allegiance.
+
+Build all fifty forms and their Base, A1, A2, B1 and B2 studio
+lineups from the repository root.
+
+```sh
+set -- needlewing nectarnurse stridulator basaltbulwark cindermaul hookbrawler flintrunner claybinder gustdrummer hidemender
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- "$@"
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- "$@"
+for unit do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```

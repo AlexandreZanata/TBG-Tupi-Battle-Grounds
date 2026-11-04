@@ -11,9 +11,10 @@ NAMES = (
 )
 PARENT = (None, 0, 1, 2, 3, 3, 5, 6, 3, 8, 9, 1, 11, 12, 1, 14, 15, 3, 4, 1, 10, 7, 17)
 EXTENDED = ("StringTop", "StringBottom", "Nock")
+INSECT_KITS = ("leafcutter", "blastbeetle", "needlewing", "nectarnurse", "stridulator")
 EXTENDED_KITS = {
     "ravager", "acidmaw", "crowcaller", "rattletick", "solarsentinel", "celestialarcher", "hornet",
-    "leafcutter", "blastbeetle",
+    *INSECT_KITS,
 }
 INDEX = {name: i for i, name in enumerate(NAMES + EXTENDED)}
 PARENT_OVERRIDES = {
@@ -46,6 +47,7 @@ PARENT_OVERRIDES = {
     },
     "capybara": {"Tabard": "Chest"},
     "trident": {"WeaponR": "Chest"},
+    "gustdrummer": {"WeaponR": "Chest"},
     "luminousoracle": {"HeadGear": "WeaponR"},
     "celestialarcher": dict.fromkeys(("BackSpring", "Tabard", "Back"), "Chest"),
     "rattletick": {
@@ -53,12 +55,14 @@ PARENT_OVERRIDES = {
         **dict.fromkeys(("HeadGear", "Back", "StringTop", "Nock"), "BackSpring"),
     },
 }
-for insect in ("leafcutter", "blastbeetle"):
+for insect in INSECT_KITS:
     PARENT_OVERRIDES[insect] = {
         "BackSpring": "Hips", "Tabard": "Hips", "HeadGear": "Chest",
         "StringTop": "BackSpring", "StringBottom": "Tabard",
         "Back": "StringTop", "Nock": "StringBottom",
     }
+
+PARENT_OVERRIDES["needlewing"].update(WeaponR="Chest", HeadGear="HandR")
 
 REST_OVERRIDES = {
     "spinehurler": {"HeadGear": (0,0,0)},
@@ -101,6 +105,7 @@ REST_OVERRIDES = {
         "Head": (0,.07,.24), "BackSpring": (0,.02,-.10),
     },
     "capybara": {"Head": (0,.38,.17), "Tabard": (0,.13,.14)},
+    "gustdrummer": {"WeaponR": (0,.12,.29)},
     "trident": {"HeadGear": (0,-.075,.13), "BackSpring": (0,.27,-.18)},
     "solarsentinel": {
         "HeadGear": (0,.15,-.06), "StringTop": (-.15,0,0), "StringBottom": (.15,0,0),
@@ -194,16 +199,24 @@ BODY_PLANS = {
     "starbreaker": (.38, .36, .34, .24, .1365, .20),
     "dawnmender": (.38, .36, .34, .24, .1365, .19),
     "prismancer": (.38, .36, .34, .24, .1365, .17),
-    "leafcutter": (.38, .36 * .83, .34, .24, .1365, .17 * .95),
-    "blastbeetle": (.38, .36 * .83, .34, .24, .1365, .17 * .95),
+    **dict.fromkeys(INSECT_KITS, (.38, .36 * .83, .34, .24, .1365, .17 * .95)),
+    "basaltbulwark": (.35, .48, .34, .24, .145, .235),
+    "cindermaul": (.35, .44, .34, .24, .145, .235),
+    "hookbrawler": (.43, .43, .34, .24, .145, .235),
+    "flintrunner": (.48, .34, .34, .24, .145, .235),
+    "claybinder": (.37, .43, .34, .24, .145, .235),
+    "gustdrummer": (.39, .47, .34, .24, .145, .235),
+    "hidemender": (.38, .41, .34, .24, .145, .235),
 }
-for insect in ("leafcutter", "blastbeetle"):
+for insect in INSECT_KITS:
     leg, width, *_ = BODY_PLANS[insect]
     REST_OVERRIDES[insect] = {
         "BackSpring": (width*.45,-.02,-.08), "Tabard": (-width*.45,-.02,-.08),
         "HeadGear": (0,0,0),
         **dict.fromkeys(("StringTop","StringBottom","Back","Nock"), (0,-leg*.55,0)),
     }
+
+REST_OVERRIDES["needlewing"]["HeadGear"] = (0,0,.13)
 
 # +Y up and +Z forward in TBG, +Z up and -Y forward in Blender.
 TO_BLENDER = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))

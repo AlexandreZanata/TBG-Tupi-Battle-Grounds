@@ -36,6 +36,9 @@ STUDIO_ANGLES = {
     "spinehurler": -28, "miretender": -19, "gorgehowl": 17, "sunlancer": -20,
     "eclipsedancer": 20, "starbreaker": 23, "dawnmender": 18, "prismancer": -23,
     "leafcutter": 36, "blastbeetle": -43,
+    "needlewing": 33, "nectarnurse": -29, "stridulator": 26,
+    "basaltbulwark": -22, "cindermaul": 26, "hookbrawler": 27,
+    "flintrunner": -26, "claybinder": 33, "gustdrummer": -17, "hidemender": 29,
 }
 INSECT_AND_PREVIEW_FRAMING = {
     "jawguard": (1.44,7.58,595,.62), "mantis": (1.32,7.10,665,.74),
@@ -50,6 +53,11 @@ COMPLETION_FRAMING = {
     "eclipsedancer": (1.43,7.55,665,.74), "starbreaker": (1.51,7.90,675,.77),
     "dawnmender": (1.43,7.52,655,.75), "prismancer": (1.38,7.35,665,.74),
     "leafcutter": (1.44,7.55,630,.72), "blastbeetle": (1.48,7.81,630,.73),
+    "needlewing": (1.48,7.79,655,.74), "nectarnurse": (1.40,7.39,640,.73),
+    "stridulator": (1.39,7.30,630,.73), "basaltbulwark": (1.57,8.19,655,.74),
+    "cindermaul": (1.52,7.99,645,.74), "hookbrawler": (1.48,7.77,675,.80),
+    "flintrunner": (1.42,7.45,675,.82), "claybinder": (1.44,7.63,670,.77),
+    "gustdrummer": (1.48,7.78,645,.76), "hidemender": (1.42,7.50,665,.78),
 }
 COMPLETION_CARRY = {
     "miretender": (("R",(-.154,.192,.211),-12,-9),("L",(.165,.147,.194),0,0)),
@@ -57,6 +65,14 @@ COMPLETION_CARRY = {
     "prismancer": (("R",(-.165,.173,.201),-8,-8),("L",(.122,.159,.196),0,0)),
     "leafcutter": (("R",(-.169,.167,.210),-29,24),),
     "blastbeetle": (("R",(-.151,.177,.209),-34,-13),("L",(.155,.163,.208),-22,17)),
+    "nectarnurse": (("R",(-.153,.162,.192),-28,-31),("L",(.177,.139,.201),0,10)),
+    "stridulator": (("R",(-.184,.121,.141),0,0),("L",(.178,.118,.155),0,0)),
+    "basaltbulwark": (("R",(-.256,.087,.217),-31,-28),("L",(.333,.069,.154),0,19)),
+    "cindermaul": (("R",(-.248,.162,.198),-39,-20),("L",(.263,.098,.202),-26,24)),
+    "hookbrawler": (("R",(-.246,.106,.179),-22,-62),("L",(.242,.097,.154),-13,25)),
+    "flintrunner": (("R",(-.224,.107,.204),-24,-33),("L",(.219,.134,.177),-18,65)),
+    "claybinder": (("R",(-.248,.119,.216),-17,-25),("L",(.249,.148,.222),0,18)),
+    "hidemender": (("R",(-.186,.155,.217),-37,-64),("L",(.191,.116,.176),0,0)),
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -204,7 +220,31 @@ def completion_guard(unit,joint,rest,default):
     return default
 
 
+def needlewing_carry(joint,rest,default):
+    grip = TO_BLENDER @ (rest["Chest"]+Vector((-.173,.191,.204)))
+    turn = Matrix.Rotation(radians(-21),4,"X") @ Matrix.Rotation(radians(-21),4,"Z")
+    if joint in arm_nodes("R")[:-1]:
+        return reach_arm(joint,rest,"R",grip,turn)
+    if joint=="HeadGear":
+        return Matrix.Translation(grip) @ turn @ Matrix.Translation(
+            TO_BLENDER @ (rest["HeadGear"]-rest["HandR"]))
+    return default
+
+
+def cask_carry(joint,rest,default):
+    for side,sign in (("R",-1),("L",1)):
+        if joint in arm_nodes(side)[:-1]:
+            grip = TO_BLENDER @ (rest["WeaponR"]+Vector((sign*.25,0,0)))
+            turn = Matrix.Rotation(radians(sign*90),4,"Z")
+            return reach_arm(joint,rest,side,grip,turn)
+    return default
+
+
 def latest_completion_pose(unit,joint,rest,tier,branch,default):
+    if unit=="needlewing":
+        return needlewing_carry(joint,rest,default)
+    if unit=="gustdrummer":
+        return cask_carry(joint,rest,default)
     if unit=="sunlancer":
         return two_hand_carry(joint,rest,(0,.12,.13),(0,0,.20),-59,yaw=6)
     if unit=="starbreaker":
@@ -383,7 +423,8 @@ def render(unit, angle):
         anchor.location.x = (column - 2) * spacing - (.20 if unit=="bonehorn" else 0)
         # Rear-mounted Evolution equipment needs a wider profile to stay legible.
         rear_angle = {"oilpress": -23, "cargocrab": 23, "smuggler": -15,
-                      "rattletick": 29, "capybara": 18}.get(unit,0)
+                      "rattletick": 29, "capybara": 18, "cindermaul": 10, "hookbrawler": -10,
+                      "claybinder": 11, "hidemender": 12}.get(unit,0)
         anchor.rotation_euler.z = radians(angle+rear_angle if tier and branch==1 else angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)

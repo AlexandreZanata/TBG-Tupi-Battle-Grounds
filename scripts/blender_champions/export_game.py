@@ -69,6 +69,16 @@ from dawnmender import dawnmender
 from prismancer import prismancer
 from leafcutter import leafcutter
 from blastbeetle import blastbeetle
+from needlewing import needlewing
+from nectarnurse import nectarnurse
+from stridulator import stridulator
+from basaltbulwark import basaltbulwark
+from cindermaul import cindermaul
+from hookbrawler import hookbrawler
+from flintrunner import flintrunner
+from claybinder import claybinder
+from gustdrummer import gustdrummer
+from hidemender import hidemender
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
@@ -132,6 +142,16 @@ GAME_UNITS = {
     "prismancer": prismancer,
     "leafcutter": leafcutter,
     "blastbeetle": blastbeetle,
+    "needlewing": needlewing,
+    "nectarnurse": nectarnurse,
+    "stridulator": stridulator,
+    "basaltbulwark": basaltbulwark,
+    "cindermaul": cindermaul,
+    "hookbrawler": hookbrawler,
+    "flintrunner": flintrunner,
+    "claybinder": claybinder,
+    "gustdrummer": gustdrummer,
+    "hidemender": hidemender,
 }
 
 

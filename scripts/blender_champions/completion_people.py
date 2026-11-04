@@ -16,6 +16,16 @@ def limbs(m,cloth,bracer,arm=.17,leg=.38,width=.055,skin="skin"):
         m.ell("Shaped boot",foot,bracer,(0,-.021,.041),(width,.045,.099),segments=10)
 
 
+def insect_collars(m,shell):
+    m.tube("Neck collar between head and thorax","Chest",shell,[
+        (0,.282,.003),(0,.326,.009),(0,.380,.014),(0,.416,.015),
+    ],[.080,.063,.048,.043],n=10)
+    for s in (-1,1):
+        m.tube("Shoulder collar seated in insect thorax","Chest",shell,[
+            (s*.082,.274,0),(s*.140,.285,0),(s*.192,.305,0),
+        ],[.045,.049,.036],n=8)
+
+
 def face(m,skin="skin",brow="darkwood"):
     h = "Head"
     m.loft("Shaped face and chin",h,skin,[
