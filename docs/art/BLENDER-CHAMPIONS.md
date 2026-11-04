@@ -1044,3 +1044,125 @@ for unit do
   convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
 done
 ```
+
+## Pebble Slinger and Rivet Ballista
+
+**Pebble Slinger** carries an upright fork sling and a hand-held
+pouch. Counterweight adds pale limestone forks and a weighted
+heel. Cliffshot adds a shoulder slab. Split Pouch uses blue-slate
+forks and two separate pebble feeds. Hail Sling adds outer guides
+on the forks. The sling bed meets WeaponR-local `(0, 0.25, 0.03)`.
+The five forms use 3,980–4,356 triangles and 302,303 bytes.
+
+![Pebble Slinger modular Blender lineup](../media/blender-champions/pebbleslinger.webp)
+
+**Rivet Ballista** is an automaton with a recessed visor and
+separate launcher rails. Rail Guide adds long ceramic rails and
+blue standoffs. Needle Engine adds two helmet sights. Triple
+Magazine uses dark steel and three copper back cartridges.
+Rivet Storm extends those cartridges and adds side exhaust
+shields. The open exit sits on WeaponR at Z 0.42 in A and
+0.35 in Base and B. The five forms use 2,702–3,350 triangles
+and 350,102 bytes.
+
+![Rivet Ballista modular Blender lineup](../media/blender-champions/rivetballista.webp)
+
+## Nacre Duelist, Reef Lancer, Trench Fist and Pearl Slinger
+
+**Nacre Duelist** wears overlapping shell strips and carries two
+nacre blades. Ivory Edge adds wider ivory blades and shoulder
+guards. Tideblade lengthens the blades and adds a tall crown
+ridge. Foam Edges adds turquoise blades with heel hooks. Nacre
+Dance adds dorsal fins and a third cheek fin ray. Each blade
+crosses its hand socket's local Z 0.25. The five forms use
+3,022–3,110 triangles and 215,586 bytes.
+
+![Nacre Duelist modular Blender lineup](../media/blender-champions/nacreduelist.webp)
+
+**Reef Lancer** carries a three-tine trident with a fitted
+forward striking guard. Reef Watch adds a pale shoulder shell.
+Guard Trident adds the ivory brow crest. Coral Barbs adds
+reverse-facing coral tines and coral shoulder thorns. Current
+Huntress extends both. The forward guard reaches WeaponR-local
+Z 0.25. The five forms use 3,250–3,406 triangles and
+253,062 bytes.
+
+![Reef Lancer modular Blender lineup](../media/blender-champions/reeflancer.webp)
+
+**Trench Fist** has a hammerhead silhouette, diving weights
+and a stone ram. Seastone Fist adds a teal ram with pale corner
+bands. Keelbreaker adds wide keel plates around the head. Salt
+Gauntlets adds an offhand ram and rose-colored salt crystals.
+Abyssal Quake grows the crystal knuckles on both hands. The ram's
+contact ridge reaches WeaponR-local Z 0.25. The five forms use
+3,270–3,622 triangles and 296,650 bytes.
+
+![Trench Fist modular Blender lineup](../media/blender-champions/trenchfist.webp)
+
+**Pearl Slinger** has a round fish head, a short folded mantle,
+and a curved shell sling. Pearl Pouch adds a wider gold cup and
+two lens frames. Tide Eye adds a raised pearl diadem. Split Shell
+adds rose-colored wings to the shell cup. Pearl Rain adds a reserve
+pearl in each wing. The main pearl sits at WeaponR-local
+`(0, 0.12, 0.28)`. The five forms use 3,814–4,252 triangles
+and 281,535 bytes.
+
+![Pearl Slinger modular Blender lineup](../media/blender-champions/pearlslinger.webp)
+
+## Abyss Harpooner, Undertow Herald, Trench Lamplighter and Foam Weaver
+
+**Abyss Harpooner** carries a loaded harpoon and a side brace
+for the left hand. Nacre Harpoon uses a pale stock and a diver's
+sight. Trench Sight adds a raised sight frame and hinge. Barbed
+Spear adds a dark stock, red coral barbs and a back rack. Abyss
+Hunt splays the rack tips farther from the shoulders. The harpoon
+guide centers on the shared Abyssal release origin. The five forms
+use 3,394–3,766 triangles and 249,763 bytes.
+
+![Abyss Harpooner modular Blender lineup](../media/blender-champions/abyssharpooner.webp)
+
+**Undertow Herald** has catfish barbels and a hollow fluted conch.
+Resonant Conch adds ivory, a second gold ring and a choir collar.
+Undertow Voice adds a larger reinforced outer rim. Tide Horn
+adds two violet side chambers. Maelstrom Call enlarges both and
+adds dorsal fins. The aperture meets the release origin and the
+side brace reaches the offhand. The five forms use 3,700–4,560
+triangles and 294,208 bytes.
+
+![Undertow Herald modular Blender lineup](../media/blender-champions/undertowherald.webp)
+
+**Trench Lamplighter** has an angler lure, a long fitted mantle
+and a framed beacon. Amber Lantern adds brass rails. Deep Beacon
+adds a tall lighthouse spire. Saltglass adds a dark frame, violet
+hood panels and seafoam light. Abyss Eye adds a ring held in the
+frame. The lower lens centers on the shared release origin. The
+five forms use 3,856–4,074 triangles and 277,044 bytes.
+
+![Trench Lamplighter modular Blender lineup](../media/blender-champions/trenchlamplighter.webp)
+
+**Foam Weaver** carries an open scallop chalice with a fixed
+offhand handle. Foam Chalice adds ivory petals and amber light.
+Nacre Spring extends the petals and adds a circlet. Tide Threads
+adds mint filaments to the chalice and mantle. Surf Mantle
+widens the mantle into two wave crests. The foam cap centers on
+the shared release origin. The five forms use 3,410–3,578
+triangles and 246,102 bytes.
+
+![Foam Weaver modular Blender lineup](../media/blender-champions/foamweaver.webp)
+
+All ten use the native 23-node rig and TBG4. The five projectile-equipped
+Abyssal kits in this batch share WeaponR-local `(0, 0.12, 0.28)`.
+The harpoon, conch and chalice support grips are measured from
+the existing two-hand stances. Both seats share the exported
+geometry and colors. The feet circle carries allegiance.
+
+Reproduce the fifty forms and the studio lineups from the repository root.
+
+```sh
+set -- pebbleslinger rivetballista nacreduelist reeflancer trenchfist pearlslinger abyssharpooner undertowherald trenchlamplighter foamweaver
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- "$@"
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- "$@"
+for unit do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```

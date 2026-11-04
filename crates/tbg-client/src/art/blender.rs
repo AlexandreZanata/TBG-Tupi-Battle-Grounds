@@ -86,6 +86,19 @@ const FLINTRUNNER: &[u8] = include_bytes!("../../assets/champions/blender/flintr
 const CLAYBINDER: &[u8] = include_bytes!("../../assets/champions/blender/claybinder.tbgmesh");
 const GUSTDRUMMER: &[u8] = include_bytes!("../../assets/champions/blender/gustdrummer.tbgmesh");
 const HIDEMENDER: &[u8] = include_bytes!("../../assets/champions/blender/hidemender.tbgmesh");
+const PEBBLESLINGER: &[u8] = include_bytes!("../../assets/champions/blender/pebbleslinger.tbgmesh");
+const RIVETBALLISTA: &[u8] = include_bytes!("../../assets/champions/blender/rivetballista.tbgmesh");
+const NACREDUELIST: &[u8] = include_bytes!("../../assets/champions/blender/nacreduelist.tbgmesh");
+const REEFLANCER: &[u8] = include_bytes!("../../assets/champions/blender/reeflancer.tbgmesh");
+const TRENCHFIST: &[u8] = include_bytes!("../../assets/champions/blender/trenchfist.tbgmesh");
+const PEARLSLINGER: &[u8] = include_bytes!("../../assets/champions/blender/pearlslinger.tbgmesh");
+const ABYSSHARPOONER: &[u8] =
+    include_bytes!("../../assets/champions/blender/abyssharpooner.tbgmesh");
+const UNDERTOWHERALD: &[u8] =
+    include_bytes!("../../assets/champions/blender/undertowherald.tbgmesh");
+const TRENCHLAMPLIGHTER: &[u8] =
+    include_bytes!("../../assets/champions/blender/trenchlamplighter.tbgmesh");
+const FOAMWEAVER: &[u8] = include_bytes!("../../assets/champions/blender/foamweaver.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -171,6 +184,16 @@ pub(super) fn form(
         UnitKind::ClayBinder => CLAYBINDER,
         UnitKind::GustDrummer => GUSTDRUMMER,
         UnitKind::HideMender => HIDEMENDER,
+        UnitKind::PebbleSlinger => PEBBLESLINGER,
+        UnitKind::RivetBallista => RIVETBALLISTA,
+        UnitKind::NacreDuelist => NACREDUELIST,
+        UnitKind::ReefLancer => REEFLANCER,
+        UnitKind::TrenchFist => TRENCHFIST,
+        UnitKind::PearlSlinger => PEARLSLINGER,
+        UnitKind::AbyssHarpooner => ABYSSHARPOONER,
+        UnitKind::UndertowHerald => UNDERTOWHERALD,
+        UnitKind::TrenchLamplighter => TRENCHLAMPLIGHTER,
+        UnitKind::FoamWeaver => FOAMWEAVER,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -425,6 +448,16 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::ClayBinder,
         UnitKind::GustDrummer,
         UnitKind::HideMender,
+        UnitKind::PebbleSlinger,
+        UnitKind::RivetBallista,
+        UnitKind::NacreDuelist,
+        UnitKind::ReefLancer,
+        UnitKind::TrenchFist,
+        UnitKind::PearlSlinger,
+        UnitKind::AbyssHarpooner,
+        UnitKind::UndertowHerald,
+        UnitKind::TrenchLamplighter,
+        UnitKind::FoamWeaver,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -465,8 +498,10 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                     kind,
                     UnitKind::Bloodweaver | UnitKind::AntidoteBrewer | UnitKind::Smuggler
                 ) && (tier, branch) == (2, 1))
-                || (matches!(kind, UnitKind::Puppetmaster | UnitKind::HookBrawler)
-                    && tier > 0
+                || (matches!(
+                    kind,
+                    UnitKind::Puppetmaster | UnitKind::HookBrawler | UnitKind::TrenchFist
+                ) && tier > 0
                     && branch == 1)
             {
                 assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
@@ -518,7 +553,9 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 UnitKind::BasaltBulwark
                 | UnitKind::CinderMaul
                 | UnitKind::FlintRunner
-                | UnitKind::ClayBinder => &[Socket::OffhandL],
+                | UnitKind::ClayBinder
+                | UnitKind::PebbleSlinger
+                | UnitKind::NacreDuelist => &[Socket::OffhandL],
                 UnitKind::Blastbeetle | UnitKind::NectarNurse => &[
                     Socket::OffhandL,
                     Socket::Back,

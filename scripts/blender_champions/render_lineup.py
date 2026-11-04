@@ -8,6 +8,9 @@ import bpy
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from abyssharpooner import SUPPORT as HARPOON_SUPPORT
+from foamweaver import SUPPORT as CHALICE_SUPPORT
+from undertowherald import SUPPORT as CONCH_SUPPORT
 from celestialarcher import HALF as CELESTIAL_BOW_HALF, TIP_Z as BOW_TIP_Z
 from export_game import FORMS, GAME_UNITS, collection
 from geometry import Model
@@ -39,6 +42,9 @@ STUDIO_ANGLES = {
     "needlewing": 33, "nectarnurse": -29, "stridulator": 26,
     "basaltbulwark": -22, "cindermaul": 26, "hookbrawler": 27,
     "flintrunner": -26, "claybinder": 33, "gustdrummer": -17, "hidemender": 29,
+    "pebbleslinger": 14, "rivetballista": 29, "nacreduelist": -23, "reeflancer": 21,
+    "trenchfist": -19, "pearlslinger": 22, "abyssharpooner": -28, "undertowherald": 17,
+    "trenchlamplighter": 27, "foamweaver": -24,
 }
 INSECT_AND_PREVIEW_FRAMING = {
     "jawguard": (1.44,7.58,595,.62), "mantis": (1.32,7.10,665,.74),
@@ -58,6 +64,11 @@ COMPLETION_FRAMING = {
     "cindermaul": (1.52,7.99,645,.74), "hookbrawler": (1.48,7.77,675,.80),
     "flintrunner": (1.42,7.45,675,.82), "claybinder": (1.44,7.63,670,.77),
     "gustdrummer": (1.48,7.78,645,.76), "hidemender": (1.42,7.50,665,.78),
+    "pebbleslinger": (1.35,7.12,650,.69), "rivetballista": (1.43,7.52,690,.81),
+    "nacreduelist": (1.39,7.34,670,.80), "reeflancer": (1.39,7.31,725,.86),
+    "trenchfist": (1.44,7.59,625,.71), "pearlslinger": (1.37,7.23,645,.70),
+    "abyssharpooner": (1.51,7.95,675,.80), "undertowherald": (1.44,7.57,665,.75),
+    "trenchlamplighter": (1.42,7.51,710,.86), "foamweaver": (1.42,7.49,665,.78),
 }
 COMPLETION_CARRY = {
     "miretender": (("R",(-.154,.192,.211),-12,-9),("L",(.165,.147,.194),0,0)),
@@ -73,6 +84,13 @@ COMPLETION_CARRY = {
     "flintrunner": (("R",(-.224,.107,.204),-24,-33),("L",(.219,.134,.177),-18,65)),
     "claybinder": (("R",(-.248,.119,.216),-17,-25),("L",(.249,.148,.222),0,18)),
     "hidemender": (("R",(-.186,.155,.217),-37,-64),("L",(.191,.116,.176),0,0)),
+    "pebbleslinger": (("R",(-.214,.128,.217),8,-24),("L",(.222,.101,.160),-5,0)),
+    "rivetballista": (("R",(-.188,.148,.220),-19,-68),),
+    "nacreduelist": (("R",(-.217,.140,.202),-18,-38),("L",(.207,.123,.186),-25,61)),
+    "reeflancer": (("R",(-.230,.126,.176),-17,-12),("L",(.176,.064,.125),0,0)),
+    "trenchfist": (("R",(-.247,.106,.239),-6,-6),("L",(.239,.089,.210),-12,18)),
+    "pearlslinger": (("R",(-.186,.151,.206),-13,-34),("L",(.191,.073,.134),0,0)),
+    "trenchlamplighter": (("R",(-.204,.133,.197),6,-36),),
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -240,7 +258,17 @@ def cask_carry(joint,rest,default):
     return default
 
 
+ABYSSAL_TWO_HAND_CARRY = {
+    "abyssharpooner": ((-.136,.152,.197), HARPOON_SUPPORT, -9, -12),
+    "undertowherald": ((-.145,.153,.190), CONCH_SUPPORT, -6, -14),
+    "foamweaver": ((-.113,.145,.198), CHALICE_SUPPORT, -5, 19),
+}
+
+
 def latest_completion_pose(unit,joint,rest,tier,branch,default):
+    if unit in ABYSSAL_TWO_HAND_CARRY:
+        at, support, angle, yaw = ABYSSAL_TWO_HAND_CARRY[unit]
+        return two_hand_carry(joint,rest,at,support,angle,yaw=yaw)
     if unit=="needlewing":
         return needlewing_carry(joint,rest,default)
     if unit=="gustdrummer":
@@ -424,7 +452,8 @@ def render(unit, angle):
         # Rear-mounted Evolution equipment needs a wider profile to stay legible.
         rear_angle = {"oilpress": -23, "cargocrab": 23, "smuggler": -15,
                       "rattletick": 29, "capybara": 18, "cindermaul": 10, "hookbrawler": -10,
-                      "claybinder": 11, "hidemender": 12}.get(unit,0)
+                      "claybinder": 11, "hidemender": 12, "abyssharpooner": 8, "foamweaver": -12,
+                      "rivetballista": 14}.get(unit,0)
         anchor.rotation_euler.z = radians(angle+rear_angle if tier and branch==1 else angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)

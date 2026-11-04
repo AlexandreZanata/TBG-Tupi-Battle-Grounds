@@ -79,6 +79,16 @@ from flintrunner import flintrunner
 from claybinder import claybinder
 from gustdrummer import gustdrummer
 from hidemender import hidemender
+from pebbleslinger import pebbleslinger
+from rivetballista import rivetballista
+from nacreduelist import nacreduelist
+from reeflancer import reeflancer
+from trenchfist import trenchfist
+from pearlslinger import pearlslinger
+from abyssharpooner import abyssharpooner
+from undertowherald import undertowherald
+from trenchlamplighter import trenchlamplighter
+from foamweaver import foamweaver
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
@@ -152,6 +162,16 @@ GAME_UNITS = {
     "claybinder": claybinder,
     "gustdrummer": gustdrummer,
     "hidemender": hidemender,
+    "pebbleslinger": pebbleslinger,
+    "rivetballista": rivetballista,
+    "nacreduelist": nacreduelist,
+    "reeflancer": reeflancer,
+    "trenchfist": trenchfist,
+    "pearlslinger": pearlslinger,
+    "abyssharpooner": abyssharpooner,
+    "undertowherald": undertowherald,
+    "trenchlamplighter": trenchlamplighter,
+    "foamweaver": foamweaver,
 }
 
 

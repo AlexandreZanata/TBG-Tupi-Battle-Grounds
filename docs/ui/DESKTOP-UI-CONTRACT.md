@@ -1611,3 +1611,34 @@ pending. Public download compatibility uses the actual running server.
   Queue the Blender loader test from the modeling guide under
   the shared lock. Windows and desktop web full-frame and
   motion comparisons remain pending.
+
+### 2026-11-04 — Blender Pebble Slinger through Foam Weaver
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. BattleLine and Evolution swaps follow each
+  champion's existing local completion availability. Both seats
+  share geometry and materials. The feet circle carries allegiance.
+- Cover Pebble Slinger's upright sling, grip and offhand pouch,
+  Rivet Ballista's two exit lengths and rear cartridges, Nacre
+  Duelist's paired blades, Reef Lancer's trident and forward guard,
+  and Trench Fist's stone ram and B-family offhand gauntlet.
+- Cover Pearl Slinger's open shell and pearl, the Abyss Harpooner
+  stock and support grip, the Undertow Herald's hollow conch and
+  offhand brace, the Trench Lamplighter's signal lens, and the
+  Foam Weaver's chalice and offhand handle.
+- Blender checked all fifty forms for socket placement, strike
+  or release anchors and reachable studio grip positions.
+  Static inspection covered 360 TBG4 and 60 TBG5 payloads for
+  group layout, indices and reserved allegiance colors.
+- The installed Linux Vulkan client embedded byte-identical
+  copies of all ten final assets and loaded all fifty forms at
+  their exported triangle counts. Twenty Laboratory captures
+  covered ten Base idle poses, eight Evolution attack clips,
+  one Evolution walk and one Evolution victory. At the default
+  1280×800 zoom, the toolbar overlaps some tall headgear.
+- In local Training on Verdant Forest, seed 62, Rivet Ballista
+  B2 removed 325 HP from a wooden dummy by the 4.40-second
+  sample. Other live match motions and Windows and desktop
+  web visual comparisons remain pending. Queue the Blender
+  loader test from the modeling guide under the shared lock
+  at consolidation.

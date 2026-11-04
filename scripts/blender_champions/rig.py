@@ -207,6 +207,16 @@ BODY_PLANS = {
     "claybinder": (.37, .43, .34, .24, .145, .235),
     "gustdrummer": (.39, .47, .34, .24, .145, .235),
     "hidemender": (.38, .41, .34, .24, .145, .235),
+    "pebbleslinger": (.34, .36, .34, .24, .145, .235),
+    "rivetballista": (.50, .32, .34, .24, .150, .220),
+    "nacreduelist": (.46, .34, .34, .24, .140, .230),
+    "reeflancer": (.48, .32, .34, .24, .140, .240),
+    "trenchfist": (.34, .45, .34, .24, .140, .250),
+    "pearlslinger": (.36, .33, .34, .24, .140, .200),
+    "abyssharpooner": (.45, .35, .34, .24, .140, .240),
+    "undertowherald": (.41, .43, .34, .24, .140, .240),
+    "trenchlamplighter": (.48, .29, .34, .24, .140, .240),
+    "foamweaver": (.46, .31, .34, .24, .140, .220),
 }
 for insect in INSECT_KITS:
     leg, width, *_ = BODY_PLANS[insect]
