@@ -620,7 +620,9 @@
       "Archer",
       "BoneBrute",
       "Shieldbearer",
-      "Hexer"
+      "Hexer",
+      "Sawbot",
+      "Bloomkeeper"
     ],
     "forms": [
       "Base",
@@ -643,6 +645,8 @@
       "idle",
       "walk",
       "attack",
+      "saw spin",
+      "healing cast",
       "hit",
       "death",
       "victory"

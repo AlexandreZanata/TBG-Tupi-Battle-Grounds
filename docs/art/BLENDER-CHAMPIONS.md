@@ -10,7 +10,8 @@ intrinsic material colors and the independent status outline.
 
 ## Editable source and export
 
-The Archer, Bone Brute, Shieldbearer and Hexer use component modeling.
+The Archer, Bone Brute, Shieldbearer, Hexer, Sawbot and Bloomkeeper
+use component modeling.
 Each Blender object is named for its physical piece and has a material and
 a named rig node. The source is in
 [scripts/blender_champions](../../scripts/blender_champions).
@@ -112,7 +113,7 @@ respectively. Render the ten forms with the same Blender studio setup.
 
 ```sh
 blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- shieldbearer hexer
-blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- shieldbearer hexer
 ```
 
 The renders are in Base, A1, A2, B1, B2 order, from left to right.
@@ -120,3 +121,34 @@ The renders are in Base, A1, A2, B1, B2 order, from left to right.
 ![Shieldbearer modular Blender lineup](../media/blender-champions/shieldbearer.webp)
 
 ![Hexer modular Blender lineup](../media/blender-champions/hexer.webp)
+
+## Sawbot and Bloomkeeper
+
+The Sawbot has a riveted boiler, piston limbs, a furnace eye and a
+directional toothed disk. Overclock adds copper, hot vents and, at A2,
+a second saw with paired exhausts. Plating adds steel guards and, at
+B2, horns and a larger disk. The disks are centered at hand-local
+Y −0.13 and rotate around the existing hand axes. The right-hand
+tooth radius follows the strike profile at 0.16 or 0.22. The studio
+lineup tilts the arms to show the face of each saw.
+
+The Bloomkeeper has a carved lightwood face, folded leaves and a petal
+skirt. The A branch adds shoulder blossoms and a flowering bough on
+the back spring. The B branch adds bark guards, thorns and, at B2, a
+thorn crown and amber seed. The flower and seed share the cast muzzle
+at weapon-local `(0.0, 0.90, 0.03)`.
+
+The exports contain 3,828–4,536 triangles per Sawbot form and
+3,094–3,924 per Bloomkeeper form. The files are 424,161 and 248,184
+bytes, respectively.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- sawbot bloomkeeper
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- sawbot bloomkeeper
+```
+
+The renders are in Base, A1, A2, B1, B2 order, from left to right.
+
+![Sawbot modular Blender lineup](../media/blender-champions/sawbot.webp)
+
+![Bloomkeeper modular Blender lineup](../media/blender-champions/bloomkeeper.webp)

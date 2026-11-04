@@ -14,6 +14,8 @@ const ARCHER: &[u8] = include_bytes!("../../assets/champions/blender/archer.tbgm
 const BONE_BRUTE: &[u8] = include_bytes!("../../assets/champions/blender/bonebrute.tbgmesh");
 const SHIELDBEARER: &[u8] = include_bytes!("../../assets/champions/blender/shieldbearer.tbgmesh");
 const HEXER: &[u8] = include_bytes!("../../assets/champions/blender/hexer.tbgmesh");
+const SAWBOT: &[u8] = include_bytes!("../../assets/champions/blender/sawbot.tbgmesh");
+const BLOOMKEEPER: &[u8] = include_bytes!("../../assets/champions/blender/bloomkeeper.tbgmesh");
 
 pub(super) fn form(
     kind: UnitKind,
@@ -27,6 +29,8 @@ pub(super) fn form(
         UnitKind::BoneBrute => BONE_BRUTE,
         UnitKind::Shieldbearer => SHIELDBEARER,
         UnitKind::Hexer => HEXER,
+        UnitKind::Sawbot => SAWBOT,
+        UnitKind::Bloomkeeper => BLOOMKEEPER,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -185,6 +189,8 @@ fn blender_assets_cover_all_forms_and_keep_the_animated_archer_string() {
         UnitKind::BoneBrute,
         UnitKind::Shieldbearer,
         UnitKind::Hexer,
+        UnitKind::Sawbot,
+        UnitKind::Bloomkeeper,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -192,12 +198,12 @@ fn blender_assets_cover_all_forms_and_keep_the_animated_archer_string() {
             let form = form(kind, tier, branch, &spec, &mut assets).unwrap();
             assert!(form.meshes[rig::Joint::Head.index()].is_some());
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
-            let grip = if kind == UnitKind::Archer {
-                Socket::OffhandL
-            } else {
-                Socket::WeaponR
+            let grip = match kind {
+                UnitKind::Archer => Node::Prop(Socket::OffhandL),
+                UnitKind::Sawbot => Node::Body(rig::Joint::HandR),
+                _ => Node::Prop(Socket::WeaponR),
             };
-            assert!(form.meshes[Node::Prop(grip).index()].is_some());
+            assert!(form.meshes[grip.index()].is_some());
             if kind == UnitKind::Archer {
                 for socket in [
                     Socket::OffhandL,

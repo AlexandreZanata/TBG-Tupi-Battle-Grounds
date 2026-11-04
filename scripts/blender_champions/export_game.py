@@ -9,14 +9,22 @@ import bpy
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
+from bloomkeeper import bloomkeeper
 from geometry import Model
 from hexer import hexer
 from rig import NAMES, rest_positions
+from sawbot import sawbot
 from shieldbearer import shieldbearer
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
-GAME_UNITS = {**STUDY_UNITS, "shieldbearer": shieldbearer, "hexer": hexer}
+GAME_UNITS = {
+    **STUDY_UNITS,
+    "shieldbearer": shieldbearer,
+    "hexer": hexer,
+    "sawbot": sawbot,
+    "bloomkeeper": bloomkeeper,
+}
 
 
 def quantize(values, scale):

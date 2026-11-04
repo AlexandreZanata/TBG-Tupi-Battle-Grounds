@@ -1305,3 +1305,16 @@ pending. Public download compatibility uses the actual running server.
 - Linux Vulkan capture covered Shieldbearer Base and A2, Hexer Base and
   B2, and a local Practice match with both champions on both seats.
 - Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Sawbot and Bloomkeeper
+
+- Cover Base and four Evolution forms for each champion in the shared
+  FigureLibrary, Laboratory, BattleLine and Evolution swap. Both seats
+  use the same body and equipment, with allegiance on the feet circle.
+- Cover Sawbot hand spin and the 0.30 s strike. Cover Bloomkeeper's
+  healing cast with the 0.22 s release at the existing staff anchor.
+  The matrix also includes spawn, idle, walk, hit, death and victory.
+- The Linux Vulkan preview loaded all ten forms with their exported
+  triangle counts. Captures cover Sawbot Base and A2, Bloomkeeper Base
+  and B2, and a local Practice match seeded with both on both seats.
+- Visual and motion comparison for Windows and desktop web remains pending.
