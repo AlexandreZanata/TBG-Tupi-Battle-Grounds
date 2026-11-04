@@ -303,7 +303,10 @@ miniatures. [ART-DIRECTION.md](ART-DIRECTION.md) owns the proposed palette,
 proportions, silhouettes, and motion language. D-22 remains proposed until
 its owner decision is recorded in the P15 report.
 
-**Production: code-built rigid parts, vertex colors, one shared material.**
+**Production: joint-local rigid meshes, vertex colors, one shared material.**
+The [Blender workflow](art/BLENDER-CHAMPIONS.md) supplies the Archer and Bone
+Brute shapes to the same FigureLibrary as the code-built kits. The runtime
+keeps the kit poses, glow layer and seat-independent model geometry.
 
 - **Rig v2:** the phase's supplied enum names 17 body joints: Root, Hips,
   Spine, Chest, Head, UpperArm/Forearm/Hand ×2, Thigh/Shin/Foot ×2. It

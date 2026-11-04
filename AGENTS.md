@@ -89,6 +89,11 @@ per-step demands for broad checks. See *Verification* below and
    consolidation, record unverified targets as pending, and never claim
    parity from shared code, compilation or Linux-only screenshots.
 
+9. **Champion modeling.** Follow the [Blender champion workflow](docs/art/BLENDER-CHAMPIONS.md).
+   The feet circle is the sole on-model allegiance cue. Keep every champion,
+   accessory and Evolution seat-independent, and remove ownership geometry
+   from the authoring source.
+
 ## How to work a phase (executor)
 
 1. Open the phase file named in `docs/ROADMAP.md`. Read only what its

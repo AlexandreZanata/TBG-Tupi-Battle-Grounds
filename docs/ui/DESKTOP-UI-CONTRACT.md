@@ -1280,3 +1280,13 @@ Desktop/390 x 844 PT/EN landing observations are in
 [the media report](../evidence/landing-android-beta-20261103.md). This adds no
 in-game parity evidence: Windows pixel/motion and physical ARM64/16 KB remain
 pending. Public download compatibility uses the actual running server.
+
+### 2026-11-04 — Blender Archer and Bone Brute
+
+- Replace all five figures for both champions in the shared FigureLibrary.
+  Cover the Laboratory, BattleLine, Evolution swap and both seats. The
+  contract matrix lists motion and the Archer Release and Bone Brute Strike
+  samples.
+- Preserve the rig, authoritative timing, and seat-independent figure
+  materials. Allegiance stays on the feet circle. Linux is the reference.
+  Windows and desktop web comparison remain pending.

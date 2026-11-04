@@ -43,7 +43,7 @@ cases/motion coverage in the same change; this applies to all phases and kits.
   separated from the ground.
 - **Team identity — owner rule, 2026-11-01 (never optional):** ally/enemy
   separation uses the blue (`#3FA9F5`) and red (`#F2545B`) ground rings at
-  the feet, plus existing HUD semantics. Champion bodies, armor, clothing,
+  the feet. Champion bodies, armor, clothing,
   weapons and all Evolution forms must be identical for both seats.
   Never add affiliation plaques, colored squares, armbands, generic team
   tabards or body labels. Remove the geometry, not merely its blue paint.
@@ -52,7 +52,8 @@ cases/motion coverage in the same change; this applies to all phases and kits.
   Temporary combat feedback remains authoritative and distinct from ownership.
   Control statuses must not overwrite the blue/red identity ring. P71 adds a
   separate status outline and solid/notched allegiance shape; Stronghold
-  banners remain architectural equipment.
+  banners remain architectural equipment. The [Blender production workflow](art/BLENDER-CHAMPIONS.md)
+  is required for new champion models.
 
 
 ## 3. Palette (start values; P15 locks them)

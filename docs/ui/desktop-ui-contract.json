@@ -614,5 +614,41 @@
       "web": "scoped desktop runtime observed; portrait stays portrait with crowded existing layout",
       "android": "scoped emulator runtime observed; physical ARM64/16KB pending"
     }
-  ]
+  ],
+  "blender_champions": {
+    "champions": [
+      "Archer",
+      "BoneBrute"
+    ],
+    "forms": [
+      "Base",
+      "A1",
+      "A2",
+      "B1",
+      "B2"
+    ],
+    "seats": [
+      "A",
+      "B"
+    ],
+    "views": [
+      "Laboratory",
+      "BattleLine",
+      "Evolution swap"
+    ],
+    "motion": [
+      "spawn",
+      "idle",
+      "walk",
+      "attack",
+      "hit",
+      "death",
+      "victory"
+    ],
+    "samples_seconds": {
+      "release": 0.18,
+      "strike_or_hit": 0.3
+    },
+    "ownership": "feet circle only"
+  }
 }
