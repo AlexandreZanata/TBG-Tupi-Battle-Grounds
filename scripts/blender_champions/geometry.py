@@ -44,6 +44,19 @@ SWATCH = {
     "drum_carmine": (155, 55, 46, 0.0, 0.76),
     "leech_plum": (68, 43, 61, 0.0, 0.74),
     "leech_pulse": (210, 96, 161, 0.0, 0.55),
+    "crab_enamel": (203, 102, 47, 0.30, 0.58),
+    "crab_armor": (98, 137, 157, 0.58, 0.44),
+    "showman_coat": (85, 54, 106, 0.0, 0.83),
+    "showman_jade": (51, 119, 105, 0.0, 0.78),
+    "showman_ruby": (150, 55, 82, 0.0, 0.79),
+    "smuggler_rust": (126, 69, 47, 0.0, 0.79),
+    "smuggler_coast": (52, 102, 124, 0.0, 0.78),
+    "horn_hide": (91, 68, 54, 0.0, 0.88),
+    "horn_stone": (116, 71, 61, 0.09, 0.85),
+    "ravager_shell": (93, 63, 109, 0.08, 0.66),
+    "ravager_rust": (172, 77, 49, 0.06, 0.70),
+    "acid_moss": (74, 113, 71, 0.0, 0.72),
+    "acid_ivory": (218, 207, 151, 0.0, 0.73),
 }
 GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse"}
 

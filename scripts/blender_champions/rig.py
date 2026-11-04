@@ -10,7 +10,39 @@ NAMES = (
     "BackSpring", "HeadGear", "Tabard", "WeaponR", "OffhandL", "Back",
 )
 PARENT = (None, 0, 1, 2, 3, 3, 5, 6, 3, 8, 9, 1, 11, 12, 1, 14, 15, 3, 4, 1, 10, 7, 17)
-INDEX = {name: i for i, name in enumerate(NAMES)}
+EXTENDED = ("StringTop", "StringBottom", "Nock")
+INDEX = {name: i for i, name in enumerate(NAMES + EXTENDED)}
+PARENT_OVERRIDES = {
+    "ravager": {
+        "WeaponR": "Hips", "OffhandL": "Hips", "Back": "WeaponR",
+        "StringBottom": "Back", "Nock": "StringTop",
+    },
+    "acidmaw": dict.fromkeys(("WeaponR", "OffhandL", "Back", "StringTop"), "Head"),
+}
+REST_OVERRIDES = {
+    "bonehorn": {
+        "Hips": (0,.70,-.34), "Spine": (0,.02,.18), "Chest": (0,.02,.38),
+        "Head": (0,.02,.47), "BackSpring": (0,0,0),
+    },
+    "ravager": {
+        "Hips": (0,.51,-.15), "Spine": (0,0,.08), "Chest": (0,0,.27),
+        "Head": (0,-.06,.30), "WeaponR": (.20,0,-.27), "OffhandL": (-.20,0,-.27),
+        "Back": (.17,-.20,-.08), "StringTop": (-.17,-.20,-.08),
+        "StringBottom": (.09,-.28,-.06), "Nock": (-.09,-.28,-.06),
+    },
+    "acidmaw": {"Head": (0,.70,.08), "BackSpring": (0,.42,.09)},
+}
+for side, sign in (("L",1), ("R",-1)):
+    for unit, offsets in (
+        ("bonehorn", ((sign*.29,-.02,.03),(0,-.32,0),(0,-.32,0),
+                      (sign*.25,-.02,-.06),(0,-.30,0),(0,-.32,0))),
+        ("ravager", ((sign*.24,0,.15),(sign*.18,-.20,.08),(sign*.08,-.27,.09),
+                     (sign*.21,0,-.02),(sign*.17,-.20,0),(sign*.09,-.28,.02))),
+    ):
+        REST_OVERRIDES[unit].update({
+            f"{joint}{side}": offset for joint, offset in
+            zip(("UpperArm","Forearm","Hand","Thigh","Shin","Foot"), offsets, strict=True)
+        })
 BODY_PLANS = {
     "archer": (0.38, 0.36, 0.34, 0.24, 0.1365, 0.20),
     "bonebrute": (0.36, 0.50, 0.38, 0.28, 0.14, 0.25),
@@ -34,9 +66,25 @@ BODY_PLANS = {
     "oilpress": (0.38, 0.46 * 1.15, 0.34 * 1.05, 0.24 * 1.35, 0.1365 * 0.8, 0.17 * 1.15),
     "drumguard": (0.38, 0.36, 0.34, 0.24, 0.1365, 0.21),
     "leechroot": (0.38, 0.36 * 1.22, 0.34, 0.24 * 1.15, 0.1365, 0.17 * 1.3),
+    "cargocrab": (.28, .70, .22, .56, .09, .24),
+    "puppetmaster": (.38 * 1.12, .36 * .9, .34, .24, .1365, .17 * 1.15),
+    "smuggler": (.38, .36, .34, .24, .1365, .20),
+    "bonehorn": (.64, .46, .34, .24, .1365, .34),
+    "ravager": (.45, .36, .34, .24, .1365, .17),
+    "acidmaw": (.48, .25, .34, .24, .1365, .12),
 }
 # +Y up and +Z forward in TBG, +Z up and -Y forward in Blender.
 TO_BLENDER = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))
+
+
+def parents_for(unit):
+    names = NAMES + EXTENDED if unit in PARENT_OVERRIDES else NAMES
+    overrides = PARENT_OVERRIDES.get(unit, {})
+    return {
+        name: overrides.get(name, NAMES[parent] if parent is not None else None)
+        for name, parent in zip(names, PARENT + (21, 21, 21) if unit in PARENT_OVERRIDES else PARENT,
+                                strict=True)
+    }
 
 
 def rest_positions(unit, *, production=False, tier=0, branch=0):
@@ -55,10 +103,14 @@ def rest_positions(unit, *, production=False, tier=0, branch=0):
         (0, height * 0.65, -depth * 0.65), (0, 0, 0), (0, 0, depth * 0.55),
         (0, 0, 0), (0, 0, 0), (0, 0, 0),
     )
-    world = []
-    for parent, offset in zip(PARENT, local, strict=True):
-        world.append(Vector(offset) if parent is None else world[parent] + Vector(offset))
-    return dict(zip(NAMES, world, strict=True))
+    offsets = dict(zip(NAMES, local, strict=True))
+    offsets.update(dict.fromkeys(EXTENDED, (0,0,0)))
+    offsets.update(REST_OVERRIDES.get(unit, {}))
+    world = {}
+    for name, parent in parents_for(unit).items():
+        offset = Vector(offsets[name])
+        world[name] = offset if parent is None else world[parent] + offset
+    return world
 
 
 def armature(unit, rest):
@@ -69,12 +121,12 @@ def armature(unit, rest):
     obj.show_in_front = True
     obj.select_set(True)
     bpy.ops.object.mode_set(mode="EDIT")
-    for name, parent in zip(NAMES, PARENT, strict=True):
+    for name, parent in parents_for(unit).items():
         bone = data.edit_bones.new(name)
         bone.head = TO_BLENDER @ rest[name]
         bone.tail = bone.head + Vector((0, 0, 0.066 if INDEX[name] < 17 else 0.041))
         if parent is not None:
-            bone.parent = data.edit_bones[NAMES[parent]]
+            bone.parent = data.edit_bones[parent]
     bpy.ops.object.mode_set(mode="OBJECT")
     obj.select_set(False)
     obj["Rig source"] = "TBG art/rig.rs and champion body plan"

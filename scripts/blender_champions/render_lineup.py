@@ -22,6 +22,8 @@ STUDIO_ANGLES = {
     "shatterback": 28, "bloodfurnace": 26,
     "bloodweaver": 24, "oilpress": -26,
     "drumguard": 23, "leechroot": -25,
+    "cargocrab": 32, "puppetmaster": 17, "smuggler": -33,
+    "bonehorn": 42, "ravager": 34, "acidmaw": 24,
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -93,6 +95,25 @@ def drum_pose(joint,rest,tier,branch):
 
 def studio_pose(unit, joint, rest, tier, branch):
     transform = Matrix.Translation(TO_BLENDER @ rest[joint])
+    if unit == "cargocrab":
+        for side in ("L","R"):
+            if joint in arm_nodes(side):
+                return folded_arm(joint,rest,side,-42,-55)
+    if unit == "puppetmaster":
+        for side, fore in (("L",-63),("R",-72)):
+            if joint in arm_nodes(side) and (side=="R" or branch==1):
+                return folded_arm(joint,rest,side,-24,fore,0)
+    if unit == "smuggler":
+        if joint in arm_nodes("R"):
+            return folded_arm(joint,rest,"R",-17,-61,12)
+        if joint in arm_nodes("L") and (tier,branch)==(2,1):
+            return folded_arm(joint,rest,"L",-10,-43,0)
+    if unit == "acidmaw":
+        petal_turns = {"WeaponR": ("Z",14), "OffhandL": ("Z",-14),
+                       "Back": ("X",-14), "StringTop": ("X",14)}
+        if joint in petal_turns:
+            axis, angle = petal_turns[joint]
+            return transform @ Matrix.Rotation(radians(angle),4,axis)
     if unit == "sawbot":
         return saw_guard(joint, rest, tier, branch) @ transform
     if unit == "bombard":
@@ -153,7 +174,10 @@ def folded_arm(joint,rest,side,upper,fore,prop_pitch=None):
 def render(unit, angle):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    spacing = {"siegewalker": 1.46, "longaxe": 1.64, "shatterback": 1.46, "oilpress": 1.46}.get(unit,1.27)
+    spacing = {
+        "siegewalker": 1.46, "longaxe": 1.64, "shatterback": 1.46, "oilpress": 1.46,
+        "cargocrab": 1.66, "bonehorn": 2.06, "ravager": 1.80, "acidmaw": 1.15,
+    }.get(unit,1.27)
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
         anchor = bpy.data.objects.new(label, None)
@@ -168,9 +192,10 @@ def render(unit, angle):
             part.obj.parent = anchor
             part.obj.data.transform(TO_BLENDER)
             part.obj.matrix_basis = studio_pose(unit, part.joint, rest, tier, branch)
-        anchor.location.x = (column - 2) * spacing
-        # The Oilpress tar forms turn farther to show their back-mounted tanks.
-        anchor.rotation_euler.z = radians(angle-23 if unit=="oilpress" and branch==1 else angle)
+        anchor.location.x = (column - 2) * spacing - (.20 if unit=="bonehorn" else 0)
+        # Rear-mounted Evolution equipment needs a wider profile to stay legible.
+        rear_angle = {"oilpress": -23, "cargocrab": 23, "smuggler": -15}.get(unit,0)
+        anchor.rotation_euler.z = radians(angle+rear_angle if tier and branch==1 else angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)
     scale = {"siegewalker": 7.56, "longaxe": 9.4}.get(unit,6.58)
@@ -186,6 +211,12 @@ def render(unit, angle):
         scale, height = 7.56, 665
     if unit == "drumguard":
         height, aim = 690, .89
+    if unit in {"cargocrab","puppetmaster","smuggler","bonehorn","ravager","acidmaw"}:
+        scale,height,aim = {
+            "cargocrab": (8.75,475,.39), "puppetmaster": (6.68,665,.79),
+            "smuggler": (6.71,675,.78), "bonehorn": (11.15,600,.67),
+            "ravager": (9.70,515,.45), "acidmaw": (6.25,720,.80),
+        }[unit]
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)
 

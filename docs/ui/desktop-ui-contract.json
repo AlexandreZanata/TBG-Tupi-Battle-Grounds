@@ -638,7 +638,13 @@
       "Bloodweaver",
       "Oilpress",
       "Drumguard",
-      "Leechroot"
+      "Leechroot",
+      "CargoCrab",
+      "Puppetmaster",
+      "Smuggler",
+      "Bonehorn",
+      "Ravager",
+      "Acidmaw"
     ],
     "forms": [
       "Base",
@@ -679,6 +685,12 @@
       "double press slam",
       "marching drum contact",
       "root whip strike",
+      "carrier scuttle, claw strike, boarding and saddle",
+      "marionette control and two-puppet cast",
+      "revolver discharge and cargo placement",
+      "quadruped stride and horn charge",
+      "six-leg crawl and scythe strike",
+      "four-jaw opening, throat pulse and acid release",
       "hit",
       "death",
       "victory"

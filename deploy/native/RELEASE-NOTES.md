@@ -13,6 +13,10 @@ Old Finn and Antidote Brewer add an authored fishing kit and portable workshop.
 Shatterback and Blood Furnace add detachable slate and a heated two-hand hammer.
 Bloodweaver, Oilpress, Drumguard and Leechroot add authored spindle, press,
 marching drum and whip-root figures.
+Cargo Crab, Puppetmaster and Smuggler add a mechanical saddle carrier,
+a marionette act and a longshore courier with articulated equipment.
+Bonehorn, Ravager and Acidmaw add a four-legged horn charger, a six-legged
+scythe predator and a stalker with four moving jaw petals.
 Protocol 40 and ruleset 16 are unchanged.
 
 TBG 0.1.4-colossus.6 — Native Android landscape candidate

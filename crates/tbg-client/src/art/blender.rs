@@ -1,9 +1,9 @@
 //! Reads the compact joint-local meshes exported by the Blender champion pipeline.
 
 use super::{
+    FORMS, FigureForm,
     figure::{self, FigureSpec},
-    rig::{self, Node, Socket, NODE_COUNT},
-    FigureForm, FORMS,
+    rig::{self, NODE_COUNT, Node, Socket},
 };
 use bevy::{
     asset::RenderAssetUsages, mesh::Indices, prelude::*, render::render_resource::PrimitiveTopology,
@@ -33,6 +33,12 @@ const OILPRESS: &[u8] = include_bytes!("../../assets/champions/blender/oilpress.
 const DRUMGUARD: &[u8] = include_bytes!("../../assets/champions/blender/drumguard.tbgmesh");
 const LEECHROOT: &[u8] = include_bytes!("../../assets/champions/blender/leechroot.tbgmesh");
 const SHATTERBACK: &[u8] = include_bytes!("../../assets/champions/blender/shatterback.tbgmesh");
+const CARGO_CRAB: &[u8] = include_bytes!("../../assets/champions/blender/cargocrab.tbgmesh");
+const PUPPETMASTER: &[u8] = include_bytes!("../../assets/champions/blender/puppetmaster.tbgmesh");
+const SMUGGLER: &[u8] = include_bytes!("../../assets/champions/blender/smuggler.tbgmesh");
+const BONEHORN: &[u8] = include_bytes!("../../assets/champions/blender/bonehorn.tbgmesh");
+const RAVAGER: &[u8] = include_bytes!("../../assets/champions/blender/ravager.tbgmesh");
+const ACIDMAW: &[u8] = include_bytes!("../../assets/champions/blender/acidmaw.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -70,6 +76,12 @@ pub(super) fn form(
         UnitKind::Drumguard => DRUMGUARD,
         UnitKind::Leechroot => LEECHROOT,
         UnitKind::Shatterback => SHATTERBACK,
+        UnitKind::CargoCrab => CARGO_CRAB,
+        UnitKind::Puppetmaster => PUPPETMASTER,
+        UnitKind::Smuggler => SMUGGLER,
+        UnitKind::Bonehorn => BONEHORN,
+        UnitKind::Ravager => RAVAGER,
+        UnitKind::Acidmaw => ACIDMAW,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -125,19 +137,28 @@ pub(super) fn shatter_plate(
 }
 
 fn decode(data: &[u8], row: usize, plan: &rig::Proportions, kind: UnitKind) -> Option<Layers> {
-    let mut payload = Reader(data.strip_prefix(b"TBG4")?);
+    let (magic, data) = data.split_at_checked(4)?;
+    let node_count = match magic {
+        b"TBG4" => Node::Prop(Socket::StringTop).index(),
+        b"TBG5" => NODE_COUNT,
+        _ => return None,
+    };
+    let mut payload = Reader(data);
     let mut sizes = Reader(payload.take(FORMS.len() * 4)?);
     let start = (0..row).try_fold(0usize, |offset, _| {
         offset.checked_add(sizes.u32()? as usize)
     })?;
     payload.take(start)?;
     let mut input = Reader(payload.take(sizes.u32()? as usize)?);
-    check_rig(&mut input, plan, kind)?;
+    check_rig(&mut input, plan, kind, node_count)?;
     let [groups] = input.bytes()?;
     let mut lit: [Option<Mesh>; NODE_COUNT] = Default::default();
     let mut glow: [Option<Mesh>; NODE_COUNT] = Default::default();
     for _ in 0..groups {
         let [layer, node] = input.bytes()?;
+        if usize::from(node) >= node_count {
+            return None;
+        }
         let target = match layer {
             0 => lit.get_mut(usize::from(node))?,
             1 => glow.get_mut(usize::from(node))?,
@@ -151,10 +172,14 @@ fn decode(data: &[u8], row: usize, plan: &rig::Proportions, kind: UnitKind) -> O
     input.0.is_empty().then_some((lit, glow))
 }
 
-fn check_rig(input: &mut Reader<'_>, plan: &rig::Proportions, kind: UnitKind) -> Option<()> {
+fn check_rig(
+    input: &mut Reader<'_>,
+    plan: &rig::Proportions,
+    kind: UnitKind,
+    node_count: usize,
+) -> Option<()> {
     let rest = super::presentation::pose_world(kind, plan, &Default::default());
-    // Blender owns the 23 shared nodes. The animated string and nock are runtime nodes.
-    for world in rest.into_iter().take(Node::Prop(Socket::StringTop).index()) {
+    for world in rest.into_iter().take(node_count) {
         if (world.w_axis.truncate() - Vec3::from_array(input.vector(4096.0)?)).length() > 0.000_25 {
             return None;
         }
@@ -263,27 +288,45 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Oilpress,
         UnitKind::Drumguard,
         UnitKind::Leechroot,
+        UnitKind::CargoCrab,
+        UnitKind::Puppetmaster,
+        UnitKind::Smuggler,
+        UnitKind::Bonehorn,
+        UnitKind::Ravager,
+        UnitKind::Acidmaw,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
             let spec = (kit.figure)(tier, branch);
             let form = form(kind, tier, branch, &spec, &mut assets).unwrap();
-            assert!(form.meshes[rig::Joint::Head.index()].is_some());
+            let body = if kind == UnitKind::CargoCrab {
+                rig::Joint::Hips
+            } else {
+                rig::Joint::Head
+            };
+            assert!(form.meshes[body.index()].is_some());
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
             let grip = match kind {
                 UnitKind::Archer => Node::Prop(Socket::OffhandL),
-                UnitKind::Rotcap => Node::Body(rig::Joint::Head),
+                UnitKind::Rotcap | UnitKind::Bonehorn | UnitKind::Acidmaw => {
+                    Node::Body(rig::Joint::Head)
+                }
+                UnitKind::Ravager => Node::Body(rig::Joint::ForearmR),
                 UnitKind::Sawbot
                 | UnitKind::Rampart
                 | UnitKind::Shatterback
                 | UnitKind::Oilpress
-                | UnitKind::Leechroot => Node::Body(rig::Joint::HandR),
+                | UnitKind::Leechroot
+                | UnitKind::CargoCrab => Node::Body(rig::Joint::HandR),
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
             if kind == UnitKind::Drumguard
-                || (matches!(kind, UnitKind::Bloodweaver | UnitKind::AntidoteBrewer)
-                    && (tier, branch) == (2, 1))
+                || (matches!(
+                    kind,
+                    UnitKind::Bloodweaver | UnitKind::AntidoteBrewer | UnitKind::Smuggler
+                ) && (tier, branch) == (2, 1))
+                || (kind == UnitKind::Puppetmaster && tier > 0 && branch == 1)
             {
                 assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
             }
@@ -295,15 +338,31 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             if kind == UnitKind::SiegeWalker {
                 assert!(form.meshes[Node::Prop(Socket::Nock).index()].is_some());
             }
-            if kind == UnitKind::Archer {
-                for socket in [
+            let additional: &[_] = match kind {
+                UnitKind::Archer => &[
                     Socket::OffhandL,
                     Socket::StringTop,
                     Socket::StringBottom,
                     Socket::Nock,
-                ] {
-                    assert!(form.meshes[Node::Prop(socket).index()].is_some());
-                }
+                ],
+                UnitKind::Ravager => &[
+                    Socket::WeaponR,
+                    Socket::OffhandL,
+                    Socket::Back,
+                    Socket::StringTop,
+                    Socket::StringBottom,
+                    Socket::Nock,
+                ],
+                UnitKind::Acidmaw => &[
+                    Socket::WeaponR,
+                    Socket::OffhandL,
+                    Socket::Back,
+                    Socket::StringTop,
+                ],
+                _ => &[],
+            };
+            for &socket in additional {
+                assert!(form.meshes[Node::Prop(socket).index()].is_some());
             }
         }
     }

@@ -9,7 +9,10 @@ import bpy
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
+from acidmaw import acidmaw
 from antidotebrewer import antidotebrewer
+from bonehorn import bonehorn
+from cargocrab import cargocrab
 from bloodfurnace import bloodfurnace
 from bloodweaver import bloodweaver
 from bloomkeeper import bloomkeeper
@@ -23,7 +26,9 @@ from longaxe import longaxe
 from nester import nester
 from oldfinn import oldfinn
 from oilpress import oilpress
+from puppetmaster import puppetmaster
 from rampart import rampart
+from ravager import ravager
 from rig import NAMES, rest_positions
 from rootcaller import rootcaller
 from rotcap import rotcap
@@ -31,6 +36,7 @@ from sawbot import sawbot
 from shatterback import plate as shatter_plate, shatterback
 from shieldbearer import shieldbearer
 from siegewalker import siegewalker
+from smuggler import smuggler
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
@@ -56,6 +62,12 @@ GAME_UNITS = {
     "oilpress": oilpress,
     "drumguard": drumguard,
     "leechroot": leechroot,
+    "cargocrab": cargocrab,
+    "puppetmaster": puppetmaster,
+    "smuggler": smuggler,
+    "bonehorn": bonehorn,
+    "ravager": ravager,
+    "acidmaw": acidmaw,
 }
 
 
@@ -64,9 +76,10 @@ def quantize(values, scale):
 
 
 def form_payload(groups, rest):
-    result = bytearray(pack("<69hB", *quantize([v for name in NAMES for v in rest[name]], 4096), len(groups)))
+    positions = quantize([value for position in rest.values() for value in position], 4096)
+    result = bytearray(pack(f"<{len(positions)}hB", *positions, len(groups)))
     for (layer, node), (vertices, indices) in sorted(groups.items()):
-        assert layer in (0, 1) and len(vertices) <= 65535
+        assert layer in (0, 1) and node < len(rest) and len(vertices) <= 65535
         result.extend(pack("<BBHI", layer, node, len(vertices), len(indices)))
         for position, normal, color, team, _ in vertices:
             assert not team and color not in OWNERSHIP, "use the ground circle for ownership"
@@ -86,7 +99,8 @@ def export(unit, name, make):
         rest = rest_positions(unit, production=True, tier=tier, branch=branch)
         payloads.append(form_payload(groups, rest))
         print(name, label, sum(len(indices)//3 for _,indices in groups.values()), flush=True)
-    data = b"TBG4" + pack("<5I", *(len(payload) for payload in payloads)) + b"".join(payloads)
+    magic = b"TBG4" if len(rest) == len(NAMES) else b"TBG5"
+    data = magic + pack("<5I", *(len(payload) for payload in payloads)) + b"".join(payloads)
     (OUTPUT / f"{name}.tbgmesh").write_bytes(data)
     print(f"{name}: {len(data)} bytes", flush=True)
 

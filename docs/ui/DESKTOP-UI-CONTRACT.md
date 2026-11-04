@@ -1429,3 +1429,31 @@ pending. Public download compatibility uses the actual running server.
   Bloodweaver, Oilpress and Leechroot in Training and Drumguard's
   native marching and drumming clips. Windows and desktop web visual
   and motion comparison remains pending.
+
+### 2026-11-04 — Blender Cargo Crab, Puppetmaster, Smuggler, Bonehorn, Ravager and Acidmaw
+
+- Cover all thirty forms in the shared FigureLibrary, Laboratory,
+  BattleLine and Evolution swap. The two seats share meshes and
+  materials. The feet circle carries allegiance.
+- Cover Cargo Crab's scuttle, claw strike, boarding and saddle,
+  Puppetmaster's single and double control casts, and Smuggler's
+  revolver release and cargo placement.
+- Cover Bonehorn's four-foot stride and horn strike, Ravager's
+  six-foot crawl and scythe strike, and Acidmaw's four-jaw opening,
+  throat pulse and acid release. The extended mesh headers validate
+  every custom rest position used by Ravager and Acidmaw.
+- Blender checked the seat, jaws, held equipment, muzzle planes and strike
+  tips across all thirty forms. The static pass checked 150 TBG4 and ten
+  TBG5 payloads for valid groups, indices and allegiance colors.
+- The local Linux Vulkan build loaded all thirty meshes at the exported
+  triangle counts. Laboratory captures passed for Base and one advanced
+  form per champion at 1280×800. The default zoom lets the toolbar overlap
+  the upper part of Puppetmaster B2, Smuggler B2 and Acidmaw B2.
+- Live Training recorded 80 damage for Smuggler, 300 for Bonehorn, 331
+  for Ravager and 294 for Acidmaw. The motion gallery completed both the
+  Cargo Crab and Puppetmaster Cast clips in all five forms. A live
+  passenger boarding, puppet control outcome and Smuggler cargo drop
+  remain pending.
+- At consolidation, run the Blender loader test named in the modeling
+  guide under the shared build lock. Windows and desktop web full-frame
+  and motion comparisons for the six champions remain pending.

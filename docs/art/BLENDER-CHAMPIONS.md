@@ -52,8 +52,10 @@ Blender 4.5.15 LTS was used for these exports.
    evaluated bevels, triangulates surfaces, keeps corner normals, and
    merges geometry by joint and lit/glow layer. TBG4 stores a five-form
    length table, quantized rest offsets, 16-bit positions, normals and
-   indices, and RGB vertex colors. Blender and the runtime both check
-   the reserved allegiance colors. The runtime also checks the joint
+   indices, and RGB vertex colors. TBG5 uses the same layout and records
+   all 26 nodes for kits that model geometry on the last three sockets.
+   The first 23 nodes retain the same order and encoding. Blender and
+   the runtime both check the reserved allegiance colors. The runtime also checks the joint
    offsets against the current kit before loading a form.
 
 ```sh
@@ -429,3 +431,87 @@ blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_l
 ![Drumguard modular Blender lineup](../media/blender-champions/drumguard.webp)
 
 ![Leechroot modular Blender lineup](../media/blender-champions/leechroot.webp)
+
+## Cargo Crab, Puppetmaster and Smuggler
+
+**Cargo Crab** has an orange enamel shell, twin optics, three piston
+legs per side and an open passenger saddle. Reinforced Shell adds
+steel-blue plates and deflection spikes. Emergency Shield adds a raised
+frame and two amber emitters outside the seating area. Faster Legs
+adds jade servos and exposed copper pipes. Overdrive adds a raised
+spoiler above the twin exhaust stacks. The cushion reaches Chest-local
+Y 0.245, or 0.605 above the ground before form scaling. The closing
+point stays between the two HandR jaws at `(0, -0.28, 0)`.
+The five forms use 5,928–6,892 triangles and 640,859 bytes.
+
+**Puppetmaster** has a violet split tailcoat, top hat and wooden
+marionette. Painful Betrayal uses ruby and equips the puppet with a
+dagger and hooks. Cruel Stumble adds a porcelain half-mask and a luminous
+control cross. Faster Strings uses jade and adds a second cross and
+puppet to the offhand. Double Puppet adds two miniature puppets to
+the coat spring. The hand grip joins the
+cross at the existing WeaponR release point `(0, -0.05, 0.12)`.
+The five forms use 4,546–5,790 triangles and 496,047 bytes.
+
+**Smuggler** has a rust jacket, eyepatch, tricorn, belt lantern and
+revolver with a recessed bore. Better Connections adds a gold-edged
+tricorn, coin purses and stacked crates. Black Market adds gilded locks, a
+short cape and a tall plume. Faster Deliveries adds a maritime blue
+bandanna and satchel. Double Shipment adds a hand-carried crate, another
+crate on the frame and a route lantern on a pole. The WeaponR muzzle
+stays at `(0, 0.04, 0.30)`. The five forms use 4,536–6,408 triangles
+and 657,540 bytes.
+
+![Cargo Crab modular Blender lineup](../media/blender-champions/cargocrab.webp)
+
+![Puppetmaster modular Blender lineup](../media/blender-champions/puppetmaster.webp)
+
+![Smuggler modular Blender lineup](../media/blender-champions/smuggler.webp)
+
+## Bonehorn, Ravager and Acidmaw
+
+**Bonehorn** has four cloven feet, a low plated mantle and a long
+boar skull. Ancestral Carapace adds ivory leg and cheek plates, then
+raises the back crest and central horn. Stone Fangs uses rust-colored
+stone, adds a shoulder collar and replaces the outer tusks, then forks their
+tips into stone hooks. The custom quadruped keeps the center horn
+strike at Head-local `(0, 0.10, 0.58)`. The five forms use 4,686–5,206
+triangles and 440,522 bytes.
+
+**Ravager** has six independently articulated supports and two front
+scythes. Voracious Hunt adds ivory hunting blades around the cheeks
+and broadens the scythes. Its second tier extends the stinger and
+adds crest feelers. Deep Frenzy uses charcoal violet and rust, with
+flared cheek fins and hot scythe edges. Its second tier adds dorsal
+hooks and an outer hook to each scythe. The front attack tip stays
+at ForearmR-local `(-0.07, -0.03, 0.43)`. Its hind feet use the
+StringBottom and Nock sockets in the custom rig. The five forms use
+3,784–4,060 triangles and 274,467 bytes.
+
+**Acidmaw** has an elongated stalk, pulsing throat sac and four
+jaw petals pivoting independently on Head. Abyssal Jaw adds ivory
+braces and broader jaw petals, then adds swept crown horns.
+Corrosive Volley adds lime veins against dark violet and a
+larger reservoir. Its second tier adds three reservoir pods and an
+extra prong to each petal. The Head-local muzzle stays at
+`(0, 0, 0.36)`, in the open center of the petals. The five forms use
+3,104–4,118 triangles and 238,404 bytes.
+
+![Bonehorn modular Blender lineup](../media/blender-champions/bonehorn.webp)
+
+![Ravager modular Blender lineup](../media/blender-champions/ravager.webp)
+
+![Acidmaw modular Blender lineup](../media/blender-champions/acidmaw.webp)
+
+To reproduce these thirty forms and the six studio lineups, run from the
+repository root. The lineup renders use the same authored parts with
+studio poses. Cargo Crab and Smuggler turn their B forms farther to
+show the rear equipment. All lineups read Base, A1, A2, B1, B2.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- cargocrab puppetmaster smuggler bonehorn ravager acidmaw
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- cargocrab puppetmaster smuggler bonehorn ravager acidmaw
+for unit in cargocrab puppetmaster smuggler bonehorn ravager acidmaw; do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```
