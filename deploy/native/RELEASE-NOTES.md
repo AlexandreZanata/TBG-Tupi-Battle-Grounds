@@ -26,6 +26,10 @@ and a shark with a fitted jaw and two-hand trident. Solar Sentinel,
 Luminous Oracle, Celestial Archer and Justiciar add a hinged sun shield,
 a weapon-mounted staff halo, separately animated wings and bowstring,
 and a judgment construct with moving core and palm apertures.
+Jawguard, Mantis, Hornet, Weaver, Pyre Warden and Drillnest complete
+the main roster's modular figures. The local completion roster gains
+Gravecutter, Lastlight Cantor, Cragclaw and Hushfang with authored
+weapons, armor and distinct Evolution equipment.
 Protocol 40 and ruleset 16 are unchanged.
 
 TBG 0.1.4-colossus.6 — Native Android landscape candidate

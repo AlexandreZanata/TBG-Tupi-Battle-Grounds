@@ -54,6 +54,17 @@ const LUMINOUS_ORACLE: &[u8] =
 const CELESTIAL_ARCHER: &[u8] =
     include_bytes!("../../assets/champions/blender/celestialarcher.tbgmesh");
 const JUSTICIAR: &[u8] = include_bytes!("../../assets/champions/blender/justiciar.tbgmesh");
+const JAWGUARD: &[u8] = include_bytes!("../../assets/champions/blender/jawguard.tbgmesh");
+const MANTIS: &[u8] = include_bytes!("../../assets/champions/blender/mantis.tbgmesh");
+const HORNET: &[u8] = include_bytes!("../../assets/champions/blender/hornet.tbgmesh");
+const WEAVER: &[u8] = include_bytes!("../../assets/champions/blender/weaver.tbgmesh");
+const PYRE_WARDEN: &[u8] = include_bytes!("../../assets/champions/blender/pyrewarden.tbgmesh");
+const DRILLNEST: &[u8] = include_bytes!("../../assets/champions/blender/drillnest.tbgmesh");
+const GRAVECUTTER: &[u8] = include_bytes!("../../assets/champions/blender/gravecutter.tbgmesh");
+const LASTLIGHT_CANTOR: &[u8] =
+    include_bytes!("../../assets/champions/blender/lastlightcantor.tbgmesh");
+const CRAGCLAW: &[u8] = include_bytes!("../../assets/champions/blender/cragclaw.tbgmesh");
+const HUSHFANG: &[u8] = include_bytes!("../../assets/champions/blender/hushfang.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -109,6 +120,16 @@ pub(super) fn form(
         UnitKind::LuminousOracle => LUMINOUS_ORACLE,
         UnitKind::CelestialArcher => CELESTIAL_ARCHER,
         UnitKind::Justiciar => JUSTICIAR,
+        UnitKind::Jawguard => JAWGUARD,
+        UnitKind::Mantis => MANTIS,
+        UnitKind::Hornet => HORNET,
+        UnitKind::Weaver => WEAVER,
+        UnitKind::PyreWarden => PYRE_WARDEN,
+        UnitKind::Drillnest => DRILLNEST,
+        UnitKind::Gravecutter => GRAVECUTTER,
+        UnitKind::LastlightCantor => LASTLIGHT_CANTOR,
+        UnitKind::Cragclaw => CRAGCLAW,
+        UnitKind::Hushfang => HUSHFANG,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -333,6 +354,16 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::LuminousOracle,
         UnitKind::CelestialArcher,
         UnitKind::Justiciar,
+        UnitKind::Jawguard,
+        UnitKind::Mantis,
+        UnitKind::Hornet,
+        UnitKind::Weaver,
+        UnitKind::PyreWarden,
+        UnitKind::Drillnest,
+        UnitKind::Gravecutter,
+        UnitKind::LastlightCantor,
+        UnitKind::Cragclaw,
+        UnitKind::Hushfang,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -347,9 +378,11 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
             let grip = match kind {
                 UnitKind::Archer | UnitKind::CelestialArcher => Node::Prop(Socket::OffhandL),
-                UnitKind::Rotcap | UnitKind::Bonehorn | UnitKind::Acidmaw => {
-                    Node::Body(rig::Joint::Head)
-                }
+                UnitKind::Rotcap
+                | UnitKind::Bonehorn
+                | UnitKind::Acidmaw
+                | UnitKind::Jawguard
+                | UnitKind::Hushfang => Node::Body(rig::Joint::Head),
                 UnitKind::Ravager => Node::Body(rig::Joint::ForearmR),
                 UnitKind::Whisperer => Node::Prop(Socket::Back),
                 UnitKind::Sawbot
@@ -396,6 +429,10 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 UnitKind::SolarSentinel => {
                     &[Socket::OffhandL, Socket::StringTop, Socket::StringBottom]
                 }
+                UnitKind::Jawguard | UnitKind::Mantis | UnitKind::LastlightCantor => {
+                    &[Socket::OffhandL]
+                }
+                UnitKind::Hornet => &super::kits::hornet::hose::SOCKETS,
                 UnitKind::Crowcaller => &[Socket::Back, Socket::Nock],
                 UnitKind::Trigger => &[Socket::OffhandL, Socket::Back],
                 UnitKind::RattleTick => &[Socket::Back, Socket::StringTop, Socket::Nock],

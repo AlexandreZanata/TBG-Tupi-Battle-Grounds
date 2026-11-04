@@ -49,6 +49,16 @@ from solarsentinel import solarsentinel
 from trigger import trigger
 from trident import trident
 from whisperer import whisperer
+from jawguard import jawguard
+from mantis import mantis
+from hornet import hornet
+from weaver import weaver
+from pyrewarden import pyrewarden
+from drillnest import drillnest
+from gravecutter import gravecutter
+from lastlightcantor import lastlightcantor
+from cragclaw import cragclaw
+from hushfang import hushfang
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
@@ -92,6 +102,16 @@ GAME_UNITS = {
     "luminousoracle": luminousoracle,
     "celestialarcher": celestialarcher,
     "justiciar": justiciar,
+    "jawguard": jawguard,
+    "mantis": mantis,
+    "hornet": hornet,
+    "weaver": weaver,
+    "pyrewarden": pyrewarden,
+    "drillnest": drillnest,
+    "gravecutter": gravecutter,
+    "lastlightcantor": lastlightcantor,
+    "cragclaw": cragclaw,
+    "hushfang": hushfang,
 }
 
 

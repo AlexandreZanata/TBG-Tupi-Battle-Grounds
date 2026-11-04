@@ -11,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from celestialarcher import HALF as CELESTIAL_BOW_HALF, TIP_Z as BOW_TIP_Z
 from export_game import FORMS, GAME_UNITS, collection
 from geometry import Model
+from hornet import HOSE, HOSE_START, HOSE_END
 from render_study import OUT, studio
 from rig import TO_BLENDER, rest_positions
 from shatterback import plate as shatter_plate
@@ -29,6 +30,16 @@ STUDIO_ANGLES = {
     "trigger": -24, "rattletick": 20,
     "capybara": 23, "trident": 15, "solarsentinel": 19,
     "luminousoracle": 18, "celestialarcher": 27, "justiciar": -24,
+    "jawguard": 27, "mantis": 35, "hornet": 24, "weaver": 34,
+    "pyrewarden": -38, "drillnest": 36, "gravecutter": -24,
+    "lastlightcantor": 24, "cragclaw": -22, "hushfang": 47,
+}
+INSECT_AND_PREVIEW_FRAMING = {
+    "jawguard": (1.44,7.58,595,.62), "mantis": (1.32,7.10,665,.74),
+    "hornet": (1.56,8.35,635,.75), "weaver": (1.70,9.05,530,.47),
+    "pyrewarden": (1.46,7.86,665,.76), "drillnest": (1.52,8.05,540,.52),
+    "gravecutter": (1.29,6.84,640,.71), "lastlightcantor": (1.32,7.05,695,.75),
+    "cragclaw": (1.35,7.15,625,.71), "hushfang": (1.62,8.80,520,.42),
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -143,8 +154,54 @@ def archer_draw(joint,rest,tier,branch,default):
     return default
 
 
+def hornet_pose(joint,rest,default):
+    at = TO_BLENDER @ (rest["Chest"]+Vector((-.170,.152,.234)))
+    turn = Matrix.Rotation(radians(-7),4,"X")
+    if joint in arm_nodes("R"):
+        return reach_arm(joint,rest,"R",at,turn)
+    if joint not in HOSE:
+        return default
+    start = TO_BLENDER @ (rest["BackSpring"]+Vector(HOSE_START))
+    end = at+turn.to_3x3() @ (TO_BLENDER @ Vector(HOSE_END))
+    control = start.lerp(end,.5)+TO_BLENDER @ Vector((-.22,-.18,0))
+    i = HOSE.index(joint)
+    def point(t):
+        return start*(1-t)**2+control*(2*t*(1-t))+end*t*t
+    a,b = point(i/4),point((i+1)/4)
+    delta = b-a
+    align = Vector((0,0,1)).rotation_difference(delta).to_matrix().to_4x4()
+    return Matrix.Translation(a.lerp(b,.5)) @ align @ Matrix.Diagonal((1,1,delta.length+.015,1))
+
+
+def completion_guard(unit,joint,rest,default):
+    if unit=="lastlightcantor":
+        for side, local, angle in (("R",(-.181,.180,.212),-9),("L",(.160,.145,.149),0)):
+            if joint in arm_nodes(side):
+                grip = TO_BLENDER @ (rest["Chest"]+Vector(local))
+                return reach_arm(joint,rest,side,grip,Matrix.Rotation(radians(angle),4,"X"))
+    if joint in arm_nodes("R"):
+        grip = TO_BLENDER @ (rest["Chest"]+Vector((-.150,.149,.207)))
+        yaw,roll = (-25,47) if unit=="gravecutter" else (-14,33)
+        turn = Matrix.Rotation(radians(yaw),4,"Z") @ Matrix.Rotation(radians(roll),4,"Y")
+        return reach_arm(joint,rest,"R",grip,turn)
+    return default
+
+
 def studio_pose(unit, joint, rest, tier, branch):
     transform = Matrix.Translation(TO_BLENDER @ rest[joint])
+    if unit == "hornet":
+        return hornet_pose(joint,rest,transform)
+    if unit == "pyrewarden":
+        return two_hand_carry(joint,rest,(-.03,.24,.17),(0,0,.20),-8,yaw=8)
+    if unit in {"gravecutter","lastlightcantor","cragclaw"}:
+        return completion_guard(unit,joint,rest,transform)
+    if unit == "mantis":
+        for side,fore in (("L",-85),("R",-67)):
+            if joint in arm_nodes(side):
+                folded = folded_arm(joint,rest,side,-49,fore,-16)
+                if joint in ("WeaponR","OffhandL"):
+                    return folded @ Matrix.Rotation(radians(-36 if side=="R" else 27),4,"Z")
+                return folded
     if unit == "trident":
         return two_hand_carry(joint,rest,(-.27,.32,.31),(0,0,.18),-20,yaw=50,roll=55)
     if unit == "solarsentinel":
@@ -260,6 +317,8 @@ def render(unit, angle):
         "capybara": 1.47, "trident": 1.97, "solarsentinel": 1.39,
         "luminousoracle": 1.42, "celestialarcher": 1.48, "justiciar": 1.47,
     }.get(unit,1.27)
+    if unit in INSECT_AND_PREVIEW_FRAMING:
+        spacing = INSECT_AND_PREVIEW_FRAMING[unit][0]
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
         anchor = bpy.data.objects.new(label, None)
@@ -312,6 +371,8 @@ def render(unit, angle):
             "solarsentinel": (7.42,655,.78), "luminousoracle": (7.55,720,.87),
             "celestialarcher": (7.76,690,.83), "justiciar": (7.65,670,.79),
         }[unit]
+    if unit in INSECT_AND_PREVIEW_FRAMING:
+        _,scale,height,aim = INSECT_AND_PREVIEW_FRAMING[unit]
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)
 

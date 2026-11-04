@@ -12,7 +12,7 @@ NAMES = (
 PARENT = (None, 0, 1, 2, 3, 3, 5, 6, 3, 8, 9, 1, 11, 12, 1, 14, 15, 3, 4, 1, 10, 7, 17)
 EXTENDED = ("StringTop", "StringBottom", "Nock")
 EXTENDED_KITS = {
-    "ravager", "acidmaw", "crowcaller", "rattletick", "solarsentinel", "celestialarcher",
+    "ravager", "acidmaw", "crowcaller", "rattletick", "solarsentinel", "celestialarcher", "hornet",
 }
 INDEX = {name: i for i, name in enumerate(NAMES + EXTENDED)}
 PARENT_OVERRIDES = {
@@ -27,6 +27,21 @@ PARENT_OVERRIDES = {
     },
     "crowcaller": {"HeadGear": "BackSpring", "Nock": "WeaponR"},
     "trigger": {"BackSpring": "Hips"},
+    "jawguard": {"WeaponR": "Head", "OffhandL": "Head"},
+    "mantis": {"BackSpring": "Hips"},
+    "hornet": {
+        "BackSpring": "Hips", "HeadGear": "Chest", "Tabard": "Chest",
+        **dict.fromkeys(("OffhandL", "Nock", "StringTop", "StringBottom"), "Root"),
+    },
+    "weaver": {
+        **dict.fromkeys(("UpperArmL", "ForearmL", "ThighL", "ShinL",
+                         "UpperArmR", "ForearmR", "ThighR", "ShinR", "Chest"), "Hips"),
+        "WeaponR": "Head", **dict.fromkeys(("BackSpring","HeadGear","Tabard"), "Chest"),
+    },
+    "drillnest": {
+        **dict.fromkeys(("Chest","Head","BackSpring","HeadGear","Tabard"), "Hips"),
+        "WeaponR": "Chest",
+    },
     "capybara": {"Tabard": "Chest"},
     "trident": {"WeaponR": "Chest"},
     "luminousoracle": {"HeadGear": "WeaponR"},
@@ -57,6 +72,24 @@ REST_OVERRIDES = {
         "Tabard": (0,.30,-.15), "Nock": (0,.035,0),
     },
     "trigger": {"BackSpring": (0,-.02,-.14), "Back": (0,.04,-.30)},
+    "jawguard": {
+        "Head": (0,.30,.16), "WeaponR": (-.13,-.08,.16), "OffhandL": (.13,-.08,.16),
+        "BackSpring": (0,.23,-.08),
+    },
+    "mantis": {"BackSpring": (0,.02,-.12)},
+    "hornet": {"BackSpring": (0,0,-.14), "HeadGear": (.10,.26,-.09), "Tabard": (-.10,.26,-.09)},
+    "weaver": {
+        "Hips": (0,.31,0), "Chest": (0,.06,-.18), "Head": (0,-.10,.43), "WeaponR": (0,0,.11),
+        **dict.fromkeys(("BackSpring","HeadGear","Tabard"), (0,0,0)),
+    },
+    "drillnest": {
+        "Hips": (0,.24,0), "Chest": (0,.15,0), "Head": (0,.29,.05), "WeaponR": (0,.05,.18),
+        **dict.fromkeys(("BackSpring","HeadGear","Tabard"), (0,0,0)),
+    },
+    "hushfang": {
+        "Hips": (0,.385,-.24), "Spine": (0,0,.12), "Chest": (0,.015,.27),
+        "Head": (0,.07,.24), "BackSpring": (0,.02,-.10),
+    },
     "capybara": {"Head": (0,.38,.17), "Tabard": (0,.13,.14)},
     "trident": {"HeadGear": (0,-.075,.13), "BackSpring": (0,.27,-.18)},
     "solarsentinel": {
@@ -74,7 +107,13 @@ REST_OVERRIDES = {
     },
 }
 for side, sign in (("L",1), ("R",-1)):
+    REST_OVERRIDES["weaver"].update({
+        f"{joint}{side}": (sign*.14,0,z) for joint,z in
+        (("UpperArm",.20),("Forearm",.06),("Thigh",-.08),("Shin",-.22))
+    })
     for unit, offsets in (
+        ("hushfang", ((sign*.14,-.01,.03),(0,-.18,0),(0,-.18,0),
+                      (sign*.14,.005,-.04),(0,-.18,0),(0,-.18,0))),
         ("whisperer", ((sign*.16,.01,.15),(0,-.17,0),(0,-.18,0),
                        (sign*.16,.01,-.15),(0,-.17,0),(0,-.18,0))),
         ("bonehorn", ((sign*.29,-.02,.03),(0,-.32,0),(0,-.32,0),
@@ -127,6 +166,16 @@ BODY_PLANS = {
     "luminousoracle": (.38, .36 * .82, .34, .24, .1365, .17),
     "celestialarcher": (.38, .36 * .85, .34, .24, .1365, .20),
     "justiciar": (.38, .46 * 1.10, .34, .24, .1365, .22),
+    "jawguard": (.28, .46, .30, .24, .1365, .18),
+    "mantis": (.36, .36 * .68, .34, .24, .1365, .23),
+    "hornet": (.38, .36 * .88, .34, .24, .1365, .23),
+    "weaver": (.38, .36, .34, .24, .1365, .17),
+    "pyrewarden": (.38, .36 * 1.2, .34, .24, .1365, .27),
+    "drillnest": (.38, .36, .34, .24, .1365, .17),
+    "gravecutter": (.38, .36, .34, .24, .1365, .17),
+    "lastlightcantor": (.38, .36, .34, .24, .1365, .17),
+    "cragclaw": (.38, .36, .34, .24, .1365, .17 * 1.15),
+    "hushfang": (.36, .36, .34, .24, .1365, .18),
 }
 # +Y up and +Z forward in TBG, +Z up and -Y forward in Blender.
 TO_BLENDER = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))

@@ -1514,3 +1514,37 @@ pending. Public download compatibility uses the actual running server.
 - Queue the Blender loader test from the modeling guide under the
   shared lock at consolidation. Windows and desktop web full-frame
   and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Jawguard through Hushfang
+
+- Cover all fifty forms in the shared FigureLibrary and Laboratory.
+  Include BattleLine and Evolution swaps under each champion's
+  existing roster availability. Gravecutter, Lastlight Cantor,
+  Cragclaw and Hushfang follow the local completion pool.
+- Cover Jawguard's moving shell and paired jaws, Mantis's two
+  scythes, Hornet's wings and four animated hose sections, and
+  Weaver's eight legs and spinner. Hornet records all 26 rig nodes.
+- Cover Pyre Warden's two-hand flame grip, Drillnest's tread and feed
+  motion, Gravecutter's sickle strike, Lastlight Cantor's bell and
+  echo, Cragclaw's asymmetric claw and Hushfang's four-foot gait.
+- Both seats share meshes and materials. The feet circle carries
+  allegiance. Blender checked the fifty forms for native anchor
+  positions and separate moving pieces. Static inspection checked
+  235 TBG4 and 35 TBG5 payloads for group layout, indices and reserved
+  allegiance colors.
+- The Linux Vulkan preview loaded all fifty forms at the exported
+  triangle counts. The first capture pass covered Base and one
+  Evolution per champion, including the Laboratory attack clip on
+  each local completion champion. At 1280×800, the toolbar can
+  overlap the upper part of some models at the default zoom.
+- Training recorded 270 damage for Jawguard, 285 for Mantis, 280 for
+  Hornet and 100 for Weaver. Drillnest produced six Microdrill summons.
+  The live fixture covers the main roster.
+- The final Linux client loaded all fifty forms at their exported
+  counts and recaptured the coffin stays and longer tail on Pyre
+  Warden and Hushfang. Pyre Warden dealt 288 damage in Training.
+  The motion gallery completed all five forms of Jawguard, Hornet,
+  Weaver and Drillnest.
+- Queue the Blender loader test from the modeling guide under the
+  shared lock at consolidation. Windows and desktop web full-frame
+  and motion comparisons remain pending.

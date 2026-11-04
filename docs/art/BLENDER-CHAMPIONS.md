@@ -678,3 +678,120 @@ for unit in capybara trident solarsentinel luminousoracle celestialarcher justic
   convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
 done
 ```
+
+## Jawguard, Mantis, Hornet and Weaver
+
+**Jawguard** carries a split beetle shell and two independently
+hinged mandibles. Reinforced Carapace adds limestone plates and a
+tall dorsal fin. Swarm Guard uses coral chitin with shoulder barbs,
+larger hooks and brass secondary fangs. The Head-local bite
+stays at `(0, -0.05, 0.31)`, between the jaws. The five forms
+use 2,952–3,016 triangles and 208,461 bytes.
+
+**Mantis** has a triangular face, a hip-mounted abdomen and two
+hooked blades. Relentless Hunt adds ivory shin spurs, longer antennae
+and brow crests. Precise Blade uses jade, a second cutting hook
+and serrated elbow crystals. The strike stays at WeaponR-local
+`(0, -0.04, 0.30)`. The five forms use 2,100–2,164 triangles
+and 150,497 bytes.
+
+**Hornet** has a banded abdomen, two wing pairs and a venom pistol.
+Deep Venom adds ivory plating and chest ampoules, then extends
+the nozzle to Z 0.53. The other forms release at Z 0.46. Swoop
+adds aqua wing and hip shapes, then gold trailing spurs. The
+unit-length hose meshes use four Root-parented sockets. Their
+length and orientation follow the existing runtime hose transforms.
+The five forms use 3,270–3,796 triangles and 265,237 bytes.
+
+**Weaver** has eight independently posed leg groups and a head-mounted
+spinner. Extended Web adds ivory silk saddle tines, then a dorsal
+spool. Protective Web adds claret shell plates, gold knee caps and
+paired nozzle wings. The spinner rim reaches WeaponR-local
+`(0, 0, 0.14)`. The five forms use 3,494–3,666 triangles and
+247,408 bytes.
+
+![Jawguard modular Blender lineup](../media/blender-champions/jawguard.webp)
+
+![Mantis modular Blender lineup](../media/blender-champions/mantis.webp)
+
+![Hornet modular Blender lineup](../media/blender-champions/hornet.webp)
+
+![Weaver modular Blender lineup](../media/blender-champions/weaver.webp)
+
+## Pyre Warden and Drillnest
+
+**Pyre Warden** carries a coffin furnace on two shoulder stays
+and holds a braced nozzle.
+Funeral Furnace adds ivory lid reinforcement, a crown and an
+extended nozzle. Pestilence Flame adds green ampoules and paired
+side barrels. The support grip stays at WeaponR-local Z 0.20.
+The flame event starts at Y 0.02 and Z 0.464, or Z 0.604 in A2.
+The five forms use 4,732–5,456 triangles and 574,065 bytes.
+
+**Drillnest** is a low tracked foundry with a honeycomb feed rack
+and an independently recoiling barrel. Swarm Factory adds ivory
+guide frames and raises the rack from five to seven cells. Siege
+Drill adds copper recoil rails and, in B2, a double fork and two
+chassis supports. HeadGear and Tabard carry the separate tread
+links. The barrel keeps its Chest-local pivot at `(0, 0.05, 0.18)`.
+The five forms use 4,462–5,322 triangles and 556,804 bytes.
+
+![Pyre Warden modular Blender lineup](../media/blender-champions/pyrewarden.webp)
+
+![Drillnest modular Blender lineup](../media/blender-champions/drillnest.webp)
+
+## Gravecutter, Lastlight Cantor, Cragclaw and Hushfang
+
+The next four figures follow the order of the local completion pool.
+
+**Gravecutter** has a fitted grave hood, interlocked forearm
+chains and a curved sickle. Gravetaker adds an ochre coat and
+coffin-shoulder plate. Final Harvester adds a spade crest and
+second sickle tooth. Chain Dancer uses teal cloth and soul chains.
+Soul Reaver adds a spectral collar and luminous tooth. The sickle
+meets the WeaponR strike at `(0, 0, 0.30)`. The five forms use
+3,422–3,810 triangles and 328,108 bytes.
+
+**Lastlight Cantor** holds a hollow handbell and bone missal.
+Vigil Bell adds gilded vestments and a wider bell. Sanctuary
+Bell adds paired finials. Funeral Choir adds an amethyst collar.
+Last Requiem adds a halo and secondary chimes. The echo outlet
+meets WeaponR-local `(0, 0, 0.25)`. The five forms use 3,062–3,596
+triangles and 268,437 bytes.
+
+**Cragclaw** has asymmetric basalt arms and a wrist-driven claw.
+Edgeclaw adds pale limestone armor and a broader blade. Obsidian
+Chisel adds a gold wrist ridge. Splitclaw adds turquoise prongs
+and shoulder forks. Shardsweeper adds bright crystal edges.
+The central claw ends at WeaponR-local `(0, 0, 0.30)`. The five
+forms use 1,828–2,052 triangles and 182,671 bytes.
+
+**Hushfang** is a low quadruped with saber fangs and a curved
+articulated tail that extends beyond the haunch.
+Silent Prowler adds warm fur, long ivory fangs and foreleg guards.
+Fang Warden adds tall collar shards. Flint Hunter adds midnight
+blue fur and flint armor. Midnight Pounce adds luminous shoulder
+shards and swept cheek blades. The bite stays at Head-local
+`(0, 0, 0.30)`. The five forms use 3,046–3,126 triangles and
+216,838 bytes.
+
+![Gravecutter modular Blender lineup](../media/blender-champions/gravecutter.webp)
+
+![Lastlight Cantor modular Blender lineup](../media/blender-champions/lastlightcantor.webp)
+
+![Cragclaw modular Blender lineup](../media/blender-champions/cragclaw.webp)
+
+![Hushfang modular Blender lineup](../media/blender-champions/hushfang.webp)
+
+Hornet uses TBG5 to record all four hose sockets. The other nine
+use TBG4. Run from the repository root to regenerate the fifty
+forms and the studio lineups.
+
+```sh
+set -- jawguard mantis hornet weaver pyrewarden drillnest gravecutter lastlightcantor cragclaw hushfang
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- "$@"
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- "$@"
+for unit do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```
