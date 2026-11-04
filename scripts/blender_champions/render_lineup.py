@@ -20,6 +20,8 @@ STUDIO_ANGLES = {
     "longaxe": 35, "farwatch": 27, "bombard": 32, "rotcap": 24,
     "oldfinn": -28, "antidotebrewer": 24,
     "shatterback": 28, "bloodfurnace": 26,
+    "bloodweaver": 24, "oilpress": -26,
+    "drumguard": 23, "leechroot": -25,
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -27,6 +29,7 @@ RIGHT_CARRY = {
     "farwatch": (15, -110, -7),
     "oldfinn": (-17, -72, -26),
     "antidotebrewer": (-19, -64, -9),
+    "bloodweaver": (-10, -75, -14),
 }
 
 
@@ -47,26 +50,44 @@ def saw_guard(joint, rest, tier, branch):
 def two_hand_carry(joint, rest, at, fore_grip, angle):
     turn = Matrix.Rotation(radians(angle), 4, "X")
     grip = TO_BLENDER @ (rest["Chest"] + Vector(at))
-    if joint == "WeaponR":
-        return Matrix.Translation(grip) @ turn
-    for side, sign in (("R",-1),("L",1)):
-        upper, fore, hand = (f"{part}{side}" for part in ("UpperArm","Forearm","Hand"))
-        if joint not in (upper, fore, hand):
+    if joint in arm_nodes("R"):
+        return reach_arm(joint,rest,"R",grip,turn)
+    if joint in arm_nodes("L"):
+        target = grip + turn.to_3x3() @ (TO_BLENDER @ Vector(fore_grip))
+        return reach_arm(joint,rest,"L",target,turn)
+    return Matrix.Translation(TO_BLENDER @ rest[joint])
+
+
+def arm_nodes(side):
+    return (f"UpperArm{side}",f"Forearm{side}",f"Hand{side}","WeaponR" if side=="R" else "OffhandL")
+
+
+def reach_arm(joint,rest,side,target,turn):
+    upper,fore,hand,prop = arm_nodes(side)
+    if joint in (hand,prop):
+        return Matrix.Translation(target) @ turn
+    shoulder = TO_BLENDER @ rest[upper]
+    delta = target-shoulder
+    axis = delta.normalized()
+    hint = TO_BLENDER @ Vector((-1 if side=="R" else 1,-.75,-.40))
+    outward = (hint-axis*hint.dot(axis)).normalized()
+    a,b = (rest[fore]-rest[upper]).length,(rest[hand]-rest[fore]).length
+    along = (a*a-b*b+delta.length_squared)/(2*delta.length)
+    elbow = shoulder+axis*along+outward*sqrt(max(0,a*a-along*along))
+    start,end = (shoulder,elbow) if joint==upper else (elbow,target)
+    rotate = Vector((0,0,-1)).rotation_difference(end-start).to_matrix().to_4x4()
+    return Matrix.Translation(start) @ rotate
+
+
+def drum_pose(joint,rest,tier,branch):
+    depth = (.15 if tier==1 else .18) if tier and branch==0 else .13
+    for side,x,lift in (("R",-.025,0),("L",.13,.71)):
+        if joint not in arm_nodes(side):
             continue
-        target = grip if side == "R" else grip + turn.to_3x3() @ (TO_BLENDER @ Vector(fore_grip))
-        if joint == hand:
-            return Matrix.Translation(target) @ turn
-        shoulder = TO_BLENDER @ rest[upper]
-        delta = target - shoulder
-        axis = delta.normalized()
-        hint = TO_BLENDER @ Vector((sign,-.75,-.40))
-        outward = (hint-axis*hint.dot(axis)).normalized()
-        a, b = (rest[fore]-rest[upper]).length, (rest[hand]-rest[fore]).length
-        along = (a*a - b*b + delta.length_squared) / (2*delta.length)
-        elbow = shoulder + axis*along + outward*sqrt(max(0,a*a-along*along))
-        start, end = (shoulder, elbow) if joint == upper else (elbow, target)
-        rotate = Vector((0,0,-1)).rotation_difference(end-start).to_matrix().to_4x4()
-        return Matrix.Translation(start) @ rotate
+        turn = Matrix.Rotation(radians(60+25*lift),4,"X")
+        tip = TO_BLENDER @ (rest["Hips"]+Vector((x,.0275+depth*.5+.075*lift,.27)))
+        target = tip-turn.to_3x3() @ (TO_BLENDER @ Vector((0,0,.23)))
+        return reach_arm(joint,rest,side,target,turn)
     return Matrix.Translation(TO_BLENDER @ rest[joint])
 
 
@@ -78,6 +99,21 @@ def studio_pose(unit, joint, rest, tier, branch):
         return two_hand_carry(joint,rest,(-.06,.11,.14),(0,-.03,.24),-20)
     if unit == "bloodfurnace":
         return two_hand_carry(joint,rest,(.02,.25,.25),(0,0,.14),35)
+    if unit == "bloodweaver" and joint in ("UpperArmL","ForearmL","HandL","OffhandL"):
+        return folded_arm(joint,rest,"L",-21,-67,0)
+    if unit == "oilpress":
+        for side in ("L","R"):
+            if joint in (f"UpperArm{side}",f"Forearm{side}",f"Hand{side}"):
+                return folded_arm(joint,rest,side,-16,-34)
+    if unit == "drumguard":
+        return drum_pose(joint,rest,tier,branch)
+    if unit == "leechroot" and joint not in ("Root","Hips") and not joint.startswith(("Thigh","Shin","Foot")):
+        if joint in ("Head","HeadGear"):
+            transform = pitch(rest["Head"],-14) @ transform
+        for side in ("L","R"):
+            if joint in arm_nodes(side):
+                transform = folded_arm(joint,rest,side,-18,-23)
+        return pitch(rest["Spine"],20) @ transform
     if unit == "shatterback":
         for side in ("L","R"):
             if joint in (f"UpperArm{side}",f"Forearm{side}",f"Hand{side}"):
@@ -103,10 +139,21 @@ def studio_pose(unit, joint, rest, tier, branch):
     return transform
 
 
+def folded_arm(joint,rest,side,upper,fore,prop_pitch=None):
+    transform = Matrix.Translation(TO_BLENDER @ rest[joint])
+    shoulder = pitch(rest[f"UpperArm{side}"],upper)
+    if joint == f"UpperArm{side}":
+        return shoulder @ transform
+    transform = shoulder @ pitch(rest[f"Forearm{side}"],fore) @ transform
+    if prop_pitch is not None and joint in ("WeaponR","OffhandL"):
+        return Matrix.Translation(transform.translation) @ Matrix.Rotation(radians(prop_pitch),4,"X")
+    return transform
+
+
 def render(unit, angle):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    spacing = {"siegewalker": 1.46, "longaxe": 1.64, "shatterback": 1.46}.get(unit,1.27)
+    spacing = {"siegewalker": 1.46, "longaxe": 1.64, "shatterback": 1.46, "oilpress": 1.46}.get(unit,1.27)
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
         anchor = bpy.data.objects.new(label, None)
@@ -122,7 +169,8 @@ def render(unit, angle):
             part.obj.data.transform(TO_BLENDER)
             part.obj.matrix_basis = studio_pose(unit, part.joint, rest, tier, branch)
         anchor.location.x = (column - 2) * spacing
-        anchor.rotation_euler.z = radians(angle)
+        # The Oilpress tar forms turn farther to show their back-mounted tanks.
+        anchor.rotation_euler.z = radians(angle-23 if unit=="oilpress" and branch==1 else angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)
     scale = {"siegewalker": 7.56, "longaxe": 9.4}.get(unit,6.58)
@@ -132,6 +180,12 @@ def render(unit, angle):
         height, aim = 690, .92
     if unit == "shatterback":
         scale, height, aim = 7.55, 650, .51
+    if unit == "bloodweaver":
+        height, aim = 710, .91
+    if unit == "oilpress":
+        scale, height = 7.56, 665
+    if unit == "drumguard":
+        height, aim = 690, .89
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)
 

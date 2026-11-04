@@ -11,6 +11,8 @@ Longaxe and Farwatch add component-modeled polearm and arbalest figures.
 Bombard and Rotcap add component-modeled mortar and spore-casting figures.
 Old Finn and Antidote Brewer add an authored fishing kit and portable workshop.
 Shatterback and Blood Furnace add detachable slate and a heated two-hand hammer.
+Bloodweaver, Oilpress, Drumguard and Leechroot add authored spindle, press,
+marching drum and whip-root figures.
 Protocol 40 and ruleset 16 are unchanged.
 
 TBG 0.1.4-colossus.6 — Native Android landscape candidate

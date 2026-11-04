@@ -28,6 +28,10 @@ const OLD_FINN: &[u8] = include_bytes!("../../assets/champions/blender/oldfinn.t
 const ANTIDOTE_BREWER: &[u8] =
     include_bytes!("../../assets/champions/blender/antidotebrewer.tbgmesh");
 const BLOOD_FURNACE: &[u8] = include_bytes!("../../assets/champions/blender/bloodfurnace.tbgmesh");
+const BLOODWEAVER: &[u8] = include_bytes!("../../assets/champions/blender/bloodweaver.tbgmesh");
+const OILPRESS: &[u8] = include_bytes!("../../assets/champions/blender/oilpress.tbgmesh");
+const DRUMGUARD: &[u8] = include_bytes!("../../assets/champions/blender/drumguard.tbgmesh");
+const LEECHROOT: &[u8] = include_bytes!("../../assets/champions/blender/leechroot.tbgmesh");
 const SHATTERBACK: &[u8] = include_bytes!("../../assets/champions/blender/shatterback.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
@@ -61,6 +65,10 @@ pub(super) fn form(
         UnitKind::OldFinn => OLD_FINN,
         UnitKind::AntidoteBrewer => ANTIDOTE_BREWER,
         UnitKind::BloodFurnace => BLOOD_FURNACE,
+        UnitKind::Bloodweaver => BLOODWEAVER,
+        UnitKind::Oilpress => OILPRESS,
+        UnitKind::Drumguard => DRUMGUARD,
+        UnitKind::Leechroot => LEECHROOT,
         UnitKind::Shatterback => SHATTERBACK,
         _ => return None,
     };
@@ -251,6 +259,10 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::AntidoteBrewer,
         UnitKind::BloodFurnace,
         UnitKind::Shatterback,
+        UnitKind::Bloodweaver,
+        UnitKind::Oilpress,
+        UnitKind::Drumguard,
+        UnitKind::Leechroot,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -261,13 +273,18 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             let grip = match kind {
                 UnitKind::Archer => Node::Prop(Socket::OffhandL),
                 UnitKind::Rotcap => Node::Body(rig::Joint::Head),
-                UnitKind::Sawbot | UnitKind::Rampart | UnitKind::Shatterback => {
-                    Node::Body(rig::Joint::HandR)
-                }
+                UnitKind::Sawbot
+                | UnitKind::Rampart
+                | UnitKind::Shatterback
+                | UnitKind::Oilpress
+                | UnitKind::Leechroot => Node::Body(rig::Joint::HandR),
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
-            if kind == UnitKind::AntidoteBrewer && (tier, branch) == (2, 1) {
+            if kind == UnitKind::Drumguard
+                || (matches!(kind, UnitKind::Bloodweaver | UnitKind::AntidoteBrewer)
+                    && (tier, branch) == (2, 1))
+            {
                 assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
             }
             if kind == UnitKind::Shatterback {

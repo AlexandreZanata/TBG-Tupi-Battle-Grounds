@@ -634,7 +634,11 @@
       "OldFinn",
       "AntidoteBrewer",
       "Shatterback",
-      "BloodFurnace"
+      "BloodFurnace",
+      "Bloodweaver",
+      "Oilpress",
+      "Drumguard",
+      "Leechroot"
     ],
     "forms": [
       "Base",
@@ -671,6 +675,10 @@
       "remedy cast",
       "planted paw strike and shell plate fall",
       "two-hand furnace hammer strike",
+      "blood spindle cast",
+      "double press slam",
+      "marching drum contact",
+      "root whip strike",
       "hit",
       "death",
       "victory"

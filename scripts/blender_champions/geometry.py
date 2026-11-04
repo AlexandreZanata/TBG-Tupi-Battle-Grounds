@@ -38,8 +38,14 @@ SWATCH = {
     "ember_stone": (225, 123, 54, 0.10, 0.71),
     "furnace_verdigris": (64, 124, 111, 0.39, 0.62),
     "furnace_jade": (99, 153, 132, 0.36, 0.57),
+    "ritual_indigo": (70, 51, 102, 0.0, 0.84),
+    "blood_glow": (197, 62, 89, 0.0, 0.53),
+    "oil_slick": (28, 37, 35, 0.12, 0.33),
+    "drum_carmine": (155, 55, 46, 0.0, 0.76),
+    "leech_plum": (68, 43, 61, 0.0, 0.74),
+    "leech_pulse": (210, 96, 161, 0.0, 0.55),
 }
-GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom"}
+GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse"}
 
 
 def linear(byte):

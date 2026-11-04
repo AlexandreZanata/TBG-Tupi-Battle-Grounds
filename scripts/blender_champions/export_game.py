@@ -11,14 +11,18 @@ sys.path.insert(0, str(HERE))
 from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
 from antidotebrewer import antidotebrewer
 from bloodfurnace import bloodfurnace
+from bloodweaver import bloodweaver
 from bloomkeeper import bloomkeeper
 from bombard import bombard
+from drumguard import drumguard
 from farwatch import farwatch
 from geometry import Model
 from hexer import hexer
+from leechroot import leechroot
 from longaxe import longaxe
 from nester import nester
 from oldfinn import oldfinn
+from oilpress import oilpress
 from rampart import rampart
 from rig import NAMES, rest_positions
 from rootcaller import rootcaller
@@ -48,6 +52,10 @@ GAME_UNITS = {
     "antidotebrewer": antidotebrewer,
     "shatterback": shatterback,
     "bloodfurnace": bloodfurnace,
+    "bloodweaver": bloodweaver,
+    "oilpress": oilpress,
+    "drumguard": drumguard,
+    "leechroot": leechroot,
 }
 
 

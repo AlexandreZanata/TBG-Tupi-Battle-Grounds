@@ -1412,3 +1412,20 @@ pending. Public download compatibility uses the actual running server.
   covers loading all ten forms, Blood Furnace's strike and a Training
   hit that removes a Shatterback plate.
 - Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Bloodweaver, Oilpress, Drumguard and Leechroot
+
+- Cover Base and all four Evolutions for each champion in the shared
+  FigureLibrary, Laboratory and BattleLine. Each seat uses the same
+  meshes and materials, with allegiance on the feet circle.
+- Cover Bloodweaver's 0.22 s spindle release and double-spindle B2,
+  Oilpress's 0.30 s two-plate slam, Drumguard's alternating strikes
+  on the hip drum, and Leechroot's 0.30 s whip strike.
+- Blender checked the spindle, pressing surfaces, drum and stick
+  placement and whip tip in all twenty forms. The binary payload
+  check covered groups, indices and reserved allegiance colors.
+- Linux installation and motion validation are deferred because the
+  shared compilation lock returned exit 75. The scoped checks cover
+  Bloodweaver, Oilpress and Leechroot in Training and Drumguard's
+  native marching and drumming clips. Windows and desktop web visual
+  and motion comparison remains pending.

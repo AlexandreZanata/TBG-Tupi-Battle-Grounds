@@ -370,3 +370,62 @@ flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
   env CARGO_BUILD_JOBS=2 cargo +1.99.0 test -p tbg-client --lib \
   blender_assets_cover_all_forms_and_keep_animated_weapon_sockets -- --test-threads=1
 ```
+
+## Bloodweaver and Oilpress
+
+Bloodweaver's base has a wine-colored hood, a pleated hip-bound robe
+and a spindle with blood thread. Deep Transfer adds an ivory stole
+and gold chalice. Last Offering adds a heart reliquary and hood
+finial. Rapid Circulation switches to indigo and violet, with wound
+cuffs and thread across the chest. Shared Blood adds the shorter offhand
+spindle and suspended drops. The WeaponR spindle releases at
+`(0, 0.84, 0.03)`.
+
+Oilpress has a riveted copper boiler, pressure gauge, stacked
+pistons, exhaust pipes and two pressing fists. Reinforced Hull adds
+brass and a steel breastplate. Immovable Mass adds a hip bulwark,
+anchor spurs and a lit grille. Oil Leak uses verdigris and twin
+tanks with dark oil trails. Black Mire swaps in a large tank and
+tar-covered strike plates. Their striking surfaces end at
+HandR/HandL-local `(0, -0.14, 0)`.
+
+Bloodweaver uses 3,340–4,530 triangles per form and 335,736 bytes.
+Oilpress uses 4,510–5,250 triangles per form and 504,025 bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- bloodweaver oilpress
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- bloodweaver oilpress
+```
+
+![Bloodweaver modular Blender lineup](../media/blender-champions/bloodweaver.webp)
+
+![Oilpress modular Blender lineup](../media/blender-champions/oilpress.webp)
+
+## Drumguard and Leechroot
+
+Drumguard's base has a wine coat, shako and rope-tensioned snare.
+War March adds carmine, gilt fittings, a plume and a larger copper
+drum. Grand March adds a second plume and a gilded bass drum. Iron
+Rhythm uses slate and steel, with a kettle helmet and breastplate.
+Unbreakable Rhythm adds shoulder lamellae, a helmet comb and engraved
+drum runes. The drum stays at Hips-local `(0.08, 0.02, 0.20)` and
+both stick tips at their hand sockets' local Z 0.23.
+
+Leechroot has a recessed ring maw, root fringe and two whip roots.
+Faster Feeding adds a wider ivory-toothed maw and horns. Endless Growth
+adds three amber sap sacs with supporting roots. Life Drain adds a
+plum bark shell, violet veins and wrist nodes. Blood Hunger adds a
+caged siphon bulb and two small maws on the whips. The native attack
+tip remains at HandR-local `(0, -0.3094, 0.06)`.
+
+Drumguard uses 2,934–3,254 triangles per form and 245,158 bytes.
+Leechroot uses 2,774–4,670 triangles per form and 243,225 bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- drumguard leechroot
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- drumguard leechroot
+```
+
+![Drumguard modular Blender lineup](../media/blender-champions/drumguard.webp)
+
+![Leechroot modular Blender lineup](../media/blender-champions/leechroot.webp)
