@@ -28,6 +28,8 @@ BODY_PLANS = {
     "rotcap": (0.38 * 0.8, 0.36 * 1.1, 0.34, 0.24, 0.1365, 0.17),
     "oldfinn": (0.36, 0.40, 0.34, 0.27, 0.1365, 0.21),
     "antidotebrewer": (0.38, 0.36, 0.34, 0.24, 0.1365, 0.17),
+    "shatterback": (0.38 * 0.6, 0.46 * 1.35, 0.16, 0.24 * 1.9, 0.1365 * 0.85, 0.26),
+    "bloodfurnace": (0.38, 0.36 * 1.1, 0.34, 0.24, 0.1365, 0.25),
 }
 # +Y up and +Z forward in TBG, +Z up and -Y forward in Blender.
 TO_BLENDER = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))
@@ -41,7 +43,7 @@ def rest_positions(unit, *, production=False, tier=0, branch=0):
     l = -leg * 0.5
     local = (
         (0, 0, 0), (0, leg + 0.06, 0), (0, 0.02, 0), (0, 0, 0),
-        (0, height + head * 0.85, 0),
+        (0, .20, .33) if unit == "shatterback" else (0, height + head * 0.85, 0),
         (a, height * 0.9, 0), (0, -arm, 0), (0, -arm * 0.9, 0),
         (-a, height * 0.9, 0), (0, -arm, 0), (0, -arm * 0.9, 0),
         (width * 0.25, 0, 0), (0, l, 0), (0, l, 0),

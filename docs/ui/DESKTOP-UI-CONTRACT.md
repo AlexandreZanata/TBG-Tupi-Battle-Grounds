@@ -1391,5 +1391,24 @@ pending. Public download compatibility uses the actual running server.
   Both casts keep their 0.22 s release.
 - Blender verified the release anchors and the offhand flask. Linux
   Vulkan loaded all ten final meshes and captured Base and B2 for
-  both champions in the Laboratory.
+  both champions in the Laboratory. Old Finn dealt damage in Training.
+  The native motion gallery played the Antidote Brewer cast in all five
+  forms. The Training opponent applied no affliction to cleanse.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Shatterback and Blood Furnace
+
+- Cover all five forms in the shared FigureLibrary, Laboratory and
+  BattleLine. Both seats share the same meshes and materials, with
+  allegiance on the feet circle.
+- Cover Shatterback's custom neck pivot, planted paw strike and all
+  four detachable plates. Cover Blood Furnace's two-hand hammer
+  strike and the chest and weapon glow. Both strike cues stay at 0.30 s.
+- Blender verified both strike anchors and the four plate positions
+  across all five forms.
+- Static checks verified the TBG4 indices, palettes and separate
+  Chest payloads. Linux installation and combat are deferred because
+  the shared validation lock returned exit 75. The deferred check
+  covers loading all ten forms, Blood Furnace's strike and a Training
+  hit that removes a Shatterback plate.
 - Visual and motion comparison for Windows and desktop web remains pending.

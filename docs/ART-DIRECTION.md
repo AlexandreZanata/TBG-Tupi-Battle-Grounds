@@ -54,6 +54,11 @@ cases/motion coverage in the same change; this applies to all phases and kits.
   separate status outline and solid/notched allegiance shape; Stronghold
   banners remain architectural equipment. The [Blender production workflow](art/BLENDER-CHAMPIONS.md)
   is required for new champion models.
+- **Evolution identity — owner rule, 2026-11-04:** every new champion
+  gives its two branches distinct intrinsic accent palettes and
+  kit-specific modeled pieces. Each tier develops its branch silhouette
+  at match distance. Follow the
+  [Blender branch identity checks](art/BLENDER-CHAMPIONS.md#required-evolution-branch-identity).
 
 
 ## 3. Palette (start values; P15 locks them)

@@ -8,6 +8,22 @@ and intrinsic colors for both seats. Remove ownership geometry from the
 source, such as chest badges, arm pennants and team tabards. Preserve
 intrinsic material colors and the independent status outline.
 
+## Required Evolution branch identity
+
+Before modeling a new champion, choose a distinct intrinsic accent
+palette and a visual equipment or anatomy motif for each Evolution
+branch. A1 and B1 must each add or replace a readable modeled piece.
+A2 and B2 must visibly develop their branch with another modeled
+addition or a recognizable silhouette change. Size or color changes
+alone do not satisfy this rule. Choose pieces that express the kit,
+such as Old Finn's catch and net or the Antidote Brewer's still and
+bandolier.
+
+Check the five forms side by side and at the desktop match scale.
+Preserve the champion's recognizable Base identity, existing rig and
+combat anchors. All branch colors and geometry match across seats.
+The feet circle carries allegiance.
+
 ## Editable source and export
 
 The initial roster and the first expanded-roster figures use component modeling.
@@ -304,3 +320,53 @@ blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_l
 ![Old Finn modular Blender lineup](../media/blender-champions/oldfinn.webp)
 
 ![Antidote Brewer modular Blender lineup](../media/blender-champions/antidotebrewer.webp)
+
+## Shatterback and Blood Furnace
+
+Shatterback has a low terrapin body, hooked beak, planted paws and
+four beveled slate plates. The pale ochre branch grows ivory shards
+from the plates in A1, then lengthens them and adds a brass brow
+shield in A2. The obsidian and ember branch adds heated veins
+and fractured plates in B1, then adds raised ridges and an iron
+brow shield in B2. The custom neck pivot is chest-local
+`(0, 0.20, 0.33)`. The central right claw reaches HandR-local
+`(0, 0, 0.24)`.
+
+The body and four numbered plates export as separate TBG4 files.
+Each plate is built in Chest coordinates so the existing live shell
+controller can replace, hide and drop it independently. The lineup
+and event-free previews assemble all four plates.
+
+Blood Furnace has an ash-stained skull, connected clavicles, charred
+ribs and an open iron grate. The hammer head is centered at
+WeaponR-local `(0, 0, 0.51)` and uses the existing two-hand hold.
+The copper and gold branch grows the fire behind a copper collar
+and adds a pointed hammer poll in A1. A2 exposes the radiant core and
+adds a gilt flame crown. The verdigris and jade branch adds a vented
+door, draft dial, bellows and a caged hammer head in B1. B2 hangs
+caged ember lanterns from the shoulders and reinforces the hammer
+with extra cage ribs.
+
+Shatterback uses 3,274–4,022 triangles with all four plates and
+269,800 bytes across the body and plate files. Blood Furnace uses
+4,788–6,752 triangles per form and 608,107 bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- shatterback bloodfurnace
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- shatterback bloodfurnace
+```
+
+![Shatterback modular Blender lineup](../media/blender-champions/shatterback.webp)
+
+![Blood Furnace modular Blender lineup](../media/blender-champions/bloodfurnace.webp)
+
+The local Linux preview build returned 75 from the shared validation
+lock. At consolidation, run the loader check under the same lock,
+install the preview, and observe a Shatterback plate loss and a Blood
+Furnace strike in Training.
+
+```sh
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" \
+  env CARGO_BUILD_JOBS=2 cargo +1.99.0 test -p tbg-client --lib \
+  blender_assets_cover_all_forms_and_keep_animated_weapon_sockets -- --test-threads=1
+```

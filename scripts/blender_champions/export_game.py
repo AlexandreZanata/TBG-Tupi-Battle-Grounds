@@ -10,6 +10,7 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
 from antidotebrewer import antidotebrewer
+from bloodfurnace import bloodfurnace
 from bloomkeeper import bloomkeeper
 from bombard import bombard
 from farwatch import farwatch
@@ -23,6 +24,7 @@ from rig import NAMES, rest_positions
 from rootcaller import rootcaller
 from rotcap import rotcap
 from sawbot import sawbot
+from shatterback import plate as shatter_plate, shatterback
 from shieldbearer import shieldbearer
 from siegewalker import siegewalker
 
@@ -44,6 +46,8 @@ GAME_UNITS = {
     "rotcap": rotcap,
     "oldfinn": oldfinn,
     "antidotebrewer": antidotebrewer,
+    "shatterback": shatterback,
+    "bloodfurnace": bloodfurnace,
 }
 
 
@@ -63,23 +67,31 @@ def form_payload(groups, rest):
     return result
 
 
+def export(unit, name, make):
+    payloads = []
+    for label, tier, branch in FORMS:
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        scene = collection(f"{name} {label}", bpy.context.scene.collection)
+        model = Model(scene)
+        make(model, tier, branch)
+        groups = groups_for(model)
+        rest = rest_positions(unit, production=True, tier=tier, branch=branch)
+        payloads.append(form_payload(groups, rest))
+        print(name, label, sum(len(indices)//3 for _,indices in groups.values()), flush=True)
+    data = b"TBG4" + pack("<5I", *(len(payload) for payload in payloads)) + b"".join(payloads)
+    (OUTPUT / f"{name}.tbgmesh").write_bytes(data)
+    print(f"{name}: {len(data)} bytes", flush=True)
+
+
 def main(units):
     OUTPUT.mkdir(parents=True, exist_ok=True)
     for unit in units:
         make = GAME_UNITS[unit]
-        payloads = []
-        for label, tier, branch in FORMS:
-            bpy.ops.wm.read_factory_settings(use_empty=True)
-            scene = collection(f"{unit} {label}", bpy.context.scene.collection)
-            model = Model(scene)
-            make(model, tier, branch, production=True)
-            groups = groups_for(model)
-            rest = rest_positions(unit, production=True, tier=tier, branch=branch)
-            payloads.append(form_payload(groups, rest))
-            print(unit, label, sum(len(indices)//3 for _,indices in groups.values()), flush=True)
-        data = b"TBG4" + pack("<5I", *(len(payload) for payload in payloads)) + b"".join(payloads)
-        (OUTPUT / f"{unit}.tbgmesh").write_bytes(data)
-        print(f"{unit}: {len(data)} bytes", flush=True)
+        export(unit, unit, lambda model, tier, branch: make(model, tier, branch, production=True))
+        if unit == "shatterback":
+            for index in range(4):
+                export(unit, f"{unit}-plate-{index}",
+                       lambda model, tier, branch: shatter_plate(model, tier, branch, index))
 
 
 if __name__ == "__main__":

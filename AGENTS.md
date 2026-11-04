@@ -98,6 +98,11 @@ per-step demands for broad checks. See *Verification* below and
    accessory and Evolution seat-independent, and remove ownership geometry
    from the authoring source.
 
+9. **Champion Evolution identity (owner rule, 2026-11-04).** Follow the
+   [required Blender branch identity checks](docs/art/BLENDER-CHAMPIONS.md#required-evolution-branch-identity)
+   for every new champion, including intrinsic color, distinct modeled
+   pieces and readability at desktop match distance.
+
 ## How to work a phase (executor)
 
 1. Open the phase file named in `docs/ROADMAP.md`. Read only what its

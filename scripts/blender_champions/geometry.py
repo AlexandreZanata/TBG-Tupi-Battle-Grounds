@@ -35,6 +35,9 @@ SWATCH = {
     "fish_silver": (186, 208, 205, 0.22, 0.50), "fish_back": (68, 109, 132, 0.13, 0.57),
     "finn_storm": (42, 76, 105, 0.0, 0.56), "finn_spray": (67, 119, 148, 0.0, 0.64),
     "herb_amber": (181, 112, 43, 0.05, 0.74), "brew_violet": (98, 63, 128, 0.0, 0.75),
+    "ember_stone": (225, 123, 54, 0.10, 0.71),
+    "furnace_verdigris": (64, 124, 111, 0.39, 0.62),
+    "furnace_jade": (99, 153, 132, 0.36, 0.57),
 }
 GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom"}
 

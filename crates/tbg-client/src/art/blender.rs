@@ -27,6 +27,14 @@ const ROTCAP: &[u8] = include_bytes!("../../assets/champions/blender/rotcap.tbgm
 const OLD_FINN: &[u8] = include_bytes!("../../assets/champions/blender/oldfinn.tbgmesh");
 const ANTIDOTE_BREWER: &[u8] =
     include_bytes!("../../assets/champions/blender/antidotebrewer.tbgmesh");
+const BLOOD_FURNACE: &[u8] = include_bytes!("../../assets/champions/blender/bloodfurnace.tbgmesh");
+const SHATTERBACK: &[u8] = include_bytes!("../../assets/champions/blender/shatterback.tbgmesh");
+const SHATTER_PLATES: [&[u8]; 4] = [
+    include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
+    include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
+    include_bytes!("../../assets/champions/blender/shatterback-plate-2.tbgmesh"),
+    include_bytes!("../../assets/champions/blender/shatterback-plate-3.tbgmesh"),
+];
 
 pub(super) fn form(
     kind: UnitKind,
@@ -52,10 +60,12 @@ pub(super) fn form(
         UnitKind::Rotcap => ROTCAP,
         UnitKind::OldFinn => OLD_FINN,
         UnitKind::AntidoteBrewer => ANTIDOTE_BREWER,
+        UnitKind::BloodFurnace => BLOOD_FURNACE,
+        UnitKind::Shatterback => SHATTERBACK,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
-    let Some((mut lit, glow)) = decode(data, row, &spec.plan) else {
+    let Some((mut lit, glow)) = decode(data, row, &spec.plan, kind) else {
         error!("Blender mesh or rig data is invalid for {kind:?} {tier}/{branch}");
         return None;
     };
@@ -90,7 +100,23 @@ pub(super) fn form(
 
 type Layers = ([Option<Mesh>; NODE_COUNT], [Option<Mesh>; NODE_COUNT]);
 
-fn decode(data: &[u8], row: usize, plan: &rig::Proportions) -> Option<Layers> {
+pub(super) fn shatter_plate(
+    tier: u8,
+    branch: u8,
+    index: usize,
+    plan: &rig::Proportions,
+) -> Option<Mesh> {
+    let row = FORMS.iter().position(|form| *form == (tier, branch))?;
+    let data = SHATTER_PLATES.get(index)?;
+    let mesh = decode(data, row, plan, UnitKind::Shatterback)
+        .and_then(|(mut lit, _)| lit[rig::Joint::Chest.index()].take());
+    if mesh.is_none() {
+        error!("Blender Shatterback plate {index} data is invalid for {tier}/{branch}");
+    }
+    mesh
+}
+
+fn decode(data: &[u8], row: usize, plan: &rig::Proportions, kind: UnitKind) -> Option<Layers> {
     let mut payload = Reader(data.strip_prefix(b"TBG4")?);
     let mut sizes = Reader(payload.take(FORMS.len() * 4)?);
     let start = (0..row).try_fold(0usize, |offset, _| {
@@ -98,7 +124,7 @@ fn decode(data: &[u8], row: usize, plan: &rig::Proportions) -> Option<Layers> {
     })?;
     payload.take(start)?;
     let mut input = Reader(payload.take(sizes.u32()? as usize)?);
-    check_rig(&mut input, plan)?;
+    check_rig(&mut input, plan, kind)?;
     let [groups] = input.bytes()?;
     let mut lit: [Option<Mesh>; NODE_COUNT] = Default::default();
     let mut glow: [Option<Mesh>; NODE_COUNT] = Default::default();
@@ -117,15 +143,13 @@ fn decode(data: &[u8], row: usize, plan: &rig::Proportions) -> Option<Layers> {
     input.0.is_empty().then_some((lit, glow))
 }
 
-fn check_rig(input: &mut Reader<'_>, plan: &rig::Proportions) -> Option<()> {
-    let mut rest = [Vec3::ZERO; NODE_COUNT];
+fn check_rig(input: &mut Reader<'_>, plan: &rig::Proportions, kind: UnitKind) -> Option<()> {
+    let rest = super::presentation::pose_world(kind, plan, &Default::default());
     // Blender owns the 23 shared nodes. The animated string and nock are runtime nodes.
-    for node in rig::nodes().take(Node::Prop(Socket::StringTop).index()) {
-        let world = node.parent().map_or(Vec3::ZERO, |p| rest[p.index()]) + rig::rest(node, plan);
-        if (world - Vec3::from_array(input.vector(4096.0)?)).length() > 0.000_25 {
+    for world in rest.into_iter().take(Node::Prop(Socket::StringTop).index()) {
+        if (world.w_axis.truncate() - Vec3::from_array(input.vector(4096.0)?)).length() > 0.000_25 {
             return None;
         }
-        rest[node.index()] = world;
     }
     Some(())
 }
@@ -225,6 +249,8 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Rotcap,
         UnitKind::OldFinn,
         UnitKind::AntidoteBrewer,
+        UnitKind::BloodFurnace,
+        UnitKind::Shatterback,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -235,12 +261,19 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             let grip = match kind {
                 UnitKind::Archer => Node::Prop(Socket::OffhandL),
                 UnitKind::Rotcap => Node::Body(rig::Joint::Head),
-                UnitKind::Sawbot | UnitKind::Rampart => Node::Body(rig::Joint::HandR),
+                UnitKind::Sawbot | UnitKind::Rampart | UnitKind::Shatterback => {
+                    Node::Body(rig::Joint::HandR)
+                }
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
             if kind == UnitKind::AntidoteBrewer && (tier, branch) == (2, 1) {
                 assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
+            }
+            if kind == UnitKind::Shatterback {
+                for index in 0..4 {
+                    assert!(shatter_plate(tier, branch, index, &spec.plan).is_some());
+                }
             }
             if kind == UnitKind::SiegeWalker {
                 assert!(form.meshes[Node::Prop(Socket::Nock).index()].is_some());

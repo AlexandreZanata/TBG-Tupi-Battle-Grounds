@@ -12,12 +12,14 @@ from export_game import FORMS, GAME_UNITS, collection
 from geometry import Model
 from render_study import OUT, studio
 from rig import TO_BLENDER, rest_positions
+from shatterback import plate as shatter_plate
 
 STUDIO_ANGLES = {
     "shieldbearer": -44, "hexer": 19, "sawbot": 24, "bloomkeeper": 15,
     "siegewalker": -27, "rootcaller": 13, "nester": -44, "rampart": 29,
     "longaxe": 35, "farwatch": 27, "bombard": 32, "rotcap": 24,
     "oldfinn": -28, "antidotebrewer": 24,
+    "shatterback": 28, "bloodfurnace": 26,
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -42,16 +44,16 @@ def saw_guard(joint, rest, tier, branch):
     return Matrix.Identity(4)
 
 
-def mortar_carry(joint, rest):
-    turn = Matrix.Rotation(radians(-20), 4, "X")
-    grip = TO_BLENDER @ (rest["Chest"] + Vector((-.06,.11,.14)))
+def two_hand_carry(joint, rest, at, fore_grip, angle):
+    turn = Matrix.Rotation(radians(angle), 4, "X")
+    grip = TO_BLENDER @ (rest["Chest"] + Vector(at))
     if joint == "WeaponR":
         return Matrix.Translation(grip) @ turn
     for side, sign in (("R",-1),("L",1)):
         upper, fore, hand = (f"{part}{side}" for part in ("UpperArm","Forearm","Hand"))
         if joint not in (upper, fore, hand):
             continue
-        target = grip if side == "R" else grip + turn.to_3x3() @ (TO_BLENDER @ Vector((0,-.03,.24)))
+        target = grip if side == "R" else grip + turn.to_3x3() @ (TO_BLENDER @ Vector(fore_grip))
         if joint == hand:
             return Matrix.Translation(target) @ turn
         shoulder = TO_BLENDER @ rest[upper]
@@ -73,7 +75,14 @@ def studio_pose(unit, joint, rest, tier, branch):
     if unit == "sawbot":
         return saw_guard(joint, rest, tier, branch) @ transform
     if unit == "bombard":
-        return mortar_carry(joint, rest)
+        return two_hand_carry(joint,rest,(-.06,.11,.14),(0,-.03,.24),-20)
+    if unit == "bloodfurnace":
+        return two_hand_carry(joint,rest,(.02,.25,.25),(0,0,.14),35)
+    if unit == "shatterback":
+        for side in ("L","R"):
+            if joint in (f"UpperArm{side}",f"Forearm{side}",f"Hand{side}"):
+                forward = pitch(rest[f"UpperArm{side}"],-38.5) @ transform
+                return Matrix.Translation(forward.translation) if joint.startswith("Hand") else forward
     if unit in RIGHT_CARRY:
         upper, fore, grip_pitch = RIGHT_CARRY[unit]
         shoulder = pitch(rest["UpperArmR"], upper)
@@ -97,13 +106,16 @@ def studio_pose(unit, joint, rest, tier, branch):
 def render(unit, angle):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    spacing = {"siegewalker": 1.46, "longaxe": 1.64}.get(unit,1.27)
+    spacing = {"siegewalker": 1.46, "longaxe": 1.64, "shatterback": 1.46}.get(unit,1.27)
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
         anchor = bpy.data.objects.new(label, None)
         group.objects.link(anchor)
         model = Model(group)
         GAME_UNITS[unit](model, tier, branch, production=True)
+        if unit == "shatterback":
+            for index in range(4):
+                shatter_plate(model,tier,branch,index)
         rest = rest_positions(unit, production=True, tier=tier, branch=branch)
         for part in model.parts:
             part.obj.parent = anchor
@@ -118,6 +130,8 @@ def render(unit, angle):
         height, aim = 850, 1.56
     if unit == "oldfinn":
         height, aim = 690, .92
+    if unit == "shatterback":
+        scale, height, aim = 7.55, 650, .51
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)
 

@@ -632,7 +632,9 @@
       "Bombard",
       "Rotcap",
       "OldFinn",
-      "AntidoteBrewer"
+      "AntidoteBrewer",
+      "Shatterback",
+      "BloodFurnace"
     ],
     "forms": [
       "Base",
@@ -667,6 +669,8 @@
       "spore cast",
       "fish cast and reel",
       "remedy cast",
+      "planted paw strike and shell plate fall",
+      "two-hand furnace hammer strike",
       "hit",
       "death",
       "victory"

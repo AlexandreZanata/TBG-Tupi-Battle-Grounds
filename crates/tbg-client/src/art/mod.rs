@@ -321,7 +321,11 @@ fn build_library(
     let shells = FORMS
         .into_iter()
         .map(|(t, b)| {
+            let plan = kits::shatterback::model::plan(t);
             let parts = std::array::from_fn(|i| {
+                if let Some(mesh) = blender::shatter_plate(t, b, i, &plan) {
+                    return meshes.add(mesh);
+                }
                 let spec = kits::shatterback::model::plate(t, b, i);
                 let mesh = figure::build_joint_meshes(&spec)[rig::Joint::Chest.index()]
                     .take()
