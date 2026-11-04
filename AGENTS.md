@@ -62,9 +62,13 @@ per-step demands for broad checks. See *Verification* below and
 6. **Git.** Never force-push or rewrite history. The owner explicitly
    authorized the P71 delivery workflow on 2026-11-01: commit completed
    changes, push the execution branch to GitHub, then reinstall the native
-   Linux playtest. Apply that same workflow to each subsequent requested
-   targeted adjustment. This does not authorize merging or public deployment. One logical change
-   per commit. No build outputs or large binaries in git.
+   Linux playtest. Apply that workflow to each subsequent requested
+   targeted adjustment. For the Blender champion series, commit and push
+   each completed stage to its execution branch on GitHub before beginning
+   the next. Install the local Linux preview and run its scoped checks at
+   the end of the stage. CI and official packaging run separately.
+   This does not authorize merging or public deployment. One logical
+   change per commit. No build outputs or large binaries in git.
 7. **English only** in code, comments, docs, and commits.
 8. **Visual correspondence — core owner rule (2026-11-01).** Linux is
    the canonical reference for the entire in-game frontend. **Every visual
@@ -101,7 +105,8 @@ per-step demands for broad checks. See *Verification* below and
    `archive/` unless the phase says so.
 2. Work on branch `phase/<pN-name>`. Do the steps in order; apply the
    minimal validation policy to each step, queue broader checks for
-   consolidation, commit after each step, and never push.
+   consolidation and commit after each step. Push only under the owner
+   authorization in rule 6.
 3. The phase file is the implementation spec; *Verification* below governs
    when its checks run. Do not invent rules, numbers, message
    types, dependencies, or architecture it does not name. If something is
