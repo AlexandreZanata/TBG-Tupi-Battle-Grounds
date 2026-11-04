@@ -146,3 +146,43 @@ def merchant_action(scene,group,roof,bow):
     frame(scene,start+3.2)
     assert abs(ship.location.y-approach)<.10 and abs(lid.rotation_euler.x)<.005,group.name
     return round(berth-approach,3)
+
+
+APPROACH=(23.1,23.4,23.92,24.28,24.82,25.15,25.62,26.30)
+
+
+def footprint(corners):
+    x,y,_=zip(*corners,strict=True)
+    return min(x),max(x),min(y),max(y)
+
+
+def overlaps(a,b):
+    return a[0]<b[1] and a[1]>b[0] and a[2]<b[3] and a[3]>b[2]
+
+
+def validate_hull_clearance(scene,sites,coast_name,obstruction_prefixes,prow_prefixes,expected_meshes):
+    frame(scene,APPROACH[0])
+    graph=bpy.context.evaluated_depsgraph_get()
+    coast=scene.collection.children[coast_name]
+    obstructions=[
+        footprint(bounds(item.object,item.matrix_world)) for item in graph.object_instances
+        if item.object.type=="MESH" and item.parent
+        and item.parent.original.name.startswith(obstruction_prefixes)
+        and coast in item.parent.original.users_collection[:]
+    ]
+    assert obstructions
+    count=0
+    hull_prefixes=("Open carvel-planked hull",*prow_prefixes)
+    for name in ("Mercador A","Mercador B"):
+        ship=pivot(sites[name],"Merchant caravel pivot")
+        hull=[o for o in ship.children_recursive if o.type=="MESH" and o.name.startswith(hull_prefixes)]
+        assert len(hull)==expected_meshes
+        for time in APPROACH:
+            frame(scene,time)
+            graph=bpy.context.evaluated_depsgraph_get()
+            for mesh in hull:
+                obj=mesh.evaluated_get(graph)
+                extent=footprint(bounds(obj,obj.matrix_world))
+                assert not any(overlaps(extent,rock) for rock in obstructions),(name,time,extent)
+                count+=1
+    return count

@@ -1341,3 +1341,17 @@ pending. Public download compatibility uses the actual running server.
   arena transitions and both seats of each auxiliary, including
   authoritative work and delivery triggers, upgrades, payouts
   and reduced motion.
+
+### 2026-11-04 — Ancient Ruins Blender study
+
+- The editable study covers the fourth arena's limestone coast,
+  BattleLine, Strongholds, sanctuary and desktop match framing.
+  Both seats use the shared Forest auxiliary timeline with
+  separate quarry portals, reed canopies and carved prows.
+  [Ancient Ruins study](../art/BLENDER-ANCIENT-RUINS.md)
+- Linux Blender checked the four bridge approaches, BattleLine
+  clearance, construction and upgrades, pick contacts, boat
+  arrival and departure, crane line, chest and lagoon clearance.
+- Queue runtime comparisons on Linux, Windows and desktop web
+  for arena transitions, both seats, hire and upgrades, work and
+  delivery triggers, payouts and reduced motion.

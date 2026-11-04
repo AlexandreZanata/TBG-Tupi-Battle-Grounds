@@ -69,6 +69,8 @@ pass, bloom, lava damage, smoke simulation or particle emitters.
 
 ## Ancient Ruins
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-ANCIENT-RUINS.md)
+
 Dry moss and muted earth replace the meadow; worn limestone tiles define
 the BattleLine. Pale sedimentary walls meet a faceted turquoise basin with submerged column remnants, mossy islets and lily pads.
 

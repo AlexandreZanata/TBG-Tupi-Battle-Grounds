@@ -75,3 +75,5 @@ The reference match camera crops parts of the four offshore
 precincts. The overview and close-ups show all four.
 Runtime integration, authoritative events and desktop platform
 comparisons remain pending.
+
+The next arena is the [Ancient Ruins Blender study](BLENDER-ANCIENT-RUINS.md).

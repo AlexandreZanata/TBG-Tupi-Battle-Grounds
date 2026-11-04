@@ -658,6 +658,15 @@
       "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "ancient-ruins-blender-arena-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-ANCIENT-RUINS.md",
+      "affected_cases": "Ancient Ruins limestone coast, BattleLine, Strongholds, sanctuary and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }
