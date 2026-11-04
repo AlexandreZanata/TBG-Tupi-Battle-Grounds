@@ -1280,3 +1280,13 @@ Desktop/390 x 844 PT/EN landing observations are in
 [the media report](../evidence/landing-android-beta-20261103.md). This adds no
 in-game parity evidence: Windows pixel/motion and physical ARM64/16 KB remain
 pending. Public download compatibility uses the actual running server.
+
+### 2026-11-04 — Verdant Forest Blender study
+
+- The [editable art study](../art/BLENDER-FOREST-ARENA.md) covers Forest
+  terrain and coast, the BattleLine, Classic Strongholds, scenery and
+  desktop 16:9 match framing. Blender checks cover the Stronghold anchors
+  and the unobstructed BattleLine.
+- Linux, Windows and desktop web runtime comparisons remain pending for
+  the study. Integration must compare match framing, arena transitions
+  and Stronghold damage and motion using shared assets.

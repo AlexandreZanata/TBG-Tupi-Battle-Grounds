@@ -613,6 +613,15 @@
       "windows": "visual pending; CI tests/build/package passed",
       "web": "scoped desktop runtime observed; portrait stays portrait with crowded existing layout",
       "android": "scoped emulator runtime observed; physical ARM64/16KB pending"
+    },
+    {
+      "id": "forest-blender-study-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-FOREST-ARENA.md",
+      "affected_cases": "Standalone Blender study of Forest terrain, BattleLine, Classic Strongholds, scenery and desktop match framing; future runtime coverage includes arena transitions and Stronghold damage and motion",
+      "linux": "Blender render and layout checks observed; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }
