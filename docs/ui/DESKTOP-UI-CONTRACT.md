@@ -1327,3 +1327,12 @@ pending. Public download compatibility uses the actual running server.
 - Cover the Siege Walker's 0.18 s release, breech and animated reload
   lever. Cover the Rootcaller's 0.22 s cast at the right claw tip.
 - Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Nester and Rampart
+
+- Cover all five forms for each champion in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Each seat uses the same
+  figure and equipment, with allegiance on the feet circle.
+- Cover the Nester's seed release and secondary basket motion. Cover
+  Rampart's chest-local wall guard and right-hand strike at 0.30 s.
+- Visual and motion comparison for Windows and desktop web remains pending.

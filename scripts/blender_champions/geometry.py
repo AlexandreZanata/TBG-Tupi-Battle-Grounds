@@ -28,8 +28,10 @@ SWATCH = {
     "sap": (251, 205, 98, 0.0, 0.48),
     "ogre": (131, 147, 87, 0.0, 0.72), "ogre_shade": (85, 104, 63, 0.0, 0.77),
     "mushroom": (161, 98, 64, 0.0, 0.84),
+    "wicker": (176, 133, 78, 0.0, 0.83), "slate": (111, 114, 112, 0.10, 0.77),
+    "venom": (159, 229, 88, 0.0, 0.50),
 }
-GLOW_SWATCHES = {"soul", "ritual", "forge", "sap"}
+GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom"}
 
 
 def linear(byte):

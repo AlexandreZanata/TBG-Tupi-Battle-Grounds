@@ -18,6 +18,8 @@ const SAWBOT: &[u8] = include_bytes!("../../assets/champions/blender/sawbot.tbgm
 const BLOOMKEEPER: &[u8] = include_bytes!("../../assets/champions/blender/bloomkeeper.tbgmesh");
 const SIEGE_WALKER: &[u8] = include_bytes!("../../assets/champions/blender/siegewalker.tbgmesh");
 const ROOTCALLER: &[u8] = include_bytes!("../../assets/champions/blender/rootcaller.tbgmesh");
+const NESTER: &[u8] = include_bytes!("../../assets/champions/blender/nester.tbgmesh");
+const RAMPART: &[u8] = include_bytes!("../../assets/champions/blender/rampart.tbgmesh");
 
 pub(super) fn form(
     kind: UnitKind,
@@ -35,6 +37,8 @@ pub(super) fn form(
         UnitKind::Bloomkeeper => BLOOMKEEPER,
         UnitKind::SiegeWalker => SIEGE_WALKER,
         UnitKind::Rootcaller => ROOTCALLER,
+        UnitKind::Nester => NESTER,
+        UnitKind::Rampart => RAMPART,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -200,6 +204,8 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Bloomkeeper,
         UnitKind::SiegeWalker,
         UnitKind::Rootcaller,
+        UnitKind::Nester,
+        UnitKind::Rampart,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -209,7 +215,7 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
             let grip = match kind {
                 UnitKind::Archer => Node::Prop(Socket::OffhandL),
-                UnitKind::Sawbot => Node::Body(rig::Joint::HandR),
+                UnitKind::Sawbot | UnitKind::Rampart => Node::Body(rig::Joint::HandR),
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());

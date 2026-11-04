@@ -10,7 +10,7 @@ intrinsic material colors and the independent status outline.
 
 ## Editable source and export
 
-The first eight production champions use component modeling.
+The ten champions in the initial roster use component modeling.
 Each Blender object is named for its physical piece and has a material and
 a named rig node. The source is in
 [scripts/blender_champions](../../scripts/blender_champions).
@@ -181,3 +181,32 @@ The renders are in Base, A1, A2, B1, B2 order, from left to right.
 ![Siege Walker modular Blender lineup](../media/blender-champions/siegewalker.webp)
 
 ![Rootcaller modular Blender lineup](../media/blender-champions/rootcaller.webp)
+
+## Nester and Rampart
+
+The Nester wears a broadleaf hood and carries a split-willow basket.
+Brood grows the clutch and A2 builds a woven straw skep with amber
+brood pods. The B branch changes the clutch from green venom eggs to
+thorned violet eggs. Keep the basket on BackSpring and the seed
+centered at the existing cast point, weapon-local `(0, 0.03, 0.06)`.
+
+The Rampart carries an oak wall with riveted crossbeams over layered
+armor. Bastion adds reinforced edges and A2 adds stone crenellations.
+The B branch adds wall spikes and a heated forearm ram at B2. Keep
+the wall chest-local with its rail at the existing left-hand grip.
+The right-hand contact plate remains at hand-local Y −0.15.
+
+The Nester export has 3,720–4,568 triangles per form and uses 276,915
+bytes. The Rampart has 4,790–5,546 triangles per form and uses 496,172
+bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- nester rampart
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- nester rampart
+```
+
+The renders are in Base, A1, A2, B1, B2 order, from left to right.
+
+![Nester modular Blender lineup](../media/blender-champions/nester.webp)
+
+![Rampart modular Blender lineup](../media/blender-champions/rampart.webp)

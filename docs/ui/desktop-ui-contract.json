@@ -624,7 +624,9 @@
       "Sawbot",
       "Bloomkeeper",
       "SiegeWalker",
-      "Rootcaller"
+      "Rootcaller",
+      "Nester",
+      "Rampart"
     ],
     "forms": [
       "Base",
@@ -651,6 +653,8 @@
       "healing cast",
       "bombard reload",
       "root cast",
+      "seed cast",
+      "wall guard",
       "hit",
       "death",
       "victory"

@@ -15,7 +15,7 @@ from rig import TO_BLENDER, rest_positions
 
 STUDIO_ANGLES = {
     "shieldbearer": -44, "hexer": 19, "sawbot": 24, "bloomkeeper": 15,
-    "siegewalker": -27, "rootcaller": 13,
+    "siegewalker": -27, "rootcaller": 13, "nester": -44, "rampart": 29,
 }
 
 

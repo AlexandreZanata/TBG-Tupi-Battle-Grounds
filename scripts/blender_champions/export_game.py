@@ -12,6 +12,8 @@ from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
 from bloomkeeper import bloomkeeper
 from geometry import Model
 from hexer import hexer
+from nester import nester
+from rampart import rampart
 from rig import NAMES, rest_positions
 from rootcaller import rootcaller
 from sawbot import sawbot
@@ -28,6 +30,8 @@ GAME_UNITS = {
     "bloomkeeper": bloomkeeper,
     "siegewalker": siegewalker,
     "rootcaller": rootcaller,
+    "nester": nester,
+    "rampart": rampart,
 }
 
 
