@@ -1489,3 +1489,9 @@ blocked-route hint and preserve aim/following through recovery.
 Installed Linux `81b018a389d3`: scoped Top/plaza/camp-view motion and decision
 traces recorded, 45 distinct focused tests passed. See the P77 installed M-76
 delivery for commands, moving evidence, metrics and deferred platforms.
+
+M-77 readable crowd motion (2026-11-04): server-side planted anchoring,
+sampled steering, direction inertia, attack places and assist, plus a 0.2 s
+client gait grace through queue stops. Linux 1600x900 recordings of a lane
+plaza fight and a jungle view before/after were inspected frame by frame;
+Windows and desktop web remain pending.

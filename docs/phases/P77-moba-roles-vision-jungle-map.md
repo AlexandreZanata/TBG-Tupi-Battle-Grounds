@@ -921,3 +921,60 @@ followed by the M-76 matrix's moving scenarios on desktop web and Windows.
 Shared sources and native compilation do not prove those targets. Owner look
 and fun sign-off remains separate. No claim of exhaustive coverage of every
 possible battle configuration is made.
+
+### M-77 readable crowd motion (owner follow-up, 2026-11-04)
+
+Owner report: champions "tremble" while walking, do not clearly know what to
+do (unlike the 1v1 BattleLine), and the Jungle misbehaves in real matches.
+Approach: measure first, then fix the measured causes, following standard
+RTS/MOBA practice — global routes plus deterministic local avoidance with a
+kept passing side (an integer cousin of RVO/HRVO), sticky prioritised targets
+(lane-minion style), attack places around a target, and motion inertia.
+
+Measurement harness (six-minute ten-bot match, seed 11; plus realistic
+Jungle scenarios with bought, unbuffed champions):
+
+| Metric | Before (b7771f2b) | After |
+|---|---|---|
+| A → B → A steps per 100 moving ticks | 2.34 | 0.04 |
+| Reversals > 80 mm per 100 moving ticks | 1.33 | 0.60 |
+| All reversals per 100 moving ticks | 4.77 | 1.34 |
+| Motion applied to attacking units | 10.8 % | 0.7 % |
+| Stance changes per unit-minute | 23.0 | 18.0 |
+| Jungle trio / mixed four, first camp cleared (ticks) | 786 / 1159 | 756 / 596 |
+
+Causes found by per-unit traces: allies shoving attacking units in and out
+of range; a 2-tick cycle of a walker blocked by a planted ally (direct step
+in, sidestep out); route points passed on an obstacle's side and walked
+back to; a Bot-bridge jam with allies overlapping by 2–3 units, where deep
+overlap pushes shook the units at the front; and a long-reach Colossus held
+outside the camp leash shuffling without ever being declared unreachable.
+
+Implementation (core `moba/core-moba/src/sim`): `bodies.rs` (grid-indexed
+swept collision, planted rule), `engagement.rs` (ring attack places),
+`navigation.rs` (sampled steering, passed-point rule, closing rule),
+`movement.rs` (anchored pressure, no-retreat pressure, direction inertia),
+`targeting.rs` (assist). Client: 0.2 s gait grace. Rules: GAME-DESIGN M-77;
+contracts: `tests/motion.rs` (CONTRACTS §9).
+
+Validation (MOBA workspace, shared lock, two jobs, target `/data/tbg-moba-target`):
+
+```text
+cargo fmt --all -- --check                                        → ok
+cargo clippy --locked --workspace --all-targets -- -D warnings    → ok (pre-existing lints in
+  effects.rs, movement.rs jungle_goal, client animate and one contract test fixed with
+  lint-only changes; no assertion changed)
+cargo test --locked -p tbg-moba-core                              → 67 passed (aggro 1, champion combat 4,
+  range 2, deployment 2, contract_moba 23, vision 3, decisions 16, motion 4, navigation 7, rewards 5)
+cargo test --locked -p tbg-moba-server                            → 3 passed, 1 failed:
+  m41 counts 2 Troops instead of 1. Pre-existing and timing-dependent: on the unmodified
+  b7771f2b it failed 2 of 3 runs (the bot owning the seat may buy before the human joins).
+  Not changed here because contract tests are append-only.
+cargo check --locked -p tbg-moba-core -p tbg-moba-client --target wasm32-unknown-unknown → ok
+```
+
+Linux in motion: native build at 1600x900 under Xvfb (local RTX 4060 via
+Vulkan), recordings of a Jungle view and a lane/plaza fight at seed 11,
+warp 200, before and after; consecutive 20 fps frames of the after plaza
+fight show attackers holding their places while turning to targets, with no
+back-and-forth. Windows and desktop web parity remain pending.

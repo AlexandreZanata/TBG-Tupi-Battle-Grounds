@@ -628,7 +628,7 @@
       "id": "p77-a-role-shop-slots-20261103",
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
-      "affected_cases": "MOBA three role-locked cards, captions, resource strip, locks/reroll/purchase, hotkeys 1\u20133; shared presentation; champion motion unchanged",
+      "affected_cases": "MOBA three role-locked cards, captions, resource strip, locks/reroll/purchase, hotkeys 1–3; shared presentation; champion motion unchanged",
       "linux": "installed overview observed: three cards/resource strip; interaction/pixel matrix pending",
       "windows": "pending (P81)",
       "web": "pending (P81)",
@@ -688,7 +688,7 @@
       "id": "p77-g-five-card-shop-20261103",
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
-      "affected_cases": "Restored five-card row/resource strip, three Role slots plus two full-roster slots, locks/reroll/purchase, Destination panel and hotkeys 1\u20135",
+      "affected_cases": "Restored five-card row/resource strip, three Role slots plus two full-roster slots, locks/reroll/purchase, Destination panel and hotkeys 1–5",
       "linux": "installed overview observed: five cards, localized open captions and Destination; interactions pending",
       "windows": "pending (P81)",
       "web": "pending (P81)",
@@ -718,7 +718,7 @@
       "id": "p77-j-scaled-champion-range",
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
-      "affected_cases": "Champion attack and cast reach, stance, muzzle releases and projectile travel with 3\u00d7 world distance; close contact and vision boundaries",
+      "affected_cases": "Champion attack and cast reach, stance, muzzle releases and projectile travel with 3× world distance; close contact and vision boundaries",
       "linux": "focused core contracts passed; motion comparison pending",
       "windows": "pending",
       "web": "pending",
@@ -752,6 +752,16 @@
       "linux": "Installed 81b018a389d3 native movement recorded at 1600x900; 45 focused tests, 1118 tick sample and 23345 Attack frames with no Walk clip; see scoped report. Complete roster pending",
       "windows": "pending",
       "web": "pending",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-m77-readable-crowd-motion",
+      "date": "2026-11-04",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "M-77 crowd motion: planted attackers, walking queues and bridge chokepoints, ring attack places, assist, direction inertia and the 0.2 s gait grace; all champions and Minions in lanes and jungle",
+      "linux": "native 1600x900 lane/plaza and jungle recordings before/after inspected frame by frame; server motion metrics recorded in the P77 report",
+      "windows": "pending",
+      "web": "pending (WASM compile only)",
       "android": "out of scope"
     }
   ],
