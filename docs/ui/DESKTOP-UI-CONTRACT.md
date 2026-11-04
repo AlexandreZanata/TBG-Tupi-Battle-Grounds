@@ -1353,3 +1353,14 @@ pending. Public download compatibility uses the actual running server.
   lever, captured Base, A1, A2 and B2 in the Laboratory, and ran local
   Practice with Siege Walker on both seats.
 - Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Longaxe and Farwatch
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and BattleLine. Both seats share meshes and materials.
+- Keep the poleaxe impact at 0.30 s, the arbalest release at 0.18 s and
+  the existing two-hand holds. Identify allegiance with the feet circle.
+- Linux Vulkan loaded all ten meshes, captured Base and A2 for Longaxe
+  and Base and B2 for Farwatch, and recorded damage from both champions
+  in local Training encounters.
+- Visual and motion comparison for Windows and desktop web remains pending.

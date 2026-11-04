@@ -10,8 +10,10 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 from export_study import FORMS, UNITS as STUDY_UNITS, collection, groups_for
 from bloomkeeper import bloomkeeper
+from farwatch import farwatch
 from geometry import Model
 from hexer import hexer
+from longaxe import longaxe
 from nester import nester
 from rampart import rampart
 from rig import NAMES, rest_positions
@@ -32,6 +34,8 @@ GAME_UNITS = {
     "rootcaller": rootcaller,
     "nester": nester,
     "rampart": rampart,
+    "longaxe": longaxe,
+    "farwatch": farwatch,
 }
 
 

@@ -7,6 +7,7 @@ sash. The feet circle identifies the team in combat. Both teams share the
 same character and equipment colors.
 Siege Walker has a fitted helmet, a sculpted face, recessed bores and a
 supported stock and sight assembly across its five forms.
+Longaxe and Farwatch add component-modeled polearm and arbalest figures.
 Protocol 40 and ruleset 16 are unchanged.
 
 TBG 0.1.4-colossus.6 — Native Android landscape candidate

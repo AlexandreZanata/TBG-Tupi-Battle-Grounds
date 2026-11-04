@@ -30,6 +30,7 @@ SWATCH = {
     "mushroom": (161, 98, 64, 0.0, 0.84),
     "wicker": (176, 133, 78, 0.0, 0.83), "slate": (111, 114, 112, 0.10, 0.77),
     "venom": (159, 229, 88, 0.0, 0.50),
+    "ochre_cloth": (156, 104, 50, 0.0, 0.82), "field_slate": (69, 87, 102, 0.0, 0.86),
 }
 GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom"}
 

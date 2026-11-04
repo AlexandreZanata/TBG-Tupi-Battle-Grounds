@@ -626,7 +626,9 @@
       "SiegeWalker",
       "Rootcaller",
       "Nester",
-      "Rampart"
+      "Rampart",
+      "Longaxe",
+      "Farwatch"
     ],
     "forms": [
       "Base",
@@ -655,6 +657,8 @@
       "root cast",
       "seed cast",
       "wall guard",
+      "polearm strike",
+      "arbalest release",
       "hit",
       "death",
       "victory"

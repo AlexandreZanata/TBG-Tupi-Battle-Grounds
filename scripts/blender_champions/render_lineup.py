@@ -16,6 +16,12 @@ from rig import TO_BLENDER, rest_positions
 STUDIO_ANGLES = {
     "shieldbearer": -44, "hexer": 19, "sawbot": 24, "bloomkeeper": 15,
     "siegewalker": -27, "rootcaller": 13, "nester": -44, "rampart": 29,
+    "longaxe": 35, "farwatch": 27,
+}
+RIGHT_CARRY = {
+    "siegewalker": (21, -133, -18),
+    "longaxe": (5, -102, -8),
+    "farwatch": (15, -110, -7),
 }
 
 
@@ -37,14 +43,18 @@ def studio_pose(unit, joint, rest, tier, branch):
     transform = Matrix.Translation(TO_BLENDER @ rest[joint])
     if unit == "sawbot":
         return saw_guard(joint, rest, tier, branch) @ transform
-    if unit == "siegewalker":
-        shoulder = pitch(rest["UpperArmR"], 21)
+    if unit in RIGHT_CARRY:
+        upper, fore, grip_pitch = RIGHT_CARRY[unit]
+        shoulder = pitch(rest["UpperArmR"], upper)
         if joint == "UpperArmR":
             return shoulder @ transform
         if joint in {"ForearmR", "HandR", "WeaponR"}:
-            transform = shoulder @ pitch(rest["ForearmR"], -133) @ transform
+            transform = shoulder @ pitch(rest["ForearmR"], fore) @ transform
             if joint == "WeaponR":
-                return Matrix.Translation(transform.translation) @ Matrix.Rotation(radians(-18), 4, "X")
+                grip = Matrix.Translation(transform.translation) @ Matrix.Rotation(radians(grip_pitch), 4, "X")
+                if unit == "longaxe":
+                    grip = grip @ Matrix.Rotation(radians(-18), 4, "Y") @ Matrix.Translation((0,0,.66))
+                return grip
             return transform
     if unit == "rootcaller":
         for side, grip in (("L","OffhandL"),("R","WeaponR")):
@@ -56,6 +66,7 @@ def studio_pose(unit, joint, rest, tier, branch):
 def render(unit, angle):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
+    spacing = {"siegewalker": 1.46, "longaxe": 1.64}.get(unit,1.27)
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
         anchor = bpy.data.objects.new(label, None)
@@ -67,12 +78,13 @@ def render(unit, angle):
             part.obj.parent = anchor
             part.obj.data.transform(TO_BLENDER)
             part.obj.matrix_basis = studio_pose(unit, part.joint, rest, tier, branch)
-        spacing = 1.46 if unit == "siegewalker" else 1.27
         anchor.location.x = (column - 2) * spacing
         anchor.rotation_euler.z = radians(angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)
-    scale = 7.56 if unit == "siegewalker" else 6.58
+    scale = {"siegewalker": 7.56, "longaxe": 9.4}.get(unit,6.58)
+    if unit == "longaxe":
+        height, aim = 850, 1.56
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)
 

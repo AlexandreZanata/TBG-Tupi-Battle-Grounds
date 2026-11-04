@@ -20,6 +20,8 @@ const SIEGE_WALKER: &[u8] = include_bytes!("../../assets/champions/blender/siege
 const ROOTCALLER: &[u8] = include_bytes!("../../assets/champions/blender/rootcaller.tbgmesh");
 const NESTER: &[u8] = include_bytes!("../../assets/champions/blender/nester.tbgmesh");
 const RAMPART: &[u8] = include_bytes!("../../assets/champions/blender/rampart.tbgmesh");
+const LONGAXE: &[u8] = include_bytes!("../../assets/champions/blender/longaxe.tbgmesh");
+const FARWATCH: &[u8] = include_bytes!("../../assets/champions/blender/farwatch.tbgmesh");
 
 pub(super) fn form(
     kind: UnitKind,
@@ -39,6 +41,8 @@ pub(super) fn form(
         UnitKind::Rootcaller => ROOTCALLER,
         UnitKind::Nester => NESTER,
         UnitKind::Rampart => RAMPART,
+        UnitKind::Longaxe => LONGAXE,
+        UnitKind::Farwatch => FARWATCH,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -206,6 +210,8 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Rootcaller,
         UnitKind::Nester,
         UnitKind::Rampart,
+        UnitKind::Longaxe,
+        UnitKind::Farwatch,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {

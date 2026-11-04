@@ -10,7 +10,7 @@ intrinsic material colors and the independent status outline.
 
 ## Editable source and export
 
-The ten champions in the initial roster use component modeling.
+The initial roster and the first expanded-roster figures use component modeling.
 Each Blender object is named for its physical piece and has a material and
 a named rig node. The source is in
 [scripts/blender_champions](../../scripts/blender_champions).
@@ -213,3 +213,29 @@ The renders are in Base, A1, A2, B1, B2 order, from left to right.
 ![Nester modular Blender lineup](../media/blender-champions/nester.webp)
 
 ![Rampart modular Blender lineup](../media/blender-champions/rampart.webp)
+
+## Longaxe and Farwatch
+
+Longaxe has a stitched ochre gambeson, a fitted kettle helmet and a
+forged ash poleaxe. The A branch adds plate, a broader edge and a gilded
+crescent. The B branch adds a twin blade, then a hook and horned helmet.
+Keep the working edge at weapon-local `(0, 1.728, 0.22)` and the existing
+two-hand grip. The lineup tilts the polearm to show the whole haft.
+
+Farwatch has a slate field coat, fitted gloves and a cranked arbalest
+with laminated steel limbs. The A branch adds a centered scope and
+a wide feathered hat. The B branch adds a scarf and heated bolt point.
+The bolt ends at weapon-local `(0, 0.05, 0.58)`. The fore-stock
+encloses the existing support-hand point `(0.02, 0, 0.14)`.
+
+Longaxe uses 2,938–3,334 triangles per form and 255,053 bytes. Farwatch
+uses 3,674–4,098 triangles per form and 353,534 bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- longaxe farwatch
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- longaxe farwatch
+```
+
+![Longaxe modular Blender lineup](../media/blender-champions/longaxe.webp)
+
+![Farwatch modular Blender lineup](../media/blender-champions/farwatch.webp)
