@@ -1289,4 +1289,7 @@ pending. Public download compatibility uses the actual running server.
   samples.
 - Preserve the rig, authoritative timing, and seat-independent figure
   materials. Allegiance stays on the feet circle. Linux is the reference.
-  Windows and desktop web comparison remain pending.
+- Linux scoped evidence covers Base and B2 in the Laboratory and an
+  authoritative Archer-versus-Bone Brute training engagement. The combat
+  recording captured 11 attack starts, 10 hits and one death.
+- Windows and desktop web comparison remain pending.

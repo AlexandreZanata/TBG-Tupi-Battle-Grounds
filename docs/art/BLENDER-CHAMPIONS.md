@@ -2,7 +2,7 @@
 
 **Required for new champions.** Read [Art Direction](../ART-DIRECTION.md)
 and the [desktop visual contract](../ui/DESKTOP-UI-CONTRACT.md) before
-authoring. The feet circle is the sole on-model allegiance cue. The model,
+authoring. The feet circle is the champion's sole allegiance marker. The model,
 weapon, fletching, clothes, glow and every Evolution use the same geometry
 and intrinsic colors for both seats. Remove ownership geometry from the
 source, such as chest badges, arm pennants and team tabards. Preserve
@@ -56,10 +56,12 @@ For editable .blend files and base GLBs, run:
 
 ```sh
 blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_study.py
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_study.py
 ```
 
-The study writes `scripts/exports/`. It builds the earlier prototype rig
-and saves separate collections for each form and method. The generated
+The study writes `scripts/exports/` and the render step writes the two
+comparison PNGs in `scripts/exports/renders/`. The study builds the earlier
+prototype rig and saves separate collections for each form and method. The generated
 comparison joins designated body volumes, applies 0.0165 voxel remesh,
 two relaxation passes and decimation, then transfers material colors and
 up to two weights from nearby source joints. Gear stays rigid. The
@@ -70,6 +72,9 @@ authoritative battle event path.
 
 `export_game.py` produces the two checked-in game assets. The editable
 scenes and intermediate build outputs are generated locally.
+The Archer export has 5,058–5,464 triangles per form and occupies 436,544
+bytes. The Bone Brute export has 6,384–6,998 triangles per form and occupies
+571,208 bytes. These counts exclude runtime bow string and projectile meshes.
 
 ## Authoring renders
 
