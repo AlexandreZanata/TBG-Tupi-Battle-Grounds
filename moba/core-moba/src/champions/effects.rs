@@ -149,6 +149,7 @@ pub fn reduction(game: &mut MobaMatch, target: u32, bp: u16, ticks: u16) {
         u.fx.reduction_until = u.fx.reduction_until.max(until);
     }
 }
+#[allow(clippy::too_many_arguments)] // one periodic effect carries its whole shared definition
 pub fn pulse(
     game: &mut MobaMatch,
     source: &Unit,

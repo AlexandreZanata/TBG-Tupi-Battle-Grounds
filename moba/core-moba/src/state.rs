@@ -214,6 +214,8 @@ pub struct MobaMatch {
     pub outcome: Option<Outcome>,
     pub events: Vec<Event>,
     pub(crate) grid: Grid,
+    /// Walkers' body index, rebuilt as they move within a tick (M-77).
+    pub(crate) motion_grid: Grid,
     /// Last observed HP for surviving structures; destruction is public map knowledge.
     pub(crate) structure_hp: [Vec<(u32, i32)>; 2],
 }
@@ -249,6 +251,7 @@ impl MobaMatch {
             outcome: None,
             events: Vec::new(),
             grid: Grid::default(),
+            motion_grid: Grid::default(),
             structure_hp: [Vec::new(), Vec::new()],
         };
         for (team, tier, lane, pos) in map::towers() {

@@ -152,3 +152,13 @@ M-07 acquisition, M-08 protection, M-61/M-62 retaliation/leash, M-18 range
 and M-75 receipts remain guarded by their existing focused tests.
 The wire schema remains v4; internal decision diagnostics are never a new
 client instruction. Linux movement observation is required separately.
+
+## 9. Readable crowd motion (M-77)
+
+`tests/motion.rs` guards a 150-second ten-bot match with at most one
+A → B → A step per thousand moving ticks and no Troop/Minion body over water
+or the rim on any tick; planted attackers staying within 300 mm of where
+they planted while a column of large allies walks past; three melee
+attackers surrounding one target on distinct places and all striking; and a
+walker with no enemy in sight assisting a fighting ally. `tests/decisions.rs`,
+`tests/navigation.rs` and the M-07/M-72 contracts continue to pass unchanged.

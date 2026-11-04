@@ -692,6 +692,7 @@ fn m14_automatic_champion_kills_keep_card_bounty_and_update_score() {
 }
 
 #[test]
+#[allow(clippy::needless_range_loop)] // lint only; the assertions are unchanged
 fn m20_five_cards_keep_three_role_slots_and_two_full_pool_slots() {
     // Owner revision M-19/M-20: both open slots can draw outside the Role; locks/purchase still redraw distinctly.
     let mut m = MobaMatch::new(205);

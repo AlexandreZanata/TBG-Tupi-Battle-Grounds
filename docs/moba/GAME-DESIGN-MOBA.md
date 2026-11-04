@@ -336,7 +336,7 @@ new camps never spawn them. Their legacy stats are unchanged.
   mission while immobile; released champions inherit it. Settle swept steps
   in id order to prevent opposing movers entering each other.
   Keep the resulting detour until obstructed, the goal moves over 2 units,
-  or the target changes. Project blocked steps along a free axis. Forty
+  or the target changes. Blocked steps follow M-77 local steering. Forty
   ticks without at least 5 mm of progress toward the next path point clear
   the route; an unreachable enemy is released and excluded for 40 ticks,
   then may be retried. M-76 refines exhaustive-search failure with a transient
@@ -429,3 +429,63 @@ new camps never spawn them. Their legacy stats are unchanged.
   hint. In particular a patient returning into range supplies fresh proof
   of reachability; following it must not alternate between acquire/reject
   because of an earlier failed approach.
+
+## 15. Readable crowd motion (owner follow-up, 2026-11-04)
+
+- **M-77 Proposed.** Owner report: champions "tremble" while walking and do
+  not clearly know what to do, unlike the 1v1 BattleLine. Measured on a
+  six-minute ten-bot match (seed 11) before this rule: 2.34 back-and-forth
+  (A → B → A) steps and 4.77 direction reversals per 100 moving ticks, 10.8 %
+  of all motion applied to units that were attacking, 23 stance changes per
+  unit-minute, and a Bot-bridge jam with allies overlapping by 2–3 units.
+  The rules below are motion and presentation safeguards, not combat tuning:
+  no damage, range, speed, reward or targeting-priority value changes.
+- **Planted units hold their ground.** A unit finishing a windup, recovering
+  or supporting (planted) is not moved by allied crowd pressure unless two
+  bodies overlap by more than half their combined spacing. Walking allies
+  treat a planted ally as a solid body and route around it; walking allies
+  stay soft lateral pressure for each other (M-72).
+- **Crowd pressure without shivering.** Up to **60 mm** of allied contact is
+  tolerated. Pressure never pushes a walker back against its own previous
+  step; only its sideways part remains. Two lane allies nearly in single
+  file (lateral offset under a quarter body radius) choose their side by id
+  order, so they never trade sides. A walker that did not step this tick
+  yields at most a quarter of its speed per tick.
+- **Local steering.** Each tick a walker samples its next route direction and
+  turns of ±11.25°, ±22.5°, ±33.75°, ±45°, ±67.5° and ±90° (32-direction
+  integer compass) at full and half speed. Terrain and solid bodies veto a
+  candidate. Cost: 10 per compass step of turn, 15 for half speed, 25 for
+  switching the passing side kept for **20** ticks, 4 per compass step away
+  from the last settled motion plus 200 beyond a quarter turn, and up to 40
+  for entering a walking ally's space. Lowest cost wins, ties by the fixed
+  candidate order. No valid candidate: wait this tick.
+- **Route points passed.** An intermediate route point counts as reached
+  within one step, or once the walker is nearer the following point than
+  the point itself is; it never walks back to a point it passed on the side
+  of an obstacle. The final point still needs 50 mm.
+- **Direction inertia.** After all movement and pressure of a tick, the part
+  of a body's displacement that points against its previous tick's settled
+  motion is removed (if the remainder is still body/terrain clear). No body
+  goes A → B → A; a real turn-round takes one still beat.
+- **Attack places.** An engaged walker claims a place on a ring around its
+  target: 32 compass directions on four rings from full reach minus 50 mm in
+  to body contact plus half the 100 mm gap, nearest direction to the walker
+  first, alternating sides by id parity. A place must be dry, inside the rim,
+  clear of solid bodies, legal (M-07 reach and the M-62 camp leash) and not
+  within the spacing of a place claimed on the same target by a lower-id
+  ally. The claim persists while valid. Without any place the previous
+  direct approach applies.
+- **Closing rule.** An engagement must bring the walker at least **50 mm**
+  nearer a legal position within **40** ticks; otherwise the standing target
+  is unreachable from here and is released and excluded for 40 ticks (the
+  existing M-74 exclusion). Being in position, or the target having moved
+  since the previous tick (a pursuit), restarts the clock.
+- **Assist.** A walker that sees no enemy of its own (M-07 acquisition)
+  adopts the target of a planted ally within its sight if it could retain
+  that target under M-07 (nearest such target, then lowest id). Groups fight
+  together instead of queueing idle behind their front.
+- **Presentation.** Walking keeps its gait through stops shorter than
+  **0.2 s** (queue stop-and-go); entering an attack drops it at once.
+- Measured after this rule on the same match: 0.04 A → B → A and 1.34
+  reversals per 100 moving ticks, 0.7 % of motion on attacking units, 18
+  stance changes per unit-minute; `tests/motion.rs` guards these properties.

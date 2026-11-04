@@ -1,4 +1,8 @@
-//! Persistent deterministic body-safe routes; mobile allies remain soft obstacles.
+//! Persistent deterministic body-safe routes and local steering: follow the
+//! route, steer around a blocking body on one persistent side, and give up
+//! only by the explicit stall rules (M-74, M-76, M-77).
+use super::bodies::{gap, Bodies};
+use super::engagement::{direction_of, offset};
 use super::pathfinding::route;
 use crate::{
     geom::{Pos, MM},
@@ -9,6 +13,10 @@ use serde::{Deserialize, Serialize};
 
 pub(super) const CELL: i32 = 2 * MM;
 const STALL: u16 = 40;
+/// Ticks a chosen passing side outlives the obstruction that caused it.
+const STEER_MEMORY: u32 = 20;
+/// Ally contact (mm) a walker may accept while queueing; shared with crowd pressure.
+pub(super) const CONTACT_TOLERANCE: i64 = 60;
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct Navigation {
@@ -20,6 +28,18 @@ pub struct Navigation {
     pub retry_at: u32,
     pub progress: Option<(Pos, i64)>,
     pub failed_since: Option<u32>,
+    /// Attack position: (target, compass index, ring from the outside in).
+    pub slot: Option<(u32, u8, u8)>,
+    /// Engagement progress: (target, best distance still to cover, since
+    /// tick, where the target stood last tick).
+    pub closing: Option<(u32, i64, u32, Pos)>,
+    /// The place this walker currently claims, read by later allies.
+    pub claim: Option<(u32, Pos)>,
+    /// Passing side (+1 left, -1 right) kept while steering around a body.
+    pub side: i8,
+    pub side_until: u32,
+    /// Last tick's settled motion (mm per tick); steering and inertia turn from it.
+    pub velocity: (i32, i32),
 }
 
 impl Navigation {
@@ -37,47 +57,6 @@ pub fn rejected(u: &Unit, id: u32, tick: u32) -> bool {
         .rejected
         .iter()
         .any(|&(old, until)| old == id && tick < until)
-}
-
-pub fn solid(a: &Unit, b: &Unit) -> bool {
-    a.id != b.id
-        && b.alive()
-        && b.fx.carrier == 0
-        && (a.team().is_none() || a.side != b.side || !b.mobile())
-}
-pub fn gap(a: &Unit, b: &Unit) -> i32 {
-    a.stats.radius
-        + b.stats.radius
-        + if a.side == b.side {
-            tbg_core::content::occupancy::GAP
-        } else {
-            0
-        }
-}
-
-/// Swept disk vs disk. An initial overlap may only move outward.
-pub fn intersects(from: Pos, to: Pos, center: Pos, radius: i32) -> bool {
-    let dx = i64::from(to.x - from.x);
-    let dy = i64::from(to.y - from.y);
-    let len = dx * dx + dy * dy;
-    let dot = i64::from(center.x - from.x) * dx + i64::from(center.y - from.y) * dy;
-    if from.dist2(center) < i64::from(radius).pow(2) {
-        return dot > 0;
-    }
-    let along = dot.clamp(0, len);
-    let p = Pos {
-        x: from.x + (dx * along / len.max(1)) as i32,
-        y: from.y + (dy * along / len.max(1)) as i32,
-    };
-    p.dist2(center) < i64::from(radius).pow(2)
-}
-
-pub fn clear(units: &[Unit], a: &Unit, from: Pos, to: Pos) -> bool {
-    map::surface::clear_segment(from, to, a.stats.radius)
-        && units
-            .iter()
-            .filter(|b| solid(a, b))
-            .all(|b| !intersects(from, to, b.pos, gap(a, b)))
 }
 
 pub(super) fn acceptable(a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> bool {
@@ -122,15 +101,14 @@ pub(super) fn approach(a: &Unit, target: Option<&Unit>, goal: Pos) -> Pos {
 
 pub fn step(
     m: &mut MobaMatch,
-    snapshot: &[Unit],
+    bodies: &Bodies,
     i: usize,
     goal: Pos,
     speed: i32,
     budget: &mut u8,
 ) -> Pos {
     let a = &m.units[i];
-    let target = snapshot.iter().find(|u| u.id == a.target && u.alive());
-    let direct = approach(a, target, goal);
+    let target = bodies.units.iter().find(|u| u.id == a.target && u.alive());
     let mut nav = a.navigation.clone();
     nav.rejected.retain(|&(_, until)| until > m.tick);
     if nav.target != a.target || !nav.goal.within(goal, CELL) {
@@ -141,22 +119,29 @@ pub fn step(
         nav.target = a.target;
         nav.goal = goal;
     }
+    // An engagement walks to its claimed ring place; a mission to its goal.
+    let direct = match target {
+        Some(b) => super::engagement::point(bodies, a, b, &mut nav)
+            .unwrap_or_else(|| approach(a, target, goal)),
+        None => {
+            nav.slot = None;
+            nav.claim = None;
+            approach(a, target, goal)
+        }
+    };
     // Reaching the old contact point requests the next leg toward the
     // current target. It never rejects an otherwise valid engagement.
-    while nav.path.first().is_some_and(|p| a.pos.within(*p, 50)) {
-        nav.path.remove(0);
-    }
-    // Retain a chosen detour until it finishes, rather than switching sides each tick.
-    if nav.path.is_empty()
-        && clear(snapshot, a, a.pos, direct)
-        && acceptable(a, target, direct, goal)
+    consume(&mut nav.path, a.pos, speed);
+    // A clear straight line to a moving ring place follows it directly every
+    // tick; otherwise retain the chosen detour until it finishes.
+    if nav.path.len() <= 1 && bodies.clear(a, a.pos, direct) && acceptable(a, target, direct, goal)
     {
-        nav.path.push(direct);
+        nav.path = vec![direct];
         nav.failed_since = None;
     }
     if nav.path.is_empty() && m.tick >= nav.retry_at && *budget > 0 {
         *budget -= 1;
-        match route(snapshot, a, target, goal) {
+        match route(bodies, a, target, goal) {
             Some(path) => {
                 nav.path = path;
                 nav.failed_since = None;
@@ -167,31 +152,10 @@ pub fn step(
         }
         nav.retry_at = m.tick + 10;
     }
-    while nav.path.first().is_some_and(|p| a.pos.within(*p, 50)) {
-        nav.path.remove(0);
-    }
+    consume(&mut nav.path, a.pos, speed);
     let mut to = a.pos;
     if let Some(&next) = nav.path.first() {
-        to.step_toward(next, speed);
-        if !clear(snapshot, a, a.pos, to) {
-            // Project the allowed displacement onto an obstacle edge. The route
-            // itself keeps the passing side fixed while the crowd settles.
-            let candidates = [
-                Pos {
-                    x: to.x,
-                    y: a.pos.y,
-                },
-                Pos {
-                    x: a.pos.x,
-                    y: to.y,
-                },
-            ];
-            to = candidates
-                .into_iter()
-                .filter(|p| clear(snapshot, a, a.pos, *p))
-                .min_by_key(|p| p.dist2(next))
-                .unwrap_or(a.pos);
-        }
+        to = steer(bodies, a, next, speed, m.tick, &mut nav);
     }
     if let Some(&next) = nav.path.first() {
         let distance = a.pos.dist(next);
@@ -208,7 +172,8 @@ pub fn step(
     let failed = nav.stalled >= STALL
         || nav
             .failed_since
-            .is_some_and(|since| m.tick.saturating_sub(since) >= u32::from(STALL));
+            .is_some_and(|since| m.tick.saturating_sub(since) >= u32::from(STALL))
+        || target.is_some_and(|b| !closing(a, b, m.tick, &mut nav));
     if failed {
         nav.path.clear();
         if a.target != 0 {
@@ -216,6 +181,9 @@ pub fn step(
         }
         nav.stalled = 0;
         nav.failed_since = None;
+        nav.slot = None;
+        nav.claim = None;
+        nav.closing = None;
     }
     let stationary = to == a.pos;
     let blocked = stationary && !acceptable(a, target, a.pos, goal);
@@ -228,4 +196,138 @@ pub fn step(
         m.units[i].decision.reason = super::decision::Reason::Arrived;
     }
     to
+}
+
+/// Candidate turns from the preferred heading, in compass steps (11.25°):
+/// straight, then alternating sides out to a quarter turn.
+const TURNS: [i32; 13] = [0, 1, -1, 2, -2, 3, -3, 4, -4, 6, -6, 8, -8];
+
+/// Sampled local avoidance (a deterministic, integer cousin of RVO): try the
+/// straight step and small turns at full and half speed, drop any that hits
+/// terrain or a solid body, and keep the cheapest. Costs favour the route
+/// direction, the side already being passed on, a smooth turn from the last
+/// step and room from walking allies, so a walker neither zig-zags nor
+/// shuffles back and forth. Nothing valid: wait in place this tick.
+fn steer(bodies: &Bodies, a: &Unit, next: Pos, speed: i32, tick: u32, nav: &mut Navigation) -> Pos {
+    let from = a.pos;
+    let remaining = i32::try_from(from.dist(next)).unwrap_or(i32::MAX);
+    let heading = direction_of(i64::from(next.x - from.x), i64::from(next.y - from.y)) as i32;
+    let previous = (nav.velocity != (0, 0))
+        .then(|| direction_of(i64::from(nav.velocity.0), i64::from(nav.velocity.1)) as i32);
+    let side = if tick < nav.side_until {
+        i32::from(nav.side)
+    } else {
+        0
+    };
+    let mut best: Option<(i64, Pos, i32)> = None;
+    for (rank, &turn) in TURNS.iter().enumerate() {
+        // Costs only grow along TURNS: stop once no later turn can win.
+        if best.is_some_and(|(c, _, _)| c <= i64::from(turn.abs()) * 10) {
+            break;
+        }
+        for (half, length) in [(false, speed), (true, speed / 2)] {
+            // Arrive exactly instead of overshooting the route point.
+            let length = if turn == 0 {
+                length.min(remaining)
+            } else {
+                length
+            };
+            if length <= 0 {
+                continue;
+            }
+            let index = (heading + turn).rem_euclid(32) as usize;
+            let p = if turn == 0 && length == remaining {
+                next
+            } else {
+                map::surface::clamp_body(offset(from, index, length), a.stats.radius)
+            };
+            if p == from || !bodies.clear(a, from, p) {
+                continue;
+            }
+            let mut cost = i64::from(turn.abs()) * 10 + if half { 15 } else { 0 };
+            if side != 0 && turn != 0 && turn.signum() != side {
+                cost += 25;
+            }
+            if let Some(prev) = previous {
+                let swing = ((index as i32 - prev).rem_euclid(32))
+                    .min((prev - index as i32).rem_euclid(32));
+                cost += i64::from(swing) * 4 + if swing > 8 { 200 } else { 0 };
+            }
+            cost += crowding(bodies, a, p);
+            let key = (cost, p, rank as i32);
+            if best.is_none_or(|(c, _, r)| (cost, rank as i32) < (c, r)) {
+                best = Some(key);
+            }
+        }
+    }
+    let Some((_, p, rank)) = best else {
+        return from;
+    };
+    let turn = TURNS[rank as usize];
+    if turn != 0 {
+        nav.side = turn.signum() as i8;
+        nav.side_until = tick + STEER_MEMORY;
+    } else if tick >= nav.side_until {
+        nav.side = 0;
+    }
+    p
+}
+
+/// Soft cost of standing in a walking ally's personal space at `p`.
+fn crowding(bodies: &Bodies, a: &Unit, p: Pos) -> i64 {
+    let mut cost = 0;
+    bodies.near(p, a.stats.radius, |c| {
+        if c.id != a.id && c.alive() && c.side == a.side && c.mobile() && c.fx.carrier == 0 {
+            let room = i64::from(gap(a, c));
+            let d = p.dist(c.pos);
+            if d < room {
+                cost += (room - d) * 40 / room.max(1);
+            }
+        }
+    });
+    cost
+}
+
+/// Drops route points already reached or passed: an intermediate point
+/// within one step, or one the walker has gone beyond (it is nearer the
+/// following point than the point itself is). Walking back to a point
+/// passed on the side of an obstacle is a visible reversal (M-77).
+fn consume(path: &mut Vec<Pos>, at: Pos, speed: i32) {
+    while let Some(&first) = path.first() {
+        let reached = match path.get(1) {
+            Some(&second) => {
+                at.within(first, speed.max(50)) || at.dist2(second) <= first.dist2(second)
+            }
+            None => at.within(first, 50),
+        };
+        if !reached {
+            break;
+        }
+        path.remove(0);
+    }
+}
+
+/// Whether an engagement still gets nearer a legal attack position. The
+/// remaining distance must improve by at least 50 mm within `STALL` ticks;
+/// circling or shuffling without that proves a standing target unreachable
+/// from here (M-77). Being in position, or a target that moved since last
+/// tick (a pursuit), is never such proof and restarts the clock.
+fn closing(a: &Unit, b: &Unit, tick: u32, nav: &mut Navigation) -> bool {
+    let remaining = (a.pos.dist(b.pos) - i64::from(super::decision::reach(a, b))).max(0);
+    let fresh = Some((b.id, remaining, tick, b.pos));
+    match nav.closing {
+        Some((target, best, since, last)) if target == b.id => {
+            if remaining == 0 || remaining + 50 <= best || !b.pos.within(last, 10) {
+                nav.closing = fresh;
+                true
+            } else {
+                nav.closing = Some((target, best, since, b.pos));
+                tick.saturating_sub(since) < u32::from(STALL)
+            }
+        }
+        _ => {
+            nav.closing = fresh;
+            true
+        }
+    }
 }

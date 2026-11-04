@@ -1,7 +1,9 @@
 //! One fixed simulation tick, split by responsibility.
 
+mod bodies;
 mod combat;
 pub mod decision;
+mod engagement;
 mod movement;
 pub(crate) mod navigation;
 mod outcome;
@@ -29,8 +31,10 @@ impl MobaMatch {
         let positions = self.units.iter().map(|u| u.pos).collect::<Vec<_>>();
         self.grid.rebuild(positions.into_iter());
         let engaged = combat::fight(self);
+        let start: Vec<_> = self.units.iter().map(|u| u.pos).collect();
         movement::advance(self, &engaged);
         movement::separate(self);
+        movement::settle(self, &start);
         rewards::resolve_deaths(self);
         outcome::check(self);
         crate::vision::remember_structures(self);

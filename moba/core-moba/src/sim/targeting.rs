@@ -227,7 +227,44 @@ fn select_target(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> 
             best = Some(priority);
         }
     });
-    best.map(|(_, _, _, k)| k)
+    best.map(|(_, _, _, k)| k).or_else(|| assist(m, vul, i))
+}
+
+/// Assist (M-77), like lane minions: a walker that sees no enemy of its own
+/// joins the fight of an ally planted in an action nearby, on that ally's
+/// target, if it could keep that target under the M-07 retention distance.
+/// Nearest such target, then lowest id.
+fn assist(m: &MobaMatch, vul: &Vulnerability, i: usize) -> Option<usize> {
+    let a = &m.units[i];
+    if !a.mobile() || matches!(a.brain, Brain::Neutral { .. }) {
+        return None;
+    }
+    let keep = a.stats.sight.max(a.stats.range) + a.stats.sight / 2;
+    let mut best: Option<(i64, u32, usize)> = None;
+    m.grid.near(a.pos, a.stats.sight, |k| {
+        let c = &m.units[k];
+        if c.id == a.id
+            || c.side != a.side
+            || !c.alive()
+            || !super::bodies::planted(c)
+            || !c.pos.within(a.pos, a.stats.sight + c.stats.radius)
+        {
+            return;
+        }
+        let Some(j) = m.slot(c.target) else { return };
+        let b = &m.units[j];
+        if super::navigation::rejected(a, b.id, m.tick)
+            || !attackable(vul, a, b)
+            || !a.pos.within(b.pos, keep + b.stats.radius)
+        {
+            return;
+        }
+        let key = (a.pos.dist2(b.pos), b.id, j);
+        if best.is_none_or(|old| key < old) {
+            best = Some(key);
+        }
+    });
+    best.map(|(_, _, j)| j)
 }
 
 /// Like the BattleLine, a support without a useful action holds at the

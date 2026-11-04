@@ -1,5 +1,6 @@
 //! Stable body-aware path search over the map lattice and continuous bridge connections.
-use super::navigation::{acceptable, approach, clear, heuristic, CELL};
+use super::bodies::Bodies;
+use super::navigation::{acceptable, approach, heuristic, CELL};
 use crate::{geom::Pos, map, state::Unit};
 use std::{cmp::Reverse, collections::BinaryHeap};
 const WIDTH: usize = 101;
@@ -7,7 +8,7 @@ const WIDTH: usize = 101;
 /// Search the fixed 2-unit lattice only after a direct approach fails. Stable
 /// (cost, node id) ties and ordered neighbours make routes replayable.
 pub(super) fn route(
-    units: &[Unit],
+    bodies: &Bodies,
     a: &Unit,
     target: Option<&Unit>,
     goal: Pos,
@@ -16,20 +17,10 @@ pub(super) fn route(
     // every distant mobile opponent has already left the entire route.
     // Engagement routes still account for the nearby contested bodies;
     // every actual step is always checked against all current bodies.
-    let permanent;
     let units = if target.is_none() && matches!(a.brain, crate::state::Brain::Lane { .. }) {
-        permanent = units
-            .iter()
-            .filter(|u| {
-                u.kind.structure()
-                    || u.side == crate::types::Side::Neutral
-                    || u.side == a.side && !u.mobile()
-            })
-            .cloned()
-            .collect::<Vec<_>>();
-        &permanent[..]
+        bodies.permanent()
     } else {
-        units
+        *bodies
     };
     let portals = bridge_portals(a.stats.radius);
     let mut cost = vec![i64::MAX; WIDTH * WIDTH + portals.len()];
@@ -39,7 +30,7 @@ pub(super) fn route(
     seeds.extend(WIDTH * WIDTH..WIDTH * WIDTH + portals.len());
     for id in seeds {
         let p = node(id, &portals);
-        if clear(units, a, a.pos, p) {
+        if units.clear(a, a.pos, p) {
             cost[id] = a.pos.dist(p);
             open.push(Reverse((
                 cost[id] + heuristic(a, target, p, goal),
@@ -53,7 +44,7 @@ pub(super) fn route(
             continue;
         }
         let at = node(id, &portals);
-        if let Some(end) = finish(units, a, target, at, goal) {
+        if let Some(end) = finish(&units, a, target, at, goal) {
             let mut path = if end == at { vec![at] } else { vec![end, at] };
             let mut n = id;
             while parent[n] != usize::MAX {
@@ -61,12 +52,12 @@ pub(super) fn route(
                 path.push(node(n, &portals));
             }
             path.reverse();
-            return Some(simplify(units, a, path));
+            return Some(simplify(&units, a, path));
         }
         for next in neighbours(id, at, &portals) {
             let p = node(next, &portals);
             let distance = distance + at.dist(p);
-            if distance < cost[next] && clear(units, a, at, p) {
+            if distance < cost[next] && units.clear(a, at, p) {
                 cost[next] = distance;
                 parent[next] = id;
                 open.push(Reverse((
@@ -112,14 +103,14 @@ fn neighbours(id: usize, at: Pos, portals: &[Pos]) -> Vec<usize> {
 
 /// Remove lattice corners visible from the previous corner. Besides smoother
 /// routes, this avoids trying to stand exactly on a seed cell under ally pressure.
-fn simplify(units: &[Unit], a: &Unit, path: Vec<Pos>) -> Vec<Pos> {
+fn simplify(units: &Bodies, a: &Unit, path: Vec<Pos>) -> Vec<Pos> {
     let mut result = Vec::new();
     let mut from = a.pos;
     let mut first = 0;
     while first < path.len() {
         let next = (first..path.len())
             .rev()
-            .find(|&j| clear(units, a, from, path[j]))
+            .find(|&j| units.clear(a, from, path[j]))
             .unwrap_or(first);
         result.push(path[next]);
         from = path[next];
@@ -150,7 +141,7 @@ fn grid_nodes(at: Pos, span: i32) -> Vec<usize> {
     }
     out
 }
-fn finish(units: &[Unit], a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> Option<Pos> {
+fn finish(units: &Bodies, a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -> Option<Pos> {
     if acceptable(a, target, at, goal) {
         return Some(at);
     }
@@ -160,5 +151,5 @@ fn finish(units: &[Unit], a: &Unit, target: Option<&Unit>, at: Pos, goal: Pos) -
     let mut probe = a.clone();
     probe.pos = at;
     let end = approach(&probe, target, goal);
-    (acceptable(a, target, end, goal) && clear(units, a, at, end)).then_some(end)
+    (acceptable(a, target, end, goal) && units.clear(a, at, end)).then_some(end)
 }

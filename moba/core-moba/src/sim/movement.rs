@@ -7,10 +7,17 @@ use crate::map;
 use crate::state::{Brain, MobaMatch};
 use crate::types::{Lane, Team};
 
+use super::bodies::{gap, planted, Bodies};
+
+use super::navigation::CONTACT_TOLERANCE;
+
 // Slot loop: brains read the whole match while one unit moves.
 #[allow(clippy::needless_range_loop)]
 pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
     let snapshot = m.units.clone();
+    let mut grid = std::mem::take(&mut m.motion_grid);
+    grid.rebuild(snapshot.iter().map(|u| u.pos));
+    let bodies = Bodies::new(&snapshot, &grid);
     let mut route_budget = 4;
     for i in 0..engaged.len() {
         let u = &m.units[i];
@@ -18,8 +25,10 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
             continue;
         }
         let chase = snapshot
-            .iter()
-            .find(|v| v.id == u.target && v.alive())
+            .binary_search_by_key(&u.target, |v| v.id)
+            .ok()
+            .map(|j| &snapshot[j])
+            .filter(|v| v.alive())
             .map(|v| v.pos);
         let goal = match chase {
             Some(p) => p,
@@ -41,10 +50,10 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
             m.units[i].decision.reason = super::decision::Reason::Formation;
             continue;
         }
-        let next = super::navigation::step(m, &snapshot, i, goal, step, &mut route_budget);
+        let next = super::navigation::step(m, &bodies, i, goal, step, &mut route_budget);
         // Decisions use the snapshot; settled bodies reserve their swept step
         // in id order so opposing movers cannot walk into each other.
-        if super::navigation::clear(&m.units, &m.units[i], from, next) {
+        if Bodies::new(&m.units, &grid).clear(&m.units[i], from, next) {
             m.units[i].pos = next;
         } else {
             super::decision::phase(&mut m.units[i], super::decision::Phase::Repath);
@@ -54,6 +63,7 @@ pub(super) fn advance(m: &mut MobaMatch, engaged: &[bool]) {
             crate::champions::walked(&mut m.units[i]);
         }
     }
+    m.motion_grid = grid;
 }
 
 /// Where the unit's behaviour wants it when it has no target; may update its
@@ -109,9 +119,8 @@ fn jungle_goal(m: &mut MobaMatch, i: usize, camp: Option<u8>, only: Option<Team>
                 .map(|c| c as u8)
         });
     let u = &mut m.units[i];
-    match (&mut u.brain, chosen) {
-        (Brain::Jungle { camp }, Some(c)) => *camp = Some(c),
-        _ => {}
+    if let (Brain::Jungle { camp }, Some(c)) = (&mut u.brain, chosen) {
+        *camp = Some(c);
     }
     chosen.map_or(pos, |c| {
         m.units
@@ -163,37 +172,59 @@ fn formation_holds(m: &MobaMatch, i: usize, to: Pos) -> bool {
     hold
 }
 
-/// Shared PK-01 bodies and gaps give allies soft pressure instead of a stop.
+/// Crowd pressure (M-72, M-77). Walking allies nudge each other sideways;
+/// a planted unit holds its ground (only a deep overlap moves it) and pushes
+/// walkers like an obstacle; a walker is never pushed back against its own
+/// route, so pressure cannot make it step back and forth.
 pub(super) fn separate(m: &mut MobaMatch) {
+    let mut grid = std::mem::take(&mut m.motion_grid);
+    grid.rebuild(m.units.iter().map(|u| u.pos));
     let mut pushes = vec![(0i64, 0i64); m.units.len()];
     for (i, a) in m.units.iter().enumerate() {
         if !a.alive() || !a.mobile() || a.fx.carrier != 0 {
             continue;
         }
-        m.grid.near(a.pos, a.stats.radius + 8 * MM, |j| {
+        let anchored = planted(a);
+        grid.near(a.pos, a.stats.radius + 8 * MM, |j| {
             let b = &m.units[j];
             if i == j || !b.alive() || b.fx.carrier != 0 {
                 return;
             }
-            let limit = i64::from(super::navigation::gap(a, b));
+            let limit = i64::from(gap(a, b));
             let d2 = a.pos.dist2(b.pos);
             if d2 >= limit * limit {
                 return;
             }
             let distance = d2.isqrt();
-            let share = (limit - distance) / if b.mobile() { 2 } else { 1 };
+            // A few millimetres of contact are tolerated: correcting them
+            // every tick is what makes a crowd visibly shiver.
+            if limit - distance < CONTACT_TOLERANCE || anchored && distance * 2 >= limit {
+                return;
+            }
+            let yields = b.mobile() && !planted(b);
+            let share = (limit - distance) / if yields { 2 } else { 1 };
             let (dx, dy) = separation_direction(a, b);
             let len = (dx * dx + dy * dy).isqrt().max(1);
             pushes[i].0 += dx * share / len;
             pushes[i].1 += dy * share / len;
         });
     }
-    for (i, (dx, dy)) in pushes.into_iter().enumerate() {
+    for (i, push) in pushes.into_iter().enumerate() {
         let u = &m.units[i];
+        let (dx, dy) = without_retreat(u, push);
         if dx == 0 && dy == 0 {
             continue;
         }
-        let cap = i64::from((u.stats.speed / 2).max(1));
+        // A walker that is waiting in a queue yields more gently.
+        let cap = i64::from(
+            (u.stats.speed
+                / if u.navigation.velocity == (0, 0) {
+                    4
+                } else {
+                    2
+                })
+            .max(1),
+        );
         let len = (dx * dx + dy * dy).isqrt().max(cap);
         let from = u.pos;
         let to = Pos {
@@ -201,10 +232,24 @@ pub(super) fn separate(m: &mut MobaMatch) {
             y: from.y + (dy * cap / len) as i32,
         }
         .clamp_to_map();
-        if super::navigation::clear(&m.units, u, from, to) {
+        if Bodies::new(&m.units, &grid).clear(u, from, to) {
             m.units[i].pos = to;
         }
     }
+    m.motion_grid = grid;
+}
+
+/// Drops the part of a push that points back against the walker's own step;
+/// the sideways part keeps the crowd spreading.
+fn without_retreat(u: &crate::state::Unit, (dx, dy): (i64, i64)) -> (i64, i64) {
+    let (hx, hy) = u.navigation.velocity;
+    let (hx, hy) = (i64::from(hx), i64::from(hy));
+    let dot = dx * hx + dy * hy;
+    let h2 = hx * hx + hy * hy;
+    if planted(u) || dot >= 0 || h2 == 0 {
+        return (dx, dy);
+    }
+    (dx - hx * dot / h2, dy - hy * dot / h2)
 }
 
 fn separation_direction(a: &crate::state::Unit, b: &crate::state::Unit) -> (i64, i64) {
@@ -217,8 +262,12 @@ fn separation_direction(a: &crate::state::Unit, b: &crate::state::Unit) -> (i64,
             let to = map::waypoint(lane, team, usize::from(waypoint));
             let x = i64::from(from.y - to.y);
             let y = i64::from(to.x - from.x);
-            let side = (dx * x + dy * y).signum();
-            let side = if side == 0 { tie } else { side };
+            // Nearly in single file, the lane side follows id order so two
+            // walkers never trade sides back and forth across the line.
+            let across = dx * x + dy * y;
+            let length = (x * x + y * y).isqrt().max(1);
+            let aligned = (across / length).abs() < i64::from(a.stats.radius) / 4;
+            let side = if aligned { tie } else { across.signum() };
             if x != 0 || y != 0 {
                 return (x * side, y * side);
             }
@@ -229,4 +278,39 @@ fn separation_direction(a: &crate::state::Unit, b: &crate::state::Unit) -> (i64,
     } else {
         (dx, dy)
     }
+}
+
+/// Direction inertia (M-77): whatever moved a body this tick (its own step,
+/// crowd pressure or both), the part that points back against last tick's
+/// motion is cancelled, so no body ever goes A → B → A on screen. A real
+/// change of direction therefore takes one still beat, like turning round.
+/// The kept motion is re-validated; if it would touch a body or the
+/// terrain the full motion stays, since that one was already validated.
+pub(super) fn settle(m: &mut MobaMatch, start: &[Pos]) {
+    let mut grid = std::mem::take(&mut m.motion_grid);
+    grid.rebuild(m.units.iter().map(|u| u.pos));
+    for (i, &from) in start.iter().enumerate().take(m.units.len()) {
+        let u = &m.units[i];
+        if !u.alive() || !u.mobile() || u.fx.carrier != 0 {
+            continue;
+        }
+        let (dx, dy) = (i64::from(u.pos.x - from.x), i64::from(u.pos.y - from.y));
+        let (px, py) = u.navigation.velocity;
+        let (px, py) = (i64::from(px), i64::from(py));
+        let dot = dx * px + dy * py;
+        let p2 = px * px + py * py;
+        let mut motion = (dx, dy);
+        if dot < 0 && p2 > 0 {
+            let kept = Pos {
+                x: from.x + (dx - px * dot / p2) as i32,
+                y: from.y + (dy - py * dot / p2) as i32,
+            };
+            if Bodies::new(&m.units, &grid).clear(u, from, kept) {
+                m.units[i].pos = kept;
+                motion = (i64::from(kept.x - from.x), i64::from(kept.y - from.y));
+            }
+        }
+        m.units[i].navigation.velocity = (motion.0 as i32, motion.1 as i32);
+    }
+    m.motion_grid = grid;
 }
