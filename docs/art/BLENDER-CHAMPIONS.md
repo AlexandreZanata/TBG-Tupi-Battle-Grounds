@@ -70,3 +70,14 @@ authoritative battle event path.
 
 `export_game.py` produces the two checked-in game assets. The editable
 scenes and intermediate build outputs are generated locally.
+
+## Authoring renders
+
+The Blender Cycles renders show the source design in the rest pose. Each
+image has the modular model on the left and the voxel comparison on the
+right. The game uses the left-hand method with its shared materials and
+animated weapon sockets.
+
+![Archer modular and generated Blender models](../media/blender-champions/archer.webp)
+
+![Bone Brute modular and generated Blender models](../media/blender-champions/bonebrute.webp)
