@@ -1380,3 +1380,16 @@ pending. Public download compatibility uses the actual running server.
   Rotcap. In local Training, Bombard dealt 192 damage from seat A and
   Rotcap dealt 60 damage from seat B.
 - Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Old Finn and Antidote Brewer
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and BattleLine. Both seats use the same models and gear.
+  Identify allegiance with the feet circle.
+- Cover Old Finn's fishing cast, reeling and back creel. Cover the
+  Antidote Brewer's remedy cast, double-flask B2 and back equipment.
+  Both casts keep their 0.22 s release.
+- Blender verified the release anchors and the offhand flask. Linux
+  Vulkan loaded all ten final meshes and captured Base and B2 for
+  both champions in the Laboratory.
+- Visual and motion comparison for Windows and desktop web remains pending.

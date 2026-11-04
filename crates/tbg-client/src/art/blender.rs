@@ -24,6 +24,9 @@ const LONGAXE: &[u8] = include_bytes!("../../assets/champions/blender/longaxe.tb
 const FARWATCH: &[u8] = include_bytes!("../../assets/champions/blender/farwatch.tbgmesh");
 const BOMBARD: &[u8] = include_bytes!("../../assets/champions/blender/bombard.tbgmesh");
 const ROTCAP: &[u8] = include_bytes!("../../assets/champions/blender/rotcap.tbgmesh");
+const OLD_FINN: &[u8] = include_bytes!("../../assets/champions/blender/oldfinn.tbgmesh");
+const ANTIDOTE_BREWER: &[u8] =
+    include_bytes!("../../assets/champions/blender/antidotebrewer.tbgmesh");
 
 pub(super) fn form(
     kind: UnitKind,
@@ -47,6 +50,8 @@ pub(super) fn form(
         UnitKind::Farwatch => FARWATCH,
         UnitKind::Bombard => BOMBARD,
         UnitKind::Rotcap => ROTCAP,
+        UnitKind::OldFinn => OLD_FINN,
+        UnitKind::AntidoteBrewer => ANTIDOTE_BREWER,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -218,6 +223,8 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Farwatch,
         UnitKind::Bombard,
         UnitKind::Rotcap,
+        UnitKind::OldFinn,
+        UnitKind::AntidoteBrewer,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -232,6 +239,9 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
+            if kind == UnitKind::AntidoteBrewer && (tier, branch) == (2, 1) {
+                assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
+            }
             if kind == UnitKind::SiegeWalker {
                 assert!(form.meshes[Node::Prop(Socket::Nock).index()].is_some());
             }

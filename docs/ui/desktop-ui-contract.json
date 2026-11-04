@@ -630,7 +630,9 @@
       "Longaxe",
       "Farwatch",
       "Bombard",
-      "Rotcap"
+      "Rotcap",
+      "OldFinn",
+      "AntidoteBrewer"
     ],
     "forms": [
       "Base",
@@ -663,6 +665,8 @@
       "arbalest release",
       "mortar reload",
       "spore cast",
+      "fish cast and reel",
+      "remedy cast",
       "hit",
       "death",
       "victory"

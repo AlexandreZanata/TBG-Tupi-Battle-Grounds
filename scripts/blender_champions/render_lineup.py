@@ -17,11 +17,14 @@ STUDIO_ANGLES = {
     "shieldbearer": -44, "hexer": 19, "sawbot": 24, "bloomkeeper": 15,
     "siegewalker": -27, "rootcaller": 13, "nester": -44, "rampart": 29,
     "longaxe": 35, "farwatch": 27, "bombard": 32, "rotcap": 24,
+    "oldfinn": -28, "antidotebrewer": 24,
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
     "longaxe": (5, -102, -8),
     "farwatch": (15, -110, -7),
+    "oldfinn": (-17, -72, -26),
+    "antidotebrewer": (-19, -64, -9),
 }
 
 
@@ -113,6 +116,8 @@ def render(unit, angle):
     scale = {"siegewalker": 7.56, "longaxe": 9.4}.get(unit,6.58)
     if unit == "longaxe":
         height, aim = 850, 1.56
+    if unit == "oldfinn":
+        height, aim = 690, .92
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)
 

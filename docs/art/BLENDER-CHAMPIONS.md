@@ -270,3 +270,37 @@ blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_l
 ![Bombard modular Blender lineup](../media/blender-champions/bombard.webp)
 
 ![Rotcap modular Blender lineup](../media/blender-champions/rotcap.webp)
+
+## Old Finn and Antidote Brewer
+
+Old Finn wears a waxed ochre coat, a sou'wester and a forked white
+beard. The rod, wrapped grip, working reel silhouette and line are
+separate pieces on WeaponR. The rod and line end at the existing
+fish-release point `(0, 0.902, 0)`. The ochre branch adds a larger catch
+and a hauling float in A1, then an offset silver-bellied catfish with
+long barbels in A2. The maritime-blue branch adds a two-tone storm
+bib and hip rope coil in B1, then lighter blue oilskin, net floats,
+extra catches and a brass hat clasp in B2. The basket and catches
+move with BackSpring.
+
+Antidote Brewer wears a linen apron and a two-leaf hood. The rim of
+the remedy flask sits at WeaponR-local `(0, 0.07, 0.03)`. The amber
+branch adds a gilt collar, braided herb crown and pouch in A1, then a
+copper still with a curved condenser and glowing port in A2. The violet
+branch adds a four-vial bandolier in B1, then a silver-collared second
+flask on OffhandL, a mixing towel and cast back cauldron in B2.
+The lower apron follows Hips and the workshop gear follows BackSpring.
+Both champions keep their 0.22 s cast releases.
+
+The branch palettes are intrinsic and match across seats. Old Finn
+uses 4,016–5,618 triangles per form and 360,707 bytes. Antidote Brewer
+uses 2,992–4,150 triangles per form and 299,567 bytes.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- oldfinn antidotebrewer
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- oldfinn antidotebrewer
+```
+
+![Old Finn modular Blender lineup](../media/blender-champions/oldfinn.webp)
+
+![Antidote Brewer modular Blender lineup](../media/blender-champions/antidotebrewer.webp)
