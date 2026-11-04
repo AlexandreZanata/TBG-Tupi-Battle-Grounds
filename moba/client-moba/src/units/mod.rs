@@ -31,6 +31,9 @@ mod monsters;
 mod motion_probe;
 mod status;
 
+/// Seconds a walker may pause before its gait settles to idle (M-77).
+const WALK_GRACE: f32 = 0.2;
+
 /// Render layer seen only by the minimap camera.
 pub const MINIMAP_LAYER: usize = 2;
 
@@ -47,6 +50,8 @@ pub struct UnitVisual {
     pub yaw: f32,
     lunge: f32,
     still: f32,
+    /// Seconds since the walk condition last held (gait grace, M-77).
+    halted: f32,
     effect: tbg_moba_core::protocol::ChampionView,
     aim: Option<(AimTarget, Vec3)>,
     range: f32,
@@ -459,6 +464,7 @@ fn spawn_unit(
                 yaw,
                 lunge: 0.0,
                 still: 0.15,
+                halted: WALK_GRACE,
                 effect: u.champion,
                 aim: None,
                 range: stats.range as f32 / 1000.0,
@@ -510,6 +516,7 @@ fn spawn_unit(
     entity.id()
 }
 
+#[allow(clippy::too_many_arguments, clippy::type_complexity)] // one presentation pass per unit
 fn animate(
     mut commands: Commands,
     lib: Res<FigureLibrary>,
@@ -608,20 +615,22 @@ fn animate(
             } else {
                 v.still + dt
             };
-            a.set_base(
-                if v.still < 0.15
-                    && v.effect.carrier == 0
-                    && matches!(
-                        v.activity,
-                        tbg_moba_core::state::Activity::Advance
-                            | tbg_moba_core::state::Activity::Pursue
-                    )
-                {
-                    Clip::Walk
-                } else {
-                    Clip::Idle
-                },
-            );
+            let walking = v.still < 0.15
+                && v.effect.carrier == 0
+                && matches!(
+                    v.activity,
+                    tbg_moba_core::state::Activity::Advance
+                        | tbg_moba_core::state::Activity::Pursue
+                );
+            // A queue's short stop-and-go keeps the gait (M-77); an action
+            // (Attack) drops it at once so the strike reads cleanly.
+            v.halted = if walking { 0.0 } else { v.halted + dt };
+            let striking = v.activity == tbg_moba_core::state::Activity::Attack;
+            a.set_base(if walking || (!striking && v.halted < WALK_GRACE) {
+                Clip::Walk
+            } else {
+                Clip::Idle
+            });
             transform.translation = at;
             let flash = v.flash;
             if flash != 0.0 && !v.flash_applied {
