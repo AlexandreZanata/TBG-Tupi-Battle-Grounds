@@ -1290,3 +1290,15 @@ pending. Public download compatibility uses the actual running server.
 - Linux, Windows and desktop web runtime comparisons remain pending for
   the study. Integration must compare match framing, arena transitions
   and Stronghold damage and motion using shared assets.
+
+### 2026-11-04 — Blender Stronghold Fortifications
+
+- The [Stronghold art study](../art/BLENDER-STRONGHOLDS.md) covers Base,
+  A1, A2, B1 and B2 for Treasury, Bastion, Artillery and Command. The
+  Blender scenes exercise both Forest placements and check the existing
+  projectile anchors and rest pitch.
+- Future runtime comparison covers both seats in the selection gallery,
+  Laboratory, BattleLine, and Fortification transitions. Motion coverage
+  includes defender aim, opening hatches, shot and reload, recoil, mint
+  and Artillery gearing, cumulative wear and zero-HP collapse. Runtime
+  and pixel/motion checks on Linux, Windows and desktop web are pending.

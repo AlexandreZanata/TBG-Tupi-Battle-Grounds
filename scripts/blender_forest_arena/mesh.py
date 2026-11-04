@@ -20,6 +20,10 @@ PALETTE = {
     "blue": "426e96", "red": "984e43", "linen": "d6c29a", "trim": "c3a266",
     "ember": "ab5536", "fire": "e88438", "glow": "ffd987",
     "distant": "536f70", "distant-light": "6d8280",
+    "tile": "8d4934", "tile-light": "ad6348", "tile-dark": "673b34",
+    "gunmetal": "4c5b60", "silver": "9aa9a2", "soot": "272f30",
+    "bronze": "a47a47", "gold": "d4a954", "patina": "4e7671",
+    "skin": "a97755", "hood": "5b6e4b",
 }
 
 
@@ -38,6 +42,9 @@ def material(key):
     shader = mat.node_tree.nodes.get("Principled BSDF")
     shader.inputs["Base Color"].default_value = mat.diffuse_color
     shader.inputs["Roughness"].default_value = .31 if key.startswith(("water","shelf")) else .85
+    if key in {"gunmetal","silver","bronze","gold","patina"}:
+        shader.inputs["Metallic"].default_value = .44
+        shader.inputs["Roughness"].default_value = .45
     if key in {"fire","glow"}:
         shader.inputs["Emission Color"].default_value = mat.diffuse_color
         shader.inputs["Emission Strength"].default_value = 1.3

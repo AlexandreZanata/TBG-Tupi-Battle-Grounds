@@ -66,3 +66,7 @@ static scenery and the base Classic Stronghold. Runtime batching,
 Stronghold damage and animation, draw calls, frame timings and visual
 correspondence on Linux, Windows and desktop web are pending an
 in-game integration.
+
+The owner approved the visual direction. The [Stronghold companion
+project](BLENDER-STRONGHOLDS.md) adds the four selectable kinds and
+their Fortifications on this terrain.

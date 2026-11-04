@@ -622,6 +622,15 @@
       "linux": "Blender render and layout checks observed; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "stronghold-blender-fortifications-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-STRONGHOLDS.md",
+      "affected_cases": "Treasury, Bastion, Artillery and Command; Base/A1/A2/B1/B2; both seats; gallery, Laboratory, BattleLine and Fortification; aim, hatch, release, recoil, reload, gearing, wear and collapse",
+      "linux": "Blender previews and muzzle geometry checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }
