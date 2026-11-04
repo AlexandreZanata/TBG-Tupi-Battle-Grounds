@@ -631,6 +631,15 @@
       "linux": "Blender previews and muzzle geometry checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "forest-blender-war-auxiliaries-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-WAR-AUXILIARIES.md",
+      "affected_cases": "Forest; Miner and Merchant; seats A and B; three tiers; bridge and precinct construction, work cycles, ship delivery and completion; runtime trigger, pause and reduced-motion comparison pending",
+      "linux": "Blender scene and animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }

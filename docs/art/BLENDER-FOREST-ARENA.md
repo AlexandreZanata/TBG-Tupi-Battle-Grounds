@@ -70,3 +70,7 @@ in-game integration.
 The owner approved the visual direction. The [Stronghold companion
 project](BLENDER-STRONGHOLDS.md) adds the four selectable kinds and
 their Fortifications on this terrain.
+
+The [War Auxiliary companion study](BLENDER-WAR-AUXILIARIES.md) stages
+Mineiro and Mercador on both shores with construction, working and
+delivery animations.

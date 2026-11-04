@@ -23,7 +23,8 @@ PALETTE = {
     "tile": "8d4934", "tile-light": "ad6348", "tile-dark": "673b34",
     "gunmetal": "4c5b60", "silver": "9aa9a2", "soot": "272f30",
     "bronze": "a47a47", "gold": "d4a954", "patina": "4e7671",
-    "skin": "a97755", "hood": "5b6e4b",
+    "skin": "a97755", "hood": "5b6e4b", "merchant-cloth": "a98446",
+    "ore": "3c8e83", "ore-light": "81c8a8", "market-cloth": "48786f",
 }
 
 

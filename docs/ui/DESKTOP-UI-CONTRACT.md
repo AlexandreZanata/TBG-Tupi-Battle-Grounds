@@ -1302,3 +1302,14 @@ pending. Public download compatibility uses the actual running server.
   includes defender aim, opening hatches, shot and reload, recoil, mint
   and Artillery gearing, cumulative wear and zero-HP collapse. Runtime
   and pixel/motion checks on Linux, Windows and desktop web are pending.
+
+### 2026-11-04 — Animated Blender War Auxiliaries
+
+- The [Forest auxiliary study](../art/BLENDER-WAR-AUXILIARIES.md) covers
+  Mineiro and Mercador in both seats, all three tiers, bridge and
+  precinct construction, work loops, ship delivery and completion.
+  Blender checks cover timed assembly, pick contact, berth, crane and
+  chest motion, plus sampled BattleLine clearance.
+- Future runtime comparison covers hire and upgrade reconciliation,
+  payouts, pause and reduced motion on the Forest BattleLine. Linux,
+  Windows and desktop web runtime comparisons remain pending.
