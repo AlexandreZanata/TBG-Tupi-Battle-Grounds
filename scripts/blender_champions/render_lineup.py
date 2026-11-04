@@ -1,6 +1,6 @@
 """Render the production Blender components for Base, A1, A2, B1 and B2."""
 
-from math import radians, sqrt
+from math import atan2, radians, sqrt
 from pathlib import Path
 import sys
 
@@ -8,6 +8,7 @@ import bpy
 from mathutils import Matrix, Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from celestialarcher import HALF as CELESTIAL_BOW_HALF, TIP_Z as BOW_TIP_Z
 from export_game import FORMS, GAME_UNITS, collection
 from geometry import Model
 from render_study import OUT, studio
@@ -26,6 +27,8 @@ STUDIO_ANGLES = {
     "bonehorn": 42, "ravager": 34, "acidmaw": 24,
     "whisperer": 16, "bulwark": -22, "demolisher": 27, "crowcaller": 24,
     "trigger": -24, "rattletick": 20,
+    "capybara": 23, "trident": 15, "solarsentinel": 19,
+    "luminousoracle": 18, "celestialarcher": 27, "justiciar": -24,
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -51,8 +54,9 @@ def saw_guard(joint, rest, tier, branch):
     return Matrix.Identity(4)
 
 
-def two_hand_carry(joint, rest, at, fore_grip, angle):
-    turn = Matrix.Rotation(radians(angle), 4, "X")
+def two_hand_carry(joint, rest, at, fore_grip, angle, yaw=0, roll=0):
+    turn = (Matrix.Rotation(radians(yaw),4,"Z") @ Matrix.Rotation(radians(angle),4,"X")
+            @ Matrix.Rotation(radians(roll),4,"Y"))
     grip = TO_BLENDER @ (rest["Chest"] + Vector(at))
     if joint in arm_nodes("R"):
         return reach_arm(joint,rest,"R",grip,turn)
@@ -95,8 +99,64 @@ def drum_pose(joint,rest,tier,branch):
     return Matrix.Translation(TO_BLENDER @ rest[joint])
 
 
+def sentinel_guard(joint,rest,default):
+    chest = rest["Chest"]
+    if joint in arm_nodes("R"):
+        grip = TO_BLENDER @ (chest+Vector((-.219,.127,.147)))
+        return reach_arm(joint,rest,"R",grip,Matrix.Rotation(radians(-65),4,"X"))
+    grip = TO_BLENDER @ (chest+Vector((.241,.149,.207)))
+    if joint in arm_nodes("L"):
+        return reach_arm(joint,rest,"L",grip,Matrix.Identity(4))
+    if joint in ("StringTop","StringBottom"):
+        s = -1 if joint=="StringTop" else 1
+        pivot = TO_BLENDER @ (rest[joint]-rest["OffhandL"])
+        return Matrix.Translation(grip+pivot) @ Matrix.Rotation(radians(s*22),4,"Z")
+    return default
+
+
+def oracle_guard(joint,rest,default):
+    grip = TO_BLENDER @ (rest["Chest"]+Vector((-.217,.117,.154)))
+    turn = Matrix.Rotation(radians(-14),4,"Y")
+    if joint in arm_nodes("R"):
+        return reach_arm(joint,rest,"R",grip,turn)
+    if joint == "HeadGear":
+        return Matrix.Translation(grip) @ turn @ Matrix.Translation(
+            TO_BLENDER @ (rest["HeadGear"]-rest["WeaponR"]))
+    return default
+
+
+def archer_draw(joint,rest,tier,branch,default):
+    grip = TO_BLENDER @ (rest["Chest"]+Vector((.128,.217,.30)))
+    draw = .06
+    nock = grip+TO_BLENDER @ Vector((0,0,BOW_TIP_Z-draw))
+    if joint in arm_nodes("L"):
+        return reach_arm(joint,rest,"L",grip,Matrix.Identity(4))
+    if joint in arm_nodes("R"):
+        return reach_arm(joint,rest,"R",nock,Matrix.Identity(4))
+    if joint == "Nock":
+        return Matrix.Translation(nock)
+    if joint in ("StringTop","StringBottom"):
+        half = CELESTIAL_BOW_HALF[tier,branch]
+        side = 1 if joint=="StringTop" else -1
+        tip = grip+TO_BLENDER @ Vector((0,side*half,BOW_TIP_Z))
+        return Matrix.Translation(tip) @ Matrix.Rotation(side*atan2(draw,half),4,"X")
+    return default
+
+
 def studio_pose(unit, joint, rest, tier, branch):
     transform = Matrix.Translation(TO_BLENDER @ rest[joint])
+    if unit == "trident":
+        return two_hand_carry(joint,rest,(-.27,.32,.31),(0,0,.18),-20,yaw=50,roll=55)
+    if unit == "solarsentinel":
+        return sentinel_guard(joint,rest,transform)
+    if unit == "luminousoracle":
+        return oracle_guard(joint,rest,transform)
+    if unit == "celestialarcher":
+        return archer_draw(joint,rest,tier,branch,transform)
+    if unit == "justiciar":
+        for side, upper, fore in (("R",-22,-66),("L",-10,-23)):
+            if joint in arm_nodes(side):
+                return folded_arm(joint,rest,side,upper,fore)
     if unit == "bulwark":
         return two_hand_carry(joint,rest,(0,.13,.20),(0,.12,0),-14)
     if unit == "crowcaller":
@@ -197,6 +257,8 @@ def render(unit, angle):
         "siegewalker": 1.46, "longaxe": 1.64, "shatterback": 1.46, "oilpress": 1.46,
         "cargocrab": 1.66, "bonehorn": 2.06, "ravager": 1.80, "acidmaw": 1.15,
         "whisperer": 1.42, "bulwark": 1.53, "demolisher": 1.46, "rattletick": 1.45,
+        "capybara": 1.47, "trident": 1.97, "solarsentinel": 1.39,
+        "luminousoracle": 1.42, "celestialarcher": 1.48, "justiciar": 1.47,
     }.get(unit,1.27)
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
@@ -215,7 +277,7 @@ def render(unit, angle):
         anchor.location.x = (column - 2) * spacing - (.20 if unit=="bonehorn" else 0)
         # Rear-mounted Evolution equipment needs a wider profile to stay legible.
         rear_angle = {"oilpress": -23, "cargocrab": 23, "smuggler": -15,
-                      "rattletick": 29}.get(unit,0)
+                      "rattletick": 29, "capybara": 18}.get(unit,0)
         anchor.rotation_euler.z = radians(angle+rear_angle if tier and branch==1 else angle)
         anchor.scale = (1 + .08 * tier,) * 3
     height, aim = (580,.76) if unit in {"shieldbearer","hexer"} else (610,.79)
@@ -243,6 +305,12 @@ def render(unit, angle):
             "whisperer": (7.50,570,.95), "bulwark": (8.15,565,.56),
             "demolisher": (7.70,590,.67), "crowcaller": (6.70,665,.72),
             "trigger": (6.63,640,.75), "rattletick": (7.75,605,.76),
+        }[unit]
+    if unit in {"capybara","trident","solarsentinel","luminousoracle","celestialarcher","justiciar"}:
+        scale,height,aim = {
+            "capybara": (7.72,545,.57), "trident": (10.83,665,.94),
+            "solarsentinel": (7.42,655,.78), "luminousoracle": (7.55,720,.87),
+            "celestialarcher": (7.76,690,.83), "justiciar": (7.65,670,.79),
         }[unit]
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)

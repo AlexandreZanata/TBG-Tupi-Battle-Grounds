@@ -650,7 +650,13 @@
       "Demolisher",
       "Crowcaller",
       "Trigger",
-      "RattleTick"
+      "RattleTick",
+      "Capybara",
+      "Trident",
+      "SolarSentinel",
+      "LuminousOracle",
+      "CelestialArcher",
+      "Justiciar"
     ],
     "forms": [
       "Base",
@@ -703,6 +709,12 @@
       "shoulder raven aim, wing beat and crossbow reload",
       "alternating revolvers and articulated tail",
       "club strike and independent rider aim and recoil",
+      "belly bounce, rolling steps and palm bump",
+      "two-hand trident thrust, hinged jaw and dorsal fin",
+      "spear thrust and independently opening shield vanes",
+      "staff halo rotation and sun-spark release",
+      "animated bow draw, nocked arrow and separate wings",
+      "moving chest core, palm bolt and two-palm stamp",
       "hit",
       "death",
       "victory"

@@ -72,6 +72,20 @@ SWATCH = {
     "gunner_indigo": (65, 60, 105, 0.0, 0.81),
     "brother_carmine": (148, 58, 42, 0.0, 0.84),
     "brother_coast": (56, 112, 130, 0.0, 0.82),
+    "capy_fur": (142, 94, 57, 0.0, 0.85),
+    "capy_reed": (74, 124, 101, 0.0, 0.79),
+    "shark_hide": (61, 107, 125, 0.0, 0.69),
+    "shark_belly": (164, 188, 176, 0.0, 0.76),
+    "shark_reef": (123, 48, 50, 0.15, 0.70),
+    "sun_navy": (43, 58, 99, 0.0, 0.84),
+    "sun_teal": (49, 115, 127, 0.15, 0.70),
+    "sun_cream": (232, 213, 164, 0.12, 0.60),
+    "oracle_saffron": (192, 129, 59, 0.0, 0.77),
+    "oracle_lagoon": (39, 104, 111, 0.0, 0.77),
+    "archer_amethyst": (109, 65, 130, 0.15, 0.68),
+    "judge_stone": (143, 153, 149, 0.12, 0.78),
+    "judge_obsidian": (58, 51, 71, 0.31, 0.70),
+    "judge_flame": (214, 108, 48, 0.21, 0.64),
 }
 GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse", "bell_eye"}
 
@@ -181,6 +195,13 @@ class Model:
                 faces.append((a, b, b+n, a+n))
         faces.extend((tuple(reversed(range(n))), tuple(range(len(vertices)-n, len(vertices)))))
         return self.mesh(name, joint, swatch, vertices, faces, fuse=fuse)
+
+    def rim(self, name, joint, swatch, center, radii, thickness, *, segments=24):
+        x, y, z = center
+        rx, ry = radii
+        points = [(x + rx*cos(i*tau/segments), y + ry*sin(i*tau/segments), z)
+                  for i in range(segments+1)]
+        return self.tube(name, joint, swatch, points, [thickness]*len(points), n=7)
 
     def plate(self, name, joint, swatch, outline, depth, *, axis="z", bevel=0.007):
         # Flat outline with supported metal edges, editable as a Blender mesh.

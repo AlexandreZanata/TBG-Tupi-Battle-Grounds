@@ -21,6 +21,11 @@ Whisperer, Bulwark and Demolisher add a hollow bone bell, a walking
 stone citadel and a hydraulic brawler. Crowcaller, Trigger and Rattle &
 Tick add an articulated shoulder raven, two feline revolvers and an
 independently aimed shoulder rider.
+Capybara and Trident add a marsh guardian with an articulated belly
+and a shark with a fitted jaw and two-hand trident. Solar Sentinel,
+Luminous Oracle, Celestial Archer and Justiciar add a hinged sun shield,
+a weapon-mounted staff halo, separately animated wings and bowstring,
+and a judgment construct with moving core and palm apertures.
 Protocol 40 and ruleset 16 are unchanged.
 
 TBG 0.1.4-colossus.6 — Native Android landscape candidate

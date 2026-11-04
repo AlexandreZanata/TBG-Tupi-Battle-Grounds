@@ -11,7 +11,9 @@ NAMES = (
 )
 PARENT = (None, 0, 1, 2, 3, 3, 5, 6, 3, 8, 9, 1, 11, 12, 1, 14, 15, 3, 4, 1, 10, 7, 17)
 EXTENDED = ("StringTop", "StringBottom", "Nock")
-EXTENDED_KITS = {"ravager", "acidmaw", "crowcaller", "rattletick"}
+EXTENDED_KITS = {
+    "ravager", "acidmaw", "crowcaller", "rattletick", "solarsentinel", "celestialarcher",
+}
 INDEX = {name: i for i, name in enumerate(NAMES + EXTENDED)}
 PARENT_OVERRIDES = {
     "ravager": {
@@ -25,6 +27,10 @@ PARENT_OVERRIDES = {
     },
     "crowcaller": {"HeadGear": "BackSpring", "Nock": "WeaponR"},
     "trigger": {"BackSpring": "Hips"},
+    "capybara": {"Tabard": "Chest"},
+    "trident": {"WeaponR": "Chest"},
+    "luminousoracle": {"HeadGear": "WeaponR"},
+    "celestialarcher": dict.fromkeys(("BackSpring", "Tabard", "Back"), "Chest"),
     "rattletick": {
         "WeaponR": "Chest", "Tabard": "Chest",
         **dict.fromkeys(("HeadGear", "Back", "StringTop", "Nock"), "BackSpring"),
@@ -51,6 +57,17 @@ REST_OVERRIDES = {
         "Tabard": (0,.30,-.15), "Nock": (0,.035,0),
     },
     "trigger": {"BackSpring": (0,-.02,-.14), "Back": (0,.04,-.30)},
+    "capybara": {"Head": (0,.38,.17), "Tabard": (0,.13,.14)},
+    "trident": {"HeadGear": (0,-.075,.13), "BackSpring": (0,.27,-.18)},
+    "solarsentinel": {
+        "HeadGear": (0,.15,-.06), "StringTop": (-.15,0,0), "StringBottom": (.15,0,0),
+    },
+    "luminousoracle": {"HeadGear": (0,.55,0)},
+    "celestialarcher": {
+        "BackSpring": (.16,.28,-.13), "Tabard": (-.16,.28,-.13),
+        "HeadGear": (0,.18,-.05), "Back": (0,.12,-.15),
+    },
+    "justiciar": {"BackSpring": (0,.19,.19), "HeadGear": (0,-.02,0)},
     "rattletick": {
         "BackSpring": (.28,.42,-.05), "HeadGear": (0,.22,0), "Tabard": (0,.20,-.22),
         "Back": (.09,.12,0), "StringTop": (-.09,.12,0), "Nock": (-.09,.035,.18),
@@ -104,6 +121,12 @@ BODY_PLANS = {
     "crowcaller": (.38, .36 * .82, .34, .24, .1365, .21),
     "trigger": (.38, .36 * .85, .34, .24, .1365, .18),
     "rattletick": (.38, .46 * 1.10, .34, .24, .1365 * .90, .17),
+    "capybara": (.25, .48, .32, .24, .1365, .20),
+    "trident": (.46, .48, .42, .26, .1365, .35),
+    "solarsentinel": (.38, .36, .34, .24, .1365, .17),
+    "luminousoracle": (.38, .36 * .82, .34, .24, .1365, .17),
+    "celestialarcher": (.38, .36 * .85, .34, .24, .1365, .20),
+    "justiciar": (.38, .46 * 1.10, .34, .24, .1365, .22),
 }
 # +Y up and +Z forward in TBG, +Z up and -Y forward in Blender.
 TO_BLENDER = Matrix(((1, 0, 0, 0), (0, 0, -1, 0), (0, 1, 0, 0), (0, 0, 0, 1)))
@@ -139,11 +162,18 @@ def rest_positions(unit, *, production=False, tier=0, branch=0):
     offsets = dict(zip(NAMES, local, strict=True))
     offsets.update(dict.fromkeys(EXTENDED, (0,0,0)))
     offsets.update(REST_OVERRIDES.get(unit, {}))
+    parents = parents_for(unit)
     world = {}
-    for name, parent in parents_for(unit).items():
-        offset = Vector(offsets[name])
-        world[name] = offset if parent is None else world[parent] + offset
-    return world
+
+    def resolve(name):
+        if name not in world:
+            parent = parents[name]
+            offset = Vector(offsets[name])
+            world[name] = offset if parent is None else resolve(parent) + offset
+        return world[name]
+
+    # Weapon-mounted springs can refer to a socket later in the export order.
+    return {name: resolve(name) for name in parents}
 
 
 def armature(unit, rest):
@@ -154,12 +184,14 @@ def armature(unit, rest):
     obj.show_in_front = True
     obj.select_set(True)
     bpy.ops.object.mode_set(mode="EDIT")
-    for name, parent in parents_for(unit).items():
+    parents = parents_for(unit)
+    for name in parents:
         bone = data.edit_bones.new(name)
         bone.head = TO_BLENDER @ rest[name]
         bone.tail = bone.head + Vector((0, 0, 0.066 if INDEX[name] < 17 else 0.041))
+    for name, parent in parents.items():
         if parent is not None:
-            bone.parent = data.edit_bones[parent]
+            data.edit_bones[name].parent = data.edit_bones[parent]
     bpy.ops.object.mode_set(mode="OBJECT")
     obj.select_set(False)
     obj["Rig source"] = "TBG art/rig.rs and champion body plan"

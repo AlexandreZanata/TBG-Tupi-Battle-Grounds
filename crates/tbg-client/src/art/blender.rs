@@ -45,6 +45,15 @@ const DEMOLISHER: &[u8] = include_bytes!("../../assets/champions/blender/demolis
 const CROWCALLER: &[u8] = include_bytes!("../../assets/champions/blender/crowcaller.tbgmesh");
 const TRIGGER: &[u8] = include_bytes!("../../assets/champions/blender/trigger.tbgmesh");
 const RATTLE_TICK: &[u8] = include_bytes!("../../assets/champions/blender/rattletick.tbgmesh");
+const CAPYBARA: &[u8] = include_bytes!("../../assets/champions/blender/capybara.tbgmesh");
+const TRIDENT: &[u8] = include_bytes!("../../assets/champions/blender/trident.tbgmesh");
+const SOLAR_SENTINEL: &[u8] =
+    include_bytes!("../../assets/champions/blender/solarsentinel.tbgmesh");
+const LUMINOUS_ORACLE: &[u8] =
+    include_bytes!("../../assets/champions/blender/luminousoracle.tbgmesh");
+const CELESTIAL_ARCHER: &[u8] =
+    include_bytes!("../../assets/champions/blender/celestialarcher.tbgmesh");
+const JUSTICIAR: &[u8] = include_bytes!("../../assets/champions/blender/justiciar.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -94,6 +103,12 @@ pub(super) fn form(
         UnitKind::Crowcaller => CROWCALLER,
         UnitKind::Trigger => TRIGGER,
         UnitKind::RattleTick => RATTLE_TICK,
+        UnitKind::Capybara => CAPYBARA,
+        UnitKind::Trident => TRIDENT,
+        UnitKind::SolarSentinel => SOLAR_SENTINEL,
+        UnitKind::LuminousOracle => LUMINOUS_ORACLE,
+        UnitKind::CelestialArcher => CELESTIAL_ARCHER,
+        UnitKind::Justiciar => JUSTICIAR,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -312,6 +327,12 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::Crowcaller,
         UnitKind::Trigger,
         UnitKind::RattleTick,
+        UnitKind::Capybara,
+        UnitKind::Trident,
+        UnitKind::SolarSentinel,
+        UnitKind::LuminousOracle,
+        UnitKind::CelestialArcher,
+        UnitKind::Justiciar,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -325,7 +346,7 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             assert!(form.meshes[body.index()].is_some());
             assert!(std::ptr::eq(form.meshes(true), form.meshes(false)));
             let grip = match kind {
-                UnitKind::Archer => Node::Prop(Socket::OffhandL),
+                UnitKind::Archer | UnitKind::CelestialArcher => Node::Prop(Socket::OffhandL),
                 UnitKind::Rotcap | UnitKind::Bonehorn | UnitKind::Acidmaw => {
                     Node::Body(rig::Joint::Head)
                 }
@@ -337,7 +358,9 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 | UnitKind::Oilpress
                 | UnitKind::Leechroot
                 | UnitKind::CargoCrab
-                | UnitKind::Demolisher => Node::Body(rig::Joint::HandR),
+                | UnitKind::Demolisher
+                | UnitKind::Capybara
+                | UnitKind::Justiciar => Node::Body(rig::Joint::HandR),
                 _ => Node::Prop(Socket::WeaponR),
             };
             assert!(form.meshes[grip.index()].is_some());
@@ -350,6 +373,11 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
             {
                 assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
             }
+            if kind == UnitKind::LuminousOracle {
+                let ring = Node::Secondary(rig::Spring::HeadGear).index();
+                assert!(form.meshes[ring].is_some());
+                assert!(form.glow[ring].is_some());
+            }
             if kind == UnitKind::Shatterback {
                 for index in 0..4 {
                     assert!(shatter_plate(tier, branch, index, &spec.plan).is_some());
@@ -359,12 +387,15 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 assert!(form.meshes[Node::Prop(Socket::Nock).index()].is_some());
             }
             let additional: &[_] = match kind {
-                UnitKind::Archer => &[
+                UnitKind::Archer | UnitKind::CelestialArcher => &[
                     Socket::OffhandL,
                     Socket::StringTop,
                     Socket::StringBottom,
                     Socket::Nock,
                 ],
+                UnitKind::SolarSentinel => {
+                    &[Socket::OffhandL, Socket::StringTop, Socket::StringBottom]
+                }
                 UnitKind::Crowcaller => &[Socket::Back, Socket::Nock],
                 UnitKind::Trigger => &[Socket::OffhandL, Socket::Back],
                 UnitKind::RattleTick => &[Socket::Back, Socket::StringTop, Socket::Nock],

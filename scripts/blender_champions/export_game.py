@@ -17,15 +17,19 @@ from bloomkeeper import bloomkeeper
 from bombard import bombard
 from bonehorn import bonehorn
 from bulwark import bulwark
+from capybara import capybara
 from cargocrab import cargocrab
+from celestialarcher import celestialarcher
 from crowcaller import crowcaller
 from demolisher import demolisher
 from drumguard import drumguard
 from farwatch import farwatch
 from geometry import Model
 from hexer import hexer
+from justiciar import justiciar
 from leechroot import leechroot
 from longaxe import longaxe
+from luminousoracle import luminousoracle
 from nester import nester
 from oldfinn import oldfinn
 from oilpress import oilpress
@@ -41,7 +45,9 @@ from shatterback import plate as shatter_plate, shatterback
 from shieldbearer import shieldbearer
 from siegewalker import siegewalker
 from smuggler import smuggler
+from solarsentinel import solarsentinel
 from trigger import trigger
+from trident import trident
 from whisperer import whisperer
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
@@ -80,6 +86,12 @@ GAME_UNITS = {
     "crowcaller": crowcaller,
     "trigger": trigger,
     "rattletick": rattletick,
+    "capybara": capybara,
+    "trident": trident,
+    "solarsentinel": solarsentinel,
+    "luminousoracle": luminousoracle,
+    "celestialarcher": celestialarcher,
+    "justiciar": justiciar,
 }
 
 

@@ -1485,3 +1485,32 @@ pending. Public download compatibility uses the actual running server.
 - Queue the Blender loader test from the modeling guide under the
   shared lock at consolidation. Windows and desktop web full-frame
   and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Capybara, Trident, Solar Sentinel, Luminous Oracle, Celestial Archer and Justiciar
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Both seats share the
+  meshes and materials. The feet circle carries allegiance.
+- Cover Capybara's moving belly, rolling steps and palm bump,
+  Trident's fixed two-hand grip, hinged jaw and dorsal fin, and
+  Solar Sentinel's spear thrust and independently hinged vanes.
+- Cover Luminous Oracle's rotating staff halo and per-form
+  release heights, Celestial Archer's bow draw, nock and separate
+  wings, and Justiciar's moving core, palm release and two-palm
+  stamp. Solar Sentinel and Celestial Archer check all 26 rig nodes.
+- Blender checked all thirty forms for the native equipment grips,
+  strike and release anchors and independently moving parts.
+  Static inspection covered 190 TBG4 and thirty TBG5 payloads for
+  valid groups, indices and reserved allegiance colors.
+- The local Linux Vulkan client loaded all thirty forms at the
+  exported triangle counts. Twelve Laboratory captures covered Base
+  and one advanced form per champion. At 1280×800 the toolbar can
+  overlap the upper halo, bow or staff at the default zoom.
+- Live Training recorded 293 damage for Capybara, 405 for Trident,
+  210 for Solar Sentinel, 75 for Luminous Oracle, 400 for
+  Celestial Archer and 240 for Justiciar. The native diagnostic
+  gallery completed all five forms of Trident, Solar Sentinel,
+  Luminous Oracle and Celestial Archer.
+- Queue the Blender loader test from the modeling guide under the
+  shared lock at consolidation. Windows and desktop web full-frame
+  and motion comparisons remain pending.

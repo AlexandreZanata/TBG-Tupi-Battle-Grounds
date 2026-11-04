@@ -596,3 +596,85 @@ for unit in whisperer bulwark demolisher crowcaller trigger rattletick; do
   convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
 done
 ```
+
+## Capybara and Trident
+
+**Capybara** has a broad snout, rounded ears, exposed incisors and
+a leaf collar. Stone Belly adds overlapping granite panels and
+stone cuffs, then moss fronds and shoulder crests. Swamp Wave
+adds teal willow weave and a reed basket, then wetland flowers
+and a wrapped hip belt. The belly follows the Chest-mounted
+Tabard, and the HandR paw reaches `(0, 0, 0.12)`. The five forms
+use 3,504–4,788 triangles and 310,975 bytes.
+
+**Trident** has a countershaded shark body, gill lines, separate
+jaw and swept dorsal fin. Ocean Fury adds ivory shoulder plates,
+then ivory shin guards, a higher fin and an amber coupling.
+Bloody Tide adds a red reef harness and broader copper fork, then
+copper shoulders and reverse hooks. The trident keeps its two
+grips at WeaponR-local Z 0 and 0.18, and its central tine ends
+at `(0, 0, 1.12)`. The five forms use 3,830–4,322 triangles and
+301,376 bytes.
+
+![Capybara modular Blender lineup](../media/blender-champions/capybara.webp)
+
+![Trident modular Blender lineup](../media/blender-champions/trident.webp)
+
+## Solar Sentinel and Luminous Oracle
+
+**Solar Sentinel** carries a sun-disk shield and a long spear.
+Light Fortress reinforces the shield with ivory spurs, then adds
+a crest and overlapping shoulder lamellae. Group Protection
+adds teal shield vanes, steel shoulder wings and, in B2, paired
+halo winglets. The shield vanes keep their two OffhandL pivots
+at X -0.15 and 0.15. The WeaponR spear ends at `(0, 0, 0.73)`.
+The five forms use 3,516–3,628 triangles and 290,699 bytes.
+
+**Luminous Oracle** wears a fitted empty hood and a layered robe.
+Restoring Light adds saffron cloth and ivory rays around the staff
+ring, then raises the ring and adds a golden finial. Sacred Aura
+adds lagoon cloth and split shoulder shells, then paired ivory
+staff prongs and a second shoulder layer. HeadGear follows
+WeaponR at Y 0.55. The release stays at WeaponR-local
+`(0, 0.55, 0.08)`, or `(0, 0.65, 0.08)` in A2. The five forms
+use 2,938–3,030 triangles and 217,440 bytes.
+
+![Solar Sentinel modular Blender lineup](../media/blender-champions/solarsentinel.webp)
+
+![Luminous Oracle modular Blender lineup](../media/blender-champions/luminousoracle.webp)
+
+## Celestial Archer and Justiciar
+
+**Celestial Archer** has rigid feather wings with shoulder hinges
+set into the cuirass and a gilded angular bow. Divine Precision adds ivory wrist guards
+and longer gold limbs, then a bow-hand ring and long flight feathers.
+Celestial Mark adds amethyst wrist blades and forked bow blades,
+then three raised prongs and longer plum wings. Both string halves
+and the nocked arrow retain their native joints. The tip pivots
+stay at Z -0.10, and the nocked arrow is 0.42 long. The five forms
+use 3,088–3,382 triangles and 228,990 bytes.
+
+**Justiciar** is a segmented stone construct with a moving chest
+core and an aperture in each palm. Celestial Fury adds ember stone,
+copper pauldron flanges and lit vents, then an open bronze crown.
+Judgment adds obsidian gauntlet forks edged with violet crystal,
+then shoulder obelisks. The HandR muzzle remains `(0, 0, 0.10)`.
+The five forms use 5,026–5,420 triangles and 717,685 bytes.
+
+![Celestial Archer modular Blender lineup](../media/blender-champions/celestialarcher.webp)
+
+![Justiciar modular Blender lineup](../media/blender-champions/justiciar.webp)
+
+Solar Sentinel and Celestial Archer use TBG5 for their extended
+socket positions. The other four use TBG4. The Trident studio pose
+rolls the fork around the shaft so all three blades remain visible.
+Both hands stay on the kit grips. Reproduce the lineups from the
+repository root.
+
+```sh
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- capybara trident solarsentinel luminousoracle celestialarcher justiciar
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- capybara trident solarsentinel luminousoracle celestialarcher justiciar
+for unit in capybara trident solarsentinel luminousoracle celestialarcher justiciar; do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```
