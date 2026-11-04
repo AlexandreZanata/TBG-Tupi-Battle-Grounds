@@ -1548,3 +1548,31 @@ pending. Public download compatibility uses the actual running server.
 - Queue the Blender loader test from the modeling guide under the
   shared lock at consolidation. Windows and desktop web full-frame
   and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Spinehurler through Blastbeetle
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. BattleLine and Evolution swaps follow each
+  champion's existing local completion availability. Both seats
+  use the same meshes and materials. The feet circle carries
+  allegiance.
+- Cover Spinehurler's removable needle, Mire Tender's bowl and
+  ladle, Gorgehowl's resonator, Sunlancer's two-hand lance,
+  Eclipse Dancer's twin blades and Starbreaker's two-hand maul.
+- Cover Dawnmender's two-hand lantern and release lens,
+  Prismancer's held crystal, and the separate auxiliary legs
+  and weapon strikes of Leafcutter and Blastbeetle. Both insects
+  check all 26 rig nodes.
+- Blender checked the fifty forms for strike and release
+  positions, hand placement and animated sockets. Static
+  inspection covered 275 TBG4 and 45 TBG5 payloads for group
+  layout, indices and reserved allegiance colors.
+- The installed Linux Vulkan client loaded the fifty new forms at
+  their exported counts. Twenty Laboratory captures covered ten Base
+  poses, eight Evolution attack clips and two Evolution walk clips.
+  At 1280×800 the toolbar overlaps some tall weapons and crests
+  at the default zoom.
+- The scoped motion evidence covers the Laboratory. Queue local
+  match observations and the Blender loader test from the modeling
+  guide under the shared lock at consolidation. Windows and desktop
+  web full-frame and motion comparisons remain pending.

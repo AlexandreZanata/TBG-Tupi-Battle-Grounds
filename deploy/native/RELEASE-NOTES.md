@@ -30,6 +30,9 @@ Jawguard, Mantis, Hornet, Weaver, Pyre Warden and Drillnest complete
 the main roster's modular figures. The local completion roster gains
 Gravecutter, Lastlight Cantor, Cragclaw and Hushfang with authored
 weapons, armor and distinct Evolution equipment.
+The local completion pool also gains authored figures for Spinehurler,
+Mire Tender, Gorgehowl, Sunlancer, Eclipse Dancer, Starbreaker,
+Dawnmender, Prismancer, Leafcutter and Blastbeetle.
 Protocol 40 and ruleset 16 are unchanged.
 
 TBG 0.1.4-colossus.6 — Native Android landscape candidate

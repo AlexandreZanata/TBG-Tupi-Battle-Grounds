@@ -65,6 +65,17 @@ const LASTLIGHT_CANTOR: &[u8] =
     include_bytes!("../../assets/champions/blender/lastlightcantor.tbgmesh");
 const CRAGCLAW: &[u8] = include_bytes!("../../assets/champions/blender/cragclaw.tbgmesh");
 const HUSHFANG: &[u8] = include_bytes!("../../assets/champions/blender/hushfang.tbgmesh");
+const SPINEHURLER: &[u8] = include_bytes!("../../assets/champions/blender/spinehurler.tbgmesh");
+const MIRE_TENDER: &[u8] = include_bytes!("../../assets/champions/blender/miretender.tbgmesh");
+const GORGEHOWL: &[u8] = include_bytes!("../../assets/champions/blender/gorgehowl.tbgmesh");
+const SUNLANCER: &[u8] = include_bytes!("../../assets/champions/blender/sunlancer.tbgmesh");
+const ECLIPSE_DANCER: &[u8] =
+    include_bytes!("../../assets/champions/blender/eclipsedancer.tbgmesh");
+const STARBREAKER: &[u8] = include_bytes!("../../assets/champions/blender/starbreaker.tbgmesh");
+const DAWNMENDER: &[u8] = include_bytes!("../../assets/champions/blender/dawnmender.tbgmesh");
+const PRISMANCER: &[u8] = include_bytes!("../../assets/champions/blender/prismancer.tbgmesh");
+const LEAFCUTTER: &[u8] = include_bytes!("../../assets/champions/blender/leafcutter.tbgmesh");
+const BLASTBEETLE: &[u8] = include_bytes!("../../assets/champions/blender/blastbeetle.tbgmesh");
 const SHATTER_PLATES: [&[u8]; 4] = [
     include_bytes!("../../assets/champions/blender/shatterback-plate-0.tbgmesh"),
     include_bytes!("../../assets/champions/blender/shatterback-plate-1.tbgmesh"),
@@ -130,6 +141,16 @@ pub(super) fn form(
         UnitKind::LastlightCantor => LASTLIGHT_CANTOR,
         UnitKind::Cragclaw => CRAGCLAW,
         UnitKind::Hushfang => HUSHFANG,
+        UnitKind::Spinehurler => SPINEHURLER,
+        UnitKind::MireTender => MIRE_TENDER,
+        UnitKind::Gorgehowl => GORGEHOWL,
+        UnitKind::Sunlancer => SUNLANCER,
+        UnitKind::EclipseDancer => ECLIPSE_DANCER,
+        UnitKind::Starbreaker => STARBREAKER,
+        UnitKind::Dawnmender => DAWNMENDER,
+        UnitKind::Prismancer => PRISMANCER,
+        UnitKind::Leafcutter => LEAFCUTTER,
+        UnitKind::Blastbeetle => BLASTBEETLE,
         _ => return None,
     };
     let row = FORMS.iter().position(|form| *form == (tier, branch))?;
@@ -364,6 +385,16 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
         UnitKind::LastlightCantor,
         UnitKind::Cragclaw,
         UnitKind::Hushfang,
+        UnitKind::Spinehurler,
+        UnitKind::MireTender,
+        UnitKind::Gorgehowl,
+        UnitKind::Sunlancer,
+        UnitKind::EclipseDancer,
+        UnitKind::Starbreaker,
+        UnitKind::Dawnmender,
+        UnitKind::Prismancer,
+        UnitKind::Leafcutter,
+        UnitKind::Blastbeetle,
     ] {
         let kit = super::kits::kit(kind).unwrap();
         for (tier, branch) in FORMS {
@@ -384,6 +415,7 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 | UnitKind::Jawguard
                 | UnitKind::Hushfang => Node::Body(rig::Joint::Head),
                 UnitKind::Ravager => Node::Body(rig::Joint::ForearmR),
+                UnitKind::Gorgehowl => Node::Body(rig::Joint::Chest),
                 UnitKind::Whisperer => Node::Prop(Socket::Back),
                 UnitKind::Sawbot
                 | UnitKind::Rampart
@@ -405,6 +437,10 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 || (kind == UnitKind::Puppetmaster && tier > 0 && branch == 1)
             {
                 assert!(form.meshes[Node::Prop(Socket::OffhandL).index()].is_some());
+            }
+            if kind == UnitKind::Spinehurler {
+                let quill = Node::Secondary(rig::Spring::HeadGear).index();
+                assert!(form.meshes[quill].is_some());
             }
             if kind == UnitKind::LuminousOracle {
                 let ring = Node::Secondary(rig::Spring::HeadGear).index();
@@ -432,6 +468,20 @@ fn blender_assets_cover_all_forms_and_keep_animated_weapon_sockets() {
                 UnitKind::Jawguard | UnitKind::Mantis | UnitKind::LastlightCantor => {
                     &[Socket::OffhandL]
                 }
+                UnitKind::MireTender | UnitKind::EclipseDancer => &[Socket::OffhandL],
+                UnitKind::Leafcutter => &[
+                    Socket::Back,
+                    Socket::StringTop,
+                    Socket::StringBottom,
+                    Socket::Nock,
+                ],
+                UnitKind::Blastbeetle => &[
+                    Socket::OffhandL,
+                    Socket::Back,
+                    Socket::StringTop,
+                    Socket::StringBottom,
+                    Socket::Nock,
+                ],
                 UnitKind::Hornet => &super::kits::hornet::hose::SOCKETS,
                 UnitKind::Crowcaller => &[Socket::Back, Socket::Nock],
                 UnitKind::Trigger => &[Socket::OffhandL, Socket::Back],

@@ -59,6 +59,16 @@ from gravecutter import gravecutter
 from lastlightcantor import lastlightcantor
 from cragclaw import cragclaw
 from hushfang import hushfang
+from spinehurler import spinehurler
+from miretender import miretender
+from gorgehowl import gorgehowl
+from sunlancer import sunlancer
+from eclipsedancer import eclipsedancer
+from starbreaker import starbreaker
+from dawnmender import dawnmender
+from prismancer import prismancer
+from leafcutter import leafcutter
+from blastbeetle import blastbeetle
 
 OUTPUT = HERE.parents[1] / "crates/tbg-client/assets/champions/blender"
 OWNERSHIP = {(63, 169, 245), (242, 84, 91)}
@@ -112,6 +122,16 @@ GAME_UNITS = {
     "lastlightcantor": lastlightcantor,
     "cragclaw": cragclaw,
     "hushfang": hushfang,
+    "spinehurler": spinehurler,
+    "miretender": miretender,
+    "gorgehowl": gorgehowl,
+    "sunlancer": sunlancer,
+    "eclipsedancer": eclipsedancer,
+    "starbreaker": starbreaker,
+    "dawnmender": dawnmender,
+    "prismancer": prismancer,
+    "leafcutter": leafcutter,
+    "blastbeetle": blastbeetle,
 }
 
 

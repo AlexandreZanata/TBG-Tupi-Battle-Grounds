@@ -795,3 +795,122 @@ for unit do
   convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
 done
 ```
+
+## Spinehurler, Mire Tender and Gorgehowl
+
+**Spinehurler** carries five dorsal quills and a loaded wrist needle.
+Keen Needle adds ivory shoulder plates and a longer needle.
+Spine Lancer adds a swept forehead quill. Barbed Fan adds a teal
+quill rack with copper clips. Needle Phalanx adds rear rack vanes.
+HeadGear follows WeaponR so the kit can hide the loaded needle at
+release. The needle reaches WeaponR-local `(0, 0, 0.25)`. The five
+forms use 2,116–2,328 triangles and 167,591 bytes.
+
+**Mire Tender** has a woven hat, clay bowl and hand-carved ladle.
+Brothkeeper adds ochre vestments and belt flasks. Deep Remedy
+adds reinforced bowl handles and a drying leaf on the hat.
+Reed Tender adds a green reed collar. Mire Sage adds marsh seed
+heads and woven bowl loops. The bowl stays on OffhandL, and the
+ladle reaches WeaponR-local `(0, 0, 0.25)`. The five forms use
+2,786–3,314 triangles and 226,112 bytes.
+
+**Gorgehowl** has a ribbed torso chamber and spiral shell horns.
+Deep Resonator adds warm clay and ivory amplifiers. Quietbreaker
+raises the rear amplifier spikes. Split Echo adds blue-green
+glazed side pipes. Chasm Voice adds fins at the outlets. The
+main outlet reaches the Chest-local strike at `(0, 0, 0.30)`.
+The five forms use 2,514–2,630 triangles and 179,896 bytes.
+
+![Spinehurler modular Blender lineup](../media/blender-champions/spinehurler.webp)
+
+![Mire Tender modular Blender lineup](../media/blender-champions/miretender.webp)
+
+![Gorgehowl modular Blender lineup](../media/blender-champions/gorgehowl.webp)
+
+## Sunlancer, Eclipse Dancer and Starbreaker
+
+**Sunlancer** has an open cavalry helmet, swept plume and diamond
+lance. Dawn Point adds saffron armor and a wider blade. Sun Pact
+adds shoulder lamellae. Ember Lance adds indigo cloth and a charged
+annulus around the shaft. Daybreak Oath adds flanking spark tips.
+The shaft covers the WeaponR strike reference at Z 0.30, and its
+wrapped support grip accommodates the idle Z 0.20 grip and the
+forward thrust blend. The five forms use 2,178–2,556 triangles
+and 166,980 bytes.
+
+**Eclipse Dancer** wears a layered skirt and carries two separate
+blades. Sun Step adds coral silk and a gold fork on the primary
+sword. Zenith Blade widens the fork and raises the diadem.
+Moon Step adds indigo silk and a violet crescent on the offhand.
+Midnight Waltz widens the crescent and raises the diadem. Both
+blades pass through local Z 0.30. The five forms use 2,486–2,518
+triangles and 179,332 bytes.
+
+**Starbreaker** wears fitted ceramic plates and a closed star
+helm. Starmaul adds ivory shoulders and a wider maul.
+Constellation Breaker adds raised edges and a crown crest.
+Hammer Dance adds cobalt and a caged nova crystal. Nova Forge
+adds a larger crystal and cage wings. The shaft keeps the kit's
+WeaponR reference at Z 0.30 and the idle support grip at Z 0.13.
+The five forms use 2,250–2,500 triangles and 249,958 bytes.
+
+![Sunlancer modular Blender lineup](../media/blender-champions/sunlancer.webp)
+
+![Eclipse Dancer modular Blender lineup](../media/blender-champions/eclipsedancer.webp)
+
+![Starbreaker modular Blender lineup](../media/blender-champions/starbreaker.webp)
+
+## Dawnmender and Prismancer
+
+**Dawnmender** has a fitted hood and a lantern held between both
+hands. Calm Lantern adds peach cloth and a larger solar frame.
+Sanctuary Light adds a tall finial. Battle Beacon adds teal
+shoulders and a second ring. Dawn Chorus adds luminous petals
+and a halo. The left grip is 0.28 units from WeaponR in Base
+and B, and 0.34 in A. The forward lens reaches `(0, 0, 0.25)`.
+The five forms use 3,174–3,898 triangles and 247,232 bytes.
+
+**Prismancer** carries a faceted crystal in an open cage. Keen
+Focus adds a porcelain bracer and a larger lilac crystal.
+Crystal Needle adds tapered focusing rails. Open Prism adds an
+ice-blue shroud. Triune Prism adds two smaller crystals. The
+central prism ends at WeaponR-local `(0, 0, 0.25)`. The five forms
+use 2,132–2,518 triangles and 173,611 bytes.
+
+![Dawnmender modular Blender lineup](../media/blender-champions/dawnmender.webp)
+
+![Prismancer modular Blender lineup](../media/blender-champions/prismancer.webp)
+
+## Leafcutter and Blastbeetle
+
+**Leafcutter** has six articulated legs, curved mandibles and a
+serrated wrist blade. Keen Mandible adds ivory cuticle armor.
+Deep Serration adds a fifth tooth and central crest. Swift Saw
+adds amber hip plates and teeth. Amber Reaper adds a reverse
+hook. The blade passes through WeaponR-local Z 0.30. The five
+forms use 2,238–2,278 triangles and 160,248 bytes.
+
+**Blastbeetle** has an exposed abdomen pressure sac and twin
+wrist spikes. Tight Carapace adds an ivory shell and thorax horn.
+Amber Heart adds a heavy ring around the sac. Split Shell adds
+coral vanes. Final Flash adds a luminous ring and side spark
+prongs. Both spikes reach local Z 0.30. The five forms use
+2,710–3,088 triangles and 201,334 bytes.
+
+![Leafcutter modular Blender lineup](../media/blender-champions/leafcutter.webp)
+
+![Blastbeetle modular Blender lineup](../media/blender-champions/blastbeetle.webp)
+
+The ten figures follow the local completion pool. Leafcutter and
+Blastbeetle use TBG5 for their auxiliary leg chains. The other
+eight use TBG4. Reproduce all fifty forms and the studio lineups
+from the repository root.
+
+```sh
+set -- spinehurler miretender gorgehowl sunlancer eclipsedancer starbreaker dawnmender prismancer leafcutter blastbeetle
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/export_game.py -- "$@"
+blender -b -t 2 --python-exit-code 1 --python scripts/blender_champions/render_lineup.py -- "$@"
+for unit do
+  convert "scripts/exports/renders/$unit-lineup.png" -quality 88 "docs/media/blender-champions/$unit.webp"
+done
+```

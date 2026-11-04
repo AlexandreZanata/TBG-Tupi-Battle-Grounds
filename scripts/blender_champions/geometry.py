@@ -104,6 +104,23 @@ SWATCH = {
     "crag_fissure": (45, 122, 122, 0.10, 0.66),
     "fang_warm": (133, 85, 55, 0.0, 0.83),
     "fang_blue": (59, 85, 116, 0.02, 0.81),
+    "spine_slate": (70, 91, 95, 0.08, 0.73),
+    "mire_amber": (161, 111, 57, 0.06, 0.76),
+    "mire_reed": (54, 116, 98, 0.0, 0.78),
+    "howl_clay": (145, 86, 57, 0.08, 0.80),
+    "howl_glaze": (43, 105, 125, 0.12, 0.66),
+    "lancer_saffron": (181, 120, 48, 0.14, 0.74),
+    "lancer_indigo": (67, 77, 134, 0.13, 0.72),
+    "eclipse_sunset": (168, 75, 67, 0.08, 0.74),
+    "eclipse_moon": (71, 59, 118, 0.12, 0.69),
+    "star_ceramic": (178, 183, 180, 0.17, 0.62),
+    "star_cobalt": (52, 82, 132, 0.17, 0.63),
+    "dawn_peach": (214, 148, 100, 0.0, 0.78),
+    "dawn_teal": (53, 131, 123, 0.08, 0.72),
+    "prism_iris": (113, 79, 142, 0.08, 0.70),
+    "prism_ice": (67, 121, 154, 0.10, 0.68),
+    "leaf_ant": (63, 102, 67, 0.07, 0.70),
+    "beetle_pumpkin": (179, 100, 48, 0.11, 0.67),
 }
 GLOW_SWATCHES = {"soul", "ritual", "forge", "sap", "venom", "blood_glow", "leech_pulse", "bell_eye"}
 

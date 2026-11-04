@@ -33,6 +33,9 @@ STUDIO_ANGLES = {
     "jawguard": 27, "mantis": 35, "hornet": 24, "weaver": 34,
     "pyrewarden": -38, "drillnest": 36, "gravecutter": -24,
     "lastlightcantor": 24, "cragclaw": -22, "hushfang": 47,
+    "spinehurler": -28, "miretender": -19, "gorgehowl": 17, "sunlancer": -20,
+    "eclipsedancer": 20, "starbreaker": 23, "dawnmender": 18, "prismancer": -23,
+    "leafcutter": 36, "blastbeetle": -43,
 }
 INSECT_AND_PREVIEW_FRAMING = {
     "jawguard": (1.44,7.58,595,.62), "mantis": (1.32,7.10,665,.74),
@@ -40,6 +43,20 @@ INSECT_AND_PREVIEW_FRAMING = {
     "pyrewarden": (1.46,7.86,665,.76), "drillnest": (1.52,8.05,540,.52),
     "gravecutter": (1.29,6.84,640,.71), "lastlightcantor": (1.32,7.05,695,.75),
     "cragclaw": (1.35,7.15,625,.71), "hushfang": (1.62,8.80,520,.42),
+}
+COMPLETION_FRAMING = {
+    "spinehurler": (1.38,7.30,685,.77), "miretender": (1.34,7.10,595,.64),
+    "gorgehowl": (1.37,7.24,665,.74), "sunlancer": (1.53,8.00,730,.89),
+    "eclipsedancer": (1.43,7.55,665,.74), "starbreaker": (1.51,7.90,675,.77),
+    "dawnmender": (1.43,7.52,655,.75), "prismancer": (1.38,7.35,665,.74),
+    "leafcutter": (1.44,7.55,630,.72), "blastbeetle": (1.48,7.81,630,.73),
+}
+COMPLETION_CARRY = {
+    "miretender": (("R",(-.154,.192,.211),-12,-9),("L",(.165,.147,.194),0,0)),
+    "eclipsedancer": (("R",(-.155,.180,.202),-48,-17),("L",(.160,.154,.214),-33,21)),
+    "prismancer": (("R",(-.165,.173,.201),-8,-8),("L",(.122,.159,.196),0,0)),
+    "leafcutter": (("R",(-.169,.167,.210),-29,24),),
+    "blastbeetle": (("R",(-.151,.177,.209),-34,-13),("L",(.155,.163,.208),-22,17)),
 }
 RIGHT_CARRY = {
     "siegewalker": (21, -133, -18),
@@ -187,8 +204,36 @@ def completion_guard(unit,joint,rest,default):
     return default
 
 
+def latest_completion_pose(unit,joint,rest,tier,branch,default):
+    if unit=="sunlancer":
+        return two_hand_carry(joint,rest,(0,.12,.13),(0,0,.20),-59,yaw=6)
+    if unit=="starbreaker":
+        return two_hand_carry(joint,rest,(0,.17,.10),(0,0,.13),-22,yaw=24)
+    if unit=="spinehurler":
+        at = TO_BLENDER @ (rest["Chest"]+Vector((-.176,.158,.174)))
+        turn = Matrix.Rotation(radians(-55),4,"X")
+        if joint in arm_nodes("R"):
+            return reach_arm(joint,rest,"R",at,turn)
+        if joint=="HeadGear":
+            return Matrix.Translation(at) @ turn
+    if unit=="dawnmender":
+        x = .17 if tier and branch==0 else .14
+        for side,sign in (("R",-1),("L",1)):
+            if joint in arm_nodes(side):
+                grip=TO_BLENDER @ (rest["Chest"]+Vector((sign*x,.171,.250)))
+                return reach_arm(joint,rest,side,grip,Matrix.Identity(4))
+    for side,local,pitch_angle,yaw in COMPLETION_CARRY.get(unit,()):
+        if joint in arm_nodes(side):
+            grip=TO_BLENDER @ (rest["Chest"]+Vector(local))
+            turn=Matrix.Rotation(radians(yaw),4,"Z") @ Matrix.Rotation(radians(pitch_angle),4,"X")
+            return reach_arm(joint,rest,side,grip,turn)
+    return default
+
+
 def studio_pose(unit, joint, rest, tier, branch):
     transform = Matrix.Translation(TO_BLENDER @ rest[joint])
+    if unit in COMPLETION_FRAMING:
+        return latest_completion_pose(unit,joint,rest,tier,branch,transform)
     if unit == "hornet":
         return hornet_pose(joint,rest,transform)
     if unit == "pyrewarden":
@@ -319,6 +364,8 @@ def render(unit, angle):
     }.get(unit,1.27)
     if unit in INSECT_AND_PREVIEW_FRAMING:
         spacing = INSECT_AND_PREVIEW_FRAMING[unit][0]
+    if unit in COMPLETION_FRAMING:
+        spacing = COMPLETION_FRAMING[unit][0]
     for column, (label, tier, branch) in enumerate(FORMS):
         group = collection(label, scene.collection)
         anchor = bpy.data.objects.new(label, None)
@@ -373,6 +420,8 @@ def render(unit, angle):
         }[unit]
     if unit in INSECT_AND_PREVIEW_FRAMING:
         _,scale,height,aim = INSECT_AND_PREVIEW_FRAMING[unit]
+    if unit in COMPLETION_FRAMING:
+        _,scale,height,aim = COMPLETION_FRAMING[unit]
     studio((0,-7.8,2.25),(0,0,aim),scale,(1920,height),OUT / f"{unit}-lineup.png")
     bpy.ops.render.render(write_still=True)
 
