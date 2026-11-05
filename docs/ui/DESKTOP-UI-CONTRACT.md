@@ -1280,3 +1280,406 @@ Desktop/390 x 844 PT/EN landing observations are in
 [the media report](../evidence/landing-android-beta-20261103.md). This adds no
 in-game parity evidence: Windows pixel/motion and physical ARM64/16 KB remain
 pending. Public download compatibility uses the actual running server.
+
+### 2026-11-04 — Blender Archer and Bone Brute
+
+- Replace all five figures for both champions in the shared FigureLibrary.
+  Cover the Laboratory, BattleLine, Evolution swap and both seats. The
+  contract matrix lists motion and the Archer Release and Bone Brute Strike
+  samples.
+- Preserve the rig, authoritative timing, and seat-independent figure
+  materials. Allegiance stays on the feet circle. Linux is the reference.
+- Linux scoped evidence covers Base and B2 in the Laboratory and an
+  authoritative Archer-versus-Bone Brute training engagement. The combat
+  recording captured 11 attack starts, 10 hits and one death.
+- Windows and desktop web comparison remain pending.
+
+### 2026-11-04 — Blender Shieldbearer and Hexer local preview
+
+- Cover Base and four Evolution forms for each champion in the shared
+  FigureLibrary, Laboratory and BattleLine. Both seats use the same
+  figure and its equipment. The feet circle identifies allegiance.
+- Keep the existing shield guard, sword strike at 0.30 s and staff cast
+  at 0.22 s. The matrix covers spawn, idle, walk, attack, hit, death,
+  victory and Evolution swap for both champions.
+- Linux Vulkan capture covered Shieldbearer Base and A2, Hexer Base and
+  B2, and a local Practice match with both champions on both seats.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Sawbot and Bloomkeeper
+
+- Cover Base and four Evolution forms for each champion in the shared
+  FigureLibrary, Laboratory, BattleLine and Evolution swap. Both seats
+  use the same body and equipment, with allegiance on the feet circle.
+- Cover Sawbot hand spin and the 0.30 s strike. Cover Bloomkeeper's
+  healing cast with the 0.22 s release at the existing staff anchor.
+  The matrix also includes spawn, idle, walk, hit, death and victory.
+- The Linux Vulkan preview loaded all ten forms with their exported
+  triangle counts. Captures cover Sawbot Base and A2, Bloomkeeper Base
+  and B2, and a local Practice match seeded with both on both seats.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Siege Walker and Rootcaller
+
+- Cover all five forms for each champion in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Each seat uses the same
+  figure and equipment, with allegiance on the feet circle.
+- Cover the Siege Walker's 0.18 s release, breech and animated reload
+  lever. Cover the Rootcaller's 0.22 s cast at the right claw tip.
+- Linux Vulkan captured Base and one tier-two Evolution for each champion
+  in the Laboratory. The client loaded all ten meshes at their exported
+  triangle counts, including the Siege Walker's native reload lever.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Nester and Rampart
+
+- Cover all five forms for each champion in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Each seat uses the same
+  figure and equipment, with allegiance on the feet circle.
+- Cover the Nester's seed release and secondary basket motion. Cover
+  Rampart's chest-local wall guard and right-hand strike at 0.30 s.
+- Linux Vulkan captured Base and one tier-two Evolution for each champion
+  in the Laboratory. Both pairs loaded together in the Practice client.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Siege Walker face and bombard refinement
+
+- Cover the five refined faces, sights, stock and open bores in the
+  Laboratory and on the BattleLine. Use the same figure in both seats.
+- Preserve the shared rig, support grip, muzzle and breech anchors,
+  the 0.18 s release, and the native animated reload lever.
+- Blender verified all five muzzle planes and the support grip.
+  The Linux Vulkan preview loaded all five refined forms with the native
+  lever, captured Base, A1, A2 and B2 in the Laboratory, and ran local
+  Practice with Siege Walker on both seats.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Longaxe and Farwatch
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and BattleLine. Both seats share meshes and materials.
+- Keep the poleaxe impact at 0.30 s, the arbalest release at 0.18 s and
+  the existing two-hand holds. Identify allegiance with the feet circle.
+- Linux Vulkan loaded all ten meshes, captured Base and A2 for Longaxe
+  and Base and B2 for Farwatch, and recorded damage from both champions
+  in local Training encounters.
+- The standard Laboratory idle framing can crop the raised poleaxe.
+  The Blender lineup includes the full weapon.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Bombard and Rotcap
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and BattleLine. Both seats share meshes and materials.
+  Identify allegiance with the feet circle.
+- Cover Bombard's hip carry, recoil and mortar reload at the existing
+  grip and bore. Cover Rotcap's wobble, spore cast and wilt. Both
+  champions release their projectile at 0.18 s.
+- Linux Vulkan loaded all ten meshes at their Blender triangle counts.
+  The Laboratory captured Base and B2 for Bombard and Base and A2 for
+  Rotcap. In local Training, Bombard dealt 192 damage from seat A and
+  Rotcap dealt 60 damage from seat B.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Old Finn and Antidote Brewer
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and BattleLine. Both seats use the same models and gear.
+  Identify allegiance with the feet circle.
+- Cover Old Finn's fishing cast, reeling and back creel. Cover the
+  Antidote Brewer's remedy cast, double-flask B2 and back equipment.
+  Both casts keep their 0.22 s release.
+- Blender verified the release anchors and the offhand flask. Linux
+  Vulkan loaded all ten final meshes and captured Base and B2 for
+  both champions in the Laboratory. Old Finn dealt damage in Training.
+  The native motion gallery played the Antidote Brewer cast in all five
+  forms. The Training opponent applied no affliction to cleanse.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Shatterback and Blood Furnace
+
+- Cover all five forms in the shared FigureLibrary, Laboratory and
+  BattleLine. Both seats share the same meshes and materials, with
+  allegiance on the feet circle.
+- Cover Shatterback's custom neck pivot, planted paw strike and all
+  four detachable plates. Cover Blood Furnace's two-hand hammer
+  strike and the chest and weapon glow. Both strike cues stay at 0.30 s.
+- Blender verified both strike anchors and the four plate positions
+  across all five forms.
+- Static checks verified the TBG4 indices, palettes and separate
+  Chest payloads. Linux installation and combat are deferred because
+  the shared validation lock returned exit 75. The deferred check
+  covers loading all ten forms, Blood Furnace's strike and a Training
+  hit that removes a Shatterback plate.
+- Visual and motion comparison for Windows and desktop web remains pending.
+
+### 2026-11-04 — Blender Bloodweaver, Oilpress, Drumguard and Leechroot
+
+- Cover Base and all four Evolutions for each champion in the shared
+  FigureLibrary, Laboratory and BattleLine. Each seat uses the same
+  meshes and materials, with allegiance on the feet circle.
+- Cover Bloodweaver's 0.22 s spindle release and double-spindle B2,
+  Oilpress's 0.30 s two-plate slam, Drumguard's alternating strikes
+  on the hip drum, and Leechroot's 0.30 s whip strike.
+- Blender checked the spindle, pressing surfaces, drum and stick
+  placement and whip tip in all twenty forms. The binary payload
+  check covered groups, indices and reserved allegiance colors.
+- Linux installation and motion validation are deferred because the
+  shared compilation lock returned exit 75. The scoped checks cover
+  Bloodweaver, Oilpress and Leechroot in Training and Drumguard's
+  native marching and drumming clips. Windows and desktop web visual
+  and motion comparison remains pending.
+
+### 2026-11-04 — Blender Cargo Crab, Puppetmaster, Smuggler, Bonehorn, Ravager and Acidmaw
+
+- Cover all thirty forms in the shared FigureLibrary, Laboratory,
+  BattleLine and Evolution swap. The two seats share meshes and
+  materials. The feet circle carries allegiance.
+- Cover Cargo Crab's scuttle, claw strike, boarding and saddle,
+  Puppetmaster's single and double control casts, and Smuggler's
+  revolver release and cargo placement.
+- Cover Bonehorn's four-foot stride and horn strike, Ravager's
+  six-foot crawl and scythe strike, and Acidmaw's four-jaw opening,
+  throat pulse and acid release. The extended mesh headers validate
+  every custom rest position used by Ravager and Acidmaw.
+- Blender checked the seat, jaws, held equipment, muzzle planes and strike
+  tips across all thirty forms. The static pass checked 150 TBG4 and ten
+  TBG5 payloads for valid groups, indices and allegiance colors.
+- The local Linux Vulkan build loaded all thirty meshes at the exported
+  triangle counts. Laboratory captures passed for Base and one advanced
+  form per champion at 1280×800. The default zoom lets the toolbar overlap
+  the upper part of Puppetmaster B2, Smuggler B2 and Acidmaw B2.
+- Live Training recorded 80 damage for Smuggler, 300 for Bonehorn, 331
+  for Ravager and 294 for Acidmaw. The motion gallery completed both the
+  Cargo Crab and Puppetmaster Cast clips in all five forms. A live
+  passenger boarding, puppet control outcome and Smuggler cargo drop
+  remain pending.
+- At consolidation, run the Blender loader test named in the modeling
+  guide under the shared build lock. Windows and desktop web full-frame
+  and motion comparisons for the six champions remain pending.
+
+### 2026-11-04 — Blender Whisperer, Bulwark, Demolisher, Crowcaller, Trigger and Rattle & Tick
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Both seats share the
+  meshes and materials. The feet circle carries allegiance.
+- Cover Whisperer's hover, six tendrils and eye release, Bulwark's
+  brace and two-hand hammer strike, and Demolisher's hydraulic
+  strike and shock pulse.
+- Cover Crowcaller's independently moving raven head and wing and
+  nocked bolt, Trigger's alternating revolvers and articulated
+  tail, and Rattle & Tick's club strike and independent rider aim
+  and recoil. Crowcaller and Rattle & Tick check all 26 rig nodes.
+- Blender checked all thirty forms for equipment placement and native
+  attack anchors. Static inspection checked 170 TBG4 and twenty TBG5
+  payloads for valid groups, indices and reserved allegiance colors.
+- The local Linux Vulkan client loaded all thirty forms at the
+  exported triangle counts. Laboratory captures covered Base and
+  one advanced form per champion at 1280×800. The toolbar overlaps
+  upper parts of Whisperer, Crowcaller and Trigger in this framing.
+- Live Training recorded 108 damage for Whisperer, 180 for Bulwark,
+  760 for Demolisher, 422 for Crowcaller, 350 for Trigger and 522
+  for Rattle & Tick. The native motion gallery played all five
+  Crowcaller and Rattle & Tick forms, including ranged release,
+  melee strike and Cast.
+- Queue the Blender loader test from the modeling guide under the
+  shared lock at consolidation. Windows and desktop web full-frame
+  and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Capybara, Trident, Solar Sentinel, Luminous Oracle, Celestial Archer and Justiciar
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory, BattleLine and Evolution swap. Both seats share the
+  meshes and materials. The feet circle carries allegiance.
+- Cover Capybara's moving belly, rolling steps and palm bump,
+  Trident's fixed two-hand grip, hinged jaw and dorsal fin, and
+  Solar Sentinel's spear thrust and independently hinged vanes.
+- Cover Luminous Oracle's rotating staff halo and per-form
+  release heights, Celestial Archer's bow draw, nock and separate
+  wings, and Justiciar's moving core, palm release and two-palm
+  stamp. Solar Sentinel and Celestial Archer check all 26 rig nodes.
+- Blender checked all thirty forms for the native equipment grips,
+  strike and release anchors and independently moving parts.
+  Static inspection covered 190 TBG4 and thirty TBG5 payloads for
+  valid groups, indices and reserved allegiance colors.
+- The local Linux Vulkan client loaded all thirty forms at the
+  exported triangle counts. Twelve Laboratory captures covered Base
+  and one advanced form per champion. At 1280×800 the toolbar can
+  overlap the upper halo, bow or staff at the default zoom.
+- Live Training recorded 293 damage for Capybara, 405 for Trident,
+  210 for Solar Sentinel, 75 for Luminous Oracle, 400 for
+  Celestial Archer and 240 for Justiciar. The native diagnostic
+  gallery completed all five forms of Trident, Solar Sentinel,
+  Luminous Oracle and Celestial Archer.
+- Queue the Blender loader test from the modeling guide under the
+  shared lock at consolidation. Windows and desktop web full-frame
+  and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Jawguard through Hushfang
+
+- Cover all fifty forms in the shared FigureLibrary and Laboratory.
+  Include BattleLine and Evolution swaps under each champion's
+  existing roster availability. Gravecutter, Lastlight Cantor,
+  Cragclaw and Hushfang follow the local completion pool.
+- Cover Jawguard's moving shell and paired jaws, Mantis's two
+  scythes, Hornet's wings and four animated hose sections, and
+  Weaver's eight legs and spinner. Hornet records all 26 rig nodes.
+- Cover Pyre Warden's two-hand flame grip, Drillnest's tread and feed
+  motion, Gravecutter's sickle strike, Lastlight Cantor's bell and
+  echo, Cragclaw's asymmetric claw and Hushfang's four-foot gait.
+- Both seats share meshes and materials. The feet circle carries
+  allegiance. Blender checked the fifty forms for native anchor
+  positions and separate moving pieces. Static inspection checked
+  235 TBG4 and 35 TBG5 payloads for group layout, indices and reserved
+  allegiance colors.
+- The Linux Vulkan preview loaded all fifty forms at the exported
+  triangle counts. The first capture pass covered Base and one
+  Evolution per champion, including the Laboratory attack clip on
+  each local completion champion. At 1280×800, the toolbar can
+  overlap the upper part of some models at the default zoom.
+- Training recorded 270 damage for Jawguard, 285 for Mantis, 280 for
+  Hornet and 100 for Weaver. Drillnest produced six Microdrill summons.
+  The live fixture covers the main roster.
+- The final Linux client loaded all fifty forms at their exported
+  counts and recaptured the coffin stays and longer tail on Pyre
+  Warden and Hushfang. Pyre Warden dealt 288 damage in Training.
+  The motion gallery completed all five forms of Jawguard, Hornet,
+  Weaver and Drillnest.
+- Queue the Blender loader test from the modeling guide under the
+  shared lock at consolidation. Windows and desktop web full-frame
+  and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Spinehurler through Blastbeetle
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. BattleLine and Evolution swaps follow each
+  champion's existing local completion availability. Both seats
+  use the same meshes and materials. The feet circle carries
+  allegiance.
+- Cover Spinehurler's removable needle, Mire Tender's bowl and
+  ladle, Gorgehowl's resonator, Sunlancer's two-hand lance,
+  Eclipse Dancer's twin blades and Starbreaker's two-hand maul.
+- Cover Dawnmender's two-hand lantern and release lens,
+  Prismancer's held crystal, and the separate auxiliary legs
+  and weapon strikes of Leafcutter and Blastbeetle. Both insects
+  check all 26 rig nodes.
+- Blender checked the fifty forms for strike and release
+  positions, hand placement and animated sockets. Static
+  inspection covered 275 TBG4 and 45 TBG5 payloads for group
+  layout, indices and reserved allegiance colors.
+- The installed Linux Vulkan client loaded the fifty new forms at
+  their exported counts. Twenty Laboratory captures covered ten Base
+  poses, eight Evolution attack clips and two Evolution walk clips.
+  At 1280×800 the toolbar overlaps some tall weapons and crests
+  at the default zoom.
+- The scoped motion evidence covers the Laboratory. Queue local
+  match observations and the Blender loader test from the modeling
+  guide under the shared lock at consolidation. Windows and desktop
+  web full-frame and motion comparisons remain pending.
+
+### 2026-11-04 — Blender Needlewing through Hide Mender
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. BattleLine and Evolution swaps follow each
+  champion's existing local completion availability. Both seats
+  use the same meshes and materials. The feet circle carries
+  allegiance.
+- Cover Needlewing's chest-mounted wing pivot and loaded wrist
+  needle, Nectar Nurse's independent bowl and spoon, and
+  Stridulator's hinged wings and chest aperture. Each insect
+  preserves all 26 nodes and both auxiliary leg chains.
+- Cover Basalt Bulwark's braced shield and quarry maul, Cinder
+  Maul's paired hammers, Hook Brawler's right hook and B-family
+  offhand hook, and Flint Runner's paired blades.
+- Cover Clay Binder's cast seal and offhand clay charge, Barrel
+  Keeper's chest-mounted cask and two-hand carry, and Hide
+  Mender's sewing needle and spool. Inspect hand contact and
+  shoulder joins through movement and Evolution swaps.
+- Blender checked all fifty forms for native rest attachments,
+  grip positions and strike or release anchors as applicable.
+  Static inspection covered 310 TBG4 and 60 TBG5 payloads for
+  group layout, indices and reserved allegiance colors.
+- The installed Linux Vulkan client loaded all fifty forms at
+  their exported triangle counts. Twenty Laboratory captures
+  covered ten Base idle poses, eight Evolution attack clips,
+  one Evolution walk and one Evolution victory. The toolbar
+  can cover the top of tall forms at the default 1280×800 zoom.
+- Local Training remains pending. The isolated Xvfb editor
+  automation failed twice to locate the add-selected button,
+  so the trial did not start. At consolidation, add Needlewing
+  B2 against a wooden dummy and observe the needle release.
+  Queue the Blender loader test from the modeling guide under
+  the shared lock. Windows and desktop web full-frame and
+  motion comparisons remain pending.
+
+### 2026-11-04 — Blender Pebble Slinger through Foam Weaver
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. BattleLine and Evolution swaps follow each
+  champion's existing local completion availability. Both seats
+  share geometry and materials. The feet circle carries allegiance.
+- Cover Pebble Slinger's upright sling, grip and offhand pouch,
+  Rivet Ballista's two exit lengths and rear cartridges, Nacre
+  Duelist's paired blades, Reef Lancer's trident and forward guard,
+  and Trench Fist's stone ram and B-family offhand gauntlet.
+- Cover Pearl Slinger's open shell and pearl, the Abyss Harpooner
+  stock and support grip, the Undertow Herald's hollow conch and
+  offhand brace, the Trench Lamplighter's signal lens, and the
+  Foam Weaver's chalice and offhand handle.
+- Blender checked all fifty forms for socket placement, strike
+  or release anchors and reachable studio grip positions.
+  Static inspection covered 360 TBG4 and 60 TBG5 payloads for
+  group layout, indices and reserved allegiance colors.
+- The installed Linux Vulkan client embedded byte-identical
+  copies of all ten final assets and loaded all fifty forms at
+  their exported triangle counts. Twenty Laboratory captures
+  covered ten Base idle poses, eight Evolution attack clips,
+  one Evolution walk and one Evolution victory. At the default
+  1280×800 zoom, the toolbar overlaps some tall headgear.
+- In local Training on Verdant Forest, seed 62, Rivet Ballista
+  B2 removed 325 HP from a wooden dummy by the 4.40-second
+  sample. Other live match motions and Windows and desktop
+  web visual comparisons remain pending. Queue the Blender
+  loader test from the modeling guide under the shared lock
+  at consolidation.
+
+### 2026-11-04 — Blender Pod Snapper and the Gods
+
+- Cover Base and all four Evolutions in the shared FigureLibrary
+  and Laboratory. These four complete the 84-model local
+  completion pool. Both seats use the same materials and geometry.
+  The feet circle carries allegiance.
+- Cover Pod Snapper's independently hinged pod valves and seed
+  release, Colossus's single obelisk through back carry, draw and
+  slam, Volthar's two-hand hammer and separate spark orbit, and
+  Astreon's two-hand lance and per-form tip.
+- Blender checked the twenty forms for joint placement, grip
+  reach and the native strike or release anchors. Static inspection
+  covered 375 TBG4 and 65 TBG5 payloads for group layout,
+  indices and reserved allegiance colors.
+- The installed Linux Vulkan client embedded all four final
+  assets byte for byte and loaded all twenty forms at their
+  exported counts. Eight Laboratory captures covered four
+  Base poses and four Evolution attack clips. At the default
+  1280×800 zoom, the toolbar covers part of Colossus's obelisk.
+- In local Training on Verdant Forest, seed 62, Colossus B2
+  removed 170 HP from a wooden dummy by the 4.35-second
+  sample. The other live combat scenarios and Windows and
+  desktop web comparisons remain pending. Queue the Blender
+  loader test from the modeling guide and the client `gd0`
+  test filter under the shared lock at consolidation.
+
+### 2026-11-04 — Abyss Harpooner launcher refinement
+
+- Cover Base and all four Evolutions in the shared FigureLibrary,
+  Laboratory and local BattleLine. The tapered receiver, reel,
+  rails, spearhead and left support grip are weapon-local.
+- Blender checked the hollow guide and shaft at the native release
+  origin, both grips and the five spear tips. Static comparison
+  matched rest data and triangulated positions and colors outside
+  WeaponR in every form.
+- The installed Linux Vulkan client loaded all five final forms.
+  Laboratory captures cover Base idle and A2 attack. Local Training
+  on Verdant Forest, seed 62, recorded 256 HP removed by Abyss
+  Harpooner B2 at the 4.35-second sample. Windows and desktop web
+  visual comparisons remain pending.
