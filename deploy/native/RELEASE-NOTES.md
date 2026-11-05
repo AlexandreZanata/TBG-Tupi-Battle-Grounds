@@ -1,3 +1,40 @@
+TBG 0.1.4-colossus.7 — Blender champion figures
+
+The ten champions in the initial roster have new component-modeled Blender
+figures for Base and all four Evolution forms in the Laboratory and in
+combat. The base Bone Brute has connected shoulders and a waist-mounted
+sash. The feet circle identifies the team in combat. Both teams share the
+same character and equipment colors.
+Siege Walker has a fitted helmet, a sculpted face, recessed bores and a
+supported stock and sight assembly across its five forms.
+Longaxe and Farwatch add component-modeled polearm and arbalest figures.
+Bombard and Rotcap add component-modeled mortar and spore-casting figures.
+Old Finn and Antidote Brewer add an authored fishing kit and portable workshop.
+Shatterback and Blood Furnace add detachable slate and a heated two-hand hammer.
+Bloodweaver, Oilpress, Drumguard and Leechroot add authored spindle, press,
+marching drum and whip-root figures.
+Cargo Crab, Puppetmaster and Smuggler add a mechanical saddle carrier,
+a marionette act and a longshore courier with articulated equipment.
+Bonehorn, Ravager and Acidmaw add a four-legged horn charger, a six-legged
+scythe predator and a stalker with four moving jaw petals.
+Whisperer, Bulwark and Demolisher add a hollow bone bell, a walking
+stone citadel and a hydraulic brawler. Crowcaller, Trigger and Rattle &
+Tick add an articulated shoulder raven, two feline revolvers and an
+independently aimed shoulder rider.
+Capybara and Trident add a marsh guardian with an articulated belly
+and a shark with a fitted jaw and two-hand trident. Solar Sentinel,
+Luminous Oracle, Celestial Archer and Justiciar add a hinged sun shield,
+a weapon-mounted staff halo, separately animated wings and bowstring,
+and a judgment construct with moving core and palm apertures.
+Jawguard, Mantis, Hornet, Weaver, Pyre Warden and Drillnest complete
+the main roster's modular figures. The local completion roster gains
+Gravecutter, Lastlight Cantor, Cragclaw and Hushfang with authored
+weapons, armor and distinct Evolution equipment.
+The local completion pool also gains authored figures for Spinehurler,
+Mire Tender, Gorgehowl, Sunlancer, Eclipse Dancer, Starbreaker,
+Dawnmender, Prismancer, Leafcutter and Blastbeetle.
+Protocol 40 and ruleset 16 are unchanged.
+
 TBG 0.1.4-colossus.6 — Native Android landscape candidate
 
 Android inherits current main177da4a0, including account recovery/social flows

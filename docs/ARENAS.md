@@ -37,6 +37,8 @@ Online assignment and symmetric gameplay modifiers are active under
 
 ## Frozen Tundra
 
+The editable Blender adaptation includes both animated auxiliary sites per seat. [Frozen Tundra Blender study](art/BLENDER-FROZEN-TUNDRA.md)
+
 Snow replaces the meadow; compact blue-gray paving keeps white troops
 separate from the BattleLine. Ice-colored cliff strata meet a cold sea with
 a frozen coastal shelf, chipped ice slabs with irregular beveled edges and pointed icebergs. The shelf
@@ -49,6 +51,8 @@ ice-and-snow railings, angular snowy ridges and cliff icicles. Cool daylight and
 ![Frozen Tundra](media/arena-reference-refinement/tundra-after-1920.jpg)
 
 ## Volcanic Forge
+
+The editable adaptation includes both animated mines and both merchant quays. [Volcanic Forge Blender study](art/BLENDER-VOLCANIC-FORGE.md)
 
 Ash and cooled rock replace grass; broad gray paving gives troops a calm
 combat surface. Dark volcanic cliffs sit above a lava sea, orange shore
@@ -65,6 +69,8 @@ pass, bloom, lava damage, smoke simulation or particle emitters.
 
 ## Ancient Ruins
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-ANCIENT-RUINS.md)
+
 Dry moss and muted earth replace the meadow; worn limestone tiles define
 the BattleLine. Pale sedimentary walls meet a faceted turquoise basin with submerged column remnants, mossy islets and lily pads.
 
@@ -75,6 +81,8 @@ moss shrubs, conifers, flowers, a stepped water entrance, stone balustrades and 
 ![Ancient Ruins](media/arena-reference-refinement/ruins-after-1920.jpg)
 
 ## Storm Valley
+
+[Editable Blender study and animated auxiliary previews](art/BLENDER-STORM-VALLEY.md)
 
 Slate-colored heath and silver-blue paving replace the green island.
 Blue-gray cliffs fall to dark open water, low linear whitecaps and jagged
@@ -92,6 +100,8 @@ flashes, screen shake, rain particles or dynamic weather simulation.
 
 ## Celestial Citadel
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-CELESTIAL-CITADEL.md)
+
 Ivory masonry, gold capitals and azure crystals frame a rear citadel with a
 stepped entrance and two ceremonial guardians. Low crystal sanctuaries and
 stone planters dress the foreground; waterfall islets extend the blue seascape.
@@ -100,6 +110,8 @@ The pale limestone lane keeps the existing dimensions and Stronghold positions.
 
 ## Clockwork Bastion
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-CLOCKWORK-BASTION.md)
+
 A dark iron foundry with brass battlements, furnace grilles and coastal cranes
 stands behind a quiet slate BattleLine. Three slowly counter-rotating gears
 reuse the existing mesh/material pipeline, carry ArenaScene ownership and do
@@ -107,6 +119,8 @@ not allocate per frame. Low boilers and riveted supply blocks stay off the lane.
 **Proposed symmetric tradeoff:** troop attack speed +8%, movement −5%.
 
 ## Desert Relics
+
+[Editable Blender study and animated auxiliary previews](art/BLENDER-DESERT-RELICS.md)
 
 Warm sandstone columns and turquoise inlays form a stepped temple, flanked by
 pointed obelisks and guardians. Coastal palms, pottery and sandstone outcrops

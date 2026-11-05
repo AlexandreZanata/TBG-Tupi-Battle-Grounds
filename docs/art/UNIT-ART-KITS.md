@@ -112,9 +112,9 @@ arena/strongholds/aim.rs ─► orders → slew yaw/elevation → fire from muzz
   - a new silhouette piece.
 
   Tier 2 adds a glowing signature (`.glow()`).
-- **Team color:** paint team pieces `ALLY`. The library builds the enemy
-  copy by recoloring them to `ENEMY`. Give every kit at least one team
-  piece readable from the 55° match camera: a pennant, armband or sash.
+- **Team identity:** the feet circle carries allegiance. Use intrinsic
+  material colors for every component and Evolution. Remove affiliation
+  geometry in the [mandatory Blender workflow](BLENDER-CHAMPIONS.md).
 - **Budgets:** 6 000 triangles per form at most (P24's 3 000, doubled by
   the owner). The tests print the counts. Current forms:
   - Siege Walker: 1.8–2.5 k;
@@ -189,8 +189,8 @@ mostly its silhouette pieces and its signature motion:
 Rules that kept twenty-three kits consistent:
 - Five forms differ in silhouette, never only in color: A and B each add
   their own pieces, tier 2 adds a glowing signature.
-- Every figure carries a team-colored piece (`ALLY`) that reads at match
-  distance: tabard, sash, flag, stripe, scarf.
+- Every figure uses the same geometry and colors for both seats. Confirm the
+  blue or red feet circle reads at match distance.
 - Support actions with an `AttackStart` (cleanse, transfer, confuse,
   heal) are shot kits; actions without one are cued in
   `sync/actions.rs`.
@@ -255,7 +255,7 @@ Leave the Artillery alone (approved).
   - effects at a target's feet hide under the target, so make them larger
     and lighter-colored than the ground;
   - a hood or cloak must sit behind the face;
-  - team color needs a piece visible from above.
+  - check the feet circle from the normal overhead camera.
 - **Aim from the line, not the pivot.** An off-center gun misses by its
   offset unless the body turns by `line_yaw`. A defender on a tower rim
   aims from the tower axis.
