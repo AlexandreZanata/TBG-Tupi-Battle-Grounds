@@ -1383,3 +1383,18 @@ pending. Public download compatibility uses the actual running server.
 - Queue runtime comparisons on Linux, Windows and desktop web for
   arena transitions, both seats, hire and upgrades, work and
   delivery triggers, payouts and reduced motion.
+
+### 2026-11-05 — Clockwork Bastion Blender study
+
+- The editable study covers the seventh arena's foundry coast, slate
+  BattleLine, Strongholds, brass drive wheels and desktop framing.
+  Both seats use the shared auxiliary timeline with cast-iron quarry
+  portals, cart plates, ribbed metal roofs and reinforced prows.
+  [Clockwork Bastion study](../art/BLENDER-CLOCKWORK-BASTION.md)
+- Linux Blender checked the four shore approaches, lane clearance,
+  construction and upgrades, pick contacts, cart parenting, berths,
+  parcel hoists, chest motion, departures and the three opposing
+  gear motions with their tooth-count ratio and axle spacing.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, foundry motion, both auxiliary seats, hire and
+  upgrades, work and delivery triggers, payouts and reduced motion.

@@ -110,6 +110,8 @@ The pale limestone lane keeps the existing dimensions and Stronghold positions.
 
 ## Clockwork Bastion
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-CLOCKWORK-BASTION.md)
+
 A dark iron foundry with brass battlements, furnace grilles and coastal cranes
 stands behind a quiet slate BattleLine. Three slowly counter-rotating gears
 reuse the existing mesh/material pipeline, carry ArenaScene ownership and do

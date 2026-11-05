@@ -82,3 +82,5 @@ The reference match camera crops parts of the outside posts and the
 rear palace. The overview and close-ups show the complete auxiliary
 sites. Runtime integration, authoritative work and delivery events,
 payouts and desktop platform comparisons are pending.
+
+The next arena is the [Clockwork Bastion Blender study](BLENDER-CLOCKWORK-BASTION.md).
