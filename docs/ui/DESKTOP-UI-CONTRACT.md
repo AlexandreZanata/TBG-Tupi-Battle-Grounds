@@ -1369,3 +1369,17 @@ pending. Public download compatibility uses the actual running server.
 - Queue runtime comparisons on Linux, Windows and desktop web for
   arena transitions, both seats, hire and upgrades, work and
   delivery triggers, payouts and reduced motion.
+
+### 2026-11-05 — Celestial Citadel Blender study
+
+- The editable study covers the sixth arena's ivory coast, BattleLine,
+  Strongholds, palace, guardians, static cascades and desktop framing.
+  Both seats use the shared auxiliary timeline with carved quarry
+  portals, gilt azure canopies and ceremonial prows.
+  [Celestial Citadel study](../art/BLENDER-CELESTIAL-CITADEL.md)
+- Linux Blender checked the four shore approaches, lane clearance,
+  construction and upgrades, pick contacts, berths, parcel hoists,
+  chest motion, departures and the three waterfall placements.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, both seats, hire and upgrades, work and
+  delivery triggers, payouts and reduced motion.

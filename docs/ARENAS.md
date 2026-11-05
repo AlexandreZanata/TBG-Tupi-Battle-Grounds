@@ -100,6 +100,8 @@ flashes, screen shake, rain particles or dynamic weather simulation.
 
 ## Celestial Citadel
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-CELESTIAL-CITADEL.md)
+
 Ivory masonry, gold capitals and azure crystals frame a rear citadel with a
 stepped entrance and two ceremonial guardians. Low crystal sanctuaries and
 stone planters dress the foreground; waterfall islets extend the blue seascape.

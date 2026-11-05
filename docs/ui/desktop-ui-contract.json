@@ -676,6 +676,15 @@
       "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "celestial-citadel-blender-arena-20261105",
+      "date": "2026-11-05",
+      "report": "docs/art/BLENDER-CELESTIAL-CITADEL.md",
+      "affected_cases": "Celestial Citadel ivory coast, BattleLine, Strongholds, palace, guardians, static cascades and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }
