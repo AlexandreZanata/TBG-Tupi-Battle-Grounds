@@ -120,6 +120,8 @@ not allocate per frame. Low boilers and riveted supply blocks stay off the lane.
 
 ## Desert Relics
 
+[Editable Blender study and animated auxiliary previews](art/BLENDER-DESERT-RELICS.md)
+
 Warm sandstone columns and turquoise inlays form a stepped temple, flanked by
 pointed obelisks and guardians. Coastal palms, pottery and sandstone outcrops
 replace conifers and cold rock. The blue sea contrasts with the muted sand lane.

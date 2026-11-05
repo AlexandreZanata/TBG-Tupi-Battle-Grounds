@@ -1398,3 +1398,17 @@ pending. Public download compatibility uses the actual running server.
 - Queue runtime comparisons on Linux, Windows and desktop web for
   arena transitions, foundry motion, both auxiliary seats, hire and
   upgrades, work and delivery triggers, payouts and reduced motion.
+
+### 2026-11-05 — Desert Relics Blender study
+
+- The editable study covers the eighth arena's sandstone coast,
+  BattleLine, Strongholds, sun temple, paired feline guardians,
+  palms and desktop framing. Both seats use the shared auxiliary
+  timeline with sandstone portals, woven roofs and carved prows.
+  [Desert Relics study](../art/BLENDER-DESERT-RELICS.md)
+- Linux Blender checked the four bridge approaches, lane clearance,
+  construction and upgrades, pick contacts, berths, parcel hoists,
+  chest motion, departures and paired guardian placement.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, both auxiliary seats, hire and upgrades, work
+  and delivery triggers, payouts and reduced motion.

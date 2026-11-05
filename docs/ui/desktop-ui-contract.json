@@ -694,6 +694,15 @@
       "linux": "Blender assembly, gear ratio and sampled auxiliary animation checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "desert-relics-blender-arena-20261105",
+      "date": "2026-11-05",
+      "report": "docs/art/BLENDER-DESERT-RELICS.md",
+      "affected_cases": "Desert Relics sandstone coast, BattleLine, Strongholds, sun temple, paired feline guardians, palms and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly and sampled auxiliary animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ]
 }

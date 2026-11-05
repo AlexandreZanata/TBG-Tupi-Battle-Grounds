@@ -94,3 +94,5 @@ The reference match camera crops parts of the outside posts and the
 rear factory. The overview and close-ups show the complete auxiliary
 sites. Runtime integration, authoritative work and delivery events,
 payouts and desktop platform comparisons are pending.
+
+The next arena is the [Desert Relics Blender study](BLENDER-DESERT-RELICS.md).
