@@ -1683,3 +1683,135 @@ pending. Public download compatibility uses the actual running server.
   on Verdant Forest, seed 62, recorded 256 HP removed by Abyss
   Harpooner B2 at the 4.35-second sample. Windows and desktop web
   visual comparisons remain pending.
+
+### 2026-11-04 — Verdant Forest Blender study
+
+- The [editable art study](../art/BLENDER-FOREST-ARENA.md) covers Forest
+  terrain and coast, the BattleLine, Classic Strongholds, scenery and
+  desktop 16:9 match framing. Blender checks cover the Stronghold anchors
+  and the unobstructed BattleLine.
+- Linux, Windows and desktop web runtime comparisons remain pending for
+  the study. Integration must compare match framing, arena transitions
+  and Stronghold damage and motion using shared assets.
+
+### 2026-11-04 — Blender Stronghold Fortifications
+
+- The [Stronghold art study](../art/BLENDER-STRONGHOLDS.md) covers Base,
+  A1, A2, B1 and B2 for Treasury, Bastion, Artillery and Command. The
+  Blender scenes exercise both Forest placements and check the existing
+  projectile anchors and rest pitch.
+- Future runtime comparison covers both seats in the selection gallery,
+  Laboratory, BattleLine, and Fortification transitions. Motion coverage
+  includes defender aim, opening hatches, shot and reload, recoil, mint
+  and Artillery gearing, cumulative wear and zero-HP collapse. Runtime
+  and pixel/motion checks on Linux, Windows and desktop web are pending.
+
+### 2026-11-04 — Animated Blender War Auxiliaries
+
+- The [Forest auxiliary study](../art/BLENDER-WAR-AUXILIARIES.md) covers
+  Mineiro and Mercador in both seats, all three tiers, bridge and
+  precinct construction, work loops, ship delivery and completion.
+  Blender checks cover timed assembly, pick contact, berth, crane and
+  chest motion, plus sampled BattleLine clearance.
+- Future runtime comparison covers hire and upgrade reconciliation,
+  payouts, pause and reduced motion on the Forest BattleLine. Linux,
+  Windows and desktop web runtime comparisons remain pending.
+
+### 2026-11-04 — Frozen Tundra Blender study
+
+- The editable study covers the second arena's winter terrain, coast,
+  BattleLine, Strongholds and desktop match framing. Both seats have a
+  Mineiro and Mercador with winter structures on the shared Forest
+  animation timelines. [Frozen Tundra study](../art/BLENDER-FROZEN-TUNDRA.md)
+- Linux Blender checks cover the camera, anchors, four shore approaches,
+  BattleLine clearance, construction and level reveals, pick contact,
+  ship berth, crane line, chest motion and departure.
+- Queue runtime presentation checks on Linux, Windows and desktop web at
+  integration. Cover arena transitions, both seats, hire and upgrade
+  reconciliation, work and delivery triggers, payouts and reduced motion.
+
+### 2026-11-04 — Volcanic Forge Blender study
+
+- The editable study covers the third arena's ash plateau, lava
+  shore, Strongholds, BattleLine and desktop match framing. Both
+  seats place a Mineiro and a Mercador on the Forest auxiliary
+  timeline. [Volcanic Forge study](../art/BLENDER-VOLCANIC-FORGE.md)
+- Linux Blender checked the shore approaches, keep-out corridor,
+  construction, work, crate lifts, chest motion and both barge
+  routes against drifting slag. The shared verifier also passed
+  on the saved Tundra project.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions and both seats of each auxiliary, including
+  authoritative work and delivery triggers, upgrades, payouts
+  and reduced motion.
+
+### 2026-11-04 — Ancient Ruins Blender study
+
+- The editable study covers the fourth arena's limestone coast,
+  BattleLine, Strongholds, sanctuary and desktop match framing.
+  Both seats use the shared Forest auxiliary timeline with
+  separate quarry portals, reed canopies and carved prows.
+  [Ancient Ruins study](../art/BLENDER-ANCIENT-RUINS.md)
+- Linux Blender checked the four bridge approaches, BattleLine
+  clearance, construction and upgrades, pick contacts, boat
+  arrival and departure, crane line, chest and lagoon clearance.
+- Queue runtime comparisons on Linux, Windows and desktop web
+  for arena transitions, both seats, hire and upgrades, work and
+  delivery triggers, payouts and reduced motion.
+
+### 2026-11-04 — Storm Valley Blender study
+
+- The editable study covers the fifth arena's slate coast, BattleLine,
+  Strongholds, conductor relay, static sky and desktop match framing.
+  Both seats use the shared auxiliary timeline with forged quarry
+  supports, standing-seam market roofs and riveted prows.
+  [Storm Valley study](../art/BLENDER-STORM-VALLEY.md)
+- Linux Blender checked the four shore approaches, lane clearance,
+  construction and upgrades, pick contacts, boat approach and
+  departure, parcel hoists and chest motion.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, both seats, hire and upgrades, work and
+  delivery triggers, payouts and reduced motion.
+
+### 2026-11-05 — Celestial Citadel Blender study
+
+- The editable study covers the sixth arena's ivory coast, BattleLine,
+  Strongholds, palace, guardians, static cascades and desktop framing.
+  Both seats use the shared auxiliary timeline with carved quarry
+  portals, gilt azure canopies and ceremonial prows.
+  [Celestial Citadel study](../art/BLENDER-CELESTIAL-CITADEL.md)
+- Linux Blender checked the four shore approaches, lane clearance,
+  construction and upgrades, pick contacts, berths, parcel hoists,
+  chest motion, departures and the three waterfall placements.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, both seats, hire and upgrades, work and
+  delivery triggers, payouts and reduced motion.
+
+### 2026-11-05 — Clockwork Bastion Blender study
+
+- The editable study covers the seventh arena's foundry coast, slate
+  BattleLine, Strongholds, brass drive wheels and desktop framing.
+  Both seats use the shared auxiliary timeline with cast-iron quarry
+  portals, cart plates, ribbed metal roofs and reinforced prows.
+  [Clockwork Bastion study](../art/BLENDER-CLOCKWORK-BASTION.md)
+- Linux Blender checked the four shore approaches, lane clearance,
+  construction and upgrades, pick contacts, cart parenting, berths,
+  parcel hoists, chest motion, departures and the three opposing
+  gear motions with their tooth-count ratio and axle spacing.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, foundry motion, both auxiliary seats, hire and
+  upgrades, work and delivery triggers, payouts and reduced motion.
+
+### 2026-11-05 — Desert Relics Blender study
+
+- The editable study covers the eighth arena's sandstone coast,
+  BattleLine, Strongholds, sun temple, paired feline guardians,
+  palms and desktop framing. Both seats use the shared auxiliary
+  timeline with sandstone portals, woven roofs and carved prows.
+  [Desert Relics study](../art/BLENDER-DESERT-RELICS.md)
+- Linux Blender checked the four bridge approaches, lane clearance,
+  construction and upgrades, pick contacts, berths, parcel hoists,
+  chest motion, departures and paired guardian placement.
+- Queue runtime comparisons on Linux, Windows and desktop web for
+  arena transitions, both auxiliary seats, hire and upgrades, work
+  and delivery triggers, payouts and reduced motion.

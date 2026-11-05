@@ -613,6 +613,96 @@
       "windows": "visual pending; CI tests/build/package passed",
       "web": "scoped desktop runtime observed; portrait stays portrait with crowded existing layout",
       "android": "scoped emulator runtime observed; physical ARM64/16KB pending"
+    },
+    {
+      "id": "forest-blender-study-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-FOREST-ARENA.md",
+      "affected_cases": "Standalone Blender study of Forest terrain, BattleLine, Classic Strongholds, scenery and desktop match framing; future runtime coverage includes arena transitions and Stronghold damage and motion",
+      "linux": "Blender render and layout checks observed; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "stronghold-blender-fortifications-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-STRONGHOLDS.md",
+      "affected_cases": "Treasury, Bastion, Artillery and Command; Base/A1/A2/B1/B2; both seats; gallery, Laboratory, BattleLine and Fortification; aim, hatch, release, recoil, reload, gearing, wear and collapse",
+      "linux": "Blender previews and muzzle geometry checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "forest-blender-war-auxiliaries-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-WAR-AUXILIARIES.md",
+      "affected_cases": "Forest; Miner and Merchant; seats A and B; three tiers; bridge and precinct construction, work cycles, ship delivery and completion; runtime trigger, pause and reduced-motion comparison pending",
+      "linux": "Blender scene and animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "tundra-blender-arena-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-FROZEN-TUNDRA.md",
+      "affected_cases": "Frozen Tundra terrain, lane, Strongholds, scene framing and both seats of the Miner and Merchant with construction, work, arrival, hoist, upgrades and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "volcanic-forge-blender-arena-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-VOLCANIC-FORGE.md",
+      "affected_cases": "Volcanic Forge lava coast, basalt lane, Strongholds and desktop framing with two Mines and two Merchant quays, construction, work, berthing, upgrades, hoist and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "ancient-ruins-blender-arena-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-ANCIENT-RUINS.md",
+      "affected_cases": "Ancient Ruins limestone coast, BattleLine, Strongholds, sanctuary and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "storm-valley-blender-arena-20261104",
+      "date": "2026-11-04",
+      "report": "docs/art/BLENDER-STORM-VALLEY.md",
+      "affected_cases": "Storm Valley slate coast, BattleLine, Strongholds, conductor relay, static sky and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "celestial-citadel-blender-arena-20261105",
+      "date": "2026-11-05",
+      "report": "docs/art/BLENDER-CELESTIAL-CITADEL.md",
+      "affected_cases": "Celestial Citadel ivory coast, BattleLine, Strongholds, palace, guardians, static cascades and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly and sampled animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "clockwork-bastion-blender-arena-20261105",
+      "date": "2026-11-05",
+      "report": "docs/art/BLENDER-CLOCKWORK-BASTION.md",
+      "affected_cases": "Clockwork Bastion foundry coast, BattleLine, Strongholds, three opposing gears, static cranes and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, moving carts, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly, gear ratio and sampled auxiliary animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "desert-relics-blender-arena-20261105",
+      "date": "2026-11-05",
+      "report": "docs/art/BLENDER-DESERT-RELICS.md",
+      "affected_cases": "Desert Relics sandstone coast, BattleLine, Strongholds, sun temple, paired feline guardians, palms and desktop framing; both seats of the Mineiro and Mercador; bridges, three tiers, pick contact, boat berth, parcel hoist, chest and departure",
+      "linux": "Blender assembly and sampled auxiliary animation checked; runtime comparison pending",
+      "windows": "runtime comparison pending",
+      "web": "desktop runtime comparison pending"
     }
   ],
   "blender_champions": {
