@@ -1,9 +1,9 @@
 //! Reads the compact joint-local meshes exported by the Blender champion pipeline.
 
 use super::{
-    FORMS, FigureForm,
     figure::{self, FigureSpec},
-    rig::{self, NODE_COUNT, Node, Socket},
+    rig::{self, Node, Socket, NODE_COUNT},
+    FigureForm, FORMS,
 };
 use bevy::{
     asset::RenderAssetUsages, mesh::Indices, prelude::*, render::render_resource::PrimitiveTopology,
