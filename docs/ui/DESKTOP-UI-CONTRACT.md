@@ -2029,3 +2029,30 @@ Windows and desktop web remain pending.
 - Queue runtime comparisons on Linux, Windows and desktop web for
   arena transitions, both auxiliary seats, hire and upgrades, work
   and delivery triggers, payouts and reduced motion.
+
+## P78 — Blender champion figures in TBG Arena 5v5 (2026-11-05)
+
+The 5v5 MOBA client now compiles the shared 1v1 `FigureLibrary` and the
+Blender `tbgmesh` champion assets. Every 5v5 Troop and Minion form uses the
+exact 1v1 mesh, rig, clip set, weapon sockets, glow layer and
+team-independent material. The existing 3× map adapter, authoritative
+timing, crowd motion and camera scale are unchanged; allegiance stays on the
+feet circle. The new Tupi Valley Blender study recreates the 5v5 map as an
+editable authoring project with reusable forest-library collections. It is
+not yet the runtime map; runtime map integration remains pending.
+
+Affected cases: all eight Shop roles and every Troop/Minion Evolution form
+in both lanes and the jungle; spawn, idle, walk, pursuit, attack, windup,
+recovery, support, hit, death and celebration; both seats, both teams, both
+camera cameras and the minimap. The match-framed Blender review covers the
+valley overview, plaza, bridges, both bases, Towers, camps and the component
+board.
+
+- Linux: merged shared art compiles, and a scoped native 1600×900 lane
+  capture showed the Blender Rootcaller and Hexer figures in a live 5v5
+  match. Full roster, motion and performance coverage remains pending.
+- Windows and desktop web: pending; shared code and a Linux capture are not
+  parity evidence.
+- Blender study: opened and rendered with Blender 4.5.15; 2,244 scene
+  objects and 321,922 authored triangles. Runtime batching, fog, water,
+  Tower damage and platform correspondence remain pending.

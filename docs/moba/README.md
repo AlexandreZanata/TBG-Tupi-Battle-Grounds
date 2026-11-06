@@ -10,7 +10,9 @@ and cross-platform acceptance pending; unbalanced.**
 
 ![1v1 champions fighting on a lane, 1v1-style HUD](media/p76-champions-lane.webp)
 
-Historical P76 image; current P77 native motion evidence is linked from the phase report.
+Historical P76 image; current P77 native motion evidence is linked from the phase
+report. Every 5v5 Troop and Minion now renders the shared 1v1 Blender
+champion meshes from the same `FigureLibrary` and `tbgmesh` assets.
 
 | Read | For |
 |---|---|
@@ -20,6 +22,7 @@ Historical P76 image; current P77 native motion evidence is linked from the phas
 | [P76 phase spec and report](../phases/P76-moba-5v5-foundation.md) | What was built and validated |
 | [P77 spec and handoff](../phases/P77-moba-roles-vision-jungle-map.md) | Three role Shop slots, team vision, jungle monsters, map refinement, strategy-only combat and left-drag camera |
 | [Reference map](media/reference-map.webp) · [1v1 battle HUD](media/reference-1v1-battle-hud.webp) | Owner visual targets |
+| [Blender Tupi Valley 5v5 study](../art/BLENDER-TUPI-VALLEY-5V5.md) | Editable 5v5 map assembly reusing the Blender library; runtime map integration pending |
 
 ## Play on Linux
 

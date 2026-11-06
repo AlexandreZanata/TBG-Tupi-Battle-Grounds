@@ -853,6 +853,16 @@
       "linux": "Blender assembly and sampled auxiliary animation checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "p78-moba-blender-champions-and-tupi-study",
+      "date": "2026-11-05",
+      "report": "docs/art/BLENDER-TUPI-VALLEY-5V5.md",
+      "affected_cases": "All 5v5 Troops and Minions use the shared 1v1 Blender FigureLibrary meshes, rigs, clips, sockets, glow layers and materials with the existing 3x map adapter; editable Tupi Valley 5v5 arena study assembled from the Blender library",
+      "linux": "scoped native 1600x900 lane capture showed Blender Rootcaller and Hexer figures in a live match; Blender 4.5.15 opened and rendered the study; complete roster/motion/performance coverage pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
     }
   ],
   "moba_motion_screens": [
@@ -865,7 +875,8 @@
     "moba-patient-range-following-and-support-hold",
     "moba-narrow-bridge-continuous-route",
     "moba-large-cargo-bridge-release",
-    "moba-lane-detour-passive-camps"
+    "moba-lane-detour-passive-camps",
+    "moba-blender-champion-figures-and-tupi-study"
   ],
   "blender_champions": {
     "champions": [
