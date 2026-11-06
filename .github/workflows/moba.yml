@@ -1,0 +1,81 @@
+name: moba
+
+# TBG Arena 5v5 lives in its own Cargo workspace (moba/, D-112). This
+# workflow checks only that workspace and runs only when it changes; the 1v1
+# `ci` workflow and its required `check` are unaffected.
+on:
+  pull_request:
+    paths: &moba-paths
+      - 'moba/**'
+      - '.github/workflows/moba.yml'
+      - 'rust-toolchain.toml'
+      # Shared 1v1 sources the MOBA builds on (D-112).
+      - 'crates/tbg-core/**'
+      - 'crates/tbg-client/src/art/**'
+      - 'crates/tbg-client/src/vfx/**'
+      - 'crates/tbg-client/src/crowd.rs'
+      - 'crates/tbg-client/assets/battle/**'
+  push:
+    branches: [main]
+    paths: *moba-paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: moba-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  RUST_TOOLCHAIN: 1.99.0
+
+defaults:
+  run:
+    working-directory: moba
+
+jobs:
+  native:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; rustc pinned by the toolchain input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: moba -> target
+          key: ubuntu-24.04-moba-native
+          save-if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: Install Bevy system dependencies
+        timeout-minutes: 10
+        run: sudo apt-get update && sudo apt-get install -y libasound2-dev libudev-dev libwayland-dev libxkbcommon-dev
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Clippy
+        run: cargo clippy --locked --workspace --all-targets -- -D warnings
+      - name: Contract tests
+        run: cargo test --locked --workspace
+
+  wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@b725eda525362e7cf34af9a7243cac1e3f01a7ec # stable branch 2026-10-16; rustc pinned by the toolchain input
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          workspaces: moba -> target
+          key: ubuntu-24.04-moba-wasm
+          save-if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: WASM compatibility (core + client)
+        run: cargo check --locked -p tbg-moba-core -p tbg-moba-client --target wasm32-unknown-unknown

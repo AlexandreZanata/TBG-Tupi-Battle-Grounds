@@ -1,0 +1,36 @@
+# TBG Arena 5v5 (MOBA) workspace. It is deliberately separate from the 1v1
+# workspace at the repository root: its own lock file, builds and CI, and no
+# dependency in either direction, so this mode can never change the 1v1 game
+# or trigger its desktop releases (docs/moba/ARCHITECTURE-MOBA.md §1).
+#   core-moba    tbg-moba-core    deterministic rules, map, bots, protocol
+#   server-moba  tbg-moba-server  authoritative Axum/Tokio room server
+#   client-moba  tbg-moba-client  Bevy client (native desktop + WASM)
+
+[workspace]
+resolver = "2"
+members = ["core-moba", "server-moba", "client-moba"]
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.97"
+
+[profile.dev]
+# Line tables are enough for panics and keep target/ small.
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+opt-level = 2
+debug = false
+
+# The simulation runs on every host each tick; keep it fast in dev builds too.
+[profile.dev.package.tbg-moba-core]
+opt-level = 2
+
+# Per-frame snapshot mirroring and HUD updates stay smooth in preview builds.
+[profile.dev.package.tbg-moba-client]
+opt-level = 1
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+opt-level = 3

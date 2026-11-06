@@ -615,6 +615,156 @@
       "android": "scoped emulator runtime observed; physical ARM64/16KB pending"
     },
     {
+      "id": "p76-moba-5v5-foundation-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P76-moba-5v5-foundation.md",
+      "affected_cases": "Separate tbg-moba client (moba/client-moba): menu, 1v1-style match HUD (score plates, round clock, resource strip, five Shop cards with 1v1 portraits and locks), overlays, Tupi Valley scene, shared 1v1 champion figures/clips/shots/impacts, Minions and structures; outside the 1v1 capture matrix",
+      "linux": "offline, overview, fight, online, lock/reroll/purchase and installed-asset journeys observed; pixel/motion matrix for the MOBA pending",
+      "windows": "pending (no MOBA package yet)",
+      "web": "pending (WASM compile only)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-a-role-shop-slots-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "MOBA three role-locked cards, captions, resource strip, locks/reroll/purchase, hotkeys 1\u20133; shared presentation; champion motion unchanged",
+      "linux": "installed overview observed: three cards/resource strip; interaction/pixel matrix pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-b-jungle-monsters-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Wolves/Golems/Jaguar/Frogs figures, camp dressing; shared idle, lunge/spit, hit flash, death collapse and spawn emergence",
+      "linux": "installed overview camp dressing observed; monster detail/motion pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-c-team-vision-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Shared map-space fog material/mask on scene and minimap; visible camp timers; hidden figure removal and projectile culling; all Roles and both Teams",
+      "linux": "installed overview/map/minimap fog shader observed; visibility transitions/timers/targets/motion pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-d-valley-refinement-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "MOBA overview/lane/jungle/base/river: shared 1v1 flora/rocks, cobbles, paths, banks, cliffs, bridges, plaza, braziers, waterfalls, water waves/flame flicker, structure damage, lighting/shadows/haze",
+      "linux": "installed overview observed; detailed captures, pixel/motion/performance pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-e-strategy-left-drag-camera-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "No player avatar/manual orders; strategic Seat crests and Troop K/D, army/tier; per-purchase Destination; captured left-button ground pan, HUD/minimap isolation, focus/release/base-centre; shared automatic champion motion",
+      "linux": "installed no-avatar Seat HUD overview observed; left-drag/input/pixel/motion pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-f-territory-vision-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Shared map/minimap: fully visible home half, river boundary, invading Troop/Minion sight, permanently revealed destroyed enemy Tower circles, scout retreat/death and new-match reset; both Teams/all Tower tiers",
+      "linux": "installed overview observed: home half, dim enemy half, scout reveal; transitions pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-g-five-card-shop-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Restored five-card row/resource strip, three Role slots plus two full-roster slots, locks/reroll/purchase, Destination panel and hotkeys 1\u20135",
+      "linux": "installed overview observed: five cards, localized open captions and Destination; interactions pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-h-champion-combat-20261103",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "MOBA base champions: PK-01 spacing, spawn, walk/idle, facing, melee/ranged releases, powered/secondary shots, muzzle flashes, lunge/recoil, footfalls, hit/heal, specials, status links, rolling casks, transport, summons, visible death and fog removal",
+      "linux": "installed battle overview and 30 focused contracts passed; complete motion matrix pending",
+      "windows": "pending (P81)",
+      "web": "pending (P81)",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-i-walk-and-route-exits",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Champion walking on local and online clocks, scaled cadence, road and bridge grounding, immediate lane exits, allied crowd pressure, Minion body spacing and solid obstacles",
+      "linux": "focused movement contracts passed; motion comparison pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-j-scaled-champion-range",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Champion attack and cast reach, stance, muzzle releases and projectile travel with 3\u00d7 world distance; close contact and vision boundaries",
+      "linux": "focused core contracts passed; motion comparison pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-k-aggro-and-nexus-exits",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Committed facing while chasing and attacking, aim release, Nexus spawn heading and widened Mid corridor on both teams",
+      "linux": "focused simulation contracts passed; full motion pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-l-missions-camera-reward-motion",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "Shared MOBA desktop camera capture/edges/focus, personal and Team reward receipts with hidden origins, eight Camps, target commitment, route resumption, crowded Nexus, water/rim pursuit, shared 1v1 gait/attack transitions and 12-unit plaza",
+      "linux": "28 focused tests; installed 0a7b3f241141 native motion/input recorded at 1600x900, personal/Team receipts observed; complete roster/device comparison pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-m-decision-commitment-motion",
+      "date": "2026-11-03",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "M-76 mission/engagement transitions; moving targets and patients; root/channel/recovery; effective motion facing; narrow bridge centres; large cargo ground placement; crowded Nexus and lane/jungle resumption; distant occupied Lane front and passive-camp detours; patient returning after a rejected approach",
+      "linux": "Installed 81b018a389d3 native movement recorded at 1600x900; 45 focused tests, 1118 tick sample and 23345 Attack frames with no Walk clip; see scoped report. Complete roster pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
+    },
+    {
+      "id": "p77-m77-readable-crowd-motion",
+      "date": "2026-11-04",
+      "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
+      "affected_cases": "M-77 crowd motion: planted attackers, walking queues and bridge chokepoints, ring attack places, assist, direction inertia and the 0.2 s gait grace; all champions and Minions in lanes and jungle",
+      "linux": "native 1600x900 lane/plaza and jungle recordings before/after inspected frame by frame; server motion metrics recorded in the P77 report",
+      "windows": "pending",
+      "web": "pending (WASM compile only)",
+      "android": "out of scope"
+    },
+    {
       "id": "forest-blender-study-20261104",
       "date": "2026-11-04",
       "report": "docs/art/BLENDER-FOREST-ARENA.md",
@@ -703,7 +853,30 @@
       "linux": "Blender assembly and sampled auxiliary animation checked; runtime comparison pending",
       "windows": "runtime comparison pending",
       "web": "desktop runtime comparison pending"
+    },
+    {
+      "id": "p78-moba-blender-champions-and-tupi-study",
+      "date": "2026-11-05",
+      "report": "docs/art/BLENDER-TUPI-VALLEY-5V5.md",
+      "affected_cases": "All 5v5 Troops and Minions use the shared 1v1 Blender FigureLibrary meshes, rigs, clips, sockets, glow layers and materials with the existing 3x map adapter; editable Tupi Valley 5v5 arena study assembled from the Blender library",
+      "linux": "scoped native 1600x900 lane capture showed Blender Rootcaller and Hexer figures in a live match; Blender 4.5.15 opened and rendered the study; complete roster/motion/performance coverage pending",
+      "windows": "pending",
+      "web": "pending",
+      "android": "out of scope"
     }
+  ],
+  "moba_motion_screens": [
+    "moba-camera-edges-and-capture",
+    "moba-rewards-personal-team-hidden-origin",
+    "moba-jungle-melee-eight-camps",
+    "moba-nexus-crowd-mission-resume",
+    "moba-water-rim-pursuit-target-commitment",
+    "moba-moving-target-contact-and-recovery",
+    "moba-patient-range-following-and-support-hold",
+    "moba-narrow-bridge-continuous-route",
+    "moba-large-cargo-bridge-release",
+    "moba-lane-detour-passive-camps",
+    "moba-blender-champion-figures-and-tupi-study"
   ],
   "blender_champions": {
     "champions": [

@@ -1,0 +1,42 @@
+//! One fixed simulation tick, split by responsibility.
+
+mod bodies;
+mod combat;
+pub mod decision;
+mod engagement;
+mod movement;
+pub(crate) mod navigation;
+mod outcome;
+mod pathfinding;
+pub(crate) mod placement;
+mod rewards;
+pub(crate) mod spawn;
+mod targeting;
+mod upkeep;
+
+use crate::state::MobaMatch;
+
+impl MobaMatch {
+    /// Advances the match by one tick (1 / `TICK_HZ` s). Intentions for this
+    /// tick must already be applied (see [`crate::host::tick`]).
+    pub fn step(&mut self) {
+        if self.outcome.is_some() {
+            return;
+        }
+        self.tick += 1;
+        upkeep::income(self);
+        spawn::waves(self);
+        spawn::camps(self);
+        crate::champions::tick(self);
+        let positions = self.units.iter().map(|u| u.pos).collect::<Vec<_>>();
+        self.grid.rebuild(positions.into_iter());
+        let engaged = combat::fight(self);
+        let start: Vec<_> = self.units.iter().map(|u| u.pos).collect();
+        movement::advance(self, &engaged);
+        movement::separate(self);
+        movement::settle(self, &start);
+        rewards::resolve_deaths(self);
+        outcome::check(self);
+        crate::vision::remember_structures(self);
+    }
+}
