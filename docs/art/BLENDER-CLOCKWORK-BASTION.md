@@ -12,6 +12,9 @@ field of view.
 
 [Editable Blender project](../media/blender-clockwork-arena/clockwork-bastion.blend)
 
+The [Sand3D gear pilot results](BLENDER-AI-MESH-WORKFLOW.md#clockwork-bastion-pilot-results)
+compare the existing foundry gear set with the fitted involute rims.
+
 ## Model and assemble the arena
 
 1. Build the foundry plateau, banded slate cliffs, coastal shelf and
