@@ -15,6 +15,7 @@ pub mod aim;
 pub mod anim;
 #[cfg(test)]
 mod anim_tests;
+mod blender;
 pub mod celebration;
 mod clips;
 #[cfg(test)]
@@ -138,7 +139,9 @@ fn build_library(
         let mut max_tris = 0;
         for (tier, branch) in FORMS {
             if let Some(kit) = kits::kit(kind) {
-                let mut form = native_form((kit.figure)(tier, branch), &mut meshes);
+                let spec = (kit.figure)(tier, branch);
+                let mut form = blender::form(kind, tier, branch, &spec, &mut meshes)
+                    .unwrap_or_else(|| native_form(spec, &mut meshes));
                 (form.overhead, form.occupancy, form.body_radius) =
                     overhead::height(&form, &meshes, kind, tier, branch);
                 info!(
@@ -318,7 +321,11 @@ fn build_library(
     let shells = FORMS
         .into_iter()
         .map(|(t, b)| {
+            let plan = kits::shatterback::model::plan(t);
             let parts = std::array::from_fn(|i| {
+                if let Some(mesh) = blender::shatter_plate(t, b, i, &plan) {
+                    return meshes.add(mesh);
+                }
                 let spec = kits::shatterback::model::plate(t, b, i);
                 let mesh = figure::build_joint_meshes(&spec)[rig::Joint::Chest.index()]
                     .take()
@@ -343,6 +350,15 @@ fn build_library(
 pub(crate) fn native_form(spec: figure::FigureSpec, meshes: &mut Assets<Mesh>) -> FigureForm {
     let built = figure::build_joint_meshes(&spec);
     let glow = figure::build_glow_meshes(&spec);
+    register_form(spec.plan, built, glow, meshes)
+}
+
+fn register_form(
+    plan: BodyPlan,
+    built: [Option<Mesh>; NODE_COUNT],
+    glow: [Option<Mesh>; NODE_COUNT],
+    meshes: &mut Assets<Mesh>,
+) -> FigureForm {
     let triangles = built
         .iter()
         .chain(&glow)
@@ -355,7 +371,7 @@ pub(crate) fn native_form(spec: figure::FigureSpec, meshes: &mut Assets<Mesh>) -
         overhead: 2.3,
         occupancy: Vec2::new(-0.4, 0.4),
         body_radius: 0.4,
-        plan: spec.plan,
+        plan,
         meshes: handles,
         triangles,
         native: true,
