@@ -8,6 +8,9 @@ and intrinsic colors for both seats. Remove ownership geometry from the
 source, such as chest badges, arm pennants and team tabards. Preserve
 intrinsic material colors and the independent status outline.
 
+For optional Sand3D part generation, AI blockouts and mesh optimization,
+see the [AI-assisted Blender mesh workflow](BLENDER-AI-MESH-WORKFLOW.md).
+
 ## Required Evolution branch identity
 
 Before modeling a new champion, choose a distinct intrinsic accent
