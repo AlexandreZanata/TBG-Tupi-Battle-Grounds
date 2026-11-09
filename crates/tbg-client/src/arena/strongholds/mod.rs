@@ -7,6 +7,7 @@ mod aim;
 mod artillery;
 mod aura;
 mod bastion;
+mod blender;
 mod classic;
 mod command;
 mod damage;
@@ -22,6 +23,11 @@ use bevy::prelude::*;
 use tbg_core::content::LANE_LEN;
 use tbg_core::{StrongholdKind, StrongholdView};
 
+use crate::arena::{
+    blender::packs::{Packs, Status},
+    theme::Theme,
+    ActiveArena,
+};
 use crate::sync::LatestView;
 use crate::visuals::AimTarget;
 use motion::{Gun, Moving};
@@ -141,6 +147,7 @@ pub(crate) struct Tower {
     /// Follows the authoritative view (false for gallery towers).
     live: bool,
     look: Option<Look>,
+    skin: Option<Theme>,
     gun: Option<Gun>,
     /// The aimed gun of the look, if any (`aim.rs`).
     turret: Option<aim::Turret>,
@@ -164,6 +171,7 @@ impl Tower {
             blue: own,
             live,
             look: None,
+            skin: None,
             gun: None,
             turret: None,
             since: f32::MAX,
@@ -208,6 +216,7 @@ fn spawn_towers(
             root,
             &mut tower,
             Look::CLASSIC,
+            None,
         );
         commands
             .entity(root)
@@ -223,40 +232,61 @@ fn sync_looks(
     mut art: ResMut<StrongholdArt>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut towers: Query<(Entity, &mut Tower)>,
+    mut packs: Packs,
+    active: Res<ActiveArena>,
 ) {
-    if !view.is_changed() {
-        return;
-    }
-    let Some(v) = view.0.as_ref() else {
-        return;
-    };
     for (root, mut tower) in &mut towers {
         if !tower.live {
             continue;
         }
         let i = usize::from(!tower.blue);
-        if i == v.you.index() && !info.spectating {
-            commands
-                .entity(root)
-                .insert(crate::ui::UiAction::SelectTower);
-        } else {
-            commands.entity(root).remove::<crate::ui::UiAction>();
+        if view.is_changed() || info.is_changed() {
+            if view
+                .0
+                .as_ref()
+                .is_some_and(|v| i == v.you.index() && !info.spectating)
+            {
+                commands
+                    .entity(root)
+                    .insert(crate::ui::UiAction::SelectTower);
+            } else {
+                commands.entity(root).remove::<crate::ui::UiAction>();
+            }
         }
-        let look = Look::from_view(&v.strongholds[i], v.stronghold_hp[i]);
-        if tower.look == Some(look) {
+        let look = view.0.as_ref().map_or(Look::CLASSIC, |v| {
+            Look::from_view(&v.strongholds[i], v.stronghold_hp[i])
+        });
+        let skin = (look.kind == StrongholdKind::Classic).then_some(active.0);
+        let same_skin = tower.skin == skin;
+        if same_skin && tower.look == Some(look) {
             continue;
         }
-        let same_form = tower.look.is_some_and(|old| {
-            old.kind == look.kind
-                && old.tier == look.tier
-                && old.branch == look.branch
-                && !(old.damage == 20 && look.damage < 20)
-        });
+        let same_form = same_skin
+            && tower.look.is_some_and(|old| {
+                old.kind == look.kind
+                    && old.tier == look.tier
+                    && old.branch == look.branch
+                    && !(old.damage == 20 && look.damage < 20)
+            });
         if same_form {
             tower.look = Some(look);
-        } else {
-            dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
+            continue;
         }
+        let bytes = match blender::pack(&mut packs, look, tower.blue, active.0) {
+            Status::Loading => continue,
+            Status::Ready(bytes) => Some(bytes),
+            Status::Missing => None,
+        };
+        tower.skin = skin;
+        dress(
+            &mut commands,
+            &mut art,
+            &mut meshes,
+            root,
+            &mut tower,
+            look,
+            bytes,
+        );
     }
 }
 
@@ -268,43 +298,18 @@ fn dress(
     root: Entity,
     tower: &mut Tower,
     look: Look,
+    bytes: Option<&[u8]>,
 ) {
     commands.entity(root).despawn_related::<Children>();
-    for piece in pieces(look.kind, look.form()) {
-        let at = piece.placed(tower.blue);
-        if piece.lost < parts::NEVER && piece.motion.is_none() {
-            for (mesh, loss) in art.fragments(piece.def, tower.blue, meshes) {
-                commands.spawn((
-                    Mesh3d(mesh),
-                    MeshMaterial3d(art.material.clone()),
-                    at,
-                    Visibility::Inherited,
-                    damage::Wear::new(0, loss),
-                    ChildOf(root),
-                ));
+    let turret = blender::dress(commands, art, meshes, root, tower, look, bytes);
+    match &turret {
+        None => dress_procedural(commands, art, meshes, root, tower, look),
+        Some(_) if look.kind == StrongholdKind::Classic => {
+            for piece in gunners::pieces(look.kind) {
+                dress_piece(commands, art, meshes, root, tower.blue, piece);
             }
-            continue;
         }
-        let mut child = commands.spawn((
-            Mesh3d(art.mesh(piece.def, tower.blue, meshes)),
-            MeshMaterial3d(art.material.clone()),
-            at,
-            ChildOf(root),
-            damage::Wear::new(0, piece.lost),
-        ));
-        if let Some(motion) = piece.motion {
-            child.insert(Moving { motion, rest: at });
-        }
-    }
-    for (piece, wear) in damage::regions(look.kind) {
-        commands.spawn((
-            Mesh3d(art.mesh(piece.def, tower.blue, meshes)),
-            MeshMaterial3d(art.material.clone()),
-            piece.placed(tower.blue),
-            Visibility::Hidden,
-            wear,
-            ChildOf(root),
-        ));
+        Some(_) => {}
     }
     if look.kind == StrongholdKind::Command {
         aura::spawn(
@@ -319,9 +324,70 @@ fn dress(
     }
     tower.look = Some(look);
     tower.gun = (look.kind == StrongholdKind::Artillery).then(|| artillery::gun(look.form()));
-    tower.turret = aim::turret(look);
+    tower.turret = turret.flatten().or_else(|| aim::turret(look));
     if let Some(t) = tower.turret.filter(|_| tower.target.is_none()) {
         tower.pitch = t.rest_pitch;
+    }
+}
+
+fn dress_procedural(
+    commands: &mut Commands,
+    art: &mut StrongholdArt,
+    meshes: &mut Assets<Mesh>,
+    root: Entity,
+    tower: &Tower,
+    look: Look,
+) {
+    for piece in pieces(look.kind, look.form()) {
+        dress_piece(commands, art, meshes, root, tower.blue, piece);
+    }
+    for (piece, wear) in damage::regions(look.kind) {
+        commands.spawn((
+            Mesh3d(art.mesh(piece.def, tower.blue, meshes)),
+            MeshMaterial3d(art.material.clone()),
+            piece.placed(tower.blue),
+            Visibility::Hidden,
+            wear,
+            ChildOf(root),
+        ));
+    }
+}
+
+fn dress_piece(
+    commands: &mut Commands,
+    art: &mut StrongholdArt,
+    meshes: &mut Assets<Mesh>,
+    root: Entity,
+    blue: bool,
+    piece: Piece,
+) {
+    let at = piece.placed(blue);
+    if piece.lost < parts::NEVER && piece.motion.is_none() {
+        for (mesh, loss) in art.fragments(piece.def, blue, meshes) {
+            commands.spawn((
+                Mesh3d(mesh),
+                MeshMaterial3d(art.material.clone()),
+                at,
+                Visibility::Inherited,
+                damage::Wear::new(0, loss),
+                ChildOf(root),
+            ));
+        }
+        return;
+    }
+    let mut child = commands.spawn((
+        Mesh3d(art.mesh(piece.def, blue, meshes)),
+        MeshMaterial3d(art.material.clone()),
+        at,
+        ChildOf(root),
+        damage::Wear::new(0, piece.lost),
+    ));
+    if let Some(motion) = piece.motion {
+        child.insert(Moving {
+            motion,
+            rest: at,
+            axle: Vec3::Y,
+        });
     }
 }
 

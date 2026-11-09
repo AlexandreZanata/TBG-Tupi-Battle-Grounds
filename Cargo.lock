@@ -6201,6 +6201,7 @@ dependencies = [
  "jiff",
  "jni 0.22.4",
  "keyring-core",
+ "miniz_oxide 0.8.9",
  "open",
  "rfd",
  "semver",

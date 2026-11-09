@@ -12,9 +12,18 @@ mod animate;
 mod models;
 mod palette;
 mod placement;
+mod playable;
 mod structures;
 
-use crate::arena::{scene::ActiveArena, theme::Theme, water};
+use crate::arena::{
+    blender::{
+        self,
+        packs::{Packs, Status},
+    },
+    scene::ActiveArena,
+    theme::Theme,
+    water,
+};
 use crate::sync::LatestView;
 use crate::GameState;
 use bevy::prelude::*;
@@ -52,10 +61,11 @@ pub(super) fn plugin(app: &mut App) {
         .add_systems(
             Update,
             (
-                rebuild_on_theme_change,
                 sync_from_view,
+                rebuild_precincts,
                 animate::clock,
                 animate::visibility,
+                playable::animate,
                 animate::mine,
                 animate::merchant,
                 animate::construction,
@@ -67,7 +77,7 @@ pub(super) fn plugin(app: &mut App) {
 
 #[derive(Resource, Default)]
 struct AuxiliarySceneState {
-    built_theme: Option<Theme>,
+    built: [[Option<Theme>; 2]; 2],
     material: Handle<StandardMaterial>,
     slot_anim: [[SlotAnimState; 2]; 2],
     animation_time: f32,
@@ -89,7 +99,7 @@ struct SlotAnimState {
     delivery_timer: f32,
 }
 
-#[derive(Component, Clone, Copy)]
+#[derive(Component, Clone, Copy, Debug)]
 pub(super) struct AuxPrecinctRoot {
     pub seat: Seat,
     pub kind: AuxiliaryKind,
@@ -191,31 +201,17 @@ fn precinct_material() -> StandardMaterial {
 fn spawn_precincts(
     mut commands: Commands,
     mut state: ResMut<AuxiliarySceneState>,
-    mut meshes: ResMut<Assets<Mesh>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
 ) {
     state.material = mats.add(precinct_material());
-    let theme = Theme::selected();
-    state.built_theme = Some(theme);
     for seat in Seat::BOTH {
         for kind in AuxiliaryKind::ALL {
-            let root = commands
-                .spawn((
-                    Name::new(format!("auxiliary {seat:?} {kind:?}")),
-                    AuxPrecinctRoot { seat, kind },
-                    placement(theme, seat, kind).root,
-                    Visibility::Hidden,
-                ))
-                .id();
-            populate_precinct(
-                &mut commands,
-                &mut meshes,
-                &state.material,
-                root,
-                seat,
-                kind,
-                theme,
-            );
+            commands.spawn((
+                Name::new(format!("auxiliary {seat:?} {kind:?}")),
+                AuxPrecinctRoot { seat, kind },
+                Transform::IDENTITY,
+                Visibility::Hidden,
+            ));
         }
     }
 }
@@ -265,7 +261,6 @@ fn populate_precinct(
     kind: AuxiliaryKind,
     theme: Theme,
 ) {
-    commands.entity(root).despawn_related::<Children>();
     let pal = AuxPalette::for_theme(theme);
     let mut b = Builder {
         commands,
@@ -578,29 +573,57 @@ pub(crate) fn spawn_portrait(
     ));
 }
 
-fn rebuild_on_theme_change(
+fn rebuild_precincts(
     mut commands: Commands,
     active_arena: Option<Res<ActiveArena>>,
     mut state: ResMut<AuxiliarySceneState>,
     mut meshes: ResMut<Assets<Mesh>>,
-    mut roots: Query<(Entity, &AuxPrecinctRoot, &mut Transform)>,
+    roots: Query<(Entity, &AuxPrecinctRoot)>,
+    mut packs: Packs,
 ) {
     let want = active_arena.map_or_else(Theme::selected, |a| a.0);
-    if state.built_theme == Some(want) {
-        return;
-    }
-    state.built_theme = Some(want);
-    for (entity, root, mut transform) in &mut roots {
-        *transform = placement(want, root.seat, root.kind).root;
-        populate_precinct(
-            &mut commands,
-            &mut meshes,
-            &state.material,
-            entity,
-            root.seat,
-            root.kind,
-            want,
-        );
+    let reference = blender::reference();
+    for (entity, root) in &roots {
+        let seat = root.seat.index();
+        let slot = usize::from(root.kind.slot());
+        if !state.slot_anim[seat][slot].hired_seen || state.built[seat][slot] == Some(want) {
+            continue;
+        }
+        let data = if reference {
+            None
+        } else {
+            match packs.get(blender::auxiliary(want, root.kind, root.seat)) {
+                Status::Loading => continue,
+                Status::Ready(bytes) => Some(bytes),
+                Status::Missing => None,
+            }
+        };
+        commands.entity(entity).despawn_related::<Children>();
+        let loaded = data.is_some_and(|bytes| {
+            playable::populate(
+                &mut commands,
+                &mut meshes,
+                &state.material,
+                entity,
+                *root,
+                bytes,
+            )
+        });
+        if !loaded {
+            commands
+                .entity(entity)
+                .insert(placement(want, root.seat, root.kind).root);
+            populate_precinct(
+                &mut commands,
+                &mut meshes,
+                &state.material,
+                entity,
+                root.seat,
+                root.kind,
+                want,
+            );
+        }
+        state.built[seat][slot] = Some(want);
     }
 }
 

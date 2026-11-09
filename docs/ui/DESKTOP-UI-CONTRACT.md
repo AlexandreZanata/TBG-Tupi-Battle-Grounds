@@ -1815,3 +1815,20 @@ pending. Public download compatibility uses the actual running server.
 - Queue runtime comparisons on Linux, Windows and desktop web for
   arena transitions, both auxiliary seats, hire and upgrades, work
   and delivery triggers, payouts and reduced motion.
+
+### 2026-11-09 — Blender Arenas, Strongholds and War Auxiliaries
+
+- Linux remains the reference. The shared Bevy runtime loads the same
+  compressed scene packs on Linux, Windows, desktop web and Android.
+  The active Arena selects the terrain, water, props, foundry gears and
+  Classic Stronghold skins. The other Strongholds use the authoritative
+  kind, Fortification, damage and attack events. War Auxiliary clips
+  follow hire, preparation, upgrades, work and delivery for both seats.
+- Matrix: `blender-arena-{forest,tundra,volcanic,ruins,storm,celestial,clockwork,desert}`,
+  `blender-strongholds-{blue,red,damage}` and
+  `blender-auxiliaries-{construction,mining,delivery,reduced-motion}`.
+  The foundry drive, Stronghold damage and auxiliary clips also use motion
+  frames 0/10/20/40. Match the launch settings and authoritative view.
+- See the [runtime art and validation report](../art/BLENDER-PLAYABLE-ART.md).
+  Visual equivalence remains pending wherever matched runtime observations
+  are absent.

@@ -46,6 +46,8 @@ ewebsock = { version = "0.8", features = ["tls"] }
 tbg-core = { path = "../tbg-core", features = ["training"] }
 # Shared JSON catalogs and bounded HTTP response decoding for native/web UI.
 serde_json = "1"
+# Inflate the on-demand Blender scene packs on desktop, Android and WASM.
+miniz_oxide = "0.8.9"
 # Callback HTTP works on native and WASM without adding an async runtime.
 ehttp = "0.7"
 # Compare release versions using SemVer, including native prerelease identifiers.

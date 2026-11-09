@@ -1,6 +1,13 @@
 //! ARENAS-G: which arena the scene shows, and switching it without a reload.
 
-use super::theme::Theme;
+use super::{
+    blender::{
+        self,
+        packs::{Packs, Status},
+        Model,
+    },
+    theme::Theme,
+};
 use crate::sync::MatchInfo;
 use crate::GameState;
 use bevy::prelude::*;
@@ -23,26 +30,15 @@ pub(crate) struct ArenaScene;
 
 /// The arena the current `ArenaScene` entities were built for.
 #[derive(Resource)]
-struct Built(Theme);
+pub(crate) struct Built(pub(crate) Option<Theme>);
 
 pub(super) fn plugin(app: &mut App) {
     let theme = Theme::selected();
     app.insert_resource(ActiveArena(theme))
-        .insert_resource(Built(theme))
-        .add_systems(Startup, spawn)
+        .insert_resource(Built(None))
         .add_systems(OnEnter(GameState::Menu), preview)
         .add_systems(OnEnter(GameState::InMatch), follow_match)
         .add_systems(Update, switch);
-}
-
-fn spawn(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut mats: ResMut<Assets<StandardMaterial>>,
-    mut images: ResMut<Assets<Image>>,
-    built: Res<Built>,
-) {
-    super::build(&mut commands, &mut meshes, &mut mats, &mut images, built.0);
 }
 
 fn preview(mut active: ResMut<ActiveArena>) {
@@ -61,20 +57,37 @@ fn switch(
     mut fog: Query<&mut DistanceFog>,
     assets: (ResMut<Assets<Mesh>>, ResMut<Assets<StandardMaterial>>),
     mut images: ResMut<Assets<Image>>,
+    mut packs: Packs,
 ) {
-    if active.0 == built.0 {
+    if Some(active.0) == built.0 {
         return;
     }
+    let model = if blender::reference() {
+        None
+    } else {
+        match packs.get(blender::arena(active.0)) {
+            Status::Loading => return,
+            Status::Ready(bytes) => Model::read(bytes),
+            Status::Missing => None,
+        }
+    };
     let (mut meshes, mut mats) = assets;
     for entity in &scene {
         commands.entity(entity).despawn();
     }
-    super::build(&mut commands, &mut meshes, &mut mats, &mut images, active.0);
+    if let Some(model) = model {
+        blender::scenery::spawn(&mut commands, &mut meshes, &mut mats, active.0, model);
+    } else {
+        if !blender::reference() {
+            warn!("Blender scenery pack unavailable: {}", active.0.name());
+        }
+        super::build_procedural(&mut commands, &mut meshes, &mut mats, &mut images, active.0);
+    }
     for mut fog in &mut fog {
         fog.color = active.0.palette().sky;
         fog.falloff = active.0.fog();
     }
-    built.0 = active.0;
+    built.0 = Some(active.0);
 }
 
 #[cfg(test)]
@@ -94,9 +107,21 @@ mod tests {
             .init_asset::<StandardMaterial>()
             .init_asset::<Image>()
             .insert_resource(ActiveArena(Theme::Forest))
-            .insert_resource(Built(Theme::Forest))
-            .add_systems(Startup, spawn)
+            .insert_resource(Built(None))
             .add_systems(Update, switch);
+        blender::packs::plugin(&mut app);
+        for theme in [
+            Theme::Forest,
+            Theme::Tundra,
+            Theme::Volcanic,
+            Theme::Ruins,
+            Theme::Storm,
+            Theme::Celestial,
+            Theme::Clockwork,
+            Theme::Desert,
+        ] {
+            blender::packs::seed(app.world_mut(), blender::arena(theme));
+        }
         app.update();
         let forest = count::<With<ArenaScene>>(&mut app);
         let world = count::<()>(&mut app);

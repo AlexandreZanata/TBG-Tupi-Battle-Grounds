@@ -25,6 +25,7 @@ pub(crate) struct Gun {
 pub(super) struct Moving {
     pub motion: Motion,
     pub rest: Transform,
+    pub axle: Vec3,
 }
 
 /// Gallery towers (not live) fire on their own at the authoritative
@@ -97,7 +98,11 @@ pub(super) fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
         }
         Motion::Aim => rest.with_rotation(aimed),
         Motion::Nocked => {
-            let turn = Quat::from_rotation_y(tower.yaw);
+            let turn = if tower.turret.is_some_and(|turret| turret.orbit) {
+                Quat::from_rotation_y(tower.yaw)
+            } else {
+                Quat::IDENTITY
+            };
             let visible = tower.pending.is_some() || tower.since >= 0.32;
             rest.with_rotation(aimed)
                 .with_translation(turn * rest.translation)
@@ -110,10 +115,10 @@ pub(super) fn pose(moving: &Moving, tower: &Tower, clock: f32) -> Transform {
             // Only the remainder matters for a wheel; it also keeps f32 exact.
             let turns = (tower.shots % 64) as f32 - 1.0 + settle;
             let turns = if tower.shots == 0 { 0.0 } else { turns };
-            rest.with_rotation(rest.rotation * Quat::from_rotation_y(angle * turns))
+            rest.with_rotation(rest.rotation * Quat::from_axis_angle(moving.axle, angle * turns))
         }
         Motion::Turn(speed) => {
-            rest.with_rotation(rest.rotation * Quat::from_rotation_y(clock * speed))
+            rest.with_rotation(rest.rotation * Quat::from_axis_angle(moving.axle, clock * speed))
         }
     }
 }
