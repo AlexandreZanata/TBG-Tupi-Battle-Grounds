@@ -1,4 +1,4 @@
-# Android Native: Blender Champions, Arenas, and Auxiliaries Integration
+# Android Native: Blender Champion Integration (arenas/strongholds pending)
 
 **Status:** Completed and verified on physical hardware (Xiaomi POCO X6 Pro).
 **Branch:** `codex/android-blender-features`.
@@ -10,8 +10,7 @@
 
 This work integrates all consolidated Blender assets from PR #68 through PR #77 into the native Android application:
 - **84+ Blender Champion Models**: Packaged and loaded directly through the Bevy runtime using the 88 `.tbgmesh` assets in `champions/blender/`.
-- **8 Themed Arenas**: Verdant Forest, Frozen Tundra, Volcanic Forge, Ancient Ruins, Storm Valley, Celestial Citadel, Clockwork Bastion, and Desert Relics, with themed terrain, props, and lighting.
-- **Strongholds & War Auxiliaries**: Updated structures (Artillery, Bastion, Command, Treasury) and animated aux sites (Merchant, Miner, Quays) rendered in landscape format.
+- **Arenas, Strongholds, War Auxiliaries: NOT integrated.** On main they exist only as Blender scripts, .blend files and renders (docs/art/BLENDER-*.md list runtime integration as pending). The app still draws the existing procedural arenas and towers.
 - **Physical Device Validation**: Installed and verified live on Xiaomi POCO X6 Pro (`2311DRK48G`, Android 16 / API 36, ARM64-v8a).
 
 ## 2. Compilation and Packaging Steps
