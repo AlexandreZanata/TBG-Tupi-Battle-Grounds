@@ -49,6 +49,6 @@ For a same-build comparison, use the explicit
 `--capture_legacy_art` option in a debug or `ui-acceptance` client. The
 comparison uses the same camera, UI and simulation path.
 
-The Android candidate uses revision 57, after the installed champion-only
+The desktop candidate is 0.1.4-colossus.8. The Android candidate uses revision 57, after the installed champion-only
 revision 56. It is based on the same shared client. Public activation remains
 subject to the existing release and compatibility checks.

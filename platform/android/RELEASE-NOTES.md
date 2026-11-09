@@ -5,6 +5,9 @@ scenery, measured safe touch controls, compact menus and battle HUD, native
 forms, Practice and Training, current champions, Evolution, Fortification,
 War Auxiliaries, War Council and complete match results.
 
+Revision 57 adds the shared Blender Arena scenery, Stronghold models and
+Fortifications, and both animated War Auxiliary precincts.
+
 Install the ARM64 APK on Android 12/API 31 or newer. It uses the same package
 and signing certificate as the reviewed prototype, so a normal in-place
 upgrade keeps its nonsecret preferences. Keep your explicit account-key backup.
