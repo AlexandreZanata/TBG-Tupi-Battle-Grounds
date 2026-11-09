@@ -227,14 +227,14 @@ fn spawn_towers(
 /// Rebuild a live tower whenever its look in the latest view changes.
 fn sync_looks(
     mut commands: Commands,
-    view: Res<LatestView>,
-    info: Res<crate::sync::MatchInfo>,
+    match_view: (Res<LatestView>, Res<crate::sync::MatchInfo>),
     mut art: ResMut<StrongholdArt>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut towers: Query<(Entity, &mut Tower)>,
     mut packs: Packs,
     active: Res<ActiveArena>,
 ) {
+    let (view, info) = match_view;
     for (root, mut tower) in &mut towers {
         if !tower.live {
             continue;

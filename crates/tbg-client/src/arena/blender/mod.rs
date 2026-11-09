@@ -94,7 +94,7 @@ impl<'a> Reader<'a> {
         let mut positions = Vec::with_capacity(count);
         let mut normals = Vec::with_capacity(count);
         let mut colors = Vec::with_capacity(count);
-        for vertex in packed.chunks_exact(12) {
+        for vertex in packed.as_chunks::<12>().0 {
             let [x, y, z, nx, ny, nz, r, g, b] = unpack(vertex);
             positions.push([x / units, y / units, z / units]);
             normals.push(Vec3::new(nx, ny, nz).normalize_or_zero().to_array());
@@ -107,17 +107,23 @@ impl<'a> Reader<'a> {
         let indices = if count <= u16::MAX as usize {
             let bytes = self.take(index_count.checked_mul(2)?)?;
             let values = bytes
-                .chunks_exact(2)
-                .map(|n| u16::from_le_bytes([n[0], n[1]]));
+                .as_chunks::<2>()
+                .0
+                .iter()
+                .copied()
+                .map(u16::from_le_bytes);
             Indices::U16(values.collect())
         } else {
             let bytes = self.take(index_count.checked_mul(4)?)?;
             let values = bytes
-                .chunks_exact(4)
-                .map(|n| u32::from_le_bytes([n[0], n[1], n[2], n[3]]));
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .copied()
+                .map(u32::from_le_bytes);
             Indices::U32(values.collect())
         };
-        if index_count % 3 != 0 || indices.iter().any(|index| index >= count) {
+        if !index_count.is_multiple_of(3) || indices.iter().any(|index| index >= count) {
             return None;
         }
         let mut mesh = Mesh::new(

@@ -49,14 +49,19 @@ fn follow_match(info: Res<MatchInfo>, mut active: ResMut<ActiveArena>) {
     active.set_if_neq(ActiveArena::of(info.arena));
 }
 
+type SceneAssets<'w> = (
+    ResMut<'w, Assets<Mesh>>,
+    ResMut<'w, Assets<StandardMaterial>>,
+    ResMut<'w, Assets<Image>>,
+);
+
 fn switch(
     mut commands: Commands,
     active: Res<ActiveArena>,
     mut built: ResMut<Built>,
     scene: Query<Entity, With<ArenaScene>>,
     mut fog: Query<&mut DistanceFog>,
-    assets: (ResMut<Assets<Mesh>>, ResMut<Assets<StandardMaterial>>),
-    mut images: ResMut<Assets<Image>>,
+    assets: SceneAssets,
     mut packs: Packs,
 ) {
     if Some(active.0) == built.0 {
@@ -71,7 +76,7 @@ fn switch(
             Status::Missing => None,
         }
     };
-    let (mut meshes, mut mats) = assets;
+    let (mut meshes, mut mats, mut images) = assets;
     for entity in &scene {
         commands.entity(entity).despawn();
     }

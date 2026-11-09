@@ -1824,7 +1824,7 @@ pending. Public download compatibility uses the actual running server.
   Classic Stronghold skins. The other Strongholds use the authoritative
   kind, Fortification, damage and attack events. War Auxiliary clips
   follow hire, preparation, upgrades, work and delivery for both seats.
-- Matrix: `blender-arena-{forest,tundra,volcanic,ruins,storm,celestial,clockwork,desert}`,
+- The matrix adds `blender-arena-{forest,tundra,volcanic,ruins,storm,celestial,clockwork,desert}`,
   `blender-strongholds-{blue,red,damage}` and
   `blender-auxiliaries-{construction,mining,delivery,reduced-motion}`.
   The foundry drive, Stronghold damage and auxiliary clips also use motion

@@ -21,7 +21,6 @@ use crate::{
 use bevy::prelude::*;
 use tbg_core::StrongholdKind;
 
-#[derive(Clone)]
 pub(super) struct Part {
     mesh: Handle<Mesh>,
     rest: Transform,
@@ -29,7 +28,6 @@ pub(super) struct Part {
     hide: u8,
 }
 
-#[derive(Clone)]
 pub(super) struct Art {
     parts: Vec<Part>,
     turret: Option<Turret>,
