@@ -45,7 +45,12 @@ pub(super) fn form_index(form: Form) -> usize {
     }
 }
 
-pub(super) fn pack(packs: &mut Packs, look: Look, blue: bool, theme: Theme) -> Status<'_> {
+pub(super) fn pack<'a>(
+    packs: &'a mut Packs<'_>,
+    look: Look,
+    blue: bool,
+    theme: Theme,
+) -> Status<'a> {
     if blender::reference() {
         return Status::Missing;
     }
@@ -105,7 +110,7 @@ fn load(look: Look, blue: bool, meshes: &mut Assets<Mesh>, bytes: &[u8]) -> Opti
         .batches
         .into_iter()
         .map(|batch| {
-            let name = batch.name;
+            let name = batch.name.as_str();
             let mut rest = batch.track[0].1;
             let motion = mechanism(name, primary, look.kind);
             if !blue {
