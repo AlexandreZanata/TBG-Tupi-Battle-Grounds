@@ -42,6 +42,26 @@ contain 301,547 triangles in total (30–49k per Arena), 16 Classic skins
 contain 63,028, 40 selectable seat/forms contain 170,240, and the 32 auxiliary
 precincts contain 229,352. Only the selected assets are requested during play.
 
+## Gallery
+
+The before/after captures for Linux and the physical Android device are in
+[the playable art gallery](blender-playable-gallery/README.md). Linux is the
+reference. Windows, desktop web and Android render with the same shared
+client. That page states the captured scenarios, the capture commit and the
+scenarios still pending.
+
+## Size and performance
+
+- The 96 compressed packs total approximately 8.8 MB. Packs are requested on
+  demand instead of at startup.
+- The eight terrain packs contain 301,547 triangles, the 16 Classic skins
+  63,028, the 40 seat/fortification packs 170,240 and the 32 auxiliary
+  precincts 229,352.
+- The Android ARM64 release APK is 127,002,880 bytes.
+- A pack is requested only when its Arena is selected, its Stronghold
+  appearance changes or an auxiliary is hired. A missing pack falls back to
+  the previous procedural art.
+
 ## Validation
 
 The desktop visual contract lists the affected screens and motion cases.
