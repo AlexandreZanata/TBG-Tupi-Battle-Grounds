@@ -3464,3 +3464,116 @@ The combined candidate classifies `protocol/social.rs` with the other wire-only
 modules in `ruleset-sources.txt`. The frozen standard emoji asset table stays
 in `protocol.rs`; its hexadecimal identifiers are not simulation operations.
 No watched source, R16 fingerprint or simulation guard changes for this move.
+
+
+### D-112 — The 5v5 MOBA mode is a separate workspace (P76, 2026-11-03, Proposed)
+
+**Decision.** TBG Arena 5v5 lives in `moba/`, a Cargo workspace of its own
+(`tbg-moba-core`, `tbg-moba-server`, `tbg-moba-client`) with its own lock
+file, CI workflow (`moba.yml`), installer and binaries. It has no dependency
+on `crates/*` and the 1v1 crates have none on it. Its rules, glossary and
+numbers are Proposed and unbalanced in `docs/moba/GAME-DESIGN-MOBA.md`; its
+wire protocol v1 and authority rules are immutable contracts in
+`docs/moba/CONTRACTS.md`.
+
+**Why.** The owner asked for a mode that cannot interfere with the 1v1
+game. Root `Cargo.toml`/`Cargo.lock` are 1v1 desktop release inputs
+(`scripts/native_release_policy.py`): adding members there would force a 1v1
+version bump and publication on merge, and Cargo feature unification could
+change 1v1 builds. A separate workspace removes both risks; the lock file
+was copied from the root so dependency versions stay the audited set.
+
+**Design choice.** The mode keeps TBG's identity — players buy Troops and
+send them to a Destination — and adds one steerable Commander per player
+with a role, on a three-lane map with a jungle, as in the owner's reference
+image. Bots fill every empty seat through the same intentions as humans.
+
+**Reopen when** the owner wants the mode inside the 1v1 launcher or server,
+shared crates between modes become worth their coupling, or balance work
+(only on explicit request) needs a lab like D-33.
+
+**Amendment (owner, 2026-11-03).** Both modes share the same champions and
+the same battle HUD language. The MOBA now depends read-only on
+`crates/tbg-core` (roster, stats, prices, pool) and compiles the 1v1 figure
+sources (`crates/tbg-client/src/art`, `vfx/impacts.rs`, `vfx/shots.rs`) in
+place, loading the 1v1 battle assets, so its Troops and Commanders are the
+1v1 champions with their rigs, animations, shots and impacts. Nothing in
+`crates/` is edited, so the 1v1 build and release inputs stay unchanged;
+the MOBA workflow also runs when those shared files change. A shared art
+crate remains the cleaner end state and needs a 1v1 release (owner gate).
+
+
+**D-112 second amendment (owner, 2026-11-03, P77 / M-65–M-66).**
+The owner clarified that 5v5 is strategy-only: no player has a champion that
+represents them, no player controls a champion, and movement skill must not
+be required. Buy a champion and choose its Lane/Jungle Destination each
+time; all subsequent movement and combat are authoritative and automatic.
+Remove the Commander avatar/XP/respawn/fountain/manual-order model.
+Troop kills now supply the scoreboard/K/D, preserving their existing card
+bounty and removing avatar rewards. Role Shop filters never restrict a
+purchase's Destination. Left-button ground dragging pans the camera; HUD
+and minimap gestures stay separate. Protocol v2 removes avatar readouts and
+rejects reserved manual-order variants. This supersedes the earlier
+steerable-Commander choice and P78 Commander-kit backlog, affects only
+`moba/`, and authorizes no 1v1 edit, balancing, push, merge or deployment.
+
+
+**D-112 third amendment (owner, 2026-11-03, P77 / M-50, M-67–M-69).**
+The owner requested full live vision over the entire allied half, enemy-half
+vision only around allied troops already on that side, and allied vision
+around a destroyed enemy Tower. The river centre line divides the home
+halves; both Teams see that line. Troops and Minions count as scouts only
+after crossing it. A destroyed Tower permanently reveals its original sight
+circle until the next match, reusing the existing 9-unit Tower sight
+rather than introducing a new radius. All home territory stays visible
+after home Tower losses. This is the owner's custom rule; no claim of exact
+League of Legends gameplay parity is made. The server still omits hidden
+units/events and owns combat. Clients derive the same territory from the
+shared map and public standing Towers; protocol v2's schema is unchanged.
+
+
+**D-112 fourth amendment (owner, 2026-11-03, P77 / M-19–M-20).**
+Restore the original five-card layout. Slots 1–3 draw only the player's Role
+Archetypes; slots 4–5 draw from the full shared roster. All five remain
+distinct across purchase/reroll/locks; destinations remain unrestricted.
+Protocol v3 advertises the new five-offer/five-mask PrivateView schema.
+
+
+**D-112 fifth amendment (owner, 2026-11-03, P77 / M-70–M-71).**
+The owner clarified that space block means spacing and collisions between
+champions, and requested real abilities in automatic combat. Share the
+1v1 authored body envelopes, base ability and OnHit parameters, rigs,
+animations and projectile release logic. The separate 5v5 engine resolves
+contacts, radii and lines in two dimensions and keeps credit per Seat.
+No player orders or avatar are added. Base ability execution moves from
+P78 into P77; selectable Evolutions and a full visual comparison remain
+separate work. No 1v1 source or release inputs are changed.
+
+
+**D-112 sixth amendment (owner, 2026-11-03, P77 / M-66, M-73–M-75).**
+Remove automatic edge camera panning. Keep each champion's basic Lane or
+Jungle mission through combat, including waiting for first-spawn Camps.
+Use deterministic body-aware navigation and stable target commitment,
+release proved inaccessible targets, and preserve immediate Nexus spawns,
+soft allied pressure, champion 3× reach and all economy values. Water is
+now blocked outside the shared crossings; enlarge the plaza radius from
+10 to 12 as a Proposed implementation value so the widest existing body
+has a valid crossing. Bridges retain their size. Reuse authoritative last-hit
+Credit and emit personal/Team Gold receipts with vision-safe origins.
+Protocol v4 adds activity and receipt fields; no manual intentions return.
+Reuse the 1v1 rigs/clips read-only. Validate focused cases and Linux motion,
+install locally, and do not push, merge or deploy. Windows/web verification
+remains required before any claim of desktop visual correspondence.
+
+
+### D-112 seventh amendment — M-76 decision coherence (2026-11-03)
+
+The owner reported remaining 5v5 stalls and target oscillation and requested
+stable automatic missions and fluid 1v1-style combat at 5v5 scale. Implement
+separate mission/engagement/navigation responsibilities, explicit decision
+phases and reasons, patient retention, continuous narrow-crossing graph
+connections and body-safe cargo release. Keep authoritative deterministic
+rules, shared read-only 1v1 rigs/clips, existing balance values and protocol
+v4. Record safeguards as Proposed M-76. Validate focused scenarios under the
+host lock and observe native Linux movement; Windows/web parity remains
+pending until observed. No push, merge or deployment is authorized.

@@ -1281,6 +1281,220 @@ Desktop/390 x 844 PT/EN landing observations are in
 in-game parity evidence: Windows pixel/motion and physical ARM64/16 KB remain
 pending. Public download compatibility uses the actual running server.
 
+## P76 — TBG Arena 5v5 (MOBA) client (2026-11-03)
+
+New, separate client `tbg-moba` (`moba/client-moba`), not part of the 1v1
+capture matrix: menu, practice/online match HUD (scoreboard, role columns,
+player card, five Troop cards with rendered portraits, Destination,
+"Comprar e Enviar", minimap with zoom/auto/centre buttons, kill feed,
+toasts, connection and end overlays), the Tupi Valley scene and every unit
+figure, health bar, projectile, spark, death burst and move marker. Linux is
+the reference: offline start, mid-game overview, online join and real X
+input journeys were observed (see the [P76 report](../phases/P76-moba-5v5-foundation.md)).
+Presentation code has no OS-specific branches; the WASM client passes
+`cargo check` without warnings (locally and in the MOBA CI). Windows and desktop web packaging, runtime and pixel/motion
+correspondence are **pending** (P80) and block visual acceptance there.
+
+P76 revision 2 (2026-11-03): the MOBA client now shows the 1v1 champions
+with the shared 1v1 rigs, clips, shots and impacts, and copies the 1v1
+battle HUD language: score plates with crests around the round clock (Gold,
+Kills and Towers replace HP), the Arena chip, the `resources.webp` strip and
+five `shop-card.webp` cards with the 1v1 portraits, texts, Cost and lock.
+Linux offline/overview/fight/lock/reroll/purchase and installed-asset runs
+were observed; Windows and desktop web remain pending (P80).
+
+## P77 A — role Shop slots (2026-11-03)
+
+MOBA only: three centred 166×225 cards, 8 px gaps, unchanged 862 px centred
+resource strip, slot category captions, locks/reroll/purchase, hotkeys 1–3
+for every Role. Shared HUD code on all desktop targets. Linux runtime and
+Windows/web pixel correspondence pending; champion motion unchanged.
+
+## P77 B — jungle monsters (2026-11-03)
+
+Shared MOBA figures use the 1v1 vertex-colour primitives: maned wolves,
+rock golems with moss/crystals, spotted jaguar, squat cururu frogs. Coverage:
+idle breathing, attack bite/lunge/spit, hit flash, death collapse, ground
+emergence on spawn; bones/crystals/moss/lily-pad camp dressing. All desktop
+runtime/motion correspondence remains pending until observed.
+
+## P77 C — team vision (2026-11-03)
+
+Both MOBA cameras use one 256×256 R8 mask. A shared material extension
+samples map-space coordinates per fragment on terrain, scenery, water,
+crystals and structure/monster figures, preserving relief without a floating
+fog plane. Two visibility levels; a cosmetic inner feather. Minimap timers
+use only received visible Camp records. Fog removals skip death cues;
+projectiles into unseen areas are culled. Linux runtime/shader and all
+Windows/web pixel/motion checks pending (P81 for the latter).
+
+## P77 D — valley map refinement (2026-11-03)
+
+Shared MOBA scene: read-only 1v1 pine canopies, bushes, flowers, grass and
+seeded boulders; darker forest floor and dirt jungle paths; sand banks,
+rock/moss rim strata, individual worn cobbles/kerbs, fences/pennants,
+stone bridges, thick plaza island/stairs, raised base courts, braziers,
+river-exit waterfalls, vertex-wave water, flame flicker and cached structure
+damage bands. Warm key/cool ambient, three shadow cascades and distance haze.
+All pixel/motion observations remain pending, including Linux. No platform
+waiver or parity claim; queue overview/lane/camp/base/river checks on all
+three desktop targets at consolidation (Windows/web runtime in P81).
+
+## P77 E — strategy-only Seats and left-drag camera (2026-11-03)
+
+Owner revision: no Commander/avatar, personal HP/XP/respawn panel, Auto
+button, right-click orders or movement markers. Seat crests/role labels
+show public Troop K/D; the player card shows army/tier. Cards still buy and
+send champions to the chosen Lane/Jungle. Left drags beginning on map
+pan by ground intersections, remain captured across HUD boundaries and
+end on release/focus loss. HUD/minimap starts never initiate map dragging;
+minimap navigates the camera, Space/H returns to the Team base. Shared
+input, UI and automatic champion motion on Linux/Windows/web; all gesture,
+pixel and motion observations pending, with no parity claim.
+
+P77 installed Linux observation (2026-11-03, `e0cbfe6c3645`): one
+1600×900 overview from the installed binary loaded the scene, three cards,
+no-avatar Seat HUD and map/minimap fog without game/shader errors. This is
+scoped startup/overview evidence; gesture interactions, full detail/pixel/
+motion coverage, performance and Windows/web remain pending. See the P77
+installation follow-up for the exact command and local screenshot/log.
+
+## P77 F — home-half and conquered Tower vision (2026-11-03)
+
+Owner-requested shared MOBA presentation: the home half is fully revealed,
+including camps/intruders; the enemy half is dim except around invading
+Troops/Minions and permanently conquered Tower sight circles. Map and
+minimap share the core river-boundary/territory model; a scout retreat or
+loss removes its temporary vision, while a Tower clear persists until a
+new match. Coverage includes both Teams, river boundary, all Tower tiers,
+scout movement/death and known structure HP/camp timers/projectiles.
+Linux runtime/pixel/motion observations pending; Windows/web pending (P81).
+
+## P77 G — restored five-card Shop (2026-11-03)
+
+Original 166×225 five-card geometry, 8 px gaps and centred 862 px resource
+strip; three Role captions and two unrestricted captions; hotkeys 1–5.
+Destination sits to the left of the row, restoring the original five-card
+layout. Shared across desktop clients; Linux, Windows/web observations
+pending. Existing champion movement/animations unchanged by the Shop.
+
+
+## P77 H — automatic champion combat presentation (2026-11-03)
+
+Shared desktop MOBA client: PK-01 body spacing, spawn, Walk/Idle with
+interpolated planar motion, facing, the BattleLine release/strike and
+footfall system, authored muzzle flashes, normal and powered shots,
+secondary projectiles, lunge/recoil, hit/heal tint, ability windups and
+resolution, status markers, rolling casks, carried placement, summon
+figures and visible death. Fog removals never produce a death animation.
+Map coordinates and the larger figure scale are the 2D adapter; the
+BattleLine rigs, clips, weapon joints and effects supply the motion.
+Queue every base champion's attack, ability, idle/walk, spawn/hit/death,
+and representative packed engagements across Linux, Windows and web.
+Focused Linux compile and core contract tests are not a motion comparison;
+full motion and cross-platform visual verification remain pending.
+
+Installed Linux overview (`f6d2b000f3ac`): the five-card Shop, localized
+open slots, Destination, territorial fog and live units were observed
+together. Full movement/attack/ability/death and input journeys remain
+pending, along with Windows and desktop web pixel/motion checks. See the
+[P77 installed run](../phases/P77-moba-roles-vision-jungle-map.md#consolidated-linux-playtest-installation-2026-11-03).
+
+
+## P77 I — continuous walking and immediate route exits
+
+The 5v5 client renders the local fixed-step remainder, or a buffered
+server-tick clock online. The shared gait uses the figure's actual world
+scale. Feet follow the road height and the actual bridge deck bounds.
+Purchased Troops and Minions appear at their own exits immediately and
+spread laterally under crowding. Queue straight-line walking, bridge
+approaches, both sides of the base, dense waves and combat contact in
+the desktop motion matrix. Complete Linux, Windows and desktop web
+motion comparisons remain pending.
+
+
+## P77 J — scaled champion attack distance
+
+Champion attacks and direct casts use the same 3× map conversion as
+their figures. The shared client aims and animates the authoritative
+attack at the new distance. Check close melee contact, ranged release
+and projectile travel, support casts, and shots crossing Team vision.
+Focused Linux core checks cover reach and acquisition. Desktop motion
+comparison on Linux, Windows and web remains pending.
+
+
+## P77 K — committed facing and Nexus exits
+
+The shared 5v5 desktop client faces the authoritative target while
+pursuing it, using interpolated endpoints and the existing turn limit.
+A cached aim survives only for an attack clip. New units near their
+Nexus face out of its plinth. The three mirrored route exits and widened
+Mid base corridor use the shared map geometry. Check motion while
+pursuing competing targets, target loss, crowd pressure, and spawn
+heading on every route. Full desktop motion comparisons remain pending.
+
+
+## P77 L — persistent missions, camera capture and reward receipts
+
+Shared desktop presentation: no edge panning; world drags remain captured
+across HUD/minimap until release, focus loss or cursor loss; preserve
+minimap, zoom and base centring. Local Gold notices last 2.5 seconds and
+label Personal/Team; hidden origins are absent. Rigs and clips remain the
+1v1 sources. Actual displacement drives Walk, authoritative Attack/Hold
+keeps the planted stance under lateral pressure, and facing follows the
+locked target smoothly. Water, bridge bounds and the enlarged 12-unit plaza
+come from core map geometry. Large bodies route via the plaza when a
+bridge cannot fit them. Include moving sequences for all eight Camps,
+competing targets, post-kill mission resumption, Nexus crowds, bank/rim
+pursuit, personal/team receipts and every camera capture transition.
+
+28 focused tests passed. Installed Linux revision `0a7b3f241141` has
+recorded moving camera/capture, melee Golem combat, personal/Team receipts
+and crowd/stance evidence at 1600×900; see the P77 report. Windows and desktop web motion/pixel
+comparison remain pending. Shared code and compilation do not prove parity.
+
+## P77 M — stable decision and action transitions (M-76)
+
+The shared 5v5 presentation uses explicit authoritative phases. Preserve the
+locked basic/channel target; independent special aim uses its existing cue.
+Walk faces effective route displacement, including a committed bridge/bank
+detour; planted recovery faces the engagement through soft allied pressure.
+Support follows an eligible patient back into range and holds at an enemy
+front without an eligible action. Mission resumes after target death or a
+proved/sustained blocked pursuit. Cargo with larger bodies appears on valid
+ground beside the same bank, then follows its inherited mission.
+
+Required motion cases: moving target plus competing enemies; patients
+crossing action range; root/channel/recovery; target death/carried invalidity;
+Top/Mid/Bot/Jungle resumption; narrow bridge centres with Bulwark/Sawbot,
+large-body plaza detours and crate opening on a bridge; Nexus crowd pressure.
+Rigs, clips, slew, blending and map geometry remain shared across Linux,
+Windows and desktop web. Focused core assertions do not prove visual parity.
+Linux follow-up observation is recorded in the P77 delivery report;
+Windows/web comparison and complete roster motion remain pending.
+
+M-76 follow-up: include an occupied distant Lane front. Units must visibly
+approach before acquiring a nearby opponent, retain collision clearance,
+and continue after the front clears; they must not wait at the previous
+waypoint for the entire future route to become empty.
+
+Also cover a Lane detouring past passive Golems/Frogs: it must keep its Lane
+mission, move around the camp and leave neutral HP unchanged. This covers
+the Ravager/Leechroot stalls observed in the intermediate Linux recording.
+
+Patient-following coverage includes a formerly unreachable patient returning
+into range, then moving away: successful reacquisition must clear the old
+blocked-route hint and preserve aim/following through recovery.
+
+Installed Linux `81b018a389d3`: scoped Top/plaza/camp-view motion and decision
+traces recorded, 45 distinct focused tests passed. See the P77 installed M-76
+delivery for commands, moving evidence, metrics and deferred platforms.
+
+M-77 readable crowd motion (2026-11-04): server-side planted anchoring,
+sampled steering, direction inertia, attack places and assist, plus a 0.2 s
+client gait grace through queue stops. Linux 1600x900 recordings of a lane
+plaza fight and a jungle view before/after were inspected frame by frame;
+Windows and desktop web remain pending.
 ### 2026-11-04 — Blender Archer and Bone Brute
 
 - Replace all five figures for both champions in the shared FigureLibrary.
@@ -1815,3 +2029,30 @@ pending. Public download compatibility uses the actual running server.
 - Queue runtime comparisons on Linux, Windows and desktop web for
   arena transitions, both auxiliary seats, hire and upgrades, work
   and delivery triggers, payouts and reduced motion.
+
+## P78 — Blender champion figures in TBG Arena 5v5 (2026-11-05)
+
+The 5v5 MOBA client now compiles the shared 1v1 `FigureLibrary` and the
+Blender `tbgmesh` champion assets. Every 5v5 Troop and Minion form uses the
+exact 1v1 mesh, rig, clip set, weapon sockets, glow layer and
+team-independent material. The existing 3× map adapter, authoritative
+timing, crowd motion and camera scale are unchanged; allegiance stays on the
+feet circle. The new Tupi Valley Blender study recreates the 5v5 map as an
+editable authoring project with reusable forest-library collections. It is
+not yet the runtime map; runtime map integration remains pending.
+
+Affected cases: all eight Shop roles and every Troop/Minion Evolution form
+in both lanes and the jungle; spawn, idle, walk, pursuit, attack, windup,
+recovery, support, hit, death and celebration; both seats, both teams, both
+camera cameras and the minimap. The match-framed Blender review covers the
+valley overview, plaza, bridges, both bases, Towers, camps and the component
+board.
+
+- Linux: merged shared art compiles, and a scoped native 1600×900 lane
+  capture showed the Blender Rootcaller and Hexer figures in a live 5v5
+  match. Full roster, motion and performance coverage remains pending.
+- Windows and desktop web: pending; shared code and a Linux capture are not
+  parity evidence.
+- Blender study: opened and rendered with Blender 4.5.15; 2,244 scene
+  objects and 321,922 authored triangles. Runtime batching, fog, water,
+  Tower damage and platform correspondence remain pending.

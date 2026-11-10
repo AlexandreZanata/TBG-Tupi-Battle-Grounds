@@ -1,0 +1,257 @@
+//! MOBA content tables. Every number is **Proposed** and unbalanced
+//! (`docs/moba/GAME-DESIGN-MOBA.md` §6); balance waits for an explicit owner request.
+
+use crate::geom::MM;
+use crate::types::{Champion, MinionKind, NeutralKind, Role, TowerTier, UnitKind};
+use tbg_core::types::Archetype;
+
+/// Simulation ticks per second (M-01).
+pub const TICK_HZ: u32 = 20;
+/// Hard match limit: 25 minutes (M-30).
+pub const MATCH_TICKS: u32 = 25 * 60 * TICK_HZ;
+
+pub const fn secs(s: u32) -> u32 {
+    s * TICK_HZ
+}
+
+/// Per-unit combat and movement stats; distances in millimetres.
+#[derive(Clone, Copy, Debug)]
+pub struct Stats {
+    pub hp: i32,
+    pub damage: i32,
+    pub range: i32,
+    pub attack_ticks: u16,
+    /// Millimetres per tick; 0 = immobile.
+    pub speed: i32,
+    /// Percent of incoming damage ignored.
+    pub armor: i32,
+    /// Distance at which the unit notices enemies.
+    pub sight: i32,
+    pub radius: i32,
+    /// HP mended per attack on the most injured ally in range (healers).
+    pub heal: i32,
+    /// Radius around the target that also takes splash damage.
+    pub splash: i32,
+}
+
+const fn u(units_x10: i32) -> i32 {
+    units_x10 * MM / 10
+}
+
+/// Units/s × 10 → mm/tick.
+const fn speed(units_x10: i32) -> i32 {
+    units_x10 * MM / 10 / TICK_HZ as i32
+}
+
+const fn stats(hp: i32, damage: i32, range_x10: i32, attack_ticks: u16, speed_x10: i32) -> Stats {
+    Stats {
+        hp,
+        damage,
+        range: u(range_x10),
+        attack_ticks,
+        speed: speed(speed_x10),
+        armor: 0,
+        sight: u(80),
+        radius: u(6),
+        heal: 0,
+        splash: 0,
+    }
+}
+
+pub fn base_stats(kind: UnitKind) -> Stats {
+    match kind {
+        // Retained wire tag, never part of an active match (M-65).
+        UnitKind::Commander(_) => stats(0, 0, 0, 1, 0),
+        UnitKind::Minion(MinionKind::Melee) => {
+            minion_stats(Champion::Shieldbearer, stats(300, 14, 16, 20, 32))
+        }
+        UnitKind::Minion(MinionKind::Ranged) => {
+            minion_stats(Champion::Archer, stats(200, 18, 60, 24, 32))
+        }
+        UnitKind::Troop(kind) => troop_stats(kind),
+        UnitKind::Neutral(kind) => neutral_stats(kind),
+        UnitKind::Tower(tier, _) => Stats {
+            hp: match tier {
+                TowerTier::Outer => 2500,
+                TowerTier::Inner => 2800,
+                TowerTier::Base => 3000,
+                TowerTier::Nexus => 3500,
+            },
+            sight: u(90),
+            radius: u(16),
+            ..stats(0, 120, 90, 20, 0)
+        },
+        UnitKind::Stronghold => Stats {
+            sight: u(100),
+            radius: u(40),
+            ..stats(6000, 150, 100, 20, 0)
+        },
+    }
+}
+
+/// Match the existing 95% Minion mesh scale to the corresponding 1v1 body.
+pub const MINION_SCALE_PERCENT: i32 = 95;
+
+fn minion_stats(profile: Champion, mut stats: Stats) -> Stats {
+    stats.radius =
+        tbg_core::content::occupancy::footprint(profile, 0).body * MINION_SCALE_PERCENT / 100;
+    stats
+}
+
+/// Keep the 1v1 profiles and scale their reach with the larger 5v5 figures (M-18).
+fn troop_stats(kind: Champion) -> Stats {
+    let def = tbg_core::content::def(kind);
+    Stats {
+        hp: def.hp,
+        damage: def.damage,
+        range: champion_range(def.range),
+        attack_ticks: def.interval.max(1),
+        speed: def.speed * CHAMPION_SPEED_FACTOR,
+        armor: if def.archetype == Archetype::Tank {
+            20
+        } else {
+            0
+        },
+        sight: u(80),
+        radius: tbg_core::content::occupancy::footprint(kind, 0).body * CHAMPION_FIGURE_SCALE,
+        heal: def.heal,
+        splash: def.splash,
+    }
+}
+
+/// Shared scale for the champion rig and its body reservation (M-70).
+pub const CHAMPION_FIGURE_SCALE: i32 = 3;
+
+/// Project an authored champion cast distance into 5v5 world millimetres.
+pub const fn champion_range(range: i32) -> i32 {
+    range * CHAMPION_FIGURE_SCALE
+}
+
+/// Champion walking speed multiplier over its 1v1 value (Proposed).
+pub const CHAMPION_SPEED_FACTOR: i32 = 4;
+/// Gold per 1v1 Energy point of a champion's price (Proposed).
+pub const GOLD_PER_ENERGY: u32 = 6;
+
+/// Gold price on the Shop card: the 1v1 Energy cost in Gold (M-10).
+pub fn troop_cost(kind: Champion) -> u32 {
+    tbg_core::content::def(kind).cost / tbg_core::content::ENERGY_SCALE * GOLD_PER_ENERGY
+}
+
+/// Redrawing the unlocked offers costs one 1v1 Energy in Gold (M-19).
+pub const REROLL_COST: u32 = GOLD_PER_ENERGY;
+/// Splash victims around a champion's target take this percent of the hit (M-07).
+pub const SPLASH_PERCENT: i32 = 50;
+/// Five Shop slots: three role-filtered and two unrestricted (Proposed, M-19/M-20).
+pub const OFFERS: usize = 5;
+pub const ROLE_OFFERS: usize = 3;
+
+/// Per-slot categories, derived separately for future player-selected rules (M-20).
+pub fn slot_rules(role: Role) -> [&'static [Archetype]; OFFERS] {
+    let allowed: &'static [Archetype] = match role {
+        Role::Top => &[Archetype::Dps, Archetype::Tank],
+        Role::Mid => &[Archetype::Control, Archetype::Dps],
+        Role::Bot => &[Archetype::Ranged, Archetype::Dps],
+        Role::Support => &[Archetype::Support, Archetype::Control],
+        Role::Jungle => &[Archetype::Dps, Archetype::Tank, Archetype::Ranged],
+    };
+    const ALL: &[Archetype] = &[
+        Archetype::Tank,
+        Archetype::Dps,
+        Archetype::Support,
+        Archetype::Ranged,
+        Archetype::Control,
+    ];
+    [allowed, allowed, allowed, ALL, ALL]
+}
+
+/// Bits follow the shared Archetype order: Tank, Dps, Support, Ranged, Control.
+pub fn archetype_mask(rules: &[Archetype]) -> u8 {
+    rules.iter().fold(0, |mask, kind| mask | (1 << *kind as u8))
+}
+
+/// Alive Troops one player may own at once (M-11).
+pub const TROOP_CAP: u8 = 8;
+
+// Economy (M-12..M-16).
+pub const START_GOLD: u32 = 60;
+pub const GOLD_PER_SECOND: u32 = 1;
+pub const ESSENCE_EVERY_TICKS: u32 = secs(10);
+pub const MINION_BOUNTY: u32 = 4;
+pub const TOWER_TEAM_BOUNTY: u32 = 25;
+pub const TOWER_TEAM_ESSENCE: u32 = 2;
+
+/// Troop upgrade tiers bought with Essence (M-17).
+pub const MAX_TIER: u8 = 5;
+pub const TIER_PERCENT: i32 = 10;
+
+pub fn upgrade_cost(tier: u8) -> u32 {
+    15 + 10 * tier as u32
+}
+
+// Waves and camps (M-23..M-25).
+pub const FIRST_WAVE_TICK: u32 = secs(10);
+pub const WAVE_EVERY_TICKS: u32 = secs(30);
+pub const WAVE: [MinionKind; 5] = [
+    MinionKind::Melee,
+    MinionKind::Melee,
+    MinionKind::Melee,
+    MinionKind::Ranged,
+    MinionKind::Ranged,
+];
+pub const CAMP_LEASH: i32 = 9 * MM;
+/// Lane units advance to the next waypoint inside this radius.
+pub const WAYPOINT_RADIUS: i32 = 2 * MM;
+
+/// Monster tables are Proposed placeholders, not a balance pass (M-60/M-64).
+fn neutral_stats(kind: NeutralKind) -> Stats {
+    use NeutralKind::*;
+    let (hp, damage, range, interval, pace, armor, radius) = match kind {
+        Small => (350, 16, 16, 20, 30, 0, 6),
+        Big => (900, 35, 20, 24, 28, 0, 12),
+        WolfAlpha => (600, 30, 18, 16, 42, 0, 10),
+        WolfPup => (180, 12, 14, 16, 45, 0, 5),
+        Golem => (1200, 32, 20, 30, 20, 25, 12),
+        SmallGolem => (450, 14, 16, 30, 22, 20, 7),
+        Jaguar => (1000, 70, 20, 20, 40, 5, 12),
+        Frog => (750, 28, 60, 24, 28, 0, 10),
+        SmallFrog => (240, 12, 50, 24, 30, 0, 6),
+    };
+    Stats {
+        armor,
+        radius: u(radius),
+        ..stats(hp, damage, range, interval, pace)
+    }
+}
+
+/// Last-hit Gold and Essence; no avatar or XP progression (M-64/M-65).
+pub fn neutral_rewards(kind: NeutralKind) -> (u32, u32) {
+    use NeutralKind::*;
+    match kind {
+        Small => (6, 0),
+        Big => (15, 2),
+        WolfAlpha => (18, 1),
+        WolfPup => (5, 0),
+        Golem => (20, 2),
+        SmallGolem => (6, 0),
+        Jaguar => (32, 3),
+        Frog => (18, 2),
+        SmallFrog => (6, 0),
+    }
+}
+
+/// Composition and seconds after a full clear (M-60/M-63).
+pub fn camp_content(kind: crate::types::CampKind) -> (&'static [NeutralKind], u32) {
+    use crate::types::CampKind;
+    use NeutralKind::*;
+    match kind {
+        CampKind::Wolves => (&[WolfAlpha, WolfPup, WolfPup, WolfPup], secs(45)),
+        CampKind::Golems => (&[Golem, SmallGolem, SmallGolem], secs(75)),
+        CampKind::Jaguar => (&[Jaguar], secs(90)),
+        CampKind::Frogs => (&[Frog, SmallFrog, SmallFrog], secs(60)),
+    }
+}
+
+/// Shared authoritative sight radius in millimetres (M-50/M-55).
+pub fn sight(kind: UnitKind) -> i32 {
+    base_stats(kind).sight
+}

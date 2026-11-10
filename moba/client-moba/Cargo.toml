@@ -1,0 +1,48 @@
+# tbg-moba-client: Bevy client for the 5v5 MOBA mode (native desktop + WASM).
+# Renders snapshots and sends MobaIntentions; online outcomes stay server-owned.
+
+[package]
+name = "tbg-moba-client"
+version = "0.1.0"
+edition.workspace = true
+rust-version.workspace = true
+license-file = "../../LICENSE"
+
+[[bin]]
+name = "tbg-moba"
+path = "src/main.rs"
+# The path-shared 1v1 art sources carry their own tests, which need the 1v1
+# crate around them; they run in the 1v1 workspace.
+test = false
+
+[dependencies]
+tbg-moba-core = { path = "../core-moba" }
+# Shared 1v1 champion content: the client compiles the 1v1 figure sources (D-112).
+tbg-core = { path = "../../crates/tbg-core" }
+# Same explicit Bevy feature set as tbg-client minus audio, glTF and pickers,
+# so both clients share compiled engine artifacts in unified builds.
+bevy = { version = "0.20", default-features = false, features = [
+    "std", "async_executor", "bevy_asset", "bevy_log", "bevy_state",
+    "bevy_winit", "bevy_window", "multi_threaded",
+    "bevy_render", "bevy_core_pipeline", "bevy_pbr", "bevy_light", "bevy_camera",
+    "bevy_color", "bevy_mesh", "bevy_image", "bevy_shader", "bevy_material",
+    # PNG encodes the opt-in --capture screenshots used for visual review.
+    "png",
+    "bevy_ui", "bevy_ui_render", "bevy_text",
+    # The shared 1v1 card frames, crests, icons and portraits are WebP.
+    "webp",
+] }
+# The shared 1v1 art's debug footprint export writes JSON (same as tbg-client).
+serde_json = "1"
+# WebSocket client with one API on native and WASM, already used by tbg-client.
+ewebsock = { version = "0.8", features = ["tls"] }
+
+[target.'cfg(all(not(target_arch = "wasm32"), not(target_os = "android")))'.dependencies.bevy]
+version = "0.20"
+default-features = false
+# Desktop window backends, as in tbg-client.
+features = ["x11", "wayland"]
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# WebGL2 remains browser-only.
+bevy = { version = "0.20", default-features = false, features = ["webgl2"] }
