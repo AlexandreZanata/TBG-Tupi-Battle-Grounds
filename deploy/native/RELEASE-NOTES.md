@@ -1,3 +1,10 @@
+TBG 0.1.4-colossus.9 — Experimental 5v5 bot Practice
+
+The desktop Practice panel can open the optional 5v5 companion to choose
+a Role and play offline with four allied bots and five opposing bots.
+Tupi Valley uses Blender-authored bridges, a plaza, Camp kits, a Nexus
+plinth and Team Towers with damage variants.
+
 TBG 0.1.4-colossus.7 — Blender champion figures
 
 The ten champions in the initial roster have new component-modeled Blender
