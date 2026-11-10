@@ -13,8 +13,6 @@ pub enum Shape {
     Cyl(f32, f32),
     Cone(f32, f32),
     Frustum(f32, f32, f32),
-    /// Six-sided bipyramid: radius, height.
-    Crystal(f32, f32),
     /// Flat disc on the ground plane.
     Disc(f32),
 }
@@ -39,29 +37,12 @@ fn build(shape: Shape) -> Mesh {
         .mesh()
         .resolution(8)
         .into(),
-        Shape::Crystal(r, h) => crystal(r, h),
         Shape::Disc(r) => Circle::new(r)
             .mesh()
             .resolution(20)
             .build()
             .rotated_by(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
     }
-}
-
-fn crystal(r: f32, h: f32) -> Mesh {
-    let ring: Vec<Vec3> = (0..6)
-        .map(|i| {
-            let a = i as f32 / 6.0 * std::f32::consts::TAU;
-            Vec3::new(r * a.cos(), 0.0, r * a.sin())
-        })
-        .collect();
-    let (top, bottom) = (Vec3::Y * h * 0.62, Vec3::NEG_Y * h * 0.38);
-    let mut tris = Vec::new();
-    for i in 0..6 {
-        let (a, b) = (ring[i], ring[(i + 1) % 6]);
-        tris.extend([top, b, a, bottom, a, b]);
-    }
-    triangles(tris.into_iter().map(|p| (p, Color::WHITE)).collect())
 }
 
 /// A non-indexed triangle list with per-vertex colours and flat normals.

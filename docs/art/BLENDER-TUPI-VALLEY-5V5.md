@@ -22,12 +22,13 @@ parts are collection instances; the scene keeps seven named layers:
 - **Valley floor and river.** A 200 × 200 meadow, a diagonal water ribbon,
   sandy banks, ripples and the river bed.
 - **Three lanes, bridges and plaza.** Lane beds, worn flagstones, kerbs,
-  the two stone bridges with rails and lanterns, and the stepped plaza island
-  with its crystal.
+  two stone bridge instances with rails and lanterns, and the plaza island
+  with a separately editable crystal.
 - **Base plateaus and Strongholds.** Grass courts, stone rims, stairs, Nexus
   plinths, the Classic Stronghold and its team banners.
-- **Towers and team pennants.** Separate plinth, shaft, crown, crystal,
-  finial and cloth collections instanced at the 11 Blue and 11 Red positions.
+- **Towers and team pennants.** Editable plinth, shaft, crown, finial and
+  cloth objects in each Team's Tower collection, with separate crystal
+  collections. Both are instanced at the 11 Blue and 11 Red positions.
 - **Jungle camps.** Clearing, outcrops, ferns and a kind-tinted camp crystal
   for Wolves, Golems, Jaguar and Frogs.
 - **Forest edge.** Pines, oaks and understory placed outside lanes, water,
@@ -49,29 +50,35 @@ Use Blender 4.5 LTS from the repository root:
 
 ```sh
 blender -b -t 4 --python-exit-code 1 \
-  --python scripts/blender_tupi_valley_5v5/build.py -- /tmp/tbg-tupi-5v5
+  --python scripts/blender_tupi_valley_5v5/build.py -- /tmp/tbg-tupi-5v5 \
+  --runtime moba/client-moba/assets/valley
 ```
 
-Add `--project-only` after the output directory to write the `.blend` and
-`metrics.json` without rendering. The command writes:
+Add `--project-only` after the output directory to skip rendering.
+`--runtime` optionally exports compact per-piece meshes with baked vertex
+colors for the shared Bevy client. The command writes:
 
 - `tupi-valley-5v5.blend` with `01  Tupi Valley 5v5` and
   `02  Tupi Valley component board`.
-- `tupi-valley-overview.png` (square 1600 px map overview).
-- `tupi-valley-match.png` (1600 × 900 match-framed review).
-- `tupi-valley-kit.png` (1600 × 900 component board).
+- `tupi-valley-overview.png` (square map overview).
+- `tupi-valley-match.png` (16:9 match-framed review).
+- `tupi-valley-kit.png` (16:9 component board).
 - `metrics.json` with collection names, object counts, triangle counts and
   the match-camera values.
 
 ## Observations
 
-Blender 4.5.15 reopened both scenes and all 40 collections. The main scene has
-2,244 objects and 321,922 authored triangles including collection instances;
-the component board has 40 objects and 12,058 triangles. The six base/Tower
-groups, 22 Tower instances, eight camp clearings and all lane/bridge/plaza
-prototypes evaluated complete. The layout was checked against the Rust map
-constants for lane waypoints, river crossing, plaza radius, base radius,
-Tower positions and camp positions.
+Blender 4.5.15 rendered the assembled map, match camera and 24-item
+component board. The two scenes, placements and mesh exports are recorded
+in [metrics.json](../media/blender-tupi-valley-5v5/metrics.json).
+
+Reopen and verify the saved assembly and baked assets:
+
+```sh
+blender -b -t 2 /tmp/tbg-tupi-5v5/tupi-valley-5v5.blend --python-exit-code 1 \
+  --python scripts/blender_tupi_valley_5v5/verify.py -- /tmp/tbg-tupi-5v5 \
+  moba/client-moba/assets/valley
+```
 
 ![Tupi Valley 5v5 overview](../media/blender-tupi-valley-5v5/tupi-valley-overview.png)
 
@@ -79,11 +86,14 @@ Tower positions and camp positions.
 
 ## Runtime scope
 
-The 5v5 **champion** figures now come from the shared 1v1 Blender
-`FigureLibrary` and `tbgmesh` assets: the same meshes, rig, clips, weapon
-sockets, glow layers and team-independent materials, with the existing 3×
-map adapter. The map itself is still assembled by the runtime Rust scene.
-Turning this Blender map study into batched runtime terrain, bridge and prop
-meshes, preserving fog, water animation, Tower damage and platform
-correspondence, remains a separate integration step. This study is an
-authoring reference, not a runtime replacement and not a parity claim.
+The match uses baked Blender bridge decks, the plaza and its crystal,
+four Jungle Camp kits, the Nexus plinth, and Blue and Red Towers. The
+runtime places them at shared map coordinates. Tower damage selects one
+of three baked crowns using the Team's observed HP. The animated crystal
+and structure lifetime continue to follow the existing snapshot-driven
+presentation. The runtime still generates the terrain, lanes, forest,
+base courts and animated water. The editable Blender file includes the
+complete assembly for art review.
+
+Troops and Minions use the shared 1v1 Blender `FigureLibrary` meshes,
+rigs, clips, sockets and materials with the existing 3× map adapter.

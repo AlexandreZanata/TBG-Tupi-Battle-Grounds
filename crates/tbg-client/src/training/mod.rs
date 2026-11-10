@@ -1,6 +1,8 @@
 //! Shared Troops catalog, event-free model viewer and isolated local training lifecycle.
 
 pub(crate) mod catalog;
+#[cfg(tbg_desktop)]
+mod moba;
 mod preview;
 pub(crate) mod runtime;
 mod stage;
@@ -50,6 +52,8 @@ pub enum Action {
     Target(u32),
     Page(i8),
     Practice,
+    #[cfg(tbg_desktop)]
+    Practice5v5,
     Difficulty(u8),
 }
 

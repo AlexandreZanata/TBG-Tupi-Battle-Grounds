@@ -9,7 +9,8 @@
 `moba/` is a **separate Cargo workspace** (`moba/Cargo.toml`, `moba/Cargo.lock`).
 
 - The 1v1 crates never depend on `moba/*`. The MOBA reads the 1v1
-  champions (see §5a) but never edits a 1v1 file.
+  champions (see §5a). The opt-in 1v1 Practice launcher starts the
+  companion executable or navigates to the staged browser client.
 - The root `Cargo.toml`/`Cargo.lock` are untouched, so the 1v1 desktop
   release policy (`scripts/native_release_policy.py`) never sees a MOBA
   change and the 1v1 packages never rebuild because of it.
@@ -21,8 +22,10 @@
   beside the binary. The lock file started as a copy of the
   root lock so dependency versions match the audited 1v1 set.
 
-Integrating the mode into the 1v1 launcher or server later is a separate,
-owner-approved phase (see the P76 backlog).
+The owner requested the 5v5 bot preview in the 1v1 Practice panel on
+2026-11-10. It uses the existing offline MOBA host. Native uses the installed
+companion and desktop web uses a separately staged same-origin WASM page.
+See the [testing entry points](README.md#test-from-the-1v1-practice-panel).
 
 ## 2. Crates
 
@@ -75,10 +78,11 @@ owner-approved phase (see the P76 backlog).
 - `link`: one `Feed` (two latest worlds, private view, events, status) fed by
   either `local` (in-process `MobaMatch` + `host::tick`, offline practice) or
   `online` (`ewebsock`). Everything else reads only the `Feed`.
-- `scene`: the static valley generated once from `core::map` — terrain
-  relief and colour, cobbled lanes, translucent river and bridges, base
-  plateaus with walls and banners, the plaza crystal, camps, forest chunks
-  merged into a few vertex-coloured meshes (one shared material).
+- `scene`: builds the valley from `core::map`, including the generated
+  terrain, lanes, water, base plateaus and forest. The same build assembles
+  the [Blender parts](../art/BLENDER-TUPI-VALLEY-5V5.md) at map positions
+  and applies the shared fog material. Towers and the Nexus plinth are
+  attached to the corresponding authoritative structure snapshots.
 - `units`: one entity per snapshot id, interpolated between the two latest
   worlds, facing movement or target, walk bob, attack lunge; billboard
   health bars; minimap icons on render layer 2; projectiles, sparks, death

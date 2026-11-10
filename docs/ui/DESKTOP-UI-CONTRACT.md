@@ -2056,3 +2056,21 @@ board.
 - Blender study: opened and rendered with Blender 4.5.15; 2,244 scene
   objects and 321,922 authored triangles. Runtime batching, fog, water,
   Tower damage and platform correspondence remain pending.
+
+### 2026-11-10 — 5v5 Practice entry and Blender Tupi Valley parts
+
+- In the Linux reference, the 1v1 Practice panel adds the experimental 5v5
+  action when the companion is available. The companion opens the same
+  bot-only Role screen and Tupi Valley match in both supported languages.
+- Linux, Windows and desktop web use the same Bevy
+  controls, in-process MOBA host, embedded Blender parts, fog and
+  snapshot-driven damage. The platform adapter starts the companion
+  executable or navigates to the local browser bundle.
+- The `moba_practice_screens` matrix covers entry, unavailable or failed launch,
+  the 5v5 menu, returning and starting a fresh match. New motion cases
+  follow Troops over both bridges and the plaza and through Camp/Nexus
+  approaches, and sample each Team's Tower damage and crystal motion.
+  Observe in pt-BR and English at the desktop contract viewports.
+- The Blender previews document the authoring work. Linux, Windows and
+  web in-game captures and exact correspondence are pending. See the
+  [work-front report](../moba/PRACTICE-5V5-REPORT.md).

@@ -6,7 +6,10 @@ use tbg_moba_core::types::{MinionKind, NeutralKind, Side, TowerTier};
 use tbg_moba_core::{Team, UnitKind};
 
 use crate::palette;
-use crate::scene::mesh::{merge, Part, Shape};
+use crate::scene::{
+    blender,
+    mesh::{merge, Part, Shape},
+};
 
 const SKIN: Color = Color::srgb(0.93, 0.76, 0.60);
 const STEEL: Color = Color::srgb(0.72, 0.74, 0.78);
@@ -69,45 +72,7 @@ fn minion(p: &mut Vec<Part>, kind: MinionKind, team: Team) {
     }
 }
 
-fn tower(p: &mut Vec<Part>, tier: TowerTier, team: Team, damage: u8) {
-    let s = if tier == TowerTier::Nexus { 1.15 } else { 1.0 };
-    let trim = palette::team(team);
-    p.push((
-        Shape::Frustum(1.7 * s, 2.2 * s, 1.0),
-        STONE,
-        at(0.0, 0.5, 0.0),
-    ));
-    p.push((Shape::Cyl(1.25 * s, 4.6 * s), STONE, at(0.0, 3.2 * s, 0.0)));
-    p.push((Shape::Cyl(1.32 * s, 0.35), trim, at(0.0, 2.4 * s, 0.0)));
-    p.push((
-        Shape::Frustum(1.75 * s, 1.3 * s, 0.9),
-        Color::srgb(0.5, 0.49, 0.47),
-        at(0.0, 5.9 * s, 0.0),
-    ));
-    for k in 0..6 {
-        if damage > 0 && k % 3 == 0 || damage > 1 && k % 2 == 0 {
-            continue;
-        }
-        let a = k as f32 / 6.0 * std::f32::consts::TAU;
-        p.push((
-            Shape::Box(0.55, 0.6, 0.55),
-            STONE,
-            at(a.cos() * 1.5 * s, 6.6 * s, a.sin() * 1.5 * s),
-        ));
-    }
-    p.push((
-        Shape::Cyl(0.7 * s, 0.3),
-        palette::team_dark(team),
-        at(0.0, 6.5 * s, 0.0),
-    ));
-}
-
 fn stronghold(p: &mut Vec<Part>, team: Team) {
-    p.push((
-        Shape::Cyl(tbg_moba_core::map::NEXUS_PLINTH_RADIUS as f32 / 1000.0, 1.2),
-        STONE,
-        at(0.0, 0.6, 0.0),
-    ));
     p.push((
         Shape::Cyl(4.3, 1.0),
         Color::srgb(0.5, 0.49, 0.47),
@@ -148,7 +113,7 @@ pub fn crystal_offset(kind: UnitKind) -> Option<(f32, f32)> {
 }
 
 pub fn crystal() -> Mesh {
-    merge(&[(Shape::Crystal(0.75, 2.4), Color::WHITE, Transform::IDENTITY)])
+    blender::tower_crystal()
 }
 
 /// Every unit figure, keyed by kind and side.
@@ -175,14 +140,26 @@ impl Models {
 pub fn figure(kind: UnitKind, side: Side, damage: u8) -> Mesh {
     let team = side.team().unwrap_or(Team::Blue);
     let mut p = Vec::new();
-    match kind {
-        UnitKind::Minion(m) => minion(&mut p, m, team),
+    let authored = match kind {
+        UnitKind::Tower(tier, _) => {
+            let scale = if tier == TowerTier::Nexus { 1.15 } else { 1.0 };
+            Some(
+                blender::tower(team, damage)
+                    .transformed_by(Transform::from_scale(Vec3::splat(scale))),
+            )
+        }
+        UnitKind::Stronghold => {
+            stronghold(&mut p, team);
+            Some(blender::nexus_plinth())
+        }
+        UnitKind::Minion(m) => {
+            minion(&mut p, m, team);
+            None
+        }
         UnitKind::Neutral(n) => return super::monsters::figure(n),
-        UnitKind::Tower(tier, _) => tower(&mut p, tier, team, damage),
-        UnitKind::Stronghold => stronghold(&mut p, team),
         // Commanders and Troops are 1v1 champion rigs (champions.rs).
-        UnitKind::Commander(_) | UnitKind::Troop(_) => {}
-    }
+        UnitKind::Commander(_) | UnitKind::Troop(_) => None,
+    };
     if damage > 0 && kind.structure() {
         for k in 0..damage * 3 {
             let angle = k as f32 * 2.4;
@@ -198,7 +175,14 @@ pub fn figure(kind: UnitKind, side: Side, damage: u8) -> Mesh {
             at(0.2, 2.5, -1.28).with_rotation(Quat::from_rotation_z(0.24)),
         ));
     }
-    merge(&p)
+    let Some(mut mesh) = authored else {
+        return merge(&p);
+    };
+    if !p.is_empty() {
+        mesh.merge(&merge(&p))
+            .expect("structure meshes have matching painted attributes");
+    }
+    mesh
 }
 
 /// Visual scale per kind (models are authored at minion size; champion

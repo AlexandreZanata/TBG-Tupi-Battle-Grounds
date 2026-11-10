@@ -863,7 +863,21 @@
       "windows": "pending",
       "web": "pending",
       "android": "out of scope"
+    },
+    {
+      "id": "moba-practice-launch-and-tupi-valley-20261110",
+      "date": "2026-11-10",
+      "report": "docs/moba/PRACTICE-5V5-REPORT.md",
+      "affected_cases": "1v1 Practice entry, bot-only Role menu, return to 1v1, Tupi Valley bridge decks and plaza, eight Camp clearings, Nexus plinths, Team Tower damage bands and animated crystals",
+      "linux": "Blender assembly and exported geometry checked; in-game observations pending",
+      "windows": "pending",
+      "web": "pending"
     }
+  ],
+  "moba_practice_screens": [
+    "practice-1v1-5v5-options-and-companion-launch-error",
+    "practice-5v5-role-selection-and-nine-bot-roster",
+    "practice-5v5-return-to-1v1-and-start-next-match"
   ],
   "moba_motion_screens": [
     "moba-camera-edges-and-capture",
@@ -876,7 +890,9 @@
     "moba-narrow-bridge-continuous-route",
     "moba-large-cargo-bridge-release",
     "moba-lane-detour-passive-camps",
-    "moba-blender-champion-figures-and-tupi-study"
+    "moba-blender-champion-figures-and-tupi-study",
+    "moba-tupi-valley-bridges-plaza-camps-and-nexus-deployment",
+    "moba-tupi-valley-team-tower-intact-damage-destroyed-and-crystal"
   ],
   "blender_champions": {
     "champions": [
