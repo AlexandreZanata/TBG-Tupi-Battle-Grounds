@@ -4,7 +4,11 @@
 //! shows the enemy color and facing, `&damage=1|2` a damage state.
 //! Artillery fires at its authoritative interval so the recoil can be timed.
 
-use super::{dress, Look, StrongholdArt, Tower};
+use super::{blender, dress, Look, StrongholdArt, Tower};
+use crate::arena::{
+    blender::packs::{Packs, Status},
+    theme::Theme,
+};
 use crate::art::palette::INK;
 use crate::{config, GameState};
 use bevy::prelude::*;
@@ -24,16 +28,17 @@ pub(super) fn spawn(
     mut art: ResMut<StrongholdArt>,
     mut meshes: ResMut<Assets<Mesh>>,
     live: Query<Entity, With<Tower>>,
+    mut packs: Packs,
 ) {
     if *done {
         return;
     }
-    *done = true;
     // Hide roots, since wear updates can legitimately re-show their child meshes.
     for root in &live {
         commands.entity(root).insert(Visibility::Hidden);
     }
     if !config::url_param("gallery").is_some_and(|m| m.eq_ignore_ascii_case("strongholds")) {
+        *done = true;
         return;
     }
     let own = config::url_param("enemy").is_none();
@@ -41,6 +46,33 @@ pub(super) fn spawn(
         .and_then(|d| d.parse::<u8>().ok())
         .unwrap_or(0)
         .min(20);
+    let theme = Theme::Forest;
+    let mut waiting = matches!(
+        blender::pack(&mut packs, Look::CLASSIC, own, theme),
+        Status::Loading
+    );
+    for kind in StrongholdKind::SELECTABLE {
+        for (tier, branch) in FORMS {
+            waiting |= matches!(
+                blender::pack(
+                    &mut packs,
+                    Look {
+                        kind,
+                        tier,
+                        branch,
+                        damage
+                    },
+                    own,
+                    theme,
+                ),
+                Status::Loading
+            );
+        }
+    }
+    if waiting {
+        return;
+    }
+    *done = true;
     let mut place = |kind, (tier, branch), x: f32, z: f32| {
         let look = Look {
             kind,
@@ -49,6 +81,7 @@ pub(super) fn spawn(
             damage,
         };
         let mut tower = Tower::new(own, false);
+        tower.skin = (kind == StrongholdKind::Classic).then_some(theme);
         let root = commands
             .spawn((
                 Name::new(format!("gallery {kind:?} {tier}/{branch}")),
@@ -56,7 +89,19 @@ pub(super) fn spawn(
                 Visibility::default(),
             ))
             .id();
-        dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
+        let bytes = match blender::pack(&mut packs, look, own, theme) {
+            Status::Ready(bytes) => Some(bytes),
+            _ => None,
+        };
+        dress(
+            &mut commands,
+            &mut art,
+            &mut meshes,
+            root,
+            &mut tower,
+            look,
+            bytes,
+        );
         commands
             .entity(root)
             .insert((tower, super::damage::Effects::default()));
@@ -122,7 +167,15 @@ pub(super) fn wear_sequence(
         };
         look.damage = stage;
         if *previous == Some(20) && stage == 0 {
-            dress(&mut commands, &mut art, &mut meshes, root, &mut tower, look);
+            dress(
+                &mut commands,
+                &mut art,
+                &mut meshes,
+                root,
+                &mut tower,
+                look,
+                None,
+            );
         } else {
             tower.look = Some(look);
         }

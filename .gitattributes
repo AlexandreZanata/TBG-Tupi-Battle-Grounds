@@ -5,3 +5,4 @@ archive/** -text
 
 # Packed joint-local Blender meshes are byte-for-byte runtime assets.
 *.tbgmesh binary
+*.tbgd binary

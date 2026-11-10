@@ -27,6 +27,6 @@
   "emulator_api": 36,
   "emulator_page_size": 4096,
   "emulator_rendering": "Task-owned Intel Vulkan API36 x86_64; API35 16KB runtime remains unverified",
-  "reference_linux_commit": "177da4a042260bf044cf7f9e323a66fcb89ecfbc",
+  "reference_linux_commit": "b480721d7e62c6eadf432f5dabff7745e35df6a7",
   "emulator_system_image_revision": 7
 }

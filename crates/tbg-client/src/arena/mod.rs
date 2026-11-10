@@ -4,6 +4,7 @@ use crate::art::mesh::{self, Shape};
 use bevy::{light::NotShadowCaster, prelude::*};
 
 mod auxiliaries;
+mod blender;
 pub(crate) use auxiliaries::spawn_portrait as spawn_auxiliary_portrait;
 mod camp;
 mod cliffs;
@@ -31,14 +32,16 @@ mod clearance_tests;
 pub(super) type Part = (Shape, Color, Transform);
 
 pub use scene::ActiveArena;
-pub(crate) use scene::ArenaScene;
+pub(crate) use scene::{ArenaScene, Built as BuiltArena};
 
 pub fn plugin(app: &mut App) {
+    blender::packs::plugin(app);
     scene::plugin(app);
     app.add_systems(
         Update,
         (
             towers::damage_states,
+            blender::scenery::animate,
             life::animate,
             maritime::animate,
             themes::animate,
@@ -59,7 +62,7 @@ pub(super) fn painted(parts: Vec<Part>) -> Mesh {
 }
 
 /// Builds one arena's static scene; every entity carries `ArenaScene`.
-fn build(
+fn build_procedural(
     commands: &mut Commands,
     meshes: &mut Assets<Mesh>,
     mats: &mut Assets<StandardMaterial>,
@@ -67,6 +70,7 @@ fn build(
     theme: theme::Theme,
 ) {
     info!("arena scene: {}", theme.name());
+
     let mut kit = themes::build(theme);
     kit.props
         .retain(|part| !auxiliaries::yields_to_precinct(theme, part));

@@ -51,7 +51,7 @@ fn loop_time(state: &AuxiliarySceneState) -> f32 {
 /// Construction progress in `[0, 1]`: the Miner follows the authoritative
 /// preparation countdown (including Augment pauses); the Merchant builds on
 /// the client clock right after hiring.
-fn build_progress(anim: &SlotAnimState, slot: usize) -> f32 {
+pub(super) fn build_progress(anim: &SlotAnimState, slot: usize) -> f32 {
     if slot == 1 {
         return (anim.since_hire / MERCHANT_BUILD_SECS).clamp(0.0, 1.0);
     }
@@ -321,8 +321,8 @@ pub(super) fn merchant(
     mut parts: Query<(&MerchantPart, &AuxPartOwner, &mut Transform)>,
 ) {
     let t = loop_time(&state);
-    let theme = state.built_theme.unwrap_or_default();
     for (part, owner, mut tr) in &mut parts {
+        let theme = state.built[owner.0.index()][1].unwrap_or_default();
         let anim = &state.slot_anim[owner.0.index()][1];
         if anim.phase == AuxiliaryPhase::Available {
             continue;

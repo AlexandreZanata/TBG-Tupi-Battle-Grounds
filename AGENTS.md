@@ -39,6 +39,8 @@ per-step demands for broad checks. See *Verification* below and
 | `crates/tbg-client` | Bevy client → WASM/WebGL2 |
 | `crates/tbg-server` | Axum/Tokio authoritative server |
 | `crates/tbg-balance` | Offline balance lab: millions of headless matches, gate, search (D-33) |
+| `moba/` | TBG Arena 5v5 (MOBA): separate Cargo workspace — `core-moba`, `server-moba`, `client-moba` (D-112) |
+| `docs/moba/` | MOBA canon, architecture, immutable contracts; start at `docs/moba/README.md` |
 | `archive/` | Legacy project, read-only (`archive/ARCHIVE-MANIFEST.md`) |
 
 ## Non-negotiables
