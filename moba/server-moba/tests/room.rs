@@ -51,7 +51,8 @@ async fn m41_seats_come_from_connections_and_purchases_are_authoritative() {
         "humans are balanced across teams"
     );
 
-    let mut gold = None;
+    // M-04/M-41: the room may have advanced the bot seat before the human joined.
+    let mut starting_troops = None;
     let mut buy_slot = None;
     let mut last_tick = 0;
     for _ in 0..40 {
@@ -62,7 +63,8 @@ async fn m41_seats_come_from_connections_and_purchases_are_authoritative() {
             }
             Some(ServerMsg::Private(p)) => {
                 assert_eq!(p.seat, wa.seat);
-                gold = Some(p.gold);
+                let initial = starting_troops.get_or_insert(p.troops);
+                assert_eq!(p.troops, *initial, "no bot purchases after the human joins");
                 buy_slot = p
                     .offers
                     .iter()
@@ -71,7 +73,8 @@ async fn m41_seats_come_from_connections_and_purchases_are_authoritative() {
             _ => {}
         }
     }
-    assert!(last_tick > 0 && gold.is_some());
+    assert!(last_tick > 0);
+    let starting_troops = starting_troops.expect("server sent the connected seat's private view");
     let buy = ClientMsg::Intention(MobaIntention::BuyTroop {
         slot: buy_slot.expect("seed 11 provides an affordable opening offer") as u8,
         to: Destination::Lane(Lane::Mid),
@@ -79,13 +82,18 @@ async fn m41_seats_come_from_connections_and_purchases_are_authoritative() {
     a.send(Message::Binary(protocol::encode(&buy).into()))
         .await
         .unwrap();
-    let mut troops = 0;
+    let mut troops = starting_troops;
     for _ in 0..40 {
         if let Some(ServerMsg::Private(p)) = next(&mut a).await {
+            assert_eq!(p.seat, wa.seat);
             troops = troops.max(p.troops);
         }
     }
-    assert_eq!(troops, 1, "the server spawned exactly the purchased Troop");
+    assert_eq!(
+        troops,
+        starting_troops + 1,
+        "the server spawned exactly one new Troop for the connected seat"
+    );
 }
 
 #[tokio::test]
