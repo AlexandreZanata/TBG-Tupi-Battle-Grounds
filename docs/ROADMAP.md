@@ -733,14 +733,14 @@ is claimed.
 
 | Phase | Spec | Deliverable | Status | Owner gates |
 |---|---|---|---|---|
-| P76 | [P76-moba-5v5-foundation.md](phases/P76-moba-5v5-foundation.md) | Separate `moba/` workspace: deterministic 5v5 core, authoritative room server, Bevy client with the reference-image valley, the 1v1 champions (shared roster, rigs, Shop rules and portraits) and the 1v1 battle HUD layout, Minion waves, offline practice vs 9 bots, online local room, Linux installer, contracts and CI | **implemented on `phase/p76-moba-core`**; MOBA workspace fmt/clippy/13 contract tests and WASM check passed; Linux runtime and input observed and installed locally; Windows/web correspondence pending; unbalanced by design | look/fun sign-off; when to balance; integration into the 1v1 launcher; P77–P81 order |
+| P76 | [P76-moba-5v5-foundation.md](phases/P76-moba-5v5-foundation.md) | Separate `moba/` workspace: deterministic 5v5 core, authoritative room server, Bevy client with the reference-image valley, the 1v1 champions (shared roster, rigs, Shop rules and portraits) and the 1v1 battle HUD layout, Minion waves, offline practice vs 9 bots, online local room, Linux installer, contracts and CI | **included in the #67 consolidation**; MOBA workspace fmt/clippy/13 contract tests and WASM check passed; Linux runtime and input observed and installed locally; Windows/web correspondence pending; unbalanced by design | look/fun sign-off; when to balance; integration into the 1v1 launcher; P77–P81 order |
 
-P77 is implemented locally on `phase/p77-moba-roles-vision-map`: five Shop
+P77 is included in the #67 consolidation: five Shop
 slots (three Role slots and two open), Team territorial sight, jungle
 monsters, valley refinement, strategy-only Seats, left-drag camera and
 automatic base champion abilities with shared presentation. See the
 [P77 report](phases/P77-moba-roles-vision-jungle-map.md#9-report) for scoped
-validation and pending checks. No push, merge or deployment.
+validation and pending checks.
 
 [P77 — role Shop slots, team vision, jungle monsters and map refinement](phases/P77-moba-roles-vision-jungle-map.md)
 (spec + handoff, owner request 2026-11-03) → P78 1v1 Evolution forms in
