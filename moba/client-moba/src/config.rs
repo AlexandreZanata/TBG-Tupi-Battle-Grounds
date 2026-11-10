@@ -12,6 +12,8 @@ pub const DEFAULT_SERVER: &str = "ws://127.0.0.1:7878/moba/ws";
 pub struct Launch {
     /// Play on a room server instead of offline practice vs 9 bots.
     pub online: bool,
+    /// The 1v1 Practice launcher opens a bot-only menu.
+    pub practice_only: bool,
     /// Room server WebSocket URL.
     pub server: String,
     pub role: Role,
@@ -38,15 +40,17 @@ impl Launch {
                 .cloned()
         };
         let has = |flag: &str| args.iter().any(|a| a == flag);
+        let practice_only = cfg!(target_arch = "wasm32") || has("--practice");
         Self {
-            online: has("--online"),
+            online: !practice_only && has("--online"),
+            practice_only,
             server: value("--online")
                 .filter(|v| v.starts_with("ws"))
                 .unwrap_or_else(|| DEFAULT_SERVER.into()),
             role: value("--role")
                 .and_then(|r| parse_role(&r))
                 .unwrap_or(Role::Support),
-            lang: value("--lang").map_or(Lang::Pt, |l| if l == "en" { Lang::En } else { Lang::Pt }),
+            lang: language(value("--lang").as_deref()),
             play: has("--play") || has("--capture"),
             warp_secs: value("--warp")
                 .and_then(|v| v.parse().ok())
@@ -58,6 +62,34 @@ impl Launch {
             capture: value("--capture"),
             overview: has("--overview"),
         }
+    }
+}
+
+fn language(native: Option<&str>) -> Lang {
+    #[cfg(target_arch = "wasm32")]
+    let browser = web_sys::window()
+        .and_then(|window| window.location().search().ok())
+        .unwrap_or_default();
+    #[cfg(target_arch = "wasm32")]
+    let native = browser
+        .trim_start_matches('?')
+        .split('&')
+        .find_map(|part| part.strip_prefix("lang="))
+        .or(native);
+    match native {
+        Some("en") => Lang::En,
+        _ => Lang::Pt,
+    }
+}
+
+/// Return to the originating 1v1 preview. The native companion closes its window.
+#[cfg(target_arch = "wasm32")]
+pub fn return_to_lobby(lang: Lang) {
+    if let Some(window) = web_sys::window() {
+        let code = if lang == Lang::En { "en" } else { "pt-BR" };
+        let _ = window
+            .location()
+            .assign(&format!("../?practice5v5=1&lang={code}"));
     }
 }
 

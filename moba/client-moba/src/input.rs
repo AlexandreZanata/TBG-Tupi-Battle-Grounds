@@ -191,7 +191,7 @@ pub fn apply(
     mut launch: ResMut<crate::config::Launch>,
     mut next: ResMut<NextState<Screen>>,
     feed: Res<Feed>,
-    mut exit: MessageWriter<AppExit>,
+    #[cfg(not(target_arch = "wasm32"))] mut exit: MessageWriter<AppExit>,
 ) {
     for action in actions.0.drain(..) {
         match action {
@@ -210,12 +210,15 @@ pub fn apply(
             Action::ZoomOut => rig.distance = (rig.distance * 1.25).min(MAX_DISTANCE),
             Action::PickRole(i) => launch.role = Role::ALL[i.min(4)],
             Action::PlayOffline | Action::PlayOnline => {
-                launch.online = action == Action::PlayOnline;
+                launch.online = !launch.practice_only && action == Action::PlayOnline;
                 next.set(Screen::Match);
             }
             Action::PlayAgain => commands.queue(crate::link::restart_local),
             Action::ToMenu => next.set(Screen::Menu),
             Action::Quit => {
+                #[cfg(target_arch = "wasm32")]
+                crate::config::return_to_lobby(launch.lang);
+                #[cfg(not(target_arch = "wasm32"))]
                 exit.write(AppExit::Success);
             }
         }

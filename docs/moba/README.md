@@ -22,7 +22,37 @@ champion meshes from the same `FigureLibrary` and `tbgmesh` assets.
 | [P76 phase spec and report](../phases/P76-moba-5v5-foundation.md) | What was built and validated |
 | [P77 spec and handoff](../phases/P77-moba-roles-vision-jungle-map.md) | Three role Shop slots, team vision, jungle monsters, map refinement, strategy-only combat and left-drag camera |
 | [Reference map](media/reference-map.webp) · [1v1 battle HUD](media/reference-1v1-battle-hud.webp) | Owner visual targets |
-| [Blender Tupi Valley 5v5 study](../art/BLENDER-TUPI-VALLEY-5V5.md) | Editable 5v5 map assembly reusing the Blender library; runtime map integration pending |
+| [Blender Tupi Valley 5v5 study](../art/BLENDER-TUPI-VALLEY-5V5.md) | Editable arena assembly, reusable parts and shared runtime export |
+
+## Test from the 1v1 Practice panel
+
+Open **Practice vs Bot**, then **Play against bots · 5v5 (test)**. Choose your
+Role and start **Practice against 9 bots**. Four bots play on your Team and
+five on the other Team. Use **Back to 1v1** from the 5v5 menu to return.
+The 1v1 difficulty and Arena settings are for the 1v1 match. The 5v5 test
+uses Tupi Valley and the current MOBA bot behavior.
+
+- On **Linux and Windows**, build both clients and set `TBG_MOBA_CLIENT` to
+  the absolute path of the companion executable before opening the 1v1
+  client. The launcher also detects `tbg-moba` (Linux) or `tbg-moba.exe`
+  (Windows) alongside the 1v1 executable.
+- For the **desktop browser**, run `moba/scripts/stage-practice-web.sh`
+  from the repository root. Serve the generated
+  `.local/practice-5v5-web` directory at the server root and open
+  `/?practice5v5=1`. For example, use
+  `python3 -m http.server --bind 127.0.0.1 --directory .local/practice-5v5-web 8000`
+  and open `http://127.0.0.1:8000/?practice5v5=1`.
+
+For a Linux development build with the repository toolchain and native
+dependencies installed:
+
+```bash
+flock -n -E 75 "/tmp/tbg-validation-$(id -u).lock" env CARGO_BUILD_JOBS=2 bash -eu -c '
+  cargo build --locked -p tbg-client --bin tbg-client
+  cargo build --locked --manifest-path moba/Cargo.toml -p tbg-moba-client --bin tbg-moba
+'
+TBG_MOBA_CLIENT="$PWD/moba/target/debug/tbg-moba" target/debug/tbg-client
+```
 
 ## Play on Linux
 

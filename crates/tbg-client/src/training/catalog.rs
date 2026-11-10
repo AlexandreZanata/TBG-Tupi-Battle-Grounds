@@ -345,11 +345,29 @@ fn practice_contents(p: &mut ChildSpawnerCommands, c: &Catalog, assets: &AssetSe
         0.,
         false,
     ));
+    #[cfg(tbg_desktop)]
+    let preview_5v5 = super::moba::available();
+    #[cfg(not(tbg_desktop))]
+    let preview_5v5 = false;
+    let practice_label = if preview_5v5 {
+        "training.play_1v1"
+    } else {
+        "training.play_practice"
+    };
     p.spawn(skin::control(
-        lang.key("training.play_practice"),
+        lang.key(practice_label),
         Action::Practice,
         0.,
         true,
     ))
     .insert(skin::primary());
+    #[cfg(tbg_desktop)]
+    if preview_5v5 {
+        p.spawn(skin::control(
+            lang.key("training.play_5v5"),
+            Action::Practice5v5,
+            0.,
+            false,
+        ));
+    }
 }

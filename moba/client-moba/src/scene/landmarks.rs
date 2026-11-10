@@ -1,12 +1,12 @@
 //! Built places: base plateaus, the river plaza, jungle camps and bridges.
 
 use bevy::prelude::*;
-use tbg_moba_core::map::{self, PLAZA};
+use tbg_moba_core::map;
 use tbg_moba_core::{Lane, Team};
 
-use super::mesh::{hash, merge, Part, Shape};
-use super::nature::rock;
-use super::terrain::{height, v, LANE_HALF_WIDTH};
+use super::blender;
+use super::mesh::{merge, Part, Shape};
+use super::terrain::{height, LANE_HALF_WIDTH};
 use super::to_world;
 use crate::palette;
 
@@ -102,107 +102,21 @@ fn banner(parts: &mut Vec<Part>, at: Vec3, team: Team, angle: f32) {
     ));
 }
 
-pub fn plaza() -> Mesh {
-    let mut parts = Vec::new();
-    let c = v(PLAZA);
-    parts.push((
-        Shape::Cyl(map::PLAZA_RADIUS as f32 + 0.2, 1.7),
-        STONE_DARK,
-        Transform::from_translation(to_world(c.x, c.y, -0.6)),
-    ));
-    flat(
-        &mut parts,
-        c,
-        map::PLAZA_RADIUS as f32 + 0.6,
-        0.27,
-        STONE_DARK,
-    );
-    flat(&mut parts, c, map::PLAZA_RADIUS as f32 - 0.6, 0.3, STONE);
-    flat(&mut parts, c, 4.2, 0.34, Color::srgb(0.30, 0.55, 0.70));
-    flat(&mut parts, c, 3.4, 0.37, STONE);
-    parts.push((
-        Shape::Cyl(2.2, 0.8),
-        STONE_DARK,
-        Transform::from_translation(to_world(c.x, c.y, 0.7)),
-    ));
-    for k in 0..8 {
-        let a = k as f32 / 8.0 * std::f32::consts::TAU + 0.39;
-        let p = c + Vec2::new(a.cos(), a.sin()) * (map::PLAZA_RADIUS as f32 - 1.0);
-        parts.push((
-            Shape::Cyl(0.45, 2.4),
-            STONE,
-            Transform::from_translation(to_world(p.x, p.y, 1.4)),
-        ));
-        parts.push((
-            Shape::Ball(0.5),
-            Color::srgb(0.5, 0.85, 1.0),
-            Transform::from_translation(to_world(p.x, p.y, 2.8)),
-        ));
-    }
-    for side in [-1., 1.] {
-        for step in 0..5 {
-            let q = c + Vec2::ONE.normalize() * (10.4 + step as f32 * 0.8) * side;
-            parts.push((
-                Shape::Box(6.5, 0.2, 0.9),
-                STONE,
-                Transform::from_translation(to_world(q.x, q.y, 0.2 - step as f32 * 0.06))
-                    .with_rotation(Quat::from_rotation_y(std::f32::consts::FRAC_PI_4)),
-            ));
-        }
-    }
-    merge(&parts)
-}
-
-/// The glowing crystal on the plaza pedestal (its own emissive material).
-pub fn plaza_crystal() -> Mesh {
-    let c = v(PLAZA);
-    merge(&[(
-        Shape::Crystal(1.1, 3.6),
-        Color::WHITE,
-        Transform::from_translation(to_world(c.x, c.y, 2.9)),
-    )])
-}
-
-pub fn camps() -> Mesh {
-    let mut parts = Vec::new();
-    for camp in 0..map::CAMP_COUNT {
-        let (pos, _team) = map::camp(camp);
+pub fn camps() -> impl Iterator<Item = Mesh> {
+    (0..map::CAMP_COUNT).map(|camp| {
+        let (pos, team) = map::camp(camp);
         let c = units(pos);
-        let r = map::CAMP_RADIUS as f32;
-        flat(&mut parts, c, r + 0.8, 0.05, Color::srgb(0.30, 0.25, 0.19));
-        flat(&mut parts, c, r - 0.4, 0.08, Color::srgb(0.24, 0.21, 0.17));
-        for k in 0..14 {
-            let a = k as f32 / 14.0 * std::f32::consts::TAU + hash(camp as i32, k, 8);
-            let p = c + Vec2::new(a.cos(), a.sin()) * (r + 0.6);
-            rock(
-                &mut parts,
-                to_world(p.x, p.y, height(p)),
-                0.7 + hash(camp as i32, k, 9) * 0.6,
-                hash(camp as i32, k, 10),
-            );
-        }
-        use tbg_moba_core::types::CampKind;
-        for k in 0..6 {
-            let angle = k as f32 * 1.047 + camp as f32;
-            let p = c + Vec2::new(angle.cos(), angle.sin()) * (r - 1.0);
-            let (shape, color, h) = match map::camp_kind(camp) {
-                CampKind::Wolves => (
-                    Shape::Box(0.22, 0.18, 1.1),
-                    Color::srgb(0.79, 0.73, 0.58),
-                    0.22,
-                ),
-                CampKind::Golems => (Shape::Crystal(0.4, 1.6), Color::srgb(0.28, 0.78, 0.72), 0.8),
-                CampKind::Jaguar => (Shape::Ball(0.55), Color::srgb(0.23, 0.39, 0.15), 0.25),
-                CampKind::Frogs => (Shape::Disc(0.75), Color::srgb(0.29, 0.53, 0.18), 0.12),
-            };
-            parts.push((
-                shape,
-                color,
-                Transform::from_translation(to_world(p.x, p.y, h)),
-            ));
-        }
-    }
-    merge(&parts)
+        // Camp kits are authored on Blue's river bank. Their shore edge faces
+        // the opposite way on Red's side.
+        let yaw = if team == Team::Red {
+            std::f32::consts::PI
+        } else {
+            0.0
+        };
+        let transform = Transform::from_translation(to_world(c.x, c.y, 0.0))
+            .with_rotation(Quat::from_rotation_y(yaw));
+        blender::camp(map::camp_kind(camp)).transformed_by(transform)
+    })
 }
 
 const BRIDGE_LENGTH: f32 = map::BRIDGE_LENGTH as f32 / 1000.0;
@@ -227,34 +141,11 @@ pub fn bridge_surface(point: Vec2) -> Option<f32> {
 }
 
 /// Stone decks where the top and bot roads cross the river.
-pub fn bridges() -> Mesh {
-    let mut parts = Vec::new();
-    for (cross, dir) in bridge_axes() {
-        let yaw = Quat::from_rotation_y(dir.y.atan2(dir.x));
-        let length = BRIDGE_LENGTH;
-        let at = to_world(cross.x, cross.y, 0.25);
-        parts.push((
-            Shape::Box(length, 0.35, LANE_HALF_WIDTH * 2.0),
-            STONE,
-            Transform::from_translation(at).with_rotation(yaw),
-        ));
-        for side in [-1.0, 1.0] {
-            let offset = yaw * Vec3::new(0.0, 0.8, side * LANE_HALF_WIDTH);
-            parts.push((
-                Shape::Box(length, 0.38, 0.6),
-                STONE,
-                Transform::from_translation(at + offset).with_rotation(yaw),
-            ));
-            for k in 0..5 {
-                let along =
-                    yaw * Vec3::new((k as f32 - 2.0) * length / 4.5, 0.4, side * LANE_HALF_WIDTH);
-                parts.push((
-                    Shape::Box(0.8, 1.4, 0.8),
-                    STONE,
-                    Transform::from_translation(at + along),
-                ));
-            }
-        }
-    }
-    merge(&parts)
+pub fn bridges() -> impl Iterator<Item = Mesh> {
+    let deck = blender::bridge();
+    bridge_axes().map(move |(cross, dir)| {
+        let transform = Transform::from_translation(to_world(cross.x, cross.y, 0.0))
+            .with_rotation(Quat::from_rotation_y(dir.y.atan2(dir.x)));
+        deck.clone().transformed_by(transform)
+    })
 }
