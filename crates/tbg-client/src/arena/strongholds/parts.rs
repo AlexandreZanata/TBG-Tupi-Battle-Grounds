@@ -191,6 +191,8 @@ pub(super) fn gear(r: f32, color: Color) -> Vec<Part> {
     parts
 }
 
+type BlenderKey = (u8, usize, bool, Option<u8>);
+
 type DamageFragments = Vec<(Handle<Mesh>, u8)>;
 
 /// Meshes and materials every tower shares: each part is built once per
@@ -199,6 +201,8 @@ type DamageFragments = Vec<(Handle<Mesh>, u8)>;
 pub(crate) struct StrongholdArt {
     pub material: Handle<StandardMaterial>,
     pub ring_material: Handle<StandardMaterial>,
+    pub(super) blender_material: Handle<StandardMaterial>,
+    pub(super) blender: HashMap<BlenderKey, super::blender::Art>,
     meshes: HashMap<(&'static str, bool), Handle<Mesh>>,
     rings: HashMap<(i32, bool), Handle<Mesh>>,
     fragments: HashMap<(&'static str, bool), DamageFragments>,
@@ -220,8 +224,15 @@ impl FromWorld for StrongholdArt {
             cull_mode: None,
             ..default()
         });
+        let blender_material = mats.add(StandardMaterial {
+            cull_mode: None,
+            perceptual_roughness: 0.85,
+            ..default()
+        });
         Self {
             material,
+            blender_material,
+            blender: HashMap::new(),
             ring_material,
             meshes: HashMap::new(),
             rings: HashMap::new(),

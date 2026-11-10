@@ -237,6 +237,7 @@ fn release_frame(tower: &Tower, turret: &Turret) -> Transform {
         let moving = super::motion::Moving {
             motion: piece.motion.unwrap_or(super::parts::Motion::Aim),
             rest: piece.placed(tower.blue),
+            axle: Vec3::Y,
         };
         return super::motion::pose(&moving, tower, 0.0);
     }

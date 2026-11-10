@@ -1,12 +1,17 @@
-# Tupi Battle Grounds — Android beta (0.1.4-colossus.7-android.56)
+# Tupi Battle Grounds — Android beta
 
 Native landscape Android with the current shared Linux game: full-window
 scenery, measured safe touch controls, compact menus and battle HUD, native
-forms, Practice and Training, current champions (including the Blender champion
-meshes now on main), Evolution, Fortification, War Auxiliaries, War Council and
-complete match results. The Blender arena, Stronghold and War Auxiliary studies
-are not yet runtime assets on any platform; the arenas and towers shown are the
-existing procedural ones.
+forms, Practice and Training, Evolution, Fortification, War Auxiliaries, War
+Council and complete match results.
+
+Revision 57 adds the shared Blender Arena scenery, Stronghold models and
+Fortifications, and both animated War Auxiliary precincts.
+
+Revision 56 packaged the 88 Blender champion meshes alongside the procedural
+Arenas, Strongholds and War Auxiliary precincts. The
+[revision 56 report](../../docs/phases/P69-android-blender-integration.md)
+records the lobby and Training Lab checks on a POCO X6 Pro.
 
 Install the ARM64 APK on Android 12/API 31 or newer. It uses the same package
 and signing certificate as the reviewed prototype, so a normal in-place

@@ -154,12 +154,13 @@ fn flag(
 #[allow(clippy::type_complexity)] // Disjoint animation queries keep transform access safe.
 pub(super) fn animate(
     time: Res<Time>,
-    glow: Res<Glow>,
+    glow: Option<Res<Glow>>,
     mut mats: ResMut<Assets<StandardMaterial>>,
     mut flames: Query<(&Flame, &mut Transform), (Without<Cloth>, Without<Foam>)>,
     mut cloth: Query<(&Cloth, &mut Transform), (Without<Flame>, Without<Foam>)>,
     mut foam: Query<&mut Transform, (With<Foam>, Without<Cloth>, Without<Flame>)>,
 ) {
+    let Some(glow) = glow else { return };
     let t = time.elapsed_secs();
     if let Some(mut mat) = mats.get_mut(&glow.material) {
         mat.emissive = LinearRgba::new(

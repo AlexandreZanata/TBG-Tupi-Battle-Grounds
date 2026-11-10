@@ -10,7 +10,7 @@
 
 This work integrates all consolidated Blender assets from PR #68 through PR #77 into the native Android application:
 - **84+ Blender Champion Models**: Packaged and loaded directly through the Bevy runtime using the 88 `.tbgmesh` assets in `champions/blender/`.
-- **Arenas, Strongholds, War Auxiliaries: NOT integrated.** On main they exist only as Blender scripts, .blend files and renders (docs/art/BLENDER-*.md list runtime integration as pending). The app still draws the existing procedural arenas and towers.
+- **Revision 56 uses the procedural Arenas, Strongholds and War Auxiliaries.** [Revision 57 integrates the Blender runtime assets](../art/BLENDER-PLAYABLE-ART.md).
 - **Physical Device Validation**: Installed and verified live on Xiaomi POCO X6 Pro (`2311DRK48G`, Android 16 / API 36, ARM64-v8a).
 
 ## 2. Compilation and Packaging Steps

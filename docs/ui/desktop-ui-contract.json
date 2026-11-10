@@ -189,7 +189,22 @@
     "auxiliary-merchant-tiers",
     "auxiliary-evolution-reveal",
     "auxiliary-reduced-motion",
-    "p75-social-log-transition"
+    "p75-social-log-transition",
+    "blender-arena-forest",
+    "blender-arena-tundra",
+    "blender-arena-volcanic",
+    "blender-arena-ruins",
+    "blender-arena-storm",
+    "blender-arena-celestial",
+    "blender-arena-clockwork",
+    "blender-arena-desert",
+    "blender-strongholds-blue",
+    "blender-strongholds-red",
+    "blender-strongholds-damage",
+    "blender-auxiliaries-construction",
+    "blender-auxiliaries-mining",
+    "blender-auxiliaries-delivery",
+    "blender-auxiliaries-reduced-motion"
   ],
   "motion_screens": [
     "preview-dance",
@@ -214,7 +229,13 @@
     "auxiliary-merchant-tiers",
     "auxiliary-evolution-reveal",
     "auxiliary-reduced-motion",
-    "p75-social-log-transition"
+    "p75-social-log-transition",
+    "blender-arena-clockwork",
+    "blender-strongholds-damage",
+    "blender-auxiliaries-construction",
+    "blender-auxiliaries-mining",
+    "blender-auxiliaries-delivery",
+    "blender-auxiliaries-reduced-motion"
   ],
   "motion_frames": [
     0,

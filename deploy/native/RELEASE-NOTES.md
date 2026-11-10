@@ -1,3 +1,11 @@
+TBG 0.1.4-colossus.8 — Playable Blender arena art
+
+All eight 1v1 Arenas load their Blender scenery and Classic Stronghold skins.
+Treasury, Bastion, Artillery and Command use authored meshes for all five
+Fortification forms. Mineiro and Mercador use their themed construction,
+working and delivery animations on both sides. The client downloads each
+compressed model pack when needed. The MatchContract stays on wire 40/R16.
+
 TBG 0.1.4-colossus.7 — Blender champion figures
 
 The ten champions in the initial roster have new component-modeled Blender

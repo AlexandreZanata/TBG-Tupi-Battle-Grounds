@@ -82,6 +82,7 @@ fn update(
     cache: Res<Cache>,
     gpu: Res<Prepared>,
     arena: Res<crate::arena::ActiveArena>,
+    built: Res<crate::arena::BuiltArena>,
     meshes: Query<(&Mesh3d, &InheritedVisibility)>,
     mut reveal: ResMut<Reveal>,
     mut status: ResMut<Status>,
@@ -101,7 +102,8 @@ fn update(
                 .iter()
                 .filter(|(_, v)| v.get())
                 .all(|(m, _)| gpu.meshes.contains(&m.0.id())));
-    let ready = cache.settled(&server, &gpu) && scene_ready && !super::forced();
+    let ready =
+        built.0 == Some(arena.0) && cache.settled(&server, &gpu) && scene_ready && !super::forced();
     reveal.frames = if ready {
         reveal.frames.saturating_add(1)
     } else {
@@ -117,8 +119,10 @@ fn update(
         status.boot_ready = true;
         clear.0 = if crate::config::url_param("portrait").is_some() {
             Color::srgb_u8(20, 32, 42)
-        } else {
+        } else if arena.0 == crate::arena::theme::Theme::Forest {
             crate::art::palette::SKY_TOP
+        } else {
+            arena.0.palette().sky
         };
     }
     status.scene_waiting = waiting;
