@@ -276,6 +276,14 @@ remain in place. Automatic Analytics script injection no longer occurs on these
 payloads; a future explicit analytics integration needs its own review. See
 [Cloudflare's documentation](https://developers.cloudflare.com/web-analytics/faq/).
 
+## Shared GitHub polling cache
+
+The four controllers share a ten-minute API response cache under
+`/var/lib/tbg-deploy/api-cache`. A conditional anonymous request still
+uses GitHub's hourly quota, so an ETag alone cannot keep four controllers
+within that budget. Expired entries revalidate with their ETag and a 304
+renews the cache interval. Network failures remain visible.
+
 ## Native download catalog (metadata only)
 
 `native_pull.py` is separate from backend/web/static activation. It verifies the
