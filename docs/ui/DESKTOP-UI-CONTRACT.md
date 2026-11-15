@@ -2126,3 +2126,19 @@ The Linux contact sheet was inspected; Windows and desktop web observations of
 the packaged screens remain pending. This records static portraits, not motion
 acceptance. The Arena preview also suppresses the account recovery toolbar,
 which has no role in the exported scene; normal account controls are unchanged.
+
+
+## 2026-11-15 — TW-02 displayed Stronghold values and current Laboratory art
+
+The `stronghold-r17-reduced-power` case covers both seats, all five Stronghold
+kinds, each Fortification form, actual HP bars and the statistics/upgrade panels.
+The shared client displays authoritative R17 values (reference 4050 HP and 111
+damage), with the existing kind coefficients and Fortification effects. Attack
+intervals, projectile motion, materials and animation timing are unchanged.
+The `laboratory-current-blender-portraits` case covers the updated portrait cards
+beside the live current Blender model and its four Evolution forms. Arena cards
+consume the same eight refreshed textures as the shared public catalog.
+
+Linux captures of the final R17 presentation are pending; Windows and desktop
+web observations and exact correspondence remain pending. Compilation and shared
+asset hashes alone cannot establish those observations.
