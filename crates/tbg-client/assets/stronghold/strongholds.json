@@ -14,8 +14,8 @@
     "badge": "Active in Practice, Casual, Ranked and private rooms",
     "scope": "Locked when you queue, join a room or start Practice. Your next match uses the selected tower.",
     "fortify": "In battle, Fortify your own tower: tier 1 picks a branch for good, tier 2 must follow it. Max HP gains keep your current HP percentage.",
-    "controls": "Click or Enter to select \u00b7 Tab to move \u00b7 Esc to close",
-    "locked": "Locked \u00b7 your tower is frozen until the match or queue ends"
+    "controls": "Click or Enter to select · Tab to move · Esc to close",
+    "locked": "Locked · your tower is frozen until the match or queue ends"
   },
   "kinds": [
     {
