@@ -2203,6 +2203,18 @@ team/form/budget balance. The final proposal is revision 10, source hash
 `523044fc973bac39`; canonical trace validation pins that exact identity.
 
 
+## TW-02 — Proposed owner revision (2026-11-15)
+
+The owner requests approximately 40% less Stronghold HP and 30% less
+Stronghold damage, preserving each kind's relative role. This supersedes
+TW-01's HP and damage only. The reference becomes **4050 HP / 111 damage**
+(6750 × 0.60 and 159 × 0.70, rounded to whole damage). Existing kind
+coefficients and integer truncation produce Classic **4050/111**, Treasury
+**3766/101**, Bastion **4657/98**, Artillery **3442/122**, and Command
+**3888/101**. Fortification scales from each reduced base, retaining its
+branches, prices, armor, splash, aura, Spoils, interval and range. Competitive
+acceptance still requires D-33 evidence; these values do not waive its gates.
+
 ## TW-01 / PK-01 / GD-01 — Proposed owner revision (2026-11-02)
 
 Owner authorizes stronger Strongholds and Fortifications, width-limited

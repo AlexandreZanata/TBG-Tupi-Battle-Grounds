@@ -18,6 +18,12 @@ fn cc_id03_keeps_pr44_legacy_outcomes_and_ticks() {
             (7, 14265, Seat::B),
             (42, 23274, Seat::A),
         ],
+        // TW-02 changes tower combat while preserving the prior revision above.
+        (17, 0x3df52af730a4e914) => [
+            (1, 41676, Seat::B),
+            (7, 10203, Seat::A),
+            (42, 25488, Seat::B),
+        ],
         _ => legacy,
     };
     for (seed, tick, winner) in expected {

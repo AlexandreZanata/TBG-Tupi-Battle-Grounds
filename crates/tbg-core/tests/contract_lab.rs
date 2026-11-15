@@ -205,6 +205,14 @@ fn c2_per_tick_traces_are_frozen() {
             (1000, 0x801231c22c8043d1, 0xf62e42692b000f18, 58307),
             (65535, 0x4d10b0fa56d68b05, 0x87fcd3250d25955a, 24291),
         ],
+        // TW-02: measured per-tick traces for the requested tower reductions.
+        (17, 0x3df52af730a4e914) => [
+            (1, 0x59569e71f2ff5bdc, 0x074f794c4ebfe0ff, 41676),
+            (7, 0xc041f39acd287faf, 0x462e074d7ea87f1a, 10203),
+            (42, 0x19f9306f7acbc26c, 0xd48923d415938781, 25488),
+            (1000, 0xcc2c8c1eb88c7847, 0x8b2c621f76af6e24, 9671),
+            (65535, 0x630c64a87a9c01d5, 0x0ae82ae1d7bd9281, 18720),
+        ],
         revision => panic!("register an explicit canonical trace for {revision:?}"),
     };
     for (seed, t, h, tick) in goldens {
