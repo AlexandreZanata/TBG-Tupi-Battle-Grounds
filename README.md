@@ -18,10 +18,10 @@ Windows. Build an army from a rotating five-offer `Shop`, combine `Faction`
 Combat runs automatically on one `BattleLine`; your purchases and timing decide
 what reaches it. Online matches use an authoritative Rust server.
 
-![Real Linux gameplay in the Verdant Forest, with Mineiro and Mercador at tier III](web/landing/media/captures/release-war-auxiliaries-1280.webp)
+![Real Linux Practice gameplay in the Verdant Forest with current Blender figures](web/landing/media/captures/blender-10-forest-battle-1280.webp)
 
-*Verdant Forest, the base Arena: a real Practice match with both War Auxiliaries
-at tier III. All screenshots below come from the native Linux release build.*
+*Verdant Forest: a real Practice match with current Blender figures. The
+updated screenshots below come from the identified Linux .10 capture client.*
 
 ## How to play
 
@@ -53,41 +53,45 @@ Full rules and the current balance proposals: [GAME-DESIGN](docs/GAME-DESIGN.md)
 
 ## Real gameplay gallery
 
-These are actual frames from **0.1.4-colossus.5**, compiled with the **release**
-profile for Linux. They show ordinary Practice gameplay, including a complete
-Forest match through the result screen. No armies, `Energy` or auxiliary tiers
-were injected. [Capture provenance and image details](docs/evidence/readme-linux-release.md).
+These are actual frames from the identified **0.1.4-colossus.10** Linux client
+with the current Blender models. They show ordinary Practice gameplay, menus
+and the Laboratory. No armies, `Energy` or auxiliary tiers were injected.
+[Capture provenance and image details](docs/evidence/blender-captures-20261115.md).
 
 ### Frozen Tundra
 
-![Champions fighting on the snow-covered Frozen Tundra BattleLine](web/landing/media/captures/release-tundra-battle-1280.webp)
+![Champions fighting on the snow-covered Frozen Tundra BattleLine](web/landing/media/captures/blender-10-tundra-battle-1280.webp)
 
 ### War Council and Augments
 
-![Four Augment cards offered during a real War Council in the Verdant Forest](web/landing/media/captures/release-augments-1280.webp)
+![Four Augment cards offered during a real War Council in the Verdant Forest](web/landing/media/captures/blender-10-augments-1280.webp)
 
 ### Click a champion: statistics and Evolution
 
-![Celestial Archer selected in the Frozen Tundra, showing statistics and branching Evolution](web/landing/media/captures/release-champion-panel-1280.webp)
+![A champion selected in the Frozen Tundra, showing statistics and branching Evolution](web/landing/media/captures/blender-10-champion-panel-1280.webp)
 
 ### Click the Stronghold: tower upgrades
 
-![Bastion Stronghold inspection and Fortification choices during the Forest match](web/landing/media/captures/release-stronghold-panel-1280.webp)
+![Bastion Stronghold inspection and Fortification choices during the Forest match](web/landing/media/captures/blender-10-stronghold-panel-1280.webp)
 
 ### A complete match reaches its result
 
-![Result of the completed Forest Practice match after a Stronghold was destroyed](web/landing/media/captures/release-forest-result-1280.webp)
+![Forest Practice defeat after the player Stronghold was destroyed](web/landing/media/captures/blender-10-forest-result-1280.webp)
+
+### Laboratory models and Evolution
+
+![Colossus B2 in the Laboratory with current Blender geometry and portraits](web/landing/media/captures/blender-10-laboratory-1280.webp)
 
 ### Choose an Arena
 
-![Native Arena catalog showing Forest, Tundra, Volcanic Forge and Ancient Ruins previews](web/landing/media/captures/release-arena-catalog-1280.webp)
+![Native Arena catalog showing Forest, Tundra, Volcanic Forge and Ancient Ruins previews](web/landing/media/captures/blender-10-arena-catalog-1280.webp)
 
 *The Arena catalog shows additional fields; the gameplay photos above are from
 actual Forest and Tundra matches.*
 
 ### The lobby
 
-![The native Linux lobby with Practice, Casual, friend challenges, private rooms and collections](web/landing/media/captures/release-lobby-1280.webp)
+![The native Linux lobby with Practice, Casual, friend challenges, private rooms and collections](web/landing/media/captures/blender-10-lobby-1280.webp)
 
 Explore more Arenas, champions and instructions on the
 [official landing page](https://tupibg.com/#screenshots), or

@@ -1,0 +1,374 @@
+{
+  "schema": 1,
+  "surface": "Actual Linux native engine at 1920x1080; private X11/Xvfb and empty isolated D-Bus vault; closed loopback server endpoint",
+  "parity": "Windows and desktop web in-game correspondence unverified",
+  "method": "Unpainted engine screenshots; 1280x720 and 800x450 resizes. Hero uses a 1920x600 scene crop; social image is a 1200x675 resize.",
+  "captures": [
+    {
+      "scene": "lobby",
+      "arena": "forest",
+      "image": "lobby.png",
+      "log": "lobby.log",
+      "sha256": "6748a6bdeb7167b9ba7def9827537a909aeee8381051212a3007898227b4eb4c",
+      "seconds": 14.47,
+      "arguments": [],
+      "capture_batch": "site-corrected",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "7d46426e52eccd6a5e6080073f96be40b6437974",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "5eb640d3b96424425ffaaa65d4c4e4afb3057fc5d1fee0e9af4a39b355245842",
+      "runtime_assets_sha256": "371c2f1b8b7acf2915f96c99539ed9e583d97397c0cb249f0707395b363b5226",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-lobby-1280.webp",
+          "sha256": "8f0007a5c695b7f86aad11302b045828a785fea23161c1d667c77bddd994cf7d",
+          "bytes": 95610
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-lobby-800.webp",
+          "sha256": "8988f39840ffcfcfd802acc78ab7f0a1719d69f3efa948b01c0bec9974ebcb13",
+          "bytes": 48800
+        }
+      ]
+    },
+    {
+      "scene": "arena-catalog",
+      "arena": "forest",
+      "image": "arena-catalog.png",
+      "log": "arena-catalog.log",
+      "sha256": "ef82b3dedc4ee404671526f79fcc16209db052be53774c0df4359cc924d38a76",
+      "seconds": 14.02,
+      "arguments": [
+        "--capture_panel",
+        "arenas"
+      ],
+      "capture_batch": "site-corrected",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "7d46426e52eccd6a5e6080073f96be40b6437974",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "5eb640d3b96424425ffaaa65d4c4e4afb3057fc5d1fee0e9af4a39b355245842",
+      "runtime_assets_sha256": "371c2f1b8b7acf2915f96c99539ed9e583d97397c0cb249f0707395b363b5226",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-arena-catalog-1280.webp",
+          "sha256": "6cceaadfa50356c1e496957b083be8f2b81ad9c5aaab4d013c39bffaff7674a3",
+          "bytes": 83496
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-arena-catalog-800.webp",
+          "sha256": "74dffdf5c7d6229f04804fe36251bd392434c5529ebd97054ade4e0fcae75bc8",
+          "bytes": 42994
+        }
+      ]
+    },
+    {
+      "scene": "laboratory",
+      "arena": "forest",
+      "image": "laboratory.png",
+      "log": "laboratory.log",
+      "sha256": "6539ca2c3ad6b3a9a0444e721da0bc8da416d8b84a0fd70d47f69bd87ff9013e",
+      "seconds": 15.02,
+      "arguments": [
+        "--capture_panel",
+        "troops",
+        "--unit",
+        "Colossus",
+        "--tier",
+        "2",
+        "--branch",
+        "1"
+      ],
+      "capture_batch": "site-final",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "28f94749891425f3c19aee8b8d80273b14c1544c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "fd666906f113dd9ae365549b08da2fd59e079c496ed1cf248eae8fc88f72f274",
+      "runtime_assets_sha256": "d765cf8d4e45b1caa76b25e03df1286175b7daf647bd27cc24f7db4281cf1c78",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-laboratory-1280.webp",
+          "sha256": "7ddf03b66dd89719677b4daa426935fc24e650302cfbf36ce941aae66a8be364",
+          "bytes": 61928
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-laboratory-800.webp",
+          "sha256": "8104412f82f2edaf1d1c04ea577317da64d22288a78fa4c9ea07cf1343582c84",
+          "bytes": 32894
+        }
+      ]
+    },
+    {
+      "scene": "forest-battle",
+      "arena": "forest",
+      "image": "forest-battle.png",
+      "log": "forest-battle.log",
+      "sha256": "8a4b4cdb8f6316dc171770afbff824fd84543b1fca7860d550d008168848c651",
+      "seconds": 72.12,
+      "arguments": [
+        "--autoplay",
+        "practice",
+        "--capture_on",
+        "running"
+      ],
+      "capture_batch": "site-corrected",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "7d46426e52eccd6a5e6080073f96be40b6437974",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "5eb640d3b96424425ffaaa65d4c4e4afb3057fc5d1fee0e9af4a39b355245842",
+      "runtime_assets_sha256": "371c2f1b8b7acf2915f96c99539ed9e583d97397c0cb249f0707395b363b5226",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-forest-battle-1280.webp",
+          "sha256": "ab871f7e7eaf30c1fa445627d47f35db09a8ea3efed0093d95340f3029c58824",
+          "bytes": 85094
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-forest-battle-800.webp",
+          "sha256": "480b338155a6456cac4c9faa4725c3e0117645de23889e39ebb84d286eb7e6a0",
+          "bytes": 45986
+        }
+      ]
+    },
+    {
+      "scene": "tundra-battle",
+      "arena": "tundra",
+      "image": "tundra-battle.png",
+      "log": "tundra-battle.log",
+      "sha256": "46eaaa8a32971d0dc524f4e59c3c1bb672046caeb359a547edaec22a58f8fe58",
+      "seconds": 71.33,
+      "arguments": [
+        "--autoplay",
+        "practice",
+        "--capture_on",
+        "running"
+      ],
+      "capture_batch": "site-corrected",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "7d46426e52eccd6a5e6080073f96be40b6437974",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "5eb640d3b96424425ffaaa65d4c4e4afb3057fc5d1fee0e9af4a39b355245842",
+      "runtime_assets_sha256": "371c2f1b8b7acf2915f96c99539ed9e583d97397c0cb249f0707395b363b5226",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-tundra-battle-1280.webp",
+          "sha256": "662cfc6b89bb331c23b56fc0c17e7fcd4fa74eeb2679ec35df95b5292030ea99",
+          "bytes": 81062
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-tundra-battle-800.webp",
+          "sha256": "e220c917bcc7d15bd2a937fa9c2353883671172634293b5b8a6bdbf64ff68c85",
+          "bytes": 43948
+        }
+      ]
+    },
+    {
+      "scene": "stronghold-panel",
+      "arena": "forest",
+      "image": "stronghold-panel.png",
+      "log": "stronghold-panel.log",
+      "sha256": "97cd0f87b9ee28e5dcb5b8c2b0a8b00be43205005934e8e8fd5d87711f3776c1",
+      "seconds": 25.88,
+      "arguments": [
+        "--autoplay",
+        "practice",
+        "--capture_panel",
+        "fortify",
+        "--capture_on",
+        "running"
+      ],
+      "capture_batch": "site-final",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "28f94749891425f3c19aee8b8d80273b14c1544c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "fd666906f113dd9ae365549b08da2fd59e079c496ed1cf248eae8fc88f72f274",
+      "runtime_assets_sha256": "d765cf8d4e45b1caa76b25e03df1286175b7daf647bd27cc24f7db4281cf1c78",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-stronghold-panel-1280.webp",
+          "sha256": "4d1c313e5e2e86763a93ccaf6bb4c58e63689a51df2ce686ed95c26e5c21b021",
+          "bytes": 86466
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-stronghold-panel-800.webp",
+          "sha256": "6f6e1e8f0d75f310388e972ef549ed5fc3d0bf85317204df794c5b01029dd05a",
+          "bytes": 46204
+        }
+      ]
+    },
+    {
+      "scene": "augments",
+      "arena": "forest",
+      "image": "augments.png",
+      "log": "augments.log",
+      "sha256": "8c36c16663ec3ee5ab77d7290ce3f6e9c6d13225473c90465090e63cced87e05",
+      "seconds": 17.92,
+      "arguments": [
+        "--capture_panel",
+        "council"
+      ],
+      "capture_batch": "site-corrected",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "7d46426e52eccd6a5e6080073f96be40b6437974",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "5eb640d3b96424425ffaaa65d4c4e4afb3057fc5d1fee0e9af4a39b355245842",
+      "runtime_assets_sha256": "371c2f1b8b7acf2915f96c99539ed9e583d97397c0cb249f0707395b363b5226",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-augments-1280.webp",
+          "sha256": "0ac8001652b0f5dd4bfd65271a46c744bc86dd3d6f6e2dd3be1b21845ff89053",
+          "bytes": 88470
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-augments-800.webp",
+          "sha256": "6e3d7c31aee3730ea7b20ac76731a3c8827060eed37b4cbefcfb76cb46a20d6a",
+          "bytes": 42768
+        }
+      ]
+    },
+    {
+      "scene": "forest-result",
+      "arena": "forest",
+      "image": "forest-result.png",
+      "log": "forest-result.log",
+      "sha256": "2017e2a212cb2536c1e693e9bdbd4f42d2394479fd6fade04acbff7148460242",
+      "seconds": 370.35,
+      "arguments": [
+        "--capture_panel",
+        "demo_transition",
+        "--capture_on",
+        "result"
+      ],
+      "capture_batch": "site-corrected",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "7d46426e52eccd6a5e6080073f96be40b6437974",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "5eb640d3b96424425ffaaa65d4c4e4afb3057fc5d1fee0e9af4a39b355245842",
+      "runtime_assets_sha256": "371c2f1b8b7acf2915f96c99539ed9e583d97397c0cb249f0707395b363b5226",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-forest-result-1280.webp",
+          "sha256": "532f26485e238e256df8e4ab84c4ebfa2c167c4f1b2c02ffe6e783e76333480e",
+          "bytes": 74450
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-forest-result-800.webp",
+          "sha256": "4cd153585a7ddf1808da95d61ac145c0011b660449d3d386c62cc07dfc3b9821",
+          "bytes": 40294
+        }
+      ]
+    },
+    {
+      "scene": "champion-panel",
+      "arena": "tundra",
+      "image": "champion-panel.png",
+      "log": "champion-panel.log",
+      "sha256": "e219a98e97884291f70c1b7059466d437b740cd166aa6d8553a17b830c6970f9",
+      "seconds": 40.61,
+      "arguments": [
+        "--autoplay",
+        "practice",
+        "--capture_panel",
+        "unit",
+        "--capture_on",
+        "running"
+      ],
+      "capture_batch": "site-final",
+      "build": {
+        "contract": "w40-r17-3df52af730a4e914",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "debug",
+        "protocol": 40,
+        "source_commit": "28f94749891425f3c19aee8b8d80273b14c1544c",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "fd666906f113dd9ae365549b08da2fd59e079c496ed1cf248eae8fc88f72f274",
+      "runtime_assets_sha256": "d765cf8d4e45b1caa76b25e03df1286175b7daf647bd27cc24f7db4281cf1c78",
+      "derivatives": [
+        {
+          "path": "web/landing/media/captures/blender-10-champion-panel-1280.webp",
+          "sha256": "00f5fb2d2b67cb6c91d66953949e3e6c818e13ac47095ce7e15974f206e96712",
+          "bytes": 82348
+        },
+        {
+          "path": "web/landing/media/captures/blender-10-champion-panel-800.webp",
+          "sha256": "02309513051391c0712ccae84f61b31956809edab7ffcaa132ee717d55e38034",
+          "bytes": 43638
+        }
+      ]
+    }
+  ],
+  "result_observation": {
+    "mode": "ordinary offline Practice; own player made no purchases",
+    "reason": "StrongholdDestroyed",
+    "combat_seconds": 276,
+    "player_purchases": 0,
+    "injected_units_or_energy": false
+  }
+}

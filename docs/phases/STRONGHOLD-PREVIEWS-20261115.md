@@ -1,6 +1,6 @@
 # Stronghold power and current Blender previews — 2026-11-15
 
-Status: work in progress; no balance acceptance or updated production release claimed.
+Status: implemented candidate; competitive evidence is not accepted and production publication is blocked pending owner decision and merge authorization.
 
 ## Owner scope
 
@@ -76,12 +76,11 @@ routing check passed. The new capture guard correctly rejected a mismatching .8
 binary before rendering in the .10 source tree. The matching .8 portrait sample
 exposed the Gallery bug described above. Source routing is not visual parity.
 
-Pending consolidation: deterministic update probe and append-only R17 trace
-registration; Stronghold balance evidence and the applicable D-33 gate; focused
-client sequence regressions; fresh identified native capture; all shared imagery
-and generated website hashes; final CI and packaged/runtime checks. Windows and
-desktop web visual observations remain pending and are not inferred from shared
-source, compilation or Linux images.
+Pending release work: full competitive gate and 1x server/lab equivalence;
+corrected live browser purchase/reconnect/natural Ranked completion; final
+GitHub checks and publication approval. Windows and desktop web in-game
+observations remain pending; shared source and Linux photographs do not prove
+visual correspondence.
 
 ## R17 focused consolidation and discovery
 
@@ -107,3 +106,74 @@ The binary was compiled against the recorded uncommitted numeric candidate;
 the reports' git_head 5e3f6a7c alone does not identify that working-tree diff.
 The raw reports and exact candidate patch remain under
 `/tmp/tbg-blender-refresh-20261115/`. No passing release gate is claimed.
+
+## Held-out confirmation (frozen candidate, no tuning)
+
+The 256-pair matrix used seeds 1,000,000..1,000,256, both seat orders for
+every kind pairing: 12,800 games in 756.48 seconds on two workers. Among the
+four selectable kinds, observed matchup scores ranged from 38.7% to 59.4%;
+Classic remains the laboratory reference. The matrix is not a full metagame gate.
+
+The 1000-pair held-out policy probes used seeds 1,000,000..1,001,000:
+Bot vs Bot seat A scored 48.9% (required band 48.5–51.5), with 100% natural
+Stronghold destruction. Median duration was 829 combat seconds (outside the
+non-release fun target 150–240 seconds). Heavy vs Bot scored 86.0% and Cheap
+vs Bot 84.6%, both above the required <=55% threshold. With the old frozen
+6750/159 values on the same seed block, the corresponding scores were 85.6%
+and 85.0%. These required failures predate the change. This comparison does not
+prove statistical equivalence and the confirmation block was not used to tune.
+
+The planned confirmation reports all completed; the first silent wrapper
+returned 143 after its final report, so wrapper success is not claimed. The
+old-value diagnostic batch, streamed through tee, completed with exit 0.
+Raw manifests and reports are retained in `docs/media/blender-refresh-20261115/balance/`.
+No thresholds or test assertions were weakened. Evidence is not accepted for
+a competitive release: the required spam rows fail; the full Nash/duel gate and
+1x server/lab equivalence are pending. Publishing a preview with these known
+limits requires an explicit owner decision.
+
+## Current interface and capture corrections
+
+The Stronghold picker and Fortification description JSON still contained old
+HP/damage values even though the authoritative HUD was already reduced. All
+four base and sixteen Fortification blocks now match R17. The existing two
+core-data contract tests caught an unsupported Unicode escape introduced by
+the first JSON serialization. UTF-8 text was restored; both tests passed.
+The two shared intention-sequence regression tests also passed. Total focused
+consolidation: 31 core tests plus four client tests, zero failures on the fixed
+tree. The identified native .10/R17 build at 28f94749 compiled successfully.
+
+An initial site-capture script incorrectly supplied the Arena-export flag to
+ordinary menu captures, hiding their interface. Those frames were rejected.
+The corrected profiles select the Arena through normal preferences, use a
+private D-Bus with an empty disposable vault and never access the desktop vault.
+A one-shot champion selection could die before the requested frame; the
+capture helper now selects a current unit at capture time. Troops exports also
+honor the requested delay. All nine corrected frames are consolidated. The final source
+28f94749 passed both Stronghold catalog tests, both sequence tests and the
+native build. The earlier failed test wrapper returned 143 after recording its
+parser failure; the fixed targeted batch completed with exit 0. Native capture
+2250 completed with exit 0. The preceding eight-frame capture wrote all its
+records but its wrapper returned 143; only the hash-verified frames are reused.
+See `docs/evidence/blender-captures-20261115.md` and the three per-image manifests.
+
+## Static consolidation and production boundary
+
+`web/scripts/check.py` passed: landing 208 files/7146 KiB, all admin variants
+checked, generated champion/Arena content current. `check-native-inputs.py`,
+package formatting and `git diff --check` passed. The mandatory patch-note
+guard rejected the unaccepted numeric candidate with `Numeric balance notes
+require accepted held-out evidence`. This is an intentional release block,
+not a passing CI result; the balance note stays `kind=balance`, accepted=false.
+
+The production host remains on the latest published .8 / R16 generation.
+The browser test account returned from its old Result screen to Menu through
+the ordinary control; the slot now reports zero running matches and zero
+pending results. No player data was deleted. An attempted PR #83 merge was
+rejected by automatic approval review for missing explicit merge authorization;
+the owner question is pending. No alternate merge or deployment bypass was used.
+
+The local desktop browser loaded all nine updated gallery images and displayed
+the Portuguese Laboratory lightbox. Screenshot:
+`/tmp/tbg-blender-refresh-20261115/site-preview-browser.jpg`. The loopback
+preview remains available at port 8601 for owner review; it changes no live site.
