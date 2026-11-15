@@ -27,6 +27,20 @@ __TBG_SITE_DOMAIN__ {
 		header Cache-Control "no-cache, no-transform"
 		file_server
 	}
+	# An attended rollout can confirm browser availability independently of the static payload.
+	@release_config {
+		path /config/release.json
+		file {
+			root /srv/tbg/landing-runtime
+			try_files /release.json
+		}
+	}
+	handle @release_config {
+		root * /srv/tbg/landing-runtime
+		rewrite * /release.json
+		header Cache-Control "no-cache, no-transform"
+		file_server
+	}
 	root * /srv/tbg/landing/current
 	# JS/CSS references carry a content revision; pages/data revalidate and art/fonts cache a day.
 	# no-transform preserves attested bytes and prevents CDN analytics script injection.
