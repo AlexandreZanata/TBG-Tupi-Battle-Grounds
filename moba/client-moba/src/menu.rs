@@ -29,7 +29,7 @@ fn autostart(launch: Res<Launch>, mut next: ResMut<NextState<Screen>>) {
     }
 }
 
-fn spawn(mut commands: Commands, lang: Res<Lang>, fonts: Res<Fonts>) {
+fn spawn(mut commands: Commands, lang: Res<Lang>, fonts: Res<Fonts>, launch: Res<Launch>) {
     let lang = *lang;
     commands
         .spawn((
@@ -96,13 +96,18 @@ fn spawn(mut commands: Commands, lang: Res<Lang>, fonts: Res<Fonts>) {
                         Action::PlayOffline,
                         &fonts,
                     );
-                    crate::hud::notices_button(
-                        row,
-                        lang.t(Key::PlayOnline),
-                        Action::PlayOnline,
-                        &fonts,
-                    );
-                    crate::hud::notices_button(row, lang.t(Key::Quit), Action::Quit, &fonts);
+                    let leave = if launch.practice_only {
+                        Key::BackToLobby
+                    } else {
+                        crate::hud::notices_button(
+                            row,
+                            lang.t(Key::PlayOnline),
+                            Action::PlayOnline,
+                            &fonts,
+                        );
+                        Key::Quit
+                    };
+                    crate::hud::notices_button(row, lang.t(leave), Action::Quit, &fonts);
                 });
             });
         });

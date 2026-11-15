@@ -39,6 +39,7 @@ fn apply(
     mut submitted: MessageReader<TextEntered>,
     mut queue: ResMut<crate::ui::ActionQueue>,
     lang: Res<Lang>,
+    #[cfg(tbg_desktop)] mut toasts: ResMut<crate::ui::Toasts>,
     mut epoch: Local<u32>,
 ) {
     for text in submitted
@@ -102,6 +103,12 @@ fn apply(
                     &catalog.difficulty.to_string(),
                 );
                 queue.0.push(crate::ui::UiAction::Practice);
+            }
+            #[cfg(tbg_desktop)]
+            Action::Practice5v5 => {
+                if !super::moba::launch(*lang) {
+                    toasts.push(lang.key("training.play_5v5_error"));
+                }
             }
             Action::Target(id) => trial.target = Some(id),
             Action::Page(delta) => {

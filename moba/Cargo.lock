@@ -5354,6 +5354,7 @@ dependencies = [
  "serde_json",
  "tbg-core",
  "tbg-moba-core",
+ "web-sys",
 ]
 
 [[package]]

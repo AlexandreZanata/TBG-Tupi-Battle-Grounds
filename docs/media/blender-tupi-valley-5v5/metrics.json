@@ -1,5 +1,22 @@
 {
   "map_size": 200,
+  "runtime_triangles": {
+    "bridge": 1444,
+    "plaza": 1024,
+    "plaza-crystal": 44,
+    "nexus-plinth": 308,
+    "tower-crystal": 38,
+    "camp-wolves": 2314,
+    "camp-golems": 2314,
+    "camp-jaguar": 2314,
+    "camp-frogs": 2314,
+    "tower-blue-0": 696,
+    "tower-blue-1": 564,
+    "tower-blue-2": 476,
+    "tower-red-0": 696,
+    "tower-red-1": 564,
+    "tower-red-2": 476
+  },
   "lanes": {
     "Top": 7,
     "Mid": 4,
@@ -44,10 +61,13 @@
     "Tupi flagstone 1",
     "Tupi flagstone 2",
     "Tupi flagstone 3",
+    "Tupi plaza crystal",
     "Tupi plaza island",
     "Tupi stronghold crest",
     "Tupi tower Blue",
     "Tupi tower Red",
+    "Tupi tower crystal Blue",
+    "Tupi tower crystal Red",
     "Wildflowers"
   ],
   "library_collections": [
@@ -67,10 +87,10 @@
     "Tide rocks",
     "Wildflowers"
   ],
-  "scene_objects": 2244,
-  "scene_triangles": 321922,
-  "board_objects": 40,
-  "board_triangles": 12058,
+  "scene_objects": 2267,
+  "scene_triangles": 321150,
+  "board_objects": 76,
+  "board_triangles": 16420,
   "camera": {
     "fov_degrees": 32,
     "pitch_degrees": 56,

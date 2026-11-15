@@ -9,7 +9,7 @@ from the owner-approved Verdant Forest Blender library. Run from the repo root:
 import argparse
 import json
 import sys
-from math import atan2, cos, hypot, radians, sin, tau
+from math import atan2, cos, hypot, pi, radians, sin, sqrt, tau
 from pathlib import Path
 from random import Random
 
@@ -17,6 +17,7 @@ import bpy
 from mathutils import Vector
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(ROOT / "scripts" / "blender_forest_arena"))
 import mesh  # noqa: E402
 from mesh import box, instance, material, pebble, prototype, surface, tube  # noqa: E402
@@ -29,6 +30,10 @@ PLAZA_RADIUS = 12
 BASE_RADIUS = 26
 LANE_HALF_WIDTH = 3.6
 WATER_HALF_WIDTH = 8.2
+BRIDGE_LENGTH = 18.0
+BRIDGE_TOP = 0.425
+NEXUS_RADIUS = 5.5
+CAMP_RADIUS = 7.0
 TOP = [(24, 24), (20, 50), (20, 110), (25, 164), (36, 175), (90, 180), (150, 180), (176, 176)]
 MID = [(24, 24), (60, 60), (100, 100), (140, 140), (176, 176)]
 BOT = [(24, 24), (50, 20), (110, 20), (164, 25), (175, 36), (180, 90), (180, 150), (176, 176)]
@@ -163,14 +168,22 @@ def segment_box(collection, name, a, b, width, height, z, key, bevel=0.04):
     return box(collection, name, center, (length, width, height), key, bevel, atan2(dy, dx))
 
 
-def disc(collection, name, center, radius, z, key, rings=1, height=0.0, accent=True):
+def cap_river_approach(x, y, limit):
+    shift = max(0.0, (x + y) / sqrt(2) - limit) / sqrt(2)
+    return x - shift, y - shift
+
+
+def disc(collection, name, center, radius, z, key, rings=1, height=0.0, accent=True,
+         river_limit=float("inf")):
     segments = 40
     vertices, faces, colors = [], [], []
     for ring in range(rings + 1):
         r = radius * (1 - ring / (rings + 1))
         for i in range(segments):
             a = tau * i / segments
-            vertices.append((center[0] + r * cos(a), center[1] + r * sin(a), z + height * ring))
+            x, y = cap_river_approach(radius * cos(a), radius * sin(a), river_limit)
+            factor = r / radius
+            vertices.append((center[0] + factor * x, center[1] + factor * y, z + height * ring))
     for ring in range(rings):
         for i in range(segments):
             j = (i + 1) % segments
@@ -184,7 +197,7 @@ def disc(collection, name, center, radius, z, key, rings=1, height=0.0, accent=T
     vertices.append((center[0], center[1], z + height * rings))
     inner = rings * segments
     for i in range(segments):
-        faces.append((center_index, inner + (i + 1) % segments, inner + i))
+        faces.append((center_index, inner + i, inner + (i + 1) % segments))
         colors.append(key)
     return surface(collection, name, vertices, faces, colors)
 
@@ -203,33 +216,40 @@ def build_prototypes(library):
     for name, key in (("Tupi curb", "curb"), ("Tupi curb lip", "curb-light")):
         box(proto(name), "Shaped road shoulder", (0, 0, 0), (2.0, 0.38, 0.18), key, 0.035)
 
-    build = proto("Tupi bridge deck")
-    box(build, "Stone bridge deck", (0, 0, 0), (21.0, 7.2, 0.42), "stone", 0.10)
+    bridge = proto("Tupi bridge deck")
+    box(bridge, "Stone bridge deck", (0, 0, BRIDGE_TOP - 0.21),
+        (BRIDGE_LENGTH, LANE_HALF_WIDTH * 2, 0.42), "stone", 0.10)
     for side in (-1, 1):
-        box(build, "Bridge stringer", (0, side * 3.32, -0.18), (21.0, 0.30, 0.30), "wood-dark", 0.04)
-        for x in (-9.0, -3.0, 3.0, 9.0):
-            box(build, "Bridge pier", (x, side * 3.32, -1.3), (0.85, 0.85, 2.4), "stone-cool", 0.07)
-        box(build, "Bridge handrail", (0, side * 3.55, 0.86), (21.0, 0.18, 0.18), "wood", 0.04)
-        for x in (-9.5, -6.5, -3.5, 0.0, 3.5, 6.5, 9.5):
-            box(build, "Handrail post", (x, side * 3.55, 0.48), (0.20, 0.20, 1.0), "oak", 0.035)
-    for x in (-7.0, 0.0, 7.0):
-        box(build, "Bridge lantern", (x, 0, 0.36), (0.24, 0.24, 0.18), "gold", 0.04)
-        tube(build, "Lantern flame", [(x, 0, 0.45), (x, 0, 0.55)], [0.10, 0.02], "fire", sides=6)
+        rail = side * (LANE_HALF_WIDTH + 0.12)
+        box(bridge, "Bridge stringer", (0, side * 3.32, 0.0),
+            (BRIDGE_LENGTH, 0.30, 0.30), "wood-dark", 0.04)
+        for x in (-7.8, -2.6, 2.6, 7.8):
+            box(bridge, "Bridge pier", (x, side * 3.32, -0.98),
+                (0.85, 0.85, 2.4), "stone-cool", 0.07)
+        box(bridge, "Bridge handrail", (0, rail, 1.28),
+            (BRIDGE_LENGTH, 0.18, 0.18), "wood", 0.04)
+        for x in (-8.5, -5.6, -2.8, 0.0, 2.8, 5.6, 8.5):
+            box(bridge, "Handrail post", (x, rail, 0.88),
+                (0.20, 0.20, 1.0), "oak", 0.035)
+        for x in (-7.8, 7.8):
+            box(bridge, "Bridge lantern", (x, rail, 1.42), (0.24, 0.24, 0.18), "gold", 0.04)
+            tube(bridge, "Lantern flame", [(x, rail, 1.51), (x, rail, 1.68)],
+                 [0.10, 0.02], "fire", sides=6)
 
     plaza = proto("Tupi plaza island")
-    for index, (radius, z) in enumerate(((12.0, 0.22), (10.8, 0.36), (9.3, 0.52), (7.6, 0.68), (5.8, 0.82))):
-        disc(plaza, "Plaza step", (0, 0), radius, z, "stone" if index % 2 else "stone-light", rings=1)
+    tube(plaza, "Plaza retaining wall", [(0, 0, -1.4), (0, 0, 0.23)],
+         [PLAZA_RADIUS, PLAZA_RADIUS], "stone-cool", sides=40, accent="stone")
+    for index, (radius, z) in enumerate(((12.0, 0.26), (10.8, 0.28), (4.2, 0.30), (3.4, 0.32))):
+        disc(plaza, "Plaza course", (0, 0), radius, z, "stone" if index % 2 else "stone-light")
     for index in range(8):
-        a = tau * index / 8
-        box(plaza, "Plaza bollard", (10.2 * cos(a), 10.2 * sin(a), 1.04),
-            (0.55, 0.55, 0.55), "stone-light", 0.08, a)
-    tube(plaza, "Plaza crystal base", [(0, 0, 0.82), (0, 0, 1.16)], [1.0, 0.72], "stone-cool", sides=10)
-    tube(plaza, "Plaza crystal", [(0, 0, 1.16), (0, 0, 5.2), (0, 0, 6.2)],
-         [0.06, 1.65, 0.05], "water-light", sides=8, accent="glow")
-    for index in range(4):
-        a = tau * index / 4 + tau / 8
-        instance(plaza, library["Brazier"], "Plaza brazier",
-                 (8.7 * cos(a), 8.7 * sin(a), 0.78), 1.5, a)
+        a = tau * index / 8 + tau / 16
+        box(plaza, "Plaza bollard", (10.8 * cos(a), 10.8 * sin(a), 0.49),
+            (0.55, 0.55, 0.46), "stone-light", 0.08, a)
+    tube(plaza, "Plaza crystal base", [(0, 0, 0.30), (0, 0, 1.16)],
+         [2.15, 0.98], "stone-cool", sides=10)
+    crystal = proto("Tupi plaza crystal")
+    tube(crystal, "Plaza crystal", [(0, 0, 1.16), (0, 0, 4.1), (0, 0, 5.7)],
+         [0.06, 1.1, 0.05], "water-light", sides=8, accent="glow")
 
     plateau = proto("Tupi base plateau")
     disc(plateau, "Base earthwork", (0, 0), BASE_RADIUS, 0.30, "stone-cool", rings=4, accent=False)
@@ -243,12 +263,9 @@ def build_prototypes(library):
             (8.0, 1.05, 0.18 + index * 0.16), "stone-light", 0.04)
 
     plinth = proto("Tupi Nexus plinth")
-    disc(plinth, "Nexus plinth", (0, 0), 6.0, 0.05, "stone-cool", rings=2)
-    tube(plinth, "Nexus rim", [(0, 0, 0.08), (0, 0, 0.30)], [5.7, 5.2], "stone-light", sides=12)
-    for index in range(8):
-        a = tau * index / 8
-        box(plinth, "Nexus sentinel", (4.4 * cos(a), 4.4 * sin(a), 0.62),
-            (0.55, 0.55, 0.55), "stone", 0.06, a)
+    tube(plinth, "Nexus plinth", [(0, 0, 0), (0, 0, 1.05), (0, 0, 1.2)],
+         [NEXUS_RADIUS, NEXUS_RADIUS, NEXUS_RADIUS - 0.2], "stone-cool", sides=32, accent="stone")
+    disc(plinth, "Nexus inlay", (0, 0), NEXUS_RADIUS - 0.4, 1.21, "stone-light")
 
     for team, tint in (("Blue", "blue"), ("Red", "red")):
         tower = proto(f"Tupi tower {team}")
@@ -257,12 +274,14 @@ def build_prototypes(library):
         tube(tower, "Tower shaft", [(0, 0, 1.1), (0, 0, 4.4), (0, 0, 5.3)],
              [1.35, 1.05, 0.92], "stone", sides=10, accent="stone-light")
         box(tower, "Tower crown", (0, 0, 5.55), (2.5, 2.5, 0.55), "stone-light", 0.08)
-        for x in (-1.0, -0.35, 0.35, 1.0):
-            for y in (-1.0, 1.0):
-                box(tower, "Crown merlon", (x, y, 5.95), (0.42, 0.42, 0.42), "stone", 0.04)
-        tube(tower, "Tower crystal", [(0, 0, 4.0), (0, 0, 6.6), (0, 0, 7.1)],
+        for index, x in enumerate((-1.0, -0.35, 0.35, 1.0)):
+            for side, y in enumerate((-1.0, 1.0)):
+                box(tower, f"{team} crown merlon {index * 2 + side}", (x, y, 5.95),
+                    (0.42, 0.42, 0.42), "stone", 0.04)
+        crystal = proto(f"Tupi tower crystal {team}")
+        tube(crystal, "Tower crystal", [(0, 0, 6.45), (0, 0, 7.5), (0, 0, 8.7)],
              [0.05, 0.75, 0.04], tint, sides=7, accent="glow")
-        tube(tower, "Tower finial", [(0, 0, 5.8), (0, 0, 7.4)], [0.06, 0.04], "gold", sides=6)
+        tube(tower, "Tower finial", [(0, 0, 5.8), (0, 0, 6.35)], [0.06, 0.04], "gold", sides=6)
         for x in (-1.2, 1.2):
             tube(tower, "Pennant staff", [(x, -1.25, 3.1), (x, -1.25, 4.7)], [0.035, 0.025], "iron", sides=6)
             cloth(tower, "Tower pennant", tint, (x + 0.26, -1.25, 4.65), 0.50, 0.42)
@@ -272,20 +291,23 @@ def build_prototypes(library):
          "gold", sides=8, accent="trim")
     pebble(stronghold, "Crest orb", (0, 0, 2.55), (0.34, 0.34, 0.30), "glow", sides=10)
 
-    for kind in CAMP_KINDS:
+    for kind, at in zip(CAMP_KINDS, BLUE_CAMPS, strict=True):
         camp = proto(f"Tupi camp {kind}")
-        disc(camp, "Camp clearing", (0, 0), 7.0, 0.04, "path-bed", rings=2, accent=False)
-        for index, (x, y, scale) in enumerate(((-4.1, 1.7, 1.8), (3.7, -1.2, 2.1),
-                                               (1.4, 3.4, 1.5), (-2.2, -3.1, 1.7))):
+        river_limit = (SIZE - sum(at)) / sqrt(2) - WATER_HALF_WIDTH - 0.35
+        disc(camp, "Camp clearing", (0, 0), CAMP_RADIUS, 0.08, "path-bed",
+             rings=2, accent=False, river_limit=river_limit)
+        for index, (x, y, scale) in enumerate(((-6.5, 2.4, 1.8), (6.2, -2.3, 2.1),
+                                               (2.4, 6.5, 1.5), (-3.6, -5.6, 1.7))):
+            x, y = cap_river_approach(x, y, river_limit - 1.0)
             instance(camp, library["Mossy rocks"], "Camp outcrop", (x, y, 0.02), scale, index)
-        tube(camp, "Camp totem", [(0, 0, 0.10), (0, 0, 2.0), (0, 0, 2.35)],
+        tube(camp, "Camp totem", [(0, -6.5, 0.10), (0, -6.5, 2.0), (0, -6.5, 2.35)],
              [0.42, 0.30, 0.24], "stone-cool", sides=7)
-        tube(camp, "Camp crystal", [(0, 0, 2.1), (0, 0, 3.3), (0, 0, 3.7)],
+        tube(camp, "Camp crystal", [(0, -6.5, 2.1), (0, -6.5, 3.3), (0, -6.5, 3.7)],
              [0.04, 0.55, 0.03], CAMP_TINT[kind], sides=6, accent="glow")
         for index in range(5):
             a = tau * index / 5
-            instance(camp, library["Fern"], "Camp fern", (4.6 * cos(a), 4.6 * sin(a), 0.02),
-                     1.8 + index * 0.12, a)
+            x, y = cap_river_approach(6.7 * cos(a), 6.7 * sin(a), river_limit - 1.0)
+            instance(camp, library["Fern"], "Camp fern", (x, y, 0.02), 1.8 + index * 0.12, a)
     return assets
 
 
@@ -345,8 +367,9 @@ def assemble(scene, assets, library):
                                                 y + ny * column / (LANE_HALF_WIDTH + 0.2), 0.11),
                              1.0, atan2(dy, dx) + rng.uniform(-0.03, 0.03))
     for at, angle in BRIDGES:
-        instance(lanes, assets["Tupi bridge deck"], "Stone bridge", (at[0], at[1], 0.55), 1.0, angle)
-    instance(lanes, assets["Tupi plaza island"], "Tupi plaza", (PLAZA[0], PLAZA[1], 0.0), 1.0, 0.0)
+        instance(lanes, assets["Tupi bridge deck"], "Stone bridge", (at[0], at[1], 0.0), 1.0, angle)
+    for key in ("Tupi plaza island", "Tupi plaza crystal"):
+        instance(lanes, assets[key], key, (*PLAZA, 0.0), 1.0, 0.0)
 
     for team, base in (("Blue", BLUE), ("Red", RED)):
         instance(bases, assets["Tupi base plateau"], f"{team} base plateau", (base[0], base[1], 0.0), 1.0, radians(135) if team == "Blue" else radians(-45))
@@ -362,12 +385,14 @@ def assemble(scene, assets, library):
     for team, tier, lane, at in towers():
         inside_base = min(hypot(at[0] - b[0], at[1] - b[1]) for b in (BLUE, RED)) < BASE_RADIUS - 1
         z = 0.52 if inside_base else 0.0
-        scale = 1.5 if tier != "nexus" else 1.7
-        instance(towers_layer, assets[f"Tupi tower {team}"], f"{team} {tier} {lane or 'Nexus'} tower",
-                 (at[0], at[1], z), scale, 0.0)
+        scale = 1.15 if tier == "nexus" else 1.0
+        for part in ("tower", "tower crystal"):
+            instance(towers_layer, assets[f"Tupi {part} {team}"],
+                     f"{team} {tier} {lane or 'Nexus'} {part}", (*at, z), scale, 0.0)
 
     for at, kind in camps():
-        instance(camps_layer, assets[f"Tupi camp {kind}"], f"{kind} camp", (at[0], at[1], 0.0), 1.25, 0.0)
+        yaw = pi if sum(at) > SIZE else 0.0
+        instance(camps_layer, assets[f"Tupi camp {kind}"], f"{kind} camp", (*at, 0.0), 1.0, yaw)
 
     placed = 0
     while placed < 380:
@@ -444,7 +469,7 @@ def camera(scene, name, origin, target, ortho=None):
     return obj
 
 
-def lighting(scene):
+def lighting(scene, studio=False):
     world = bpy.data.worlds.new(scene.name + " ambient")
     scene.world = world
     world.use_nodes = True
@@ -455,16 +480,17 @@ def lighting(scene):
     sun = bpy.data.lights.new("Warm valley sun", "SUN")
     obj = bpy.data.objects.new(sun.name, sun)
     rig.objects.link(obj)
-    obj.location = (-80, -120, 180)
-    aim(obj, (100, 100, 0))
+    focus = (0, 0, 0) if studio else (100, 100, 0)
+    obj.location = (-12, -20, 65) if studio else (-80, -120, 180)
+    aim(obj, focus)
     sun.energy, sun.angle = 2.4, radians(8)
     sun.color = (1.0, 0.86, 0.70)
     fill = bpy.data.lights.new("Cool sky bounce", "AREA")
     obj = bpy.data.objects.new(fill.name, fill)
     rig.objects.link(obj)
-    obj.location = (200, 20, 130)
-    aim(obj, (100, 100, 0))
-    fill.energy, fill.shape, fill.size = 9000, "DISK", 80
+    obj.location = (10, 18, 22) if studio else (200, 20, 130)
+    aim(obj, focus)
+    fill.energy, fill.shape, fill.size = (1900, "DISK", 25) if studio else (9000, "DISK", 80)
     fill.color = (0.72, 0.85, 1.0)
 
 
@@ -505,7 +531,7 @@ def scene_triangles(scene):
 
 def label(collection, body, at):
     data = bpy.data.curves.new(body, "FONT")
-    data.body, data.size, data.align_x = body, 0.32, "CENTER"
+    data.body, data.size, data.align_x = body, 0.45, "CENTER"
     obj = bpy.data.objects.new(body, data)
     collection.objects.link(obj)
     obj.location = at
@@ -515,24 +541,29 @@ def label(collection, body, at):
 def component_scene(assets, library, samples):
     scene = bpy.data.scenes.new("02  Tupi Valley component board")
     collection = group(scene, "Editable Tupi Valley instances")
-    box(collection, "Studio tabletop", (0, 0, -0.35), (44, 30, 0.30), "cliff-shadow")
+    box(collection, "Studio tabletop", (0, 0, -0.35), (58, 38, 0.30), "cliff-shadow")
     samples_to_show = [
-        ("Tupi base plateau", 1.0), ("Tupi Nexus plinth", 1.0), ("Classic Stronghold", 2.4),
-        ("Tupi tower Blue", 1.0), ("Tupi tower Red", 1.0), ("Tupi bridge deck", 0.72),
-        ("Tupi plaza island", 0.55), ("Tupi camp Wolves", 1.0), ("Tupi camp Golems", 1.0),
-        ("Full pine", 2.6), ("Coastal oak", 2.2), ("Mossy rocks", 2.4),
+        ("Tupi base plateau", 0.12), ("Tupi Nexus plinth", 0.56), ("Classic Stronghold", 2.1),
+        ("Tupi tower Blue", 0.82), ("Tupi tower Red", 0.82), ("Tupi bridge deck", 0.40),
+        ("Tupi plaza island", 0.26), ("Tupi plaza crystal", 0.85), ("Tupi camp Wolves", 0.46),
+        ("Tupi camp Golems", 0.46), ("Tupi camp Jaguar", 0.46), ("Tupi camp Frogs", 0.46),
+        ("Tupi flagstone 1", 1.6), ("Tupi flagstone 2", 1.6), ("Tupi flagstone 3", 1.6),
+        ("Tupi curb", 2.1), ("Tupi curb lip", 2.1), ("Tupi stronghold crest", 1.35),
+        ("Tupi tower crystal Blue", 0.8), ("Tupi tower crystal Red", 0.8),
+        ("Full pine", 2.4), ("Coastal oak", 2.0), ("Mossy rocks", 2.4), ("Brazier", 2.4),
     ]
     for index, (name, scale) in enumerate(samples_to_show):
-        x, y = (index % 4 - 1.5) * 10.0, (1.5 - index // 4) * 7.5
-        box(collection, "Sample platform", (x, y, -0.105), (8.8, 6.4, 0.20), "distant", 0.08)
+        x, y = (index % 6 - 2.5) * 9.2, (1.5 - index // 6) * 8.2
+        box(collection, "Sample platform", (x, y, -0.105), (8.6, 7.6, 0.20), "distant", 0.08)
         source = assets.get(name) or library.get(name)
         if source is None:
             continue
-        instance(collection, source, name, (x, y, 0.02), scale, 0.0)
-        label(collection, name, (x, y - 3.2, 0.15))
-    lighting(scene)
+        lift = -6.45 * scale if name.startswith("Tupi tower crystal") else 0.0
+        instance(collection, source, name, (x, y + 0.3, lift + 0.02), scale, 0.0)
+        label(collection, name.removeprefix("Tupi ").title(), (x, y - 3.25, 0.03))
+    lighting(scene, studio=True)
     render_setup(scene, 1600, 900, samples)
-    cam = camera(scene, "Component board camera", (0, -8, 25), (0, 0, 0), ortho=46)
+    cam = camera(scene, "Component board camera", (0, -17, 40), (0, 0, 0), ortho=63)
     scene.camera = cam
     return scene
 
@@ -543,6 +574,8 @@ def main():
     parser.add_argument("out", type=Path)
     parser.add_argument("--project-only", action="store_true")
     parser.add_argument("--samples", type=int, default=24)
+    parser.add_argument("--preview-width", type=int, default=1600)
+    parser.add_argument("--runtime", type=Path, help="export pieces for the Bevy scene")
     options = parser.parse_args(args)
     options.out.mkdir(parents=True, exist_ok=True)
 
@@ -558,9 +591,15 @@ def main():
     match = camera(scene, "Match camera", (100, 46.9, 78.8), (100, 100, 0))
     scene.camera = match
     board = component_scene(assets, library, options.samples)
+    if options.runtime:
+        from export_runtime import export
+        metrics_runtime = export(options.runtime, assets)
+    else:
+        metrics_runtime = {}
 
     metrics = {
         "map_size": SIZE,
+        "runtime_triangles": metrics_runtime,
         "lanes": {name: len(points) - 1 for name, points in LANES.items()},
         "towers": len(list(towers())),
         "camps": len(list(camps())),
@@ -574,14 +613,14 @@ def main():
     }
     if not options.project_only:
         for scene_to_render, camera_to_use, name, size in (
-            (scene, overview, "tupi-valley-overview.png", 1600),
-            (scene, match, "tupi-valley-match.png", 1600),
-            (board, board.camera, "tupi-valley-kit.png", 1600),
+            (scene, overview, "tupi-valley-overview.png", options.preview_width),
+            (scene, match, "tupi-valley-match.png", options.preview_width),
+            (board, board.camera, "tupi-valley-kit.png", options.preview_width),
         ):
             bpy.context.window.scene = scene_to_render
             scene_to_render.camera = camera_to_use
             scene_to_render.render.resolution_x = size
-            scene_to_render.render.resolution_y = size if name.endswith("overview.png") else 900
+            scene_to_render.render.resolution_y = size if name.endswith("overview.png") else size * 9 // 16
             scene_to_render.render.filepath = str(options.out / name)
             bpy.ops.render.render(write_still=True)
             print("rendered", name, flush=True)

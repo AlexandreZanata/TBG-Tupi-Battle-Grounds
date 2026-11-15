@@ -46,3 +46,5 @@ features = ["x11", "wayland"]
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # WebGL2 remains browser-only.
 bevy = { version = "0.20", default-features = false, features = ["webgl2"] }
+# Read the 1v1 Practice language and navigate back to the same-origin lobby.
+web-sys = { version = "0.3", features = ["Window", "Location"] }

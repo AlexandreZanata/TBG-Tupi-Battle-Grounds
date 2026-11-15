@@ -1,8 +1,9 @@
-//! The static Tupi Valley diorama, generated once from `tbg_moba_core::map`.
+//! Assembles the Tupi Valley terrain and Blender pieces from the shared map.
 
 use bevy::light::{CascadeShadowConfigBuilder, DirectionalLightShadowMap};
 use bevy::prelude::*;
 
+pub(crate) mod blender;
 pub mod fog;
 mod kit;
 pub(crate) mod landmarks;
@@ -79,9 +80,13 @@ fn build(
         put(chunk);
     }
     put(landmarks::bases());
-    put(landmarks::plaza());
-    put(landmarks::camps());
-    put(landmarks::bridges());
+    put(blender::plaza());
+    for camp in landmarks::camps() {
+        put(camp);
+    }
+    for bridge in landmarks::bridges() {
+        put(bridge);
+    }
     put(props::streets());
     put(props::rim());
     let waterfall = put(props::waterfalls());
@@ -126,7 +131,7 @@ fn build(
         },
     });
     commands.spawn((
-        Mesh3d(meshes.add(landmarks::plaza_crystal())),
+        Mesh3d(meshes.add(blender::plaza_crystal())),
         MeshMaterial3d(crystal),
         Transform::default(),
     ));
