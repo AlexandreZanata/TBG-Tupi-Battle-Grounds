@@ -34,7 +34,7 @@ async fn execute(app: AppState, req: Request) -> Result<Response, Error> {
     let binding = if raw {
         crate::auth::http::image_binding(&app, req.headers())
     } else {
-        crate::auth::http::history_binding(&app, req.headers())
+        crate::auth::http::history_binding(&app, req.method(), req.headers())
     }
     .map_err(|_| Error::Restricted)?;
     let account = binding.account;

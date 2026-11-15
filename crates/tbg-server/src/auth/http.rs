@@ -4,7 +4,7 @@ use super::*;
 use crate::AppState;
 use axum::{
     extract::{ConnectInfo, Path, Request, State},
-    http::{HeaderMap, StatusCode},
+    http::{HeaderMap, Method, StatusCode},
     response::{IntoResponse, Response},
     Json,
 };
@@ -425,6 +425,7 @@ mod tests {
 /// P73 owner HTTP uses the same Access index, channel/origin policy and slot fence.
 pub(crate) fn history_binding(
     app: &AppState,
+    method: &Method,
     headers: &HeaderMap,
 ) -> Result<super::Binding, Error> {
     let channel = if headers.get("x-tbg-client").is_some_and(|v| v == "native") {
@@ -432,7 +433,7 @@ pub(crate) fn history_binding(
     } else {
         Channel::Browser
     };
-    origin::validate(channel, headers, &app.config.auth_origins)?;
+    origin::validate_account(channel, method, headers, &app.config.auth_origins)?;
     slot_matches(headers, app.release.slot())?;
     let raw = bearer(headers)?.ok_or(Error::Unauthorized)?;
     app.auth.authenticate(tokens::decode::<32>(&raw)?)
@@ -452,5 +453,5 @@ pub(crate) fn image_binding(app: &AppState, headers: &HeaderMap) -> Result<super
         "content-type",
         axum::http::HeaderValue::from_static("application/json"),
     );
-    history_binding(app, &envelope)
+    history_binding(app, &Method::POST, &envelope)
 }
