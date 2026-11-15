@@ -2104,3 +2104,11 @@ capture uses the ordinary shared menu panel.
 New shared WebP assets and final per-target observations are pending. Source
 routing passed for the earlier sequence change; it does not prove packaged
 Windows/web visual correspondence or acceptance of the new photographs.
+
+The initial official R16 portrait capture exposed scenery appearing behind a
+champion after its Blender pack finished loading. The Gallery now hides newly
+loaded Arena meshes before visibility propagation whenever its isolated studio
+framing is active. Arena lighting and the champion meshes remain available;
+range review and ordinary gameplay keep their Arena scenery. The rejected
+sample is retained outside Git and is not a deliverable portrait. Corrected
+Linux captures and Windows/web observations remain pending.
