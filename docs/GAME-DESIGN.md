@@ -2215,6 +2215,14 @@ coefficients and integer truncation produce Classic **4050/111**, Treasury
 branches, prices, armor, splash, aura, Spoils, interval and range. Competitive
 acceptance still requires D-33 evidence; these values do not waive its gates.
 
+**Owner preview exception (D-112, 2026-11-15).** After reviewing the measured
+pre-existing Heavy/Cheap target failures and pending Windows/web observations,
+the owner explicitly authorizes merging PRs #83/#84 and publishing this change
+to production as a preview. The held-out evidence is accepted for that bounded
+preview only. Competitive acceptance remains pending; §6 thresholds, required
+rows, future release gates and exact visual correspondence requirements are
+not weakened or reported as passed.
+
 ## TW-01 / PK-01 / GD-01 — Proposed owner revision (2026-11-02)
 
 Owner authorizes stronger Strongholds and Fortifications, width-limited

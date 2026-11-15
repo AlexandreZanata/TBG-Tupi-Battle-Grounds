@@ -1,6 +1,6 @@
 # Stronghold power and current Blender previews — 2026-11-15
 
-Status: implemented candidate; competitive evidence is not accepted and production publication is blocked pending owner decision and merge authorization.
+Status: owner-authorized production preview (D-112); technical CI, artifact publication and attended rollout in progress. Competitive acceptance remains pending.
 
 ## Owner scope
 
@@ -177,3 +177,13 @@ The local desktop browser loaded all nine updated gallery images and displayed
 the Portuguese Laboratory lightbox. Screenshot:
 `/tmp/tbg-blender-refresh-20261115/site-preview-browser.jpg`. The loopback
 preview remains available at port 8601 for owner review; it changes no live site.
+
+## Owner authorization (D-112)
+
+The owner answered both pending approval questions: authorize merge #83 and
+authorize merges #83/#84 plus the .10 preview with the disclosed competitive
+and visual limits. The owner then explicitly requested publication of all
+changes in production. PR #83 merged as c527c0f5. The balance note remains
+`kind=balance`; `accepted=true` now records owner acceptance for the preview,
+with explicit `competitive_accepted=false`. No failing row is reported as passed.
+The previous quality rejection remains historical evidence of the enforced gate.

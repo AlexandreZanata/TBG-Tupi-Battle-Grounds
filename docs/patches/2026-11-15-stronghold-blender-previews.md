@@ -1,6 +1,6 @@
 # TW-02: reduced Stronghold power and current Blender photographs
 
-Candidate 0.1.4-colossus.10, R17 / 3df52af730a4e914.
+Owner-authorized preview 0.1.4-colossus.10, R17 / 3df52af730a4e914.
 
 The owner confirmed 40% less Stronghold HP and approximately 30% less damage.
 Reference 6750/159 becomes 4050/111. The existing kind coefficients give
@@ -18,9 +18,11 @@ reload/reconnection. Gallery exports hide late scenery; capture helpers wait
 for readiness and inspect a current live champion.
 
 The held-out anti-spam probes fail required targets before and after this
-change. Evidence is not accepted for competitive release. The full gate,
+change. The owner explicitly accepted this evidence for a production preview only
+(D-112); competitive acceptance is still pending. The full gate,
 1x server/lab equivalence, corrected live browser purchase/reconnect/natural
 Ranked completion and Windows/web visual correspondence remain pending.
-The owner must explicitly decide whether to publish a preview with these limits.
+The owner authorized both PR merges and production publication with these
+limits on 2026-11-15. No threshold or test was weakened.
 See the [consolidation report](../phases/STRONGHOLD-PREVIEWS-20261115.md) and
 [capture evidence](../evidence/blender-captures-20261115.md).

@@ -3577,3 +3577,20 @@ rules, shared read-only 1v1 rigs/clips, existing balance values and protocol
 v4. Record safeguards as Proposed M-76. Validate focused scenarios under the
 host lock and observe native Linux movement; Windows/web parity remains
 pending until observed. No push, merge or deployment is authorized.
+
+
+## D-112 · Owner-authorized TW-02 production preview — 2026-11-15
+
+**Decision.** The owner explicitly approves merges of PRs #83/#84 and publication
+of colossus.10 to production as a preview, after being told that Heavy/Cheap
+win about 85% against the bot (required ceiling 55%, also failing with the old
+tower values) and Windows/web in-game observations remain pending. The later
+instruction is to publish all changes in production.
+**Scope.** Accept the recorded held-out evidence for this preview only; keep
+`competitive_accepted=false`, the failures, raw reports and unverified targets
+visible. No gate threshold, assertion, trust receipt or player data is altered.
+The full competitive gate and 1x server/lab equivalence remain separate pending
+acceptance work. Production rollout still requires green technical CI, genuine
+main-built attested artifacts and a coordinated R17 contract switch.
+**Reopen when** competitive balance is tuned or cross-platform evidence is ready;
+the exception does not approve subsequent numerical revisions.

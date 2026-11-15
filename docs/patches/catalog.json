@@ -1329,7 +1329,7 @@
       "id": "tw02-stronghold-blender-previews",
       "version": "0.1.4-colossus.10",
       "date": "2026-11-15",
-      "status": "candidate",
+      "status": "preview",
       "kind": "balance",
       "ruleset_version": 17,
       "ruleset_hash": "3df52af730a4e914",
@@ -1338,8 +1338,8 @@
         "pt-BR": "Fortalezas mais frágeis e imagens atuais do Blender"
       },
       "summary": {
-        "en": "Candidate: Strongholds lose 40% base HP and approximately 30% damage. Champion, Arena and Laboratory imagery uses the current models. Competitive balance approval is pending.",
-        "pt-BR": "Candidata: Fortalezas perdem 40% da vida básica e aproximadamente 30% do dano. As imagens de campeões, Arenas e Laboratório usam os modelos atuais. A aprovação do equilíbrio competitivo está pendente."
+        "en": "Owner-approved preview: Strongholds lose 40% base HP and approximately 30% damage. Champion, Arena and Laboratory imagery uses the current models. Competitive balance approval is pending.",
+        "pt-BR": "Prévia aprovada pelo criador: Fortalezas perdem 40% da vida básica e aproximadamente 30% do dano. As imagens de campeões, Arenas e Laboratório usam os modelos atuais. A aprovação do equilíbrio competitivo está pendente."
       },
       "changes": [
         {
@@ -1497,7 +1497,7 @@
           },
           {
             "title": "Validation boundary",
-            "body": "Focused rule, interface and reconnect-counter tests passed. Held-out policy probes still fail the required anti-spam targets, as they did with the previous tower values. This candidate is not approved for competitive release. Windows and desktop web in-game visual correspondence remains pending."
+            "body": "Focused rule, interface and reconnect-counter tests passed. The owner explicitly authorized this preview despite the pre-existing anti-spam target failures. Full competitive acceptance and Windows/desktop web in-game visual correspondence remain pending; no gate threshold was changed."
           }
         ],
         "pt-BR": [
@@ -1507,13 +1507,13 @@
           },
           {
             "title": "Limite da validação",
-            "body": "Passaram os testes focados das regras, interface e contador de reconexão. Os testes de estratégias em sementes reservadas ainda reprovam os limites contra compras repetitivas, como já ocorria com os valores anteriores das torres. Esta candidata não está aprovada para publicação competitiva. A correspondência visual dentro do jogo em Windows e navegador desktop permanece pendente."
+            "body": "Passaram os testes focados das regras, interface e contador de reconexão. O criador autorizou explicitamente esta prévia apesar das falhas anteriores nos limites contra compras repetitivas. A aprovação competitiva completa e a correspondência visual dentro do jogo em Windows/navegador desktop continuam pendentes; nenhum limite de teste foi alterado."
           }
         ]
       },
       "document": "docs/patches/2026-11-15-stronghold-blender-previews.md",
       "evidence": {
-        "accepted": false,
+        "accepted": true,
         "report": "docs/phases/STRONGHOLD-PREVIEWS-20261115.md",
         "seed_blocks": {
           "discovery": "0..32, five-kind matrix before and after",
@@ -1522,7 +1522,9 @@
         "required_failures": [
           "heavy vs bot >55%",
           "cheap vs bot >55%"
-        ]
+        ],
+        "competitive_accepted": false,
+        "acceptance_scope": "Owner-authorized preview, 2026-11-15; required spam targets remain failing and visual observations remain pending. No competitive gate pass is claimed."
       }
     }
   ]

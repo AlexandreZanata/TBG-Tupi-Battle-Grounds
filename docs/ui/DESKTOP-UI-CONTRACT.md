@@ -2165,3 +2165,16 @@ requested frame. Both helpers use ordinary shared UI actions; no units, Energy
 or outcomes are injected. Normal player controls and motion are unchanged.
 Linux runtime checks of the corrected helpers and Windows/web observations are
 pending. The existing portrait/Laboratory/inspection cases cover this change.
+
+
+## 2026-11-15 — D-112 preview authorization and observed Linux references
+
+The owner explicitly permits production publication of this preview while
+Windows and desktop web in-game observations remain pending. Exact visual
+correspondence is still required; this is not acceptance of a known mismatch
+or a pixel tolerance. Linux evidence now includes all 88 static portraits,
+eight Arena previews and nine native screens. Source 28f94749 verified the
+Colossus B2 catalog, live champion inspection and Bastion's reduced 4657 HP /
+6054 first-Fortification description. Full kind/form/motion matrix coverage and
+Windows/web runtime comparison remain pending. The desktop browser also loaded
+all nine photographs in the local public gallery; that is static-site evidence.
