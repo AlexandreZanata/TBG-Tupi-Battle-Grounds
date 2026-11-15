@@ -1,0 +1,14 @@
+command: /data/tbg-open-fronts-target/release/tbg-balance run --a heavy --b bot --pairs 1000 --threads 2 --seed-start 1000000 --apply stronghold_hp=6750,stronghold_damage=159 --out /tmp/tbg-blender-refresh-20261115/heavy-before-confirmation
+git_head: 7d46426e
+ruleset_fingerprint: 2b25e5233af1233c
+applied: stronghold_hp=6750,stronghold_damage=159
+seeds: 1000000..1001000 (1000 pairs)
+ruleset_base: canon
+shop_preview: false
+pool_kinds: 46
+threads: 2
+reaction_views: 5
+wall_s: 77.75
+games: 2000
+games_per_s: 26
+game_seconds_per_wall_second: 16348

@@ -61,8 +61,27 @@ pub fn plugin(app: &mut App) {
                 range::fire,
             )
                 .run_if(in_state(GameState::Gallery)),
+        )
+        .add_systems(
+            PostUpdate,
+            hide_loaded_scenery
+                .before(bevy::camera::visibility::VisibilitySystems::VisibilityPropagate)
+                .run_if(in_state(GameState::Gallery)),
         );
 }
+
+type LoadedScenery<'w, 's> =
+    Query<'w, 's, &'static mut Visibility, (Added<crate::arena::ArenaScene>, With<Mesh3d>)>;
+
+fn hide_loaded_scenery(options: Res<Gallery>, mut scenery: LoadedScenery) {
+    if options.hide_arena() {
+        // Blender packs can finish after the Gallery's initial visibility pass.
+        for mut visibility in &mut scenery {
+            *visibility = Visibility::Hidden;
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)] // Review scene resources and portrait clear color.
 fn spawn(
     mut commands: Commands,

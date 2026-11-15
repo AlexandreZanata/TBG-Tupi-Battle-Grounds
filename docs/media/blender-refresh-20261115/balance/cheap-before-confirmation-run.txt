@@ -1,0 +1,4 @@
+cheap vs bot: 85.0% [82.9 – 87.0] over 1000 seed pairs
+stalled matches (60 s): 0.5% (9/2000)
+cheap vs bot                                     85.0% [82.8% – 87.0%]        target 0.0% – 55.0%       FAIL
+1 rows, 1 failing

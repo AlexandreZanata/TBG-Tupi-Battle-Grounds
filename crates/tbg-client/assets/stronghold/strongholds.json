@@ -37,8 +37,8 @@
         "Pays nothing while your army is not killing"
       ],
       "stats": {
-        "maxHp": 6277,
-        "damage": 144,
+        "maxHp": 3766,
+        "damage": 101,
         "interval": 20,
         "range": 6000,
         "spoils": 270,
@@ -59,8 +59,8 @@
                 "hpBp": 2500
               },
               "stats": {
-                "maxHp": 7846,
-                "damage": 144,
+                "maxHp": 4707,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 270,
@@ -78,8 +78,8 @@
                 "hpBp": 2500
               },
               "stats": {
-                "maxHp": 9415,
-                "damage": 144,
+                "maxHp": 5649,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 270,
@@ -106,8 +106,8 @@
                 "spoilsAdd": 90
               },
               "stats": {
-                "maxHp": 6277,
-                "damage": 144,
+                "maxHp": 3766,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 360,
@@ -126,8 +126,8 @@
                 "spoilsCapAdd": 540
               },
               "stats": {
-                "maxHp": 6277,
-                "damage": 144,
+                "maxHp": 3766,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 450,
@@ -174,8 +174,8 @@
         "No effect beyond its walls"
       ],
       "stats": {
-        "maxHp": 7762,
-        "damage": 141,
+        "maxHp": 4657,
+        "damage": 98,
         "interval": 20,
         "range": 6000,
         "spoils": 0,
@@ -196,8 +196,8 @@
                 "hpBp": 3000
               },
               "stats": {
-                "maxHp": 10090,
-                "damage": 141,
+                "maxHp": 6054,
+                "damage": 98,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
@@ -215,8 +215,8 @@
                 "hpBp": 3000
               },
               "stats": {
-                "maxHp": 12419,
-                "damage": 141,
+                "maxHp": 7451,
+                "damage": 98,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
@@ -243,8 +243,8 @@
                 "rangeAdd": 1500
               },
               "stats": {
-                "maxHp": 7762,
-                "damage": 141,
+                "maxHp": 4657,
+                "damage": 98,
                 "interval": 20,
                 "range": 7500,
                 "spoils": 0,
@@ -262,8 +262,8 @@
                 "dmgBp": 3000
               },
               "stats": {
-                "maxHp": 7762,
-                "damage": 183,
+                "maxHp": 4657,
+                "damage": 127,
                 "interval": 20,
                 "range": 7500,
                 "spoils": 0,
@@ -310,8 +310,8 @@
         "No passive effect"
       ],
       "stats": {
-        "maxHp": 5737,
-        "damage": 174,
+        "maxHp": 3442,
+        "damage": 122,
         "interval": 20,
         "range": 6000,
         "spoils": 0,
@@ -332,8 +332,8 @@
                 "dmgBp": 4000
               },
               "stats": {
-                "maxHp": 5737,
-                "damage": 243,
+                "maxHp": 3442,
+                "damage": 170,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
@@ -351,8 +351,8 @@
                 "dmgBp": 4000
               },
               "stats": {
-                "maxHp": 5737,
-                "damage": 313,
+                "maxHp": 3442,
+                "damage": 219,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
@@ -379,8 +379,8 @@
                 "interval": 14
               },
               "stats": {
-                "maxHp": 5737,
-                "damage": 174,
+                "maxHp": 3442,
+                "damage": 122,
                 "interval": 14,
                 "range": 6000,
                 "spoils": 0,
@@ -398,8 +398,8 @@
                 "interval": 10
               },
               "stats": {
-                "maxHp": 5737,
-                "damage": 174,
+                "maxHp": 3442,
+                "damage": 122,
                 "interval": 10,
                 "range": 6000,
                 "spoils": 0,
@@ -446,8 +446,8 @@
         "Only helps units fighting close to your tower"
       ],
       "stats": {
-        "maxHp": 6480,
-        "damage": 144,
+        "maxHp": 3888,
+        "damage": 101,
         "interval": 20,
         "range": 6000,
         "spoils": 0,
@@ -468,8 +468,8 @@
                 "auraBpAdd": 750
               },
               "stats": {
-                "maxHp": 6480,
-                "damage": 144,
+                "maxHp": 3888,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
@@ -487,8 +487,8 @@
                 "auraBpAdd": 750
               },
               "stats": {
-                "maxHp": 6480,
-                "damage": 144,
+                "maxHp": 3888,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
@@ -515,8 +515,8 @@
                 "auraRangeAdd": 1500
               },
               "stats": {
-                "maxHp": 6480,
-                "damage": 144,
+                "maxHp": 3888,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,
@@ -534,8 +534,8 @@
                 "auraRangeAdd": 1500
               },
               "stats": {
-                "maxHp": 6480,
-                "damage": 144,
+                "maxHp": 3888,
+                "damage": 101,
                 "interval": 20,
                 "range": 6000,
                 "spoils": 0,

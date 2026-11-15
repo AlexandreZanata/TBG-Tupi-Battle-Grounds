@@ -11,7 +11,23 @@ use tbg_core::{
 
 use StrongholdKind::{Artillery, Bastion, Classic, Command, Treasury};
 // TW-01 Proposed in GAME-DESIGN; historical assertions remain available below.
-const TW01: bool = matches!(tbg_core::ruleset_version::RULESET_VERSION, 11..=16);
+const TW01: bool = matches!(tbg_core::ruleset_version::RULESET_VERSION, 11..=17);
+
+#[test]
+fn tw02_reduced_bases_preserve_the_five_stronghold_roles() {
+    // GAME-DESIGN TW-02: -40% HP and approximately -30% damage per kind.
+    let rules = Ruleset::canon();
+    for (kind, hp, damage) in [
+        (Classic, 4050, 111),
+        (Treasury, 3766, 101),
+        (Bastion, 4657, 98),
+        (Artillery, 3442, 122),
+        (Command, 3888, 101),
+    ] {
+        let tower = stronghold::stats(rules, kind, 0, 0);
+        assert_eq!((tower.max_hp, tower.damage), (hp, damage), "{kind:?}");
+    }
+}
 
 /// Running, with only the effects under test: no regen, no Interest, no
 /// Augment rounds.

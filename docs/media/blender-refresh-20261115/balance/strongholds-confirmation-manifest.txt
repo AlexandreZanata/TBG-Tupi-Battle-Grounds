@@ -1,0 +1,14 @@
+command: /data/tbg-open-fronts-target/release/tbg-balance strongholds --pairs 256 --threads 2 --seed-start 1000000 --out /tmp/tbg-blender-refresh-20261115/strongholds-confirmation
+git_head: 7d46426e
+ruleset_fingerprint: 70f2bd0819870a43
+applied: none
+seeds: 1000000..1000256 (256 pairs)
+ruleset_base: canon
+shop_preview: false
+pool_kinds: 46
+threads: 2
+reaction_views: 5
+wall_s: 756.48
+games: 12800
+games_per_s: 17
+game_seconds_per_wall_second: 0

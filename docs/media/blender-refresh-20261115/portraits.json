@@ -1,0 +1,2571 @@
+{
+  "build": {
+    "contract": "w40-r16-f2e253b98ccb313a",
+    "features": [
+      "ui-acceptance"
+    ],
+    "profile": "release",
+    "protocol": 40,
+    "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "0.1.4-colossus.10"
+  },
+  "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+  "os": "Linux-7.2.15-76070215-generic-x86_64-with-glibc2.39",
+  "surface": "Linux X11/Xvfb; actual Bevy native render",
+  "parity": "Windows/desktop web unverified",
+  "captures": [
+    {
+      "kind": "Archer",
+      "forms": [
+        "base"
+      ],
+      "image": "archer-portrait.png",
+      "sha256": "63a997d9cdef8695fcdd7aa4afa60a1bea939f3f47052f4eb923f6bcc83ffbde",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.94,
+      "mode": "base portrait",
+      "log": "archer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/archer.webp",
+      "asset_sha256": "a73923bb8b4f83033fe5ac20c488dbe5d3524f51b7fa58d0a8e04bfea4a05de4"
+    },
+    {
+      "kind": "Longaxe",
+      "forms": [
+        "base"
+      ],
+      "image": "longaxe-portrait.png",
+      "sha256": "d570a165027c1e4a5a0288a74cece2f777d0557c5c278d28f1f1f72fce06e92e",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.52,
+      "mode": "base portrait",
+      "log": "longaxe-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/longaxe.webp",
+      "asset_sha256": "0a9573e1874eec7489c689109a1881f84516d8a9fbfbe5094f749685c26c4323"
+    },
+    {
+      "kind": "Colossus",
+      "forms": [
+        "base"
+      ],
+      "image": "colossus-portrait.png",
+      "sha256": "21b5b04e04fead831fb7140eccd1fe7e1400b6c1f3cb21113959b24220c1b156",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.28,
+      "mode": "base portrait",
+      "log": "colossus-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/colossus.webp",
+      "asset_sha256": "69beaa0881929bde980bcc80f447b62884ffafeaf7e4290545c4633618945a03"
+    },
+    {
+      "kind": "Shieldbearer",
+      "forms": [
+        "base"
+      ],
+      "image": "shieldbearer-portrait.png",
+      "sha256": "2a01fa8cfb396f8b2ddcbdedd915d370a25cc14c2628d5ce45ba403de9863a2e",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.16,
+      "mode": "base portrait",
+      "log": "shieldbearer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/shieldbearer.webp",
+      "asset_sha256": "5bfa138287544eb6a049a7a769effa871365576b2a6acd032472bcc861d62af6"
+    },
+    {
+      "kind": "BoneBrute",
+      "forms": [
+        "base"
+      ],
+      "image": "bonebrute-portrait.png",
+      "sha256": "6b1c541156fe1b85a66518d8fea96d0714501f5fc07cd9e522004136cc9c472b",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.88,
+      "mode": "base portrait",
+      "log": "bonebrute-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/bonebrute.webp",
+      "asset_sha256": "a15691b298f7da46a5e54caf49aa751cd35ed20c2754f3d8a7c33c5b96df8046"
+    },
+    {
+      "kind": "Hexer",
+      "forms": [
+        "base"
+      ],
+      "image": "hexer-portrait.png",
+      "sha256": "bfe8aac9bf39366916a00becdc0fc7327691b271f6d5531201c58e2ed7dd81a5",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.16,
+      "mode": "base portrait",
+      "log": "hexer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/hexer.webp",
+      "asset_sha256": "c488601304c71474c1b907ebbd1bd8bda0048a5072c4190622ba54c70ae45d45"
+    },
+    {
+      "kind": "Sawbot",
+      "forms": [
+        "base"
+      ],
+      "image": "sawbot-portrait.png",
+      "sha256": "2d77d8ae39d0e8ce2f8edc6d1fa7d685edf6b57a1cc103c0abed6d1e0bec755d",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.15,
+      "mode": "base portrait",
+      "log": "sawbot-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/sawbot.webp",
+      "asset_sha256": "c7862b3016874d5a14ebb4e0bbddd87df550bdf0415f9e83df876dd9813ec51f"
+    },
+    {
+      "kind": "SiegeWalker",
+      "forms": [
+        "base"
+      ],
+      "image": "siegewalker-portrait.png",
+      "sha256": "aa00c5b5266108e12c35f6ee3d5e9cc3e966a4c6e4605a43f143346d0c562a62",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.33,
+      "mode": "base portrait",
+      "log": "siegewalker-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/siegewalker.webp",
+      "asset_sha256": "5c21954dc25f357d71fb1525855566473e8269ae6b83a023f2c70a6010303c4e"
+    },
+    {
+      "kind": "Bloomkeeper",
+      "forms": [
+        "base"
+      ],
+      "image": "bloomkeeper-portrait.png",
+      "sha256": "41c5fb80a99bc25fb179a06a11403e76b627d823e290c6002bb5e4d8d6279cfb",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.99,
+      "mode": "base portrait",
+      "log": "bloomkeeper-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/bloomkeeper.webp",
+      "asset_sha256": "67090bfdf7cf494ef45f97adf977aa77f93f11c2a6209a42b464082bcec83372"
+    },
+    {
+      "kind": "Rootcaller",
+      "forms": [
+        "base"
+      ],
+      "image": "rootcaller-portrait.png",
+      "sha256": "72e7568c9c60c6e1b04d99b31bbe5108f60a204347e2a11ba2df3930f2ca8691",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.77,
+      "mode": "base portrait",
+      "log": "rootcaller-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/rootcaller.webp",
+      "asset_sha256": "be3b510613ad502f37d4425cd14020692271a4b99611bb33f98dae6e72a86fbd"
+    },
+    {
+      "kind": "Nester",
+      "forms": [
+        "base"
+      ],
+      "image": "nester-portrait.png",
+      "sha256": "83480d0bf92382a3c27a99766ad14e3861fc57965a8f14e04fe760aa7301b2b7",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.81,
+      "mode": "base portrait",
+      "log": "nester-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/nester.webp",
+      "asset_sha256": "ee4c862340806df79483004857c151aeef7896347d10e60282a755cf50502702"
+    },
+    {
+      "kind": "Rampart",
+      "forms": [
+        "base"
+      ],
+      "image": "rampart-portrait.png",
+      "sha256": "dece01081636890d9a6455a9c4cfabdff5eb6c2104de2a64b15b90b62fd2c330",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.84,
+      "mode": "base portrait",
+      "log": "rampart-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/rampart.webp",
+      "asset_sha256": "9d04c9b227858fb5691a2cc8b65f0898f3b9ba9e4c7c7878b0e2ba69d12e62b5"
+    },
+    {
+      "kind": "Beetling",
+      "forms": [
+        "base"
+      ],
+      "image": "beetling-portrait.png",
+      "sha256": "6cfd1b05579a1bf9404adb37ec339014b29c21786f8c62e69a84b72926d524ec",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.7,
+      "mode": "base portrait",
+      "log": "beetling-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/beetling.webp",
+      "asset_sha256": "2cced6b1f25b8db071fe331c073caee38a341bf1cddc11dbd81261a4996363b8"
+    },
+    {
+      "kind": "Farwatch",
+      "forms": [
+        "base"
+      ],
+      "image": "farwatch-portrait.png",
+      "sha256": "faedf98dab43cade24bc9dbac45cb607b25d7c6f299fc1c02a10a032e55f12b8",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.78,
+      "mode": "base portrait",
+      "log": "farwatch-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/farwatch.webp",
+      "asset_sha256": "ba79647349e3e00fa9e8475a6f81116f5acfc8e0235be272ff85954109a8da0f"
+    },
+    {
+      "kind": "Bombard",
+      "forms": [
+        "base"
+      ],
+      "image": "bombard-portrait.png",
+      "sha256": "1afa1b3ad41cb009b9113d33e6be8e28d707b38cd43fcdcc60c2692ee188488a",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.69,
+      "mode": "base portrait",
+      "log": "bombard-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/bombard.webp",
+      "asset_sha256": "a589257f509488552699e6a9ea049dc3236eac4c3489011497c488ce408bcf21"
+    },
+    {
+      "kind": "Rotcap",
+      "forms": [
+        "base"
+      ],
+      "image": "rotcap-portrait.png",
+      "sha256": "e1191b5e31c9d8c277ece06b7ad40a969b553b4e7886d93da676fc0cf3934b99",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.64,
+      "mode": "base portrait",
+      "log": "rotcap-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/rotcap.webp",
+      "asset_sha256": "bf6b68e0bd260f4d991842699c9c9b9c675adc4055fc777cebe12bbd417d49c4"
+    },
+    {
+      "kind": "OldFinn",
+      "forms": [
+        "base"
+      ],
+      "image": "oldfinn-portrait.png",
+      "sha256": "1a2391f7fc701573f5961e23d2c79da2e5fcac2644b06024bb95aef8d822ae4f",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.57,
+      "mode": "base portrait",
+      "log": "oldfinn-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/oldfinn.webp",
+      "asset_sha256": "4d0fa4438d1f1a617a50fd164c06f2d330105e80762dbf27bcb0f6de3c3a85e3"
+    },
+    {
+      "kind": "AntidoteBrewer",
+      "forms": [
+        "base"
+      ],
+      "image": "antidotebrewer-portrait.png",
+      "sha256": "b520eca059b6451c69e651dcb3d5a58e6f42fe46049561495ba19682ee026120",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.61,
+      "mode": "base portrait",
+      "log": "antidotebrewer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/antidotebrewer.webp",
+      "asset_sha256": "22454adc5dfaab476fb262d4652ede16d376007496aa8f272ab62ed26cfbabcb"
+    },
+    {
+      "kind": "Shatterback",
+      "forms": [
+        "base"
+      ],
+      "image": "shatterback-portrait.png",
+      "sha256": "3419156f025598a901a6776733667aeaeb68124d78389bb673285b10c849a175",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.69,
+      "mode": "base portrait",
+      "log": "shatterback-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/shatterback.webp",
+      "asset_sha256": "18a0a5e0944d9da854de3d80aadbcd9cb0caaa07a2347e17d0e79c14d9fa8918"
+    },
+    {
+      "kind": "BloodFurnace",
+      "forms": [
+        "base"
+      ],
+      "image": "bloodfurnace-portrait.png",
+      "sha256": "166831771e8cd8900ae44f64135af36eb62893f8576451b57f063cd1ad7cc9c7",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.75,
+      "mode": "base portrait",
+      "log": "bloodfurnace-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/bloodfurnace.webp",
+      "asset_sha256": "1ebc82752d4788aa3f68b603e55e6ed82b0d4ae88e39b779aa62c5d416f50e27"
+    },
+    {
+      "kind": "Bloodweaver",
+      "forms": [
+        "base"
+      ],
+      "image": "bloodweaver-portrait.png",
+      "sha256": "ee2dbb01e27d730a4e6a36b26b355e161c54f0cfd035aaa369c855bab8e4f57e",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.85,
+      "mode": "base portrait",
+      "log": "bloodweaver-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/bloodweaver.webp",
+      "asset_sha256": "973220f0ac7ebe9248438c5ec856d709860606840b2289641e03b5c864c1286f"
+    },
+    {
+      "kind": "Oilpress",
+      "forms": [
+        "base"
+      ],
+      "image": "oilpress-portrait.png",
+      "sha256": "0547b7071fc968cb347e304f66d8af0c8691ad8d96545e627f95b95765f43bf9",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.87,
+      "mode": "base portrait",
+      "log": "oilpress-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/oilpress.webp",
+      "asset_sha256": "13a602765287456c8d7a836602b1aad51575072ae30fce0d90554d93221a27a5"
+    },
+    {
+      "kind": "Drumguard",
+      "forms": [
+        "base"
+      ],
+      "image": "drumguard-portrait.png",
+      "sha256": "e5a11a5b479685d13cbcb786d2a5d8743ebe31c471228f65e43069aeb924b1fa",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.03,
+      "mode": "base portrait",
+      "log": "drumguard-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/drumguard.webp",
+      "asset_sha256": "02db8cc6403c2ba5b15140de01d815c2337770c4e3e19ae09c7ef20359986acd"
+    },
+    {
+      "kind": "Leechroot",
+      "forms": [
+        "base"
+      ],
+      "image": "leechroot-portrait.png",
+      "sha256": "48a5e8c5b3ce635460a79a39dcb3022a3434d22a4df7ab0edfe2fbb8e68f7d52",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.09,
+      "mode": "base portrait",
+      "log": "leechroot-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/leechroot.webp",
+      "asset_sha256": "fff723f92870693f82337a76be35aa988e2acafbe269806fa3677ef23dc728d1"
+    },
+    {
+      "kind": "CargoCrab",
+      "forms": [
+        "base"
+      ],
+      "image": "cargocrab-portrait.png",
+      "sha256": "a2a61f47b205bad8deb5affd2c55d10b8fa703ea4cfcf759aea9829ee51bdf53",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.3,
+      "mode": "base portrait",
+      "log": "cargocrab-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/cargocrab.webp",
+      "asset_sha256": "300dc7f93b476ed53da09b27dafc9f4a2e94d3d40a9e772b1ae6f2714e0fda0b"
+    },
+    {
+      "kind": "Puppetmaster",
+      "forms": [
+        "base"
+      ],
+      "image": "puppetmaster-portrait.png",
+      "sha256": "402afb682f9db893e365b9d30db91aa9cccb684d0ac86773025a554a8e99b384",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.36,
+      "mode": "base portrait",
+      "log": "puppetmaster-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/puppetmaster.webp",
+      "asset_sha256": "07079ba714ebe5b51eb86bfbdaadc08a4082f1c22830fb10c5737e83429c4e6c"
+    },
+    {
+      "kind": "Smuggler",
+      "forms": [
+        "base"
+      ],
+      "image": "smuggler-portrait.png",
+      "sha256": "949c80c02dd32a15818556d6828ba83114fa80e0b4b882663efcc25ca018b6d8",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.91,
+      "mode": "base portrait",
+      "log": "smuggler-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/smuggler.webp",
+      "asset_sha256": "2c35b947f98074f407ef839749c66673953c50d4e71f3339be47c3089b255856"
+    },
+    {
+      "kind": "Bonehorn",
+      "forms": [
+        "base"
+      ],
+      "image": "bonehorn-portrait.png",
+      "sha256": "abc405127604693f57dba0ca717e64c678252a5d47fcb194d3fb5a2f65191508",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.08,
+      "mode": "base portrait",
+      "log": "bonehorn-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/bonehorn.webp",
+      "asset_sha256": "03e9687bb52bb1b9bcefca91667f544ba7fb38c46ea6db437b4b0e2ab468454b"
+    },
+    {
+      "kind": "Ravager",
+      "forms": [
+        "base"
+      ],
+      "image": "ravager-portrait.png",
+      "sha256": "3e2eb004c44768c623def9a915cc3dbb9e4681f01dae188d377c27547a7c8697",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.75,
+      "mode": "base portrait",
+      "log": "ravager-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/ravager.webp",
+      "asset_sha256": "2a615d896ce8e2ac8a3af37d86493bfe592afa1d01809ec7fc7607f752f52329"
+    },
+    {
+      "kind": "Acidmaw",
+      "forms": [
+        "base"
+      ],
+      "image": "acidmaw-portrait.png",
+      "sha256": "6533d9ad29e48977e5e4f8f5fb54c2fa343a7d910ed2ec73ac2b2eac224f25b0",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.73,
+      "mode": "base portrait",
+      "log": "acidmaw-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/acidmaw.webp",
+      "asset_sha256": "ca10309cb1bea544e2ae874432548754c7a9ba304910c1973775fa911102ca01"
+    },
+    {
+      "kind": "Whisperer",
+      "forms": [
+        "base"
+      ],
+      "image": "whisperer-portrait.png",
+      "sha256": "3c000f968dfbd74cbd10f1108c4c581e973bdd5adb8c80b90c869eb48aebf34a",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.07,
+      "mode": "base portrait",
+      "log": "whisperer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/whisperer.webp",
+      "asset_sha256": "1380ebc557c2a68f0368d2c461eca6ac0cad901ea99f79c37302b3d99a658bea"
+    },
+    {
+      "kind": "Bulwark",
+      "forms": [
+        "base"
+      ],
+      "image": "bulwark-portrait.png",
+      "sha256": "10e6c8ccd74121ab8f0f9f67c71023e98885c5af1e476027de6682b8be8853d6",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.95,
+      "mode": "base portrait",
+      "log": "bulwark-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/bulwark.webp",
+      "asset_sha256": "a45139340649ac285095858c1ead5ce758732f248510e66798279fd0f9bf91c9"
+    },
+    {
+      "kind": "Demolisher",
+      "forms": [
+        "base"
+      ],
+      "image": "demolisher-portrait.png",
+      "sha256": "cbf443664cb28481101923e689752d7fec22f64dbd640d264534b7330464ddf3",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.61,
+      "mode": "base portrait",
+      "log": "demolisher-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/demolisher.webp",
+      "asset_sha256": "ff1e7c167746fa074ca75d0c26c55a980d917e3bfb6e84da9ed104a62c5bee9f"
+    },
+    {
+      "kind": "Crowcaller",
+      "forms": [
+        "base"
+      ],
+      "image": "crowcaller-portrait.png",
+      "sha256": "83585885b266771b18f73cc42efe0daf199153645bc064197027f7ed4ca3e472",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.74,
+      "mode": "base portrait",
+      "log": "crowcaller-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/crowcaller.webp",
+      "asset_sha256": "a73fe49e60432684e262a950434f3235cfdce1c24179e464cf84635b0ddaf800"
+    },
+    {
+      "kind": "Trigger",
+      "forms": [
+        "base"
+      ],
+      "image": "trigger-portrait.png",
+      "sha256": "51a52af3be1b3b31d942ede140f596410095360727cc980903debf73361bafdf",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.85,
+      "mode": "base portrait",
+      "log": "trigger-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/trigger.webp",
+      "asset_sha256": "1d82dc9892ac6745e1d82207e6930223c8663bfe90bd56637e5ac0b450b4ab5e"
+    },
+    {
+      "kind": "RattleTick",
+      "forms": [
+        "base"
+      ],
+      "image": "rattletick-portrait.png",
+      "sha256": "0196a0f9d06982c4e2198ff22d0be81555be79af2194d6cf6804ee0d8cff847d",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.46,
+      "mode": "base portrait",
+      "log": "rattletick-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/rattletick.webp",
+      "asset_sha256": "4f32b0dca832b3372a6dc1014f485917c77ae3377d24d03865600a746a1f8621"
+    },
+    {
+      "kind": "Capybara",
+      "forms": [
+        "base"
+      ],
+      "image": "capybara-portrait.png",
+      "sha256": "155bd218cacfcd8a23da73c83cc2c437b28a1b82743314996d0b8e4617546089",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.05,
+      "mode": "base portrait",
+      "log": "capybara-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/capybara.webp",
+      "asset_sha256": "a79c6702759d3072eb520094b2beeba14d0a43ec8504208c0e07360a58746171"
+    },
+    {
+      "kind": "Trident",
+      "forms": [
+        "base"
+      ],
+      "image": "trident-portrait.png",
+      "sha256": "50eca72ed43b5a3e1e918861a0c830c2435917c12872f443c648fa8b3432b965",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.04,
+      "mode": "base portrait",
+      "log": "trident-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/trident.webp",
+      "asset_sha256": "1be55578e86ce1b1ce6e6caeaab9c4b9595eb246fdabd911481d34987c918756"
+    },
+    {
+      "kind": "SolarSentinel",
+      "forms": [
+        "base"
+      ],
+      "image": "solarsentinel-portrait.png",
+      "sha256": "bcaa9bb835cbb1b3667534018729cb610fe53978909b12609b5f12c78d935127",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.85,
+      "mode": "base portrait",
+      "log": "solarsentinel-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/solarsentinel.webp",
+      "asset_sha256": "ed0e360b644abc921fb003202d121679e76053e331316bca110f4728e4dd3ca7"
+    },
+    {
+      "kind": "LuminousOracle",
+      "forms": [
+        "base"
+      ],
+      "image": "luminousoracle-portrait.png",
+      "sha256": "6e90517190a0d2e7393e3d83706310dd9d316803197c9220302415741c186138",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.48,
+      "mode": "base portrait",
+      "log": "luminousoracle-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/luminousoracle.webp",
+      "asset_sha256": "e7364771ebc23fb719e1b06e29e666c68cbb6220582919847d3da5c0c7011a96"
+    },
+    {
+      "kind": "CelestialArcher",
+      "forms": [
+        "base"
+      ],
+      "image": "celestialarcher-portrait.png",
+      "sha256": "4b85b62b16ae35c4e61ec4b05830cfe41e61daf91735cc6b388f2f320ae17077",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.16,
+      "mode": "base portrait",
+      "log": "celestialarcher-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/celestialarcher.webp",
+      "asset_sha256": "11e6cba5ae0429ea9fd908e1792343e2a2ada9cae09e944f49857fc24fa3a2fb"
+    },
+    {
+      "kind": "Justiciar",
+      "forms": [
+        "base"
+      ],
+      "image": "justiciar-portrait.png",
+      "sha256": "88882e634312d1dca22d20b10fd1a4d08b63660c9169cd2ef02aef234b0af196",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.35,
+      "mode": "base portrait",
+      "log": "justiciar-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/justiciar.webp",
+      "asset_sha256": "42d335c97fbc96fe109054e9267a6f82461c550a61bcc46b9f038a419515898c"
+    },
+    {
+      "kind": "Jawguard",
+      "forms": [
+        "base"
+      ],
+      "image": "jawguard-portrait.png",
+      "sha256": "bae3668f6befff55afbb2945559c88d360f284f4222b51102b6d7314bd2cc555",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.93,
+      "mode": "base portrait",
+      "log": "jawguard-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/jawguard.webp",
+      "asset_sha256": "3758c41ad8866d684b640df7a87c9dd81eb9532fefcc4c6b31739c60ee6c4ae6"
+    },
+    {
+      "kind": "Mantis",
+      "forms": [
+        "base"
+      ],
+      "image": "mantis-portrait.png",
+      "sha256": "e32e1165ead221d4fe45fc6673d5cd15cdf44cc1822c1199c624e4d095716866",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.41,
+      "mode": "base portrait",
+      "log": "mantis-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/mantis.webp",
+      "asset_sha256": "6d91e8af2066e21f287cd9188c77b622991e15aa740f4a25f7c97ec9cf56fdfc"
+    },
+    {
+      "kind": "Hornet",
+      "forms": [
+        "base"
+      ],
+      "image": "hornet-portrait.png",
+      "sha256": "2018274f72aa8aea957648728681988e254231e2f949a3ca53103a605a027623",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.03,
+      "mode": "base portrait",
+      "log": "hornet-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/hornet.webp",
+      "asset_sha256": "34f573247e5ad22ee376251bfa473c35178638dfc269373c74d6dd03db78f7ca"
+    },
+    {
+      "kind": "Weaver",
+      "forms": [
+        "base"
+      ],
+      "image": "weaver-portrait.png",
+      "sha256": "66a68ff88aa34ef7d8169b25a94a1a0a468603b40dd4d944713821c56b5d9f72",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.25,
+      "mode": "base portrait",
+      "log": "weaver-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/weaver.webp",
+      "asset_sha256": "51b24d09e6d025846df946f5a6045b80c15de1ddf002fb48e3c580e5ba1bf2f1"
+    },
+    {
+      "kind": "PyreWarden",
+      "forms": [
+        "base"
+      ],
+      "image": "pyrewarden-portrait.png",
+      "sha256": "25dc3e3d8612c2334de307a1cd9be839d23d956737dbef109c3a767cdc98dda1",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.88,
+      "mode": "base portrait",
+      "log": "pyrewarden-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/pyrewarden.webp",
+      "asset_sha256": "43e2bebb6df6426c70bc0a4e98d11d80d13bc26583055d227ad98f3dc7379eeb"
+    },
+    {
+      "kind": "Drillnest",
+      "forms": [
+        "base"
+      ],
+      "image": "drillnest-portrait.png",
+      "sha256": "af025127ed079aa779f80e70eda7fa4ca6895242ed265fd7d18ca9aad97be866",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.38,
+      "mode": "base portrait",
+      "log": "drillnest-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/drillnest.webp",
+      "asset_sha256": "2c775ed397e465527008b0c11cea7ba6c34bcd498bbaef7a0dc63080638e97cb"
+    },
+    {
+      "kind": "Microdrill",
+      "forms": [
+        "base"
+      ],
+      "image": "microdrill-portrait.png",
+      "sha256": "97c4f11ace0fb7948be4fd2d0fa254c6b74f5239b7b02dbf6a09bb1725fddb76",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.72,
+      "mode": "base portrait",
+      "log": "microdrill-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/microdrill.webp",
+      "asset_sha256": "2e7ba562136f9301d5e55bb06c83bc83f8d73d0a42b1ee72177073793d0950eb"
+    },
+    {
+      "kind": "Duodrill",
+      "forms": [
+        "base"
+      ],
+      "image": "duodrill-portrait.png",
+      "sha256": "1fa44c23e25bb93845d6eb4e068771718471f3f010fc1427f62336809ddc8410",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.0,
+      "mode": "base portrait",
+      "log": "duodrill-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/duodrill.webp",
+      "asset_sha256": "b434b85ae149e6daa40bec4f395c6788ca084c61a9c61a5bf9d331aa0420dd6c"
+    },
+    {
+      "kind": "Megadrill",
+      "forms": [
+        "base"
+      ],
+      "image": "megadrill-portrait.png",
+      "sha256": "0d0451b3821d958ad092b56551770388f02c02a1f08d61dd65df64589422b68d",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.43,
+      "mode": "base portrait",
+      "log": "megadrill-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/megadrill.webp",
+      "asset_sha256": "da5a053695f1ee5fbeeb81ac922d99c1f68fde1ce8c6883881e195a60b0fb763"
+    },
+    {
+      "kind": "Gravecutter",
+      "forms": [
+        "base"
+      ],
+      "image": "gravecutter-portrait.png",
+      "sha256": "2eee97c3958ffb642d5cbd3c5de53dc8e7687b8ced4eb96acde2553edb7d07e4",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.87,
+      "mode": "base portrait",
+      "log": "gravecutter-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/gravecutter.webp",
+      "asset_sha256": "340e881da9bc2257a52346d588bcde31c7dbc2d858ab631e98f4575993008c6a"
+    },
+    {
+      "kind": "LastlightCantor",
+      "forms": [
+        "base"
+      ],
+      "image": "lastlight-cantor-portrait.png",
+      "sha256": "5cb3ff8399cbcd283d7b811fbda4bc7d0a4bc14fb99e99114f5f9e0f88c875f4",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.9,
+      "mode": "base portrait",
+      "log": "lastlight-cantor-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/lastlightcantor.webp",
+      "asset_sha256": "c5211237617dd831ef847733092db208e66d7385567483c3a4cab214441cae77"
+    },
+    {
+      "kind": "Cragclaw",
+      "forms": [
+        "base"
+      ],
+      "image": "cragclaw-portrait.png",
+      "sha256": "c64649461c9b8285561eb8d0eb83c342fdec822ff45155ac6704cbc0a42e6721",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.06,
+      "mode": "base portrait",
+      "log": "cragclaw-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/cragclaw.webp",
+      "asset_sha256": "948e2335cc784b704e88909e55f5994262d9f9403e73a6bca376c9ecb7ddcf49"
+    },
+    {
+      "kind": "Hushfang",
+      "forms": [
+        "base"
+      ],
+      "image": "hushfang-portrait.png",
+      "sha256": "b67fca50f6984b7093e96ef461aec35f198ccea84222deef2152760ed9018857",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.17,
+      "mode": "base portrait",
+      "log": "hushfang-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/hushfang.webp",
+      "asset_sha256": "7900db5a50a3f728d6803f79a12705190caed34c15baa1acb4cd04126545aba5"
+    },
+    {
+      "kind": "Spinehurler",
+      "forms": [
+        "base"
+      ],
+      "image": "spinehurler-portrait.png",
+      "sha256": "5b0825dc4dc903a06604acd0191c8d27d93a70bb5a4c153e0f0f71352f8e4669",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.15,
+      "mode": "base portrait",
+      "log": "spinehurler-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/spinehurler.webp",
+      "asset_sha256": "48b5f1fc3cee3c2b92922b3efdfe13938efcf67bc55a0f86c4ac7b6a1b6f999d"
+    },
+    {
+      "kind": "MireTender",
+      "forms": [
+        "base"
+      ],
+      "image": "mire-tender-portrait.png",
+      "sha256": "19b14a32eb73aee8b5988f6f21f9fdf419dcc0aec9ded2c5de205ddbab9edd24",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.51,
+      "mode": "base portrait",
+      "log": "mire-tender-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/miretender.webp",
+      "asset_sha256": "8f56f1efb7521f5bb097c226b3cabf3f5a255f53eeb7dfffbfca3feebd38b2ba"
+    },
+    {
+      "kind": "Gorgehowl",
+      "forms": [
+        "base"
+      ],
+      "image": "gorgehowl-portrait.png",
+      "sha256": "619861d58e17a67af0cabd5113b32cc19c77ea22ef1671b861cb44ff9e43c055",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.8,
+      "mode": "base portrait",
+      "log": "gorgehowl-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/gorgehowl.webp",
+      "asset_sha256": "4f20911860446ac6dd50e3ba1c5577c0e0fb7691b20021a986edc669d097465f"
+    },
+    {
+      "kind": "Sunlancer",
+      "forms": [
+        "base"
+      ],
+      "image": "sunlancer-portrait.png",
+      "sha256": "f5518ae63c66335eb8f21e65de20a30bc938775df00f310c7cc098877ae18646",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.62,
+      "mode": "base portrait",
+      "log": "sunlancer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/sunlancer.webp",
+      "asset_sha256": "d658d6752efd0ab767e87bd590ab9ac827caa370de520c49c382e9a37678dec9"
+    },
+    {
+      "kind": "EclipseDancer",
+      "forms": [
+        "base"
+      ],
+      "image": "eclipse-dancer-portrait.png",
+      "sha256": "7e8776b993fb4ce0acea729429aa3ef5991d455e913ede71962d2b32ad43ac5c",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.35,
+      "mode": "base portrait",
+      "log": "eclipse-dancer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/eclipsedancer.webp",
+      "asset_sha256": "e37c1b17c86ea2dbb2fd7beabc279a22889fe8583331653aebc6e33eaec773d8"
+    },
+    {
+      "kind": "Starbreaker",
+      "forms": [
+        "base"
+      ],
+      "image": "starbreaker-portrait.png",
+      "sha256": "0e14bee9d90a48aa3e796ea0b4096adc1689371a30e9e40e26fa1117af9627af",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.04,
+      "mode": "base portrait",
+      "log": "starbreaker-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/starbreaker.webp",
+      "asset_sha256": "09d9d66342a8c1c47e69f4c64cb346fdb3e24cd4e27cd8e2585c3447b293dc72"
+    },
+    {
+      "kind": "Dawnmender",
+      "forms": [
+        "base"
+      ],
+      "image": "dawnmender-portrait.png",
+      "sha256": "cd9fcf08aaebec1b1cc442995ee4735159e68b57e02b935a5c6868a7d89323b6",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.15,
+      "mode": "base portrait",
+      "log": "dawnmender-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/dawnmender.webp",
+      "asset_sha256": "b992a7fa61548ad3064efde684c449772fe7f9b665f3bb6544abe34e907ba6c5"
+    },
+    {
+      "kind": "Prismancer",
+      "forms": [
+        "base"
+      ],
+      "image": "prismancer-portrait.png",
+      "sha256": "e16fc1fe50d5bb3b1ad9de744d9da39e19b4ac8f44710cc3433d6deeb58c88c5",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.08,
+      "mode": "base portrait",
+      "log": "prismancer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/prismancer.webp",
+      "asset_sha256": "dc4e6862ac3a5a80e708c551b1476da78c897cc0d7de8a298d89fb97af855472"
+    },
+    {
+      "kind": "Leafcutter",
+      "forms": [
+        "base"
+      ],
+      "image": "leafcutter-portrait.png",
+      "sha256": "db83941282eaf89dcd17709f8b25992fa9545b5ea826e57caadd75f5f6625459",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.07,
+      "mode": "base portrait",
+      "log": "leafcutter-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/leafcutter.webp",
+      "asset_sha256": "7adef1bdd6a3032ee952279465ed4e671acc354bc95e4271c334eb5ea7020c01"
+    },
+    {
+      "kind": "Blastbeetle",
+      "forms": [
+        "base"
+      ],
+      "image": "blastbeetle-portrait.png",
+      "sha256": "5e6fdd896a4fc22367c0f52cae1a0b5defa220755e7f3709d49888dcb310dc7b",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.41,
+      "mode": "base portrait",
+      "log": "blastbeetle-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/blastbeetle.webp",
+      "asset_sha256": "12d8440137ac711fe019ffe11d00ebcf48e75d50224a81ab8607a08ff8e0f9ce"
+    },
+    {
+      "kind": "Needlewing",
+      "forms": [
+        "base"
+      ],
+      "image": "needlewing-portrait.png",
+      "sha256": "21af28543d8d3ce05600e0a4f6dc79421e79278771052a7d760d98766746dd0d",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.92,
+      "mode": "base portrait",
+      "log": "needlewing-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/needlewing.webp",
+      "asset_sha256": "ba90721fba1e6894c319b3fe2c70c9759ce10a99412b5a6c97eccc349b15b733"
+    },
+    {
+      "kind": "NectarNurse",
+      "forms": [
+        "base"
+      ],
+      "image": "nectar-nurse-portrait.png",
+      "sha256": "7aa4ed9d3f163aa04bd40e64e0f39dcc1060f9906a87dac81eecdc5417a5f726",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.62,
+      "mode": "base portrait",
+      "log": "nectar-nurse-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/nectarnurse.webp",
+      "asset_sha256": "0ba10fabb0568d52ecd65160f51229046f9e4e9b086b0ae8e44a000dacad8413"
+    },
+    {
+      "kind": "Stridulator",
+      "forms": [
+        "base"
+      ],
+      "image": "stridulator-portrait.png",
+      "sha256": "b2b977a08c90895907fa7ee2d67d8110975b718a69b6503836bb0f7f7cebc6a8",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.68,
+      "mode": "base portrait",
+      "log": "stridulator-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/stridulator.webp",
+      "asset_sha256": "ac3367f58a5b90eda85a7ebb485c59e2071b140029fb18f1ee173e757dd02d12"
+    },
+    {
+      "kind": "BasaltBulwark",
+      "forms": [
+        "base"
+      ],
+      "image": "basaltbulwark-portrait.png",
+      "sha256": "e6319984bc5b5e411fb342c7be34eea48f9d99e1d7669b8ea61c62bab3a1e496",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 12.04,
+      "mode": "base portrait",
+      "log": "basaltbulwark-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/basaltbulwark.webp",
+      "asset_sha256": "7fabca2dd6cfe9ba76b53cb9c66e1d7efe622cfdb13f836c82757357fa380057"
+    },
+    {
+      "kind": "CinderMaul",
+      "forms": [
+        "base"
+      ],
+      "image": "cindermaul-portrait.png",
+      "sha256": "f7ac33578f79b5adbd7f830ae650d05421350f6a2782186ef11be1fce3462d6a",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.76,
+      "mode": "base portrait",
+      "log": "cindermaul-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/cindermaul.webp",
+      "asset_sha256": "597f43a4b92b6085551d497ea7ac9ddde2eae3a0b3c351dc0e763439e2aed5c7"
+    },
+    {
+      "kind": "HookBrawler",
+      "forms": [
+        "base"
+      ],
+      "image": "hookbrawler-portrait.png",
+      "sha256": "576b825110931ea4c07671858e4d0a84329a710013f8bae6d6a78a78ec8ec355",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.58,
+      "mode": "base portrait",
+      "log": "hookbrawler-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/hookbrawler.webp",
+      "asset_sha256": "f9de263c0a58d28916d15c448dfa4c50e8b1782daee1fe5a79d75cb4ee4f6c41"
+    },
+    {
+      "kind": "FlintRunner",
+      "forms": [
+        "base"
+      ],
+      "image": "flintrunner-portrait.png",
+      "sha256": "c998a894971e47c4d3342ff2c2cc0d5c1062e6593d7675b3c63a1e3299a863b9",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.78,
+      "mode": "base portrait",
+      "log": "flintrunner-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/flintrunner.webp",
+      "asset_sha256": "b1eedcd8d25d9bdf28be0627b5ce53040ecc1a92aab70a6e0e30e5b7ca9e4df2"
+    },
+    {
+      "kind": "ClayBinder",
+      "forms": [
+        "base"
+      ],
+      "image": "claybinder-portrait.png",
+      "sha256": "3dcdb06c3f794a87aa24bcce528f8f90cb84f8fc3a1c66df2a5ffc06d08b3e90",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.97,
+      "mode": "base portrait",
+      "log": "claybinder-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/claybinder.webp",
+      "asset_sha256": "abb989e90af6232f6123f1d7aa82ea60b8561debb644712abc024404e9ad2f59"
+    },
+    {
+      "kind": "GustDrummer",
+      "forms": [
+        "base"
+      ],
+      "image": "gustdrummer-portrait.png",
+      "sha256": "31422fe7e0c922bfd3d4d3d9a2a35941a7ccd268c4d6aa2c2429afa474e20d12",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 11.07,
+      "mode": "base portrait",
+      "log": "gustdrummer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/gustdrummer.webp",
+      "asset_sha256": "4158062885a75fa4f431fe4f878d1cce8369cfb8a2c6c1bf5a52fcb89cc22eb0"
+    },
+    {
+      "kind": "HideMender",
+      "forms": [
+        "base"
+      ],
+      "image": "hidemender-portrait.png",
+      "sha256": "b800944da0a840600a998dfd33d374981850495d14c6c70a589a93b62498e32f",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.99,
+      "mode": "base portrait",
+      "log": "hidemender-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/hidemender.webp",
+      "asset_sha256": "494cca14da66a103f3c80eb2f62fa4ccadc10ebb6becd9b66df79ba0f8374a3a"
+    },
+    {
+      "kind": "PebbleSlinger",
+      "forms": [
+        "base"
+      ],
+      "image": "pebbleslinger-portrait.png",
+      "sha256": "f5869ed715605c18f4523d72e2b3b6fab15aef796b99a344f463fdb3e8477db6",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 10.19,
+      "mode": "base portrait",
+      "log": "pebbleslinger-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/pebbleslinger.webp",
+      "asset_sha256": "4046afc3adb6e37a0cf67652f6e9e74c272d70057890e054e308371acf5376a2"
+    },
+    {
+      "kind": "RivetBallista",
+      "forms": [
+        "base"
+      ],
+      "image": "rivetballista-portrait.png",
+      "sha256": "5f45260c7cbf56e80c0f83d8fd99dbf51bb93c435d36ff203dbc5b1fab2e5114",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.78,
+      "mode": "base portrait",
+      "log": "rivetballista-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/rivetballista.webp",
+      "asset_sha256": "264511d2a1805a52e2bd85447afee8936e47eeb604f8f7ddb0c5f922d3e6c741"
+    },
+    {
+      "kind": "NacreDuelist",
+      "forms": [
+        "base"
+      ],
+      "image": "nacreduelist-portrait.png",
+      "sha256": "8d27c60d68b9611d3ba38659ba4cc56d4a1a0a5a57cf537fed3c2c8ee719cddd",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.64,
+      "mode": "base portrait",
+      "log": "nacreduelist-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/nacreduelist.webp",
+      "asset_sha256": "f3906402b1917c13e38d885319aa7618ee133af9417e54718fbaf9233a6b0512"
+    },
+    {
+      "kind": "ReefLancer",
+      "forms": [
+        "base"
+      ],
+      "image": "reeflancer-portrait.png",
+      "sha256": "2d0f4e8a9e6c12a016f8c7c1957ac5adf60d6184580c9ab43887675baa624fe7",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.64,
+      "mode": "base portrait",
+      "log": "reeflancer-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/reeflancer.webp",
+      "asset_sha256": "c74a1ac8bfeea02a28ad5a05bde0b01b26796cbbcf49475d5d44a82208b9e1d6"
+    },
+    {
+      "kind": "TrenchFist",
+      "forms": [
+        "base"
+      ],
+      "image": "trenchfist-portrait.png",
+      "sha256": "82200f8dead4f17f77b9b897acbad7335e3308e45a1806a18fec3b22de03b192",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.49,
+      "mode": "base portrait",
+      "log": "trenchfist-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/trenchfist.webp",
+      "asset_sha256": "a42cbbfbd5cc2778f4d333a4d33b204b478b90f5687ddf94996a59eea27778bc"
+    },
+    {
+      "kind": "PearlSlinger",
+      "forms": [
+        "base"
+      ],
+      "image": "pearlslinger-portrait.png",
+      "sha256": "75daa34c640339c3aa2d8eb6ce43e2d9a3e42355e62ffc96372106cc6f249d1e",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.77,
+      "mode": "base portrait",
+      "log": "pearlslinger-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/pearlslinger.webp",
+      "asset_sha256": "b891a376735a5041738dabb0f26742b74f15641dca85cc5a842f0123cdd40875"
+    },
+    {
+      "kind": "AbyssHarpooner",
+      "forms": [
+        "base"
+      ],
+      "image": "abyssharpooner-portrait.png",
+      "sha256": "2c63c168a74662c74509dce58b1c0db9e40b05df0fb6fb29f5e731df41e5c96d",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.56,
+      "mode": "base portrait",
+      "log": "abyssharpooner-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/abyssharpooner.webp",
+      "asset_sha256": "65ab8b402c12352714cbf5adb84e8d987cbd36f21a9d5c1958c9080705592dc0"
+    },
+    {
+      "kind": "UndertowHerald",
+      "forms": [
+        "base"
+      ],
+      "image": "undertowherald-portrait.png",
+      "sha256": "065a69cc8d5c05ad6fc4766732b7351f98e29de5546f9a621006e3143678c525",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.56,
+      "mode": "base portrait",
+      "log": "undertowherald-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/undertowherald.webp",
+      "asset_sha256": "fbea9589b4e1d60b2a3e34b5104385a349b12f1346d5ddf02a08f7d16e076587"
+    },
+    {
+      "kind": "TrenchLamplighter",
+      "forms": [
+        "base"
+      ],
+      "image": "trenchlamplighter-portrait.png",
+      "sha256": "019073094aa9dd40f607ea5259cfa580b7eb0e03b72a0f81c9f2f032675bd2ce",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.5,
+      "mode": "base portrait",
+      "log": "trenchlamplighter-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/trenchlamplighter.webp",
+      "asset_sha256": "bbe741ed906173a7e373712374806170a3607e0686ec1ae3155067ea52a94e14"
+    },
+    {
+      "kind": "FoamWeaver",
+      "forms": [
+        "base"
+      ],
+      "image": "foamweaver-portrait.png",
+      "sha256": "8a820364deebd94d03da4f4dca25fc33bfa9534032bd189b35ad72a47a3c95c5",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.45,
+      "mode": "base portrait",
+      "log": "foamweaver-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/foamweaver.webp",
+      "asset_sha256": "e67f4b1adc6252e68e7e4cdf8c2da408be47248c45b576583d24a88bf5c76170"
+    },
+    {
+      "kind": "PodSnapper",
+      "forms": [
+        "base"
+      ],
+      "image": "podsnapper-portrait.png",
+      "sha256": "b9eaffb148e24c0f6e8ee706b66d4474445fd38ae9c3cb16dce1fe0d5847d3f6",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.5,
+      "mode": "base portrait",
+      "log": "podsnapper-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/podsnapper.webp",
+      "asset_sha256": "b95f2a9d088e8e26c95dd357c14c6777365e1da3a29730411a97de28fc5da030"
+    },
+    {
+      "kind": "Volthar",
+      "forms": [
+        "base"
+      ],
+      "image": "volthar-portrait.png",
+      "sha256": "ef713fc5df02f7306567951f57dcaadc1106b8b9ada77583a1cc18fc86117d59",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.79,
+      "mode": "base portrait",
+      "log": "volthar-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/volthar.webp",
+      "asset_sha256": "802882389504b23fdea328f7acf6302cb16ad0adf8b259eb3307160b6202d685"
+    },
+    {
+      "kind": "Astreon",
+      "forms": [
+        "base"
+      ],
+      "image": "astreon-portrait.png",
+      "sha256": "ff83c52dfcc8db6c63d86fc68ed4e2487099ecc93329500902d252f2b2d835a1",
+      "size": [
+        400,
+        400
+      ],
+      "seconds": 9.85,
+      "mode": "base portrait",
+      "log": "astreon-portrait.log",
+      "build": {
+        "contract": "w40-r16-f2e253b98ccb313a",
+        "features": [
+          "ui-acceptance"
+        ],
+        "profile": "release",
+        "protocol": 40,
+        "source_commit": "36b49b229b66e1e3afada11c5696655e2ef40564",
+        "target": "x86_64-unknown-linux-gnu",
+        "version": "0.1.4-colossus.10"
+      },
+      "binary_sha256": "53480c44d095c7e2915a8740fb7d970af77cf7a2455ab311e37be9d6b51c1f5c",
+      "asset": "crates/tbg-client/assets/battle/portraits/astreon.webp",
+      "asset_sha256": "7a336f0274981977db61e1587142fd04972d87affd9012fb37bdd789961c01cd"
+    }
+  ]
+}

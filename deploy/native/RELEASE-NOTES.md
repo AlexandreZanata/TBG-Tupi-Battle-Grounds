@@ -1,3 +1,18 @@
+TBG 0.1.4-colossus.10 — Strongholds and current Blender previews
+
+Strongholds have 40% less base HP and approximately 30% less damage, preserving
+each kind's relative defenses and firepower. Fortification scales from the new
+bases. MatchContract: wire 40 / R17 / 3df52af730a4e914.
+
+All 88 champion/summon portraits and the eight Arena thumbnails use fresh
+captures of the current Blender figures and scenery. The same assets feed the
+Shop, Laboratory, catalogs and public site. Gallery portraits remain isolated
+from Arena meshes that finish loading later.
+
+Shop, Evolution, Fortification and Augment selections remain usable immediately
+after reconnecting or reloading a match. Manual actions and autoplay share the
+acknowledged intention sequence.
+
 TBG 0.1.4-colossus.8 — Playable Blender arena art
 
 All eight 1v1 Arenas load their Blender scenery and Classic Stronghold skins.

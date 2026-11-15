@@ -1,0 +1,4 @@
+heavy vs bot: 86.0% [84.0 – 88.0] over 1000 seed pairs
+stalled matches (60 s): 0.2% (5/2000)
+heavy vs bot                                     86.0% [83.9% – 88.0%]        target 0.0% – 55.0%       FAIL
+1 rows, 1 failing

@@ -2073,3 +2073,108 @@ board.
 - Blender study: opened and rendered with Blender 4.5.15; 2,244 scene
   objects and 321,922 authored triangles. Runtime batching, fog, water,
   Tower damage and platform correspondence remain pending.
+
+
+## 2026-11-15 — Purchase after resuming a match
+
+Linux remains the reference for `ranked-reconnect-purchase`. The first Shop
+purchase after reconnecting or reloading must consume Energy, redraw offers
+and spawn the purchased unit when accepted by the server. Manual actions
+and opt-in autoplay share one intention sequence; the server's private
+`last_seq` advances its floor without reusing pending numbers. Spectator
+views never advance that floor. Layout, art and animation timing are unchanged.
+
+The shared implementation applies to Linux, Windows and desktop web. A live
+browser test on R16 exposed stale command numbers after reload and after
+turning off autoplay. Regression scenarios are queued for consolidation;
+Linux, Windows and browser observations of the corrected build remain pending.
+
+
+## 2026-11-15 — Current Blender preview capture sources
+
+The Linux reference adds `portrait-gallery-ready-blender` for every registered
+champion and `arena-preview-ready-blender` for the eight Arenas. The capture
+helpers identify the executable version, source commit and binary hash, wait
+for the real shared scene and image readiness, and retain original PNG evidence.
+The isolated processes use a closed loopback endpoint. Arena inspection hides
+the diagnostic text just as the champion Gallery does, on all desktop targets;
+normal lobby and battle diagnostics are unchanged. The opt-in Arena catalog
+capture uses the ordinary shared menu panel.
+
+New shared WebP assets and final per-target observations are pending. Source
+routing passed for the earlier sequence change; it does not prove packaged
+Windows/web visual correspondence or acceptance of the new photographs.
+
+The initial official R16 portrait capture exposed scenery appearing behind a
+champion after its Blender pack finished loading. The Gallery now hides newly
+loaded Arena meshes before visibility propagation whenever its isolated studio
+framing is active. Arena lighting and the champion meshes remain available;
+range review and ordinary gameplay keep their Arena scenery. The rejected
+sample is retained outside Git and is not a deliverable portrait. Corrected
+Linux captures and Windows/web observations remain pending.
+
+
+## 2026-11-15 — Refreshed shared champion portraits
+
+All 88 registered non-Crate portraits (84 champions and four summons) now use
+400×400 native renders of the current Blender figures, with their original
+studio framing. Lossless WebP encoding preserves every captured pixel and each
+asset stays within 40 KiB. The source-identified Linux reference and asset hashes
+are retained in `docs/media/blender-refresh-20261115/portraits.json`. These shared
+assets feed Shop, catalogs, Laboratory and the public catalog on all targets.
+The Linux contact sheet was inspected; Windows and desktop web observations of
+the packaged screens remain pending. This records static portraits, not motion
+acceptance. The Arena preview also suppresses the account recovery toolbar,
+which has no role in the exported scene; normal account controls are unchanged.
+
+
+## 2026-11-15 — TW-02 displayed Stronghold values and current Laboratory art
+
+The `stronghold-r17-reduced-power` case covers both seats, all five Stronghold
+kinds, each Fortification form, actual HP bars and the statistics/upgrade panels.
+The shared client displays authoritative R17 values (reference 4050 HP and 111
+damage), with the existing kind coefficients and Fortification effects. Attack
+intervals, projectile motion, materials and animation timing are unchanged.
+The `laboratory-current-blender-portraits` case covers the updated portrait cards
+beside the live current Blender model and its four Evolution forms. Arena cards
+consume the same eight refreshed textures as the shared public catalog.
+
+Linux captures of the final R17 presentation are pending; Windows and desktop
+web observations and exact correspondence remain pending. Compilation and shared
+asset hashes alone cannot establish those observations.
+
+
+## 2026-11-15 — Reviewed current Blender Arena thumbnails
+
+All eight shared Arena thumbnails were recaptured at native 1536×764 and
+encoded to 768×382 WebP. Each source scene reached image/text/scene readiness
+without fallback scenery. The Linux contact sheet was inspected with no account
+recovery controls over the scene. Source, binary, PNG and thumbnail hashes are
+in `docs/media/blender-refresh-20261115/arenas.json`. The exact shared assets
+feed the Linux, Windows and desktop web Arena cards and Laboratory picker.
+Windows and desktop web observations of those cards remain pending.
+
+
+## 2026-11-15 — Capture readiness for live inspection panels
+
+The opt-in Troops export honors the requested capture delay after selecting the
+real model and allowing its interface to settle. The champion inspection export
+selects a current living unit at capture time and can select another if the
+previous one dies. The earlier one-shot selection could expire before the
+requested frame. Both helpers use ordinary shared UI actions; no units, Energy
+or outcomes are injected. Normal player controls and motion are unchanged.
+Linux runtime checks of the corrected helpers and Windows/web observations are
+pending. The existing portrait/Laboratory/inspection cases cover this change.
+
+
+## 2026-11-15 — D-112 preview authorization and observed Linux references
+
+The owner explicitly permits production publication of this preview while
+Windows and desktop web in-game observations remain pending. Exact visual
+correspondence is still required; this is not acceptance of a known mismatch
+or a pixel tolerance. Linux evidence now includes all 88 static portraits,
+eight Arena previews and nine native screens. Source 28f94749 verified the
+Colossus B2 catalog, live champion inspection and Bastion's reduced 4657 HP /
+6054 first-Fortification description. Full kind/form/motion matrix coverage and
+Windows/web runtime comparison remain pending. The desktop browser also loaded
+all nine photographs in the local public gallery; that is static-site evidence.

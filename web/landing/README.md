@@ -46,25 +46,23 @@ The browser repeats the same validation, so a malformed file stays in the safe p
 ## Content sources
 
 - Champions, Factions, Archetypes and Arena effects: `web/scripts/sync_content.py` (tbg-core
-  `COMPLETION_POOL` (81 authored kinds), `FULL_POOL` availability and content table, client i18n names, client Arena data). Portraits and Arena
+  `COMPLETION_POOL` (84 authored kinds), `FULL_POOL` availability and content table, client i18n names, client Arena data). Portraits and Arena
   previews are the client's own renders.
 - Patch notes: `docs/patches/catalog.json` copied at staging; the page shows title, summary,
   date, version and status only (technical sections stay in the game and repository).
-- Captures: the current gallery and root README share real native Linux
-  release-profile `0.1.4-colossus.5` Practice screenshots. Forest and Tundra
-  matches include War Auxiliaries, Augments, inspection panels and the result
-  of a complete match. See [capture provenance](../../docs/evidence/readme-linux-release.md)
-  for the exact CI package, hashes, method and acceptance limits. Derivatives
-  are 1280 × 720 with 800 × 450 thumbnails; no content was painted over.
-- Hero/social background: real Linux Forest release capture; wordmark:
-  `lobby/wordmark.webp` (owner-selected wordmark for the lobby brand); emblem: branding.
+- Captures: the gallery and root README share current-model native Linux
+  `0.1.4-colossus.10` frames, including Practice, inspection panels, the
+  Laboratory and menus. See [capture provenance](../../docs/evidence/blender-captures-20261115.md)
+  for binary/source/asset hashes, methods and verification limits. Derivatives
+  are 1280 × 720 with 800 × 450 thumbnails; no game content was painted over.
+- Hero/social background: a current Blender Forest gameplay frame; wordmark:
+  `lobby/wordmark.webp`; emblem: shared branding. New image filenames prevent
+  returning visitors from retaining old screenshots under cached URLs.
 
-The 2026-11-03 update uses the README's real release captures for the hero and
-gallery, with a real Forest frame for the social image/background. Three
-additional native Android emulator captures show battle, Council and the
-Colossus B2 catalog. All 84 portraits and eight Arena previews keep their canonical
-client files with content-hash URLs, so updated assets do not reuse stale cache
-entries. See [media provenance](../../docs/evidence/landing-android-beta-20261103.md).
+All 84 catalog champion portraits and eight Arena previews use the shared client
+files and content-hash URLs. The additional four summon portraits are shared
+inside the game. Historical .5 and Android emulator screenshots remain in the
+repository as historical evidence; the current gallery no longer displays them.
 
 ## Legal pages
 

@@ -185,6 +185,12 @@ fn bot_matches_are_frozen() {
             (7, 0x252ea41f2ca9de65, 14265, Seat::B, StrongholdDestroyed),
             (42, 0x244926d4c6d3fd01, 23274, Seat::A, StrongholdDestroyed),
         ],
+        // TW-02: owner-authorized Stronghold HP and damage reduction.
+        (17, 0x3df52af730a4e914) => [
+            (1, 0x074f794c4ebfe0ff, 41676, Seat::B, StrongholdDestroyed),
+            (7, 0x462e074d7ea87f1a, 10203, Seat::A, StrongholdDestroyed),
+            (42, 0xd48923d415938781, 25488, Seat::B, StrongholdDestroyed),
+        ],
         revision => panic!("register an explicit canonical baseline for {revision:?}"),
     };
     let mut observed = Vec::with_capacity(goldens.len());

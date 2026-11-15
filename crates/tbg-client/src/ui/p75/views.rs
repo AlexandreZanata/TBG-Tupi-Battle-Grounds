@@ -42,6 +42,7 @@ pub(super) fn render(
     }
     if !cfg!(target_os = "android")
         && *game.get() == GameState::Menu
+        && !crate::config::arena_preview()
         && !textform::is_open(&form)
         && s.page == Page::None
     {

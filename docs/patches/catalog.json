@@ -1324,6 +1324,208 @@
       "evidence": {
         "report": "docs/phases/P69-mobile-20261102.md"
       }
+    },
+    {
+      "id": "tw02-stronghold-blender-previews",
+      "version": "0.1.4-colossus.10",
+      "date": "2026-11-15",
+      "status": "preview",
+      "kind": "balance",
+      "ruleset_version": 17,
+      "ruleset_hash": "3df52af730a4e914",
+      "title": {
+        "en": "Lighter Strongholds and current Blender images",
+        "pt-BR": "Fortalezas mais frágeis e imagens atuais do Blender"
+      },
+      "summary": {
+        "en": "Owner-approved preview: Strongholds lose 40% base HP and approximately 30% damage. Champion, Arena and Laboratory imagery uses the current models. Competitive balance approval is pending.",
+        "pt-BR": "Prévia aprovada pelo criador: Fortalezas perdem 40% da vida básica e aproximadamente 30% do dano. As imagens de campeões, Arenas e Laboratório usam os modelos atuais. A aprovação do equilíbrio competitivo está pendente."
+      },
+      "changes": [
+        {
+          "subject": {
+            "en": "Classic",
+            "pt-BR": "Classic"
+          },
+          "field": {
+            "en": "Base HP / damage",
+            "pt-BR": "Vida / dano básicos"
+          },
+          "before": "6750 / 159",
+          "after": "4050 / 111",
+          "reason": {
+            "en": "Owner-requested reduction with the existing kind coefficients and Fortification scaling.",
+            "pt-BR": "Redução solicitada pelo criador, preservando os coeficientes de cada tipo e a escala da Fortificação."
+          }
+        },
+        {
+          "subject": {
+            "en": "Treasury",
+            "pt-BR": "Treasury"
+          },
+          "field": {
+            "en": "Base HP / damage",
+            "pt-BR": "Vida / dano básicos"
+          },
+          "before": "6277 / 144",
+          "after": "3766 / 101",
+          "reason": {
+            "en": "Owner-requested reduction with the existing kind coefficients and Fortification scaling.",
+            "pt-BR": "Redução solicitada pelo criador, preservando os coeficientes de cada tipo e a escala da Fortificação."
+          }
+        },
+        {
+          "subject": {
+            "en": "Bastion",
+            "pt-BR": "Bastion"
+          },
+          "field": {
+            "en": "Base HP / damage",
+            "pt-BR": "Vida / dano básicos"
+          },
+          "before": "7762 / 141",
+          "after": "4657 / 98",
+          "reason": {
+            "en": "Owner-requested reduction with the existing kind coefficients and Fortification scaling.",
+            "pt-BR": "Redução solicitada pelo criador, preservando os coeficientes de cada tipo e a escala da Fortificação."
+          }
+        },
+        {
+          "subject": {
+            "en": "Artillery",
+            "pt-BR": "Artillery"
+          },
+          "field": {
+            "en": "Base HP / damage",
+            "pt-BR": "Vida / dano básicos"
+          },
+          "before": "5737 / 174",
+          "after": "3442 / 122",
+          "reason": {
+            "en": "Owner-requested reduction with the existing kind coefficients and Fortification scaling.",
+            "pt-BR": "Redução solicitada pelo criador, preservando os coeficientes de cada tipo e a escala da Fortificação."
+          }
+        },
+        {
+          "subject": {
+            "en": "Command",
+            "pt-BR": "Command"
+          },
+          "field": {
+            "en": "Base HP / damage",
+            "pt-BR": "Vida / dano básicos"
+          },
+          "before": "6480 / 144",
+          "after": "3888 / 101",
+          "reason": {
+            "en": "Owner-requested reduction with the existing kind coefficients and Fortification scaling.",
+            "pt-BR": "Redução solicitada pelo criador, preservando os coeficientes de cada tipo e a escala da Fortificação."
+          }
+        },
+        {
+          "subject": {
+            "en": "Champion portraits",
+            "pt-BR": "Retratos dos campeões"
+          },
+          "field": {
+            "en": "shared artwork",
+            "pt-BR": "imagens compartilhadas"
+          },
+          "before": {
+            "en": "Previous model photographs",
+            "pt-BR": "Fotos anteriores dos modelos"
+          },
+          "after": {
+            "en": "88 fresh current-model native portraits",
+            "pt-BR": "88 retratos nativos novos dos modelos atuais"
+          },
+          "reason": {
+            "en": "Match the Blender figures visible in the game and Laboratory.",
+            "pt-BR": "Mostrar as figuras do Blender vistas no jogo e Laboratório."
+          }
+        },
+        {
+          "subject": {
+            "en": "Arena previews and site gallery",
+            "pt-BR": "Prévias das Arenas e galeria do site"
+          },
+          "field": {
+            "en": "photographs",
+            "pt-BR": "fotografias"
+          },
+          "before": {
+            "en": "Older Arena and release screenshots",
+            "pt-BR": "Prévias e capturas de versões anteriores"
+          },
+          "after": {
+            "en": "Eight Blender Arena previews and nine current native screens",
+            "pt-BR": "Oito prévias Blender das Arenas e nove telas nativas atuais"
+          },
+          "reason": {
+            "en": "Keep the same current art across desktop clients and public pages.",
+            "pt-BR": "Manter as imagens atuais nos clientes desktop e páginas públicas."
+          }
+        },
+        {
+          "subject": {
+            "en": "Resumed match controls",
+            "pt-BR": "Controles após reconexão"
+          },
+          "field": {
+            "en": "intention sequence",
+            "pt-BR": "sequência dos comandos"
+          },
+          "before": {
+            "en": "Manual actions could reuse an old sequence after reload or autoplay",
+            "pt-BR": "Ações manuais podiam reutilizar uma sequência antiga após recarregar ou usar o modo automático"
+          },
+          "after": {
+            "en": "Manual actions and autoplay continue above acknowledged commands",
+            "pt-BR": "Ações manuais e modo automático continuam acima dos comandos confirmados"
+          },
+          "reason": {
+            "en": "Keep purchases and upgrade selections usable after reconnecting.",
+            "pt-BR": "Manter compras e escolhas de melhorias utilizáveis após reconectar."
+          }
+        }
+      ],
+      "sections": {
+        "en": [
+          {
+            "title": "Tower identities and Fortification",
+            "body": "The four selectable kinds retain their existing armor, splash, economy and aura roles. Every Fortification scales from the reduced base. The shared picker and upgrade descriptions use the same current values."
+          },
+          {
+            "title": "Validation boundary",
+            "body": "Focused rule, interface and reconnect-counter tests passed. The owner explicitly authorized this preview despite the pre-existing anti-spam target failures. Full competitive acceptance and Windows/desktop web in-game visual correspondence remain pending; no gate threshold was changed."
+          }
+        ],
+        "pt-BR": [
+          {
+            "title": "Identidade das torres e Fortificação",
+            "body": "Os quatro tipos selecionáveis preservam suas funções de armadura, dano em área, economia e aura. Toda Fortificação parte da base reduzida. A seleção de torres e as descrições de melhorias usam os mesmos valores atuais."
+          },
+          {
+            "title": "Limite da validação",
+            "body": "Passaram os testes focados das regras, interface e contador de reconexão. O criador autorizou explicitamente esta prévia apesar das falhas anteriores nos limites contra compras repetitivas. A aprovação competitiva completa e a correspondência visual dentro do jogo em Windows/navegador desktop continuam pendentes; nenhum limite de teste foi alterado."
+          }
+        ]
+      },
+      "document": "docs/patches/2026-11-15-stronghold-blender-previews.md",
+      "evidence": {
+        "accepted": true,
+        "report": "docs/phases/STRONGHOLD-PREVIEWS-20261115.md",
+        "seed_blocks": {
+          "discovery": "0..32, five-kind matrix before and after",
+          "confirmation": "1000000..1000256 matrix; 1000000..1001000 policy probes"
+        },
+        "required_failures": [
+          "heavy vs bot >55%",
+          "cheap vs bot >55%"
+        ],
+        "competitive_accepted": false,
+        "acceptance_scope": "Owner-authorized preview, 2026-11-15; required spam targets remain failing and visual observations remain pending. No competitive gate pass is claimed."
+      }
     }
   ]
 }

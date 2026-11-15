@@ -64,9 +64,10 @@ pub(super) fn poll_link(
         Res<Lang>,
         ResMut<crate::ui::PendingBuy>,
         Res<State<GameState>>,
+        ResMut<crate::ui::IntentSeq>,
     ),
 ) {
-    let (lang, mut shop_pending, state) = presentation;
+    let (lang, mut shop_pending, state, mut sequence) = presentation;
     let now = time.elapsed_secs_f64();
     let mut started = false;
     for msg in link.poll(now) {
@@ -137,14 +138,17 @@ pub(super) fn poll_link(
                 );
                 next.set(GameState::InMatch);
             }
-            ServerMsg::View(view) => accept_view(
-                *view,
-                now,
-                &mut info,
-                &mut latest,
-                &mut buffer,
-                &mut stats.1 .0,
-            ),
+            ServerMsg::View(view) => {
+                sequence.observe(view.last_seq);
+                accept_view(
+                    *view,
+                    now,
+                    &mut info,
+                    &mut latest,
+                    &mut buffer,
+                    &mut stats.1 .0,
+                );
+            }
             // P47: a watcher's view, drawn like a seat's (see `sync::spectate`).
             ServerMsg::SpectatorView(view) => accept_view(
                 spectate::match_view(&view),

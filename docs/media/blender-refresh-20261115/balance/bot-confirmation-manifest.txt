@@ -1,0 +1,14 @@
+command: /data/tbg-open-fronts-target/release/tbg-balance run --a bot --b bot --pairs 1000 --threads 2 --seed-start 1000000 --out /tmp/tbg-blender-refresh-20261115/bot-confirmation
+git_head: 7d46426e
+ruleset_fingerprint: 70f2bd0819870a43
+applied: none
+seeds: 1000000..1001000 (1000 pairs)
+ruleset_base: canon
+shop_preview: false
+pool_kinds: 46
+threads: 2
+reaction_views: 5
+wall_s: 100.25
+games: 2000
+games_per_s: 20
+game_seconds_per_wall_second: 19562

@@ -1,0 +1,14 @@
+command: /data/tbg-open-fronts-target/release/tbg-balance strongholds --pairs 32 --threads 2 --seed-start 0 --apply stronghold_hp=6750,stronghold_damage=159 --out /tmp/tbg-blender-refresh-20261115/strongholds-before
+git_head: 5e3f6a7c
+ruleset_fingerprint: 2b25e5233af1233c
+applied: stronghold_hp=6750,stronghold_damage=159
+seeds: 0..32 (32 pairs)
+ruleset_base: canon
+shop_preview: false
+pool_kinds: 46
+threads: 2
+reaction_views: 5
+wall_s: 210.79
+games: 1600
+games_per_s: 8
+game_seconds_per_wall_second: 0

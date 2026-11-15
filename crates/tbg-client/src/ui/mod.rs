@@ -78,6 +78,7 @@ mod toast;
 pub(crate) mod update;
 
 pub use actions::ActionQueue;
+pub(crate) use actions::IntentSeq;
 pub use toast::{Banner, Toasts};
 
 #[derive(Component, Clone, Copy, Debug, PartialEq, Eq)]

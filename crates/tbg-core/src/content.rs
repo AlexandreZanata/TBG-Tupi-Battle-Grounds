@@ -56,9 +56,10 @@ pub const BEETLES_PER_NESTER: [usize; 2] = [2, 3];
 pub const BEETLES_PER_PLAYER: usize = 6;
 pub const BEETLE_LIFETIME: Tick = 200;
 
-pub const STRONGHOLD_HP: i32 = 6_750;
-/// TW-01 owner revision: the 53-damage reference is tripled.
-pub const STRONGHOLD_DAMAGE: i32 = 159;
+/// TW-02 owner revision: retain 60% of TW-01 HP for every Stronghold kind.
+pub const STRONGHOLD_HP: i32 = 4_050;
+/// TW-02 retains approximately 70% of TW-01 damage, rounded to whole damage.
+pub const STRONGHOLD_DAMAGE: i32 = 111;
 pub const STRONGHOLD_INTERVAL: u16 = 20;
 pub const STRONGHOLD_RANGE: i32 = 6_000;
 
@@ -138,8 +139,8 @@ const fn kind(kind: StrongholdKind, name: &'static str, hp_bp: i32, dmg_bp: i32)
 }
 
 /// Every Stronghold kind in `StrongholdKind` order. Treasury and Command
-/// keep their distinct HP ratios. TW-01 triples the former rounded damage
-/// exactly, with a small coefficient correction for integer truncation.
+/// keep their distinct HP ratios. TW-02 preserves these kind coefficients
+/// so the reduced reference keeps each tower's relative role.
 #[rustfmt::skip]
 pub const STRONGHOLD_KINDS: [KindDef; 5] = [
     kind(StrongholdKind::Classic, "Classic", 0, 0),
