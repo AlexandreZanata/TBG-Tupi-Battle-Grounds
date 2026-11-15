@@ -47,6 +47,8 @@ def main():
         witness = 'boot_ready=true, scene_waiting=false, pending_images=0, pending_texts=0, failed_images=0'
         if witness not in log.read_text():
             raise SystemExit(f'Arena capture was not ready: {log}')
+        if 'Blender scenery pack unavailable' in log.read_text():
+            raise SystemExit(f'Arena capture used fallback scenery: {log}')
         measured = subprocess.check_output(
             ['identify', '-format', '%w %h %[fx:standard_deviation]', str(png)], text=True).split()
         if measured[:2] != ['1536', '764'] or float(measured[2]) < .001:

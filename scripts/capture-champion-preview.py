@@ -8,6 +8,7 @@ from pathlib import Path
 import platform
 import re
 import shutil
+import signal
 import subprocess
 import time
 import tomllib
@@ -37,7 +38,19 @@ def capture(binary, scratch, kind, lineup, delay):
     log = png.with_suffix('.log')
     started = time.monotonic()
     with log.open('w') as out:
-        subprocess.run(command, env=env, stdout=out, stderr=out, timeout=90, check=True)
+        process = subprocess.Popen(command, env=env, stdout=out, stderr=out, start_new_session=True)
+        try:
+            code = process.wait(timeout=90)
+        except subprocess.TimeoutExpired:
+            os.killpg(process.pid, signal.SIGTERM)
+            try:
+                process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                os.killpg(process.pid, signal.SIGKILL)
+                process.wait(timeout=5)
+            raise SystemExit(f'Capture timed out; owned renderer group closed: {log}')
+        if code:
+            raise SystemExit(f'Capture exited {code}: {log}')
     if not ready(log):
         raise SystemExit(f'Capture raced loading; preserve the evidence and increase --capture-after: {log}')
     dimensions = subprocess.check_output(['identify','-format','%w %h %[fx:standard_deviation]',str(png)], text=True).split()

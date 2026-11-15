@@ -2112,3 +2112,17 @@ framing is active. Arena lighting and the champion meshes remain available;
 range review and ordinary gameplay keep their Arena scenery. The rejected
 sample is retained outside Git and is not a deliverable portrait. Corrected
 Linux captures and Windows/web observations remain pending.
+
+
+## 2026-11-15 — Refreshed shared champion portraits
+
+All 88 registered non-Crate portraits (84 champions and four summons) now use
+400×400 native renders of the current Blender figures, with their original
+studio framing. Lossless WebP encoding preserves every captured pixel and each
+asset stays within 40 KiB. The source-identified Linux reference and asset hashes
+are retained in `docs/media/blender-refresh-20261115/portraits.json`. These shared
+assets feed Shop, catalogs, Laboratory and the public catalog on all targets.
+The Linux contact sheet was inspected; Windows and desktop web observations of
+the packaged screens remain pending. This records static portraits, not motion
+acceptance. The Arena preview also suppresses the account recovery toolbar,
+which has no role in the exported scene; normal account controls are unchanged.
