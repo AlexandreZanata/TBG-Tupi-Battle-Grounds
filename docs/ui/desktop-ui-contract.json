@@ -204,7 +204,8 @@
     "blender-auxiliaries-construction",
     "blender-auxiliaries-mining",
     "blender-auxiliaries-delivery",
-    "blender-auxiliaries-reduced-motion"
+    "blender-auxiliaries-reduced-motion",
+    "ranked-reconnect-purchase"
   ],
   "motion_screens": [
     "preview-dance",
@@ -649,7 +650,7 @@
       "id": "p77-a-role-shop-slots-20261103",
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
-      "affected_cases": "MOBA three role-locked cards, captions, resource strip, locks/reroll/purchase, hotkeys 1\u20133; shared presentation; champion motion unchanged",
+      "affected_cases": "MOBA three role-locked cards, captions, resource strip, locks/reroll/purchase, hotkeys 1–3; shared presentation; champion motion unchanged",
       "linux": "installed overview observed: three cards/resource strip; interaction/pixel matrix pending",
       "windows": "pending (P81)",
       "web": "pending (P81)",
@@ -709,7 +710,7 @@
       "id": "p77-g-five-card-shop-20261103",
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
-      "affected_cases": "Restored five-card row/resource strip, three Role slots plus two full-roster slots, locks/reroll/purchase, Destination panel and hotkeys 1\u20135",
+      "affected_cases": "Restored five-card row/resource strip, three Role slots plus two full-roster slots, locks/reroll/purchase, Destination panel and hotkeys 1–5",
       "linux": "installed overview observed: five cards, localized open captions and Destination; interactions pending",
       "windows": "pending (P81)",
       "web": "pending (P81)",
@@ -739,7 +740,7 @@
       "id": "p77-j-scaled-champion-range",
       "date": "2026-11-03",
       "report": "docs/phases/P77-moba-roles-vision-jungle-map.md",
-      "affected_cases": "Champion attack and cast reach, stance, muzzle releases and projectile travel with 3\u00d7 world distance; close contact and vision boundaries",
+      "affected_cases": "Champion attack and cast reach, stance, muzzle releases and projectile travel with 3× world distance; close contact and vision boundaries",
       "linux": "focused core contracts passed; motion comparison pending",
       "windows": "pending",
       "web": "pending",

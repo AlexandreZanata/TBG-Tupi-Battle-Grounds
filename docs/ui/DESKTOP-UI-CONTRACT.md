@@ -2073,3 +2073,18 @@ board.
 - Blender study: opened and rendered with Blender 4.5.15; 2,244 scene
   objects and 321,922 authored triangles. Runtime batching, fog, water,
   Tower damage and platform correspondence remain pending.
+
+
+## 2026-11-15 — Purchase after resuming a match
+
+Linux remains the reference for `ranked-reconnect-purchase`. The first Shop
+purchase after reconnecting or reloading must consume Energy, redraw offers
+and spawn the purchased unit when accepted by the server. Manual actions
+and opt-in autoplay share one intention sequence; the server's private
+`last_seq` advances its floor without reusing pending numbers. Spectator
+views never advance that floor. Layout, art and animation timing are unchanged.
+
+The shared implementation applies to Linux, Windows and desktop web. A live
+browser test on R16 exposed stale command numbers after reload and after
+turning off autoplay. Regression scenarios are queued for consolidation;
+Linux, Windows and browser observations of the corrected build remain pending.

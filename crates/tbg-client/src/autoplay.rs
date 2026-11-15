@@ -9,14 +9,13 @@ use tbg_core::protocol::ClientMsg;
 use crate::config;
 use crate::link::MatchLink;
 use crate::sync::LatestView;
-use crate::ui::{ActionQueue, UiAction};
+use crate::ui::{ActionQueue, IntentSeq, UiAction};
 use crate::GameState;
 
 #[derive(Resource)]
 struct Autoplay {
     bot: Bot,
     last_tick: u32,
-    seq: u32,
 }
 
 pub fn plugin(app: &mut App) {
@@ -24,7 +23,6 @@ pub fn plugin(app: &mut App) {
         app.insert_resource(Autoplay {
             bot: Bot::new(0xa070),
             last_tick: u32::MAX,
-            seq: 1_000_000,
         })
         .add_systems(Update, play)
         .add_systems(OnEnter(GameState::Menu), start);
@@ -45,6 +43,7 @@ fn play(
     mut auto: ResMut<Autoplay>,
     view: Res<LatestView>,
     mut link: NonSendMut<MatchLink>,
+    mut seq: ResMut<IntentSeq>,
 ) {
     let Some(v) = &view.0 else { return };
     if v.clock == auto.last_tick {
@@ -52,8 +51,7 @@ fn play(
     }
     auto.last_tick = v.clock;
     if let Some(intent) = auto.bot.decide(v) {
-        auto.seq += 1;
-        let seq = auto.seq;
+        let seq = seq.advance();
         link.send(ClientMsg::Intent { seq, intent }, time.elapsed_secs_f64());
     }
 }

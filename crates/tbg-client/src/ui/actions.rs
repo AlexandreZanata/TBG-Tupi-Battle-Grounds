@@ -19,7 +19,19 @@ use crate::{config, GameState};
 pub struct ActionQueue(pub Vec<UiAction>);
 
 #[derive(Resource, Default)]
-pub(super) struct IntentSeq(u32);
+pub(crate) struct IntentSeq(u32);
+
+impl IntentSeq {
+    /// Resume above the server's acknowledgement without reusing in-flight numbers.
+    pub(crate) fn observe(&mut self, acknowledged: u32) {
+        self.0 = self.0.max(acknowledged);
+    }
+
+    pub(crate) fn advance(&mut self) -> u32 {
+        self.0 = self.0.saturating_add(1);
+        self.0
+    }
+}
 
 /// What "Play again" repeats.
 #[derive(Resource, Default, Clone, Copy, PartialEq, Eq)]
@@ -314,7 +326,7 @@ pub(super) fn apply(
             UiAction::ChooseAugment(option) => {
                 if let Some(round) = extra.0 .0.as_ref().and_then(|v| v.augment_round.as_ref()) {
                     if !round.resolved && round.ticks_left > 0 {
-                        seq.0 += 1;
+                        seq.advance();
                         link.send(
                             ClientMsg::Intent {
                                 seq: seq.0,
@@ -331,7 +343,7 @@ pub(super) fn apply(
             UiAction::ForgoAugment => {
                 if let Some(round) = extra.0 .0.as_ref().and_then(|v| v.augment_round.as_ref()) {
                     if !round.resolved && round.ticks_left > 0 {
-                        seq.0 += 1;
+                        seq.advance();
                         link.send(
                             ClientMsg::Intent {
                                 seq: seq.0,
@@ -350,7 +362,7 @@ pub(super) fn apply(
                     UiAction::Reserve { kind, .. } => PlayerIntention::Reserve { offer, kind },
                     _ => PlayerIntention::Release { offer },
                 };
-                seq.0 += 1;
+                seq.advance();
                 link.send(ClientMsg::Intent { seq: seq.0, intent }, now);
                 pending.0 = Some((u8::MAX, seq.0));
             }
@@ -366,7 +378,7 @@ pub(super) fn apply(
                     }
                 });
                 if let Some(cost) = cost {
-                    seq.0 += 1;
+                    seq.advance();
                     link.send(
                         ClientMsg::Intent {
                             seq: seq.0,
@@ -385,7 +397,7 @@ pub(super) fn apply(
                 if pending.0.is_some() {
                     continue;
                 }
-                seq.0 += 1;
+                seq.advance();
                 link.send(
                     ClientMsg::Intent {
                         seq: seq.0,
@@ -398,7 +410,7 @@ pub(super) fn apply(
                 if pending.0.is_some_and(|(slot, _)| slot == u8::MAX) {
                     continue;
                 }
-                seq.0 += 1;
+                seq.advance();
                 link.send(
                     ClientMsg::Intent {
                         seq: seq.0,
@@ -426,7 +438,7 @@ pub(super) fn apply(
                 selected.0 = (own && !extra.4.spectating).then_some(id);
             }
             UiAction::Evolve { unit, branch } => {
-                seq.0 += 1;
+                seq.advance();
                 link.send(
                     ClientMsg::Intent {
                         seq: seq.0,
@@ -440,7 +452,7 @@ pub(super) fn apply(
             // the authoritative view does.
             UiAction::Fortify(branch) => {
                 if fortifying.0.is_none() {
-                    seq.0 += 1;
+                    seq.advance();
                     link.send(
                         ClientMsg::Intent {
                             seq: seq.0,
@@ -531,4 +543,28 @@ fn start_practice(link: &mut MatchLink, now: f64) {
     *link = MatchLink::Local(Box::new(LocalMatch::new(
         seed, arcanas, stronghold, army, arena,
     )));
+}
+
+#[cfg(test)]
+mod sequence_tests {
+    use super::IntentSeq;
+
+    #[test]
+    fn reconnect_and_manual_play_continue_above_acknowledged_commands() {
+        // A page reload must not replay old numbers (BR-A02), including after autoplay.
+        let mut sequence = IntentSeq::default();
+        sequence.observe(1_000_037);
+        assert_eq!(sequence.advance(), 1_000_038);
+        assert_eq!(sequence.advance(), 1_000_039);
+        // A delayed acknowledgement cannot reuse either in-flight number.
+        sequence.observe(1_000_037);
+        assert_eq!(sequence.advance(), 1_000_040);
+    }
+
+    #[test]
+    fn maximum_acknowledgement_never_overflows_the_client() {
+        let mut sequence = IntentSeq::default();
+        sequence.observe(u32::MAX);
+        assert_eq!(sequence.advance(), u32::MAX);
+    }
 }

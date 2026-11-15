@@ -1,3 +1,8 @@
+TBG 0.1.4-colossus.10 — Resumed match controls
+
+Shop, Evolution, Fortification and Augment selections remain usable immediately
+after reconnecting or reloading a match.
+
 TBG 0.1.4-colossus.8 — Playable Blender arena art
 
 All eight 1v1 Arenas load their Blender scenery and Classic Stronghold skins.
