@@ -2142,3 +2142,14 @@ consume the same eight refreshed textures as the shared public catalog.
 Linux captures of the final R17 presentation are pending; Windows and desktop
 web observations and exact correspondence remain pending. Compilation and shared
 asset hashes alone cannot establish those observations.
+
+
+## 2026-11-15 — Reviewed current Blender Arena thumbnails
+
+All eight shared Arena thumbnails were recaptured at native 1536×764 and
+encoded to 768×382 WebP. Each source scene reached image/text/scene readiness
+without fallback scenery. The Linux contact sheet was inspected with no account
+recovery controls over the scene. Source, binary, PNG and thumbnail hashes are
+in `docs/media/blender-refresh-20261115/arenas.json`. The exact shared assets
+feed the Linux, Windows and desktop web Arena cards and Laboratory picker.
+Windows and desktop web observations of those cards remain pending.

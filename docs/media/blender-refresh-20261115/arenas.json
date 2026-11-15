@@ -1,0 +1,74 @@
+{
+  "build": {
+    "contract": "w40-r17-3df52af730a4e914",
+    "features": [
+      "ui-acceptance"
+    ],
+    "profile": "debug",
+    "protocol": 40,
+    "source_commit": "7d46426e52eccd6a5e6080073f96be40b6437974",
+    "target": "x86_64-unknown-linux-gnu",
+    "version": "0.1.4-colossus.10"
+  },
+  "binary_sha256": "5eb640d3b96424425ffaaa65d4c4e4afb3057fc5d1fee0e9af4a39b355245842",
+  "surface": "Linux X11/Xvfb; actual Bevy native Blender scenery",
+  "parity": "Windows and desktop web observations pending",
+  "captures": [
+    {
+      "arena": "forest",
+      "image": "forest.png",
+      "log": "forest.log",
+      "sha256": "581af6cbafbec01d19161edc75033cb7fc535163d00a531043142cc2b287678d",
+      "thumbnail_sha256": "4de688b142ea8ce7246920b1bc9e8108f23ed77b5fcde260bbfd42113615b8dc"
+    },
+    {
+      "arena": "tundra",
+      "image": "tundra.png",
+      "log": "tundra.log",
+      "sha256": "dfb484b437caceea5793d91b1270639e48c72f2b6f9b8585f0887800abfff99a",
+      "thumbnail_sha256": "4e60f08438c76162c6a414c658313b678727cee80e78927c1dccad81c5252ed6"
+    },
+    {
+      "arena": "volcanic",
+      "image": "volcanic.png",
+      "log": "volcanic.log",
+      "sha256": "49b65e3f4cce8f8e7c407907a565e0b5800638b7469852cf4a907bd1660b945d",
+      "thumbnail_sha256": "ac5d363ca716e15694027af9daae8a4cffc150ea841cdf08209155ed696aba47"
+    },
+    {
+      "arena": "ruins",
+      "image": "ruins.png",
+      "log": "ruins.log",
+      "sha256": "80f315d0192ed392e5bbcf2ea68c3fe9f9fb7d03838c48a193673537f490c8d5",
+      "thumbnail_sha256": "7da9d964d2cc6748960ba01dff5efee42bcc4d1b3789aa242e052e1d3bb613fc"
+    },
+    {
+      "arena": "storm",
+      "image": "storm.png",
+      "log": "storm.log",
+      "sha256": "c7a4da7c1f085bac0cb6b8b9118459453b1b8ffa9ef6c3d4250d71c2eeba6237",
+      "thumbnail_sha256": "92011930ba06692f2c0005b9c375f6fb87ac7c7d4634ca67920298ef6a3639b3"
+    },
+    {
+      "arena": "celestial",
+      "image": "celestial.png",
+      "log": "celestial.log",
+      "sha256": "5cc3832a6850abeafa084d83d6af42818348490a1345fb60a82194f819906f1b",
+      "thumbnail_sha256": "f0d5dbd0e5a05ebbb2932ae31706db96bee0592ce2d4b3441fd6169572279352"
+    },
+    {
+      "arena": "clockwork",
+      "image": "clockwork.png",
+      "log": "clockwork.log",
+      "sha256": "8d227f4cd55d726d586a2ca966dfa13c4c0390ced28abd3f6c59f03039f8be4e",
+      "thumbnail_sha256": "dd2af1b4e488d18e7e5874ec1669d2731b6db1b83938ef5900d0fb8ba35fca03"
+    },
+    {
+      "arena": "desert",
+      "image": "desert.png",
+      "log": "desert.log",
+      "sha256": "4db08a3dbf6a4be4666ba094c19ef681fe0141a472a6911e93ff017f3268f9e5",
+      "thumbnail_sha256": "fd7a643ee38dce683dd72dab8b146fdd88eab4a2e013481e772cdf1b7bef2708"
+    }
+  ]
+}
