@@ -55,6 +55,16 @@ pub fn plugin(app: &mut App) {
     }
     if crate::config::url_param("capture").is_some() {
         #[cfg(tbg_desktop)]
+        if crate::config::url_param("capture_panel").as_deref() == Some("arenas") {
+            app.add_systems(
+                OnEnter(crate::GameState::Menu),
+                |mut shell: ResMut<crate::ui::shell::Shell>| {
+                    shell.panel = crate::ui::shell::Panel::Arenas;
+                    shell.dirty = true;
+                },
+            );
+        }
+        #[cfg(tbg_desktop)]
         if crate::config::url_param("capture_panel").as_deref() == Some("troops") {
             troops::plugin(app);
             return;

@@ -2088,3 +2088,19 @@ The shared implementation applies to Linux, Windows and desktop web. A live
 browser test on R16 exposed stale command numbers after reload and after
 turning off autoplay. Regression scenarios are queued for consolidation;
 Linux, Windows and browser observations of the corrected build remain pending.
+
+
+## 2026-11-15 — Current Blender preview capture sources
+
+The Linux reference adds `portrait-gallery-ready-blender` for every registered
+champion and `arena-preview-ready-blender` for the eight Arenas. The capture
+helpers identify the executable version, source commit and binary hash, wait
+for the real shared scene and image readiness, and retain original PNG evidence.
+The isolated processes use a closed loopback endpoint. Arena inspection hides
+the diagnostic text just as the champion Gallery does, on all desktop targets;
+normal lobby and battle diagnostics are unchanged. The opt-in Arena catalog
+capture uses the ordinary shared menu panel.
+
+New shared WebP assets and final per-target observations are pending. Source
+routing passed for the earlier sequence change; it does not prove packaged
+Windows/web visual correspondence or acceptance of the new photographs.

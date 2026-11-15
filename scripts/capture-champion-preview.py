@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capture actual CC17 native models once; encode Shop portraits without changing their pixels."""
+"""Capture current Blender champion models; encode portraits without changing their pixels."""
 import argparse
 import hashlib
 import json
@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import time
+import tomllib
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -24,8 +25,9 @@ def capture(binary, scratch, kind, lineup, delay):
     env.update(WINIT_UNIX_BACKEND='x11', TBG_GALLERY=kind,
                TBG_CAPTURE=str(png), TBG_CAPTURE_SIZE=f'{width}x{height}',
                TBG_CAPTURE_AFTER=str(delay), TBG_DATA_DIR=str(scratch / 'data'),
-               LP_NUM_THREADS='2', OMP_NUM_THREADS='2')
-    for key in ['WAYLAND_DISPLAY', 'WAYLAND_SOCKET', 'TBG_PORTRAIT', 'TBG_LINEUP']:
+               LP_NUM_THREADS='2', OMP_NUM_THREADS='2', TBG_SERVER='ws://127.0.0.1:9/ws')
+    for key in ['WAYLAND_DISPLAY', 'WAYLAND_SOCKET', 'TBG_PORTRAIT', 'TBG_LINEUP',
+                'DBUS_SESSION_BUS_ADDRESS']:
         env.pop(key, None)
     env['TBG_LINEUP' if lineup else 'TBG_PORTRAIT'] = '1'
     command = ['xvfb-run', '-a', '-s', f'-screen 0 {width}x{height}x24', str(binary)]
@@ -68,11 +70,18 @@ def main():
     parser.add_argument('--seed-manifest', type=Path, help='Reuse ready, hash-verified captures with their original build provenance')
     parser.add_argument('--invalidate-kind', nargs='*', default=[])
     parser.add_argument('--all-portraits', action='store_true', help='Refresh every registered non-Crate portrait, plus the seventeen new lineups')
+    parser.add_argument('--portraits-only', action='store_true', help='Skip review lineups when refreshing shipped portrait images')
     args = parser.parse_args()
     binary = args.binary.resolve()
     scratch = args.output.resolve()
     scratch.mkdir(parents=True, exist_ok=True)
     info = json.loads(subprocess.check_output([str(binary),'--build-info'], text=True))
+    expected = tomllib.loads((ROOT / 'crates/tbg-client/Cargo.toml').read_text())['package']['version']
+    source = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    if info['version'] != expected or info['source_commit'] != source:
+        raise SystemExit(f'Capture binary must match current version {expected} and source {source}; got {info}')
+    if info['profile'] != 'debug' and 'ui-acceptance' not in info['features']:
+        raise SystemExit('Capture binary requires debug mode or the ui-acceptance feature')
     catalog = json.loads((ROOT / 'docs/champion-completion/catalog.json').read_text())['champions']
     new_kinds = [c['kind'] for c in catalog]
     expanded = json.loads((ROOT / 'docs/ogre-faction/catalog.json').read_text())['champions']
@@ -110,7 +119,7 @@ def main():
             report['captures'].append({**record, 'build': seed['build'], 'binary_sha256': seed['binary_sha256']})
         existing.write_text(json.dumps(report, indent=2)+'\n')
     for kind in kinds:
-        for lineup in ([False, True] if kind in lineup_kinds else [False]):
+        for lineup in ([False, True] if kind in lineup_kinds and not args.portraits_only else [False]):
             mode='lineup: idle/walk/attack' if lineup else 'base portrait'
             cached=next((c for c in report['captures'] if c['kind']==kind and c['mode']==mode),None)
             if cached and (scratch/cached['image']).exists() and hashlib.sha256((scratch/cached['image']).read_bytes()).hexdigest()==cached['sha256'] and ready(scratch/cached['log']):
