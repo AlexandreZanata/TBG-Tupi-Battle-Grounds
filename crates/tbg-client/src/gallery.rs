@@ -70,17 +70,10 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-fn hide_loaded_scenery(
-    options: Res<Gallery>,
-    mut scenery: Query<
-        &mut Visibility,
-        (
-            With<crate::arena::ArenaScene>,
-            Added<crate::arena::ArenaScene>,
-            With<Mesh3d>,
-        ),
-    >,
-) {
+type LoadedScenery<'w, 's> =
+    Query<'w, 's, &'static mut Visibility, (Added<crate::arena::ArenaScene>, With<Mesh3d>)>;
+
+fn hide_loaded_scenery(options: Res<Gallery>, mut scenery: LoadedScenery) {
     if options.hide_arena() {
         // Blender packs can finish after the Gallery's initial visibility pass.
         for mut visibility in &mut scenery {
