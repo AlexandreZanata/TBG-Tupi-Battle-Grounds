@@ -83,8 +83,8 @@ pub(crate) async fn handler(
     result
 }
 async fn execute(app: AppState, peer: SocketAddr, req: Request) -> Result<Response, Error> {
-    let binding =
-        crate::auth::http::history_binding(&app, req.headers()).map_err(|_| Error::Denied)?;
+    let binding = crate::auth::http::history_binding(&app, req.method(), req.headers())
+        .map_err(|_| Error::Denied)?;
     let _permit = app
         .history_reads
         .clone()

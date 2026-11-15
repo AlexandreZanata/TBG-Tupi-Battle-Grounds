@@ -3594,3 +3594,14 @@ acceptance work. Production rollout still requires green technical CI, genuine
 main-built attested artifacts and a coordinated R17 contract switch.
 **Reopen when** competitive balance is tuned or cross-platform evidence is ready;
 the exception does not approve subsequent numerical revisions.
+
+### D-97 implementation correction: browser account GET origin proof — 2026-11-15
+
+The Fetch Standard omits Origin on ordinary same-origin GETs. Require an exact
+allowlisted Referer origin plus same-origin Fetch Metadata for those account
+reads only; retain JSON/custom-header checks, in-memory bearer authentication,
+generation fencing and revocation. An explicit bad Origin never falls back to
+Referer. Writes and cookie authentication keep strict Origin validation; native
+envelopes remain isolated. This repairs the emoji-library refresh after a valid
+save, and the same account/history read transport, without enabling uploads or
+changing game rules. See [the regression report](phases/EMOJI-LIBRARY-20261115.md).

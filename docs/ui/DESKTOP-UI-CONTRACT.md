@@ -2178,3 +2178,14 @@ Colossus B2 catalog, live champion inspection and Bastion's reduced 4657 HP /
 6054 first-Fortification description. Full kind/form/motion matrix coverage and
 Windows/web runtime comparison remain pending. The desktop browser also loaded
 all nine photographs in the local public gallery; that is static-site evidence.
+
+## 2026-11-15 — Emoji library refresh after selecting a standard emoji
+
+The shared P75 emoji dialog must open, save each of its three slots, refresh
+its library and reopen after reload without a false generic error. A backend
+origin-proof correction accepts actual same-origin browser GET envelopes;
+Linux/Windows native requests retain their existing authentication path. The
+layout, icon assets, upload moderation and motion are preserved. Browser runtime
+verification after deployment and Linux/Windows observation are pending in
+[the correction report](../phases/EMOJI-LIBRARY-20261115.md). Targeted HTTP tests
+are functional evidence, not three-platform visual correspondence acceptance.

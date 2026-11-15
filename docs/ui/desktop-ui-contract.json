@@ -890,6 +890,15 @@
       "windows": "pending",
       "web": "pending",
       "android": "out of scope"
+    },
+    {
+      "id": "emoji-library-browser-read-origin-proof",
+      "date": "2026-11-15",
+      "report": "docs/phases/EMOJI-LIBRARY-20261115.md",
+      "affected_cases": "P75 standard emoji library open, three-slot save, refresh and reload; account/history GET binding; shared layout, assets, native authentication and all motion preserved",
+      "linux": "pending",
+      "windows": "pending",
+      "web": "pending"
     }
   ],
   "moba_motion_screens": [

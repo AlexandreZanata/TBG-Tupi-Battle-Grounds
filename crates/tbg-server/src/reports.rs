@@ -23,8 +23,8 @@ pub(crate) async fn handler(State(app): State<AppState>, req: Request) -> Respon
     response
 }
 async fn execute(app: AppState, req: Request) -> Result<i64, Error> {
-    let binding =
-        crate::auth::http::history_binding(&app, req.headers()).map_err(|_| Error::Forbidden)?;
+    let binding = crate::auth::http::history_binding(&app, req.method(), req.headers())
+        .map_err(|_| Error::Forbidden)?;
     let permit = app
         .history_reads
         .clone()

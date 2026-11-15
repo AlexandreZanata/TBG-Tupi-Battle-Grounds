@@ -62,10 +62,11 @@ async fn handle(app: &AppState, peer: SocketAddr, request: Request) -> Result<Va
         .ok_or((StatusCode::SERVICE_UNAVAILABLE, "history_unavailable"))?;
     let path = request.uri().path().to_owned();
     let headers = request.headers().clone();
+    let method = request.method().clone();
     let owner = path.starts_with("/api/me/");
     let binding = if owner {
         Some(
-            crate::auth::http::history_binding(app, &headers)
+            crate::auth::http::history_binding(app, &method, &headers)
                 .map_err(|_| (StatusCode::UNAUTHORIZED, "auth_required"))?,
         )
     } else {
@@ -165,7 +166,7 @@ async fn handle(app: &AppState, peer: SocketAddr, request: Request) -> Result<Va
     .ok_or((StatusCode::SERVICE_UNAVAILABLE, "history_unavailable"))?
     .map_err(failure)?;
     if let Some(old) = binding {
-        let current = crate::auth::http::history_binding(app, &headers)
+        let current = crate::auth::http::history_binding(app, &method, &headers)
             .map_err(|_| (StatusCode::UNAUTHORIZED, "auth_required"))?;
         if current.account != old.account || current.family != old.family {
             return Err((StatusCode::UNAUTHORIZED, "auth_required"));
