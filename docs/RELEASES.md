@@ -242,6 +242,49 @@ Email registration/recovery is still an offline P67 foundation, and the public a
 is a preparation page. Do not advertise email delivery, functioning administrative
 permissions, accepted competitive balance or mobile availability from this merge.
 
+## Manual production alignment, 2026-11-15
+
+The owner requested a manual update to the latest published release.
+Production had remained on `0.1.4-colossus.4`, source `130cadc16681`,
+wire 38, ruleset 15 and database schema 10. The next release family
+required wire 40, ruleset 16 and schema 12, so the automatic compatibility
+guards deferred the browser/site and rejected the backend/native update.
+
+The attended update verified the published provenance and payload hashes.
+A SQLite backup and a scratch migration with the published backend passed
+integrity and foreign-key checks. Existing account, match, ranked and auth
+rows were preserved in the rehearsal. The same additive migration on
+production preserved the account and match/result rows.
+
+The slot coordinator promoted `b9041af8bcb982a94d72d8c1607ed25c1ef73e77`
+with the explicit contract `w40-r16-f2e253b98ccb313a`, then retired the
+previous slot. The browser uses that source. The landing uses
+`b480721d7e62c6eadf432f5dabff7745e35df6a7`, the latest published static
+candidate. Both Linux and Windows downloads now name
+`0.1.4-colossus.8`.
+
+The independent metadata file `/srv/tbg/landing-runtime/release.json`
+confirms the browser's live URL after the matching browser/backend
+receipts and public probes pass. Caddy optionally serves it at
+`/config/release.json`, preserving the immutable static payload. Without
+that file the authored config remains the fallback. Review this runtime
+metadata during any later coordinated contract switch.
+
+The VPS also exhausted GitHub's anonymous API quota despite ETags.
+The shared ten-minute response cache now covers all four controllers.
+For the attended recovery, fresh public API responses fetched on the
+operator computer seeded this cache while the host's quota was exhausted.
+Artifact signatures, hashes, source ancestry and compatibility checks
+remained required. All four controller services subsequently exited
+successfully and their enabled timers were restored.
+
+Work-front evidence includes 22 deployment guard tests, 14 web deployment
+tests, `git diff --check`, a successful production `caddy validate`,
+public admission to the new slot and `/health` returning `ok`.
+The landing's Linux modal showed the .8 AppImage/tarball links, and public
+JSON verified both Linux and Windows formats. A full multiplayer match
+and packaged platform correspondence were not part of this host update.
+
 ## TLS incident, 2026-11-01
 
 The initial origin configured only API/app hosts. Direct SNI for root/www/admin

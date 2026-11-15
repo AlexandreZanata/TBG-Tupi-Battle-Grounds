@@ -3,6 +3,7 @@ import hashlib
 import json
 import re
 import sys
+import time
 from urllib.error import HTTPError
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
@@ -14,6 +15,9 @@ API = 'https://api.github.com/repos/'+REPOSITORY
 REPOSITORY_ID = 1285090346
 PAGE = 100
 CACHE = STATE/'api-cache'
+# Four ten-minute controllers share one anonymous quota. Even conditional
+# requests spend it, so reuse verified API metadata within one polling interval.
+CACHE_SECONDS = 600
 
 
 class HttpsRedirects(HTTPRedirectHandler):
@@ -46,19 +50,24 @@ def fetch(url, maximum):
 
 
 def api(path):
-    """Conditional GET: an unchanged answer is a 304, which does not spend the anonymous quota."""
+    """Reuse recent metadata, then revalidate it with a conditional GET."""
     key = CACHE/(hashlib.sha256(path.encode()).hexdigest()[:32]+'.json')
     cached = json.loads(key.read_text()) if key.exists() else None
+    now = time.time()
+    if cached and 0 <= now - cached.get('checked_at', 0) < CACHE_SECONDS:
+        print(f'github-api {path or "/"} cached', file=sys.stderr)
+        return json.loads(cached['body'])
     headers = {'If-None-Match': cached['etag']} if cached and cached.get('etag') else {}
     status, meta, data = request(API+path, 4 * 1024 * 1024, headers)
     # Quota is measured, not assumed: every controller run logs what it spent.
     print(f'github-api {path or "/"} {status} remaining={meta.get("X-RateLimit-Remaining", "?")}', file=sys.stderr)
     if status == 304:
         require(cached is not None, 'unexpected 304 without a cached answer')
+        write_json(key, {**cached, 'checked_at': now})
         return json.loads(cached['body'])
     if meta.get('ETag'):
         CACHE.mkdir(mode=0o700, exist_ok=True)
-        write_json(key, {'etag': meta['ETag'], 'body': data.decode()})
+        write_json(key, {'etag': meta['ETag'], 'body': data.decode(), 'checked_at': now})
     return json.loads(data)
 
 

@@ -343,9 +343,19 @@ class ControllerSafety(unittest.TestCase):
                 return 200, {'ETag': '"v1"', 'X-RateLimit-Remaining': '59'}, b'[{"tag_name": "web-x"}]'
             return 304, {'X-RateLimit-Remaining': '59'}, b''
         with patch.multiple(self.github, CACHE=self.state/'api-cache', request=answer):
-            first = self.github.api('/releases?per_page=100')
-            second = self.github.api('/releases?per_page=100')
+            with patch.object(self.github.time, 'time', return_value=1000):
+                first = self.github.api('/releases?per_page=100')
+            with patch.object(self.github.time, 'time', return_value=1599):
+                cached = self.github.api('/releases?per_page=100')
+            self.assertEqual(len(calls), 1, 'controllers share one request per polling interval')
+            with patch.object(self.github.time, 'time', return_value=1600):
+                second = self.github.api('/releases?per_page=100')
+            with patch.object(self.github.time, 'time', return_value=2199):
+                refreshed = self.github.api('/releases?per_page=100')
+        self.assertEqual(first, cached)
         self.assertEqual(first, second)
+        self.assertEqual(second, refreshed)
+        self.assertEqual(len(calls), 2, 'a 304 also renews the polling interval')
         self.assertEqual(calls[1], {'If-None-Match': '"v1"'})
 
 
