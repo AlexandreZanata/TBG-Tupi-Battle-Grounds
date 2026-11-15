@@ -212,10 +212,7 @@ fn capture(
             return;
         }
     }
-    let delay = crate::config::url_param("capture_after")
-        .and_then(|s| s.parse::<f32>().ok())
-        .unwrap_or(8.0)
-        .clamp(1.0, 600.0);
+    let delay = capture_delay();
     let result_only = crate::config::url_param("capture_on").as_deref() == Some("result");
     if *started
         || time.elapsed_secs() < delay
@@ -312,11 +309,13 @@ fn capture(
 
 #[cfg(tbg_desktop)]
 fn select_unit(
+    time: Res<Time>,
     view: Res<crate::sync::LatestView>,
+    inspected: Res<crate::ui::inspect::Inspected>,
     mut actions: ResMut<crate::ui::ActionQueue>,
-    mut done: Local<bool>,
 ) {
-    if *done {
+    // Select at capture time; the first purchased unit may already have died.
+    if time.elapsed_secs() < capture_delay() || inspected.0.is_some() {
         return;
     }
     let Some(v) = &view.0 else { return };
@@ -326,6 +325,12 @@ fn select_unit(
         .find(|unit| unit.seat == v.you && !unit.is_summon())
     {
         actions.0.push(crate::ui::UiAction::SelectUnit(unit.id));
-        *done = true;
     }
+}
+
+fn capture_delay() -> f32 {
+    crate::config::url_param("capture_after")
+        .and_then(|s| s.parse::<f32>().ok())
+        .unwrap_or(8.0)
+        .clamp(1.0, 600.0)
 }

@@ -68,7 +68,7 @@ fn capture(
         *started = Some(time.elapsed_secs());
         return;
     };
-    if time.elapsed_secs() < start + 2.0
+    if time.elapsed_secs() < super::capture_delay().max(start + 2.0)
         || shell.panel != Panel::Troops
         || catalog.selected != unit
         || catalog.form != form

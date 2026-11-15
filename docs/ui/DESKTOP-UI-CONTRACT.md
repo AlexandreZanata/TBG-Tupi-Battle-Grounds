@@ -2153,3 +2153,15 @@ recovery controls over the scene. Source, binary, PNG and thumbnail hashes are
 in `docs/media/blender-refresh-20261115/arenas.json`. The exact shared assets
 feed the Linux, Windows and desktop web Arena cards and Laboratory picker.
 Windows and desktop web observations of those cards remain pending.
+
+
+## 2026-11-15 — Capture readiness for live inspection panels
+
+The opt-in Troops export honors the requested capture delay after selecting the
+real model and allowing its interface to settle. The champion inspection export
+selects a current living unit at capture time and can select another if the
+previous one dies. The earlier one-shot selection could expire before the
+requested frame. Both helpers use ordinary shared UI actions; no units, Energy
+or outcomes are injected. Normal player controls and motion are unchanged.
+Linux runtime checks of the corrected helpers and Windows/web observations are
+pending. The existing portrait/Laboratory/inspection cases cover this change.
