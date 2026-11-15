@@ -8,7 +8,8 @@ fn tw01_artillery_hits_three_additional_enemies_and_fury_counts_each_eligible_ki
     s.players[0].augments.add(22);
     for i in 0..5 {
         s.lab_spawn_at(Seat::B, UnitKind::Archer, 0, 0, 1000 + i * 100);
-        s.units.last_mut().unwrap().hp = 50;
+        // Exercise the target cap and Fury independently of the current shot damage.
+        s.units.last_mut().unwrap().hp = 1;
     }
     let ally = s.lab_spawn_at(Seat::A, UnitKind::Archer, 0, 0, 1200);
     let hp = s.units.last().unwrap().hp;

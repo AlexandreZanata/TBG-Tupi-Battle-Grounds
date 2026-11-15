@@ -1,7 +1,11 @@
-//! TW-01: exact base tower boost, effective Fortifications and distinct passives.
+//! Historical TW-01 reference values and current Fortification/passive roles.
 use tbg_core::{content, Ruleset, StrongholdKind};
 #[test]
 fn tw01_every_base_tower_has_triple_damage_and_fifty_percent_more_printed_hp() {
+    // TW-02 supersedes the live bases; contract_strongholds pins the R17 values.
+    let mut reference = Ruleset::canon().clone();
+    reference.stronghold_hp = 6750;
+    reference.stronghold_damage = 159;
     for (kind, hp, damage) in [
         (StrongholdKind::Classic, 4500, 53),
         (StrongholdKind::Treasury, 4185, 48),
@@ -9,7 +13,7 @@ fn tw01_every_base_tower_has_triple_damage_and_fifty_percent_more_printed_hp() {
         (StrongholdKind::Artillery, 3825, 58),
         (StrongholdKind::Command, 4320, 48),
     ] {
-        let s = tbg_core::stronghold::stats(Ruleset::canon(), kind, 0, 0);
+        let s = tbg_core::stronghold::stats(&reference, kind, 0, 0);
         assert_eq!(s.max_hp, hp * 3 / 2);
         assert_eq!(s.damage, damage * 3);
     }

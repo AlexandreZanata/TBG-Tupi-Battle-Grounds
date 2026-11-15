@@ -187,3 +187,17 @@ changes in production. PR #83 merged as c527c0f5. The balance note remains
 `kind=balance`; `accepted=true` now records owner acceptance for the preview,
 with explicit `competitive_accepted=false`. No failing row is reported as passed.
 The previous quality rejection remains historical evidence of the enforced gate.
+
+## Final CI fixture consolidation
+
+CI on 9792a4e3 exposed two TW-01 assumptions outside the initial focused set.
+The Artillery target/Fury fixture used 50 HP, above R17 collateral damage;
+its enemies now have one HP to isolate the unchanged three-extra-target limit
+and per-kill attribution. All four-kill, ally-safety and Fury assertions remain.
+The historical TW-01 boost test retains its exact assertions against a frozen
+6750/159 reference; current R17 bases remain pinned by contract_strongholds.
+No production mechanics or source fingerprint changed. Both focused module
+tests and both fortification_power tests passed (four tests, exit 0) under
+the shared lock/two-job limit. Total focused Rust checks: 39 passing tests.
+After the explicit D-112 decision, all five patch-note guard regression tests
+and the actual current-note guard passed, with no guard/test modifications.
